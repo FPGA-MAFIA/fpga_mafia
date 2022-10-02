@@ -8,8 +8,6 @@
 // Created          : 9/2022
 //-----------------------------------------------------------------------------
 // Description :
-// This file will be a single cycle core implemenation of the RV32I RISCV specification
-// Fetch, Decode, Exe, Mem, Write_Back
 //-----------------------------------------------------------------------------
 
 
@@ -18,6 +16,12 @@
 `define CORE_PKG_VS
 package core_pkg;
     
+
+parameter I_MEM_SIZE   = 'h1000;
+parameter I_MEM_OFFSET = 'h0;
+parameter D_MEM_SIZE   = 'h1000;
+parameter D_MEM_OFFSET = 'h1000;
+
 typedef enum logic [2:0] {
     U_TYPE = 3'b000 , 
     I_TYPE = 3'b001 ,  

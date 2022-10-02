@@ -21,7 +21,7 @@ import core_pkg::*;
     input logic Rst,
     // interafce with instruciton memory
     output logic [31:0] Pc,
-    output logic [31:0] Instruction,
+    input  logic [31:0] Instruction,
     // interface with Data Memory
     output logic [31:0] DMemAddress,
     output logic [31:0] DMemData   ,
