@@ -186,18 +186,20 @@ always_comb begin : alu_logic
     Shamt = AluIn2[4:0]; 
     //Acording to ALU OP we select the correct operation
     unique casez (CtrlAluOp)
-        ADD      :   AluOut = AluIn1 + AluIn2          ;
-        SUB      :   AluOut = AluIn1 + (~AluIn2) + 1'b1;
+        ADD      :   AluOut = AluIn1 + AluIn2                  ;
+        SUB      :   AluOut = AluIn1 + (~AluIn2) + 1'b1        ;
         //shift
-        SLL     : AluOut = AluIn1 << Shamt             ;//SLL
-        SRL     : AluOut = AluIn1 >> Shamt             ;//SRL
-        SRA     : AluOut = $signed(AluIn1) >>> Shamt   ;//SRA
+        SLL     : AluOut = AluIn1 << Shamt                     ;//SLL
+        SRL     : AluOut = AluIn1 >> Shamt                     ;//SRL
+        SRA     : AluOut = $signed(AluIn1) >>> Shamt           ;//SRA
         //bit wise opirations
-        XOR     : AluOut = AluIn1 ^ AluIn2             ;//XOR
-        OR      : AluOut = AluIn1 | AluIn2             ;//OR
-        AND     : AluOut = AluIn1 & AluIn2             ;//AND
-        IN_2    : AluOut = AluIn2                      ;//LUI
-        default : AluOut = AluIn1 + AluIn2             ;
+        XOR     : AluOut = AluIn1 ^ AluIn2                     ;//XOR
+        OR      : AluOut = AluIn1 | AluIn2                     ;//OR
+        AND     : AluOut = AluIn1 & AluIn2                     ;//AND
+        IN_2    : AluOut = AluIn2                              ;//LUI
+        SLT     : AluOut = $signed(AluIn1) < $signed(AluIn2)   ;//SLT
+        SLTU    : AluOut = AluIn1 < AluIn2                     ;//SLTU
+        default : AluOut = AluIn1 + AluIn2                     ;
   endcase
 end
 
