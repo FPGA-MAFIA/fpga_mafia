@@ -1,4 +1,5 @@
 modelsim/work/*
 target/*
 !modelsim/work/README
+!target/README.md
 
