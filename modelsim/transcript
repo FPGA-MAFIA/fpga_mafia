@@ -1,0 +1,31 @@
+# Reading pref.tcl
+# vsim -gui work.core_tb 
+# Start time: 22:02:46 on Nov 21,2022
+# Loading sv_std.std
+# Loading work.core_pkg
+# Loading work.core_tb
+# Loading work.core
+# GetModuleFileName: The specified module could not be found.
+# 
+# 
+add wave -position insertpoint sim:/core_tb/core/*
+# ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
+#           File in use by: abendavid  Hostname: NV-701DWG3  ProcessID: 6052
+#           Attempting to use alternate WLF file "./wlft8qjxwr".
+# ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
+#           Using alternate file: ./wlft8qjxwr
+restart
+# ** Note: (vsim-12125) Error and warning message counts have been reset to '0' because of 'restart'.
+restart
+run
+# GetModuleFileName: The specified module could not be found.
+# 
+# 
+# GetModuleFileName: The specified module could not be found.
+# 
+# 
+# ** Warning: (vsim-7) Failed to open readmem file "../app/inst_mem.sv" in read mode.
+# No such file or directory. (errno = ENOENT)    : ../verif/core_tb.sv(65)
+#    Time: 0 ps  Iteration: 0  Instance: /core_tb
+# End time: 22:10:31 on Nov 21,2022, Elapsed time: 0:07:45
+# Errors: 0, Warnings: 1
