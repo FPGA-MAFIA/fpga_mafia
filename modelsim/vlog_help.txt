@@ -1,0 +1,915 @@
+Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+    The vlog command compiles Verilog source code and SystemVerilog extensions
+    into a specified working library (or to the work library by default).
+    Compressed SystemVerilog source files (those compressed with zlib) are
+    accepted.
+    
+    The vlog command may be invoked from within Questa SIM or from the
+    operating system command prompt. It may also be invoked during simulation.
+    Compiled libraries are major-version dependent. When moving between major
+    version, you have to refresh compiled libraries using the -refresh argument
+    to vlog. This is not true for minor versions (letter releases).
+    
+    All arguments to the vlog command are case sensitive. For example, -WORK
+    and -work are not equivalent.
+    
+    SystemVerilog requires that the default behavior of the vlog command is to
+    treat each Verilog design file listed on the command line as a separate
+    compilation unit. To treat multiple files listed within a single command
+    line as a single compilation unit, use either the vlog -mfcu argument or
+    the MultiFileCompilationUnit in the User's Manual
+    
+    Try the following to get help on specific options or categories: 
+
+    vlog -help all            : List all categories and options
+    vlog -help category       : List all categories
+    vlog -help <option>       : Help on an option
+    vlog -help <command-line> : Help on all options in a command-line
+    vlog -help <category>     : List all options in a category
+
+------------------------------------General------------------------------------
+General Category for option
+
+--------------------------------------------------------------------------------
+-32                             Run in 32-bit mode
+                                
+-64                             Run in 64-bit mode
+                                
+-F <filename>                   Specify a file containing more command line
+                                arguments. Prefixes relative file names within
+                                the arguments file with the absolute path of
+                                arguments file, if lookup with relative path
+                                fails.
+                                
+-O0                             Disable optimizations
+                                
+-O1                             Enable some optimizations
+                                
+-O4                             Enable most optimizations (default)
+                                
+-O5                             Enable additional compiler optimizations
+                                
+-R [<simargs>]                  Cause vsim to be invoked with <simargs> and
+                                top-level modules; simargs consists of the rest
+                                of the arguments or until a single-character
+                                dash is encountered. Indicate end of optional
+                                -R <simargs>
+                                
+-createlib[=compress]           Create libraries that do not exist. The
+                                =compress modifier creates compressed
+                                libraries.
+                                
+-f <filename>                   Specify a file containing more command line
+                                arguments
+                                
+-file <filename>                Specify a file containing more command line
+                                arguments
+                                
+-gen_xml <entity> <output>      Output (into a file) the interface definition
+                                of the specified design unit in XML format
+                                
+-gen_xmlstruct <entity> <output>
+                                Similar to -gen_xml, but also output the
+                                structural definition of the specified design
+                                unit in XML format.
+                                
+-hazard                         Disable some optimizations to become Cadence
+                                compatible
+                                
+-hazards                        Enable run-time hazard checking code
+                                
+-incr                           Enable incremental compilation
+                                
+-l <filename>                   Write compilation log to <filename>
+                                
+-line <lineNum>                 Specify a starting line number
+                                
+-logfile <filename>             Write compilation log to <filename>
+                                
+-modelsimini <modelsim.ini>     Specify path to the modelsim.ini file
+                                
+-noincr                         Forces complete analysis and code generation,
+                                effectively turning off incremental
+                                compilation.
+                                
+-nologo                         Disable startup banner
+                                
+-novopt                         Do not run the "vopt" compiler before
+                                simulation.
+                                
+-optionset <optionset_name>     Calls an option set in modelsim.ini.
+                                
+-outf <filename>                Specify a file to save the final list of
+                                options after recursively expanding
+                                
+-proftick=<integer>             Set the time interval between the profile data
+                                collection. Default value is 10.
+                                
+-quiet                          Disable 'Loading' messages
+                                
+-stats[=[+-]<args>]             Enables compiler statistics <args> are
+                                all,none,time,cmd,msg,perf,verbose,list,kb.
+                                
+-version                        Print the version of the compiler
+                                
+-vmake                          Collects complete list of command line args and
+                                files processed for use by vmake.
+                                
+-work <path>                    Specify library WORK
+                                
+-wprof=<filename>               Enables CPU (-prof) or WALL (-wprof) time based
+                                profiling and saves the profile data to the
+                                given filename.
+                                
+-writetoplevels <fileName>      Writes complete list of toplevels into
+                                <fileName> (also includes the name specified
+                                with -cuname). The file <fileName> can be used
+                                with vopt command's -f switch.
+                                
+-------------------------------------Analog-------------------------------------
+Analog Category for option
+
+--------------------------------------------------------------------------------
+-ams                            Enable AMS wreal extensions
+                                
+-vamsext[=[+|-]<extension>[,[+|-]<extension>]*]
+                                Enable Verilog-AMS language extensions.
+                                Valid extensions are:
+                                nnummacro  - Verilog-AMS: Enclose macros
+                                defined as negative numbers inside parens upon
+                                expansion.
+                                evis  - Expand Environment Variables within
+                                Include String literals.
+                                
+-vamsfilesuffix=<extension>[,<extension>...]
+                                filename extensions for Verilog-AMS code
+                                
+-wireasinterconnect             Convert qualifying nets from wire to
+                                interconnect.
+                                
+-wireasinterconnectverbose      Identify which nets have been converted from
+                                wire to interconnect.
+                                
+------------------------------------Coverage------------------------------------
+Coverage Category
+
+--------------------------------------------------------------------------------
++cover[=<spec>]                 <spec> is used to enable code coverage metrics
+                                for certain kinds of constructs. <spec>
+                                consists of one or more of the following letter
+                                codes:
+                                   s (statement)
+                                   b (branch)
+                                   c (condition)
+                                   e (expression)
+                                   f (finite state machine)
+                                   t (toggle)
+                                   x (extended toggle)
+                                If no <spec> characters are given, sbceft is
+                                the default.
+                                
++nocover[=<spec>]               This option disables code coverage metrics for
+                                certain kinds of constructs specified by <spec>
+                                and in the region specified by +<selection>
+                                modifiers. The <spec> modifiers are described
+                                in the help text for the +cover option. The
+                                +<selection>, <recurse_level and '.' modifiers
+                                are described in the help text for the +acc
+                                option.
+                                
+-adaptive                       Enable adaptive exclusion feature
+                                
+-adaptive_debug                 Enable debugging for adaptive exclusion feature
+                                - Dumping adaptive exclusion database data.
+                                
+-coverExcludeDefault            Automatically exclude case default clauses.
+                                
+-covercebi                      Enable collapse of else-begin-if to an 'elsif'
+                                equivalent for coverage.
+                                
+-covercells                     Enable code coverage options in cells.
+                                
+-coverdeglitch <period>         Report only the last execution of non-clocked
+                                processes/continuous assignments. Within time
+                                greater than <period>, where <period> is 0 or a
+                                time string with units
+                                
+-coverenhanced                  Enables functionality which may change the
+                                appearance or content of coverage metrics. A
+                                detailed list of these changes can be found by
+                                searching in the release notes for
+                                'coverenhanced'. This option only takes
+                                meaningful effect in letter releases (e.g.
+                                10.2b). It has no effect in initial major
+                                releases (e.g. 10.2).
+                                
+-coverexcludedefault            Automatically exclude case default clauses.
+                                
+-coverexpandrdpfx               Bit-blast multi-bit operands of reduction
+                                prefix expressions for expression/condition
+                                coverage.
+                                
+-coverfec                       Enable Focused Expression Coverage analysis for
+                                conditions and expressions.
+                                
+-covermultibit                  Enable coverage of multibit expressions.
+                                
+-coveropt <i>                   Specify a digit for code coverage optimization
+                                level: 1 through 4.
+                                
+-coverrec                       Enable Rapid Expression Coverage mode of FEC
+                                for conditions and expressions.
+                                
+-coverreportcancelled           Report coverage items that have been optimized
+                                away.
+                                
+-coversub                       Include VHDL subprograms for code coverage
+                                
+-coverudp                       Enable UDP Coverage analysis for conditions and
+                                expressions.
+                                
+-extendedtogglemode [1|2|3]     Change the level of support for extended
+                                toggles. The levels of support are:
+                                1 - 0L->1H & 1H->0L & any one 'Z' transition
+                                (to/from 'Z')
+                                2 - 0L->1H & 1H->0L & one transition to 'Z' &
+                                one transition from 'Z'
+                                3 - 0L->1H & 1H->0L & all 'Z' transitions
+                                
+-fecudpeffort n                 Limit the size of expressions and conditions
+                                considered for expr/cond coverage. Levels
+                                supported are:
+                                1 - (low) Only small expressions and conditions
+                                considered for coverage.
+                                2 - (medium) Bigger expressions and conditions
+                                considered for coverage.
+                                3 - (high) Very large expressions and
+                                conditions considered for coverage.
+                                
+-fsmimplicittrans               Enable recognition of implicit transitions in
+                                FSMs
+                                
+-fsmmultitrans                  Enable recognition of Multi-state transitions
+                                in FSMs
+                                
+-fsmresettrans                  Enable recognition of implicit asynchronous
+                                reset transitions for FSMs
+                                
+-fsmsingle                      Enable recognition FSMs having single bit
+                                current state variable
+                                
+-fsmverbose [b|t|w]             Provides information about FSMs recognized,
+                                including state reachability analysis. There
+                                are three detail levels that can be set with
+                                this option.
+                                    b (displays only basic information)
+                                    t (displays a transition table in addition
+                                to the basic information)
+                                    w (displays any warning messages in
+                                addition to the basic information)
+                                If no character is specified, btw is the
+                                default.
+                                
+-fsmxassign                     Enable recognition of FSMs containing x
+                                assignment
+                                
+-maxfecrows n                   Max number of input patterns allowed in FEC
+                                table for code coverage.
+                                
+-maxudprows n                   Max number of rows allowed in UDP tables for
+                                code coverage.
+                                
+-nocover                        Disable code coverage even if vlog -cover was
+                                used on source files.
+                                
+-nocoverExcludeDefault          Don't automatically exclude case default
+                                clauses.
+                                
+-nocovercebi                    Disable collapse of else-begin-if to an 'elsif'
+                                equivalent for coverage.
+                                
+-nocovercells                   Disable code coverage options in cells.
+                                
+-nocoverexcludedefault          Don't automatically exclude case default
+                                clauses.
+                                
+-nocoverexpandrdpfx             Don't bit-blast multi-bit operands of reduction
+                                prefix expressions for expression/condition
+                                coverage.
+                                
+-nocoverfec                     Disable Focused Expression Coverage analysis
+                                for conditions and expressions.
+                                
+-nocoverrec                     Disable Rapid Expression Coverage mode of FEC
+                                for conditions and expressions.
+                                
+-nocovershort                   Disable short circuiting of
+                                expressions/condition when coverage is enabled.
+                                
+-nocoversub                     Ignore VHDL subprograms for code coverage
+                                
+-nocoverudp                     Disable UDP Coverage analysis for conditions
+                                and expressions.
+                                
+-noexcludeternary <design_unit> Disables exclusion of ternary expressions in
+                                UCDB.
+                                
+-nofsmimplicittrans             Disable recognition of implicit transitions in
+                                FSMs
+                                
+-nofsmresettrans                Disable recognition of implicit asynchronous
+                                reset transitions for FSMs
+                                
+-nofsmsingle                    Disable recognition FSMs having single bit
+                                current state variable
+                                
+-nofsmxassign                   Disable recognition of FSMs containing x
+                                assignment
+                                
+-togglecountlimit n             Quit collecting toggle info after count n is
+                                reached.
+                                
+-toggleportsonly                Enable toggle statistics collection only for
+                                ports.
+                                
+-togglewidthlimit n             Don't collect toggle data on reg's or arrays
+                                wider than n.
+                                
+--------------------------------------Cpp--------------------------------------
+C/C++ Category for option
+
+--------------------------------------------------------------------------------
+-ccflags opts                   Specify in quotes all the C/C++ compiler
+                                options for vlog/qverilog
+                                
+-ccwarn [on|off|verbose|strict] Enable additional error/warning gcc flags with
+                                C/C++ files compilation. Options are:
+                                on (default): compiles with -Wreturn-type,
+                                -Wimplicit, -Wuninitialized, 
+                                -Wmissing-declarations gcc options.
+                                off: compiles without any warning options.
+                                verbose: compiles with the -Wall gcc option.
+                                strict: compiles with the -Werror gcc option.
+                                
+-cppinstall <[gcc|g++] version> Specify the version of the desired GNU
+                                compiler. example: 5.3.0, 4.7.4
+                                
+-cpppath <filename>             Specify path to the desired GNU compiler.
+                                
+-dpicppinstall <[gcc|g++] version>
+                                Specify the version of the desired GNU compiler
+                                supported and distributed by Mentor for the DPI
+                                compilation
+                                
+-dpicpppath <path_to_gcc>       Specify desired GCC path for DPI compilation
+                                
+-dpiforceheader                 Force generation of dpi header file even when
+                                empty of function prototypes
+                                
+-dpiheader <filename>           Save the generated declarations of
+                                SystemVerilog DPI tasks and functions into
+                                <filename>
+                                
+-scdpiheader <filename>         Save the generated declarations of
+                                SystemVerilog SystemC DPI tasks and functions
+                                into <filename>
+                                
+-vv                             Print auto C/C++ compile/link subprocess
+                                command line information
+                                
+-------------------------------------Debug-------------------------------------
+Debug Category contains debug, and assertion options
+
+--------------------------------------------------------------------------------
++acc[=<spec>]                   <spec> consists of one or more of the following
+                                letter codes:
+                                m (module, program, and interface instances)
+                                n (nets)
+                                p (ports)
+                                r (variables and parameters)
+                                t (task and function scopes)
+                                
++noacc[=<spec>]                 Enable/disable access to certain objects.
+                                <spec> consists of one or more of the following
+                                letter codes:
+                                   m (module, program, and interface instances)
+                                   n (nets)
+                                   p (ports)
+                                   r (Verilog variables and parameters)
+                                   t (task and function scopes)
+                                   v (VHDL variables, constants, and aliases
+                                
+-mti_trace_vlog_calls           class contents can only be seen in the objects
+                                window at the current time of the simulation.
+                                We have a vlog/vopt switch which will enable
+                                tracing the creation of objects like classes.
+                                Below is the relevant info on how to use/enable
+                                it:
+                                The -mti_trace_vlog_calls option is available
+                                for vlog/vopt. The basic use is to add
+                                "-mti_trace_vlog_calls" to either vlog or vopt
+                                command line. There is also the ability to
+                                control this during simulation via a TCL
+                                comand. "SetVlogTrace on" to get tracing to
+                                start and you can turn it on and off as a
+                                normal tcl boolean (0/1, on/off, true/false).
+                                So one can run out to whatever time and then
+                                turn the tracing on in order to reduce
+                                transcript sizes.
+                                
+-nodbgsym                       Do not generate symbols debugging database.
+                                
+-nodebug[=ports][=pli][=ports+pli]
+                                Do not put symbolic debugging information into
+                                the library.
+                                
+-smartdbgsym                    Generate symbols debugging database for only
+                                some special cases.
+                                
+--------------------------------------GLS--------------------------------------
+Gate level simulation category
+
+--------------------------------------------------------------------------------
++delay_mode_distributed         Use structural delays and ignore path delays
+                                
++delay_mode_path                Set structural delays to zero and use path
+                                delays
+                                
++delay_mode_unit                Set non-zero structural delays to one
+                                
++delay_mode_zero                Set structural delays to zero
+                                
++maxdelays                      Use maximum timing from min:typ:max expressions
+                                
++mindelays                      Use minimum timing from min:typ:max expressions
+                                
++nospecify                      Disable specify path delays and timing checks
+                                
++notimingchecks                 Disable timing checks
+                                
++num_opt_cell_conds+<value>     Restricts gate-level optimization capacity for
+                                accepting cells with I/O path and timing check
+                                conditions. <value> integer between 32 and
+                                1023, inclusive. where the default value is
+                                1023.
+                                
++typdelays                      Use typical timing from min:typ:max expressions
+                                
+-debugVA                        Print VITAL cell optimization information
+                                
+-nosdf                          Disable specify paths with zero delay and hence
+                                speed up simulation,can be used only for
+                                non-sdf simulation.
+                                
+------------------------------------Language------------------------------------
+Options to control Language features
+
+--------------------------------------------------------------------------------
++define+<macro_name>[=<macro_text>]
+                                Same as compiler directive: `define macro_name
+                                macro_text
+                                
++incdir+<dir>                   Search directory for files included with
+                                `include "filename"
+                                
++initmem[=<spec>][+0|1|X|Z]     Initialize fixed-size arrays of type indicated
+                                by <spec>.
+                                
++initreg[=<spec>][+0|1|X|Z]     Initialize variables of type indicated by
+                                <spec>. Valid values of <spec> are:
+                                    r (4-state integral types)
+                                    b (2-state integral types)
+                                    e (enum types)
+                                    u (udp types)
+                                If no <spec> is given, all these types are
+                                enabled. If 0|1|X|Z is specified, all the bits
+                                in the variable are intialized to that value. 
+                                Otherwise, these variables are prepared for
+                                randomization during vsim.
+                                
++initwire[+0|1|X|Z]             Initialize unconnected wires with given value.
+                                If no value is given, unconnected wires are
+                                initialized with 0.
+                                
++protect[=<file>]               *DEPRECATED* Enable
+                                protection/encryption-related compiler
+                                directives.
+                                
+-93                             Preserve the case of Verilog module (and
+                                parameter and port) names in the equivalent
+                                VHDL entity by using VHDL-1993 extended
+                                identifiers; this may be useful in
+                                mixed-language designs.
+                                
+-E <filename>                   Write preprocessed Verilog and SystemVerilog
+                                into <filename>
+                                
+-Edebug <filename>              Write debugable preprocessed Verilog and
+                                SystemVerilog into <filename>.
+                                
+-Epretty <filename>             Write pretty preprocessed Verilog and
+                                SystemVerilog into <filename>
+                                
+-addpragmaprefix <prefix>       Enable recognition of synthesis and coverage
+                                pragmas with a user specified prefix.
+                                
+-afs_check                      Dump XML information from compilation unit
+                                scope
+                                
+-compat                         Disable optimizations that result in different
+                                event ordering than Verilog-XL (at expense of
+                                performance).
+                                
+-compile_uselibs[=<directory_name>]
+                                Use the `uselib directive to find verilog
+                                source files and compile them into
+                                automatically created libraries.
+                                
+-convertallparams               Enables converting parameters not defined in
+                                ANSI style to VHDL generics of type
+                                std_logic_vector, bit_vector, std_logic and
+                                bit.
+                                
+-cuautoname=[file|du]           Select method for naming $unit library entries.
+                                file - base the name of the first file on the
+                                command line (default)
+                                du   - base the name on the first design unit
+                                following items found in the $unit scope
+                                
+-cuname <compilation_unit_name> Explicitly name the compilation unit package.
+                                The option can only be used with -mfcu. The
+                                <compilation_unit_name> can be top design unit
+                                name at vsim and vopt commandline
+                                
+-define <macro_name>[=<macro_text>]
+                                Alternative to +define+ that allows + symbol in
+                                macros.
+                                
+-deglitchalways                 Make always blocks insensitive to variable
+                                glitches, potentially breaking zero delay
+                                oscillations among combinatorial always blocks.
+                                (default)
+                                
+-enumfirstinit                  Initialize an enum using its first elem.
+                                
+-ignorepragmaprefix <prefix>    Ignore synthesis and coverage pragmas with
+                                specified prefix.
+                                
+-ignoresvkeywords=<keyword>[,<keyword>]
+                                Ignore SystemVerilog Keywords
+                                
+-immedalways                    Run combinatorial always blocks with the same
+                                high priority as continuous assignments and
+                                primitives in order to miminize the effect of
+                                optimizations on race dependent results.
+                                
+-libmap <path>                  Specify Verilog 2001 library map file
+                                
+-lint[=full][=fast][=default]   Perform lint-style checks
+                                
+-mfcu[=macro]                   Multi-file compilation unit, all files in
+                                command line make up a compilation unit. The
+                                =macro modifier only enables the visibility of
+                                macro definitions across different files. The
+                                default is to have each file be a separate
+                                compilation unit (-sfcu mode).
+                                
+-mixedansiports                 Enables mixing of ANSI-style and non-ANSI-style
+                                declarations
+                                
+-mixedsvvh [b | s | v] [packedstruct]
+                                Facilitates using SV packages at the SV-VHDL
+                                mixed-language boundary.
+                                    b - treat scalars/vectors in package as
+                                bit/bit_vector
+                                    s - treat scalars/vectors in package as
+                                std_logic/std_logic_vector
+                                    v - treat scalars/vectors in package as
+                                vl_logic/vl_logic_vector
+                                    packedstruct - treat packed structures as
+                                VHDL arrays of equivalent size
+                                
+-noForceUnsignedToVHDLInteger   Prevents conversion of untyped parameters to
+                                integer.
+                                
+-noconvertintparamtovec         an option in vlog that will convert SV vector
+                                type parameters to VHDL generics of
+                                'vl_logic_vector' type even if the parameter
+                                value is foldable. Till now for foldable
+                                parameter value the base type of parameter was
+                                being ignored and instead an 'integer' generic
+                                was dumped in the _primary.vhd file.
+                                
+-nodeglitchalways               Disable -deglitchalways behavior.
+                                
+-noimmedalways                  Disable -immedalways behavior. (default)
+                                
+-nooverrideundef                Do not ignore `undef if the macro is defined
+                                using +define option.
+                                
+-nopsl                          Disable embedded PSL language parsing.
+                                
+-override_precision             Override the precision of timescale specified
+                                in the source code.
+                                
+-override_timescale[=]<timescale>
+                                Override the timescale specified in the source
+                                code.
+                                
+-pedanticerrors                 Enforce strict language checks
+                                
+-permissive                     Relax some language error checks to warnings.
+                                
+-printinfilenames[=<filename>]  Print path names for all source files opened
+                                during compilation.
+                                
+-pslext                         Enable PSL LTL/Universal operators.
+                                
+-pslfile <file>                 Compile and bind PSL vunits specified by <file>
+                                
+-qlint                          Enables collection of data to be used with
+                                qlint.
+                                
+-s                              Do not load the std package.
+                                
+-sfcu                           Single-file compilation unit (default), each
+                                file in command line is a separate compilation
+                                unit.
+                                
+-skipprotected                  Ignore protected regions
+                                
+-skipprotectedmodule            Ignore modules containing protected regions.
+                                
+-skipsynthoffregion             Ignore all constructs within synthesis_off or
+                                translate_off pragma regions.
+                                
+-sv                             Enable SystemVerilog features and keywords
+                                
+-sv05compat                     Ensure compatibility with IEEE standard
+                                1800-2005.
+                                
+-sv09compat                     Ensure compatibility with IEEE standard
+                                1800-2009.
+                                
+-sv12compat                     Ensure compatibility with IEEE standard
+                                1800-2012.
+                                
+-sv17compat                     Ensure compatibility with IEEE standard
+                                1800-2017.
+                                
+-sv_pragma                      Compiles SystemVerilog code that follows
+                                sv_pragma keyword in a single line or
+                                multi-line comment.
+                                
+-svext[=[+|-]<extension>[,[+|-]<extension>]*]
+                                Enable SystemVerilog language extensions. Valid
+                                extensions are:
+                                acade - Add always_comb driven elements in the
+                                senstivity list.
+                                acum - Assignment Compatible Untyped Mailbox.
+                                adsl - Add dynamic in the always@* senstivity
+                                list.
+                                alltsic - Allow local lookup of this & super in
+                                inline constraints.
+                                alpo - Allow local parameter overriding using
+                                -G switch. (Note: only for vopt tool)
+                                altdpiheader - Alternative style function
+                                signature generated in DPI header.
+                                ared - Iterate over innermost array elements
+                                for array reduction methods.
+                                arif - Allow ref args in fork.
+                                aswe - Allow symmetric wild equality operator.
+                                atpi - Allow Types in Port Identifiers.
+                                bstr - Allow usage of string builtin method
+                                bittostr.
+                                catx - Concat extensions.
+                                ctlc - Cast time literal in constraint context
+                                to time datatype.
+                                dbpp - Decrypt before preprocessing.
+                                ddup - Drive default unconnected port.
+                                defervda - Defer variable declaration
+                                assignments until after top-blocking always are
+                                sensitized.
+                                dmsbw - Drive MSB unconnected bits of the wider
+                                hiconn (output) or the wider loconn (input) in
+                                an otherwise collapsible port connection.
+                                dvydl - Allow defines to persist after -v -and
+                                -y processing.
+                                evdactor - Do early variable declaration
+                                assignments in constructors.
+                                evis - Expand Environment Variables within
+                                Include String literals.
+                                extrtoi - Extend return value of $rtoi method
+                                to a  signed 64 bit  value.
+                                feci - Treat constant expressions in foreach
+                                loop variable indices as constant.
+                                fin0 - $finish() system call works as
+                                $finish(0), prints no diagnostic information.
+                                hiercross1 - Allow hierarchical cross feature.
+                                hiercross2 - Allow an alternate hierarchical
+                                cross feature.
+                                ias - Iterate on always @* evaluations until
+                                inputs settle.
+                                idcl - Pass import DPI call location as
+                                implicit scope.
+                                iddp - Ignore DPI disable protocol check.
+                                ifca - Iterate on feedback continuous
+                                assignment until inputs settle.
+                                ifslvbefr - Allow solve/before constraint under
+                                a constant If condition (Default).
+                                islm - Ignore String Literals within Macros.
+                                lrtic - Lookup for return type of external
+                                class function inside class without using scope
+                                operator.
+                                mewq - Allow macro expansion within quotes for
+                                string literals.
+                                mncim - Allow macro names to contain a minus
+                                ('-') character.
+                                mtdl - Macro expansion treats `" more like a
+                                string literal".
+                                mttd - Within macro expansion treat ``" as `".
+                                ncref - Ref formal in covergroup new is not
+                                treated as constant ref.
+                                noexptc - Ignore DPI export SV type name
+                                overloading check
+                                pae - Automatically export all symbols imported
+                                and referenced in a package.
+                                pae1 - Automatically export all symbols
+                                imported(referenced or not) in a package using
+                                wildcard export.
+                                pctap - Promote Concat To Assignment Pattern
+                                using heuristics such as presence of unsized
+                                literals.
+                                qcat - Allow use of an assignment pattern for
+                                concatenating onto a queue.
+                                realrand - Support randomize() with real
+                                variables and constraints (Default).
+                                sas - Strict LRM @* implicit sensitivity (whole
+                                variable and net identifiers rather than
+                                longest static prefix).
+                                sccts - String concatenation convert to string.
+                                sceq - Allow string comparison with case
+                                equality operator.
+                                scref - Ref formal in covergroup sample is
+                                treated as constant ref.
+                                sffi - Allow same function and formal
+                                identifier in case of functions with void
+                                return type.
+                                softunique - allow 'unique' constraint to be
+                                declared as 'soft'.
+                                spsl - Search for packages in source libraries
+                                specified with -y and +libext.
+                                stop0 - $stop() system call works as $stop(0),
+                                prints no diagnostic information.
+                                substr1 - Allow one argument in substr()
+                                builtin method. Second argument will be end of
+                                string.
+                                tzas - Run a top-blocking always @* at time
+                                zero, same as is done for an always_comb.
+                                ubdic - Allows the use of a variable in a
+                                SystemVerilog class before it is defined.
+                                udm0 - UnDefined Macro is assume to be defined
+                                as the value 1'b0.
+                                uslt - Promote unused design units to top-level
+                                design units.
+                                vmctor - Honor virtual method calls in class
+                                constructor.
+                                voidsystf - Interpret '$void(x)' as '(x) in
+                                constraint contexts.
+                                
+-svfilesuffix=<extension>[,<extension>...]
+                                filename extensions for SystemVerilog code
+                                
+-svinputport=net|var|compat|relaxed
+                                Select the default kind for an input port that
+                                is declared with a type, but without the var
+                                keyword. Select 'net' for strict LRM
+                                compliance, where the kind always defaults to
+                                wire. Select 'var' for non-compliant behavior,
+                                where the kind always defaults to var. Select
+                                'compat', where only types compatible with net
+                                declarations default to wire. The default is
+                                'relaxed', where only a type that is a 4-state
+                                scalar or 4-state single dimension vector type
+                                defaults to wire.
+                                
+-timescale[=]<timescale>        Specify the default timescale for modules not
+                                having an explicit timescale. The format of
+                                <timescale> is the same as that of the
+                                `timescale directive. For example, -timescale
+                                "1 ns / 1 ps".
+                                
+-u                              Convert regular Verilog identifiers to
+                                uppercase.
+                                
+-v <path>                       Specify Verilog source library file
+                                
+-vlog01compat                   Ensure compatibility with Std 1364-2001.
+                                
+-vlog95compat                   Ensure compatibility with Std 1364-1995.
+                                
+-y <path>                       Specify Verilog source library directory
+                                
+------------------------------------Library------------------------------------
+Library Category for option
+
+--------------------------------------------------------------------------------
++libcell                        Define library modules (found with -v|-y
+                                search) as cells
+                                
++libext+<suffix>                Specify suffix of files in library directory
+                                
++librescan                      Scan libraries in command line order for all
+                                unresolved module references
+                                
++nolibcell                      Do not automatically define library modules as
+                                cells(default)
+                                
+-L <libname>                    Search library for design units needed when
+                                optimizing
+                                
+-Ldir <dirname>                 Specify the container folder for libraries
+                                passed with -L & -Lf options.
+                                
+-Lf <libname>                   Same as -L, but libraries are searched before
+                                `uselib
+                                
+-force_refresh                  Force a refresh of the library image from .dat
+                                file(s) even if there are dependency errors.
+                                
+-nocreatelib                    Do not create libraries that do not exist.
+                                
+-refresh                        Refresh the library image from .dat file(s)
+                                
+------------------------------------Messages------------------------------------
+Options to suppress or downgrade errors.
+
+--------------------------------------------------------------------------------
++nowarnBSOB                     Disable BSOB warning message
+                                
++nowarnEXTSTR                   Disable EXTSTR warning message
+                                
++nowarnPSL                      Disable PSL warning message
+                                
++nowarnRDGN                     Disable RDGN warning message
+                                
++nowarnSVCHK                    Disable SVCHK warning message
+                                
++nowarnTFMPC                    Disable TFMPC warning message
+                                
++nowarnTMREN                    Disable TMREN warning message
+                                
+-error <msgNumber>[,<msgNumber>...]
+                                Report the listed messages as errors.
+                                
+-fatal <msgNumber>[,<msgNumber>...]
+                                Report the listed messages as fatal
+                                
+-msglimit [all,|none,][-|+]<msgNumber>[,[-|+]<msgNumber>...]
+                                Limit the reporting of listed messages to
+                                default count
+                                
+-msglimit [error|warning]       Limit the total number of errors/warnings to
+                                default count
+                                
+-msglimitcount <limit_value> -msglimit [all,|none,][-|+]<msgNumber>[,[-|+]<msgNumber>...]
+                                Limit the reporting of listed messages to user
+                                defined count
+                                
+-msglimitcount <limit_value> -msglimit [error|warning]
+                                Limit the total number of errors/warnings to
+                                user defined count
+                                
+-msgsingleline                  Display the messages in a single line.
+                                
+-note <msgNumber>[,<msgNumber>...]
+                                Report the listed message as notes
+                                
+-nowarn <number>                Disable specified category of warning messages;
+                                verror 1907 to see them.
+                                
+-source                         Print the source line with error messages.
+                                
+-suppress <msgNumber/msgGroup>[,<msgNumber/msgGroup>...]
+                                Suppress the listed messages using number or
+                                group. Valid <msgGroup> are All, GroupNote,
+                                GroupWarning, GroupFLI, GroupPLI, GroupSDF,
+                                GroupVCD, GroupVital, GroupWLF, GroupTCHK,
+                                GroupPA, GroupLRM
+                                
+-warnOOB                        Enable out-of-bounds warning message
+                                
+-warning error                  Report all warnings as errors
+                                
+-warning <msgNumber>[,<msgNumber>...]
+                                Report the listed messages as warnings
+                                
+------------------------------------Optimize------------------------------------
+Optimization Category
+
+--------------------------------------------------------------------------------
+-keep_delta                     Exclude optimizations that remove delta delays
+                                
+-no1164                         Disable optimization for the std_logic_1164
+                                package (same as "-noaccel std_logic_1164")
+                                
