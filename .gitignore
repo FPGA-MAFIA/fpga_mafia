@@ -1,4 +1,5 @@
 modelsim/work/*
+modelsim/big_core/work/*
 target/*
 !modelsim/work/README*
 !modelsim/big_core/work/README*
