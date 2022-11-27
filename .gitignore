@@ -1,5 +1,6 @@
 modelsim/work/*
 target/*
-!modelsim/work/README
-!target/README.md
+!modelsim/work/README*
+!modelsim/big_core/work/README*
+!target/README*
 
