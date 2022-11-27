@@ -1,5 +1,6 @@
 modelsim/work/*
 target/*
+*.swp
 !modelsim/work/README
 !target/README.md
 
