@@ -1,4 +1,5 @@
 modelsim/work/*
+modelsim/transcript
 target/*
 *.swp
 !modelsim/work/README
