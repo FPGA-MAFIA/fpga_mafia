@@ -21,6 +21,7 @@ parameter I_MEM_SIZE   = 'h1000;
 parameter I_MEM_OFFSET = 'h0;
 parameter D_MEM_SIZE   = 'h1000;
 parameter D_MEM_OFFSET = 'h1000;
+parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
 
 typedef enum logic [2:0] {
     U_TYPE = 3'b000 , 
