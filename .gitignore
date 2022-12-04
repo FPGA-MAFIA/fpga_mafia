@@ -11,8 +11,5 @@ target/*
 !target/README.md
 !target/mini_core/README.md
 !target/mini_core/README.md
-<<<<<<< HEAD
 !target/mini_core/gcc_gen_files/README.md
-=======
-!target/mini_core/gcc_gen_files/README.md
->>>>>>> e42381ae8a1b744bba0f936015edd14194d06148
+
