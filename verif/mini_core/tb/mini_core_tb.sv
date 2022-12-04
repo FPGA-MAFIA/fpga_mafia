@@ -16,7 +16,6 @@
 
 
 `include "macros.sv"
-`include "mini_core_macros.sv"
 
 
 module mini_core_tb () ;
@@ -33,7 +32,7 @@ logic [31:0] DMemData   ;
 logic [3:0]  DMemByteEn ;
 logic        DMemWrEn   ;
 logic        DMemRdEn   ;
-logic [31:0] DMemRspData;
+logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
@@ -66,7 +65,7 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../app/inst_mem.sv"}, IMem);
+    $readmemh({"../../target/mini_core/gcc_gen_files/inst_mem.sv"}, IMem);
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #1us $finish;
 end // test_seq
@@ -75,7 +74,7 @@ end // test_seq
 integer trk_alu;
 initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
-    trk_alu = $fopen({"../target/trk_alu.log"},"w");
+    trk_alu = $fopen({"../../target/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
     $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
     $fwrite(trk_alu,"---------------------------------------------------------\n");  
@@ -89,7 +88,7 @@ end
 integer trk_inst;
 initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
-    trk_inst = $fopen({"../target/trk_inst.log"},"w");
+    trk_inst = $fopen({"../../target/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
     $fwrite(trk_inst,"Time\t|\tPC \t | Instraction\t|\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
@@ -101,7 +100,7 @@ end
 integer trk_fetch;
 initial begin: trk_fetch_gen
     $timeformat(-9, 1, " ", 6);
-    trk_fetch = $fopen({"../target/trk_fetch.log"},"w");
+    trk_fetch = $fopen({"../../target/trk_fetch.log"},"w");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");
     $fwrite(trk_fetch,"Time\t|\tPC \t |Funct3 \t| Funct7 \t | Opcode|\n");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
@@ -114,7 +113,7 @@ end
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
     $timeformat(-9, 1, " ", 6);
-    trk_memory_access = $fopen({"../target/trk_memory_access.log"},"w");
+    trk_memory_access = $fopen({"../../target/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_memory_access,"Time\t|\tPC \t | Opcode\t| Adress\t| Data\t|\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
@@ -172,7 +171,7 @@ end
 //------------------------------
 // Read access
 //------------------------------
-assign DMemRspData = {DMem[DMemAddress+3] ,
+assign DMemRdRspData = {DMem[DMemAddress+3] ,
                       DMem[DMemAddress+2] ,
                       DMem[DMemAddress+1] ,
                       DMem[DMemAddress+0]};

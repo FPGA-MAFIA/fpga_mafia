@@ -10,11 +10,7 @@
 // Description :
 //-----------------------------------------------------------------------------
 
-+incdir+../source/
++incdir+../../source/common/
 //RTL FIles
-../source/mini_core_pkg.sv
-../source/mini_core/mini_core.sv
-
-
-//Verif files 
-../verif/mini_core/tb/mini_core_tb.sv
+../../source/mini_core/mini_core_pkg.sv
+../../source/mini_core/mini_core.sv

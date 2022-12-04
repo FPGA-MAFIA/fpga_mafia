@@ -1,0 +1,7 @@
+** Error: (vlog-7) Failed to open -f file "C:/Users/abendavid/OneDrive" in read mode.
+Permission denied. (errno = EACCES)
+Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+Start time: 10:21:34 on Dec 04,2022
+vlog -f C:/Users/abendavid/OneDrive - NVIDIA Corporation/Desktop/github/BIU_project/riscv_manycore_mesh_fpga/source/mini_core/mini_core_list.f 
+End time: 10:21:34 on Dec 04,2022, Elapsed time: 0:00:00
+Errors: 1, Warnings: 0
