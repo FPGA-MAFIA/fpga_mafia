@@ -35,9 +35,9 @@ logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 //=========================================
-// Instantiating the rvc_asap_5pl core
+// Instantiating the big_core core
 //=========================================
-rvc_asap_5pl rvc_asap_5pl (
+ big_core big_core (
     .Clock               (Clk),
     .Rst                 (Rst),
     .PcQ100H             (Pc),          // To I_MEM
@@ -93,7 +93,7 @@ initial begin: trk_alu_gen
 end
 //tracker on ALU operations
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,Pc, rvc_asap_5pl.AluIn1Q102H, rvc_asap_5pl.AluIn2Q102H, rvc_asap_5pl.AluOutQ102H); // # FIXME
+    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,Pc, big_core.AluIn1Q102H, big_core.AluIn2Q102H, big_core.AluOutQ102H); // # FIXME
 end
 
 integer trk_inst;
@@ -118,7 +118,7 @@ initial begin: trk_fetch_gen
 
 end
 always @(posedge Clk) begin : fetch_print
-    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,Pc, rvc_asap_5pl.Funct3Q101H, rvc_asap_5pl.Funct7Q101H, rvc_asap_5pl.OpcodeQ101H); // # FIXME
+    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,Pc, big_core.Funct3Q101H, big_core.Funct7Q101H, big_core.OpcodeQ101H); // # FIXME
 end
 
 integer trk_memory_access;

@@ -13,4 +13,4 @@
 +incdir+../../source/common/
 //RTL FIles
 ../../source/big_core/big_core_pkg.sv
-../../source/big_core/rvc_asap_5pl.sv
+../../source/big_core/big_core.sv
