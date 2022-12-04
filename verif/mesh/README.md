@@ -1,1 +1,1 @@
-readme
+this directory will contain the mesh verification content in our project.

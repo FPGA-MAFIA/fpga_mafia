@@ -1,7 +1,14 @@
+*.swp
 modelsim/work/*
 modelsim/big_core/work/*
+modelsim/mini_core/work/*
+modelsim/mini_core/*
+modelsim/transcript
 target/*
-!modelsim/work/README*
+!modelsim/work/README
+!modelsim/mini_core/work/README
 !modelsim/big_core/work/README*
-!target/README*
-
+!target/README.md
+!target/mini_core/README.md
+!target/mini_core/README.md
+!target/mini_core/gcc_gen_files/README.md
