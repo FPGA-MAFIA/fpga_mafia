@@ -10,12 +10,7 @@
 // Description :
 //-----------------------------------------------------------------------------
 
-+incdir+../../source/big_core/
++incdir+../../source/common/
 //RTL FIles
 ../../source/big_core/big_core_pkg.sv
-../../source/big_core/common/rvc_asap_pkg.sv
 ../../source/big_core/rvc_asap_5pl.sv
-
-
-//Verif files 
-../../verif/big_core/big_core_5pl_tb.sv

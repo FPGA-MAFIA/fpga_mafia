@@ -19,8 +19,7 @@
 // 4) Q103H Memory Access
 // 5) Q104H Write back data from Memory/ALU to Registerfile
 
-`include "../common/macros.sv"
-//`include "../common/rvc_asap_pkg.sv"
+`include "macros.sv"
 
 module rvc_asap_5pl (
     input  logic        Clock,

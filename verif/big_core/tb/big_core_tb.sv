@@ -34,7 +34,21 @@ logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
-
+//=========================================
+// Instantiating the rvc_asap_5pl core
+//=========================================
+rvc_asap_5pl rvc_asap_5pl (
+    .Clock               (Clk),
+    .Rst                 (Rst),
+    .PcQ100H             (Pc),          // To I_MEM
+    .PreInstructionQ101H (Instruction), // From I_MEM
+    .DMemWrDataQ103H     (DMemData),  // To D_MEM
+    .DMemAddressQ103H    (DMemAddress), // To D_MEM
+    .DMemByteEnQ103H     (DMemByteEn),  // To D_MEM
+    .DMemWrEnQ103H       (DMemWrEn),    // To D_MEM
+    .DMemRdEnQ103H       (DMemRdEn),    // To D_MEM
+    .DMemRdRspQ104H      (DMemRspData)    // From D_MEM
+);
 
 // ========================
 // clock gen
@@ -62,7 +76,7 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../app/inst_mem.sv"}, IMem);
+    $readmemh({"../../target/big_core/gcc_gen_files/inst_mem.sv"}, IMem);
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #10000 $finish;
 end // test_seq
@@ -71,7 +85,7 @@ end // test_seq
 integer trk_alu;
 initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
-    trk_alu = $fopen({"../../target/trk_alu.log"},"w");
+    trk_alu = $fopen({"../../target/big_core/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
     $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1\t| AluIn2\t| AluOut\t|\n");
     $fwrite(trk_alu,"---------------------------------------------------------\n");  
@@ -79,13 +93,13 @@ initial begin: trk_alu_gen
 end
 //tracker on ALU operations
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,Pc, big_core.AluIn1 , big_core.AluIn2, big_core.AluOut);
+    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,Pc, rvc_asap_5pl.AluIn1Q102H, rvc_asap_5pl.AluIn2Q102H, rvc_asap_5pl.AluOutQ102H); // # FIXME
 end
 
 integer trk_inst;
 initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
-    trk_inst = $fopen({"../../target/trk_inst.log"},"w");
+    trk_inst = $fopen({"../../target/big_core/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
     $fwrite(trk_inst,"Time\t|\tPC \t | Instraction\t|\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
@@ -97,20 +111,20 @@ end
 integer trk_fetch;
 initial begin: trk_fetch_gen
     $timeformat(-9, 1, " ", 6);
-    trk_fetch = $fopen({"../../target/trk_fetch.log"},"w");
+    trk_fetch = $fopen({"../../target/big_core/trk_fetch.log"},"w");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");
     $fwrite(trk_fetch,"Time\t|\tPC \t |Funct3 \t| Funct7 \t | Opcode|\n");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
 
 end
 always @(posedge Clk) begin : fetch_print
-    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,Pc, big_core.Funct3, big_core.Funct7, big_core.Opcode);
+    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,Pc, rvc_asap_5pl.Funct3Q101H, rvc_asap_5pl.Funct7Q101H, rvc_asap_5pl.OpcodeQ101H); // # FIXME
 end
 
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
     $timeformat(-9, 1, " ", 6);
-    trk_memory_access = $fopen({"../../target/trk_memory_access.log"},"w");
+    trk_memory_access = $fopen({"../../target/big_core/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_memory_access,"Time\t\t\t| PC\t\t\t\t\t| Opcode\t| Adress\t\t\t| Data \n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
@@ -126,22 +140,7 @@ always @(posedge Clk) begin : memory_access_print
     end
 end
 
-// DUT instance big_core 
-big_core big_core (
-    .Clk        ( Clk )          ,//input logic Clk,
-    .Rst        ( Rst )          ,//input logic Rst,
-    // interafce with instruciton memory
-    .Pc         ( Pc )           ,//output logic [31:0] Pc,
-    .Instruction( Instruction )  ,//output logic [31:0] Instruction,
-    //interface with Data Memory
-    .DMemAddress( DMemAddress )  ,//output logic [31:0] DMemAddress,
-    .DMemData   ( DMemData    )  ,//output logic [31:0] DMemData   ,
-    .DMemByteEn ( DMemByteEn  )  ,//output logic [3:0]  DMemByteEn ,
-    .DMemWrEn   ( DMemWrEn    )  ,//output logic        DMemWrEn   ,
-    .DMemRdEn   ( DMemRdEn    )  ,//output logic        DMemRdEn   ,
-    .DMemRspData( DMemRspData )   //input  logic [31:0] DMemRspData
-);
-
+ 
 
 
 

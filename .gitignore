@@ -4,6 +4,8 @@ modelsim/big_core/work/*
 modelsim/mini_core/work/*
 modelsim/mini_core/*
 modelsim/transcript
+modelsim/big_core/transcript
+modelsim/mini_core/transcript
 target/*
 !modelsim/work/README
 !modelsim/mini_core/work/README
