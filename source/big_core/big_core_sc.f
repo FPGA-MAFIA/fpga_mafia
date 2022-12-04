@@ -13,9 +13,8 @@
 +incdir+../../source/big_core/
 //RTL FIles
 ../../source/big_core/big_core_pkg.sv
-../../source/big_core/common/rvc_asap_pkg.sv
-../../source/big_core/rvc_asap_5pl.sv
+../../source/big_core/big_core.sv
 
 
 //Verif files 
-../../verif/big_core/big_core_5pl_tb.sv
+../../verif/big_core/big_core_tb.sv

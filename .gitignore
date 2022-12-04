@@ -12,3 +12,4 @@ target/*
 !target/mini_core/README.md
 !target/mini_core/README.md
 !target/mini_core/gcc_gen_files/README.md
+
