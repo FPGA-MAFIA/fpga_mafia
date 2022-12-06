@@ -2,14 +2,17 @@
 modelsim/work/*
 modelsim/big_core/work/*
 modelsim/mini_core/work/*
+modelsim/cache/work/*
 modelsim/mini_core/*
 modelsim/transcript
 modelsim/big_core/transcript
 modelsim/mini_core/transcript
+modelsim/cache/transcript
 target/*
 !modelsim/work/README
 !modelsim/mini_core/work/README
 !modelsim/big_core/work/README*
+!modelsim/cache/work/README
 !target/README.md
 !target/mini_core/README.md
 !target/mini_core/README.md
