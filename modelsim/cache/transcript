@@ -1,0 +1,18 @@
+# vsim work.test_tb -c -do "run -all" 
+# Start time: 00:45:21 on Dec 06,2022
+# Loading sv_std.std
+# Loading work.test_tb
+# Loading work.test
+# run -all
+# XOR (0, 0)= 0
+# 
+# XOR (0, 1)= 1
+# 
+# XOR (1, 0)= 1
+# 
+# XOR (1, 1)= 0
+# 
+# ** Note: $finish    : ../../verif/cache/tb/test_tb.sv(18)
+#    Time: 40 ps  Iteration: 0  Instance: /test_tb
+# End time: 00:45:23 on Dec 06,2022, Elapsed time: 0:00:02
+# Errors: 0, Warnings: 0
