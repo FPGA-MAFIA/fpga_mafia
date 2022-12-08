@@ -32,7 +32,7 @@ $display("====== Reset Done =======\n");
 delay(20);  $display("-----------First Write Request ----------");
 delay(2);   wr_req(20'h11_0A_0, 32'hDEAD_BEAF , 5'b0);
 delay(20);  $display("-----------Seconde Write Request ----------");
-delay(2);   wr_req(20'h11_0A_0, 32'hFAFA_FAFA , 5'b1);
+delay(2);   wr_req(20'h11_0B_0, 32'hFAFA_FAFA , 5'b1);
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
