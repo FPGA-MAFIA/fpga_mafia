@@ -38,7 +38,7 @@ logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 // Instantiating the big_core core
 //=========================================
  big_core big_core (
-    .Clock               (Clk),
+    .Clk               (Clk),
     .Rst                 (Rst),
     .PcQ100H             (Pc),          // To I_MEM
     .PreInstructionQ101H (Instruction), // From I_MEM

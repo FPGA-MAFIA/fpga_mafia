@@ -22,7 +22,7 @@
 `include "macros.sv"
 
 module big_core (
-    input  logic        Clock,
+    input  logic        Clk,
     input  logic        Rst,
     // Instruction Memory
     output logic [31:0] PcQ100H,             // To I_MEM
@@ -114,11 +114,11 @@ logic MatchRd2AftrWrQ101H;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 assign PcPlus4Q100H     = PcQ100H + 3'h4;
-`RVC_EN_RST_DFF(PcQ100H, NextPcQ102H, Clock, PcEnQ101H, Rst)
+`RVC_EN_RST_DFF(PcQ100H, NextPcQ102H, Clk, PcEnQ101H, Rst)
 
 // Q100H to Q101H Flip Flops. 
-`RVC_EN_DFF(PcQ101H, PcQ100H, Clock, PcEnQ101H)
-`RVC_EN_DFF(PcPlus4Q101H, PcPlus4Q100H, Clock, PcEnQ101H)
+`RVC_EN_DFF(PcQ101H, PcQ100H, Clk, PcEnQ101H)
+`RVC_EN_DFF(PcPlus4Q101H, PcPlus4Q100H, Clk, PcEnQ101H)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    __   _    _ 
@@ -239,30 +239,30 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
                                                   Register[RegSrc2Q101H]; // Common Case - reading from Register file
 
 // Q101H to Q102H Flip Flops
-`RVC_DFF(PcQ102H                  , PcQ101H               , Clock)
-`RVC_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clock)
-`RVC_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clock)
-`RVC_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clock)
-`RVC_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clock)
-`RVC_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clock)
-`RVC_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clock)
-`RVC_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clock)
-`RVC_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clock)
-`RVC_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clock)
-`RVC_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clock)
-`RVC_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clock)
-`RVC_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clock)
-`RVC_DFF(CtrlBranchOpQ102H        , CtrlBranchOpQ101H     , Clock)
-`RVC_DFF(CtrlAluOpQ102H           , CtrlAluOpQ101H        , Clock)
-`RVC_DFF(ImmediateQ102H           , ImmediateQ101H        , Clock)
-`RVC_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clock)
-`RVC_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clock)
-`RVC_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clock)
-`RVC_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clock)
-`RVC_DFF(RegDstQ102H              , RegDstQ101H           , Clock)
-`RVC_DFF(OpcodeQ102H              , OpcodeQ101H           , Clock)
-`RVC_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clock)
-`RVC_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clock)
+`RVC_DFF(PcQ102H                  , PcQ101H               , Clk)
+`RVC_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk)
+`RVC_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk)
+`RVC_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk)
+`RVC_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clk)
+`RVC_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk)
+`RVC_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk)
+`RVC_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk)
+`RVC_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk)
+`RVC_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk)
+`RVC_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk)
+`RVC_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clk)
+`RVC_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clk)
+`RVC_DFF(CtrlBranchOpQ102H        , CtrlBranchOpQ101H     , Clk)
+`RVC_DFF(CtrlAluOpQ102H           , CtrlAluOpQ101H        , Clk)
+`RVC_DFF(ImmediateQ102H           , ImmediateQ101H        , Clk)
+`RVC_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clk)
+`RVC_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clk)
+`RVC_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk)
+`RVC_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk)
+`RVC_DFF(RegDstQ102H              , RegDstQ101H           , Clk)
+`RVC_DFF(OpcodeQ102H              , OpcodeQ101H           , Clk)
+`RVC_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk)
+`RVC_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    _____  __     __   _____   _        ______          ____    __    ___    ___    _    _ 
@@ -283,7 +283,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 //---- The Register File ----
- `RVC_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clock , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
+ `RVC_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clk , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
 // Hazard Detection
 assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc1Q102H != 5'b0);
 assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);
@@ -341,17 +341,17 @@ assign NextPcQ102H = SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
 assign flushQ102H = SelNextPcAluOutQ102H;
 
 // Q102H to Q103H Flip Flops
-`RVC_DFF(RegRdData2Q103H     , RegRdData2Q102H     , Clock)
-`RVC_DFF(AluOutQ103H         , AluOutQ102H         , Clock)
-`RVC_DFF(CtrlDMemByteEnQ103H , CtrlDMemByteEnQ102H , Clock)
-`RVC_DFF(CtrlDMemWrEnQ103H   , CtrlDMemWrEnQ102H   , Clock)
-`RVC_DFF(SelDMemWbQ103H      , SelDMemWbQ102H      , Clock)
-`RVC_DFF(CtrlSignExtQ103H    , CtrlSignExtQ102H    , Clock)
-`RVC_DFF(PcPlus4Q103H        , PcPlus4Q102H        , Clock)
-`RVC_DFF(SelRegWrPcQ103H     , SelRegWrPcQ102H     , Clock)
-`RVC_DFF(RegDstQ103H         , RegDstQ102H         , Clock)
-`RVC_DFF(CtrlRegWrEnQ103H    , CtrlRegWrEnQ102H    , Clock)
-`RVC_DFF(flushQ103H          , flushQ102H          , Clock)
+`RVC_DFF(RegRdData2Q103H     , RegRdData2Q102H     , Clk)
+`RVC_DFF(AluOutQ103H         , AluOutQ102H         , Clk)
+`RVC_DFF(CtrlDMemByteEnQ103H , CtrlDMemByteEnQ102H , Clk)
+`RVC_DFF(CtrlDMemWrEnQ103H   , CtrlDMemWrEnQ102H   , Clk)
+`RVC_DFF(SelDMemWbQ103H      , SelDMemWbQ102H      , Clk)
+`RVC_DFF(CtrlSignExtQ103H    , CtrlSignExtQ102H    , Clk)
+`RVC_DFF(PcPlus4Q103H        , PcPlus4Q102H        , Clk)
+`RVC_DFF(SelRegWrPcQ103H     , SelRegWrPcQ102H     , Clk)
+`RVC_DFF(RegDstQ103H         , RegDstQ102H         , Clk)
+`RVC_DFF(CtrlRegWrEnQ103H    , CtrlRegWrEnQ102H    , Clk)
+`RVC_DFF(flushQ103H          , flushQ102H          , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 
@@ -368,29 +368,29 @@ assign flushQ102H = SelNextPcAluOutQ102H;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Outputs to memory
-always_comb begin
-DMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { RegRdData2Q103H[23:0],8'b0  } :
-                  (DMemAddressQ103H[1:0] == 2'b10 ) ? { RegRdData2Q103H[15:0],16'b0 } :
-                  (DMemAddressQ103H[1:0] == 2'b11 ) ? { RegRdData2Q103H[7:0] ,24'b0 } :
-                                                        RegRdData2Q103H;
-DMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { CtrlDMemByteEnQ103H[2:0],1'b0 } :
-                  (DMemAddressQ103H[1:0] == 2'b10 ) ? { CtrlDMemByteEnQ103H[1:0],2'b0 } :
-                  (DMemAddressQ103H[1:0] == 2'b11 ) ? { CtrlDMemByteEnQ103H[0]  ,3'b0 } :
-                                                        CtrlDMemByteEnQ103H;
-end
+// always_comb begin
+// DMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { RegRdData2Q103H[23:0],8'b0  } :
+//                   (DMemAddressQ103H[1:0] == 2'b10 ) ? { RegRdData2Q103H[15:0],16'b0 } :
+//                   (DMemAddressQ103H[1:0] == 2'b11 ) ? { RegRdData2Q103H[7:0] ,24'b0 } :
+//                                                         RegRdData2Q103H;
+// DMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { CtrlDMemByteEnQ103H[2:0],1'b0 } :
+//                   (DMemAddressQ103H[1:0] == 2'b10 ) ? { CtrlDMemByteEnQ103H[1:0],2'b0 } :
+//                   (DMemAddressQ103H[1:0] == 2'b11 ) ? { CtrlDMemByteEnQ103H[0]  ,3'b0 } :
+//                                                         CtrlDMemByteEnQ103H;
+// end
 assign DMemAddressQ103H = AluOutQ103H;
 assign DMemWrEnQ103H    = CtrlDMemWrEnQ103H;
 assign DMemRdEnQ103H    = SelDMemWbQ103H;
 
 // Q103H to Q104H Flip Flops
-`RVC_DFF(AluOutQ104H         , AluOutQ103H         , Clock)
-`RVC_DFF(SelDMemWbQ104H      , SelDMemWbQ103H      , Clock)
-`RVC_DFF(PcPlus4Q104H        , PcPlus4Q103H        , Clock)
-`RVC_DFF(SelRegWrPcQ104H     , SelRegWrPcQ103H     , Clock)
-`RVC_DFF(RegDstQ104H         , RegDstQ103H         , Clock)
-`RVC_DFF(CtrlRegWrEnQ104H    , CtrlRegWrEnQ103H    , Clock)
-`RVC_DFF(CtrlSignExtQ104H    , CtrlSignExtQ103H    , Clock)
-`RVC_DFF(ByteEnQ104H         , CtrlDMemByteEnQ103H , Clock)
+`RVC_DFF(AluOutQ104H         , AluOutQ103H         , Clk)
+`RVC_DFF(SelDMemWbQ104H      , SelDMemWbQ103H      , Clk)
+`RVC_DFF(PcPlus4Q104H        , PcPlus4Q103H        , Clk)
+`RVC_DFF(SelRegWrPcQ104H     , SelRegWrPcQ103H     , Clk)
+`RVC_DFF(RegDstQ104H         , RegDstQ103H         , Clk)
+`RVC_DFF(CtrlRegWrEnQ104H    , CtrlRegWrEnQ103H    , Clk)
+`RVC_DFF(CtrlSignExtQ104H    , CtrlSignExtQ103H    , Clk)
+`RVC_DFF(ByteEnQ104H         , CtrlDMemByteEnQ103H , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
