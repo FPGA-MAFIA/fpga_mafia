@@ -52,7 +52,10 @@ logic MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H;
 logic MatchVGAMemRegionQ103H, MatchVGAMemRegionQ104H;
 logic [31:0] DMemAddressQ104H;
 logic [31:0] PreDMemRdDataQ104H;
+logic [31:0] PreShiftDMemRdDataQ104H;
 logic [31:0] DMemRdDataQ104H;
+logic [31:0] ShiftDMemWrDataQ103H;
+logic [3:0]  ShiftDMemByteEnQ103H;
 logic [31:0] PreCRMemRdDataQ104H;
 logic [31:0] PreVGAMemRdDataQ104H;
 
@@ -75,98 +78,77 @@ assign DMemRdRspQ104H= MatchCRMemRegionQ104H  ? PreCRMemRdDataQ104H  :
                                                 32'b0                ;
 // Half & Byte READ
 always_comb begin
-DMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { RegRdData2Q103H[23:0],8'b0  } :
-                  (DMemAddressQ103H[1:0] == 2'b10 ) ? { RegRdData2Q103H[15:0],16'b0 } :
-                  (DMemAddressQ103H[1:0] == 2'b11 ) ? { RegRdData2Q103H[7:0] ,24'b0 } :
-                                                        RegRdData2Q103H;
-// DMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { CtrlDMemByteEnQ103H[2:0],1'b0 } :
-//                   (DMemAddressQ103H[1:0] == 2'b10 ) ? { CtrlDMemByteEnQ103H[1:0],2'b0 } :
-//                   (DMemAddressQ103H[1:0] == 2'b11 ) ? { CtrlDMemByteEnQ103H[0]  ,3'b0 } :
-//                                                         CtrlDMemByteEnQ103H;
+ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
+                       (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
+                       (DMemAddressQ103H[1:0] == 2'b11 ) ? { DMemWrDataQ103H[7:0] ,24'b0 } :
+                                                             DMemWrDataQ103H;
+ShiftDMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemByteEnQ103H[2:0],1'b0 } :
+                       (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemByteEnQ103H[1:0],2'b0 } :
+                       (DMemAddressQ103H[1:0] == 2'b11 ) ? { DMemByteEnQ103H[0]  ,3'b0 } :
+                                                             DMemByteEnQ103H;
 end               
-// Half & Byte WRITE
-always_comb begin
 
-ByteenaRestoreQ104H   = (ByteOffsetQ104H == 2'b01 ) ? { 1'b0,ByteEnQ104H[3:1] } : // we have done 1 shift - so 1 shift right
-                        (ByteOffsetQ104H == 2'b10 ) ? { 2'b0,ByteEnQ104H[3:2] } : // we have done 2 shift - so 2 shift right
-                        (ByteOffsetQ104H == 2'b11 ) ? { 3'b0,ByteEnQ104H[3]   } : // we have done 3 shift - so 3 shift right
-                                                             ByteEnQ104H;         // we don't shifted
-end
-
-assign DMemRdDataQ104H =       (DMemAddressQ104H[1:0] == 2'b00) ?        DMemRdRspQ104H         :
-                               (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,DMemRdRspQ104H[31:8]}  :
-                               (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,DMemRdRspQ104H[31:16]} :
-                               (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,DMemRdRspQ104H[31:24]} :
-                                                                   DMemRdRspQ104H         ;
-
-assign RdDataAfterShiftQ104H = (ByteOffsetQ104H == 2'b00) ?        DMemRdRspQ104H         :
-                               (ByteOffsetQ104H == 2'b01) ? { 8'b0,DMemRdRspQ104H[31:8]}  :
-                               (ByteOffsetQ104H == 2'b10) ? {16'b0,DMemRdRspQ104H[31:16]} :
-                               (ByteOffsetQ104H == 2'b11) ? {24'b0,DMemRdRspQ104H[31:24]} :
-                                                                   DMemRdRspQ104H         ;
+assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
+                            (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
+                            (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
+                                                                      PreShiftDMemRdDataQ104H         ; 
 
 // Instantiating the rvc_asap_5pl_i_mem instruction memory
-`ifndef SIMULATION_ON // if NOT def
-i_mem_16kb rvc_asap_5pl_i_mem (
-`else
-rvc_asap_5pl_i_mem rvc_asap_5pl_i_mem (
-`endif
+i_mem i_mem (
     .clock          (Clk),
     .address        (PcQ100H[31:2]),
     .q              (InstructionQ101H)
 );
 
 // Instantiating the rvc_asap_5pl_d_mem data memory
-`ifndef SIMULATION_ON // if NOT def
-d_mem_16kb rvc_asap_5pl_d_mem (
-`else
-rvc_asap_5pl_d_mem rvc_asap_5pl_d_mem (
-`endif
+
+ d_mem d_mem (
     .clock          (Clk),
-    .data           (DMemWrDataQ103H),
+    .data           (ShiftDMemWrDataQ103H),
     .address        (DMemAddressQ103H[31:2]),
-    .byteena        (DMemByteEnQ103H),
+    .byteena        (ShiftDMemByteEnQ103H),
     .wren           (DMemWrEnQ103H && MatchDMemRegionQ103H),
     .rden           (DMemRdEnQ103H && MatchDMemRegionQ103H),
-    .q              (PreDMemRdDataQ104H)
+    .q              (PreShiftDMemRdDataQ104H)
 );
+
 
 // Instantiating the rvc_asap_5pl_cr_mem data memory
-rvc_asap_5pl_cr_mem rvc_asap_5pl_cr_mem (
-    .Clk            (Clk),
-    .Rst              (Rst),
-    .data             (DMemWrDataQ103H),
-    .address          (DMemAddressQ103H),
-    .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
-    .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
-    .q                (PreCRMemRdDataQ104H),
-    .Button_0         (Button_0),
-    .Button_1         (Button_1),
-    .Switch           (Switch),
-    .SEG7_0           (SEG7_0),
-    .SEG7_1           (SEG7_1),
-    .SEG7_2           (SEG7_2),
-    .SEG7_3           (SEG7_3),
-    .SEG7_4           (SEG7_4),
-    .SEG7_5           (SEG7_5),
-    .LED              (LED)
-);
+//rvc_asap_5pl_cr_mem rvc_asap_5pl_cr_mem (
+//    .Clk            (Clk),
+//    .Rst              (Rst),
+//    .data             (DMemWrDataQ103H),
+//    .address          (DMemAddressQ103H),
+//    .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
+//    .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
+//    .q                (PreCRMemRdDataQ104H),
+//    .Button_0         (Button_0),
+//    .Button_1         (Button_1),
+//    .Switch           (Switch),
+//    .SEG7_0           (SEG7_0),
+//    .SEG7_1           (SEG7_1),
+//    .SEG7_2           (SEG7_2),
+//    .SEG7_3           (SEG7_3),
+//    .SEG7_4           (SEG7_4),
+//    .SEG7_5           (SEG7_5),
+//    .LED              (LED)
+//);
 
 // Instantiating the rvc_asap_5pl_vga_ctrl
-rvc_asap_5pl_vga_ctrl rvc_asap_5pl_vga_ctrl (
-    .CLK_50            (Clk),
-    .Reset             (Rst),
-    .data              (DMemWrDataQ103H),
-    .address           (DMemAddressQ103H),
-    .byteena           (DMemByteEnQ103H),
-    .wren              (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
-    .rden              (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
-    .q                 (PreVGAMemRdDataQ104H),
-    .RED               (RED),
-    .GREEN             (GREEN),
-    .BLUE              (BLUE),
-    .h_sync            (h_sync),
-    .v_sync            (v_sync)
-);
+//rvc_asap_5pl_vga_ctrl rvc_asap_5pl_vga_ctrl (
+//    .CLK_50            (Clk),
+//    .Reset             (Rst),
+//    .data              (DMemWrDataQ103H),
+//    .address           (DMemAddressQ103H),
+//    .byteena           (DMemByteEnQ103H),
+//    .wren              (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
+//    .rden              (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
+//    .q                 (PreVGAMemRdDataQ104H),
+//    .RED               (RED),
+//    .GREEN             (GREEN),
+//    .BLUE              (BLUE),
+//    .h_sync            (h_sync),
+//    .v_sync            (v_sync)
+//);
 
 endmodule // Module rvc_asap_5pl_mem_wrap
