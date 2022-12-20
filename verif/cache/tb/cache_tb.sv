@@ -1,6 +1,6 @@
 `include "macros.sv"
 
-module cache_tb ();
+module cache_tb ;
 
 import cache_param_pkg::*;  
 logic             clk;
