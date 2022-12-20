@@ -12,5 +12,8 @@
 
 +incdir+../../source/common/
 //RTL FIles
+../../source/common/mem.sv
 ../../source/mini_core/mini_core_pkg.sv
 ../../source/mini_core/mini_core.sv
+../../source/mini_core/mini_top.sv
+../../source/mini_core/mini_mem_wrap.sv
