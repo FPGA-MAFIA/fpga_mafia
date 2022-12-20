@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// Title            : riscv as-fast-as-possible 
-// Project          : rvc_asap
+// Title            : Big Core 
+// Project          : riscv_manycore_mesh_fpga 
 //-----------------------------------------------------------------------------
-// File             : rvc_asap_5pl 
+// File             : big_core 
 // Original Author  : Amichai Ben-David
 // Code Owner       : 
 // Adviser          : Amichai Ben-David
@@ -21,7 +21,7 @@
 
 `include "macros.sv"
 
-module mini_core (
+module big_core (
     input  logic        Clock,
     input  logic        Rst,
     // Instruction Memory
@@ -35,7 +35,7 @@ module mini_core (
     output logic        DMemRdEnQ103H,       // To D_MEM
     input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
-import mini_core_pkg::*;
+import big_core_pkg::*;
 // ---- Data-Path signals ----
 // Program counter
 logic [31:0]        PcQ101H, PcQ102H;
@@ -433,4 +433,4 @@ assign PostSxDMemRdDataQ104H[31:24] =  ByteenaRestoreQ104H[3] ? RdDataAfterShift
 // ---- Select what write to the register file ----
 assign WrBackDataQ104H = SelDMemWbQ104H  ? PostSxDMemRdDataQ104H : AluOutQ104H;
 assign RegWrDataQ104H  = SelRegWrPcQ104H ? PcPlus4Q104H          : WrBackDataQ104H;
-endmodule // Module rvc_asap_5pl
+endmodule // Module big_core 

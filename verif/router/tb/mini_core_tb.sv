@@ -18,7 +18,7 @@
 `include "macros.sv"
 
 
-module mini_core_tb  ;
+module mini_core_tb ;
 //import core_pkg::*;
 import mini_core_pkg::*;
 
