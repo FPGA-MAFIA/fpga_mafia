@@ -63,7 +63,7 @@ always @(posedge clk) begin
     if(cache.cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
         $fwrite(cache_pipe_trk,"%t      %0s       %h        %h\n",
         $realtime,
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(), //lu_res
+        cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(), 
         cache.cache_pipe_wrap.pipe_lu_rsp_q3.address, 
         cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
     end
