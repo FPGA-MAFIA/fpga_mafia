@@ -53,6 +53,7 @@ typedef logic [SET_ADRS_WIDTH-1:0] t_set_address;
 typedef logic [SET_WIDTH     -1:0] t_set_data;
 typedef logic [ADDRESS_WIDTH -1:0] t_address; 
 typedef logic [TQ_ID_WIDTH   -1:0] t_tq_id;
+typedef logic [WORD_WIDTH -1:0] t_word;
 
 
 
@@ -131,7 +132,7 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     t_address    address;
-    t_cl         data;
+    t_word         data;
     logic   [4:0] reg_id;
 } t_rd_rsp ;
 
@@ -148,6 +149,7 @@ typedef struct packed {
     t_lu_result  lu_result;
     t_tq_id      tq_id;
     t_cl         data;
+    t_adress     address;
 } t_lu_rsp ;
 
 
