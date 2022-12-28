@@ -53,29 +53,82 @@ assign cache2core_rsp.reg_id = '0; //FIXME
 
 
 
+// always_comb begin
+//     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
+//         next_tq_state = t_tq_state;
+//         unique casez (t_tq_state)
+//             IDLE                : 
+
+//             CORE_WR_REQ         :
+            
+//             LU_CORE_WR_REQ      :
+
+//             CORE_RD_REQ         :
+
+//             LU_CORE_RD_REQ      :
+
+//             CORE_RD_RSP         :
+
+//             WAIT_FILL           :
+
+//             FILL                :
+
+//             LU_FILL             :
+
+//             ERROR               :
+
+//             default: begin
+//                 next_tq_state = t_tq_state;
+//             end
+
+//         endcase //casez
+//     end //for loop   
+// end //always_comb
+
+
+
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
         next_tq_state = t_tq_state;
         unique casez (t_tq_state)
             IDLE                : 
+                //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
+                if () begin
+                    next_tq_state[i] =   (core2cache_req.opcode == RD_OP)     ?     LU_CORE_RD_REQ  :
+                                         (core2cache_req.opcode == RD_OP)     ?     LU_CORE_WR_REQ  :
+                                                                                    ERROR           :
+                end
+            LU_CORE_WR_REQ              : 
+                //if Cache_hit : nex_state == IDLE
+                //if Cache_miss : next_state == MB_WAIT_FILL
+                if ((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)) begin  
+                    next_tq_state[i]=   (pipe_lu_rsp_q3.t_lu_result == HIT)     ?   IDLE            :
+                                        (pipe_lu_rsp_q3.t_lu_result == MISS)    ?   MB_WAIT_FILL    :
+                                        (pipe_lu_rsp_q3.t_lu_result == REJECT)  ?                   :   //FIXME
+                                                                                    ERROR           ;
+                end                    
+               
 
-            CORE_WR_REQ         :
-            
-            LU_CORE_WR_REQ      :
+            LU_CORE_RD_REQ              :
+                //if Cache_hit : nex_state == IDLE
+                //if Cache_miss : next_state == MB_WAIT_FILL
+               if ((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)) begin  
+                    next_tq_state[i]=   (pipe_lu_rsp_q3.t_lu_result == HIT)     ?   IDLE            :
+                                        (pipe_lu_rsp_q3.t_lu_result == MISS)    ?   MB_WAIT_FILL    :
+                                        (pipe_lu_rsp_q3.t_lu_result == REJECT)  ?                   :   //FIXME
+                                                                                    ERROR           ;
+                end                
 
-            CORE_RD_REQ         :
+            MB_WAIT_FILL                :
+                //if fm_fill_rsp : nex_state == MB_FILL_READY
 
-            LU_CORE_RD_REQ      :
 
-            CORE_RD_RSP         :
+            MB_FILL_READY               :
+                //if fill_winner : next_state == FILL_LU
 
-            WAIT_FILL           :
-
-            FILL                :
-
-            LU_FILL             :
-
-            ERROR               :
+            FILL_LU                     :
+                //next_state == IDLE
+            ERROR                       :
 
             default: begin
                 next_tq_state = t_tq_state;
