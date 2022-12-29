@@ -55,40 +55,6 @@ assign cache2core_rsp.reg_id = '0; //FIXME
 
 
 
-// always_comb begin
-//     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
-//         next_tq_state = tq_state;
-//         unique casez (tq_state)
-//             IDLE                : 
-
-//             CORE_WR_REQ         :
-            
-//             LU_CORE_WR_REQ      :
-
-//             CORE_RD_REQ         :
-
-//             LU_CORE_RD_REQ      :
-
-//             CORE_RD_RSP         :
-
-//             WAIT_FILL           :
-
-//             FILL                :
-
-//             LU_FILL             :
-
-//             ERROR               :
-
-//             default: begin
-//                 next_tq_state = tq_state;
-//             end
-
-//         endcase //casez
-//     end //for loop   
-// end //always_comb
-
-
-
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
         next_tq_state = tq_state;
