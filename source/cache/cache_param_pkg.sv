@@ -71,13 +71,13 @@ typedef logic [WORD_WIDTH -1:0] t_word;
 // } t_tq_state ;
 
 typedef enum logic [3:0] {
-  IDLE            =   4'h0,
-  LU_CORE_WR_REQ  =   4'h1,
-  LU_CORE_RD_REQ  =   4'h2,
-  MB_WAIT_FILL    =   4'h3,
-  MB_FILL_READY   =   4'h4,
-  FILL_LU         =   4'h5,
-  ERROR           =   4'h6
+  S_IDLE            =   4'h0,
+  S_LU_CORE_WR_REQ  =   4'h1,
+  S_LU_CORE_RD_REQ  =   4'h2,
+  S_MB_WAIT_FILL    =   4'h3,
+  S_MB_FILL_READY   =   4'h4,
+  S_FILL_LU         =   4'h5,
+  S_ERROR           =   4'h6
 } t_tq_state ;
 
 typedef enum logic [1:0] {
@@ -159,7 +159,7 @@ typedef struct packed {
     t_lu_result  lu_result;
     t_tq_id      tq_id;
     t_cl         data;
-    t_adress     address;
+    t_address     address;
 } t_lu_rsp ;
 
 
