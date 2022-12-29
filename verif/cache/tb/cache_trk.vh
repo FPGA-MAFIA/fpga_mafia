@@ -17,6 +17,7 @@
 
 integer cache_top_trk;
 integer cache_pipe_trk;
+integer cache_fm_trk;
 initial begin
     $timeformat(-12, 1, "", 6);
     cache_top_trk      = $fopen({"../../target/cache/cache_top_trk.log"},"w");
@@ -28,6 +29,11 @@ initial begin
     $fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
     $fwrite(cache_pipe_trk,"  Time  ||  OPCODE  ||  Adress  ||    Data\n");
     $fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
+
+    cache_fm_trk = $fopen({"../../target/cache/cache_fm_trk.log"},"w");
+    $fwrite(cache_fm_trk,"-----------------------------------------------------------------------\n");
+    $fwrite(cache_fm_trk,"  Time  ||  OPCODE  ||  Adress  ||    Data\n");
+    $fwrite(cache_fm_trk,"-----------------------------------------------------------------------\n");
 end
 
 //==================================================
@@ -63,25 +69,36 @@ always @(posedge clk) begin
     if(cache.cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
         $fwrite(cache_pipe_trk,"%t      %0s       %h        %h\n",
         $realtime,
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(), 
+        cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_result.name(), 
         cache.cache_pipe_wrap.pipe_lu_rsp_q3.address, 
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
+        cache.cache_pipe_wrap.pipe_lu_rsp_q3.data);     
     end
 
+//==================================================
+// tracker on FM IO
+//==================================================
  //===== FM Request Tracker =====   
-    if(cache.cache_pipe_wrap.cache2fm_wr_req_q3.valid) begin
-        $fwrite(cache_pipe_trk,"%t      FM WRITE Request        %h        %h\n",
+    if(cache2fm_wr_req_q3.valid) begin
+        $fwrite(cache_fm_trk,"%t      FM WRITE Request        %h        %h          \n",
         $realtime,
-        cache.cache_pipe_wrap.cache2fm_wr_req_q3.address, 
-        cache.cache_pipe_wrap.cache2fm_wr_req_q3.cl_data);     
+        cache2fm_wr_req_q3.address, 
+        cache2fm_wr_req_q3.data);     
     end
 
-    if(cache.cache_pipe_wrap.cache2fm_rd_req_q3.valid) begin
-        $fwrite(cache_pipe_trk,"%t      FM READ Request       %h        %h\n",
+    if(cache2fm_rd_req_q3.valid) begin
+        $fwrite(cache_fm_trk,"%t      FM READ Request         %h                       %h\n",
         $realtime,
-        cache.cache_pipe_wrap.cache2fm_rd_req_q3.address, 
-        cache.cache_pipe_wrap.cache2fm_rd_req_q3.cl_data);     
+        cache2fm_rd_req_q3.address,
+        cache2fm_rd_req_q3.tq_id
+        );     
     end
 
-
+ //===== FM Responce Tracker =====   
+    if(fm2cache_rd_rsp.valid) begin
+        $fwrite(cache_fm_trk,"%t      FM READ Responce                   %h         %h\n",
+        $realtime,
+        fm2cache_rd_rsp.data,
+        fm2cache_rd_rsp.tq_id
+        );     
+    end
 end

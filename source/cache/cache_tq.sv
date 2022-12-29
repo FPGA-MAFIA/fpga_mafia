@@ -19,15 +19,15 @@ module  cache_tq
     input   logic           clk,        
     input   logic           rst,        
     //core Interface
-    input   t_req           core2cache_req,
+    input   var t_req           core2cache_req,
     output  logic           stall,
     output  t_rd_rsp        cache2core_rsp,
     //FM Inteface
-    input   t_fm_rd_rsp     fm2cache_rd_rsp,
+    input   var t_fm_rd_rsp     fm2cache_rd_rsp,
     //output 
     //Pipe Interface
     output  t_lu_req        pipe_lu_req_q1,
-    input   t_lu_rsp        pipe_lu_rsp_q3
+    input   var t_lu_rsp        pipe_lu_rsp_q3
 );
 t_tq_state tq_state;
 t_tq_state next_tq_state;
@@ -39,7 +39,8 @@ assign pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
                                 (core2cache_req.opcode == RD_OP) ? RD_LU :
                                                                    NO_LU ;
 assign pipe_lu_req_q1.address = core2cache_req.address;
-assign pipe_lu_req_q1.cl_data    = core2cache_req.data;
+assign pipe_lu_req_q1.cl_data = core2cache_req.data;
+assign pipe_lu_req_q1.tq_id   = 5'd3;//FIXME
 
 
 

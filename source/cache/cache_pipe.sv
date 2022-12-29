@@ -35,11 +35,28 @@ module cache_pipe
 );
 
     assign pipe_lu_rsp_q3     = '0;
-    assign cache2fm_wr_req_q3 = '0;
-    assign cache2fm_rd_req_q3 = '0;
+    //assign cache2fm_wr_req_q3 = '0;
+    //assign cache2fm_rd_req_q3 = '0;
     assign rd_set_req_q1      = '0;
     assign wr_data_set_q2     = '0;
     assign rd_cl_req_q2       = '0;
     assign wr_data_cl_q3      = '0;
 
+
+
+//==============================================
+// Not functinal -  just to test the FM tracker
+//==============================================
+t_lu_req     pipe_lu_req_q2;
+t_lu_req     pipe_lu_req_q3;
+`RVC_DFF(pipe_lu_req_q2 ,pipe_lu_req_q1 , clk)
+`RVC_DFF(pipe_lu_req_q3 ,pipe_lu_req_q2 , clk)
+
+assign cache2fm_wr_req_q3.valid    = pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == WR_LU);
+assign cache2fm_wr_req_q3.address  = pipe_lu_req_q3.address;
+assign cache2fm_wr_req_q3.data     = pipe_lu_req_q3.cl_data;
+
+assign cache2fm_rd_req_q3.valid    = pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == RD_LU);
+assign cache2fm_rd_req_q3.address  = pipe_lu_req_q3.address;
+assign cache2fm_rd_req_q3.tq_id    = pipe_lu_req_q3.tq_id;
 endmodule

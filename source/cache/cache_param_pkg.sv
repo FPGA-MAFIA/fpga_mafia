@@ -159,7 +159,7 @@ typedef struct packed {
     t_lu_result  lu_result;
     t_tq_id      tq_id;
     t_cl         data;
-    t_address     address;
+    t_address    address;
 } t_lu_rsp ;
 
 
