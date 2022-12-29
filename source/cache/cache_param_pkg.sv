@@ -53,20 +53,31 @@ typedef logic [SET_ADRS_WIDTH-1:0] t_set_address;
 typedef logic [SET_WIDTH     -1:0] t_set_data;
 typedef logic [ADDRESS_WIDTH -1:0] t_address; 
 typedef logic [TQ_ID_WIDTH   -1:0] t_tq_id;
+typedef logic [WORD_WIDTH -1:0] t_word;
 
 
+//Check if ok before erase
+// typedef enum logic [3:0] {
+//   IDLE            =   4'h0,
+//   CORE_WR_REQ     =   4'h1,
+//   LU_CORE_WR_REQ  =   4'h2,
+//   CORE_RD_REQ     =   4'h3,
+//   LU_CORE_RD_REQ  =   4'h4,
+//   CORE_RD_RSP     =   4'h5,
+//   WAIT_FILL       =   4'h6,
+//   FILL            =   4'h7,
+//   LU_FILL         =   4'h8,
+//   ERROR           =   4'hF
+// } t_tq_state ;
 
 typedef enum logic [3:0] {
   IDLE            =   4'h0,
-  CORE_WR_REQ     =   4'h1,
-  LU_CORE_WR_REQ  =   4'h2,
-  CORE_RD_REQ     =   4'h3,
-  LU_CORE_RD_REQ  =   4'h4,
-  CORE_RD_RSP     =   4'h5,
-  WAIT_FILL       =   4'h6,
-  FILL            =   4'h7,
-  LU_FILL         =   4'h8,
-  ERROR           =   4'hF
+  LU_CORE_WR_REQ  =   4'h1,
+  LU_CORE_RD_REQ  =   4'h2,
+  MB_WAIT_FILL    =   4'h3,
+  MB_FILL_READY   =   4'h4,
+  FILL_LU         =   4'h5,
+  ERROR           =   4'h6
 } t_tq_state ;
 
 typedef enum logic [1:0] {
@@ -131,7 +142,7 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     t_address    address;
-    t_cl         data;
+    t_word         data;
     logic   [4:0] reg_id;
 } t_rd_rsp ;
 
@@ -148,6 +159,7 @@ typedef struct packed {
     t_lu_result  lu_result;
     t_tq_id      tq_id;
     t_cl         data;
+    t_adress     address;
 } t_lu_rsp ;
 
 
