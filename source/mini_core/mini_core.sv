@@ -21,7 +21,9 @@
 
 `include "macros.sv"
 
-module mini_core (
+module mini_core 
+import mini_core_pkg::*;
+(
     input  logic        Clock,
     input  logic        Rst,
     // Instruction Memory
@@ -32,10 +34,9 @@ module mini_core (
     output logic [31:0] DMemAddressQ103H,    // To D_MEM
     output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
     output logic        DMemWrEnQ103H,       // To D_MEM
-    output logic        DMemRdEnQ103H,       // To D_MEM
     input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
-import mini_core_pkg::*;
+
 // ---- Data-Path signals ----
 // Program counter
 logic [31:0]        PcQ101H, PcQ102H;
@@ -380,7 +381,6 @@ DMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { CtrlDMemByteEnQ103H[2:0]
 end
 assign DMemAddressQ103H = AluOutQ103H;
 assign DMemWrEnQ103H    = CtrlDMemWrEnQ103H;
-assign DMemRdEnQ103H    = SelDMemWbQ103H;
 
 // Q103H to Q104H Flip Flops
 `RVC_DFF(AluOutQ104H         , AluOutQ103H         , Clock)
