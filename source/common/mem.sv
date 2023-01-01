@@ -12,14 +12,14 @@
 // Modification history :
 //------------------------------------------------------------------------------
 
-`include "lotr_defines.sv"
+`include "macros.sv"
 
 //---------------------------------------------------
 module mem #(
     parameter WORD_WIDTH,   //no defualt value.
     parameter ADRS_WIDTH    //no default value.
 ) (
-    input  logic                  clk        ,
+    input  logic                  clock      ,
     //interface a
     input  logic [ADRS_WIDTH-1:0] address_a  ,
     input  logic                  wren_a     ,
@@ -65,7 +65,7 @@ end
 //=======================================
 //          the memory Array
 //=======================================
-`LOTR_MSFF(mem, next_mem, clk)
+`RVC_DFF(mem, next_mem, clock)
 
 //=======================================
 //          reading the memory
@@ -73,7 +73,7 @@ end
 assign pre_q_a = {mem[address_a_byte+3], mem[address_a_byte+2], mem[address_a_byte+1], mem[address_a_byte+0]};
 assign pre_q_b = {mem[address_b_byte+3], mem[address_b_byte+2], mem[address_b_byte+1], mem[address_b_byte+0]};
 // sample the read - synchorus read
-`LOTR_MSFF(q_a, pre_q_a, clk)
-`LOTR_MSFF(q_b, pre_q_b, clk)
+`RVC_DFF(q_a, pre_q_a, clock)
+`RVC_DFF(q_b, pre_q_b, clock)
 
 endmodule

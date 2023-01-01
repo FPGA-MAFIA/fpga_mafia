@@ -67,8 +67,7 @@ array #(
     .wr_data        ({wr_data_set_q2.tags,     // #way x tag_width
                       wr_data_set_q2.valid,    // #way 
                       wr_data_set_q2.modified, // #way 
-                      wr_data_set_q2.mru,      // #way
-                      wr_data_set_q2.fill}),   // #way
+                      wr_data_set_q2.mru}),   // #way
     //read interface
     .rd_address     (rd_set_req_q1.set),       //input
     .q              (rd_data_set_rsp_q2)       //output

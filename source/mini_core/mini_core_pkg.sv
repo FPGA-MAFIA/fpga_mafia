@@ -40,9 +40,20 @@ parameter VGA_MEM_REGION_ROOF  = VGA_MEM_MSB            ;
 
 // define data memory sizes
 parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
-
+//parameter D_MEM_OFFSET     = 'h0040_0000;   // See D_MEM_REGION
+parameter LSB_D_MEM        = 0 ;
+parameter MSB_D_MEM        = 12;
+parameter SIZE_D_MEM_LOTR  = 2**(MSB_D_MEM + 1);
+parameter SIZE_SHRD_MEM    = 2**(MSB_D_MEM );
+parameter T0_STK_OFFSET    = 32'h0040_1400;
+parameter T1_STK_OFFSET    = 32'h0040_1800;
+parameter T2_STK_OFFSET    = 32'h0040_1C00;
+parameter T3_STK_OFFSET    = 32'h0040_2000;
+parameter MEM_SHARD_OFFSET = 32'h0040_0f00;
 // define VGA memory sizes
 parameter SIZE_VGA_MEM       = 38400;
+
+
 
 typedef enum logic [2:0] {
     U_TYPE = 3'b000 , 
@@ -172,6 +183,12 @@ parameter D_MEM_OFFSET = 'h1000;
 //   FENCE  = 7'b0001111 ,
 //   SYSCAL = 7'b1110011
 //} t_opcode ;
+typedef enum logic [1:0] {
+    RD_REQ = 2'b00 , 
+    WR_REQ = 2'b01 , 
+    RD_RSP = 2'b10 
+} t_fab_op ;
+
 
 
 endpackage
