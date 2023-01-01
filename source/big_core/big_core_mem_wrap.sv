@@ -13,9 +13,9 @@
 // instruction memory and control registers memory.
 // I_MEM, D_MEM and CR_MEM will support sync memory read.
 `include "macros.sv"
-
-module big_core_mem_wrap (
-    input  logic        Clk,
+module big_core_mem_wrap 
+    import big_core_pkg::*;
+(   input  logic        Clk,
     input  logic        Rst,
     input  logic [31:0] PcQ100H,          // I_MEM
     output logic [31:0] InstructionQ101H, // I_MEM
@@ -44,7 +44,6 @@ module big_core_mem_wrap (
     output logic        h_sync,
     output logic        v_sync
 );
-import big_core_pkg::*;
 
 // Control signals
 logic MatchDMemRegionQ103H,   MatchDMemRegionQ104H;
@@ -76,7 +75,7 @@ assign DMemRdRspQ104H= MatchCRMemRegionQ104H  ? PreCRMemRdDataQ104H  :
                        MatchDMemRegionQ104H   ? PreDMemRdDataQ104H   :
                        MatchVGAMemRegionQ104H ? PreVGAMemRdDataQ104H :
                                                 32'b0                ;
-// Half & Byte READ
+// Half & Byte Write
 always_comb begin
 ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
                        (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
@@ -88,6 +87,7 @@ ShiftDMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemByteEnQ103H[2:0
                                                              DMemByteEnQ103H;
 end               
 
+// Half & Byte READ
 assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
                             (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
                             (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
@@ -95,7 +95,7 @@ assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDM
 
 // Instantiating the rvc_asap_5pl_i_mem instruction memory
 i_mem i_mem (
-    .clock          (Clk),
+    .Clk            (Clk),
     .address        (PcQ100H[31:2]),
     .q              (InstructionQ101H)
 );
@@ -103,7 +103,7 @@ i_mem i_mem (
 // Instantiating the rvc_asap_5pl_d_mem data memory
 
  d_mem d_mem (
-    .clock          (Clk),
+    .Clk            (Clk),
     .data           (ShiftDMemWrDataQ103H),
     .address        (DMemAddressQ103H[31:2]),
     .byteena        (ShiftDMemByteEnQ103H),
