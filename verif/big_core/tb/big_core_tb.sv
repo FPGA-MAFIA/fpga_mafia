@@ -17,7 +17,7 @@
 
 `include "macros.sv"
 
-module big_core_tb () ;
+module big_core_tb ;
 import big_core_pkg::*;
 
 logic        Clk;

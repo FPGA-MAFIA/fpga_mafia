@@ -43,7 +43,7 @@ parameter MSB_TAG         = 19;                        //
 parameter CL_ADRS_WIDTH   = TAG_WIDTH + SET_ADRS_WIDTH;//16 -> Address[TAG_MSB:SET_LSB] = Address[19:4]
 parameter WAY_WIDTH       = 2;
 parameter NUM_WAYS        = 2**WAY_WIDTH;              //4 -> (2)^2. -> 2 bits represent 4 ways.
-parameter SET_WIDTH       = (TAG_WIDTH+4)*NUM_WAYS ; //{tag,valid,modified,mru,fill} * NUM_WAYS
+parameter SET_WIDTH       = (TAG_WIDTH+3)*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
 
 typedef logic [CL_WIDTH      -1:0] t_cl;
 typedef logic [5             -1:0] t_reg_id;
@@ -53,20 +53,18 @@ typedef logic [SET_ADRS_WIDTH-1:0] t_set_address;
 typedef logic [SET_WIDTH     -1:0] t_set_data;
 typedef logic [ADDRESS_WIDTH -1:0] t_address; 
 typedef logic [TQ_ID_WIDTH   -1:0] t_tq_id;
+typedef logic [WORD_WIDTH -1:0] t_word;
 
 
 
 typedef enum logic [3:0] {
-  IDLE            =   4'h0,
-  CORE_WR_REQ     =   4'h1,
-  LU_CORE_WR_REQ  =   4'h2,
-  CORE_RD_REQ     =   4'h3,
-  LU_CORE_RD_REQ  =   4'h4,
-  CORE_RD_RSP     =   4'h5,
-  WAIT_FILL       =   4'h6,
-  FILL            =   4'h7,
-  LU_FILL         =   4'h8,
-  ERROR           =   4'hF
+  S_IDLE            = 4'h0,
+  S_LU_CORE_WR_REQ  = 4'h1,
+  S_LU_CORE_RD_REQ  = 4'h2,
+  S_MB_WAIT_FILL    = 4'h3,
+  S_MB_FILL_READY   = 4'h4,
+  S_FILL_LU         = 4'h5,
+  S_ERROR           = 4'h6
 } t_tq_state ;
 
 typedef enum logic [1:0] {
@@ -131,7 +129,7 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     t_address    address;
-    t_cl         data;
+    t_word         data;
     logic   [4:0] reg_id;
 } t_rd_rsp ;
 
@@ -148,6 +146,7 @@ typedef struct packed {
     t_lu_result  lu_result;
     t_tq_id      tq_id;
     t_cl         data;
+    t_address    address;
 } t_lu_rsp ;
 
 
@@ -176,7 +175,6 @@ typedef struct packed {
     logic [NUM_WAYS-1:0]                valid;
     logic [NUM_WAYS-1:0]                modified;
     logic [NUM_WAYS-1:0]                mru;
-    logic [NUM_WAYS-1:0]                fill;
 } t_set_rd_rsp ;
 
 typedef struct packed {
@@ -186,7 +184,6 @@ typedef struct packed {
     logic [NUM_WAYS-1:0]                 valid;
     logic [NUM_WAYS-1:0]                 modified;
     logic [NUM_WAYS-1:0]                 mru;
-    logic [NUM_WAYS-1:0]                 fill;
 } t_set_wr_req ;
 
 
