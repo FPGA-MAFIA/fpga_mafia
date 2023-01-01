@@ -24,7 +24,7 @@ MODELSIM = './modelsim/'+args.proj_name+'/'
 SOURCE = './source/'+args.proj_name+'/'
 TARGET = './target/'+args.proj_name+'/'
 APP = './app/'
-APP_C = './app/c/'
+TESTS = './verif/'+args.proj_name+'/tests/'
 
 #####################################################################################################
 #                                           class Test
@@ -34,7 +34,7 @@ class Test:
         self.name = name
         self.project = project 
         self.gcc_dir = self._create_gcc_dir()
-        self.path = APP_C+self.name+'.c' if os.path.exists(APP_C+self.name+'.c') else ''
+        self.path = TESTS+self.name+'.c' if os.path.exists(TESTS+self.name+'.c') else ''
     def _create_gcc_dir(self):
         if os.path.exists(TARGET+'gcc_gen_files/'+self.name):
             pass
@@ -91,9 +91,11 @@ class Test:
             print_message('[ERROR] Failed to run gui of '+self.name)
         os.chdir(MODEL_ROOT)
     def _no_debug(self):
-        for test in os.listdir(TARGET):
-            for file in os.listdir(TARGET+'/'+test):
-                os.remove(file)
+        for test in os.listdir(TARGET+'gcc_gen_files/'):
+            print(f'test - {test}')
+            for file in os.listdir(TARGET+'gcc_gen_files/'+test):
+                print(f'file - {file}')
+                os.remove(TARGET+'gcc_gen_files/'+test+'/'+file)
 
 def print_message(msg):
     msg_type = msg.split()[0]
@@ -108,12 +110,13 @@ def main():
     os.chdir(MODEL_ROOT)
     tests = []
     if args.all:
-        test_list = os.listdir(APP_C)
+        test_list = os.listdir(TESTS)
+        print(f'test_list - {test_list}')
         for test in test_list:
             tests.append(Test(test.split('.c')[0], args.proj_name))
     else:
         for test in args.tests.split():
-            tests.append(Test(test))
+            tests.append(Test(test), args.proj_name)
         
     for test in tests:
         print_message('[INFO] ***********************************************************************')
