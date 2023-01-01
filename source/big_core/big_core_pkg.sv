@@ -16,6 +16,36 @@
 `define BIG_CORE_PKG_VS
 package big_core_pkg;
     
+parameter I_MEM_MSB   = 'h4000-1;  // I_MEM   0x0    - 0x3FFF
+parameter D_MEM_MSB   = 'h7000-1;  // D_MEM   0x4000 - 0x6FFF
+parameter CR_MEM_MSB  = 'h8000-1;  // CR_MEM  0x7000 - 0x7FFF
+parameter VGA_MEM_MSB = 'h11600-1; // VGA_MEM 0x8000 - 0x115FF
+
+// Region bits
+parameter LSB_REGION = 0;
+parameter MSB_REGION = 15;
+
+// VGA Region bits
+parameter VGA_MSB_REGION = 19;
+
+// Encoded regions
+parameter I_MEM_REGION_FLOOR   = 'h0                    ;
+parameter I_MEM_REGION_ROOF    = I_MEM_MSB              ;
+
+parameter D_MEM_REGION_FLOOR   = I_MEM_REGION_ROOF  + 1 ;
+parameter D_MEM_REGION_ROOF    = D_MEM_MSB              ;
+
+parameter CR_MEM_REGION_FLOOR  = D_MEM_REGION_ROOF  + 1 ;
+parameter CR_MEM_REGION_ROOF   = CR_MEM_MSB             ;
+
+parameter VGA_MEM_REGION_FLOOR = CR_MEM_REGION_ROOF + 1 ;
+parameter VGA_MEM_REGION_ROOF  = VGA_MEM_MSB            ;
+
+// define data memory sizes
+parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
+
+// define VGA memory sizes
+parameter SIZE_VGA_MEM       = 38400; 
 
 parameter I_MEM_SIZE   = 'h1000;
 parameter I_MEM_OFFSET = 'h0;

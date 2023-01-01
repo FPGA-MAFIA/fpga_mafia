@@ -34,22 +34,67 @@ logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
+// FPGA interface inputs              
+logic        Button_0;
+logic        Button_1;
+logic [9:0]  Switch;
+
+// FPGA interface outputs
+logic [7:0]  SEG7_0;
+logic [7:0]  SEG7_1;
+logic [7:0]  SEG7_2;
+logic [7:0]  SEG7_3;
+logic [7:0]  SEG7_4;
+logic [7:0]  SEG7_5;
+logic [9:0]  LED;
+
+//=========================================
+//     VGA - Core interface
+//=========================================
+// VGA output
+logic [3:0]  RED;
+logic [3:0]  GREEN;
+logic [3:0]  BLUE;
+logic        h_sync;
+logic        v_sync;
+
 //=========================================
 // Instantiating the big_core core
 //=========================================
- big_core big_core (
-    .Clock               (Clk),
-    .Rst                 (Rst),
-    .PcQ100H             (Pc),          // To I_MEM
-    .PreInstructionQ101H (Instruction), // From I_MEM
-    .DMemWrDataQ103H     (DMemData),  // To D_MEM
-    .DMemAddressQ103H    (DMemAddress), // To D_MEM
-    .DMemByteEnQ103H     (DMemByteEn),  // To D_MEM
-    .DMemWrEnQ103H       (DMemWrEn),    // To D_MEM
-    .DMemRdEnQ103H       (DMemRdEn),    // To D_MEM
-    .DMemRdRspQ104H      (DMemRspData)    // From D_MEM
+// big_core big_core (
+//    .Clk                 (Clk),
+//    .Rst                 (Rst),
+//    .PcQ100H             (Pc),          // To I_MEM
+//    .PreInstructionQ101H (Instruction), // From I_MEM
+//    .DMemWrDataQ103H     (DMemData),  // To D_MEM
+//    .DMemAddressQ103H    (DMemAddress), // To D_MEM
+//    .DMemByteEnQ103H     (DMemByteEn),  // To D_MEM
+//    .DMemWrEnQ103H       (DMemWrEn),    // To D_MEM
+//    .DMemRdEnQ103H       (DMemRdEn),    // To D_MEM
+//    .DMemRdRspQ104H      (DMemRspData)    // From D_MEM
+//);
+//=========================================
+// Instantiating the big_core_top
+//=========================================
+big_core_top big_core_top(
+    .Clk            (Clk     ),
+    .Rst            (Rst     ),
+    .Button_0       (Button_0),
+    .Button_1       (Button_1),
+    .Switch         (Switch  ),
+    .SEG7_0         (SEG7_0  ),
+    .SEG7_1         (SEG7_1  ),
+    .SEG7_2         (SEG7_2  ),
+    .SEG7_3         (SEG7_3  ),
+    .SEG7_4         (SEG7_4  ),
+    .SEG7_5         (SEG7_5  ),
+    .LED            (LED     ),
+    .RED            (RED     ),
+    .GREEN          (GREEN   ),
+    .BLUE           (BLUE    ),
+    .h_sync         (h_sync  ),
+    .v_sync         (v_sync  ) 
 );
-
 // ========================
 // clock gen
 // ========================
@@ -72,12 +117,15 @@ end: reset_gen
 `RVC_DFF(IMem, IMem    , Clk)
 `RVC_DFF(DMem, NextDMem, Clk)
 
+string test_name;
 initial begin: test_seq
+    if ($value$plusargs ("STRING=%s", test_name))
+        $$display("STRING value %s", test_name);
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../target/big_core/gcc_gen_files/inst_mem.sv"}, IMem);
-    //$readmemh({"../app/data_mem.sv"}, DMem);
+    $readmemh({"../../target/big_core/gcc_gen_files/",test_name,"/inst_mem.sv"} , IMem);
+    //$readmemh({"../../target/big_core/gcc_gen_files/",test_name,"/data_mem_rv32i.sv"} , DMem);
     #10000 $finish;
 end // test_seq
 
@@ -93,7 +141,7 @@ initial begin: trk_alu_gen
 end
 //tracker on ALU operations
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,Pc, big_core.AluIn1Q102H, big_core.AluIn2Q102H, big_core.AluOutQ102H); // # FIXME
+    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.AluIn1Q102H, big_core_top.big_core.AluIn2Q102H, big_core_top.big_core.AluOutQ102H); // # FIXME
 end
 
 integer trk_inst;
@@ -106,7 +154,7 @@ initial begin: trk_inst_gen
 
 end
 always @(posedge Clk) begin : inst_print
-    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,Pc, Instruction);
+    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.InstructionQ100H);
 end
 integer trk_fetch;
 initial begin: trk_fetch_gen
@@ -118,7 +166,7 @@ initial begin: trk_fetch_gen
 
 end
 always @(posedge Clk) begin : fetch_print
-    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,Pc, big_core.Funct3Q101H, big_core.Funct7Q101H, big_core.OpcodeQ101H); // # FIXME
+    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.Funct3Q101H, big_core_top.big_core.Funct7Q101H, big_core_top.big_core.OpcodeQ101H); // # FIXME
 end
 
 integer trk_memory_access;
@@ -133,10 +181,10 @@ end
 //tracker on memory_access operations
 always @(posedge Clk) begin : memory_access_print
     if(DMemWrEn) begin
-    $fwrite(trk_memory_access,"%t\t\t| %8h\t\t| write\t\t| %8h\t\t| %8h \n", $realtime, Pc, DMemAddress, DMemData);
+    $fwrite(trk_memory_access,"%t\t\t| %8h\t\t| write\t\t| %8h\t\t| %8h \n", $realtime, big_core_top.big_core.PcQ100H, big_core_top.big_core.DMemAddressQ103H, big_core_top.big_core.DMemWrDataQ103H);
     end
     if(DMemRdEn) begin
-    $fwrite(trk_memory_access,"%t\t\t| %8h\t\t| read\t\t| %8h\t\t| %8h \n", $realtime, Pc, DMemAddress, DMemData);
+    $fwrite(trk_memory_access,"%t\t\t| %8h\t\t| read\t\t| %8h\t\t| %8h \n", $realtime, big_core_top.big_core.PcQ100H, big_core_top.big_core.DMemAddressQ103H, big_core_top.big_core.DMemWrDataQ103H);
     end
 end
 
