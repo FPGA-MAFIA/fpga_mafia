@@ -61,11 +61,15 @@ end: reset_gen
 `RVC_DFF(IMem, IMem    , Clk)
 `RVC_DFF(DMem, NextDMem, Clk)
 
+string test_name;
 initial begin: test_seq
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("STRING value %s", test_name);
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../target/mini_core/gcc_gen_files/inst_mem.sv"}, mini_top.mini_mem_wrap.i_mem.mem);
+    $readmemh({"../../target/mini_core/gcc_gen_files/",test_name,"/inst_mem.sv"} , IMem);
+    force mini_top.mini_mem_wrap.i_mem.mem = IMem;
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #1us $finish;
 end // test_seq
