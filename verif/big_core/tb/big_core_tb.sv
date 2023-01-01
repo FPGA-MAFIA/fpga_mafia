@@ -120,7 +120,7 @@ end: reset_gen
 string test_name;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
-        $$display("STRING value %s", test_name);
+        $display("STRING value %s", test_name);
     //======================================
     //load the program to the TB
     //======================================
@@ -154,7 +154,7 @@ initial begin: trk_inst_gen
 
 end
 always @(posedge Clk) begin : inst_print
-    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.InstructionQ100H);
+    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.PreInstructionQ101H);
 end
 integer trk_fetch;
 initial begin: trk_fetch_gen

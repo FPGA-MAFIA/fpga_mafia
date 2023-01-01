@@ -49,16 +49,16 @@ class Test:
             elf_path = self.name+'_rv32i.elf'
             txt_path = self.name+'_rv32i_elf.txt'
             commands = []
-            commands.append('rv_gcc -S -ffreestanding -march=rv32i ../../../../'+self.path+' -o '+cs_path)
-            commands.append('rv_gcc -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ '+cs_path+' -o '+elf_path)
-            commands.append('rv_objdump -gd '+elf_path+' > '+txt_path)
-            commands.append('rv_objcopy --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv')
+            commands.append('riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../'+self.path+' -o '+cs_path)
+            commands.append('riscv-none-embed-gcc.exe     -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ '+cs_path+' -o '+elf_path)
+            commands.append('riscv-none-embed-objdump.exe -gd '+elf_path+' > '+txt_path)
+            commands.append('riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv')
             with open(self.gcc_dir+'commands.sh', 'w') as p:
                 for cmd in commands:
                     p.write(cmd+' ;\n')
             try:
                 os.chdir(self.gcc_dir)
-                subprocess.call('commands.sh', shell=True)
+                subprocess.call('bash commands.sh', shell=True)
                 os.chdir(MODEL_ROOT)
             except:
                 print_message('[ERROR] Failed to compile SW of '+self.name+'.c')
@@ -116,7 +116,7 @@ def main():
             tests.append(Test(test.split('.c')[0], args.proj_name))
     else:
         for test in args.tests.split():
-            tests.append(Test(test), args.proj_name)
+            tests.append(Test(test, args.proj_name))
         
     for test in tests:
         print_message('[INFO] ***********************************************************************')
