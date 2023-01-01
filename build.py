@@ -50,7 +50,7 @@ class Test:
             txt_path = self.name+'_rv32i_elf.txt'
             commands = []
             commands.append('riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../'+self.path+' -o '+cs_path)
-            commands.append('riscv-none-embed-gcc.exe     -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ '+cs_path+' -o '+elf_path)
+            commands.append('riscv-none-embed-gcc.exe     -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ ../../../../app/crt0.S '+cs_path+' -o '+elf_path)
             commands.append('riscv-none-embed-objdump.exe -gd '+elf_path+' > '+txt_path)
             commands.append('riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv')
             with open(self.gcc_dir+'commands.sh', 'w') as p:

@@ -40,7 +40,7 @@ import big_core_pkg::*;
 // Program counter
 logic [31:0]        PcQ101H, PcQ102H;
 logic [31:0]        PcPlus4Q100H, PcPlus4Q101H, PcPlus4Q102H, PcPlus4Q103H, PcPlus4Q104H;
-logic [31:0]        NextPcQ102H;
+logic [31:0]        NextPcQ10XH;
 logic [31:0]        InstructionQ101H;
 
 logic [31:1][31:0]  Register; 
@@ -112,11 +112,12 @@ logic MatchRd2AftrWrQ101H;
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-assign PcPlus4Q100H     = PcQ100H + 3'h4;
-`RVC_EN_RST_DFF(PcQ100H, NextPcQ102H, Clk, PcEnQ101H, Rst)
+assign PcPlus4Q100H  = PcQ100H + 3'h4;
+assign NextPcQ10XH   = SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
+`RVC_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst)
 
 // Q100H to Q101H Flip Flops. 
-`RVC_EN_DFF(PcQ101H, PcQ100H, Clk, PcEnQ101H)
+`RVC_EN_DFF(PcQ101H,      PcQ100H,      Clk, PcEnQ101H)
 `RVC_EN_DFF(PcPlus4Q101H, PcPlus4Q100H, Clk, PcEnQ101H)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -238,30 +239,30 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
                                                   Register[RegSrc2Q101H]; // Common Case - reading from Register file
 
 // Q101H to Q102H Flip Flops
-`RVC_DFF(PcQ102H                  , PcQ101H               , Clk)
-`RVC_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk)
-`RVC_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk)
-`RVC_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk)
-`RVC_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clk)
-`RVC_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk)
-`RVC_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk)
-`RVC_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk)
-`RVC_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk)
-`RVC_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk)
-`RVC_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk)
-`RVC_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clk)
-`RVC_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clk)
-`RVC_DFF(CtrlBranchOpQ102H        , CtrlBranchOpQ101H     , Clk)
-`RVC_DFF(CtrlAluOpQ102H           , CtrlAluOpQ101H        , Clk)
-`RVC_DFF(ImmediateQ102H           , ImmediateQ101H        , Clk)
-`RVC_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clk)
-`RVC_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clk)
-`RVC_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk)
-`RVC_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk)
-`RVC_DFF(RegDstQ102H              , RegDstQ101H           , Clk)
-`RVC_DFF(OpcodeQ102H              , OpcodeQ101H           , Clk)
-`RVC_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk)
-`RVC_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk)
+`RVC_RST_DFF(PcQ102H                  , PcQ101H               , Clk, Rst)
+`RVC_RST_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk, Rst)
+`RVC_RST_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk, Rst)
+`RVC_RST_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk, Rst)
+`RVC_RST_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clk, Rst)
+`RVC_RST_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk, Rst)
+`RVC_RST_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk, Rst)
+`RVC_RST_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk, Rst)
+`RVC_RST_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk, Rst)
+`RVC_RST_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk, Rst)
+`RVC_RST_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk, Rst)
+`RVC_RST_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clk, Rst)
+`RVC_RST_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clk, Rst)
+`RVC_RST_VAL_DFF(CtrlBranchOpQ102H    , CtrlBranchOpQ101H     , Clk, Rst, t_branch_type'('0))
+`RVC_RST_VAL_DFF(CtrlAluOpQ102H       , CtrlAluOpQ101H        , Clk, Rst, t_alu_op'('0))
+`RVC_RST_DFF(ImmediateQ102H           , ImmediateQ101H        , Clk, Rst)
+`RVC_RST_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clk, Rst)
+`RVC_RST_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clk, Rst)
+`RVC_RST_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk, Rst)
+`RVC_RST_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk, Rst)
+`RVC_RST_DFF(RegDstQ102H              , RegDstQ101H           , Clk, Rst)
+`RVC_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0))
+`RVC_RST_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk, Rst)
+`RVC_RST_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk, Rst)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    _____  __     __   _____   _        ______          ____    __    ___    ___    _    _ 
@@ -336,7 +337,6 @@ always_comb begin : branch_comp
 end
 
 assign SelNextPcAluOutQ102H = (SelNextPcAluOutBQ102H && BranchCondMetQ102H) || (SelNextPcAluOutJQ102H);   
-assign NextPcQ102H = SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
 assign flushQ102H = SelNextPcAluOutQ102H;
 
 // Q102H to Q103H Flip Flops

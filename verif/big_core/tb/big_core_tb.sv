@@ -22,7 +22,6 @@ import big_core_pkg::*;
 
 logic        Clk;
 logic        Rst;
-logic [31:0] Pc;
 logic [31:0] Instruction;
 logic [31:0] DMemAddress;
 logic [31:0] DMemData   ;
@@ -30,7 +29,8 @@ logic [3:0]  DMemByteEn ;
 logic        DMemWrEn   ;
 logic        DMemRdEn   ;
 logic [31:0] DMemRspData;
-logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
+logic  [7:0] IMem     [I_MEM_MSB : 0];
+logic  [7:0] NextIMem [I_MEM_MSB : 0];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
@@ -114,7 +114,7 @@ initial begin: reset_gen
 end: reset_gen
 
 
-`RVC_DFF(IMem, IMem    , Clk)
+`RVC_DFF(IMem, NextIMem, Clk)
 `RVC_DFF(DMem, NextDMem, Clk)
 
 string test_name;
@@ -125,6 +125,8 @@ initial begin: test_seq
     //load the program to the TB
     //======================================
     $readmemh({"../../target/big_core/gcc_gen_files/",test_name,"/inst_mem.sv"} , IMem);
+    $readmemh({"../../target/big_core/gcc_gen_files/",test_name,"/inst_mem.sv"} , NextIMem);
+    force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
     //$readmemh({"../../target/big_core/gcc_gen_files/",test_name,"/data_mem_rv32i.sv"} , DMem);
     #10000 $finish;
 end // test_seq
@@ -135,13 +137,13 @@ initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
     trk_alu = $fopen({"../../target/big_core/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
-    $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1\t| AluIn2\t| AluOut\t|\n");
+    $fwrite(trk_alu,"Time    |    PC    | inst_op | opcode |  AluIn1   |  AluIn2   | AluOut   |  \n");
     $fwrite(trk_alu,"---------------------------------------------------------\n");  
 
 end
 //tracker on ALU operations
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.AluIn1Q102H, big_core_top.big_core.AluIn2Q102H, big_core_top.big_core.AluOutQ102H); // # FIXME
+    $fwrite(trk_alu,"%t  | %8h |  %5s  | %6s | %8h  | %8h  |%8h  | \n", $realtime,big_core_top.big_core.PcQ102H, big_core_top.big_core.OpcodeQ102H.name(), big_core_top.big_core.CtrlAluOpQ102H.name(), big_core_top.big_core.AluIn1Q102H, big_core_top.big_core.AluIn2Q102H, big_core_top.big_core.AluOutQ102H); // # FIXME
 end
 
 integer trk_inst;
@@ -192,10 +194,6 @@ end
 
 
 
-assign Instruction = {IMem[Pc + 3] ,
-                      IMem[Pc + 2] ,
-                      IMem[Pc + 1] ,
-                      IMem[Pc + 0]};
 
 
 //==============================

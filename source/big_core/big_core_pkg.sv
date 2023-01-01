@@ -21,6 +21,10 @@ parameter D_MEM_MSB   = 'h7000-1;  // D_MEM   0x4000 - 0x6FFF
 parameter CR_MEM_MSB  = 'h8000-1;  // CR_MEM  0x7000 - 0x7FFF
 parameter VGA_MEM_MSB = 'h11600-1; // VGA_MEM 0x8000 - 0x115FF
 
+parameter I_MEM_SIZE   = 'h4000;
+parameter I_MEM_OFFSET = 'h0;
+parameter D_MEM_SIZE   = 'h4000;
+parameter D_MEM_OFFSET = 'h4000;
 // Region bits
 parameter LSB_REGION = 0;
 parameter MSB_REGION = 15;
@@ -47,10 +51,7 @@ parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1;
 // define VGA memory sizes
 parameter SIZE_VGA_MEM       = 38400; 
 
-parameter I_MEM_SIZE   = 'h1000;
-parameter I_MEM_OFFSET = 'h0;
-parameter D_MEM_SIZE   = 'h1000;
-parameter D_MEM_OFFSET = 'h1000;
+
 parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
 
 typedef enum logic [2:0] {
