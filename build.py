@@ -1,5 +1,3 @@
-#!/bin/python3
-
 import os
 import subprocess
 import glob
@@ -35,6 +33,7 @@ class Test:
         self.project = project 
         self.gcc_dir = self._create_gcc_dir()
         self.path = TESTS+self.name+'.c' if os.path.exists(TESTS+self.name+'.c') else ''
+        self.fail_flag = False
     def _create_gcc_dir(self):
         if os.path.exists(TARGET+'gcc_gen_files/'+self.name):
             pass
@@ -43,7 +42,8 @@ class Test:
         else:
             os.mkdir(TARGET+'gcc_gen_files/'+self.name)
         return TARGET+'gcc_gen_files/'+self.name+'/'
-    def _test_compilation(self):
+    def _compile_sw(self):
+        print_message('[INFO] Starting to compile SW ...')
         if self.path:
             cs_path =  self.name+'_rv32i.c.s'
             elf_path = self.name+'_rv32i.elf'
@@ -62,25 +62,73 @@ class Test:
                 os.chdir(MODEL_ROOT)
             except:
                 print_message('[ERROR] Failed to compile SW of '+self.name+'.c')
+                self.fail_flag = True
+            else:
+                print_message('[INFO] SW compiation finished with no errors\n')
+            #first_cmd =  'riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../'+self.path+' -o '+cs_path
+            #second_cmd = 'riscv-none-embed-gcc.exe     -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ ../../../../app/crt0.S '+cs_path+' -o '+elf_path
+            #third_cmd = 'riscv-none-embed-objdump.exe -gd '+elf_path+' > '+txt_path
+            #forth_cmd = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
+            #try:
+            #   subprocess.call(first_cmd)
+            #except:
+            #    print_message([f'[ERROR] failed to gcc the test - {self.name}'])
+            #    self.fail_flag = True
+            #else:
+            #    try:
+            #        subprocess.call(second_cmd)
+            #    except:
+            #        print_message([f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}'])
+            #        self.fail_flag = True
+            #    else:
+            #        try:
+            #            print(third_cmd)
+            #            subprocess.call(third_cmd)
+            #        except:
+            #            print_message([f'[ERROR] failed to create "elf.txt" to the test - {self.name}'])
+            #            self.fail_flag = True
+            #        else:
+            #            try:
+            #                subprocess.call(forth_cmd)
+            #            except:
+            #                print_message([f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}'])
+            #                self.fail_flag = True
         else:
             print_message('[ERROR] Can\'t find the c files of '+self.name)
-            exit(1)
-    def _compile_simulation(self):
+            self.fail_flag = True
+        os.chdir(MODEL_ROOT)
+    def _compile_hw(self):
         os.chdir(MODELSIM)
+        print_message('[INFO] Starting to compile HW ...')
         comp_sim_cmd = 'vlog.exe -lint -f ../../'+TB+'/'+self.project+'_list.f'
         try:
-            os.system(comp_sim_cmd)
+            #results = subprocess.check_output(comp_sim_cmd, shell=True, stderr=subprocess.STDOUT).decode()
+            results = subprocess.run(comp_sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         except:
             print_message('[ERROR] Failed to compile simulation of '+self.name)
+            self.fail_flag = True
+        else:
+            if len(results.stdout.split('Error')) > 2:
+                print(results.stdout)
+                self.fail_flag = True
+            else:
+                print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
         os.chdir(MODEL_ROOT)
     def _start_simulation(self):
         os.chdir(MODELSIM)
+        print_message('[INFO] Now running simulation ...')
         sim_cmd = 'vsim.exe work.'+self.project+'_tb -c -do "run -all" +STRING='+self.name
-        print(sim_cmd)
         try:
-            subprocess.call(sim_cmd, shell=True)
+            results = subprocess.run(sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
+            self.fail_flag = True
+        else:
+            if len(results.stdout.split('Error')) > 2:
+                print(results.stdout)
+                self.fail_flag = True
+            else:
+                print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
         os.chdir(MODEL_ROOT)
     def _gui(self):
         os.chdir(MODELSIM)
@@ -89,17 +137,15 @@ class Test:
             subprocess.call(gui_cmd, shell=True)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
+            self.fail_flag = True
         os.chdir(MODEL_ROOT)
     def _no_debug(self):
-        for test in os.listdir(TARGET+'gcc_gen_files/'):
-            print(f'test - {test}')
-            for file in os.listdir(TARGET+'gcc_gen_files/'+test):
-                print(f'file - {file}')
-                os.remove(TARGET+'gcc_gen_files/'+test+'/'+file)
+        for file in os.listdir(TARGET+'gcc_gen_files/'+self.name):
+            os.remove(TARGET+'gcc_gen_files/'+self.name+'/'+file)
 
 def print_message(msg):
     msg_type = msg.split()[0]
-    color = 'red' if msg_type == '[ERROR]' else 'yellow' if msg_type == '[WARNING]' else 'green'
+    color = 'red' if msg_type == '[ERROR]' else 'yellow' if msg_type == '[WARNING]' else 'white' if msg_type == '[INFO]' else 'blue'
     print(colored(msg,color,attrs=['bold']))        
 
 #####################################################################################################
@@ -119,17 +165,17 @@ def main():
             tests.append(Test(test, args.proj_name))
         
     for test in tests:
-        print_message('[INFO] ***********************************************************************')
-        print_message('[INFO] Test - '+test.name)
-        if args.app or args.full_run:
-            test._test_compilation()
-        if args.hw or args.full_run:
-            test._compile_simulation()
-        if args.sim or args.full_run:
+        print_message('******************************************************************************')
+        print_message('                               Test - '+test.name)
+        if (args.app or args.full_run) and not test.fail_flag:
+            test._compile_sw()
+        if (args.hw or args.full_run) and not test.fail_flag:
+            test._compile_hw()
+        if (args.sim or args.full_run) and not test.fail_flag:
             test._start_simulation()
         if not args.debug:
             test._no_debug()
-        print_message('[INFO] ***********************************************************************')
+        print_message('******************************************************************************')
     
 if __name__ == "__main__" :
     main()      
