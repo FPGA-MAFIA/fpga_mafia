@@ -55,6 +55,7 @@ cache_pipe cache_pipe(
 //============================
 //          TAG ARRAY
 //============================
+//============================
 array #(
     .WORD_WIDTH     (SET_WIDTH),        // {tag,valid,modified,lru,fill} * NUM_WAYS
     .ADRS_WIDTH     (SET_ADRS_WIDTH)    // 2^SET_ADRS_WIDTH -> array size
@@ -75,6 +76,7 @@ array #(
 
 //============================
 //          DATA ARRAY
+//============================
 //============================
 array  #(
     .WORD_WIDTH     (CL_WIDTH),
