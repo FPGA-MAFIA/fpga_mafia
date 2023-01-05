@@ -43,7 +43,9 @@ parameter MSB_TAG         = 19;                        //
 parameter CL_ADRS_WIDTH   = TAG_WIDTH + SET_ADRS_WIDTH;//16 -> Address[TAG_MSB:SET_LSB] = Address[19:4]
 parameter WAY_WIDTH       = 2;
 parameter NUM_WAYS        = 2**WAY_WIDTH;              //4 -> (2)^2. -> 2 bits represent 4 ways.
-parameter SET_WIDTH       = (TAG_WIDTH+3)*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
+parameter WAY_ENTRY_SIZE  = (TAG_WIDTH+3); //{tag,valid,modified,mru} * NUM_WAYS
+parameter SET_WIDTH       = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
+parameter NUM_SET         = 2**SET_ADRS_WIDTH;
 
 typedef logic [CL_WIDTH      -1:0] t_cl;
 typedef logic [5             -1:0] t_reg_id;
@@ -118,6 +120,7 @@ typedef struct packed {
     logic       valid;
     t_tq_id     tq_id;
     t_address   address;
+    t_cl        data;
 } t_fm_rd_req ;
 
 typedef struct packed {

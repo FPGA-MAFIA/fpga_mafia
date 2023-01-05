@@ -23,18 +23,33 @@ initial begin: clock_gen
     end
 end// clock_gen
 
+t_set_rd_rsp back_door_entry ;
+
+logic [SET_WIDTH-1:0] tag_mem   [(2**SET_ADRS_WIDTH)-1:0];
+logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
+
+
+
+
 initial begin : assign_input
 $display("================\n     START\n================\n");
             rst= 1'b1;
             core2cache_req     = '0;
 delay(80);  rst= 1'b0;
+delay(1); backdoor_cache_load();
 $display("====== Reset Done =======\n");
-delay(20);  $display("-----------First Write Request ----------");
-delay(2);   wr_req(20'h11_0A_0, 32'hDEAD_BEAF , 5'b0);
-delay(20);  $display("-----------Seconde Write Request ----------");
-delay(2);   wr_req(20'h11_0B_0, 32'hFAFA_FAFA , 5'b1);
-delay(20);  $display("-----------First Read Request ----------");
-delay(2);   rd_req(20'h11_0B_0, 5'b1);
+delay(5);   wr_req(20'hE8_01_0, 32'hDEAD_BEAF , 5'b0);
+delay(5);   wr_req(20'hE9_01_0, 32'hFAFA_FAFA , 5'b1);
+delay(5);   wr_req(20'hEA_01_0, 32'hBABA_BABA , 5'b1);
+delay(5);   rd_req(20'hE8_01_0, 5'd1);
+delay(5);   rd_req(20'hE9_01_0, 5'd2);
+delay(5);   rd_req(20'hEA_01_0, 5'd3);
+delay(5);   wr_req(20'hE8_01_0, 32'h1234_5678 , 5'b0);
+delay(5);   wr_req(20'hE9_01_0, 32'hCCCC_DDDD , 5'b1);
+delay(5);   wr_req(20'hEA_01_0, 32'h6666_6666 , 5'b1);
+delay(5);   rd_req(20'hE8_01_0, 5'd1);
+delay(5);   rd_req(20'hE9_01_0, 5'd2);
+delay(5);   rd_req(20'hEA_01_0, 5'd3);
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
@@ -61,6 +76,29 @@ task delay(input int cycles);
   end
 endtask
 
+task backdoor_cache_load();
+
+  for(int SET =0; SET< NUM_SET ; SET++) begin
+    for(int WAY =0; WAY< NUM_WAYS; WAY++) begin
+        back_door_entry.tags[WAY]    = WAY + 1000;
+        back_door_entry.valid[WAY]   = 1'b1;
+        back_door_entry.modified[WAY] = 1'b0;
+        back_door_entry.mru[WAY]      = 1'b0;
+    end
+    tag_mem[SET]  = back_door_entry;
+  end
+
+  for(int D_WAY = 0; D_WAY< (SET_ADRS_WIDTH + WAY_WIDTH) ; D_WAY++) begin
+    data_mem[D_WAY]  = 'h5000+D_WAY;
+  end
+    force cache.cache_pipe_wrap.tag_array.mem  = tag_mem;
+    force cache.cache_pipe_wrap.data_array.mem = data_mem;
+    delay(5);
+
+    release cache.cache_pipe_wrap.data_array.mem;
+    release cache.cache_pipe_wrap.tag_array.mem;
+endtask
+
 task wr_req( input logic [19:0]  address, 
              input logic [127:0] data ,
              input logic [4:0]   id );
@@ -84,7 +122,7 @@ task rd_req( input logic [19:0] address,
     core2cache_req.valid   =  1'b1;
     core2cache_req.opcode  =  RD_OP;
     core2cache_req.address =  address;
-    core2cache_req.reg_id =  id;
+    core2cache_req.reg_id  =  id;
     delay(1);
     core2cache_req     = '0;
 endtask

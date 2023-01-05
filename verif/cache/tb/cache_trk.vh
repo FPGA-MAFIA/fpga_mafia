@@ -89,16 +89,16 @@ always @(posedge clk) begin
         $fwrite(cache_fm_trk,"%t      FM READ Request         %h                       %h\n",
         $realtime,
         cache2fm_rd_req_q3.address,
-        cache2fm_rd_req_q3.tq_id
+        cache2fm_rd_req_q3.data
         );     
     end
 
- //===== FM Responce Tracker =====   
-    if(fm2cache_rd_rsp.valid) begin
-        $fwrite(cache_fm_trk,"%t      FM READ Responce                   %h         %h\n",
-        $realtime,
-        fm2cache_rd_rsp.data,
-        fm2cache_rd_rsp.tq_id
-        );     
-    end
+// //===== FM Responce Tracker =====   
+//    if(fm2cache_rd_rsp.valid) begin
+//        $fwrite(cache_fm_trk,"%t      FM READ Responce                   %h         %h\n",
+//        $realtime,
+//        fm2cache_rd_rsp.data,
+//        fm2cache_rd_rsp.tq_id
+//        );     
+//    end
 end
