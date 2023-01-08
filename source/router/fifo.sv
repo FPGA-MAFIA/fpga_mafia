@@ -2,88 +2,68 @@
 // File Name: fifo.sv
 // Description: The fifo module.
 //
+`include "macros.sv"
 module fifo #(parameter int DATA_WIDTH = 8, 
 			  parameter int FIFO_DEPTH = 3)
 	(
-	 input 					 clk,
-	 input 					 mrst_n,
-	 input 					 srst_n,
-	 input 					 wr,
-	 input [DATA_WIDTH-1:0]  wr_data,
-	 input 					 rd,
-	 output [DATA_WIDTH-1:0] rd_data,
-	 output 				 full,
-	 output 				 empty
+	 input  logic					 clk,
+	 input  logic				     rst,
+	 input  logic					 push,
+	 input  logic[DATA_WIDTH-1:0]    push_data,
+	 input  logic					 pop,
+	 output logic [DATA_WIDTH-1:0]   pop_data,
+	 output logic				     full,
+	 output logic				     empty
 	 );
-reg [DATA_WIDTH-1:0] rd_data;
+logic [DATA_WIDTH-1:0] pop_data;
 //INTERNAL VARIABLES
-reg [FIFO_DEPTH-1:0] w_counter;//point to next cell in memory that will be writen  
-reg [FIFO_DEPTH-1:0] r_counter;//point to next cell will readen
-reg [FIFO_DEPTH:0] fifo_status;//flag to empty and full
-reg [DATA_WIDTH-1:0] memory [0:FIFO_DEPTH-1];
+logic [FIFO_DEPTH-1:0] w_counter;//point to next cell in memory that will be writen  
+logic [FIFO_DEPTH-1:0] r_counter;//point to next cell will readen
+logic [FIFO_DEPTH:0]   fifo_status;//flag to empty and full
+logic [DATA_WIDTH-1:0] memory [0:FIFO_DEPTH-1];
+logic                  en_push_fifo;
+logic [FIFO_DEPTH-1:0] next_w_counter;
+logic                  en_pop_fifo;
+logic [FIFO_DEPTH-1:0] next_r_counter;
+logic                  en_status_plus;
+logic                  en_status_minus;
+logic                  en_status;
+logic [FIFO_DEPTH:0]   next_fifo_status;
 
-
+//assigning to full, empty, pop_data
 assign full=(fifo_status==(FIFO_DEPTH));
 assign empty=(fifo_status==0);
-assign rd_data= memory[r_counter];
+assign pop_data= memory[r_counter];
 
-always @(posedge clk or negedge mrst_n)
-begin:WRITE_COUNTER
-	if(!mrst_n || !srst_n) begin
-		w_counter<=0;
-	end
-	else if((wr && !full)||(wr && rd && full)) begin
-		if (w_counter==FIFO_DEPTH-1)begin
-			w_counter<=0;
-		end
-		else begin
-			w_counter<=w_counter+1;
-		end
-	end
-end
+//pointer to the next place to push to it
+assign en_push_fifo =(push &&!full)||(push && pop && full);
+assign next_w_counter=(w_counter==FIFO_DEPTH-1)? '0 : (w_counter+1);
+`RVC_EN_RST_DFF(w_counter, next_w_counter, clk, en_push_fifo, rst);
 
-always @(posedge clk or negedge mrst_n)
-begin: READ_COUNTER
-	if(!mrst_n || !srst_n)begin
-		r_counter<=0;
-	end
-	else if((rd && !empty)||(rd && wr && empty))begin
-		if(r_counter==FIFO_DEPTH-1)begin
-			r_counter<=0;
-		end
-		else begin
-			r_counter<=r_counter+1;
-		end
-	end
-end
+//pointer to the next place to pop from it
+assign en_pop_fifo=(pop && !empty)||(pop && push && empty);
+assign next_r_counter=(r_counter==FIFO_DEPTH-1)?'0 : (r_counter+1);
+`RVC_EN_RST_DFF(r_counter, next_r_counter, clk, en_pop_fifo, rst);
 
+//fifo_status
+assign en_status_plus=(push && !full) && !(pop && !empty);
+assign en_status_minus=(pop && !empty)&& !(push && !full);
+assign en_status=en_status_plus |en_status_minus;
+assign next_fifo_status=en_status_plus ? (fifo_status+1):(fifo_status-1);
+`RVC_EN_RST_DFF(fifo_status, next_fifo_status, clk, en_status, rst);
 
-always @(posedge clk or negedge mrst_n)
-begin: STATUS
-	if(!mrst_n ||!srst_n) begin
-		fifo_status<=0;
-	end
-	else begin
-		if((wr && !full) && !(rd && !empty)) begin
-			fifo_status<= fifo_status +1;
-		end
-		if((rd && !empty) && !(wr && !full)) begin
-			fifo_status<= fifo_status -1;
-		end
-	end
-end
-
-always @(posedge clk or negedge mrst_n)
+always @(posedge clk)
 begin: MEMORY_WRITE
-	if (!srst_n || !mrst_n) begin
+	if (rst) begin
 		for(int i=0; i<FIFO_DEPTH; i = i+1) begin
 			memory[i]<=0;
 		end
 	end
-	else if((wr && !full)||(wr && full && rd))begin
-		memory[w_counter]<=wr_data;
+	else if((push && !full)||(push && full && pop))begin
+		memory[w_counter]<=push_data;
 	end
 end
+
 
 endmodule : fifo
 

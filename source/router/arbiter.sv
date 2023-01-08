@@ -5,66 +5,43 @@
 module arbiter #(parameter int NUM_CLIENTS=4,
 				parameter int DATA_WIDTH=8)
 	(
-	 input 						clk,
-	 input 						mrst_n,
-	 input 						srst_n,
-	 input req [NUM_CLIENTS-1:0],
-	 input [DATA_WIDTH-1:0] din [0:NUM_CLIENTS-1],
-	 output [$clog2(NUM_CLIENTS-1):0]src_num,           
-	 output 					valid,
-	 output [NUM_CLIENTS-1:0] ack ,
-	 output 	[DATA_WIDTH-1:0]	dout 
+	 input  logic                           clk,
+	 input  logic                           rst,
+	 input  logic                           req [NUM_CLIENTS-1:0],
+	 input  logic [DATA_WIDTH-1:0]          din [0:NUM_CLIENTS-1],
+	 output logic [$clog2(NUM_CLIENTS-1):0] src_num,           
+	 output logic                           valid,
+	 output logic [NUM_CLIENTS-1:0]         ack ,
+	 output logic	[DATA_WIDTH-1:0]	    dout 
 	);
-reg [$clog2(NUM_CLIENTS-1):0] src_num;	
-reg  [NUM_CLIENTS-1:0] ack;
-reg [DATA_WIDTH-1:0]dout ;
+logic [$clog2(NUM_CLIENTS-1):0]  src_num;	
+logic  [NUM_CLIENTS-1:0]         ack;
+logic [DATA_WIDTH-1:0]           dout ;
 //INTERNAL VARIABLE
-reg  [$clog2(NUM_CLIENTS-1):0] counter;	
-reg valid;
-wire[$clog2(NUM_CLIENTS-1):0]  nxt_cnt;
-	
+logic  [$clog2(NUM_CLIENTS-1):0] counter;	
+logic                            valid;
+logic [$clog2(NUM_CLIENTS-1):0]  nxt_cnt;
+logic [$clog2(NUM_CLIENTS-1):0]  nxt_counter;
+logic [$clog2(NUM_CLIENTS-1):0]  former_counter;
+logic                            next_valid;
+//counter
+assign nxt_counter=(counter+1)%NUM_CLIENTS;
+`RVC_RST_DFF(counter,nxt_counter,clk,rst);
 
+//ack and reset former ack
+assign former_counter=(counter==0)? (NUM_CLIENTS-1):(counter-1); //maybe needed another ff
+`RVC_RST_DFF(ack[former_counter],'0,clk,rst);
+`RVC_EN_RST_DFF(ack[counter],1'b1,clk,req[counter],rst);
 
-	always @(posedge clk or negedge mrst_n )
-	begin : COUNTER
-		if (!mrst_n) begin
-			counter<=0;
-		end
-		else if(!srst_n)begin
-			counter<=0;
-		end
-		else begin
-			 counter<=(counter+1)%NUM_CLIENTS;
-		end
-		
-	end
+//valid
+assign next_valid = req[counter] ? 1'b1 : 0;
+`RVC_RST_DFF(valid,next_valid,clk,rst);
 
+//src_num
+`RVC_EN_RST_DFF(src_num, counter, clk, req[counter], rst);
 
-	always @ (posedge clk or negedge mrst_n)                   
-	begin : OUTPUTS
-
-		if (!mrst_n || !srst_n) begin
-			valid<=0;
-			src_num<=0;
-			dout<=0;
-			ack<=0;
-		end
-		else begin
-			ack<=0;
-			if (req[counter]) begin
-				valid<=1;
-				src_num<=counter;
-				dout<=din[counter];
-				ack[counter]<=1;
-			end
-		
-			else begin
-				valid<=0;
-			end
-		end
-	end
-
-
+//dout
+`RVC_EN_RST_DFF(dout, din[counter], clk, req[counter], rst);
 
 endmodule : arbiter
 

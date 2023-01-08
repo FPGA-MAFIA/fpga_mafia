@@ -5,20 +5,20 @@
 -	module fifo_arbiter #(parameter int DATA_WIDTH=8,
 -					parameter int FIFO_DEPTH=3,
 -					parameter int NUM_CLIENTS=3)
--		(input			clk,
--		 input			rst,
--		 input [DATA_WIDTH-1:0] din [0:NUM_CLIENTS-1],
--		 input write [NUM_CLIENTS-1:0],
--		 output full [NUM_CLIENTS-1:0],
--		 output [$clog2(NUM_CLIENTS-1):0]src_num,           
--		 output 			valid,
--		 output    [DATA_WIDTH-1:0]	dout 
+-		(input			                  clk,
+-		 input			                  rst,
+-		 input [DATA_WIDTH-1:0]           din      [0:NUM_CLIENTS-1],
+-		 input                            write    [NUM_CLIENTS-1:0],
+-		 output                           full     [NUM_CLIENTS-1:0],
+-		 output [$clog2(NUM_CLIENTS-1):0] src_num,           
+-		 output                           valid,
+-		 output [DATA_WIDTH-1:0]	      dout 
 -		);
 -	//INTERNAL VARIABLES
--	reg [DATA_WIDTH-1:0] inside_din [0:NUM_CLIENTS-1];//maybe connect directly fifo to arbiter 
--	wire  [NUM_CLIENTS-1:0]	ack;
--	logic empty [NUM_CLIENTS-1:0] ;
--	logic new_empty [NUM_CLIENTS-1:0];
+-	reg [DATA_WIDTH-1:0]     inside_din [0:NUM_CLIENTS-1];//maybe connect directly fifo to arbiter 
+-	wire  [NUM_CLIENTS-1:0]	 ack;
+-	logic                    empty [NUM_CLIENTS-1:0] ;
+-	logic                    new_empty [NUM_CLIENTS-1:0];
 -	
 -	
 -	
@@ -27,8 +27,7 @@
 -				.NUM_CLIENTS (NUM_CLIENTS))
 -		arb
 -			   (.clk(clk),
--			    .mrst_n(rst),
--			    .srst_n(1'b1),
+-			    .rst(rst),
 -			    .req (new_empty),
 -			    .din(inside_din),//get from fifo
 -			    .src_num(src_num),
@@ -40,12 +39,11 @@
 -		for (i=0; i<NUM_CLIENTS; i=i+1)begin
 -			fifo #(.DATA_WIDTH(DATA_WIDTH),.FIFO_DEPTH(FIFO_DEPTH))
 -				inside_fifo (.clk(clk),
--					     .mrst_n(rst),
--					     .srst_n(1'b1),
--					     .wr(write[i]),
--					     .wr_data(din[i]),
--					     .rd(ack[i]),
--					     .rd_data(inside_din[i]),
+-					     .rst(rst),
+-					     .push(write[i]),
+-					     .push_data(din[i]),
+-					     .pop(ack[i]),
+-					     .pop_data(inside_din[i]),
 -					     .full(full[i]),
 -					     .empty(empty[i]));//need to find how put !empty
 -		end
