@@ -1,7 +1,11 @@
     MEMORY {  
-        i_mem          : ORIGIN = 0x00000000 , LENGTH = 0x1000  
-        global_data    : ORIGIN = 0x00001000 , LENGTH = 0x1000  
+        i_mem          : ORIGIN = 0x00000000 , LENGTH = 0x2000  
+        global_data    : ORIGIN = 0x00002000 , LENGTH = 0x2000  
     }  
+
+
+_stack_start   = ORIGIN(global_data) + LENGTH(global_data);
+
     SECTIONS {  
         .text : {  
         . = ALIGN(4);  

@@ -148,6 +148,21 @@ always_comb begin
         if(DMemByteEn[3]) NextDMem[DMemAddress+3] = DMemData[31:24];
     end
 end
+
+parameter EBREAK = 32'h00100073;
+logic [31:0] InstructionQ102H;
+logic [31:0] InstructionQ103H;
+`RVC_DFF(InstructionQ102H, big_core_top.big_core.InstructionQ101H, Clk)
+`RVC_DFF(InstructionQ103H, InstructionQ102H, Clk)
+
+// Ebrake detection
+always @(posedge Clk) begin : ebrake_status
+    if (EBREAK == InstructionQ103H) begin // ebrake instruction opcode
+        $display("===================\n test %s ended with Ebreake \n =====================", test_name);
+        $finish;
+        //end_tb("The test ended");
+    end
+end
 //------------------------------
 // Read access
 //------------------------------

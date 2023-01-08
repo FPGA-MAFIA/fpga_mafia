@@ -39,7 +39,9 @@ reset_handler:
   mv x30, x1
   mv x31, x1
   /* stack initialization */
-  li   x2, 0x8000
+  la   x2, _stack_start
+
+
   jal x1, main  //jump to main
   ebreak        //end
   .section .text

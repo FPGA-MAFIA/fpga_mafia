@@ -48,24 +48,37 @@ initial begin: trk_fetch_gen
 
 end
 always @(posedge Clk) begin : fetch_print
-    $fwrite(trk_fetch,"%t | %8h |   %3b  | %7b | %7b | \n", $realtime,big_core_top.big_core.PcQ101H, big_core_top.big_core.Funct3Q101H, big_core_top.big_core.Funct7Q101H, big_core_top.big_core.OpcodeQ101H); // # FIXME
+    $fwrite(trk_fetch,"%t | %8h |   %3b  | %7b | %s | \n", $realtime,big_core_top.big_core.PcQ101H, big_core_top.big_core.Funct3Q101H, big_core_top.big_core.Funct7Q101H, big_core_top.big_core.OpcodeQ101H.name()); // # FIXME
 end
+
+
+
+logic [31:0] PcQ104H;
+logic [31:0] DMemAddressQ104H;
+logic [31:0] DMemWrDataQ104H;
+logic        DMemWrEnQ104H;
+logic        DMemRdEnQ104H;
+`RVC_DFF(DMemWrEnQ104H    , big_core_top.big_core.DMemWrEnQ103H   , Clk)
+`RVC_DFF(DMemRdEnQ104H    , big_core_top.big_core.DMemRdEnQ103H   , Clk)
+`RVC_DFF(PcQ104H          , big_core_top.big_core.PcQ103H         , Clk)
+`RVC_DFF(DMemAddressQ104H , big_core_top.big_core.DMemAddressQ103H, Clk)
+`RVC_DFF(DMemWrDataQ104H  , big_core_top.big_core.DMemWrDataQ103H , Clk)
 
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
-    $timeformat(-9, 1, " ", 6);
+    $timeformat(-12, 1, " ", 6);
     trk_memory_access = $fopen({"../../target/big_core/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_memory_access," Time  | PC       | Opcode | Adress   | Data     \n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
-
 end
+
 //tracker on memory_access operations
 always @(posedge Clk) begin : memory_access_print
-    if( big_core_top.big_core.DMemWrEnQ103H) begin
-    $fwrite(trk_memory_access,"%t | %8h | write  | %8h | %8h \n", $realtime, big_core_top.big_core.PcQ103H, big_core_top.big_core.DMemAddressQ103H, big_core_top.big_core.DMemWrDataQ103H);
+    if( DMemWrEnQ104H) begin
+    $fwrite(trk_memory_access,"%t | %8h | write  | %8h | %8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
     end
-    if( big_core_top.big_core.DMemRdEnQ103H) begin
-    $fwrite(trk_memory_access,"%t | %8h | read   | %8h | %8h \n", $realtime, big_core_top.big_core.PcQ103H, big_core_top.big_core.DMemAddressQ103H, big_core_top.big_core.DMemWrDataQ103H);
+    if( DMemRdEnQ104H) begin
+    $fwrite(trk_memory_access,"%t | %8h | read   | %8h | %8h \n", $realtime, PcQ104H, DMemAddressQ104H, big_core_top.big_core.DMemRdRspQ104H);
     end
 end

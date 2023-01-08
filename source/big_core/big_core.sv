@@ -370,6 +370,8 @@ assign flushQ102H = SelNextPcAluOutQ102H;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 assign DMemAddressQ103H = AluOutQ103H;
+assign DMemWrDataQ103H  = RegRdData2Q103H;
+assign DMemByteEnQ103H  = CtrlDMemByteEnQ103H;
 assign DMemWrEnQ103H    = CtrlDMemWrEnQ103H;
 assign DMemRdEnQ103H    = SelDMemWbQ103H;
 
