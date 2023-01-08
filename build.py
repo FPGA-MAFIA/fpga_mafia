@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser(description='Build script for any project')
 parser.add_argument('-all', action='store_true', default=False, help='running all the tests')
 parser.add_argument('-tests', default='', help='list of the tests for run the script on')
 parser.add_argument('-debug', action='store_true', help='run simulation with debug flag')
+parser.add_argument('-gui', action='store_true', help='run simulation with gui')
 parser.add_argument('-app', action='store_true', help='compile the RISCV SW into SV executables')
 parser.add_argument('-hw', action='store_true', help='compile the RISCV HW into simulation')
 parser.add_argument('-sim', action='store_true', help='start simulation')
@@ -115,6 +116,8 @@ class Test:
                 print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
         os.chdir(MODEL_ROOT)
     def _start_simulation(self):
+        if not os.path.exists(TARGET+self.name):
+            os.mkdir(TARGET+self.name)
         os.chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         sim_cmd = 'vsim.exe work.'+self.project+'_tb -c -do "run -all" +STRING='+self.name
@@ -124,15 +127,16 @@ class Test:
             print_message('[ERROR] Failed to simulate '+self.name)
             self.fail_flag = True
         else:
-            if len(results.stdout.split('Error')) > 2:
+            if len(results.stdout.split('Error')) > 2 or len(results.stdout.split('Warning')) > 2:
                 print(results.stdout)
-                self.fail_flag = True
+                if len(results.stdout.split('Error')) > 2:
+                    self.fail_flag = True
             else:
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
         os.chdir(MODEL_ROOT)
     def _gui(self):
         os.chdir(MODELSIM)
-        gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb'
+        gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb +STRING='+self.name+' &'
         try:
             subprocess.call(gui_cmd, shell=True)
         except:
@@ -173,6 +177,8 @@ def main():
             test._compile_hw()
         if (args.sim or args.full_run) and not test.fail_flag:
             test._start_simulation()
+        if (args.gui):
+            test._gui()
         if not args.debug:
             test._no_debug()
         print_message('******************************************************************************')

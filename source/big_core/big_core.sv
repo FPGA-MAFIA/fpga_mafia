@@ -38,10 +38,10 @@ module big_core (
 import big_core_pkg::*;
 // ---- Data-Path signals ----
 // Program counter
-logic [31:0]        PcQ101H, PcQ102H;
+logic [31:0]        PcQ101H, PcQ102H, PcQ103H;
 logic [31:0]        PcPlus4Q100H, PcPlus4Q101H, PcPlus4Q102H, PcPlus4Q103H, PcPlus4Q104H;
 logic [31:0]        NextPcQ10XH;
-logic [31:0]        InstructionQ101H;
+logic [31:0]        InstructionQ101H, InstructionQ102H;
 
 logic [31:1][31:0]  Register; 
 logic [31:0]        ImmediateQ101H, ImmediateQ102H;
@@ -152,6 +152,8 @@ assign InstructionQ101H         = flushQ102H ? NOP :
                                   LoadHzrdDetectQ102H ? PreviousInstructionQ101H :
                                                         PreInstructionQ101H;
 
+`RVC_DFF(InstructionQ102H, InstructionQ101H, Clk)
+
 // End Load and Ctrl hazard detection
 
 assign OpcodeQ101H           = t_opcode'(InstructionQ101H[6:0]);
@@ -240,6 +242,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 
 // Q101H to Q102H Flip Flops
 `RVC_RST_DFF(PcQ102H                  , PcQ101H               , Clk, Rst)
+`RVC_RST_DFF(PcQ103H                  , PcQ102H               , Clk, Rst)
 `RVC_RST_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk, Rst)
 `RVC_RST_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk, Rst)
 `RVC_RST_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk, Rst)
