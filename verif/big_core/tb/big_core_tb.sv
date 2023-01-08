@@ -132,69 +132,7 @@ initial begin: test_seq
 end // test_seq
 
 
-integer trk_alu;
-initial begin: trk_alu_gen
-    $timeformat(-9, 1, " ", 6);
-    trk_alu = $fopen({"../../target/big_core/trk_alu.log"},"w");
-    $fwrite(trk_alu,"---------------------------------------------------------\n");
-    $fwrite(trk_alu,"Time    |    PC    | inst_op | opcode |  AluIn1   |  AluIn2   | AluOut   |  \n");
-    $fwrite(trk_alu,"---------------------------------------------------------\n");  
-
-end
-//tracker on ALU operations
-always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t  | %8h |  %5s  | %6s | %8h  | %8h  |%8h  | \n", $realtime,big_core_top.big_core.PcQ102H, big_core_top.big_core.OpcodeQ102H.name(), big_core_top.big_core.CtrlAluOpQ102H.name(), big_core_top.big_core.AluIn1Q102H, big_core_top.big_core.AluIn2Q102H, big_core_top.big_core.AluOutQ102H); // # FIXME
-end
-
-integer trk_inst;
-initial begin: trk_inst_gen
-    $timeformat(-9, 1, " ", 6);
-    trk_inst = $fopen({"../../target/big_core/trk_inst.log"},"w");
-    $fwrite(trk_inst,"---------------------------------------------------------\n");
-    $fwrite(trk_inst,"Time\t|\tPC \t | Instraction\t|\n");
-    $fwrite(trk_inst,"---------------------------------------------------------\n");  
-
-end
-always @(posedge Clk) begin : inst_print
-    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.PreInstructionQ101H);
-end
-integer trk_fetch;
-initial begin: trk_fetch_gen
-    $timeformat(-9, 1, " ", 6);
-    trk_fetch = $fopen({"../../target/big_core/trk_fetch.log"},"w");
-    $fwrite(trk_fetch,"---------------------------------------------------------\n");
-    $fwrite(trk_fetch,"Time\t|\tPC \t |Funct3 \t| Funct7 \t | Opcode|\n");
-    $fwrite(trk_fetch,"---------------------------------------------------------\n");  
-
-end
-always @(posedge Clk) begin : fetch_print
-    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,big_core_top.big_core.PcQ100H, big_core_top.big_core.Funct3Q101H, big_core_top.big_core.Funct7Q101H, big_core_top.big_core.OpcodeQ101H); // # FIXME
-end
-
-integer trk_memory_access;
-initial begin: trk_memory_access_gen
-    $timeformat(-9, 1, " ", 6);
-    trk_memory_access = $fopen({"../../target/big_core/trk_memory_access.log"},"w");
-    $fwrite(trk_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_memory_access,"Time\t\t\t| PC\t\t\t\t\t| Opcode\t| Adress\t\t\t| Data \n");
-    $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
-
-end
-//tracker on memory_access operations
-always @(posedge Clk) begin : memory_access_print
-    if(DMemWrEn) begin
-    $fwrite(trk_memory_access,"%t\t\t| %8h\t\t| write\t\t| %8h\t\t| %8h \n", $realtime, big_core_top.big_core.PcQ100H, big_core_top.big_core.DMemAddressQ103H, big_core_top.big_core.DMemWrDataQ103H);
-    end
-    if(DMemRdEn) begin
-    $fwrite(trk_memory_access,"%t\t\t| %8h\t\t| read\t\t| %8h\t\t| %8h \n", $realtime, big_core_top.big_core.PcQ100H, big_core_top.big_core.DMemAddressQ103H, big_core_top.big_core.DMemWrDataQ103H);
-    end
-end
-
- 
-
-
-
-
+`include "big_core_trk.vh"
 
 //==============================
 // Behavrual Memory
