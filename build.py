@@ -4,7 +4,16 @@ import glob
 import argparse
 from termcolor import colored
 
-parser = argparse.ArgumentParser(description='Build script for any project')
+examples = '''
+Examples:
+python build.py -proj_name 'big_core' -debug -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
+python build.py -proj_name 'big_core'        -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
+python build.py -proj_name 'big_core' -debug -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
+python build.py -proj_name 'big_core' -debug -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
+python build.py -proj_name 'big_core' -debug -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
+python build.py -proj_name 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
+'''
+parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all', action='store_true', default=False, help='running all the tests')
 parser.add_argument('-tests', default='', help='list of the tests for run the script on')
 parser.add_argument('-debug', action='store_true', help='run simulation with debug flag')
@@ -14,6 +23,7 @@ parser.add_argument('-hw', action='store_true', help='compile the RISCV HW into 
 parser.add_argument('-sim', action='store_true', help='start simulation')
 parser.add_argument('-full_run', action='store_true', help='compile SW, HW of the test and simulate it')
 parser.add_argument('-proj_name', default='big_core', help='insert your project name (as mentioned in the dirs name')
+parser.print_help()
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -29,71 +39,60 @@ TESTS = './verif/'+args.proj_name+'/tests/'
 #                                           class Test
 #####################################################################################################
 class Test:
+    hw_compilation = False
     def __init__(self, name, project):
-        self.name = name
+        self.name = name.split('.')[0]
+        self.file_name = name
+        self.assembly = True if self.file_name[-1] == 's' else False
         self.project = project 
-        self.gcc_dir = self._create_gcc_dir()
-        self.path = TESTS+self.name+'.c' if os.path.exists(TESTS+self.name+'.c') else ''
+        self.target , self.gcc_dir = self._create_test_dir()
+        self.path = TESTS+self.file_name
         self.fail_flag = False
-    def _create_gcc_dir(self):
-        if os.path.exists(TARGET+'gcc_gen_files/'+self.name):
-            pass
-            #for file in os.listdir(TARGET+'gcc_gen_files/'+self.name):
-            #    os.remove(TARGET+'gcc_gen_files/'+self.name+'/'+file)
-        else:
-            os.mkdir(TARGET+'gcc_gen_files/'+self.name)
-        return TARGET+'gcc_gen_files/'+self.name+'/'
+    def _create_test_dir(self):
+        if not os.path.exists(TARGET+'tests/'+self.name):
+            os.mkdir(TARGET+'tests/'+self.name)
+        if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
+            os.mkdir(TARGET+'tests/'+self.name+'/gcc_files')
+        return TARGET+'tests/'+self.name+'/', TARGET+'tests/'+self.name+'/gcc_files'
     def _compile_sw(self):
         print_message('[INFO] Starting to compile SW ...')
         if self.path:
-            cs_path =  self.name+'_rv32i.c.s'
+            cs_path =  self.name+'_rv32i.c.s' if not self.assembly else '../../../../../'+self.path
             elf_path = self.name+'_rv32i.elf'
             txt_path = self.name+'_rv32i_elf.txt'
-            commands = []
-            commands.append('riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../'+self.path+' -o '+cs_path)
-            commands.append('riscv-none-embed-gcc.exe     -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ ../../../../app/crt0.S '+cs_path+' -o '+elf_path)
-            commands.append('riscv-none-embed-objdump.exe -gd '+elf_path+' > '+txt_path)
-            commands.append('riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv')
-            with open(self.gcc_dir+'commands.sh', 'w') as p:
-                for cmd in commands:
-                    p.write(cmd+' ;\n')
+            os.chdir(self.gcc_dir)
             try:
-                os.chdir(self.gcc_dir)
-                subprocess.call('bash commands.sh', shell=True)
-                os.chdir(MODEL_ROOT)
+                if not self.assembly:
+                    first_cmd  = 'riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../../'+self.path+' -o '+cs_path
+                    subprocess.check_output(first_cmd, shell=True)
+                else:
+                    pass
             except:
-                print_message('[ERROR] Failed to compile SW of '+self.name+'.c')
+                print_message(f'[ERROR] failed to gcc the test - {self.name}')
                 self.fail_flag = True
             else:
+                try:
+                    second_cmd = 'riscv-none-embed-gcc.exe  -O3 -march=rv32i -T ../../../../../app/link.common.ld -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
+                    subprocess.check_output(second_cmd, shell=True)
+                except:
+                    print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
+                    self.fail_flag = True
+                else:
+                    try:
+                        third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
+                        subprocess.check_output(third_cmd, shell=True)
+                    except:
+                        print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
+                        self.fail_flag = True
+                    else:
+                        try:
+                            forth_cmd  = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
+                            subprocess.check_output(forth_cmd, shell=True)
+                        except:
+                            print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')
+                            self.fail_flag = True
+            if not self.fail_flag:
                 print_message('[INFO] SW compiation finished with no errors\n')
-            #first_cmd =  'riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../'+self.path+' -o '+cs_path
-            #second_cmd = 'riscv-none-embed-gcc.exe     -O3 -march=rv32i -T ../../../../app/link.common.ld -nostartfiles -D__riscv__ ../../../../app/crt0.S '+cs_path+' -o '+elf_path
-            #third_cmd = 'riscv-none-embed-objdump.exe -gd '+elf_path+' > '+txt_path
-            #forth_cmd = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
-            #try:
-            #   subprocess.call(first_cmd)
-            #except:
-            #    print_message([f'[ERROR] failed to gcc the test - {self.name}'])
-            #    self.fail_flag = True
-            #else:
-            #    try:
-            #        subprocess.call(second_cmd)
-            #    except:
-            #        print_message([f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}'])
-            #        self.fail_flag = True
-            #    else:
-            #        try:
-            #            print(third_cmd)
-            #            subprocess.call(third_cmd)
-            #        except:
-            #            print_message([f'[ERROR] failed to create "elf.txt" to the test - {self.name}'])
-            #            self.fail_flag = True
-            #        else:
-            #            try:
-            #                subprocess.call(forth_cmd)
-            #            except:
-            #                print_message([f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}'])
-            #                self.fail_flag = True
         else:
             print_message('[ERROR] Can\'t find the c files of '+self.name)
             self.fail_flag = True
@@ -101,23 +100,25 @@ class Test:
     def _compile_hw(self):
         os.chdir(MODELSIM)
         print_message('[INFO] Starting to compile HW ...')
-        comp_sim_cmd = 'vlog.exe -lint -f ../../'+TB+'/'+self.project+'_list.f'
-        try:
-            #results = subprocess.check_output(comp_sim_cmd, shell=True, stderr=subprocess.STDOUT).decode()
-            results = subprocess.run(comp_sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        except:
-            print_message('[ERROR] Failed to compile simulation of '+self.name)
-            self.fail_flag = True
-        else:
-            if len(results.stdout.split('Error')) > 2:
-                print(results.stdout)
+        if not Test.hw_compilation:
+            comp_sim_cmd = 'vlog.exe -lint -f ../../'+TB+'/'+self.project+'_list.f'
+            try:
+                #results = subprocess.check_output(comp_sim_cmd, shell=True, stderr=subprocess.STDOUT).decode()
+                results = subprocess.run(comp_sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            except:
+                print_message('[ERROR] Failed to compile simulation of '+self.name)
                 self.fail_flag = True
             else:
-                print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
+                Test.hw_compilation = True
+                if len(results.stdout.split('Error')) > 2:
+                    print(results.stdout)
+                    self.fail_flag = True
+                else:
+                    print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
+        else:
+            print_message(f'[INFO] HW copilation is already done\n')
         os.chdir(MODEL_ROOT)
     def _start_simulation(self):
-        if not os.path.exists(TARGET+self.name):
-            os.mkdir(TARGET+self.name)
         os.chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         sim_cmd = 'vsim.exe work.'+self.project+'_tb -c -do "run -all" +STRING='+self.name
@@ -144,8 +145,11 @@ class Test:
             self.fail_flag = True
         os.chdir(MODEL_ROOT)
     def _no_debug(self):
-        for file in os.listdir(TARGET+'gcc_gen_files/'+self.name):
-            os.remove(TARGET+'gcc_gen_files/'+self.name+'/'+file)
+        delete_cmd = 'rm -rf '+TARGET+'tests/'+self.name
+        try:
+            subprocess.check_output(delete_cmd, shell=True)
+        except:
+            print_message('[ERROR] failed to remove /target/'+self.project+'/tests/'+self.name+' directory')
 
 def print_message(msg):
     msg_type = msg.split()[0]
@@ -163,9 +167,12 @@ def main():
         test_list = os.listdir(TESTS)
         print(f'test_list - {test_list}')
         for test in test_list:
-            tests.append(Test(test.split('.c')[0], args.proj_name))
+            tests.append(Test(test, args.proj_name))
     else:
+        print(args.tests)
         for test in args.tests.split():
+            test = glob.glob(TESTS+test+'*')[0]
+            test = test.replace('\\', '/').split('/')[-1]
             tests.append(Test(test, args.proj_name))
         
     for test in tests:
