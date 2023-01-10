@@ -1,6 +1,8 @@
+    
+
     MEMORY {  
-        i_mem          : ORIGIN = 0x00000000 , LENGTH = 0x2000  
-        global_data    : ORIGIN = 0x00002000 , LENGTH = 0x2000  
+        i_mem          : ORIGIN = I_MEM_OFFSET , LENGTH = I_MEM_LENGTH  
+        global_data    : ORIGIN = D_MEM_OFFSET , LENGTH = D_MEM_LENGTH  
     }  
 
 

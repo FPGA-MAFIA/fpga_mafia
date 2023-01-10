@@ -74,7 +74,12 @@ class Test:
                 self.fail_flag = True
             else:
                 try:
-                    second_cmd = 'riscv-none-embed-gcc.exe  -O3 -march=rv32i -T ../../../../../app/link.common.ld -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
+                    second_cmd = 'riscv-none-embed-gcc.exe  -O3 -march=rv32i -T ../../../../../app/link.common.ld\
+                                    -Wl,--defsym=I_MEM_OFFSET=0x00000000\
+                                    -Wl,--defsym=I_MEM_LENGTH=0x00002000\
+                                    -Wl,--defsym=D_MEM_OFFSET=0x00002000\
+                                    -Wl,--defsym=D_MEM_LENGTH=0x00002000\
+                                    -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
                     subprocess.check_output(second_cmd, shell=True)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
