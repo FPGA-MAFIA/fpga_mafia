@@ -1,5 +1,5 @@
     MEMORY {  
-        i_mem          : ORIGIN = 0x00000000 , LENGTH = 0x2000  
+        i_mem          : ORIGIN = %I_MEM_ORIGIN , LENGTH = 0x2000  
         global_data    : ORIGIN = 0x00002000 , LENGTH = 0x2000  
     }  
 
