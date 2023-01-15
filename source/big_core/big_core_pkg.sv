@@ -16,15 +16,17 @@
 `define BIG_CORE_PKG_VS
 package big_core_pkg;
     
-parameter I_MEM_MSB   = 'h2000-1;  // I_MEM   0x0    - 0x3FFF
-parameter D_MEM_MSB   = 'h4000-1;  // D_MEM   0x4000 - 0x6FFF
-parameter CR_MEM_MSB  = 'h5000-1;  // CR_MEM  0x7000 - 0x7FFF
-parameter VGA_MEM_MSB = 'h11600-1; // VGA_MEM 0x8000 - 0x115FF
+
 
 parameter I_MEM_SIZE   = 'h2000;
 parameter I_MEM_OFFSET = 'h0;
 parameter D_MEM_SIZE   = 'h2000;
 parameter D_MEM_OFFSET = 'h2000;
+
+parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
+parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
+parameter CR_MEM_MSB  = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
+parameter VGA_MEM_MSB = 'h11600-1;                  // VGA_MEM 0x8000 - 0x115FF
 // Region bits
 parameter LSB_REGION = 0;
 parameter MSB_REGION = 15;

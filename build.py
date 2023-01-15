@@ -125,7 +125,7 @@ class Test:
                 else:
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
         else:
-            print_message(f'[INFO] HW copilation is already done\n')
+            print_message(f'[INFO] HW compilation is already done\n')
         os.chdir(MODEL_ROOT)
     def _start_simulation(self):
         os.chdir(MODELSIM)
