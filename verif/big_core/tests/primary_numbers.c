@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "../../../app/defines/big_core_defines.h"
 
 int isPrime(int n) {
     if (n <= 1) return 0;
@@ -11,12 +11,20 @@ int isPrime(int n) {
 
     return 1;
 }
-
+void eot(int *list, int size){
+    for(int i = 0; i<size; i++){
+        MEM_SCRATCH[i]=list[i];
+    }
+}
 int main() {
     int n = 20;
+    int primeNumbers[20]; // create an array to store the prime numbers
+    int primeCounter = 0; // keep track of how many prime numbers have been found
     for (int i = 2; i <= n; i++) {
-        if (isPrime(i)) printf("%d ", i);
+        if (isPrime(i)) {
+            primeNumbers[primeCounter] = i; // add the prime number to the array
+            primeCounter++;
+        }
     }
-    return 0;
+    eot(primeNumbers, primeCounter);
 }
-
