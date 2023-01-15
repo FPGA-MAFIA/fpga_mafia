@@ -25,7 +25,6 @@ parser.add_argument('-hw', action='store_true', help='compile the RISCV HW into 
 parser.add_argument('-sim', action='store_true', help='start simulation')
 parser.add_argument('-full_run', action='store_true', help='compile SW, HW of the test and simulate it')
 parser.add_argument('-proj_name', default='big_core', help='insert your project name (as mentioned in the dirs name')
-parser.print_help()
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -175,7 +174,6 @@ def main():
     tests = []
     if args.all:
         test_list = os.listdir(TESTS)
-        print(f'test_list - {test_list}')
         for test in test_list:
             tests.append(Test(test, args.proj_name))
     else:
