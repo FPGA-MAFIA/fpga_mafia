@@ -41,6 +41,10 @@ TESTS = './verif/'+args.proj_name+'/tests/'
 #####################################################################################################
 class Test:
     hw_compilation = False
+    I_MEM_OFFSET = str(0x00000000)
+    I_MEM_LENGTH = str(0x00002000)
+    D_MEM_OFFSET = str(0x00002000)
+    D_MEM_LENGTH = str(0x00003000)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
@@ -76,10 +80,10 @@ class Test:
             else:
                 try:
                     second_cmd = 'riscv-none-embed-gcc.exe  -O3 -march=rv32i -T ../../../../../app/link.common.ld\
-                                    -Wl,--defsym=I_MEM_OFFSET=0x00000000\
-                                    -Wl,--defsym=I_MEM_LENGTH=0x00002000\
-                                    -Wl,--defsym=D_MEM_OFFSET=0x00002000\
-                                    -Wl,--defsym=D_MEM_LENGTH=0x00002000\
+                                    -Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+'\
+                                    -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+'\
+                                    -Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+'\
+                                    -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+'\
                                     -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
                     subprocess.check_output(second_cmd, shell=True)
                 except:
@@ -177,7 +181,6 @@ def main():
         for test in test_list:
             tests.append(Test(test, args.proj_name))
     else:
-        print(args.tests)
         for test in args.tests.split():
             test = glob.glob(TESTS+test+'*')[0]
             test = test.replace('\\', '/').split('/')[-1]
