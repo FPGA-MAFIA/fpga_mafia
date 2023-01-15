@@ -8,11 +8,4 @@ target/*
 !modelsim/cache/work/README*
 !modelsim/work/README*
 
-
-!target/mini_core/gcc_gen_files/README.md
-!target/mini_core/README.md
-!target/big_core/gcc_gen_files/README.md
-!target/big_core/README.md
-!target/cache/gcc_gen_files/README.md
-!target/cache/README.md
 !target/README.md

@@ -184,6 +184,8 @@ def print_message(msg):
 def main():
     
     os.chdir(MODEL_ROOT)
+    if not os.path.exists('target/'+args.proj_name+'/tests/'):
+        os.makedirs('target/'+args.proj_name+'/tests/')
     # log_file = "target/big_core/build_log.txt"
     
     tests = []
