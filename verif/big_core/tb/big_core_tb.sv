@@ -143,21 +143,6 @@ end // test_seq
 
 `include "big_core_trk.vh"
 
-//==============================
-// Behavrual Memory
-//------------------------------
-// Write access
-//------------------------------
-always_comb begin
-    NextDMem = DMem;
-    if(DMemWrEn) begin
-        if(DMemByteEn[0]) NextDMem[DMemAddress+0] = DMemData[7:0]  ;
-        if(DMemByteEn[1]) NextDMem[DMemAddress+1] = DMemData[15:8] ;
-        if(DMemByteEn[2]) NextDMem[DMemAddress+2] = DMemData[23:16];
-        if(DMemByteEn[3]) NextDMem[DMemAddress+3] = DMemData[31:24];
-    end
-end
-
 parameter EBREAK = 32'h00100073;
 logic [31:0] InstructionQ102H;
 logic [31:0] InstructionQ103H;
@@ -172,13 +157,6 @@ always @(posedge Clk) begin : ebrake_status
         //end_tb("The test ended");
     end
 end
-//------------------------------
-// Read access
-//------------------------------
-assign DMemRspData = {DMem[DMemAddress+3] ,
-                      DMem[DMemAddress+2] ,
-                      DMem[DMemAddress+1] ,
-                      DMem[DMemAddress+0]};
 
 
 endmodule //big_core_tb
