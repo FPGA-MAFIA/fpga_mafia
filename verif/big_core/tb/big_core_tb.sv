@@ -134,7 +134,10 @@ initial begin: test_seq
     release big_core_top.big_core_mem_wrap.d_mem.DMem;
 
 
-    #10000 $finish;
+    #100000
+    $display("===================\n test %s ended timeout \n=====================", test_name);
+    $finish;
+
 end // test_seq
 
 
@@ -164,7 +167,7 @@ logic [31:0] InstructionQ103H;
 // Ebrake detection
 always @(posedge Clk) begin : ebrake_status
     if (EBREAK == InstructionQ103H) begin // ebrake instruction opcode
-        $display("===================\n test %s ended with Ebreake \n =====================", test_name);
+        $display("===================\n test %s ended with Ebreake \n=====================", test_name);
         $finish;
         //end_tb("The test ended");
     end
