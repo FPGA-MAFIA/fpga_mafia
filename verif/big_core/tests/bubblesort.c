@@ -1,4 +1,6 @@
-#include <stdio.h>
+
+#define SCRATCH_OFFSET   0x00005000
+#define MEM_SCRATCH ((volatile int *) (SCRATCH_OFFSET))
 
 void bubbleSort(int arr[], int n) {
     int i, j;
@@ -13,12 +15,17 @@ void bubbleSort(int arr[], int n) {
     }
 }
 
+void eot(int arr[]) {
+    for(int i =0; i<7; i++){
+        MEM_SCRATCH[i]=arr[i];
+    }
+}
 int main() {
     int arr[] = {64, 34, 25, 12, 22, 11, 90};
     int n = sizeof(arr)/sizeof(arr[0]);
 
     bubbleSort(arr, n);
-
+    eot(arr);
     // printf("Sorted array: \n");
     // for (int i=0; i < n; i++)
     //     printf("%d ", arr[i]);
