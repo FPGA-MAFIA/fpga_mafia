@@ -127,7 +127,13 @@ initial begin: test_seq
     $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
-    //$readmemh({"../../target/big_core/gcc_gen_files/",test_name,"/data_mem_rv32i.sv"} , DMem);
+    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
+    force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
+    #10
+    release big_core_top.big_core_mem_wrap.d_mem.DMem;
+
+
     #10000 $finish;
 end // test_seq
 
