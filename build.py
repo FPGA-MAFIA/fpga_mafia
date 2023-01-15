@@ -3,8 +3,8 @@ import subprocess
 import glob
 import argparse
 from termcolor import colored
-import colorama
-colorama.init()
+# import colorama
+# colorama.init()
 
 examples = '''
 Examples:
@@ -44,7 +44,7 @@ class Test:
     I_MEM_OFFSET = str(0x00000000)
     I_MEM_LENGTH = str(0x00002000)
     D_MEM_OFFSET = str(0x00002000)
-    D_MEM_LENGTH = str(0x00003000)
+    D_MEM_LENGTH = str(0x00002000)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
@@ -103,6 +103,15 @@ class Test:
                         except:
                             print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')
                             self.fail_flag = True
+                        else:
+                            memories = open('inst_mem.sv', 'r').read()
+                            with open('data_mem.sv', 'w') as dmem:
+                                if (len(memories.split('@'))>2):
+                                    dmem.write('@'+memories.split('@')[-1])
+                                else:
+                                    pass
+                            with open('inst_mem.sv', 'w') as imem:
+                                imem.write('@'+memories.split('@')[1])
             if not self.fail_flag:
                 print_message('[INFO] SW compiation finished with no errors\n')
         else:
@@ -122,11 +131,11 @@ class Test:
                 self.fail_flag = True
             else:
                 Test.hw_compilation = True
-                if len(results.stdout.split('Error')) > 2 or len(results.stdout.split('Warning')) > 2:
+                if len(results.stdout.split('Error')) > 2:
+                    self.fail_flag = True
                     print(results.stdout)
-                    if len(results.stdout.split('Error')) > 2:
-                        self.fail_flag = True
                 else:
+                    print(results.stdout)
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
@@ -141,11 +150,11 @@ class Test:
             print_message('[ERROR] Failed to simulate '+self.name)
             self.fail_flag = True
         else:
-            if len(results.stdout.split('Error')) > 2 or len(results.stdout.split('Warning')) > 2:
+            if len(results.stdout.split('Error')) > 2:
+                self.fail_flag = True
                 print(results.stdout)
-                if len(results.stdout.split('Error')) > 2:
-                    self.fail_flag = True
             else:
+                print(results.stdout)
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
         os.chdir(MODEL_ROOT)
     def _gui(self):
@@ -166,7 +175,7 @@ class Test:
 
 def print_message(msg):
     msg_type = msg.split()[0]
-    color = 'red' if msg_type == '[ERROR]' else 'yellow' if msg_type == '[WARNING]' else 'white' if msg_type == '[INFO]' else 'blue'
+    color = 'red' if msg_type == '[ERROR]' else 'yellow' if msg_type == '[WARNING]' else 'green' if msg_type == '[INFO]' else 'blue'
     print(colored(msg,color,attrs=['bold']))        
 
 #####################################################################################################
@@ -175,6 +184,8 @@ def print_message(msg):
 def main():
     
     os.chdir(MODEL_ROOT)
+    # log_file = "target/big_core/build_log.txt"
+    
     tests = []
     if args.all:
         test_list = os.listdir(TESTS)
@@ -185,7 +196,10 @@ def main():
             test = glob.glob(TESTS+test+'*')[0]
             test = test.replace('\\', '/').split('/')[-1]
             tests.append(Test(test, args.proj_name))
-        
+
+     # Redirect stdout and stderr to log file
+    # sys.stdout = open(log_file, "w", buffering=1)
+    # sys.stderr = open(log_file, "w", buffering=1)   
     for test in tests:
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
@@ -200,6 +214,8 @@ def main():
         if not args.debug:
             test._no_debug()
         print_message('******************************************************************************')
+    # sys.stdout.flush()
+    # sys.stderr.flush()
     
 if __name__ == "__main__" :
     main()      

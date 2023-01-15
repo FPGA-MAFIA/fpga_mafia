@@ -13,7 +13,7 @@
 // (2) load backdoor the I_MEM & D_MEM.
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
-
+`define NO_WARNING_ON_FILE_NOT_FOUND
 
 `include "macros.sv"
 
@@ -118,6 +118,7 @@ end: reset_gen
 `RVC_DFF(DMem, NextDMem, Clk)
 
 string test_name;
+integer file;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
@@ -127,11 +128,16 @@ initial begin: test_seq
     $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
-    force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
-    #10
-    release big_core_top.big_core_mem_wrap.d_mem.DMem;
+
+    file = $fopen({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    if (file) begin
+        $fclose(file);
+        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
+        force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
+        #10
+        release big_core_top.big_core_mem_wrap.d_mem.DMem;
+    end
 
 
     #100000
