@@ -119,9 +119,10 @@ class Test:
                 self.fail_flag = True
             else:
                 Test.hw_compilation = True
-                if len(results.stdout.split('Error')) > 2:
+                if len(results.stdout.split('Error')) > 2 or len(results.stdout.split('Warning')) > 2:
                     print(results.stdout)
-                    self.fail_flag = True
+                    if len(results.stdout.split('Error')) > 2:
+                        self.fail_flag = True
                 else:
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
         else:
