@@ -50,7 +50,7 @@ assign cache2core_rsp.data    = pipe_lu_rsp_q3.address[3:2] == 2'b00 ?  pipe_lu_
                                 pipe_lu_rsp_q3.address[3:2] == 2'b01 ?  pipe_lu_rsp_q3.data[63:32] : 
                                 pipe_lu_rsp_q3.address[3:2] == 2'b10 ?  pipe_lu_rsp_q3.data[95:64] :
                                                                         pipe_lu_rsp_q3.data[127:96];
-assign cache2core_rsp.address = pipe_lu_rsp_q3.address;
+assign cache2core_rsp.address = pipe_lu_rsp_q3.address; //FIXME: adress should come from tq_entry
 assign cache2core_rsp.reg_id = '0; //FIXME
 
 

@@ -44,7 +44,7 @@ cache_pipe cache_pipe(
     .cache2fm_rd_req_q3     (cache2fm_rd_req_q3),//output
     //tag_array interface
     .rd_set_req_q1          (rd_set_req_q1),     //output
-    .pre_rd_data_set_rsp_q2 (rd_data_set_rsp_q2),//input
+    .rd_data_set_rsp_q2 (rd_data_set_rsp_q2),//input
     .wr_data_set_q2         (wr_data_set_q2),    //output
     //data_array interface
     .rd_cl_req_q2           (rd_cl_req_q2),      //output
