@@ -8,8 +8,7 @@ logic             rst;
 t_req             core2cache_req;
 logic             stall;
 t_rd_rsp          cache2core_rsp;
-t_fm_wr_req       cache2fm_wr_req_q3;
-t_fm_rd_req       cache2fm_rd_req_q3;
+t_fm_req       cache2fm_req_q3;
 t_fm_rd_rsp [9:0] samp_fm2cache_rd_rsp;
 t_fm_rd_rsp       fm2cache_rd_rsp;
 
@@ -65,8 +64,7 @@ cache cache ( //DUT
    .stall              (stall),          //output  logic
    .cache2core_rsp     (cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
-   .cache2fm_wr_req_q3 (cache2fm_wr_req_q3),//output  t_fm_wr_req
-   .cache2fm_rd_req_q3 (cache2fm_rd_req_q3),//output  t_fm_rd_req
+   .cache2fm_req_q3 (cache2fm_req_q3),//output  t_fm_req
    .fm2cache_rd_rsp    (fm2cache_rd_rsp)    //input   var t_fm_rd_rsp
 );
 
@@ -137,17 +135,17 @@ array  #(
     .clk            (clk),                                     //input
     .rst            (rst),                                     //input
     //write interface
-    .wr_en          (cache2fm_wr_req_q3.valid),                   //input
-    .wr_address     (cache2fm_wr_req_q3.address[MSB_TAG:LSB_SET]),//input
-    .wr_data        (cache2fm_wr_req_q3.data),                    //input
+    .wr_en          (cache2fm_req_q3.valid),                   //input
+    .wr_address     (cache2fm_req_q3.address[MSB_TAG:LSB_SET]),//input
+    .wr_data        (cache2fm_req_q3.data),                    //input
     //read interface
-    .rd_address     (cache2fm_rd_req_q3.address[MSB_TAG:LSB_SET]),//input
+    .rd_address     (cache2fm_req_q3.address[MSB_TAG:LSB_SET]),//input
     .q              (samp_fm2cache_rd_rsp[0].data)                //output
 );
 
 // One Cycle Latency on memory read - sample the id & Valid.
-`RVC_DFF(samp_fm2cache_rd_rsp[0].tq_id   ,cache2fm_rd_req_q3.tq_id     , clk)
-`RVC_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_rd_req_q3.valid     , clk)
+`RVC_DFF(samp_fm2cache_rd_rsp[0].tq_id   ,cache2fm_req_q3.tq_id     , clk)
+`RVC_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_req_q3.valid     , clk)
 // Shift register to add 10 cycle latecy on FM read.
 `RVC_DFF(samp_fm2cache_rd_rsp[9:1]       ,samp_fm2cache_rd_rsp[8:0] , clk)
 `RVC_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , clk)

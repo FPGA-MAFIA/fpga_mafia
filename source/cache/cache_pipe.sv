@@ -16,31 +16,34 @@
 module cache_pipe
     import cache_param_pkg::*;  
 (
-    input   logic            clk,
-    input   logic            rst,
+    input   logic               clk,
+    input   logic               rst,
     //tq interface 
-    input   var t_lu_req     pipe_lu_req_q1,
-    output  t_lu_rsp         pipe_lu_rsp_q3,
+    input   var t_lu_req        pipe_lu_req_q1,
+    output  t_lu_rsp            pipe_lu_rsp_q3,
     // FM interface Reqiuets 
-    output  t_fm_wr_req      cache2fm_wr_req_q3,
-    output  t_fm_rd_req      cache2fm_rd_req_q3,
+    output  t_fm_req            cache2fm_req_q3,
     //tag_array interface 
-    output  t_set_rd_req     rd_set_req_q1,
-    input   var t_set_rd_rsp rd_data_set_rsp_q2,
-    output  t_set_wr_req     wr_data_set_q2,
+    output  t_set_rd_req        rd_set_req_q1,
+    input   var t_set_rd_rsp    rd_data_set_rsp_q2,
+    output  t_set_wr_req        wr_data_set_q2,
     //data_array interface 
-    output  t_cl_rd_req      rd_cl_req_q2,
-    input   var t_cl_rd_rsp  rd_data_cl_rsp_q3,
-    output  t_cl_wr_req      wr_data_cl_q3
+    output  t_cl_rd_req         rd_cl_req_q2,
+    input   var t_cl_rd_rsp     rd_data_cl_rsp_q3,
+    output  t_cl_wr_req         wr_data_cl_q3
 
 );
 
 t_pipe_bus pre_cache_pipe_lu_q2, pre_cache_pipe_lu_q3;
 t_pipe_bus cache_pipe_lu_q1, cache_pipe_lu_q2, cache_pipe_lu_q3;
+t_offset    lu_offset_q3;
 logic [NUM_WAYS-1:0] way_tag_match_q2;
 logic [WAY_WIDTH-1:0] way_tag_enc_match_q2;
 logic                 valid_match;
 logic [WAY_WIDTH-1:0] way_tag_enc_match_q3;
+logic   [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
+
+
 
 //==================================================================
 //       ____    _                     ___    _ 
@@ -72,7 +75,7 @@ always_comb begin
   cache_pipe_lu_q1.lu_set           = pipe_lu_req_q1.address[MSB_SET:LSB_SET];
   cache_pipe_lu_q1.lu_tag           = pipe_lu_req_q1.address[MSB_TAG:LSB_TAG]; 
   cache_pipe_lu_q1.lu_op            = pipe_lu_req_q1.lu_op ;
-  cache_pipe_lu_q1.cl_data     = pipe_lu_req_q1.cl_data;
+  cache_pipe_lu_q1.cl_data          = pipe_lu_req_q1.cl_data;
   cache_pipe_lu_q1.data             = pipe_lu_req_q1.data;
 end //always_comb
 
@@ -180,21 +183,21 @@ assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 //    TQ_UPDATE -> PIPE_LU_RSP_q3
 //======================
 
-assign pipe_lu_rsp_q3.valid     = cache_pipe_lu_q3.lu_valid;
-assign pipe_lu_rsp_q3.lu_result     = cache_pipe_lu_q3.hit ?    HIT :
-                                      cache_pipe_lu_q3.miss ?   MISS : 
-                                                                NO_RSP;                      
-assign pipe_lu_rsp_q3.tq_id     = cache_pipe_lu_q3.lu_tq_id; 
-assign pipe_lu_rsp_q3.data     = (cache_pipe_lu_q3.lu_op == FILL_LU)                           ? cache_pipe_lu_q3.cl_data  :
-                                 (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)   ? rd_data_cl_rsp_q3         :
-                                                                                                    '0;    
-assign pipe_lu_rsp_q3.address   =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset,2'b00};
+assign pipe_lu_rsp_q3.valid         =   cache_pipe_lu_q3.lu_valid;
+assign pipe_lu_rsp_q3.lu_result     =   cache_pipe_lu_q3.hit ?      HIT :
+                                        cache_pipe_lu_q3.miss ?     MISS : 
+                                                                    NO_RSP;                      
+assign pipe_lu_rsp_q3.tq_id         =   cache_pipe_lu_q3.lu_tq_id; 
+assign pipe_lu_rsp_q3.data          =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
+                                        (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)     ? rd_data_cl_rsp_q3         :
+                                                                                                        '0;    
+assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset,2'b00};
 
 //======================
 //    assign PIPE BUS
 //======================
 always_comb begin
-  cache_pipe_lu_q3                        =pre_cache_pipe_lu_q2; //this is the default value
+  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q2; //this is the default value
 
 end
 always_comb begin
@@ -204,9 +207,9 @@ always_comb begin
 //======================
 //We should dirty evict to far memory only in case of fill that allocated a modified entry
 //if (dirty evict) begin
-    cache2fm_wr_req_q3.valid    =    '0; 
-    cache2fm_wr_req_q3.address  =    '0;
-    cache2fm_wr_req_q3.data     =    '0;
+    cache2fm_req_q3.valid    =    '0; 
+    cache2fm_req_q3.address  =    '0;
+    cache2fm_req_q3.data     =    '0;
     //cache2fm_req_q3.opcode  = DIRTY_EVICT_OP;
 //end
 
@@ -215,9 +218,9 @@ always_comb begin
 //======================
 //in case of Rd/Wr cache_miss send a FM fill request
 //if (cache_miss) begin
-    cache2fm_rd_req_q3.valid    =    '0;
-    cache2fm_rd_req_q3.address  =    '0;
-    cache2fm_rd_req_q3.data     =    '0; //FIXME: Rd Request does not use data field
+    cache2fm_req_q3.valid    =    '0;
+    cache2fm_req_q3.address  =    '0;
+    cache2fm_req_q3.data     =    '0; //FIXME: Rd Request does not use data field
     //cache2fm_req_q3.opcode  = FILL_REQ_OP;
 //end 
 end
@@ -226,17 +229,15 @@ end
 //======================
 //    WRITE_DATA
 //======================
-t_offset    lu_offset_q3;
 assign lu_offset_q3 = cache_pipe_lu_q3.lu_offset;
-logic   [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
 
 always_comb begin
     data_array_data_q3                  =   rd_data_cl_rsp_q3; //the current CL in data array
     data_array_data_q3[lu_offset_q3]    =   cache_pipe_lu_q3.data; //overide the specific word
     wr_data_cl_q3                       =   '0;
-    wr_data_cl_q3.data                  =   (cache_pipe_lu_q3.lu_op == FILL_LU)                            ? cache_pipe_lu_q3.cl_data  :
+    wr_data_cl_q3.data                  =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                             (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
-                                                                                                                '0; 
+                                                                                                            '0; 
     wr_data_cl_q3.cl_address            =   cache_pipe_lu_q3.data_array_address;
     wr_data_cl_q3.valid                 =   (cache_pipe_lu_q3.lu_valid &&   
                                             ((cache_pipe_lu_q3.lu_op == WR_LU)|| (cache_pipe_lu_q3.lu_op == FILL_LU)));

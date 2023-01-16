@@ -22,8 +22,7 @@ module cache_pipe_wrap
     input   var t_lu_req pipe_lu_req_q1,
     output  t_lu_rsp     pipe_lu_rsp_q3,
     // FM Interface
-    output  t_fm_wr_req  cache2fm_wr_req_q3,
-    output  t_fm_rd_req  cache2fm_rd_req_q3
+    output  t_fm_req  cache2fm_req_q3
 );
 
 t_set_rd_req rd_set_req_q1;
@@ -40,8 +39,7 @@ cache_pipe cache_pipe(
     .pipe_lu_req_q1         (pipe_lu_req_q1),    //input
     .pipe_lu_rsp_q3         (pipe_lu_rsp_q3),    //output
     // FM interface Reqiuets 
-    .cache2fm_wr_req_q3     (cache2fm_wr_req_q3),//output
-    .cache2fm_rd_req_q3     (cache2fm_rd_req_q3),//output
+    .cache2fm_req_q3     (cache2fm_req_q3),//output
     //tag_array interface
     .rd_set_req_q1          (rd_set_req_q1),     //output
     .rd_data_set_rsp_q2 (rd_data_set_rsp_q2),//input

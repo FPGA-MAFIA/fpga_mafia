@@ -109,21 +109,21 @@ always @(posedge clk) begin
 // tracker on FM IO
 //==================================================
  //===== FM Request Tracker =====   
-//     if(cache2fm_wr_req_q3.valid) begin
+//     if(cache2fm_req_q3.valid) begin
 //         foreach (fm_files_to_write[i]) begin
 //             $fwrite(cache_fm_trk,"%t      FM WRITE Request        %h        %h\n",
 //             $realtime,
-//             cache2fm_wr_req_q3.address, 
-//             cache2fm_wr_req_q3.data);    
+//             cache2fm_req_q3.address, 
+//             cache2fm_req_q3.data);    
 //         end  //foreach      
 //     end
 
-//     if(cache2fm_rd_req_q3.valid) begin
+//     if(cache2fm_req_q3.valid) begin
 //         foreach (fm_files_to_write[i]) begin
 //             $fwrite(fm_files_to_write[i],"%t      FM READ Request         %h        %h\n",
 //             $realtime,
-//             cache2fm_rd_req_q3.address,
-//             cache2fm_rd_req_q3.data
+//             cache2fm_req_q3.address,
+//             cache2fm_req_q3.data
 //             ); 
 //         end //foreach   
 //     end

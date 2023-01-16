@@ -17,8 +17,8 @@
 package cache_param_pkg;
 
 //TQ parameters
-parameter TQ_ID_WIDTH  = 3;                       
-parameter NUM_TQ_ENTRY = 2**TQ_ID_WIDTH;                       
+parameter TQ_ID_WIDTH     = 3;                       
+parameter NUM_TQ_ENTRY    = 2**TQ_ID_WIDTH;                       
 
 
 
@@ -47,16 +47,16 @@ parameter SET_WIDTH       = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,modified,mru}
 parameter NUM_SET         = 2**SET_ADRS_WIDTH;
 
 
-typedef logic [CL_WIDTH      -1:0] t_cl;
-typedef logic [5             -1:0] t_reg_id;
-typedef logic [CL_ADRS_WIDTH -1:0] t_cl_address;
-typedef logic [TAG_WIDTH     -1:0] t_tag;
-typedef logic [SET_ADRS_WIDTH-1:0] t_set_address;
-typedef logic [SET_WIDTH     -1:0] t_set_data;
-typedef logic [ADDRESS_WIDTH -1:0] t_address; 
-typedef logic [TQ_ID_WIDTH   -1:0] t_tq_id;
-typedef logic [WORD_WIDTH -1:0] t_word;
-typedef logic [OFFSET_WIDTH -1:2] t_offset;
+typedef logic [CL_WIDTH      -1:0]  t_cl;
+typedef logic [5             -1:0]  t_reg_id;
+typedef logic [CL_ADRS_WIDTH -1:0]  t_cl_address;
+typedef logic [TAG_WIDTH     -1:0]  t_tag;
+typedef logic [SET_ADRS_WIDTH-1:0]  t_set_address;
+typedef logic [SET_WIDTH     -1:0]  t_set_data;
+typedef logic [ADDRESS_WIDTH -1:0]  t_address; 
+typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
+typedef logic [WORD_WIDTH -1:0]     t_word;
+typedef logic [OFFSET_WIDTH -1:2]   t_offset;
 
 
 
@@ -101,7 +101,7 @@ typedef struct packed {
     logic   [4:0] reg_id;
     t_opcode      opcode;
     t_address     address;
-    t_cl          data;
+    t_word          data;    //t_word or t_cl
 } t_req ;
 
 typedef struct packed {
@@ -114,16 +114,10 @@ typedef struct packed {
 
 typedef struct packed {
     logic       valid;
-    t_address   address;
-    t_cl        data;
-} t_fm_wr_req ;
-
-typedef struct packed {
-    logic       valid;
     t_tq_id     tq_id;
     t_address   address;
     t_cl        data;
-} t_fm_rd_req ;
+} t_fm_req ;
 
 typedef struct packed {
     logic       valid;
@@ -213,8 +207,6 @@ typedef struct packed {
     t_word                                  data;
     logic                                   fill_valid;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
-    
-
 } t_pipe_bus; 
 
 
