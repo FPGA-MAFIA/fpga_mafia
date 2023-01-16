@@ -39,8 +39,6 @@ t_pipe_bus cache_pipe_lu_q1, cache_pipe_lu_q2, cache_pipe_lu_q3;
 t_offset    lu_offset_q3;
 logic [NUM_WAYS-1:0] way_tag_match_q2;
 logic [WAY_WIDTH-1:0] way_tag_enc_match_q2;
-logic                 valid_match;
-logic [WAY_WIDTH-1:0] way_tag_enc_match_q3;
 logic   [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
 
 
@@ -109,8 +107,8 @@ end //always_comb
 always_comb begin
     for( int WAY =0; WAY<NUM_WAYS; WAY++) begin
         way_tag_match_q2[WAY] = (rd_data_set_rsp_q2.tags[WAY] == cache_pipe_lu_q2.lu_tag)  && 
-                              rd_data_set_rsp_q2.valid[WAY] &&
-                              cache_pipe_lu_q2.lu_valid ;
+                                 rd_data_set_rsp_q2.valid[WAY] &&
+                                 cache_pipe_lu_q2.lu_valid ;
     end
 end
 
@@ -118,7 +116,7 @@ end
 //    ALOC_VICTIM (incase of fill)
 //====================== 
 //TODO: if Opcode is fill, find first invalid entry if all valids use MRU to choose victim
-
+// set the cache_pipe_lu_q2.dirty_evict incase of modified data is the victim
 //======================
 //    WRITE_SET_UPDATE
 //======================
@@ -184,6 +182,7 @@ assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 //======================
 
 assign pipe_lu_rsp_q3.valid         =   cache_pipe_lu_q3.lu_valid;
+assign pipe_lu_rsp_q3.lu_opcode     =   cache_pipe_lu_q3.lu_op;
 assign pipe_lu_rsp_q3.lu_result     =   cache_pipe_lu_q3.hit ?      HIT :
                                         cache_pipe_lu_q3.miss ?     MISS : 
                                                                     NO_RSP;                      
@@ -197,32 +196,36 @@ assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_
 //    assign PIPE BUS
 //======================
 always_comb begin
-  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q2; //this is the default value
-
+  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q3; //this is the default value
 end
+
+
 always_comb begin
-    //cache2fm_req_q3 = '0;   
+    cache2fm_req_q3 = '0;   
 //======================
 //    DIRTY_EVICT 
 //======================
 //We should dirty evict to far memory only in case of fill that allocated a modified entry
-//if (dirty evict) begin
-    cache2fm_req_q3.valid    =    '0; 
-    cache2fm_req_q3.address  =    '0;
-    cache2fm_req_q3.data     =    '0;
-    //cache2fm_req_q3.opcode  = DIRTY_EVICT_OP;
-//end
+if (cache_pipe_lu_q3.dirty_evict &&
+    (cache_pipe_lu_q3.lu_op == FILL_LU)) begin
+    cache2fm_req_q3.valid    = cache_pipe_lu_q3.lu_valid; 
+    cache2fm_req_q3.address  ={cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset, 2'b00};
+    cache2fm_req_q3.tq_id    = cache_pipe_lu_q3.lu_tq_id;
+    cache2fm_req_q3.data     = cache_pipe_lu_q3.cl_data;
+    cache2fm_req_q3.opcode   = DIRTY_EVICT_OP;
+end
 
 //======================
 //    CACHE_MISS, send FM_FILL_REQUEST
 //======================
 //in case of Rd/Wr cache_miss send a FM fill request
-//if (cache_miss) begin
-    cache2fm_req_q3.valid    =    '0;
-    cache2fm_req_q3.address  =    '0;
-    cache2fm_req_q3.data     =    '0; //FIXME: Rd Request does not use data field
-    //cache2fm_req_q3.opcode  = FILL_REQ_OP;
-//end 
+if (cache_pipe_lu_q3.miss) begin
+    cache2fm_req_q3.valid   = cache_pipe_lu_q3.lu_valid; 
+    cache2fm_req_q3.address ={cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset, 2'b00};
+    cache2fm_req_q3.tq_id   = cache_pipe_lu_q3.lu_tq_id;
+    cache2fm_req_q3.data    = '0; //Rd Request does not use data field
+    cache2fm_req_q3.opcode  = FILL_REQ_OP;
+end 
 end
 //FIXME: the FM access for dirty evict and Cache miss will never occure at the same time, we should merge the FM request to a single interface with an opcode fill (fill_req, dirty_evict)
 

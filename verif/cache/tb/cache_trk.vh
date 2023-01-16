@@ -27,14 +27,14 @@ initial begin
     $fwrite(cache_top_trk, "                        CACHE TOP TRACKER                              \n");
     $fwrite(cache_top_trk, "==================================================================================\n");
     $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
-    $fwrite(cache_top_trk," Time  ||  OPCODE  ||   address  ||  REG_ID -> tag  || Set ||    Data \n");
+    $fwrite(cache_top_trk," Time  ||  OPCODE  ||   address  ||  REG_ID || tag  || Set ||    Data \n");
     $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
 
     cache_pipe_trk = $fopen({"../../target/cache/cache_pipe_trk.log"},"w");
     $fwrite(cache_pipe_trk, "=======================================================================\n");
-    $fwrite(cache_pipe_trk, "                        CACHE PIPE TRACKER                             \n");
-    $fwrite(cache_pipe_trk, "=======================================================================\n");
-    $fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
+$fwrite(cache_pipe_trk, "                        CACHE PIPE TRACKER                             \n");
+$fwrite(cache_pipe_trk, "=======================================================================\n");
+$fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
     $fwrite(cache_pipe_trk,"  Time  ||  OPCODE  ||  address  ||    Data\n");
     $fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
 
@@ -55,7 +55,7 @@ end
 //==================================================
 always @(posedge clk) begin
     if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
-        $fwrite(cache_top_trk,"%t     RD_REQ      %h           %h -> %h       %h      ( -- read request -- ) \n",
+        $fwrite(cache_top_trk,"%t     RD_REQ      %h           %h      %h       %h      ( -- read request -- ) \n",
         $realtime, 
         core2cache_req.address, 
         core2cache_req.reg_id, 
@@ -63,7 +63,7 @@ always @(posedge clk) begin
         core2cache_req.address[MSB_SET:LSB_SET]);      
     end
     if(core2cache_req.valid && (core2cache_req.opcode == WR_OP )) begin
-        $fwrite(cache_top_trk,"%t     WR_REQ      %h           %h -> %h       %h      %h \n",
+        $fwrite(cache_top_trk,"%t     WR_REQ      %h           %h      %h       %h      %h \n",
         $realtime, 
         core2cache_req.address, 
         core2cache_req.reg_id, 
@@ -72,7 +72,7 @@ always @(posedge clk) begin
         core2cache_req.data);      
     end
     if(cache2core_rsp.valid) begin
-        $fwrite(cache_top_trk,"%t     RD_RSP      %h           %h -> %h       %h      %h \n",
+        $fwrite(cache_top_trk,"%t     RD_RSP      %h           %h      %h       %h      %h \n",
         $realtime, 
         cache2core_rsp.address, 
         cache2core_rsp.reg_id, 

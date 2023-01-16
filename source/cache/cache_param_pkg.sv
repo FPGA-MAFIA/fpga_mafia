@@ -84,9 +84,9 @@ typedef enum logic {
 } t_opcode ;
 
 typedef enum logic [1:0] {
-    HIT     = 2'b00 ,
-    MISS    = 2'b01,
-    NO_RSP  = 2'b11
+    NO_RSP  = 2'b00,
+    HIT     = 2'b01,
+    MISS    = 2'b11
 } t_lu_result ;
 
 typedef enum logic [1:0] {
@@ -95,6 +95,12 @@ typedef enum logic [1:0] {
    WR_LU   = 2'b10 ,
    FILL_LU = 2'b11
 } t_lu_opcode ;
+
+typedef enum logic [1:0] {
+    NO_FM_REQ      = 2'b00,
+    DIRTY_EVICT_OP = 2'b01,
+    FILL_REQ_OP    = 2'b11
+} t_fm_req_op ;
 
 typedef struct packed {
     logic         valid;
@@ -117,6 +123,7 @@ typedef struct packed {
     t_tq_id     tq_id;
     t_address   address;
     t_cl        data;
+    t_fm_req_op opcode;
 } t_fm_req ;
 
 typedef struct packed {
@@ -144,6 +151,7 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     t_lu_result  lu_result;
+    t_lu_opcode  lu_opcode;
     t_tq_id      tq_id;
     t_cl         data;
     // t_offset     offset;
@@ -206,6 +214,7 @@ typedef struct packed {
     t_cl                                    cl_data;
     t_word                                  data;
     logic                                   fill_valid;
+    logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
 } t_pipe_bus; 
 
