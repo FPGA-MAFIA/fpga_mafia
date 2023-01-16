@@ -16,45 +16,34 @@
 module cache_pipe
     import cache_param_pkg::*;  
 (
-    input   logic            clk,
-    input   logic            rst,
+    input   logic               clk,
+    input   logic               rst,
     //tq interface 
-    input   var t_lu_req     pipe_lu_req_q1,
-    output  t_lu_rsp         pipe_lu_rsp_q3,
+    input   var t_lu_req        pipe_lu_req_q1,
+    output  t_lu_rsp            pipe_lu_rsp_q3,
     // FM interface Reqiuets 
-    output  t_fm_wr_req      cache2fm_wr_req_q3,
-    output  t_fm_rd_req      cache2fm_rd_req_q3,
+    output  t_fm_req            cache2fm_req_q3,
     //tag_array interface 
-    output  t_set_rd_req     rd_set_req_q1,
-    input   var t_set_rd_rsp pre_rd_data_set_rsp_q2,
-    output  t_set_wr_req     wr_data_set_q2,
+    output  t_set_rd_req        rd_set_req_q1,
+    input   var t_set_rd_rsp    rd_data_set_rsp_q2,
+    output  t_set_wr_req        wr_data_set_q2,
     //data_array interface 
-    output  t_cl_rd_req      rd_cl_req_q2,
-    input   var t_cl_rd_rsp  rd_data_cl_rsp_q3,
-    output  t_cl_wr_req      wr_data_cl_q3
+    output  t_cl_rd_req         rd_cl_req_q2,
+    input   var t_cl_rd_rsp     rd_data_cl_rsp_q3,
+    output  t_cl_wr_req         wr_data_cl_q3
+
 );
 
-    assign pipe_lu_rsp_q3     = '0;
-    //assign cache2fm_wr_req_q3 = '0;
-    //assign cache2fm_rd_req_q3 = '0;
-    assign wr_data_set_q2     = '0;
-    //assign rd_cl_req_q2       = '0;
+t_pipe_bus pre_cache_pipe_lu_q2, pre_cache_pipe_lu_q3;
+t_pipe_bus cache_pipe_lu_q1, cache_pipe_lu_q2, cache_pipe_lu_q3;
+t_offset    lu_offset_q3;
+logic [NUM_WAYS-1:0] way_tag_match_q2;
+logic [WAY_WIDTH-1:0] way_tag_enc_match_q2;
+logic                 valid_match;
+logic [WAY_WIDTH-1:0] way_tag_enc_match_q3;
+logic   [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
 
-//==============================================
-// FIXME Not functinal -  just to test the FM tracker
-//==============================================
-t_lu_req     pipe_lu_req_q2;
-t_lu_req     pipe_lu_req_q3;
-`RVC_DFF(pipe_lu_req_q2 ,pipe_lu_req_q1 , clk)
-`RVC_DFF(pipe_lu_req_q3 ,pipe_lu_req_q2 , clk)
-//
-//assign cache2fm_wr_req_q3.valid    = pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == WR_LU);
-//assign cache2fm_wr_req_q3.address  = pipe_lu_req_q3.address;
-//assign cache2fm_wr_req_q3.data     = pipe_lu_req_q3.cl_data;
-//
-//assign cache2fm_rd_req_q3.valid    = pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == RD_LU);
-//assign cache2fm_rd_req_q3.address  = pipe_lu_req_q3.address;
-//assign cache2fm_rd_req_q3.tq_id    = pipe_lu_req_q3.tq_id;
+
 
 //==================================================================
 //       ____    _                     ___    _ 
@@ -68,16 +57,30 @@ t_lu_req     pipe_lu_req_q3;
 //      Hold the pipe transaction indications & Data
 //      assign the signals to the tag array lookup request
 //=================================================================
-//======================
-//  assign PIPE BUS
-//======================
+
 
 //======================
 //  SET_LOOKUP / TAG Array Lookup
 //======================
     assign rd_set_req_q1.set = pipe_lu_req_q1.address[MSB_SET:LSB_SET];
 //==================================================================
-//`DFF(pre_pipe_bus_q2, pipe_bus_q1, clk)
+
+//======================
+//  assign PIPE BUS
+//======================
+always_comb begin
+  cache_pipe_lu_q1 ='0; //this is the default value
+  cache_pipe_lu_q1.lu_valid         = pipe_lu_req_q1.valid ;
+  cache_pipe_lu_q1.lu_offset        = pipe_lu_req_q1.address[MSB_OFFSET:LSB_OFFSET];
+  cache_pipe_lu_q1.lu_set           = pipe_lu_req_q1.address[MSB_SET:LSB_SET];
+  cache_pipe_lu_q1.lu_tag           = pipe_lu_req_q1.address[MSB_TAG:LSB_TAG]; 
+  cache_pipe_lu_q1.lu_op            = pipe_lu_req_q1.lu_op ;
+  cache_pipe_lu_q1.cl_data          = pipe_lu_req_q1.cl_data;
+  cache_pipe_lu_q1.data             = pipe_lu_req_q1.data;
+end //always_comb
+
+//==================================================================
+`RVC_DFF(pre_cache_pipe_lu_q2, cache_pipe_lu_q1, clk)
 //==================================================================
 //       ____    _                     ___    ____  
 //      |  _ \  (_)  _ __     ___     / _ \  |___ \ 
@@ -93,35 +96,41 @@ t_lu_req     pipe_lu_req_q3;
 //  5. rd request from data array
 //==================================================================
 
+
 //======================
 //     Data_Hazard - accessing same set B2B 
 //====================== 
+//TODO: Detect acces to same set back2back
 
 //======================
 //     TAG_COMPARE 
 //====================== 
-logic [NUM_WAYS-1:0] way_tag_match_q2;
+
 always_comb begin
     for( int WAY =0; WAY<NUM_WAYS; WAY++) begin
-        way_tag_match_q2[WAY] = (pre_rd_data_set_rsp_q2.tags[WAY] == pipe_lu_req_q2.address[MSB_TAG:LSB_TAG])  && 
-                              pre_rd_data_set_rsp_q2.valid[WAY] &&
-                              pipe_lu_req_q2.valid ;
+        way_tag_match_q2[WAY] = (rd_data_set_rsp_q2.tags[WAY] == cache_pipe_lu_q2.lu_tag)  && 
+                              rd_data_set_rsp_q2.valid[WAY] &&
+                              cache_pipe_lu_q2.lu_valid ;
     end
 end
+
 //======================
-//    ALOC_VICTIM (incase of miss)
+//    ALOC_VICTIM (incase of fill)
 //====================== 
+//TODO: if Opcode is fill, find first invalid entry if all valids use MRU to choose victim
 
 //======================
 //    WRITE_SET_UPDATE
 //======================
-
+//TODO: in case Rd hit update MRU 
+//      in case of Wr hit update MRU , modified
+//      in case of fill, update tag,valid,mru, modified?
+assign wr_data_set_q2     = '0;
 
 //======================
 //    DATA_FETCH
 //======================
-logic [WAY_WIDTH-1:0] way_tag_enc_match_q2;
-logic                 valid_match;
+
 //`ENCODER(way_tag_enc_match_q2 , valid_match, way_tag_match_q2 )
 always_comb begin
     unique case (way_tag_match_q2)
@@ -132,11 +141,31 @@ always_comb begin
         default : way_tag_enc_match_q2 = 2'b00;
     endcase
 end
-assign rd_cl_req_q2.cl_address = {pipe_lu_req_q2.address[MSB_SET:LSB_SET],way_tag_enc_match_q2};
+
+
+//======================
+//    assign PIPE BUS
+//======================
+
+always_comb begin
+  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2; //this is the default value
+  cache_pipe_lu_q2.set_ways_valid       =   rd_data_set_rsp_q2.valid;
+  cache_pipe_lu_q2.set_ways_tags        =   rd_data_set_rsp_q2.tags;
+  cache_pipe_lu_q2.set_ways_mru         =   rd_data_set_rsp_q2.mru;
+  cache_pipe_lu_q2.set_ways_hit         =   way_tag_match_q2;
+  cache_pipe_lu_q2.set_ways_enc_hit     =   way_tag_enc_match_q2;
+  cache_pipe_lu_q2.hit                  =   |way_tag_match_q2;
+  cache_pipe_lu_q2.miss                 =   !(|way_tag_match_q2) && (cache_pipe_lu_q2.lu_valid);
+  cache_pipe_lu_q2.data_array_address   =   {cache_pipe_lu_q2.lu_set , cache_pipe_lu_q2.set_ways_enc_hit};
+
+end //always_comb
+
+//data array read
+assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
+
+
 //==================================================================
-//`DFF(pipe_bus_q3,        pipe_bus_q2,        clk)
-//`DFF(wr_data_set_q3,     wr_data_set_q2,     clk)
-//`DFF(cache2fm_rd_req_q3, cache2fm_rd_req_q2, clk)
+`RVC_DFF(pre_cache_pipe_lu_q3, cache_pipe_lu_q2, clk)
 //==================================================================
 //       ____    _                     ___    _____ 
 //      |  _ \  (_)  _ __     ___     / _ \  |___ / 
@@ -154,31 +183,65 @@ assign rd_cl_req_q2.cl_address = {pipe_lu_req_q2.address[MSB_SET:LSB_SET],way_ta
 //    TQ_UPDATE -> PIPE_LU_RSP_q3
 //======================
 
+assign pipe_lu_rsp_q3.valid         =   cache_pipe_lu_q3.lu_valid;
+assign pipe_lu_rsp_q3.lu_result     =   cache_pipe_lu_q3.hit ?      HIT :
+                                        cache_pipe_lu_q3.miss ?     MISS : 
+                                                                    NO_RSP;                      
+assign pipe_lu_rsp_q3.tq_id         =   cache_pipe_lu_q3.lu_tq_id; 
+assign pipe_lu_rsp_q3.data          =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
+                                        (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)     ? rd_data_cl_rsp_q3         :
+                                                                                                        '0;    
+assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset,2'b00};
+
+//======================
+//    assign PIPE BUS
+//======================
+always_comb begin
+  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q2; //this is the default value
+
+end
+always_comb begin
+    //cache2fm_req_q3 = '0;   
 //======================
 //    DIRTY_EVICT 
 //======================
+//We should dirty evict to far memory only in case of fill that allocated a modified entry
+//if (dirty evict) begin
+    cache2fm_req_q3.valid    =    '0; 
+    cache2fm_req_q3.address  =    '0;
+    cache2fm_req_q3.data     =    '0;
+    //cache2fm_req_q3.opcode  = DIRTY_EVICT_OP;
+//end
 
-assign cache2fm_wr_req_q3.valid    = pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == WR_LU);
-assign cache2fm_wr_req_q3.address  = pipe_lu_req_q3.address;
-assign cache2fm_wr_req_q3.data     = pipe_lu_req_q3.cl_data;
-//
-assign cache2fm_rd_req_q3.valid    = pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == RD_LU);
-assign cache2fm_rd_req_q3.address  = pipe_lu_req_q3.address;
-assign cache2fm_rd_req_q3.data     = rd_data_cl_rsp_q3.cl_data;
+//======================
+//    CACHE_MISS, send FM_FILL_REQUEST
+//======================
+//in case of Rd/Wr cache_miss send a FM fill request
+//if (cache_miss) begin
+    cache2fm_req_q3.valid    =    '0;
+    cache2fm_req_q3.address  =    '0;
+    cache2fm_req_q3.data     =    '0; //FIXME: Rd Request does not use data field
+    //cache2fm_req_q3.opcode  = FILL_REQ_OP;
+//end 
+end
+//FIXME: the FM access for dirty evict and Cache miss will never occure at the same time, we should merge the FM request to a single interface with an opcode fill (fill_req, dirty_evict)
+
 //======================
 //    WRITE_DATA
 //======================
-logic [WAY_WIDTH-1:0] way_tag_enc_match_q3;
-`RVC_DFF(way_tag_enc_match_q3, way_tag_enc_match_q2, clk)
+assign lu_offset_q3 = cache_pipe_lu_q3.lu_offset;
 
 always_comb begin
-    wr_data_cl_q3            = '0;
-    wr_data_cl_q3.data       = pipe_lu_req_q3.cl_data;
-    wr_data_cl_q3.cl_address = {pipe_lu_req_q3.address[MSB_SET:LSB_SET],way_tag_enc_match_q3};
-    wr_data_cl_q3.valid      = (pipe_lu_req_q3.valid && (pipe_lu_req_q3.lu_op == WR_LU));
-    
+    data_array_data_q3                  =   rd_data_cl_rsp_q3; //the current CL in data array
+    data_array_data_q3[lu_offset_q3]    =   cache_pipe_lu_q3.data; //overide the specific word
+    wr_data_cl_q3                       =   '0;
+    wr_data_cl_q3.data                  =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
+                                            (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
+                                                                                                            '0; 
+    wr_data_cl_q3.cl_address            =   cache_pipe_lu_q3.data_array_address;
+    wr_data_cl_q3.valid                 =   (cache_pipe_lu_q3.lu_valid &&   
+                                            ((cache_pipe_lu_q3.lu_op == WR_LU)|| (cache_pipe_lu_q3.lu_op == FILL_LU)));
 end
-
 
 
 

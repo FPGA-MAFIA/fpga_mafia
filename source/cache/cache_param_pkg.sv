@@ -17,13 +17,12 @@
 package cache_param_pkg;
 
 //TQ parameters
-parameter TQ_ID_WIDTH  = 3;                       
-parameter NUM_TQ_ENTRY = 2**TQ_ID_WIDTH;                       
+parameter TQ_ID_WIDTH     = 3;                       
+parameter NUM_TQ_ENTRY    = 2**TQ_ID_WIDTH;                       
 
 
 
 parameter WORD_WIDTH      = 32;                        // 4 Bytes - integer
-parameter WORD_MSB        = 2;                         // [1:0] -> 4 Bytes
 parameter NUM_WORDS_IN_CL = 4;                         // 
  
 //Address break-down: 
@@ -32,7 +31,7 @@ parameter OFFSET_WIDTH    = 4;                         // log2(4*4) -> log2(WORD
 parameter SET_ADRS_WIDTH  = 8;
 parameter TAG_WIDTH       = 8;
 parameter CL_WIDTH        = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 Bytes 
-parameter LSB_OFFSET      = 0;                         // 
+parameter LSB_OFFSET      = 2;                         // 
 parameter MSB_OFFSET      = 3;                         // CL is 32 Bytes
 parameter LSB_SET         = 4;                         // CL address is 16 bites (TAG_SET)
 parameter MSB_SET         = 11;                        // 
@@ -47,15 +46,18 @@ parameter WAY_ENTRY_SIZE  = (TAG_WIDTH+3); //{tag,valid,modified,mru} * NUM_WAYS
 parameter SET_WIDTH       = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
 parameter NUM_SET         = 2**SET_ADRS_WIDTH;
 
-typedef logic [CL_WIDTH      -1:0] t_cl;
-typedef logic [5             -1:0] t_reg_id;
-typedef logic [CL_ADRS_WIDTH -1:0] t_cl_address;
-typedef logic [TAG_WIDTH     -1:0] t_tag;
-typedef logic [SET_ADRS_WIDTH-1:0] t_set_address;
-typedef logic [SET_WIDTH     -1:0] t_set_data;
-typedef logic [ADDRESS_WIDTH -1:0] t_address; 
-typedef logic [TQ_ID_WIDTH   -1:0] t_tq_id;
-typedef logic [WORD_WIDTH -1:0] t_word;
+
+typedef logic [CL_WIDTH      -1:0]  t_cl;
+typedef logic [5             -1:0]  t_reg_id;
+typedef logic [CL_ADRS_WIDTH -1:0]  t_cl_address;
+typedef logic [TAG_WIDTH     -1:0]  t_tag;
+typedef logic [SET_ADRS_WIDTH-1:0]  t_set_address;
+typedef logic [SET_WIDTH     -1:0]  t_set_data;
+typedef logic [ADDRESS_WIDTH -1:0]  t_address; 
+typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
+typedef logic [WORD_WIDTH -1:0]     t_word;
+typedef logic [OFFSET_WIDTH -1:2]   t_offset;
+
 
 
 
@@ -83,8 +85,8 @@ typedef enum logic {
 
 typedef enum logic [1:0] {
     HIT     = 2'b00 ,
-    MISS    = 2'b01 ,
-    REJECT  = 2'b10
+    MISS    = 2'b01,
+    NO_RSP  = 2'b11
 } t_lu_result ;
 
 typedef enum logic [1:0] {
@@ -99,7 +101,7 @@ typedef struct packed {
     logic   [4:0] reg_id;
     t_opcode      opcode;
     t_address     address;
-    t_cl          data;
+    t_word          data;    //t_word or t_cl
 } t_req ;
 
 typedef struct packed {
@@ -112,16 +114,10 @@ typedef struct packed {
 
 typedef struct packed {
     logic       valid;
-    t_address   address;
-    t_cl        data;
-} t_fm_wr_req ;
-
-typedef struct packed {
-    logic       valid;
     t_tq_id     tq_id;
     t_address   address;
     t_cl        data;
-} t_fm_rd_req ;
+} t_fm_req ;
 
 typedef struct packed {
     logic       valid;
@@ -141,7 +137,8 @@ typedef struct packed {
     t_lu_opcode  lu_op;
     t_tq_id      tq_id;
     t_address    address;
-    t_cl         cl_data;
+    t_cl         cl_data; //Fill Req
+    t_word       data; //CoreWrites req
 } t_lu_req ;
 
 typedef struct packed {
@@ -149,25 +146,10 @@ typedef struct packed {
     t_lu_result  lu_result;
     t_tq_id      tq_id;
     t_cl         data;
+    // t_offset     offset;
     t_address    address;
 } t_lu_rsp ;
 
-
-typedef struct packed {
-    logic                 valid;
-    t_set_address         set;
-    t_tag                 tag;
-    t_lu_opcode           lu_op;
-    t_cl                  cl_data;
-    t_tq_id               tq_id;
-    logic                 hit;
-    logic                 reject;
-    logic                 dirty_evict;
-    t_tag                 dirty_evict_tag;
-    logic [NUM_WAYS-1:0]  aloc_way;
-    logic [NUM_WAYS-1:0]  valid_way;
-    logic [WAY_WIDTH-1:0] encoded_way;
-} t_pipe_bus ;
 
 typedef struct packed {
     t_set_address set;
@@ -204,5 +186,28 @@ typedef struct packed {
     logic [CL_WIDTH-1:0]                   data;
 } t_cl_wr_req ;
 
-    
+
+typedef struct packed {
+    logic                                   lu_valid;
+    t_offset                                lu_offset;
+    t_set_address                           lu_set; 
+    t_tag                                   lu_tag;
+    t_lu_opcode                             lu_op;
+    t_tq_id                                 lu_tq_id;
+    logic                                   hit;
+    logic                                   miss;
+    logic                                   mb_hit_cancel;
+    logic [NUM_WAYS-1:0]                    set_ways_mru;
+    logic [NUM_WAYS-1:0][TAG_WIDTH-1:0]     set_ways_tags;
+    logic [NUM_WAYS-1:0]                    set_ways_valid;
+    logic [NUM_WAYS-1:0]                    set_ways_victim;
+    logic [NUM_WAYS-1:0]                    set_ways_hit;
+    logic [WAY_WIDTH-1:0]                   set_ways_enc_hit;
+    t_cl                                    cl_data;
+    t_word                                  data;
+    logic                                   fill_valid;
+    logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
+} t_pipe_bus; 
+
+
 endpackage
