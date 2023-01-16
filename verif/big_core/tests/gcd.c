@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "../../../app/defines/big_core_defines.h"
 
 int gcd(int a, int b) {
     if (b == 0) return a;
@@ -7,8 +7,8 @@ int gcd(int a, int b) {
 
 int main() {
     int a = 48, b = 18;
-    int c = gcd(a, b);
-    // printf("%d\n", gcd(a, b));
+    int gcd_res = gcd(a, b);
+    MEM_SCRATCH[0]=gcd_res;
     return 0;
 }
 

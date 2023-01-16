@@ -13,7 +13,7 @@
 // (2) load backdoor the I_MEM & D_MEM.
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
-
+`define NO_WARNING_ON_FILE_NOT_FOUND
 
 `include "macros.sv"
 
@@ -118,6 +118,7 @@ end: reset_gen
 `RVC_DFF(DMem, NextDMem, Clk)
 
 string test_name;
+integer file;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
@@ -127,33 +128,26 @@ initial begin: test_seq
     $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
-    force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
-    #10
-    release big_core_top.big_core_mem_wrap.d_mem.DMem;
+
+    file = $fopen({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    if (file) begin
+        $fclose(file);
+        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
+        force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
+        #10
+        release big_core_top.big_core_mem_wrap.d_mem.DMem;
+    end
 
 
-    #10000 $finish;
+    #100000
+    $display("===================\n test %s ended timeout \n=====================", test_name);
+    $finish;
+
 end // test_seq
 
 
 `include "big_core_trk.vh"
-
-//==============================
-// Behavrual Memory
-//------------------------------
-// Write access
-//------------------------------
-always_comb begin
-    NextDMem = DMem;
-    if(DMemWrEn) begin
-        if(DMemByteEn[0]) NextDMem[DMemAddress+0] = DMemData[7:0]  ;
-        if(DMemByteEn[1]) NextDMem[DMemAddress+1] = DMemData[15:8] ;
-        if(DMemByteEn[2]) NextDMem[DMemAddress+2] = DMemData[23:16];
-        if(DMemByteEn[3]) NextDMem[DMemAddress+3] = DMemData[31:24];
-    end
-end
 
 parameter EBREAK = 32'h00100073;
 logic [31:0] InstructionQ102H;
@@ -164,18 +158,11 @@ logic [31:0] InstructionQ103H;
 // Ebrake detection
 always @(posedge Clk) begin : ebrake_status
     if (EBREAK == InstructionQ103H) begin // ebrake instruction opcode
-        $display("===================\n test %s ended with Ebreake \n =====================", test_name);
+        $display("===================\n test %s ended with Ebreake \n=====================", test_name);
         $finish;
         //end_tb("The test ended");
     end
 end
-//------------------------------
-// Read access
-//------------------------------
-assign DMemRspData = {DMem[DMemAddress+3] ,
-                      DMem[DMemAddress+2] ,
-                      DMem[DMemAddress+1] ,
-                      DMem[DMemAddress+0]};
 
 
 endmodule //big_core_tb

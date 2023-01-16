@@ -1,6 +1,5 @@
+#include "../../../app/defines/big_core_defines.h"
 
-#define SCRATCH_OFFSET   0x00005000
-#define MEM_SCRATCH ((volatile int *) (SCRATCH_OFFSET))
 
 void bubbleSort(int arr[], int n) {
     int i, j;
