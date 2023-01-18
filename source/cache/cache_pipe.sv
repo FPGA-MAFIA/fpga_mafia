@@ -117,6 +117,8 @@ end
 //====================== 
 //TODO: if Opcode is fill, find first invalid entry if all valids use MRU to choose victim
 // set the cache_pipe_lu_q2.dirty_evict incase of modified data is the victim
+
+
 //======================
 //    WRITE_SET_UPDATE
 //======================
@@ -124,6 +126,26 @@ end
 //      in case of Wr hit update MRU , modified
 //      in case of fill, update tag,valid,mru, modified?
 assign wr_data_set_q2     = '0;
+
+always_comb begin 
+    //in case Rd hit update MRU 
+    if ((cache_pipe_lu_q2.lu_op == RD_LU)&&(cache_pipe_lu_q2.hit)) begin //Need to check valid too or hit is enough ? 
+        
+    end
+
+    //      in case of Wr hit update MRU , modified  
+    if ((cache_pipe_lu_q2.lu_op == WR_LU)&&(cache_pipe_lu_q2.hit)) begin
+        
+    end
+    
+    //      in case of fill, update tag,valid,mru, modified?
+    if ((cache_pipe_lu_q2.lu_op == FILL_LU)) begin
+        
+    end
+
+
+
+end
 
 //======================
 //    DATA_FETCH
@@ -227,7 +249,6 @@ if (cache_pipe_lu_q3.miss) begin
     cache2fm_req_q3.opcode  = FILL_REQ_OP;
 end 
 end
-//FIXME: the FM access for dirty evict and Cache miss will never occure at the same time, we should merge the FM request to a single interface with an opcode fill (fill_req, dirty_evict)
 
 //======================
 //    WRITE_DATA
