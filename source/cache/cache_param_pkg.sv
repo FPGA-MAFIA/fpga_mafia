@@ -22,29 +22,32 @@ parameter NUM_TQ_ENTRY    = 2**TQ_ID_WIDTH;
 
 
 
-parameter WORD_WIDTH      = 32;                        // 4 Bytes - integer
-parameter NUM_WORDS_IN_CL = 4;                         // 
+parameter WORD_WIDTH            = 32;                        // 4 Bytes - integer
+parameter NUM_WORDS_IN_CL       = 4;                         // 
  
 //Address break-down: 
-parameter ADDRESS_WIDTH   = 20;                        // OFFSET+SET+TAG -> 1MB
-parameter OFFSET_WIDTH    = 4;                         // log2(4*4) -> log2(WORD * NUM_WORDS_IN_CL)
-parameter SET_ADRS_WIDTH  = 8;
-parameter TAG_WIDTH       = 8;
-parameter CL_WIDTH        = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 Bytes 
-parameter LSB_OFFSET      = 2;                         // 4-byte Word offset
-parameter MSB_OFFSET      = 3;                         // 
-parameter LSB_SET         = 4;                         // CL address is 16 bites (TAG_SET)
-parameter MSB_SET         = 11;                        // 
-parameter LSB_TAG         = 12;                        // 
-parameter MSB_TAG         = 19;                        //
+parameter ADDRESS_WIDTH         = 20;                        // OFFSET+SET+TAG -> 1MB
+parameter OFFSET_WIDTH          = 4;                         // log2(4*4) -> log2(WORD * NUM_WORDS_IN_CL)
+parameter SET_ADRS_WIDTH        = 8;
+parameter TAG_WIDTH             = 8;
+parameter CL_WIDTH              = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 Bytes 
+parameter LSB_OFFSET            = 0;                         // 16-byte offset
+parameter MSB_OFFSET            = 3;                          
+parameter LSB_WORD_OFFSET       = 2;                    // 4-byte Word offset
+parameter MSB_WORD_OFFSET       = 3;                        
+
+parameter LSB_SET               = 4;                         // CL address is 16 bites (TAG_SET)
+parameter MSB_SET               = 11;                        // 
+parameter LSB_TAG               = 12;                        // 
+parameter MSB_TAG               = 19;                        //
  
 //Tag Array break-down: 
-parameter CL_ADRS_WIDTH   = TAG_WIDTH + SET_ADRS_WIDTH;//16 -> Address[TAG_MSB:SET_LSB] = Address[19:4]
-parameter WAY_WIDTH       = 2;
-parameter NUM_WAYS        = 2**WAY_WIDTH;              //4 -> (2)^2. -> 2 bits represent 4 ways.
-parameter WAY_ENTRY_SIZE  = (TAG_WIDTH+3); //{tag,valid,modified,mru} * NUM_WAYS
-parameter SET_WIDTH       = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
-parameter NUM_SET         = 2**SET_ADRS_WIDTH;
+parameter CL_ADRS_WIDTH         = TAG_WIDTH + SET_ADRS_WIDTH;//16 -> Address[TAG_MSB:SET_LSB] = Address[19:4]
+parameter WAY_WIDTH             = 2;
+parameter NUM_WAYS              = 2**WAY_WIDTH;              //4 -> (2)^2. -> 2 bits represent 4 ways.
+parameter WAY_ENTRY_SIZE        = (TAG_WIDTH+3); //{tag,valid,modified,mru} * NUM_WAYS
+parameter SET_WIDTH             = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
+parameter NUM_SET               = 2**SET_ADRS_WIDTH;
 
 
 typedef logic [CL_WIDTH      -1:0]  t_cl;
