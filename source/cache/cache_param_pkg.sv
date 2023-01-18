@@ -31,8 +31,8 @@ parameter OFFSET_WIDTH    = 4;                         // log2(4*4) -> log2(WORD
 parameter SET_ADRS_WIDTH  = 8;
 parameter TAG_WIDTH       = 8;
 parameter CL_WIDTH        = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 Bytes 
-parameter LSB_OFFSET      = 2;                         // 
-parameter MSB_OFFSET      = 3;                         // CL is 32 Bytes
+parameter LSB_OFFSET      = 2;                         // 4-byte Word offset
+parameter MSB_OFFSET      = 3;                         // 
 parameter LSB_SET         = 4;                         // CL address is 16 bites (TAG_SET)
 parameter MSB_SET         = 11;                        // 
 parameter LSB_TAG         = 12;                        // 
@@ -104,10 +104,10 @@ typedef enum logic [1:0] {
 
 typedef struct packed {
     logic         valid;
-    logic   [4:0] reg_id;
+    t_reg_id     reg_id;
     t_opcode      opcode;
     t_address     address;
-    t_word          data;    //t_word or t_cl
+    t_word          data;    
 } t_req ;
 
 typedef struct packed {
@@ -115,7 +115,7 @@ typedef struct packed {
     logic         reject;
     logic         accept;
     t_address     address;
-    logic   [4:0] reg_id;
+    t_reg_id      reg_id;
 } t_ack ;
 
 typedef struct packed {
@@ -136,7 +136,7 @@ typedef struct packed {
     logic        valid;
     t_address    address;
     t_word         data;
-    logic   [4:0] reg_id;
+   t_reg_id      reg_id;
 } t_rd_rsp ;
 
 typedef struct packed {
