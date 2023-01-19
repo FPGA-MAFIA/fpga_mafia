@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : Cache
-// Project          : riscv_manycore_mesh_fpga 
+// Project          : fpga_mafia 
 //-----------------------------------------------------------------------------
 // File             : <TODO>
 // Original Author  : 
@@ -18,13 +18,13 @@ module cache
 (
     input   logic           clk,
     input   logic           rst,
-    //Core Inteface
+    //Core Interface
     input   var t_req       core2cache_req,
     output  logic           stall,
     output  t_rd_rsp        cache2core_rsp, //RD Response
     // FM Interface
-    output  t_fm_req     cache2fm_req_q3, 
-    input   var t_fm_rd_rsp fm2cache_rd_rsp
+    output  t_fm_req        cache2fm_req_q3, 
+    input   var t_fm_rd_rsp     fm2cache_rd_rsp
 );
 
 t_lu_req    pipe_lu_req_q1;
@@ -38,7 +38,7 @@ cache_tq cache_tq (
     .core2cache_req  (core2cache_req), //input
     .stall           (stall),          //output
     .cache2core_rsp  (cache2core_rsp), //output
-    //FM Inteface
+    //FM Interface
     .fm2cache_rd_rsp (fm2cache_rd_rsp),//input
     //Pipe Interface
     .pipe_lu_req_q1  (pipe_lu_req_q1), //output
@@ -51,7 +51,7 @@ cache_pipe_wrap cache_pipe_wrap (
     //Pipe Interface
     .pipe_lu_req_q1     (pipe_lu_req_q1),    //input
     .pipe_lu_rsp_q3     (pipe_lu_rsp_q3),    //output
-    //FM Inteface
+    //FM Interface
     .cache2fm_req_q3 (cache2fm_req_q3)//output
 );
 

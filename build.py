@@ -28,13 +28,13 @@ parser.add_argument('-proj_name', default='big_core', help='insert your project 
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
-VERIF = './verif/'+args.proj_name+'/'
-TB = './verif/'+args.proj_name+'/tb/'
-MODELSIM = './modelsim/'+args.proj_name+'/'
-SOURCE = './source/'+args.proj_name+'/'
-TARGET = './target/'+args.proj_name+'/'
-APP = './app/'
-TESTS = './verif/'+args.proj_name+'/tests/'
+VERIF     = './verif/'+args.proj_name+'/'
+TB        = './verif/'+args.proj_name+'/tb/'
+SOURCE    = './source/'+args.proj_name+'/'
+TARGET    = './target/'+args.proj_name+'/'
+MODELSIM  = './target/'+args.proj_name+'/modelsim/'
+APP       = './app/'
+TESTS     = './verif/'+args.proj_name+'/tests/'
 
 #####################################################################################################
 #                                           class Test
@@ -54,12 +54,18 @@ class Test:
         self.path = TESTS+self.file_name
         self.fail_flag = False
     def _create_test_dir(self):
+        if not os.path.exists(TARGET):
+            os.mkdir(TARGET)
         if not os.path.exists(TARGET+'tests'):
             os.mkdir(TARGET+'tests')
         if not os.path.exists(TARGET+'tests/'+self.name):
             os.mkdir(TARGET+'tests/'+self.name)
         if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
             os.mkdir(TARGET+'tests/'+self.name+'/gcc_files')
+        if not os.path.exists(MODELSIM):
+            os.mkdir(MODELSIM)
+        if not os.path.exists(MODELSIM+'work'):
+            os.mkdir(MODELSIM+'work')
         return TARGET+'tests/'+self.name+'/', TARGET+'tests/'+self.name+'/gcc_files'
     def _compile_sw(self):
         print_message('[INFO] Starting to compile SW ...')
@@ -71,6 +77,7 @@ class Test:
             try:
                 if not self.assembly:
                     first_cmd  = 'riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../../'+self.path+' -o '+cs_path
+                    print_message(first_cmd)
                     subprocess.check_output(first_cmd, shell=True)
                 else:
                     pass
@@ -85,6 +92,7 @@ class Test:
                                     -Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+'\
                                     -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+'\
                                     -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
+                    print_message(second_cmd)
                     subprocess.check_output(second_cmd, shell=True)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -92,6 +100,7 @@ class Test:
                 else:
                     try:
                         third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
+                        print_message(third_cmd)
                         subprocess.check_output(third_cmd, shell=True)
                     except:
                         print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
@@ -99,6 +108,7 @@ class Test:
                     else:
                         try:
                             forth_cmd  = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
+                            print_message(forth_cmd)
                             subprocess.check_output(forth_cmd, shell=True)
                         except:
                             print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')
@@ -113,7 +123,7 @@ class Test:
                             with open('inst_mem.sv', 'w') as imem:
                                 imem.write('@'+memories.split('@')[1])
             if not self.fail_flag:
-                print_message('[INFO] SW compiation finished with no errors\n')
+                print_message('[INFO] SW compilation finished with no errors\n')
         else:
             print_message('[ERROR] Can\'t find the c files of '+self.name)
             self.fail_flag = True
@@ -122,7 +132,7 @@ class Test:
         os.chdir(MODELSIM)
         print_message('[INFO] Starting to compile HW ...')
         if not Test.hw_compilation:
-            comp_sim_cmd = 'vlog.exe -lint -f ../../'+TB+'/'+self.project+'_list.f'
+            comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.project+'_list.f'
             try:
                 #results = subprocess.check_output(comp_sim_cmd, shell=True, stderr=subprocess.STDOUT).decode()
                 results = subprocess.run(comp_sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)

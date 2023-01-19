@@ -59,19 +59,18 @@ typedef logic [SET_WIDTH     -1:0]  t_set_data;
 typedef logic [ADDRESS_WIDTH -1:0]  t_address; 
 typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
 typedef logic [WORD_WIDTH -1:0]     t_word;
-typedef logic [OFFSET_WIDTH -1:2]   t_offset;
+typedef logic [OFFSET_WIDTH -1:0]   t_offset;
+typedef logic [OFFSET_WIDTH -1:2]   t_word_offset;
 
 
 
 
-typedef enum logic [3:0] {
-  S_IDLE            = 4'h0,
-  S_LU_CORE_WR_REQ  = 4'h1,
-  S_LU_CORE_RD_REQ  = 4'h2,
-  S_MB_WAIT_FILL    = 4'h3,
-  S_MB_FILL_READY   = 4'h4,
-  S_FILL_LU         = 4'h5,
-  S_ERROR           = 4'h6
+typedef enum logic [2:0] {
+  S_IDLE            = 3'h0,
+  S_LU_CORE         = 3'h1,
+  S_MB_WAIT_FILL    = 3'h2,
+  S_MB_FILL_READY   = 3'h3,
+  S_ERROR           = 3'h7
 } t_tq_state ;
 
 typedef enum logic [1:0] {
@@ -149,6 +148,8 @@ typedef struct packed {
     t_address    address;
     t_cl         cl_data; //Fill Req
     t_word       data; //CoreWrites req
+    logic        rd_indication;
+    logic        wr_indication;
 } t_lu_req ;
 
 typedef struct packed {
@@ -208,15 +209,17 @@ typedef struct packed {
     logic                                   hit;
     logic                                   miss;
     logic                                   mb_hit_cancel;
+    logic [NUM_WAYS-1:0]                    set_ways_valid;
+    logic [NUM_WAYS-1:0]                    set_ways_modified;
     logic [NUM_WAYS-1:0]                    set_ways_mru;
     logic [NUM_WAYS-1:0][TAG_WIDTH-1:0]     set_ways_tags;
-    logic [NUM_WAYS-1:0]                    set_ways_valid;
     logic [NUM_WAYS-1:0]                    set_ways_victim;
     logic [NUM_WAYS-1:0]                    set_ways_hit;
     logic [WAY_WIDTH-1:0]                   set_ways_enc_hit;
     t_cl                                    cl_data;
     t_word                                  data;
-    logic                                   fill_valid;
+    logic                                   fill_modified;
+    logic                                   fill_rd;
     logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
 } t_pipe_bus; 

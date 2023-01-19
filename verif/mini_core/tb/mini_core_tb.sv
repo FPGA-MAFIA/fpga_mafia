@@ -68,7 +68,7 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../target/mini_core/gcc_gen_files/",test_name,"/inst_mem.sv"} , IMem);
+    $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force mini_top.mini_mem_wrap.i_mem.mem = IMem;
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #1us $finish;

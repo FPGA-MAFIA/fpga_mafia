@@ -10,7 +10,7 @@
 // Description :
 //-----------------------------------------------------------------------------
 
-+incdir+../../source/common/
++incdir+../../../source/common/
 //RTL FIles
-../../source/router/router_pkg.sv
-../../source/router/router.sv
+../../../source/router/router_pkg.sv
+../../../source/router/router.sv

@@ -55,7 +55,7 @@
 	always_comb begin                                   \
         encoded = '0 ;                                 	\
         valid   = |decoded;                             \
-        for (logic [$bits(encoded)-1:0] i = 0 ; i <$bits(decoded) ;i++) begin  \
+        for (int i = 0 ; i <$bits(decoded) ;i++) begin  \
 	        if (decoded[i])                             \
     	        encoded = i ;                           \
     	end                                             \

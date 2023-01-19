@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            :  
-// Project          : riscv_manycore_mesh_fpga
+// Project          : fpga_mafia
 //-----------------------------------------------------------------------------
 // File             : big_core_top 
 // Original Author  : Daniel Kaufman

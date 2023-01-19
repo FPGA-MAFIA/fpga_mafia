@@ -30,33 +30,27 @@ logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
 
 
 
-initial begin : assign_input
+string test_name;
+initial begin : start_test
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("STRING value %s", test_name);
 $display("================\n     START\n================\n");
             rst= 1'b1;
             core2cache_req     = '0;
+//exit reset
 delay(80);  rst= 1'b0;
-delay(1); backdoor_cache_load();
 $display("====== Reset Done =======\n");
-delay(5);   wr_req(20'hE8_01_0, 32'hDEAD_BEAF , 5'b0);
-delay(5);   wr_req(20'hE9_01_0, 32'hFAFA_FAFA , 5'b1);
-delay(5);   wr_req(20'hEA_01_0, 32'hBABA_BABA , 5'b1);
-delay(5);   rd_req(20'hE8_01_0, 5'd1);
-delay(5);   rd_req(20'hE9_01_0, 5'd2);
-delay(5);   rd_req(20'hEA_01_0, 5'd3);
+//start test
+if(test_name == "cache_alive") begin
+`include "cache_alive.sv"
+end else 
+if(test_name == "cache_alive_2") begin
+`include "cache_alive_2.sv"
+end
+if(test_name == "single_fm_req") begin
+`include "single_fm_req.sv"
+end
 
-// Same CL (same TAG 'E8', SAME SET '5'), different words (1,2,3):
-delay(5);   wr_req(20'hE8_05_4, 32'h4444_4444 , 5'b0);
-delay(5);   wr_req(20'hE8_05_8, 32'h8888_8888 , 5'b1);
-delay(5);   wr_req(20'hE8_05_C, 32'hCCCC_CCCC , 5'b1);
-delay(5);   rd_req(20'hE8_05_4, 5'd1);
-delay(5);   rd_req(20'hE8_05_8, 5'd2);
-delay(5);   rd_req(20'hE8_05_C, 5'd3);
-// delay(5);   wr_req(20'hE8_01_0, 32'h1234_5678 , 5'b0);
-// delay(5);   wr_req(20'hE9_01_0, 32'hCCCC_DDDD , 5'b1);
-// delay(5);   wr_req(20'hEA_01_0, 32'h6666_6666 , 5'b1);
-// delay(5);   rd_req(20'hE8_01_0, 5'd1);
-// delay(5);   rd_req(20'hE9_01_0, 5'd2);
-// delay(5);   rd_req(20'hEA_01_0, 5'd3);
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
@@ -72,7 +66,7 @@ cache cache ( //DUT
    .stall              (stall),          //output  logic
    .cache2core_rsp     (cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
-   .cache2fm_req_q3 (cache2fm_req_q3),//output  t_fm_req
+   .cache2fm_req_q3    (cache2fm_req_q3),//output  t_fm_req
    .fm2cache_rd_rsp    (fm2cache_rd_rsp)    //input   var t_fm_rd_rsp
 );
 
@@ -86,10 +80,10 @@ task backdoor_cache_load();
 
   for(int SET =0; SET< NUM_SET ; SET++) begin
     for(int WAY =0; WAY< NUM_WAYS; WAY++) begin
-        back_door_entry.tags[WAY]    = WAY + 1000;
-        back_door_entry.valid[WAY]   = 1'b1;
+        back_door_entry.tags    [WAY] = WAY + 1000;
+        back_door_entry.valid   [WAY] = 1'b1;
         back_door_entry.modified[WAY] = 1'b0;
-        back_door_entry.mru[WAY]      = 1'b0;
+        back_door_entry.mru     [WAY] = 1'b0;
     end
     tag_mem[SET]  = back_door_entry;
   end
@@ -103,6 +97,17 @@ task backdoor_cache_load();
 
     release cache.cache_pipe_wrap.data_array.mem;
     release cache.cache_pipe_wrap.tag_array.mem;
+endtask
+
+localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
+t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
+task backdoor_fm_load();
+  for(int FM_ADDRESS =0; FM_ADDRESS < NUM_FM_CL ; FM_ADDRESS++) begin
+        back_door_fm_mem[FM_ADDRESS] = FM_ADDRESS + 'h1111;
+  end
+    force far_memory_array.mem  = back_door_fm_mem;
+    delay(5);
+    release far_memory_array.mem;
 endtask
 
 task wr_req( input logic [19:0]  address, 

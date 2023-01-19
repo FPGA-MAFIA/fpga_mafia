@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : Risc-V Many Core mesh FPGA
-// Project          : riscv_manycore_mesh_fpga
+// Project          : fpga_mafia
 //-----------------------------------------------------------------------------
 // File             : big_core_mem_wrap
 // Original Author  : Daniel Kaufman

@@ -1,11 +1,3 @@
 *.swp
 .vscode/*
-modelsim/*
 target/*
-
-!modelsim/big_core/work/README*
-!modelsim/mini_core/work/README*
-!modelsim/cache/work/README*
-!modelsim/work/README*
-
-!target/README.md

@@ -12,9 +12,13 @@
 //-----------------------------------------------------------------------------
 
 package mini_core_pkg;
+parameter I_MEM_SIZE   = 'h2000;
+parameter I_MEM_OFFSET = 'h0;
+parameter D_MEM_SIZE   = 'h3000;
+parameter D_MEM_OFFSET = 'h2000;
 
-parameter I_MEM_MSB   = 'h4000-1;  // I_MEM   0x0    - 0x3FFF
-parameter D_MEM_MSB   = 'h7000-1;  // D_MEM   0x4000 - 0x6FFF
+parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
+parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
 parameter CR_MEM_MSB  = 'h8000-1;  // CR_MEM  0x7000 - 0x7FFF
 parameter VGA_MEM_MSB = 'h11600-1; // VGA_MEM 0x8000 - 0x115FF
 
@@ -45,10 +49,6 @@ parameter LSB_D_MEM        = 0 ;
 parameter MSB_D_MEM        = 12;
 parameter SIZE_D_MEM_LOTR  = 2**(MSB_D_MEM + 1);
 parameter SIZE_SHRD_MEM    = 2**(MSB_D_MEM );
-parameter T0_STK_OFFSET    = 32'h0040_1400;
-parameter T1_STK_OFFSET    = 32'h0040_1800;
-parameter T2_STK_OFFSET    = 32'h0040_1C00;
-parameter T3_STK_OFFSET    = 32'h0040_2000;
 parameter MEM_SHARD_OFFSET = 32'h0040_0f00;
 // define VGA memory sizes
 parameter SIZE_VGA_MEM       = 38400;
@@ -134,10 +134,6 @@ typedef struct packed { // RW
 } t_cr_rw ;
 
 
-parameter I_MEM_SIZE   = 'h1000;
-parameter I_MEM_OFFSET = 'h0;
-parameter D_MEM_SIZE   = 'h1000;
-parameter D_MEM_OFFSET = 'h1000;
 
 //typedef enum logic [2:0] {
 //    U_TYPE = 3'b000 , 

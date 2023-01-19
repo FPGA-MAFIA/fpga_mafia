@@ -1,26 +1,28 @@
 //-----------------------------------------------------------------------------
-// Title            : simple core  design
-// Project          : simple_core
+// Title            : single cycle core design
+// Project          : 
 //-----------------------------------------------------------------------------
-// File             : big_core_sc
+// File             : 
 // Original Author  : Daniel Kaufman
 // Code Owner       : 
 // Created          : 11/2022
 //-----------------------------------------------------------------------------
 // Description :
-// This file will be a 7 pipes core implemenation of the RISCV specification
-// Fetch, Decode, Exe, Mem, Write_Back, ??, ??
+// This is the top level of the single cycle core design.
+// The core is a 32 bit RISC-V core.
+// compatible with the RV32I base instruction set.
+// Fetch, Decode, Execute, Memory, WriteBack all in one cycle.
+// The PC (program counter) is the synchronous element in the core 
 //-----------------------------------------------------------------------------
-
 `include "macros.sv"
 
-module big_core_sc
+module sc_core
 
-import big_core_pkg::*;
+import sc_core_pkg::*;
 (
     input logic Clk,
     input logic Rst,
-    // interafce with instruciton memory
+    // interface with instruction memory
     output logic [31:0] Pc,
     input  logic [31:0] Instruction,
     // interface with Data Memory
@@ -31,17 +33,14 @@ import big_core_pkg::*;
     output logic        DMemRdEn   ,
     input  logic [31:0] DMemRspData
 );
-// signal decliration
+// signal declination
 //Data-Path signals
-//logic [31:0]        Pc;
 logic [31:0]        NextPc;
 logic [31:0]        PcPlus4;
-//logic [31:0]        Instruction;
 logic [31:1][31:0]  Register; 
 logic [31:0]        Immediate;
 logic [4:0]         Shamt;
 logic [31:0]        PreDMemRdData;
-logic [31:0]        DMemRdData;
 logic [31:0]        AluIn1; 
 logic [31:0]        AluIn2; 
 logic [31:0]        AluOut;
@@ -92,7 +91,7 @@ assign Funct7           = Instruction[31:25];
 assign SelNextPcAluOut  = (Opcode == JAL) || (Opcode == JALR) || ((Opcode == BRANCH) && BranchCondMet);
 assign SelRegWrPc       = (Opcode == JAL) || (Opcode == JALR);
 assign SelAluPc         = (Opcode == JAL) || (Opcode == BRANCH) || (Opcode == AUIPC);
-assign SelAluImm        =!(Opcode == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
+assign SelAluImm        =!(Opcode == R_OP); // Only in case of RegReg Operation the Imm Selector is de-asserted - default is asserted
 assign SelDMemWb        = (Opcode == LOAD);
 assign CtrlLui          = (Opcode == LUI);
 assign CtrlRegWrEn      = (Opcode == LUI ) || (Opcode == AUIPC) || (Opcode == JAL)  || (Opcode == JALR) ||
@@ -185,7 +184,7 @@ assign AluIn2 = SelAluImm   ? Immediate : RegRdData2;
 
 always_comb begin : alu_logic
     Shamt = AluIn2[4:0]; 
-    //Acording to ALU OP we select the correct operation
+    //According to ALU OP we select the correct operation
     unique casez (CtrlAluOp)
         ADD      :   AluOut = AluIn1 + AluIn2                  ;
         SUB      :   AluOut = AluIn1 + (~AluIn2) + 1'b1        ;
@@ -193,7 +192,7 @@ always_comb begin : alu_logic
         SLL     : AluOut = AluIn1 << Shamt                     ;//SLL
         SRL     : AluOut = AluIn1 >> Shamt                     ;//SRL
         SRA     : AluOut = $signed(AluIn1) >>> Shamt           ;//SRA
-        //bit wise opirations
+        //bit wise operations
         XOR     : AluOut = AluIn1 ^ AluIn2                     ;//XOR
         OR      : AluOut = AluIn1 | AluIn2                     ;//OR
         AND     : AluOut = AluIn1 & AluIn2                     ;//AND
@@ -218,7 +217,7 @@ always_comb begin : branch_comp
 end
 //===========================================================================
 // Memory Access
-// Acceess D_MEM for Write (STORE) and Reads (LOAD). – use Byte Enable and Sign-Extend indications.
+// Access D_MEM for Write (STORE) and Reads (LOAD). – use Byte Enable and Sign-Extend indications.
 //===========================================================================
 
 // Both RD & WR
@@ -229,13 +228,23 @@ assign DMemData     = RegRdData2;
 assign DMemWrEn     = CtrlDMemWrEn;
 //RD
 assign DMemRdEn     = SelDMemWb;
-assign DMemRdData   = DMemRspData;  //from D_MEM
 
 //===========================================================================
 // Write-Back
-// Select data write back to register file ->  AluOut vs DMemRdData
 //===========================================================================
-assign WrBackData = SelDMemWb ? DMemRdData : AluOut;
+// -----------------
+// 1. Select which data should be written back to the register file AluOut or DMemRdData.
+// Sign extend taking care of
+logic [31:0] DMemRspDataBeSx;
+assign DMemRspDataBeSx[7:0]   =  CtrlDMemByteEn[0] ? DMemRspData[7:0]     : 8'b0;
+assign DMemRspDataBeSx[15:8]  =  CtrlDMemByteEn[1] ? DMemRspData[15:8]    :
+                                 CtrlSignExt       ? {8{WrBackData[7]}} : 8'b0;
+assign DMemRspDataBeSx[23:16] =  CtrlDMemByteEn[2] ? DMemRspData[23:16]:
+                                 CtrlSignExt       ? {8{WrBackData[15]}}: 8'b0;
+assign DMemRspDataBeSx[31:24] =  CtrlDMemByteEn[3] ? DMemRspData[31:24]:
+                                 CtrlSignExt       ? {8{WrBackData[23]}}: 8'b0;
+//
+assign WrBackData = SelDMemWb ? DMemRspDataBeSx : AluOut;
 
 
 endmodule

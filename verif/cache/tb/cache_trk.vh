@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : cache_trk
-// Project          : riscv_manycore_mesh_fpga
+// Project          : fpga_mafia
 //-----------------------------------------------------------------------------
 // File             : cache_trk.vh
 // Original Author  : Noam Sabban
@@ -21,8 +21,10 @@ integer cache_fm_trk;
 integer fm_files_to_write[2];
 
 initial begin
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("creating tracker in test directory: target/cache/tests/%s", test_name);
     $timeformat(-12, 1, "", 6);
-    cache_top_trk      = $fopen({"../../target/cache/cache_top_trk.log"},"w");
+    cache_top_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_top_trk.log"},"w");
     $fwrite(cache_top_trk, "==================================================================================\n");
     $fwrite(cache_top_trk, "                        CACHE TOP TRACKER                              \n");
     $fwrite(cache_top_trk, "==================================================================================\n");
@@ -30,15 +32,15 @@ initial begin
     $fwrite(cache_top_trk," Time  ||  OPCODE  ||   address  ||  REG_ID || tag  || Set ||    Data \n");
     $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
 
-    cache_pipe_trk = $fopen({"../../target/cache/cache_pipe_trk.log"},"w");
+    cache_pipe_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_trk.log"},"w");
     $fwrite(cache_pipe_trk, "=======================================================================\n");
-$fwrite(cache_pipe_trk, "                        CACHE PIPE TRACKER                             \n");
-$fwrite(cache_pipe_trk, "=======================================================================\n");
-$fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
+    $fwrite(cache_pipe_trk, "                        CACHE PIPE TRACKER                             \n");
+    $fwrite(cache_pipe_trk, "=======================================================================\n");
+    $fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
     $fwrite(cache_pipe_trk,"  Time  ||  OPCODE  ||  address  ||    Data\n");
     $fwrite(cache_pipe_trk,"-----------------------------------------------------------------------\n");
 
-    cache_fm_trk = $fopen({"../../target/cache/cache_fm_trk.log"},"w");
+    cache_fm_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_fm_trk.log"},"w");
     $fwrite(cache_fm_trk, "==================================================================================\n");
     $fwrite(cache_fm_trk, "                        CACHE FAR MEMORY TRACKER                       \n");
     $fwrite(cache_fm_trk, "==================================================================================\n");
