@@ -36,13 +36,27 @@ module cache_pipe
 
 t_pipe_bus pre_cache_pipe_lu_q2, pre_cache_pipe_lu_q3;
 t_pipe_bus cache_pipe_lu_q1, cache_pipe_lu_q2, cache_pipe_lu_q3;
-t_offset    lu_offset_q3;
-logic [NUM_WAYS-1:0] way_tag_match_q2;
-logic [WAY_WIDTH-1:0] way_tag_enc_match_q2;
-logic   [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
+t_word_offset                               lu_word_offset_q3;
+logic [NUM_WAYS-1:0]                        way_tag_match_q2;
+logic [WAY_WIDTH-1:0]                       way_tag_enc_match_q2;
+logic [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
 
+logic [NUM_WAYS-1:0]                set_ways_mru_q2;
+logic [NUM_WAYS-1:0]                set_ways_victim_q2;
+logic [NUM_WAYS-1:0]                set_ways_modified_q2;
+logic [NUM_WAYS-1:0]                set_ways_valid_q2;
+logic [NUM_WAYS-1:0][TAG_WIDTH-1:0] set_ways_tags_q2; 
 
+logic [WAY_WIDTH-1:0]               set_ways_enc_victim_q2;
 
+logic [NUM_WAYS-1:0]                set_ways_lru_q2;
+logic [NUM_WAYS-1:0]                set_ways_free_q2;
+logic [NUM_WAYS-1:0]                first_free_way_q2;
+logic [NUM_WAYS-1:0]                first_lru_way_q2;
+logic [NUM_WAYS-1:0]                victim_and_modified_q2;
+logic                               dirty_evict_q2;
+logic                               any_free_way_q2;
+logic                               any_lru_way_q2;
 //==================================================================
 //       ____    _                     ___    _ 
 //      |  _ \  (_)  _ __     ___     / _ \  / |
@@ -75,6 +89,7 @@ always_comb begin
   cache_pipe_lu_q1.lu_op            = pipe_lu_req_q1.lu_op ;
   cache_pipe_lu_q1.cl_data          = pipe_lu_req_q1.cl_data;
   cache_pipe_lu_q1.data             = pipe_lu_req_q1.data;
+  //TODO set the fill indications: fill_modified, fill_rd
 end //always_comb
 
 //==================================================================
@@ -103,7 +118,6 @@ end //always_comb
 //======================
 //     TAG_COMPARE 
 //====================== 
-
 always_comb begin
     for( int WAY =0; WAY<NUM_WAYS; WAY++) begin
         way_tag_match_q2[WAY] = (rd_data_set_rsp_q2.tags[WAY] == cache_pipe_lu_q2.lu_tag)  && 
@@ -118,6 +132,27 @@ end
 //TODO: if Opcode is fill, find first invalid entry if all valids use MRU to choose victim
 // set the cache_pipe_lu_q2.dirty_evict incase of modified data is the victim
 
+assign set_ways_lru_q2  = ~rd_data_set_rsp_q2.mru;
+assign set_ways_free_q2 = ~rd_data_set_rsp_q2.valid;
+`FIND_FIRST(first_free_way_q2, set_ways_free_q2)
+`FIND_FIRST(first_lru_way_q2 , set_ways_lru_q2)
+
+always_comb begin : fill_victem_way
+    set_ways_victim_q2 = '0; //TODO
+    dirty_evict_q2     = 1'b0;
+    any_free_way_q2    = |first_free_way_q2;
+    any_lru_way_q2     = |first_lru_way_q2;
+    if( cache_pipe_lu_q2.lu_op == FILL_LU ) begin
+        set_ways_victim_q2 = any_free_way_q2 ? first_free_way_q2 :
+                             any_lru_way_q2  ? first_lru_way_q2  : // expecting always to have at lease 1 LRU (due to the bit flip)
+                                               4'b0000 ;           // not expecting to occure - this will couse a bug if it doues 
+    end
+    // if entry is valid, modified and chossen as victim
+    victim_and_modified_q2 = (rd_data_set_rsp_q2.valid & rd_data_set_rsp_q2.modified & set_ways_victim_q2); //the "and" will help us indicate if we choose a modified entry to evict
+    // set the dirty evict bit
+    dirty_evict_q2     = !victim_and_modified_q2;
+
+end
 
 //======================
 //    WRITE_SET_UPDATE
@@ -125,27 +160,60 @@ end
 //TODO: in case Rd hit update MRU 
 //      in case of Wr hit update MRU , modified
 //      in case of fill, update tag,valid,mru, modified?
-assign wr_data_set_q2     = '0;
-
-always_comb begin 
-    //in case Rd hit update MRU 
-    if ((cache_pipe_lu_q2.lu_op == RD_LU)&&(cache_pipe_lu_q2.hit)) begin //Need to check valid too or hit is enough ? 
-        
+always_comb begin
+    set_ways_valid_q2    = rd_data_set_rsp_q2.valid;    //defualt value - keep data the same.
+    set_ways_mru_q2      = rd_data_set_rsp_q2.mru;      //defualt value - keep data the same.  
+    set_ways_modified_q2 = rd_data_set_rsp_q2.modified; //defualt value - keep data the same.  
+    set_ways_tags_q2     = rd_data_set_rsp_q2.tags;     //defualt value - keep data the same.
+    //-----------------------------
+    // in case of RD hit update MRU
+    //-----------------------------
+    if ((cache_pipe_lu_q2.lu_op == RD_LU) && (cache_pipe_lu_q2.hit)) begin //Need to check valid too or hit is enough ? 
+        set_ways_mru_q2      =  cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.mru;
     end
 
-    //      in case of Wr hit update MRU , modified  
-    if ((cache_pipe_lu_q2.lu_op == WR_LU)&&(cache_pipe_lu_q2.hit)) begin
-        
+    //-----------------------------
+    // in case of Wr hit update MRU , modified  
+    //-----------------------------
+    if ((cache_pipe_lu_q2.lu_op == WR_LU) && (cache_pipe_lu_q2.hit)) begin
+        set_ways_mru_q2           = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.mru;     // adding the way hit location to the current MRU vec
+        set_ways_modified_q2 = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.modified;// adding the way hit location to the current modified vec
     end
     
-    //      in case of fill, update tag,valid,mru, modified?
+    //-----------------------------
+    // in case of fill, update tag,valid,mru, modified?
+    //-----------------------------
     if ((cache_pipe_lu_q2.lu_op == FILL_LU)) begin
-        
+        set_ways_mru_q2                           = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.mru;
+        set_ways_valid_q2                         = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.mru;
+        set_ways_tags_q2[set_ways_enc_victim_q2]  = cache_pipe_lu_q2.lu_tag;  // updating the way victim entry only - the rest of the ways are updated in the defuat value
+        if(cache_pipe_lu_q2.fill_modified) begin //the fill has modified data from the merge buffer
+            set_ways_modified_q2 = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.modified;// adding the way victim to location to the current modified vec
+        end
     end
 
-
+    //-----------------------------
+    // if all are MRU - need to bit flip and set the new allocation/ last hit
+    //-----------------------------
+    if(&(set_ways_mru_q2)) begin        
+        set_ways_mru_q2 = cache_pipe_lu_q2.hit ? cache_pipe_lu_q2.set_ways_hit    : //reset all, and set only the WR/RD Hit location
+                                                 cache_pipe_lu_q2.set_ways_victim ; //reset all, and set only the WR/RD Hit location
+    end
 
 end
+
+always_comb begin : tag_array_update_assignment
+    //-----------------------------
+    // assiging the final tag array update
+    //-----------------------------
+    wr_data_set_q2.en       =  cache_pipe_lu_q2.lu_valid;
+    wr_data_set_q2.set      =  cache_pipe_lu_q2.lu_set; 
+    wr_data_set_q2.tags     =  cache_pipe_lu_q2.set_ways_tags ;
+    wr_data_set_q2.valid    =  cache_pipe_lu_q2.set_ways_valid ;
+    wr_data_set_q2.modified =  cache_pipe_lu_q2.set_ways_modified ;
+    wr_data_set_q2.mru      =  cache_pipe_lu_q2.set_ways_mru ;
+end
+
 
 //======================
 //    DATA_FETCH
@@ -162,21 +230,34 @@ always_comb begin
     endcase
 end
 
+//`ENCODER(set_ways_enc_victim_q2 , set_ways_victim_q2 )
+always_comb begin
+    unique case (set_ways_victim_q2)
+        4'b0001 : set_ways_enc_victim_q2 = 2'b00;
+        4'b0010 : set_ways_enc_victim_q2 = 2'b01;
+        4'b0100 : set_ways_enc_victim_q2 = 2'b10;
+        4'b1000 : set_ways_enc_victim_q2 = 2'b11;
+        default : set_ways_enc_victim_q2 = 2'b00;
+    endcase
+end
 
 //======================
 //    assign PIPE BUS
 //======================
 
 always_comb begin
-  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2; //this is the default value
-  cache_pipe_lu_q2.set_ways_valid       =   rd_data_set_rsp_q2.valid;
-  cache_pipe_lu_q2.set_ways_tags        =   rd_data_set_rsp_q2.tags;
-  cache_pipe_lu_q2.set_ways_mru         =   rd_data_set_rsp_q2.mru;
+  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2;     //this is the default value
+  cache_pipe_lu_q2.set_ways_valid       =   set_ways_valid_q2; //FIXME - need to udpate valid bits incase of fill
+  cache_pipe_lu_q2.set_ways_tags        =   set_ways_tags_q2;  //FIXME - need to udpate tag incase of fill
+  cache_pipe_lu_q2.set_ways_mru         =   set_ways_mru_q2;
   cache_pipe_lu_q2.set_ways_hit         =   way_tag_match_q2;
   cache_pipe_lu_q2.set_ways_enc_hit     =   way_tag_enc_match_q2;
+  cache_pipe_lu_q2.set_ways_victim      =   set_ways_victim_q2;
+  cache_pipe_lu_q2.set_ways_modified    =   set_ways_modified_q2;
   cache_pipe_lu_q2.hit                  =   |way_tag_match_q2;
   cache_pipe_lu_q2.miss                 =   !(|way_tag_match_q2) && (cache_pipe_lu_q2.lu_valid);
   cache_pipe_lu_q2.data_array_address   =   {cache_pipe_lu_q2.lu_set , cache_pipe_lu_q2.set_ways_enc_hit};
+  cache_pipe_lu_q2.dirty_evict          =  dirty_evict_q2;
 
 end //always_comb
 
@@ -202,17 +283,16 @@ assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 //======================
 //    TQ_UPDATE -> PIPE_LU_RSP_q3
 //======================
-
 assign pipe_lu_rsp_q3.valid         =   cache_pipe_lu_q3.lu_valid;
 assign pipe_lu_rsp_q3.lu_opcode     =   cache_pipe_lu_q3.lu_op;
-assign pipe_lu_rsp_q3.lu_result     =   cache_pipe_lu_q3.hit ?      HIT :
-                                        cache_pipe_lu_q3.miss ?     MISS : 
-                                                                    NO_RSP;                      
+assign pipe_lu_rsp_q3.lu_result     =   cache_pipe_lu_q3.hit  ? HIT   :
+                                        cache_pipe_lu_q3.miss ? MISS  : 
+                                                                NO_RSP;                      
 assign pipe_lu_rsp_q3.tq_id         =   cache_pipe_lu_q3.lu_tq_id; 
 assign pipe_lu_rsp_q3.data          =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                         (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)     ? rd_data_cl_rsp_q3         :
                                                                                                         '0;    
-assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset,2'b00};
+assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset};
 
 //======================
 //    assign PIPE BUS
@@ -230,11 +310,11 @@ always_comb begin
 //We should dirty evict to far memory only in case of fill that allocated a modified entry
 if (cache_pipe_lu_q3.dirty_evict &&
     (cache_pipe_lu_q3.lu_op == FILL_LU)) begin
-    cache2fm_req_q3.valid    = cache_pipe_lu_q3.lu_valid; 
-    cache2fm_req_q3.address  ={cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset, 2'b00};
-    cache2fm_req_q3.tq_id    = cache_pipe_lu_q3.lu_tq_id;
-    cache2fm_req_q3.data     = cache_pipe_lu_q3.cl_data;
-    cache2fm_req_q3.opcode   = DIRTY_EVICT_OP;
+    cache2fm_req_q3.valid    =  cache_pipe_lu_q3.lu_valid; 
+    cache2fm_req_q3.address  = {cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset};
+    cache2fm_req_q3.tq_id    =  cache_pipe_lu_q3.lu_tq_id;
+    cache2fm_req_q3.data     =  cache_pipe_lu_q3.cl_data;
+    cache2fm_req_q3.opcode   =  DIRTY_EVICT_OP;
 end
 
 //======================
@@ -242,29 +322,29 @@ end
 //======================
 //in case of Rd/Wr cache_miss send a FM fill request
 if (cache_pipe_lu_q3.miss) begin
-    cache2fm_req_q3.valid   = cache_pipe_lu_q3.lu_valid; 
-    cache2fm_req_q3.address ={cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset, 2'b00};
-    cache2fm_req_q3.tq_id   = cache_pipe_lu_q3.lu_tq_id;
-    cache2fm_req_q3.data    = '0; //Rd Request does not use data field
-    cache2fm_req_q3.opcode  = FILL_REQ_OP;
+    cache2fm_req_q3.valid   =  cache_pipe_lu_q3.lu_valid; 
+    cache2fm_req_q3.address = {cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset};
+    cache2fm_req_q3.tq_id   =  cache_pipe_lu_q3.lu_tq_id;
+    cache2fm_req_q3.data    =  '0; //Rd Request does not use data field
+    cache2fm_req_q3.opcode  =  FILL_REQ_OP;
 end 
 end
 
 //======================
 //    WRITE_DATA
 //======================
-assign lu_offset_q3 = cache_pipe_lu_q3.lu_offset;
+assign lu_word_offset_q3 = cache_pipe_lu_q3.lu_offset[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
 
 always_comb begin
-    data_array_data_q3                  =   rd_data_cl_rsp_q3; //the current CL in data array
-    data_array_data_q3[lu_offset_q3]    =   cache_pipe_lu_q3.data; //overide the specific word
-    wr_data_cl_q3                       =   '0;
-    wr_data_cl_q3.data                  =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
-                                            (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
+    data_array_data_q3                   =   rd_data_cl_rsp_q3; //the current CL in data array
+    data_array_data_q3[lu_word_offset_q3]=   cache_pipe_lu_q3.data; //overide the specific word
+    wr_data_cl_q3                        =   '0;
+    wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
+                                             (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
                                                                                                             '0; 
-    wr_data_cl_q3.cl_address            =   cache_pipe_lu_q3.data_array_address;
-    wr_data_cl_q3.valid                 =   (cache_pipe_lu_q3.lu_valid &&   
-                                            ((cache_pipe_lu_q3.lu_op == WR_LU)|| (cache_pipe_lu_q3.lu_op == FILL_LU)));
+    wr_data_cl_q3.cl_address             =   cache_pipe_lu_q3.data_array_address;
+    wr_data_cl_q3.valid                  =   (cache_pipe_lu_q3.lu_valid &&   
+                                             ((cache_pipe_lu_q3.lu_op == WR_LU)|| (cache_pipe_lu_q3.lu_op == FILL_LU)));
 end
 
 
