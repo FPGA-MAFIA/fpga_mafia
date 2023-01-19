@@ -59,7 +59,8 @@ typedef logic [SET_WIDTH     -1:0]  t_set_data;
 typedef logic [ADDRESS_WIDTH -1:0]  t_address; 
 typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
 typedef logic [WORD_WIDTH -1:0]     t_word;
-typedef logic [OFFSET_WIDTH -1:2]   t_offset;
+typedef logic [OFFSET_WIDTH -1:0]   t_offset;
+typedef logic [OFFSET_WIDTH -1:2]   t_word_offset;
 
 
 
@@ -208,15 +209,17 @@ typedef struct packed {
     logic                                   hit;
     logic                                   miss;
     logic                                   mb_hit_cancel;
+    logic [NUM_WAYS-1:0]                    set_ways_valid;
+    logic [NUM_WAYS-1:0]                    set_ways_modified;
     logic [NUM_WAYS-1:0]                    set_ways_mru;
     logic [NUM_WAYS-1:0][TAG_WIDTH-1:0]     set_ways_tags;
-    logic [NUM_WAYS-1:0]                    set_ways_valid;
     logic [NUM_WAYS-1:0]                    set_ways_victim;
     logic [NUM_WAYS-1:0]                    set_ways_hit;
     logic [WAY_WIDTH-1:0]                   set_ways_enc_hit;
     t_cl                                    cl_data;
     t_word                                  data;
-    logic                                   fill_valid;
+    logic                                   fill_modified;
+    logic                                   fill_rd;
     logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
 } t_pipe_bus; 
