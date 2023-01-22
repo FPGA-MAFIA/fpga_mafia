@@ -6,7 +6,7 @@ logic [31:0] PcQ104H;             // To I_MEM
 integer trk_alu;
 initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
-    trk_alu = $fopen({"../../target/mini_core/trk_alu.log"},"w");
+    trk_alu = $fopen({"../../target/mini_core/tests/",test_name,"/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
     $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
     $fwrite(trk_alu,"---------------------------------------------------------\n");  
@@ -20,7 +20,7 @@ end
 integer trk_inst;
 initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
-    trk_inst = $fopen({"../../target/mini_core/trk_inst.log"},"w");
+    trk_inst = $fopen({"../../target/mini_core/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
     $fwrite(trk_inst,"Time\t|\tPC \t | Instraction\t|\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
@@ -32,7 +32,7 @@ end
 integer trk_fetch;
 initial begin: trk_fetch_gen
     $timeformat(-9, 1, " ", 6);
-    trk_fetch = $fopen({"../../target/mini_core/trk_fetch.log"},"w");
+    trk_fetch = $fopen({"../../target/mini_core/tests/",test_name,"/trk_fetch.log"},"w");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");
     $fwrite(trk_fetch,"Time\t|\tPC \t |Funct3 \t| Funct7 \t | Opcode|\n");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
@@ -45,7 +45,7 @@ end
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
     $timeformat(-9, 1, " ", 6);
-    trk_memory_access = $fopen({"../../target/mini_core/trk_memory_access.log"},"w");
+    trk_memory_access = $fopen({"../../target/mini_core/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_memory_access,"Time\t|\tPC \t | Opcode\t| Adress\t| Data\t|\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
