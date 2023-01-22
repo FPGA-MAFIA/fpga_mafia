@@ -31,7 +31,6 @@ module cache_pipe
     output  t_cl_rd_req         rd_cl_req_q2,
     input   var t_cl_rd_rsp     rd_data_cl_rsp_q3,
     output  t_cl_wr_req         wr_data_cl_q3
-
 );
 
 t_pipe_bus pre_cache_pipe_lu_q2, pre_cache_pipe_lu_q3;
