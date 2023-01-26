@@ -1,0 +1,24 @@
+==================================================================================
+                        CACHE TOP TRACKER                              
+==================================================================================
+-----------------------------------------------------------------------------------
+ Time  ||  OPCODE  ||   address  ||  REG_ID || tag  || Set ||    Data 
+-----------------------------------------------------------------------------------
+ 920.0     WR_REQ      e8010           00      e8       01      deadbeaf 
+ 980.0     WR_REQ      e9010           01      e9       01      fafafafa 
+1040.0     WR_REQ      ea010           01      ea       01      babababa 
+1100.0     RD_REQ      e8010           01      e8       01      ( -- read request -- ) 
+1120.0     RD_RSP      e8010           00      e8       01      deadbeaf 
+1160.0     RD_REQ      e9010           02      e9       01      ( -- read request -- ) 
+1180.0     RD_RSP      e9010           00      e9       01      fafafafa 
+1220.0     RD_REQ      ea010           03      ea       01      ( -- read request -- ) 
+1240.0     RD_RSP      ea010           00      ea       01      babababa 
+1280.0     WR_REQ      e8054           00      e8       05      44444444 
+1340.0     WR_REQ      e8058           01      e8       05      88888888 
+1400.0     WR_REQ      e805c           01      e8       05      cccccccc 
+1460.0     RD_REQ      e8054           01      e8       05      ( -- read request -- ) 
+1480.0     RD_RSP      e8054           00      e8       05      44444444 
+1520.0     RD_REQ      e8058           02      e8       05      ( -- read request -- ) 
+1540.0     RD_RSP      e8058           00      e8       05      88888888 
+1580.0     RD_REQ      e805c           03      e8       05      ( -- read request -- ) 
+1600.0     RD_RSP      e805c           00      e8       05      cccccccc 
