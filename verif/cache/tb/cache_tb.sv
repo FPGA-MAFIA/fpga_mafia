@@ -30,33 +30,26 @@ logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
 
 
 
-initial begin : assign_input
+string test_name;
+initial begin : start_test
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("STRING value %s", test_name);
 $display("================\n     START\n================\n");
             rst= 1'b1;
             core2cache_req     = '0;
+//exit reset
 delay(80);  rst= 1'b0;
+//peload Cache
 delay(1); backdoor_cache_load();
-$display("====== Reset Done =======\n");
-delay(5);   wr_req(20'hE8_01_0, 32'hDEAD_BEAF , 5'b0);
-delay(5);   wr_req(20'hE9_01_0, 32'hFAFA_FAFA , 5'b1);
-delay(5);   wr_req(20'hEA_01_0, 32'hBABA_BABA , 5'b1);
-delay(5);   rd_req(20'hE8_01_0, 5'd1);
-delay(5);   rd_req(20'hE9_01_0, 5'd2);
-delay(5);   rd_req(20'hEA_01_0, 5'd3);
+//start test
+if(test_name == "cache_alive") begin
+`include "cache_alive.sv"
+end else 
+if(test_name == "cache_alive_2") begin
+`include "cache_alive_2.sv"
+end
 
-// Same CL (same TAG 'E8', SAME SET '5'), different words (1,2,3):
-delay(5);   wr_req(20'hE8_05_4, 32'h4444_4444 , 5'b0);
-delay(5);   wr_req(20'hE8_05_8, 32'h8888_8888 , 5'b1);
-delay(5);   wr_req(20'hE8_05_C, 32'hCCCC_CCCC , 5'b1);
-delay(5);   rd_req(20'hE8_05_4, 5'd1);
-delay(5);   rd_req(20'hE8_05_8, 5'd2);
-delay(5);   rd_req(20'hE8_05_C, 5'd3);
-// delay(5);   wr_req(20'hE8_01_0, 32'h1234_5678 , 5'b0);
-// delay(5);   wr_req(20'hE9_01_0, 32'hCCCC_DDDD , 5'b1);
-// delay(5);   wr_req(20'hEA_01_0, 32'h6666_6666 , 5'b1);
-// delay(5);   rd_req(20'hE8_01_0, 5'd1);
-// delay(5);   rd_req(20'hE9_01_0, 5'd2);
-// delay(5);   rd_req(20'hEA_01_0, 5'd3);
+
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
@@ -72,7 +65,7 @@ cache cache ( //DUT
    .stall              (stall),          //output  logic
    .cache2core_rsp     (cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
-   .cache2fm_req_q3 (cache2fm_req_q3),//output  t_fm_req
+   .cache2fm_req_q3    (cache2fm_req_q3),//output  t_fm_req
    .fm2cache_rd_rsp    (fm2cache_rd_rsp)    //input   var t_fm_rd_rsp
 );
 
