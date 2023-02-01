@@ -1,3 +1,5 @@
+# The Amny Core Project!!!
+
 # riscv_manycore_mesh_fpga
 Running Build:
 > python build.py -h
