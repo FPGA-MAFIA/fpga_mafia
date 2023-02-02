@@ -20,10 +20,11 @@ typedef enum logic[1:0] {
 } t_tile_opcode;
 
 typedef enum logic[1:0] {  
-    3'b000 = NORTH;
-    3'b001 = SOUTH;
-    3'b010 = EAST;
-    3'b011 = WEST;
+    3'b000 = NULL_CARDINAL;
+    3'b001 = NORTH;
+    3'b010 = SOUTH;
+    3'b011 = EAST;
+    3'b100 = WEST;
     3'b111 = LOCAL;
 } t_cardinal;
 
