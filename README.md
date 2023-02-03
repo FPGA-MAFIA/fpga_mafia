@@ -1,4 +1,4 @@
-# The Amny Core Project!!!
+# The Many Core Project!!!
 
 # riscv_manycore_mesh_fpga
 Running Build:
