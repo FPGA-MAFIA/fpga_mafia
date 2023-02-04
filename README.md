@@ -1,4 +1,10 @@
 # The Many Core Project!!!
+Designing a SOC Tile based mesh fabric.
+Here is the general idea of the project
+
+![image](https://user-images.githubusercontent.com/81047406/183295711-80f3fa18-a318-4523-8b5d-05764eb2fc40.png)
+
+
 
 # riscv_manycore_mesh_fpga
 Running Build:
@@ -32,11 +38,6 @@ try this:
 
 
 
-
-
-Here is the general idea of the project
-
-![image](https://user-images.githubusercontent.com/81047407/183295711-80f3fa18-a318-4523-8b5d-05764eb2fc40.png)
 
 
 intresting reference:
