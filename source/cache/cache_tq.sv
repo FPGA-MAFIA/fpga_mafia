@@ -22,7 +22,7 @@ module  cache_tq
     input   var t_req       core2cache_req,
     output  logic           stall,
     output  t_rd_rsp        cache2core_rsp,
-    //FM Inteface
+    //FM Interface
     input   var t_fm_rd_rsp fm2cache_rd_rsp,
     //output 
     //Pipe Interface

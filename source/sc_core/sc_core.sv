@@ -1,26 +1,29 @@
 //-----------------------------------------------------------------------------
-// Title            : simple core  design
-// Project          : simple_core
+// Title            : single cycle core  design
+// Project          : 
 //-----------------------------------------------------------------------------
-// File             : big_core_sc
+// File             : 
 // Original Author  : Daniel Kaufman
 // Code Owner       : 
 // Created          : 11/2022
 //-----------------------------------------------------------------------------
 // Description :
-// This file will be a 7 pipes core implemenation of the RISCV specification
-// Fetch, Decode, Exe, Mem, Write_Back, ??, ??
+// This is the top level of the single cycle core design.
+// The core is a 32 bit RISC-V core.
+// Support the RV32I base instruction set.
+// Fetch, Decode, Execute, Memory, WriteBack all in one cycle.
+// The PC (program counter) is the synchronous element in the core 
 //-----------------------------------------------------------------------------
-
+`
 `include "macros.sv"
 
-module big_core_sc
+module sc_core
 
-import big_core_pkg::*;
+import sc_core_pkg::*;
 (
     input logic Clk,
     input logic Rst,
-    // interafce with instruciton memory
+    // interface with instruction memory
     output logic [31:0] Pc,
     input  logic [31:0] Instruction,
     // interface with Data Memory
@@ -31,7 +34,7 @@ import big_core_pkg::*;
     output logic        DMemRdEn   ,
     input  logic [31:0] DMemRspData
 );
-// signal decliration
+// signal declination
 //Data-Path signals
 //logic [31:0]        Pc;
 logic [31:0]        NextPc;
