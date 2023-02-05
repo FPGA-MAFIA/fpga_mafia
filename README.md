@@ -3,7 +3,7 @@ This project aims to design a SOC (System-on-a-Chip) Tile based mesh fabric that
 
 
 ## Getting Started
-To see your build and run options, run the following command:
+To see your build and run options, run the following command:  
 ```python build.py -h ```  
 
 ## Prerequisite
@@ -17,7 +17,23 @@ To make your experience smoother, we recommend installing the following tools:
 
 
 # Project overview
-The diagram below provides a general idea of the project's architecture.  
+This project is part of the final project for 4th year Electrical Engineering and Computer Engineering students at Bar-Ilan University and the Technion in Israel.   
+The project contributors will be individually graded based on their contribution to the Many-Core project.  
+  
+The goal of this project is to design a System-on-a-Chip (SOC) tile-based mesh fabric that integrates various functionalities, such as RISCV mini-cores, big-cores, hardware accelerators, and I/O devices such as UART, keyboard, VGA, DE10-Lite FPGA I/O, and more.
+
+The main components of the project include:  
+- The Router: A 4-way router that connects the mesh tiles.  
+- The Mini Core: A 3-stage RISCV RV32I compatible core.  
+- The Big Core: A 7-stage RISCVRV32IM CSR compatible core with MMIO for VGA, keyboard, UART, LED, 7SEG, buttons, switches, Arduino digital and analog I/O.  
+- The Memory Subsystem: L1 Instruction and Data Cache and a Memory Controller (MC).  
+  
+In addition to the hardware design, the project also includes a software stack necessary to run applications on the fabric, including:  
+- A software library for VGA graphical capabilities, such as `draw_line()`, `draw_circle()`, `print_char()`, and `printf()`.  
+- A software library for accessing the FPGA MMIO and special control registers of the SOC and cores.  
+- Software examples demonstrating the utilization of the many cores for distributed calculations and parallel computation.  
+  
+The diagram below provides a general idea of the project's architecture.   
 ![image](https://user-images.githubusercontent.com/81047407/216783815-4cb35990-2092-4b19-8a76-f564cca77023.png)
 
 
