@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// Title            : 7 stages pipline design
-// Project          : big_core
+// Title            : Single Cycle Core
+// Project          : 
 //-----------------------------------------------------------------------------
-// File             : core
+// File             : sc_core.sv
 // Original Author  : Daniel Kaufman
 // Code Owner       : 
 // Created          : 11/2022
@@ -10,11 +10,11 @@
 // Description :
 //-----------------------------------------------------------------------------
 
-+incdir+../../source/big_core/
++incdir+../../source/sc_core/
 //RTL FIles
-../../source/big_core/big_core_pkg.sv
-../../source/big_core/big_core.sv
+../../source/sc_core/sc_core_pkg.sv
+../../source/sc_core/sc_core.sv
 
 
 //Verif files 
-../../verif/big_core/big_core_tb.sv
+../../verif/sc_core/sc_core_tb.sv

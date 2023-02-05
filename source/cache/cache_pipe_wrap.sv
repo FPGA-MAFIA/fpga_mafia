@@ -18,8 +18,8 @@ module cache_pipe_wrap
 (
     input   logic        clk,
     input   logic        rst,
-    //Agent Inteface
-    input   var t_lu_req pipe_lu_req_q1,
+    //Agent Interface
+    input   t_lu_req     pipe_lu_req_q1,
     output  t_lu_rsp     pipe_lu_rsp_q3,
     // FM Interface
     output  t_fm_req  cache2fm_req_q3
@@ -38,7 +38,7 @@ cache_pipe cache_pipe(
     //tq interface
     .pipe_lu_req_q1         (pipe_lu_req_q1),    //input
     .pipe_lu_rsp_q3         (pipe_lu_rsp_q3),    //output
-    // FM interface Reqiuets 
+    // FM interface request 
     .cache2fm_req_q3     (cache2fm_req_q3),//output
     //tag_array interface
     .rd_set_req_q1          (rd_set_req_q1),     //output
@@ -90,5 +90,6 @@ array  #(
     .rd_address     (rd_cl_req_q2),            //input
     .q              (rd_data_cl_rsp_q3)        //output
 );
+
 
 endmodule
