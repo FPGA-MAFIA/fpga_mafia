@@ -10,11 +10,10 @@
 // Description :
 // This is the top level of the single cycle core design.
 // The core is a 32 bit RISC-V core.
-// Support the RV32I base instruction set.
+// compatible with the RV32I base instruction set.
 // Fetch, Decode, Execute, Memory, WriteBack all in one cycle.
 // The PC (program counter) is the synchronous element in the core 
 //-----------------------------------------------------------------------------
-`
 `include "macros.sv"
 
 module sc_core

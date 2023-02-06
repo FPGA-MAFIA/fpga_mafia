@@ -57,44 +57,57 @@ logic [3:0]  GREEN;
 logic [3:0]  BLUE;
 logic        h_sync;
 logic        v_sync;
+logic [31:0] Pc;
 
 //=========================================
-// Instantiating the big_core core
+// Instantiating the sc_core core
 //=========================================
-// big_core big_core (
-//    .Clk                 (Clk),
-//    .Rst                 (Rst),
-//    .PcQ100H             (Pc),          // To I_MEM
-//    .PreInstructionQ101H (Instruction), // From I_MEM
-//    .DMemWrDataQ103H     (DMemData),  // To D_MEM
-//    .DMemAddressQ103H    (DMemAddress), // To D_MEM
-//    .DMemByteEnQ103H     (DMemByteEn),  // To D_MEM
-//    .DMemWrEnQ103H       (DMemWrEn),    // To D_MEM
-//    .DMemRdEnQ103H       (DMemRdEn),    // To D_MEM
-//    .DMemRdRspQ104H      (DMemRspData)    // From D_MEM
-//);
-//=========================================
-// Instantiating the big_core_top
-//=========================================
-big_core_top big_core_top(
-    .Clk            (Clk     ),
-    .Rst            (Rst     ),
-    .Button_0       (Button_0),
-    .Button_1       (Button_1),
-    .Switch         (Switch  ),
-    .SEG7_0         (SEG7_0  ),
-    .SEG7_1         (SEG7_1  ),
-    .SEG7_2         (SEG7_2  ),
-    .SEG7_3         (SEG7_3  ),
-    .SEG7_4         (SEG7_4  ),
-    .SEG7_5         (SEG7_5  ),
-    .LED            (LED     ),
-    .RED            (RED     ),
-    .GREEN          (GREEN   ),
-    .BLUE           (BLUE    ),
-    .h_sync         (h_sync  ),
-    .v_sync         (v_sync  ) 
+
+ sc_core sc_core (
+    .Clk            (Clk),                      
+    .Rst            (Rst),                      
+                                                
+    .Pc             (Pc),         // To I_MEM   
+    .Instruction    (Instruction),// From I_MEM 
+                                                
+    .DMemData       (DMemData),   // To D_MEM   
+    .DMemAddress    (DMemAddress),// To D_MEM   
+    .DMemByteEn     (DMemByteEn), // To D_MEM   
+    .DMemWrEn       (DMemWrEn),   // To D_MEM   
+    .DMemRdEn       (DMemRdEn),   // To D_MEM   
+    .DMemRspData    (DMemRspData) // From D_MEM 
 );
+//======================
+//  instruction memory
+//======================
+assign Instruction[7:0]   = IMem[Pc+0];
+assign Instruction[15:8]  = IMem[Pc+1];
+assign Instruction[23:16] = IMem[Pc+2];
+assign Instruction[31:24] = IMem[Pc+3];
+//======================
+//  Data memory Write
+//======================
+always_comb begin
+    NextDMem = DMem;
+    if(DMemWrEn) begin
+        if(DMemByteEn[0]) NextDMem[DMemAddress+0] = DMemData[7:0];  
+        if(DMemByteEn[1]) NextDMem[DMemAddress+1] = DMemData[15:8];
+        if(DMemByteEn[2]) NextDMem[DMemAddress+2] = DMemData[23:16];
+        if(DMemByteEn[3]) NextDMem[DMemAddress+3] = DMemData[31:24];
+    end //if DMemWrEn
+end //always_comb
+
+//======================
+//  Data memory Read
+//======================
+assign DMemRspData[7:0]   = DMem[DMemAddress+0];
+assign DMemRspData[15:8]  = DMem[DMemAddress+1];
+assign DMemRspData[23:16] = DMem[DMemAddress+2];
+assign DMemRspData[31:24] = DMem[DMemAddress+3];
+
+
+
+
 // ========================
 // clock gen
 // ========================
@@ -125,21 +138,15 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
-    force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
+    $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
 
-    file = $fopen({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    file = $fopen({"../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
-        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
-        force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
-        #10
-        release big_core_top.big_core_mem_wrap.d_mem.DMem;
+        $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
     end
-
-
     #100000
     $display("===================\n test %s ended timeout \n=====================", test_name);
     $finish;
@@ -147,18 +154,14 @@ initial begin: test_seq
 end // test_seq
 
 
-`include "big_core_trk.vh"
+`include "sc_core_trk.vh"
 
 parameter EBREAK = 32'h00100073;
-logic [31:0] InstructionQ102H;
-logic [31:0] InstructionQ103H;
-`RVC_DFF(InstructionQ102H, big_core_top.big_core.InstructionQ101H, Clk)
-`RVC_DFF(InstructionQ103H, InstructionQ102H, Clk)
 
-// Ebrake detection
+// EBREAK detection
 always @(posedge Clk) begin : ebrake_status
-    if (EBREAK == InstructionQ103H) begin // ebrake instruction opcode
-        $display("===================\n test %s ended with Ebreake \n=====================", test_name);
+    if (EBREAK == sc_core.Instruction) begin // ebrake instruction opcode
+        $display("===================\n test %s ended with EBREAK \n=====================", test_name);
         $finish;
         //end_tb("The test ended");
     end

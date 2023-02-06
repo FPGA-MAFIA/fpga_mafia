@@ -3,6 +3,7 @@
 modelsim/*
 target/*
 
+!modelsim/sc_core/work/README*
 !modelsim/big_core/work/README*
 !modelsim/mini_core/work/README*
 !modelsim/cache/work/README*

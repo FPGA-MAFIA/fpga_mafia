@@ -1,2 +1,2 @@
--f ../../source/big_core/big_core_rtl_list.f
--f ../../verif/big_core/tb/big_core_verif_list.f
+-f ../../source/sc_core/sc_core_rtl_list.f
+-f ../../verif/sc_core/tb/sc_core_verif_list.f
