@@ -11,10 +11,7 @@
 //-----------------------------------------------------------------------------
 
 +incdir+../../source/sc_core/
++incdir+../../source/common/
 //RTL FIles
 ../../source/sc_core/sc_core_pkg.sv
 ../../source/sc_core/sc_core.sv
-
-
-//Verif files 
-../../verif/sc_core/sc_core_tb.sv

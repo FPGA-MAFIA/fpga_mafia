@@ -1,2 +1,2 @@
 +incdir+../../source/common/
-../../verif/big_core/tb/big_core_tb.sv
+../../verif/sc_core/tb/sc_core_tb.sv
