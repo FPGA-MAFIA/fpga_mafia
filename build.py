@@ -54,6 +54,8 @@ class Test:
         self.path = TESTS+self.file_name
         self.fail_flag = False
     def _create_test_dir(self):
+        if not os.path.exists('./target/'):
+            os.mkdir('./target')
         if not os.path.exists(TARGET+'tests'):
             os.mkdir(TARGET+'tests')
         if not os.path.exists(TARGET+'tests/'+self.name):

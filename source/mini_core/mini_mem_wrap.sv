@@ -71,18 +71,18 @@ assign F2C_RspDataQ504H   = F2C_IMemHitQ503H ? F2C_IMemRspDataQ504H :
 `RVC_DFF(F2C_RspValidQ504H, F2C_ReqValidQ503H, Clock)
 
 mem  #(
-  .WORD_WIDTH(32),
-  .ADRS_WIDTH(12)
+  .WORD_WIDTH(32),  //FIXME - Parametrize!!
+  .ADRS_WIDTH(13)   //FIXME - Parametrize!!
 ) i_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
-    .address_a  (PcQ100H[13:2]),
+    .address_a  (PcQ100H[14:2]),           //FIXME - Parametrize!!
     .data_a     ('0),
     .wren_a     (1'b0),
     .byteena_a  (4'b0),
     .q_a        (PreInstructionQ101H),
     //fabric interface
-    .address_b  (F2C_ReqAddressQ503H[13:2]),
+    .address_b  (F2C_ReqAddressQ503H[14:2]),//FIXME - Parametrize!!
     .data_b     (F2C_ReqDataQ503H),              
     .wren_b     (F2C_IMemWrEnQ503H),                
     .byteena_b  (4'b1111),
@@ -90,19 +90,19 @@ mem  #(
     );
 
 mem   
-#(.WORD_WIDTH(32),
-  .ADRS_WIDTH(12)
+#(.WORD_WIDTH(32),//FIXME - Parametrize!!
+  .ADRS_WIDTH(14)//FIXME - Parametrize!!
 )
 d_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
-    .address_a  (DMemAddressQ103H[13:2]),
+    .address_a  (DMemAddressQ103H[15:2]),//FIXME - Parametrize!!
     .data_a     (DMemWrDataQ103H),
     .wren_a     (DMemWrEnQ103H),
     .byteena_a  (DMemByteEnQ103H),
     .q_a        (DMemRdRspQ104H),
     //fabric interface
-    .address_b  (F2C_ReqAddressQ503H[13:2]),
+    .address_b  (F2C_ReqAddressQ503H[15:2]),//FIXME - Parametrize!!
     .data_b     (F2C_ReqDataQ503H),              
     .wren_b     (F2C_DMemWrEnQ503H),                
     .byteena_b  (4'b1111),
