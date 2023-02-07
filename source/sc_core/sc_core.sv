@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Title            : single cycle core  design
+// Title            : single cycle core design
 // Project          : 
 //-----------------------------------------------------------------------------
 // File             : 
@@ -43,7 +43,6 @@ logic [31:1][31:0]  Register;
 logic [31:0]        Immediate;
 logic [4:0]         Shamt;
 logic [31:0]        PreDMemRdData;
-logic [31:0]        DMemRdData;
 logic [31:0]        AluIn1; 
 logic [31:0]        AluIn2; 
 logic [31:0]        AluOut;
@@ -231,13 +230,23 @@ assign DMemData     = RegRdData2;
 assign DMemWrEn     = CtrlDMemWrEn;
 //RD
 assign DMemRdEn     = SelDMemWb;
-assign DMemRdData   = DMemRspData;  //from D_MEM
 
 //===========================================================================
 // Write-Back
-// Select data write back to register file ->  AluOut vs DMemRdData
 //===========================================================================
-assign WrBackData = SelDMemWb ? DMemRdData : AluOut;
+// -----------------
+// 1. Select which data should be written back to the register file AluOut or DMemRdData.
+// Sign extend taking care of
+logic [31:0] DMemRspDataBeSx;
+assign DMemRspDataBeSx[7:0]   =  CtrlDMemByteEn[0] ? DMemRspData[7:0]     : 8'b0;
+assign DMemRspDataBeSx[15:8]  =  CtrlDMemByteEn[1] ? DMemRspData[15:8]    :
+                                 CtrlSignExt       ? {8{WrBackData[7]}} : 8'b0;
+assign DMemRspDataBeSx[23:16] =  CtrlDMemByteEn[2] ? DMemRspData[23:16]:
+                                 CtrlSignExt       ? {8{WrBackData[15]}}: 8'b0;
+assign DMemRspDataBeSx[31:24] =  CtrlDMemByteEn[3] ? DMemRspData[31:24]:
+                                 CtrlSignExt       ? {8{WrBackData[23]}}: 8'b0;
+//
+assign WrBackData = SelDMemWb ? DMemRspDataBeSx : AluOut;
 
 
 endmodule

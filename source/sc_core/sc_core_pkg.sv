@@ -21,7 +21,7 @@ package sc_core_pkg;
 
 parameter I_MEM_SIZE   = 'h2000;
 parameter I_MEM_OFFSET = 'h0;
-parameter D_MEM_SIZE   = 'h3000;
+parameter D_MEM_SIZE   = 'h100000;
 parameter D_MEM_OFFSET = 'h2000;
 
 parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF

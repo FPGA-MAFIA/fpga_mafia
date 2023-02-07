@@ -30,13 +30,13 @@ integer trk_inst;
 initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../target/sc_core/tests/",test_name,"/trk_inst.log"},"w");
-    $fwrite(trk_inst,"---------------------------------------------------------\n");
-    $fwrite(trk_inst," Time  | PC       | Instraction                      |\n");
-    $fwrite(trk_inst,"---------------------------------------------------------\n");  
+    $fwrite(trk_inst,"----------------------------------------------------------------\n");
+    $fwrite(trk_inst," Time  |   PC     | opcode  | ALU_OP | Instruction              |\n");
+    $fwrite(trk_inst,"----------------------------------------------------------------\n");  
 
 end
 always @(posedge Clk) begin : inst_print
-    $fwrite(trk_inst,"%t | %8h | %32b | \n", $realtime,sc_core.Pc, sc_core.Instruction);
+    $fwrite(trk_inst,"%t | %8h |  %-6s | %-6s |%7b_%5b_%5b_%3b_%5b_%7b | \n", $realtime,sc_core.Pc, sc_core.Opcode.name(), sc_core.CtrlAluOp.name(), sc_core.Instruction[31:25],sc_core.Instruction[24:20], sc_core.Instruction[19:15], sc_core.Instruction[14:12], sc_core.Instruction[11:7], sc_core.Instruction[6:0]);
 end
 integer trk_fetch;
 initial begin: trk_fetch_gen
@@ -58,7 +58,7 @@ initial begin: trk_memory_access_gen
     $timeformat(-12, 1, " ", 6);
     trk_memory_access = $fopen({"../../target/sc_core/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_memory_access," Time  | PC       | Opcode | Adress   | Data     \n");
+    $fwrite(trk_memory_access," Time  | PC       | Opcode | Address   | Data     \n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
 end
 
