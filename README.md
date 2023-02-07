@@ -1,5 +1,5 @@
 # The Many Core Project
-This project aims to design a SOC (System-on-a-Chip) Tile based mesh fabric that can incorporate various functionalities, such as RISCV mini-cores, big-cores, hardware accelerators, and IO devices like UART, keyboard, VGA, DE10-Lite FPGA IO, and more.
+This project aims to design a SOC Tile based mesh fabric that can incorporate various functionalities, such as RISCV mini-cores, big-cores, hardware accelerators, and IO devices like UART, keyboard, VGA, DE10-Lite FPGA IO, and more.
 
 
 ## Getting Started
@@ -12,7 +12,7 @@ Before you start, make sure you have the following tools and software installed:
 - [Intel design SW for windows](https://www.intel.com/content/www/us/en/software-kit/660907/intel-quartus-prime-lite-edition-design-software-version-20-1-1-for-windows.html) , modelsim + quartus + MAX10 (de10-lite). used to compile, simulate & load to FPGA the HW systemverilog design.  
 ### Recommendations
 To make your experience smoother, we recommend installing the following tools:
-- [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a Unix shell.  
+- [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a "Unix-like" shell.  
 - [Visual Studio Code](https://code.visualstudio.com/download), a code editor that supports many programming languages.  
 
 
@@ -34,7 +34,7 @@ In addition to the hardware design, the project also includes a software stack n
 - Software examples demonstrating the utilization of the many cores for distributed calculations and parallel computation.  
   
 The diagram below provides a general idea of the project's architecture.   
-![image](https://user-images.githubusercontent.com/81047407/216783815-4cb35990-2092-4b19-8a76-f564cca77023.png)
+![image](https://user-images.githubusercontent.com/81047407/217345069-21aef258-084b-44b3-b776-e9740aad8e88.png)
 
 
 ## Common Issues:
