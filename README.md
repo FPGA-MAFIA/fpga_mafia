@@ -12,7 +12,7 @@ Before you start, make sure you have the following tools and software installed:
 - [Intel design SW for windows](https://www.intel.com/content/www/us/en/software-kit/660907/intel-quartus-prime-lite-edition-design-software-version-20-1-1-for-windows.html) , modelsim + quartus + MAX10 (de10-lite). used to compile, simulate & load to FPGA the HW systemverilog design.  
 ### Recommendations
 To make your experience smoother, we recommend installing the following tools:
-- [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a Unix shell.  
+- [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a "Unix-like" shell.  
 - [Visual Studio Code](https://code.visualstudio.com/download), a code editor that supports many programming languages.  
 
 
