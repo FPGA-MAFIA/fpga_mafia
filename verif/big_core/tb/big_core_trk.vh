@@ -15,7 +15,7 @@
 integer trk_alu;
 initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
-    trk_alu = $fopen({"../../target/big_core/tests/",test_name,"/trk_alu.log"},"w");
+    trk_alu = $fopen({"../../../target/big_core/tests/",test_name,"/trk_alu.log"},"w");
     $fwrite(trk_alu,"-----------------------------------------------------------------------------\n");
     $fwrite(trk_alu,"Time    |    PC    | inst_op  | opcode |  AluIn1   |  AluIn2   | AluOut   |  \n");
     $fwrite(trk_alu,"-----------------------------------------------------------------------------\n");  
@@ -29,7 +29,7 @@ end
 integer trk_inst;
 initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
-    trk_inst = $fopen({"../../target/big_core/tests/",test_name,"/trk_inst.log"},"w");
+    trk_inst = $fopen({"../../../target/big_core/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
     $fwrite(trk_inst," Time  | PC       | Instraction                      |\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
@@ -41,7 +41,7 @@ end
 integer trk_fetch;
 initial begin: trk_fetch_gen
     $timeformat(-9, 1, " ", 6);
-    trk_fetch = $fopen({"../../target/big_core/tests/",test_name,"/trk_fetch.log"},"w");
+    trk_fetch = $fopen({"../../../target/big_core/tests/",test_name,"/trk_fetch.log"},"w");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");
     $fwrite(trk_fetch," Time  | PC       | Funct3 | Funct7  | Opcode  |\n");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
@@ -67,7 +67,7 @@ logic        DMemRdEnQ104H;
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
     $timeformat(-12, 1, " ", 6);
-    trk_memory_access = $fopen({"../../target/big_core/tests/",test_name,"/trk_memory_access.log"},"w");
+    trk_memory_access = $fopen({"../../../target/big_core/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_memory_access," Time  | PC       | Opcode | Adress   | Data     \n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  

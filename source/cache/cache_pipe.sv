@@ -19,17 +19,17 @@ module cache_pipe
     input   logic               clk,
     input   logic               rst,
     //tq interface 
-    input   t_lu_req            pipe_lu_req_q1,
+    input   var t_lu_req            pipe_lu_req_q1,
     output  t_lu_rsp            pipe_lu_rsp_q3,
     // FM interface Reqiuets 
     output  t_fm_req            cache2fm_req_q3,
     //tag_array interface 
     output  t_set_rd_req        rd_set_req_q1,
-    input   t_set_rd_rsp        rd_data_set_rsp_q2,
+    input   var t_set_rd_rsp        rd_data_set_rsp_q2,
     output  t_set_wr_req        wr_data_set_q2,
     //data_array interface 
     output  t_cl_rd_req         rd_cl_req_q2,
-    input   t_cl_rd_rsp         rd_data_cl_rsp_q3,
+    input   var t_cl_rd_rsp         rd_data_cl_rsp_q3,
     output  t_cl_wr_req         wr_data_cl_q3
 );
 

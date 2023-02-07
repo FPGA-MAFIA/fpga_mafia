@@ -19,7 +19,7 @@ module cache_pipe_wrap
     input   logic        clk,
     input   logic        rst,
     //Agent Interface
-    input   t_lu_req     pipe_lu_req_q1,
+    input   var t_lu_req     pipe_lu_req_q1,
     output  t_lu_rsp     pipe_lu_rsp_q3,
     // FM Interface
     output  t_fm_req  cache2fm_req_q3

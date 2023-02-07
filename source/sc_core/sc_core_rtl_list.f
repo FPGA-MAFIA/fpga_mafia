@@ -10,8 +10,8 @@
 // Description :
 //-----------------------------------------------------------------------------
 
-+incdir+../../source/sc_core/
-+incdir+../../source/common/
++incdir+../../../source/sc_core/
++incdir+../../../source/common/
 //RTL FIles
-../../source/sc_core/sc_core_pkg.sv
-../../source/sc_core/sc_core.sv
+../../../source/sc_core/sc_core_pkg.sv
+../../../source/sc_core/sc_core.sv

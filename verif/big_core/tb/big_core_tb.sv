@@ -125,15 +125,15 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
+    $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
 
-    file = $fopen({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    file = $fopen({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
-        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        $readmemh({"../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
+        $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
         force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
         #10
         release big_core_top.big_core_mem_wrap.d_mem.DMem;

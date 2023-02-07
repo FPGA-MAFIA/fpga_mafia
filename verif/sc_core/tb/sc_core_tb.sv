@@ -108,14 +108,14 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
+    $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
 
-    file = $fopen({"../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    file = $fopen({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
-        $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        $readmemh({"../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
+        $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
     end
     #100000
     $display("===================\n test %s ended timeout \n=====================", test_name);
@@ -141,7 +141,7 @@ task end_tb;
         // VGA memory snapshot - simulate a screen
     integer fd1;
     string draw;
-    fd1 = $fopen({"../../target/sc_core/tests/",test_name,"/screen.log"},"w");
+    fd1 = $fopen({"../../../target/sc_core/tests/",test_name,"/screen.log"},"w");
     if (fd1) $display("File was open successfully : %0d", fd1);
     else $display("File was not open successfully : %0d", fd1);
     for (int i = 0 ; i < 38400; i = i+320) begin // Lines

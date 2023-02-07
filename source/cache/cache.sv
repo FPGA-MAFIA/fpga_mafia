@@ -19,12 +19,12 @@ module cache
     input   logic           clk,
     input   logic           rst,
     //Core Interface
-    input   t_req           core2cache_req,
+    input   var t_req       core2cache_req,
     output  logic           stall,
     output  t_rd_rsp        cache2core_rsp, //RD Response
     // FM Interface
     output  t_fm_req        cache2fm_req_q3, 
-    input   t_fm_rd_rsp     fm2cache_rd_rsp
+    input   var t_fm_rd_rsp     fm2cache_rd_rsp
 );
 
 t_lu_req    pipe_lu_req_q1;
