@@ -34,7 +34,7 @@ In addition to the hardware design, the project also includes a software stack n
 - Software examples demonstrating the utilization of the many cores for distributed calculations and parallel computation.  
   
 The diagram below provides a general idea of the project's architecture.   
-![image](https://user-images.githubusercontent.com/81047407/216783815-4cb35990-2092-4b19-8a76-f564cca77023.png)
+![image](https://user-images.githubusercontent.com/81047407/217343899-60d4277e-0d44-488b-89b5-e4de25e01012.png)
 
 
 ## Common Issues:
