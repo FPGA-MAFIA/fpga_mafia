@@ -35,10 +35,8 @@ import sc_core_pkg::*;
 );
 // signal declination
 //Data-Path signals
-//logic [31:0]        Pc;
 logic [31:0]        NextPc;
 logic [31:0]        PcPlus4;
-//logic [31:0]        Instruction;
 logic [31:1][31:0]  Register; 
 logic [31:0]        Immediate;
 logic [4:0]         Shamt;
@@ -93,7 +91,7 @@ assign Funct7           = Instruction[31:25];
 assign SelNextPcAluOut  = (Opcode == JAL) || (Opcode == JALR) || ((Opcode == BRANCH) && BranchCondMet);
 assign SelRegWrPc       = (Opcode == JAL) || (Opcode == JALR);
 assign SelAluPc         = (Opcode == JAL) || (Opcode == BRANCH) || (Opcode == AUIPC);
-assign SelAluImm        =!(Opcode == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
+assign SelAluImm        =!(Opcode == R_OP); // Only in case of RegReg Operation the Imm Selector is de-asserted - default is asserted
 assign SelDMemWb        = (Opcode == LOAD);
 assign CtrlLui          = (Opcode == LUI);
 assign CtrlRegWrEn      = (Opcode == LUI ) || (Opcode == AUIPC) || (Opcode == JAL)  || (Opcode == JALR) ||
@@ -186,7 +184,7 @@ assign AluIn2 = SelAluImm   ? Immediate : RegRdData2;
 
 always_comb begin : alu_logic
     Shamt = AluIn2[4:0]; 
-    //Acording to ALU OP we select the correct operation
+    //According to ALU OP we select the correct operation
     unique casez (CtrlAluOp)
         ADD      :   AluOut = AluIn1 + AluIn2                  ;
         SUB      :   AluOut = AluIn1 + (~AluIn2) + 1'b1        ;
@@ -194,7 +192,7 @@ always_comb begin : alu_logic
         SLL     : AluOut = AluIn1 << Shamt                     ;//SLL
         SRL     : AluOut = AluIn1 >> Shamt                     ;//SRL
         SRA     : AluOut = $signed(AluIn1) >>> Shamt           ;//SRA
-        //bit wise opirations
+        //bit wise operations
         XOR     : AluOut = AluIn1 ^ AluIn2                     ;//XOR
         OR      : AluOut = AluIn1 | AluIn2                     ;//OR
         AND     : AluOut = AluIn1 & AluIn2                     ;//AND
@@ -219,7 +217,7 @@ always_comb begin : branch_comp
 end
 //===========================================================================
 // Memory Access
-// Acceess D_MEM for Write (STORE) and Reads (LOAD). – use Byte Enable and Sign-Extend indications.
+// Access D_MEM for Write (STORE) and Reads (LOAD). – use Byte Enable and Sign-Extend indications.
 //===========================================================================
 
 // Both RD & WR

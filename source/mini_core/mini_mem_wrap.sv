@@ -7,7 +7,7 @@
 // Created          : 1/2020
 //-----------------------------------------------------------------------------
 // Description :
-// Behavioral duel read dueal write memory
+// Behavioral duel read duel write memory
 //------------------------------------------------------------------------------
 // Modification history :
 //------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ import mini_core_pkg::*;
                 //============================================
                 //     i_mem
                 //============================================
-                input  logic [31:0] PcQ100H,        //curr_pc    ,
+                input  logic [31:0] PcQ100H,             //cur_pc    ,
                 output logic [31:0] PreInstructionQ101H, //instruction,
                 //============================================
                 //     d_mem
