@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------------
-// Title            : big_core tb
-// Project          : 7 stages core
+// Title            : single cycle Core TB
+// Project          : 
 //-----------------------------------------------------------------------------
-// File             : big_core_tb.sv
-// Original Author  : Daniel Kaufman
-// Code Owner       : 
-// Created          : 11/2022
+// File             : sc_core_tb.sv
+// Original Author  : Amichai
+// Code Owner       : Amichai
+// Created          : 2/2023
 //-----------------------------------------------------------------------------
 // Description :
 // simple test bench
@@ -13,8 +13,6 @@
 // (2) load backdoor the I_MEM & D_MEM.
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
-`define NO_WARNING_ON_FILE_NOT_FOUND
-
 `include "macros.sv"
 
 module sc_core_tb ;
@@ -33,30 +31,6 @@ logic  [7:0] IMem     [I_MEM_MSB : 0];
 logic  [7:0] NextIMem [I_MEM_MSB : 0];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
-
-// FPGA interface inputs              
-logic        Button_0;
-logic        Button_1;
-logic [9:0]  Switch;
-
-// FPGA interface outputs
-logic [7:0]  SEG7_0;
-logic [7:0]  SEG7_1;
-logic [7:0]  SEG7_2;
-logic [7:0]  SEG7_3;
-logic [7:0]  SEG7_4;
-logic [7:0]  SEG7_5;
-logic [9:0]  LED;
-
-//=========================================
-//     VGA - Core interface
-//=========================================
-// VGA output
-logic [3:0]  RED;
-logic [3:0]  GREEN;
-logic [3:0]  BLUE;
-logic        h_sync;
-logic        v_sync;
 logic [31:0] Pc;
 
 //=========================================
@@ -66,10 +40,8 @@ logic [31:0] Pc;
  sc_core sc_core (
     .Clk            (Clk),                      
     .Rst            (Rst),                      
-                                                
     .Pc             (Pc),         // To I_MEM   
     .Instruction    (Instruction),// From I_MEM 
-                                                
     .DMemData       (DMemData),   // To D_MEM   
     .DMemAddress    (DMemAddress),// To D_MEM   
     .DMemByteEn     (DMemByteEn), // To D_MEM   
@@ -104,8 +76,6 @@ assign DMemRspData[7:0]   = DMem[DMemAddress+0];
 assign DMemRspData[15:8]  = DMem[DMemAddress+1];
 assign DMemRspData[23:16] = DMem[DMemAddress+2];
 assign DMemRspData[31:24] = DMem[DMemAddress+3];
-
-
 
 
 // ========================
@@ -157,16 +127,35 @@ end // test_seq
 `include "sc_core_trk.vh"
 
 parameter EBREAK = 32'h00100073;
-
 // EBREAK detection
 always @(posedge Clk) begin : ebrake_status
     if (EBREAK == sc_core.Instruction) begin // ebrake instruction opcode
         $display("===================\n test %s ended with EBREAK \n=====================", test_name);
+        end_tb();
         $finish;
         //end_tb("The test ended");
     end
 end
 
+task end_tb;
+        // VGA memory snapshot - simulate a screen
+    integer fd1;
+    string draw;
+    fd1 = $fopen({"../../target/sc_core/tests/",test_name,"/screen.log"},"w");
+    if (fd1) $display("File was open successfully : %0d", fd1);
+    else $display("File was not open successfully : %0d", fd1);
+    for (int i = 0 ; i < 38400; i = i+320) begin // Lines
+        for (int j = 0 ; j < 4; j = j+1) begin // Bytes
+            for (int k = 0 ; k < 320; k = k+4) begin // Words
+                for (int l = 0 ; l < 8; l = l+1) begin // Bits  
+                    draw = (DMem['h5000+k+j+i][l] === 1'b1) ? "x" : " ";
+                    $fwrite(fd1,"%s",draw);
+                end        
+            end 
+            $fwrite(fd1,"\n");
+        end
+    end
+endtask
 
 endmodule //big_core_tb
 
