@@ -39,8 +39,7 @@ $display("================\n     START\n================\n");
             core2cache_req     = '0;
 //exit reset
 delay(80);  rst= 1'b0;
-//peload Cache
-delay(1); backdoor_cache_load();
+$display("====== Reset Done =======\n");
 //start test
 if(test_name == "cache_alive") begin
 `include "cache_alive.sv"
@@ -48,7 +47,9 @@ end else
 if(test_name == "cache_alive_2") begin
 `include "cache_alive_2.sv"
 end
-
+if(test_name == "single_fm_req") begin
+`include "single_fm_req.sv"
+end
 
 $display("\n\n================\n     Done\n================\n");
 
@@ -79,10 +80,10 @@ task backdoor_cache_load();
 
   for(int SET =0; SET< NUM_SET ; SET++) begin
     for(int WAY =0; WAY< NUM_WAYS; WAY++) begin
-        back_door_entry.tags[WAY]    = WAY + 1000;
-        back_door_entry.valid[WAY]   = 1'b1;
+        back_door_entry.tags    [WAY] = WAY + 1000;
+        back_door_entry.valid   [WAY] = 1'b1;
         back_door_entry.modified[WAY] = 1'b0;
-        back_door_entry.mru[WAY]      = 1'b0;
+        back_door_entry.mru     [WAY] = 1'b0;
     end
     tag_mem[SET]  = back_door_entry;
   end
@@ -96,6 +97,17 @@ task backdoor_cache_load();
 
     release cache.cache_pipe_wrap.data_array.mem;
     release cache.cache_pipe_wrap.tag_array.mem;
+endtask
+
+localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
+t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
+task backdoor_fm_load();
+  for(int FM_ADDRESS =0; FM_ADDRESS < NUM_FM_CL ; FM_ADDRESS++) begin
+        back_door_fm_mem[FM_ADDRESS] = FM_ADDRESS + 'h1111;
+  end
+    force far_memory_array.mem  = back_door_fm_mem;
+    delay(5);
+    release far_memory_array.mem;
 endtask
 
 task wr_req( input logic [19:0]  address, 
