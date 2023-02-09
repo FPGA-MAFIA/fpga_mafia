@@ -13,7 +13,7 @@
 `include "macros.sv"
 
 module array #(
-    parameter WORD_WIDTH,   //no defualt value.
+    parameter WORD_WIDTH,   //no default value.
     parameter ADRS_WIDTH     //no default value.
 )(
     input   logic                   clk,
@@ -49,7 +49,7 @@ end
 //          reading the memory
 //=======================================
 assign pre_q= mem[rd_address];
-// sample the read - synchorus read
+// sample the read - synchros read
 `RVC_DFF(q, pre_q, clk)
 
 endmodule

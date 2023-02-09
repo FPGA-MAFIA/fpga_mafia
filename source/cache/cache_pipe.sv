@@ -160,10 +160,10 @@ end
 //      in case of Wr hit update MRU , modified
 //      in case of fill, update tag,valid,mru, modified?
 always_comb begin
-    set_ways_valid_q2    = rd_data_set_rsp_q2.valid;    //defualt value - keep data the same.
-    set_ways_mru_q2      = rd_data_set_rsp_q2.mru;      //defualt value - keep data the same.  
-    set_ways_modified_q2 = rd_data_set_rsp_q2.modified; //defualt value - keep data the same.  
-    set_ways_tags_q2     = rd_data_set_rsp_q2.tags;     //defualt value - keep data the same.
+    set_ways_valid_q2    = rd_data_set_rsp_q2.valid;    //default value - keep data the same.
+    set_ways_mru_q2      = rd_data_set_rsp_q2.mru;      //default value - keep data the same.  
+    set_ways_modified_q2 = rd_data_set_rsp_q2.modified; //default value - keep data the same.  
+    set_ways_tags_q2     = rd_data_set_rsp_q2.tags;     //default value - keep data the same.
     //-----------------------------
     // in case of RD hit update MRU
     //-----------------------------
@@ -175,7 +175,7 @@ always_comb begin
     // in case of Wr hit update MRU , modified  
     //-----------------------------
     if ((cache_pipe_lu_q2.lu_op == WR_LU) && (cache_pipe_lu_q2.hit)) begin
-        set_ways_mru_q2           = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.mru;     // adding the way hit location to the current MRU vec
+        set_ways_mru_q2      = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.mru;     // adding the way hit location to the current MRU vec
         set_ways_modified_q2 = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.modified;// adding the way hit location to the current modified vec
     end
     
