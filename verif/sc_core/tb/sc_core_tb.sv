@@ -117,7 +117,7 @@ initial begin: test_seq
         $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
         $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
     end
-    #100000
+    #1000
     $display("===================\n test %s ended timeout \n=====================", test_name);
     $finish;
 
