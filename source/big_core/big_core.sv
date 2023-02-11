@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : Big Core 
-// Project          : riscv_manycore_mesh_fpga 
+// Project          : fpga_mafia 
 //-----------------------------------------------------------------------------
 // File             : big_core 
 // Original Author  : Amichai Ben-David

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : big_core_trk
-// Project          : riscv_manycore_mesh_fpga
+// Project          : fpga_mafia
 //-----------------------------------------------------------------------------
 // File             : big_core_trk.vh
 // Original Author  : Daniel Kaufman

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : cache_trk
-// Project          : riscv_manycore_mesh_fpga
+// Project          : fpga_mafia
 //-----------------------------------------------------------------------------
 // File             : cache_trk.vh
 // Original Author  : Noam Sabban

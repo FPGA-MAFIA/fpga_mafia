@@ -5,6 +5,8 @@ This project aims to design a SOC Tile based mesh fabric that can incorporate va
 ## Getting Started
 To see your build and run options, run the following command:  
 ```python build.py -h ```  
+For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)
+Please add your question in the comment section of the discussion
 
 ## Prerequisite
 Before you start, make sure you have the following tools and software installed:
