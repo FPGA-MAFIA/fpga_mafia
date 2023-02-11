@@ -1,11 +1,13 @@
-# The Many Core Project
+# The FPGA Multi-Agent Fabric Integration Architecture Project
+## The MAFIA Project
+
 This project aims to design a SOC Tile based mesh fabric that can incorporate various functionalities, such as RISCV mini-cores, big-cores, hardware accelerators, and IO devices like UART, keyboard, VGA, DE10-Lite FPGA IO, and more.
 
 
 ## Getting Started
 To see your build and run options, run the following command:  
 ```python build.py -h ```  
-For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)
+For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
 Please add your question in the comment section of the discussion
 
 ## Prerequisite
@@ -38,6 +40,16 @@ In addition to the hardware design, the project also includes a software stack n
 The diagram below provides a general idea of the project's architecture.   
 ![image](https://user-images.githubusercontent.com/81047407/217345069-21aef258-084b-44b3-b776-e9740aad8e88.png)
 
+
+
+
+## Inspiration Behind the Project:  
+This project draws inspiration from some of the most innovative players in the field of computing.  
+These include:  
+- [Tesla: DOJO](https://www.tesla.com/AI) | [Watch the video on Youtube](https://www.youtube.com/watch?v=DSw3IwsgNnc)  
+- [Tenstorrent: Wormhole & more](https://tenstorrent.com/) | [Watch the video on Youtube](https://www.youtube.com/watch?v=32CRYenTcdw)  
+- [Esperanto: ET-SoC-1](https://www.esperanto.ai/)  | [Watch the video on Youtube](https://www.youtube.com/watch?v=5foT3huJ_Gg)  
+Each of these entities has pushed the boundaries of what's possible with modern computing, and this project aims to continue that legacy by offering a unique, highly-integratable mesh architecture that can support a wide range of agents.  
 
 ## Common Issues:
 
