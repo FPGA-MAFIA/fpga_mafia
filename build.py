@@ -93,6 +93,7 @@ class Test:
                                     -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+'\
                                     -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
                     print_message(f'[COMMAND] '+second_cmd)
+                    print_message(f'[COMMAND] '+second_cmd)
                     subprocess.check_output(second_cmd, shell=True)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -101,6 +102,7 @@ class Test:
                     try:
                         third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
                         print_message(f'[COMMAND] '+third_cmd)
+                        print_message(f'[COMMAND] '+third_cmd)
                         subprocess.check_output(third_cmd, shell=True)
                     except:
                         print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
@@ -108,6 +110,7 @@ class Test:
                     else:
                         try:
                             forth_cmd  = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
+                            print_message(f'[COMMAND] '+forth_cmd)
                             print_message(f'[COMMAND] '+forth_cmd)
                             subprocess.check_output(forth_cmd, shell=True)
                         except:
@@ -185,6 +188,16 @@ class Test:
 
 def print_message(msg):
     msg_type = msg.split()[0]
+    try:
+        color = {
+            '[ERROR]'   : 'red',
+            '[WARNING]' : 'yellow',
+            '[INFO]'    : 'green',
+            '[COMMAND]' : 'cyan',
+        }[msg_type]
+    except:
+        color = 'blue'
+
     try:
         color = {
             '[ERROR]'   : 'red',
