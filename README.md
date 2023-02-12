@@ -69,3 +69,9 @@ Additionally, make sure the following aliases are present in your `~/.aliases` f
 > alias rv_objdump='/c/Users/amich/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin/riscv-none-embed-objdump.exe'    
 
 Then run ``` source ~/.aliases ```    
+
+
+
+### fast access
+python build.py -h
+python build.py -proj_name 'big_core' -debug -tests alive -app 
