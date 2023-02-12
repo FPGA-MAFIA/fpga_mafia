@@ -76,7 +76,7 @@ class Test:
             os.chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe     -S -ffreestanding -march=rv32i ../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i ../../../../../'+self.path+' -o '+cs_path
                     print_message(f'[COMMAND] '+first_cmd)
                     subprocess.check_output(first_cmd, shell=True)
                 else:
