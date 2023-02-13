@@ -37,7 +37,7 @@ Software Stack to run on SOC:
 - Software examples demonstrating utilization of many cores for distributed calculations and parallel computation
 
 The diagram below provides a general idea of the project's architecture.   
-![image](https://user-images.githubusercontent.com/81047407/217345069-21aef258-084b-44b3-b776-e9740aad8e88.png)
+![image](https://user-images.githubusercontent.com/81047407/218472661-3bc4eb33-af35-410d-8c9b-e10fa3911650.png)
 
 
 
