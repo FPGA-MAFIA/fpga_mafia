@@ -1,1 +1,20 @@
-place holder
+# this is a github action that runs the python build
+
+name: mafia_sanity
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted , windows, x64]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run the build
+        run: ${GITHUB_ACTION_PATH//\\//}/action.sh 
+        shell: /bin/bash
+
