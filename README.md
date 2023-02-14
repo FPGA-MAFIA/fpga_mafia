@@ -1,6 +1,6 @@
 [![mafia_sanity](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_bash.yml/badge.svg)](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_bash.yml)
 
-# The FPGA Multi-Agent Fabric Integration Architecture Project
+# FPGA Multi-Agent Fabric Integration Architecture
 ## The MAFIA Project
 
 This project aims to design a SOC Tile based mesh fabric that can incorporate various functionalities, such as RISCV mini-cores, big-cores, hardware accelerators, and IO devices like UART, keyboard, VGA, DE10-Lite FPGA IO, and more.
