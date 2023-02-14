@@ -1,6 +1,6 @@
 # this is a github action that runs the python build
 
-name: mafia_sanity_2
+name: mafia_sanity
 
 on:
   push:
@@ -14,6 +14,12 @@ jobs:
     runs-on: [self-hosted , windows, x64]
     steps:
       - uses: actions/checkout@v2
-      - name: Run build on bash take2
+      - name: Run build BIG_CORE - alive test
         run: python build.py -proj_name 'big_core' -debug -tests alive -app -hw -sim
+      - name: Run build MINI_CORE - alive test
+        run: python build.py -proj_name 'mini_core' -debug -tests alive -app -hw -sim
+      - name: Run build SC_CORE - alive test
+        run: python build.py -proj_name 'sc_core' -debug -tests alive -app -hw -sim
+      - name: Run build CACHE - alive test
+        run: python build.py -proj_name 'cache' -debug -tests cache_alive -hw -sim
 
