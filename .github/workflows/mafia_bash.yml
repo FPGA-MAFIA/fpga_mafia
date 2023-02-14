@@ -13,10 +13,6 @@ jobs:
   build:
     runs-on: [self-hosted , windows, x64]
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
       - uses: actions/checkout@v2
       - name: Run build BIG_CORE - alive test
         run: python build.py -proj_name 'big_core' -debug -all -app -hw -sim
