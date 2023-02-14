@@ -15,5 +15,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run build on bash take2
-        run: python build.py -proj_name 'big_core' -debug -tests alive -app 
+        run: python build.py -proj_name 'big_core' -debug -tests alive -app -hw -sim
 
