@@ -92,7 +92,7 @@ always_comb begin
 end //always_comb
 
 //==================================================================
-`RVC_DFF(pre_cache_pipe_lu_q2, cache_pipe_lu_q1, clk)
+`MAFIA_DFF(pre_cache_pipe_lu_q2, cache_pipe_lu_q1, clk)
 //==================================================================
 //       ____    _                     ___    ____  
 //      |  _ \  (_)  _ __     ___     / _ \  |___ \ 
@@ -265,7 +265,7 @@ assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 
 
 //==================================================================
-`RVC_DFF(pre_cache_pipe_lu_q3, cache_pipe_lu_q2, clk)
+`MAFIA_DFF(pre_cache_pipe_lu_q3, cache_pipe_lu_q2, clk)
 //==================================================================
 //       ____    _                     ___    _____ 
 //      |  _ \  (_)  _ __     ___     / _ \  |___ / 

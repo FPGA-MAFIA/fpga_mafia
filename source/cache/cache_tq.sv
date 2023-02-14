@@ -81,12 +81,12 @@ assign cache2core_rsp.reg_id  = tq_reg_id[pipe_lu_rsp_q3.tq_id]; //FIXME
 
 genvar TQ_GEN;
 generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_ff_block
-    `RVC_RST_VAL_DFF(tq_state            [TQ_GEN], next_tq_state            [TQ_GEN], clk, rst, S_IDLE)
-    `RVC_EN_DFF     (tq_rd_indication    [TQ_GEN], next_tq_rd_indication    [TQ_GEN], clk, en_tq_rd_indication    [TQ_GEN]) 
-    `RVC_EN_DFF     (tq_wr_indication    [TQ_GEN], next_tq_wr_indication    [TQ_GEN], clk, en_tq_wr_indication    [TQ_GEN]) 
-    `RVC_EN_DFF     (tq_merge_buffer_data[TQ_GEN], next_tq_merge_buffer_data[TQ_GEN], clk, en_tq_merge_buffer_data[TQ_GEN]) 
-    `RVC_EN_DFF     (tq_cl_address       [TQ_GEN], next_tq_cl_address       [TQ_GEN], clk, en_tq_cl_address       [TQ_GEN]) 
-    `RVC_EN_DFF     (tq_reg_id           [TQ_GEN], next_tq_reg_id           [TQ_GEN], clk, en_tq_reg_id           [TQ_GEN])
+    `MAFIA_RST_VAL_DFF(tq_state            [TQ_GEN], next_tq_state            [TQ_GEN], clk, rst, S_IDLE)
+    `MAFIA_EN_DFF     (tq_rd_indication    [TQ_GEN], next_tq_rd_indication    [TQ_GEN], clk, en_tq_rd_indication    [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_wr_indication    [TQ_GEN], next_tq_wr_indication    [TQ_GEN], clk, en_tq_wr_indication    [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_merge_buffer_data[TQ_GEN], next_tq_merge_buffer_data[TQ_GEN], clk, en_tq_merge_buffer_data[TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_cl_address       [TQ_GEN], next_tq_cl_address       [TQ_GEN], clk, en_tq_cl_address       [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_reg_id           [TQ_GEN], next_tq_reg_id           [TQ_GEN], clk, en_tq_reg_id           [TQ_GEN])
 end endgenerate
 
 always_comb begin

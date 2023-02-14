@@ -3,7 +3,7 @@
 // Project          : 
 //-----------------------------------------------------------------------------
 // File             : 
-// Original Author  : Daniel Kaufman
+// Original Author  : Amichai Ben-David
 // Code Owner       : 
 // Created          : 11/2022
 //-----------------------------------------------------------------------------
@@ -17,7 +17,6 @@
 `include "macros.sv"
 
 module sc_core
-
 import sc_core_pkg::*;
 (
     input logic Clk,
@@ -75,7 +74,7 @@ t_opcode            Opcode;
 //===========================================================================
 assign PcPlus4  = Pc + 32'd4;
 assign NextPc   = SelNextPcAluOut ? AluOut : PcPlus4;
-`RVC_RST_DFF( Pc, NextPc , Clk, Rst )
+`MAFIA_RST_DFF( Pc, NextPc , Clk, Rst )
 
 
 //===========================================================================
@@ -165,7 +164,7 @@ assign RegSrc2 = Instruction[24:20];
 // --- Select what Write to register file --------
 assign RegWrData = SelRegWrPc ? PcPlus4 : WrBackData;
 //---- The Register File  ------
-`RVC_EN_DFF(Register[RegDst] , RegWrData , Clk , (CtrlRegWrEn && (RegDst!=5'b0)))
+`MAFIA_EN_DFF(Register[RegDst] , RegWrData , Clk , (CtrlRegWrEn && (RegDst!=5'b0)))
 // --- read Register File --------
 assign RegRdData1 = (RegSrc1==5'b0) ? 32'b0 : Register[RegSrc1];
 assign RegRdData2 = (RegSrc2==5'b0) ? 32'b0 : Register[RegSrc2];

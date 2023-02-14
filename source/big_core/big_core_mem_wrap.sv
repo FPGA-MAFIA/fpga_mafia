@@ -65,10 +65,10 @@ always_comb begin
 end
 
 // Q103H to Q104H Flip Flops
-`RVC_DFF(MatchDMemRegionQ104H   , MatchDMemRegionQ103H    , Clk)
-`RVC_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clk)
-`RVC_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clk)
-`RVC_DFF(DMemAddressQ104H       , DMemAddressQ103H        , Clk)
+`MAFIA_DFF(MatchDMemRegionQ104H   , MatchDMemRegionQ103H    , Clk)
+`MAFIA_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clk)
+`MAFIA_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clk)
+`MAFIA_DFF(DMemAddressQ104H       , DMemAddressQ103H        , Clk)
 
 // Mux between CR ,data and vga memory
 assign DMemRdRspQ104H= MatchCRMemRegionQ104H  ? PreCRMemRdDataQ104H  :
@@ -93,14 +93,14 @@ assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDM
                             (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
                                                                       PreShiftDMemRdDataQ104H         ; 
 
-// Instantiating the rvc_asap_5pl_i_mem instruction memory
+// Instantiating the mafia_asap_5pl_i_mem instruction memory
 i_mem i_mem (
     .Clk            (Clk),
     .address        (PcQ100H[31:2]),
     .q              (InstructionQ101H)
 );
 
-// Instantiating the rvc_asap_5pl_d_mem data memory
+// Instantiating the mafia_asap_5pl_d_mem data memory
 
  d_mem d_mem (
     .Clk            (Clk),
@@ -113,8 +113,8 @@ i_mem i_mem (
 );
 
 
-// Instantiating the rvc_asap_5pl_cr_mem data memory
-//rvc_asap_5pl_cr_mem rvc_asap_5pl_cr_mem (
+// Instantiating the mafia_asap_5pl_cr_mem data memory
+//mafia_asap_5pl_cr_mem mafia_asap_5pl_cr_mem (
 //    .Clk            (Clk),
 //    .Rst              (Rst),
 //    .data             (DMemWrDataQ103H),
@@ -134,8 +134,8 @@ i_mem i_mem (
 //    .LED              (LED)
 //);
 
-// Instantiating the rvc_asap_5pl_vga_ctrl
-//rvc_asap_5pl_vga_ctrl rvc_asap_5pl_vga_ctrl (
+// Instantiating the mafia_asap_5pl_vga_ctrl
+//mafia_asap_5pl_vga_ctrl mafia_asap_5pl_vga_ctrl (
 //    .CLK_50            (Clk),
 //    .Reset             (Rst),
 //    .data              (DMemWrDataQ103H),
@@ -151,4 +151,4 @@ i_mem i_mem (
 //    .v_sync            (v_sync)
 //);
 
-endmodule // Module rvc_asap_5pl_mem_wrap
+endmodule // Module mafia_asap_5pl_mem_wrap

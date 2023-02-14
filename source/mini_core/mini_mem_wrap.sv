@@ -68,7 +68,7 @@ assign F2C_RspDataQ504H   = F2C_IMemHitQ503H ? F2C_IMemRspDataQ504H :
                             F2C_DMemHitQ503H ? F2C_DMemRspDataQ504H :
                                                 '0                  ;
 
-`RVC_DFF(F2C_RspValidQ504H, F2C_ReqValidQ503H, Clock)
+`MAFIA_DFF(F2C_RspValidQ504H, F2C_ReqValidQ503H, Clock)
 
 mem  #(
   .WORD_WIDTH(32),  //FIXME - Parametrize!!

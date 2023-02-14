@@ -65,7 +65,7 @@ end
 //=======================================
 //          the memory Array
 //=======================================
-`RVC_DFF(mem, next_mem, clock)
+`MAFIA_DFF(mem, next_mem, clock)
 
 //=======================================
 //          reading the memory
@@ -73,7 +73,7 @@ end
 assign pre_q_a = {mem[address_a_byte+3], mem[address_a_byte+2], mem[address_a_byte+1], mem[address_a_byte+0]};
 assign pre_q_b = {mem[address_b_byte+3], mem[address_b_byte+2], mem[address_b_byte+1], mem[address_b_byte+0]};
 // sample the read - synchorus read
-`RVC_DFF(q_a, pre_q_a, clock)
-`RVC_DFF(q_b, pre_q_b, clock)
+`MAFIA_DFF(q_a, pre_q_a, clock)
+`MAFIA_DFF(q_b, pre_q_b, clock)
 
 endmodule

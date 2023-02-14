@@ -157,11 +157,11 @@ array  #(
 );
 
 // One Cycle Latency on memory read - sample the id & Valid.
-`RVC_DFF(samp_fm2cache_rd_rsp[0].tq_id   ,cache2fm_req_q3.tq_id     , clk)
-`RVC_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_req_q3.valid     , clk)
+`MAFIA_DFF(samp_fm2cache_rd_rsp[0].tq_id   ,cache2fm_req_q3.tq_id     , clk)
+`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_req_q3.valid     , clk)
 // Shift register to add 10 cycle latecy on FM read.
-`RVC_DFF(samp_fm2cache_rd_rsp[9:1]       ,samp_fm2cache_rd_rsp[8:0] , clk)
-`RVC_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , clk)
+`MAFIA_DFF(samp_fm2cache_rd_rsp[9:1]       ,samp_fm2cache_rd_rsp[8:0] , clk)
+`MAFIA_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , clk)
 
 
 

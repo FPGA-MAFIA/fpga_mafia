@@ -97,8 +97,8 @@ initial begin: reset_gen
 end: reset_gen
 
 
-`RVC_DFF(IMem, NextIMem, Clk)
-`RVC_DFF(DMem, NextDMem, Clk)
+`MAFIA_DFF(IMem, NextIMem, Clk)
+`MAFIA_DFF(DMem, NextDMem, Clk)
 
 string test_name;
 integer file;
