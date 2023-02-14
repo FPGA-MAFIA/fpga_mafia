@@ -45,12 +45,12 @@ The diagram below provides a general idea of the project's architecture.
 
 
 ## Inspiration Behind the Project:  
-This project draws inspiration from some of the most innovative players in the field of computing.  
+This project draws inspiration from innovative players in the field of computing.  
 These include:  
 - [Tesla: DOJO](https://www.tesla.com/AI) | [Watch the video on Youtube](https://www.youtube.com/watch?v=DSw3IwsgNnc)  
 - [Tenstorrent: Wormhole & more](https://tenstorrent.com/) | [Watch the video on Youtube](https://www.youtube.com/watch?v=32CRYenTcdw)  
 - [Esperanto: ET-SoC-1](https://www.esperanto.ai/)  | [Watch the video on Youtube](https://www.youtube.com/watch?v=5foT3huJ_Gg)  
-Each of these entities has pushed the boundaries of what's possible with modern computing, and this project aims to continue that legacy by offering a unique, highly-integratable mesh architecture that can support a wide range of agents.  
+Similarly, this project offers a unique, highly-integratable mesh architecture that can support a wide range of agents, and execute parallel computing for distributed algorithms.
 
 ## Common Issues:
 
