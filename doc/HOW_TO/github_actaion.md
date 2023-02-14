@@ -10,3 +10,7 @@ setting your personal PC as a server to run sanity action - gate keeper for Subm
 1. ./config.cmd --url https://github.com/amichai-bd/fpga_mafia --token ATKK63ZZDRXTGTP3DHJQ233D5NQJI
     1. Would you like to run the runner as service? (Y/N) [press Enter for N] N  /Press "N"
 1. ./run.cmd
+
+
+
+still WIP to get this to run on pull request & push
