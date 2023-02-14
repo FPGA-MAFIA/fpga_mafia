@@ -75,5 +75,5 @@ Then run ``` source ~/.aliases ```
 
 
 ### fast access
-python build.py -h
+python build.py -h  
 python build.py -proj_name 'big_core' -debug -tests alive -app 
