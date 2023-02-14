@@ -1,14 +1,14 @@
 //-----------------------------------------------------------------------------
 // Title            : riscv as-fast-as-possible 
-// Project          : rvc_asap
+// Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : rvc_asap_pkg.sv
+// File             : mafia_asap_pkg.sv
 // Original Author  : Amichai Ben-David
 // Code Owner       : 
 // Created          : 11/2021
 //-----------------------------------------------------------------------------
 // Description :
-// enum & parameters for the RVC core
+// enum & parameters for the MAFIA core
 //-----------------------------------------------------------------------------
 
 package mini_core_pkg;

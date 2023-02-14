@@ -57,8 +57,8 @@ initial begin: reset_gen
 end: reset_gen
 
 
-`RVC_DFF(IMem, IMem    , Clk)
-`RVC_DFF(DMem, NextDMem, Clk)
+`MAFIA_DFF(IMem, IMem    , Clk)
+`MAFIA_DFF(DMem, NextDMem, Clk)
 
 initial begin: test_seq
     //======================================

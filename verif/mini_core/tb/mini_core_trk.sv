@@ -53,10 +53,10 @@ initial begin: trk_memory_access_gen
 end
 //
 assign PcQ100H = mini_top.PcQ100H;
-`RVC_DFF(PcQ101H,  PcQ100H , Clk)
-`RVC_DFF(PcQ102H,  PcQ101H , Clk)
-`RVC_DFF(PcQ103H,  PcQ102H , Clk)
-//`RVC_DFF(PcQ104H,  PcQ103H , Clk)
+`MAFIA_DFF(PcQ101H,  PcQ100H , Clk)
+`MAFIA_DFF(PcQ102H,  PcQ101H , Clk)
+`MAFIA_DFF(PcQ103H,  PcQ102H , Clk)
+//`MAFIA_DFF(PcQ104H,  PcQ103H , Clk)
 ////tracker on memory_access operations
 //always @(posedge Clk) begin : memory_access_print
 //    if(DMemWrEn) begin

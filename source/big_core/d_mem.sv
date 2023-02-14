@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 // Title            : riscv as-fast-as-possible 
-// Project          : rvc_asap
+// Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : rvc_asap_5pl_d_mem
+// File             : mafia_asap_5pl_d_mem
 // Original Author  : Matan Eshel & Gil Ya'akov
 // Code Owner       : 
 // Adviser          : Amichai Ben-David
@@ -47,11 +47,11 @@ always_comb begin
     end
 end
 
-`RVC_DFF(DMem , NextDMem , Clk)
+`MAFIA_DFF(DMem , NextDMem , Clk)
 // This is the load
 assign pre_q = rden ? {DMem[address_aligned+3], DMem[address_aligned+2], DMem[address_aligned+1], DMem[address_aligned+0]} : '0;
 
 // Sample the data load - synchorus load
-`RVC_DFF(q, pre_q, Clk)
+`MAFIA_DFF(q, pre_q, Clk)
 
-endmodule // Module rvc_asap_5pl_d_mem
+endmodule // Module mafia_asap_5pl_d_mem

@@ -114,8 +114,8 @@ initial begin: reset_gen
 end: reset_gen
 
 
-`RVC_DFF(IMem, NextIMem, Clk)
-`RVC_DFF(DMem, NextDMem, Clk)
+`MAFIA_DFF(IMem, NextIMem, Clk)
+`MAFIA_DFF(DMem, NextDMem, Clk)
 
 string test_name;
 integer file;
@@ -152,8 +152,8 @@ end // test_seq
 parameter EBREAK = 32'h00100073;
 logic [31:0] InstructionQ102H;
 logic [31:0] InstructionQ103H;
-`RVC_DFF(InstructionQ102H, big_core_top.big_core.InstructionQ101H, Clk)
-`RVC_DFF(InstructionQ103H, InstructionQ102H, Clk)
+`MAFIA_DFF(InstructionQ102H, big_core_top.big_core.InstructionQ101H, Clk)
+`MAFIA_DFF(InstructionQ103H, InstructionQ102H, Clk)
 
 // Ebrake detection
 always @(posedge Clk) begin : ebrake_status

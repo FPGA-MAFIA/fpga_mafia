@@ -38,19 +38,19 @@ assign pop_data= memory[r_counter];
 //pointer to the next place to push to it
 assign en_push_fifo =(push &&!full)||(push && pop && full);
 assign next_w_counter=(w_counter==FIFO_DEPTH-1)? '0 : (w_counter+1);
-`RVC_EN_RST_DFF(w_counter, next_w_counter, clk, en_push_fifo, rst);
+`MAFIA_EN_RST_DFF(w_counter, next_w_counter, clk, en_push_fifo, rst);
 
 //pointer to the next place to pop from it
 assign en_pop_fifo=(pop && !empty)||(pop && push && empty);
 assign next_r_counter=(r_counter==FIFO_DEPTH-1)?'0 : (r_counter+1);
-`RVC_EN_RST_DFF(r_counter, next_r_counter, clk, en_pop_fifo, rst);
+`MAFIA_EN_RST_DFF(r_counter, next_r_counter, clk, en_pop_fifo, rst);
 
 //fifo_status
 assign en_status_plus=(push && !full) && !(pop && !empty);
 assign en_status_minus=(pop && !empty)&& !(push && !full);
 assign en_status=en_status_plus |en_status_minus;
 assign next_fifo_status=en_status_plus ? (fifo_status+1):(fifo_status-1);
-`RVC_EN_RST_DFF(fifo_status, next_fifo_status, clk, en_status, rst);
+`MAFIA_EN_RST_DFF(fifo_status, next_fifo_status, clk, en_status, rst);
 
 always @(posedge clk)
 begin: MEMORY_WRITE

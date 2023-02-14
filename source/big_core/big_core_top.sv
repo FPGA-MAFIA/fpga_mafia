@@ -50,7 +50,7 @@ logic        DMemWrEnQ103H;       // To D_MEM
 logic        DMemRdEnQ103H;       // To D_MEM
 logic [31:0] DMemRdRspQ104H;      // From D_MEM
 //=========================================
-// Instantiating the rvc_asap_5pl core
+// Instantiating the mafia_asap_5pl core
 //=========================================
 big_core big_core (
     .Clk                 (Clk),
@@ -66,7 +66,7 @@ big_core big_core (
 );                                                            
 
 //=========================================
-// Instantiating the rvc_asap_5pl_mem_wrap memory
+// Instantiating the mafia_asap_5pl_mem_wrap memory
 //=========================================
 big_core_mem_wrap big_core_mem_wrap (
     .Clk              (Clk),     

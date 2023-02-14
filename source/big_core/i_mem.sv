@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 // Title            : riscv as-fast-as-possible 
-// Project          : rvc_asap
+// Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : rvc_asap_5pl_i_mem
+// File             : mafia_asap_5pl_i_mem
 // Original Author  : Matan Eshel & Gil Ya'akov
 // Code Owner       : 
 // Adviser          : Amichai Ben-David
@@ -29,7 +29,7 @@ assign address_aligned = {address,2'b00};
 
 // Note: This memory is written in behavioral way for simulation - for FPGA/ASIC should be replaced with SRAM/RF/LATCH based memory etc.
 // FIXME - currently this logic wont allow to load the I_MEM from HW interface - for simulation we will use Backdoor. (force with XMR)
-`RVC_DFF(IMem, IMem, Clk)
+`MAFIA_DFF(IMem, IMem, Clk)
 // This is the instruction fetch. (input pc, output Instruction)
 
 assign InstructionQ100H[7:0]   = IMem[address_aligned+0]; // mux - address_aligned is the selector, IMem is the Data, Instruction is the Out
@@ -38,6 +38,6 @@ assign InstructionQ100H[23:16] = IMem[address_aligned+2];
 assign InstructionQ100H[31:24] = IMem[address_aligned+3];
 // Sample the instruction read - synchorus read
 
-`RVC_DFF(q, InstructionQ100H, Clk)
+`MAFIA_DFF(q, InstructionQ100H, Clk)
 
 endmodule // Module i_mem

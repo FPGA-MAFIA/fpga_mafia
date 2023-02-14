@@ -114,11 +114,11 @@ logic MatchRd2AftrWrQ101H;
 
 assign PcPlus4Q100H  = PcQ100H + 3'h4;
 assign NextPcQ10XH   = SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
-`RVC_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst)
+`MAFIA_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst)
 
 // Q100H to Q101H Flip Flops. 
-`RVC_EN_DFF(PcQ101H,      PcQ100H,      Clk, PcEnQ101H)
-`RVC_EN_DFF(PcPlus4Q101H, PcPlus4Q100H, Clk, PcEnQ101H)
+`MAFIA_EN_DFF(PcQ101H,      PcQ100H,      Clk, PcEnQ101H)
+`MAFIA_EN_DFF(PcPlus4Q101H, PcPlus4Q100H, Clk, PcEnQ101H)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    __   _    _ 
@@ -152,7 +152,7 @@ assign InstructionQ101H         = flushQ102H ? NOP :
                                   LoadHzrdDetectQ102H ? PreviousInstructionQ101H :
                                                         PreInstructionQ101H;
 
-`RVC_DFF(InstructionQ102H, InstructionQ101H, Clk)
+`MAFIA_DFF(InstructionQ102H, InstructionQ101H, Clk)
 
 // End Load and Ctrl hazard detection
 
@@ -241,31 +241,31 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
                                                   Register[RegSrc2Q101H]; // Common Case - reading from Register file
 
 // Q101H to Q102H Flip Flops
-`RVC_RST_DFF(PcQ102H                  , PcQ101H               , Clk, Rst)
-`RVC_RST_DFF(PcQ103H                  , PcQ102H               , Clk, Rst)
-`RVC_RST_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk, Rst)
-`RVC_RST_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk, Rst)
-`RVC_RST_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk, Rst)
-`RVC_RST_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clk, Rst)
-`RVC_RST_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk, Rst)
-`RVC_RST_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk, Rst)
-`RVC_RST_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk, Rst)
-`RVC_RST_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk, Rst)
-`RVC_RST_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk, Rst)
-`RVC_RST_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk, Rst)
-`RVC_RST_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clk, Rst)
-`RVC_RST_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clk, Rst)
-`RVC_RST_VAL_DFF(CtrlBranchOpQ102H    , CtrlBranchOpQ101H     , Clk, Rst, t_branch_type'('0))
-`RVC_RST_VAL_DFF(CtrlAluOpQ102H       , CtrlAluOpQ101H        , Clk, Rst, t_alu_op'('0))
-`RVC_RST_DFF(ImmediateQ102H           , ImmediateQ101H        , Clk, Rst)
-`RVC_RST_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clk, Rst)
-`RVC_RST_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clk, Rst)
-`RVC_RST_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk, Rst)
-`RVC_RST_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk, Rst)
-`RVC_RST_DFF(RegDstQ102H              , RegDstQ101H           , Clk, Rst)
-`RVC_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0))
-`RVC_RST_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk, Rst)
-`RVC_RST_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk, Rst)
+`MAFIA_RST_DFF(PcQ102H                  , PcQ101H               , Clk, Rst)
+`MAFIA_RST_DFF(PcQ103H                  , PcQ102H               , Clk, Rst)
+`MAFIA_RST_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk, Rst)
+`MAFIA_RST_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk, Rst)
+`MAFIA_RST_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk, Rst)
+`MAFIA_RST_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clk, Rst)
+`MAFIA_RST_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk, Rst)
+`MAFIA_RST_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk, Rst)
+`MAFIA_RST_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk, Rst)
+`MAFIA_RST_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk, Rst)
+`MAFIA_RST_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk, Rst)
+`MAFIA_RST_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk, Rst)
+`MAFIA_RST_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clk, Rst)
+`MAFIA_RST_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clk, Rst)
+`MAFIA_RST_VAL_DFF(CtrlBranchOpQ102H    , CtrlBranchOpQ101H     , Clk, Rst, t_branch_type'('0))
+`MAFIA_RST_VAL_DFF(CtrlAluOpQ102H       , CtrlAluOpQ101H        , Clk, Rst, t_alu_op'('0))
+`MAFIA_RST_DFF(ImmediateQ102H           , ImmediateQ101H        , Clk, Rst)
+`MAFIA_RST_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clk, Rst)
+`MAFIA_RST_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clk, Rst)
+`MAFIA_RST_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk, Rst)
+`MAFIA_RST_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk, Rst)
+`MAFIA_RST_DFF(RegDstQ102H              , RegDstQ101H           , Clk, Rst)
+`MAFIA_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0))
+`MAFIA_RST_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk, Rst)
+`MAFIA_RST_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk, Rst)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    _____  __     __   _____   _        ______          ____    __    ___    ___    _    _ 
@@ -286,7 +286,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 //---- The Register File ----
- `RVC_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clk , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
+ `MAFIA_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clk , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
 // Hazard Detection
 assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc1Q102H != 5'b0);
 assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);
@@ -343,17 +343,17 @@ assign SelNextPcAluOutQ102H = (SelNextPcAluOutBQ102H && BranchCondMetQ102H) || (
 assign flushQ102H = SelNextPcAluOutQ102H;
 
 // Q102H to Q103H Flip Flops
-`RVC_DFF(RegRdData2Q103H     , RegRdData2Q102H     , Clk)
-`RVC_DFF(AluOutQ103H         , AluOutQ102H         , Clk)
-`RVC_DFF(CtrlDMemByteEnQ103H , CtrlDMemByteEnQ102H , Clk)
-`RVC_DFF(CtrlDMemWrEnQ103H   , CtrlDMemWrEnQ102H   , Clk)
-`RVC_DFF(SelDMemWbQ103H      , SelDMemWbQ102H      , Clk)
-`RVC_DFF(CtrlSignExtQ103H    , CtrlSignExtQ102H    , Clk)
-`RVC_DFF(PcPlus4Q103H        , PcPlus4Q102H        , Clk)
-`RVC_DFF(SelRegWrPcQ103H     , SelRegWrPcQ102H     , Clk)
-`RVC_DFF(RegDstQ103H         , RegDstQ102H         , Clk)
-`RVC_DFF(CtrlRegWrEnQ103H    , CtrlRegWrEnQ102H    , Clk)
-`RVC_DFF(flushQ103H          , flushQ102H          , Clk)
+`MAFIA_DFF(RegRdData2Q103H     , RegRdData2Q102H     , Clk)
+`MAFIA_DFF(AluOutQ103H         , AluOutQ102H         , Clk)
+`MAFIA_DFF(CtrlDMemByteEnQ103H , CtrlDMemByteEnQ102H , Clk)
+`MAFIA_DFF(CtrlDMemWrEnQ103H   , CtrlDMemWrEnQ102H   , Clk)
+`MAFIA_DFF(SelDMemWbQ103H      , SelDMemWbQ102H      , Clk)
+`MAFIA_DFF(CtrlSignExtQ103H    , CtrlSignExtQ102H    , Clk)
+`MAFIA_DFF(PcPlus4Q103H        , PcPlus4Q102H        , Clk)
+`MAFIA_DFF(SelRegWrPcQ103H     , SelRegWrPcQ102H     , Clk)
+`MAFIA_DFF(RegDstQ103H         , RegDstQ102H         , Clk)
+`MAFIA_DFF(CtrlRegWrEnQ103H    , CtrlRegWrEnQ102H    , Clk)
+`MAFIA_DFF(flushQ103H          , flushQ102H          , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 
@@ -376,14 +376,14 @@ assign DMemWrEnQ103H    = CtrlDMemWrEnQ103H;
 assign DMemRdEnQ103H    = SelDMemWbQ103H;
 
 // Q103H to Q104H Flip Flops
-`RVC_DFF(AluOutQ104H         , AluOutQ103H         , Clk)
-`RVC_DFF(SelDMemWbQ104H      , SelDMemWbQ103H      , Clk)
-`RVC_DFF(PcPlus4Q104H        , PcPlus4Q103H        , Clk)
-`RVC_DFF(SelRegWrPcQ104H     , SelRegWrPcQ103H     , Clk)
-`RVC_DFF(RegDstQ104H         , RegDstQ103H         , Clk)
-`RVC_DFF(CtrlRegWrEnQ104H    , CtrlRegWrEnQ103H    , Clk)
-`RVC_DFF(CtrlSignExtQ104H    , CtrlSignExtQ103H    , Clk)
-`RVC_DFF(ByteEnQ104H         , CtrlDMemByteEnQ103H , Clk)
+`MAFIA_DFF(AluOutQ104H         , AluOutQ103H         , Clk)
+`MAFIA_DFF(SelDMemWbQ104H      , SelDMemWbQ103H      , Clk)
+`MAFIA_DFF(PcPlus4Q104H        , PcPlus4Q103H        , Clk)
+`MAFIA_DFF(SelRegWrPcQ104H     , SelRegWrPcQ103H     , Clk)
+`MAFIA_DFF(RegDstQ104H         , RegDstQ103H         , Clk)
+`MAFIA_DFF(CtrlRegWrEnQ104H    , CtrlRegWrEnQ103H    , Clk)
+`MAFIA_DFF(CtrlSignExtQ104H    , CtrlSignExtQ103H    , Clk)
+`MAFIA_DFF(ByteEnQ104H         , CtrlDMemByteEnQ103H , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 

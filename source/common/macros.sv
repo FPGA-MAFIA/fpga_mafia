@@ -15,28 +15,28 @@
 `ifndef MACROS_VS
 `define MACROS_VS
 
-`define  RVC_DFF(q,i,clk)              \
+`define  MAFIA_DFF(q,i,clk)              \
          always_ff @(posedge clk)      \
             q<=i;
 
-`define  RVC_EN_DFF(q,i,clk,en)        \
+`define  MAFIA_EN_DFF(q,i,clk,en)        \
          always_ff @(posedge clk)      \
             if(en) q<=i;
 
-`define  RVC_RST_DFF(q,i,clk,rst)      \
+`define  MAFIA_RST_DFF(q,i,clk,rst)      \
          always_ff @(posedge clk) begin\
             if (rst) q <='0;           \
             else     q <= i;           \
          end
 
-`define  RVC_RST_VAL_DFF(q,i,clk,rst,val)      \
+`define  MAFIA_RST_VAL_DFF(q,i,clk,rst,val)      \
          always_ff @(posedge clk) begin\
             if (rst) q <=val;          \
             else     q <= i;           \
          end
 
 
-`define  RVC_EN_RST_DFF(q,i,clk,en,rst)\
+`define  MAFIA_EN_RST_DFF(q,i,clk,en,rst)\
          always_ff @(posedge clk)      \
             if (rst)    q <='0;        \
             else if(en) q <= i;

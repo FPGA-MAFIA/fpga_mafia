@@ -43,13 +43,13 @@ end
 //=======================================
 //          the memory Array
 //=======================================
-`RVC_DFF(mem, next_mem, clk)
+`MAFIA_DFF(mem, next_mem, clk)
 
 //=======================================
 //          reading the memory
 //=======================================
 assign pre_q= mem[rd_address];
 // sample the read - synchros read
-`RVC_DFF(q, pre_q, clk)
+`MAFIA_DFF(q, pre_q, clk)
 
 endmodule
