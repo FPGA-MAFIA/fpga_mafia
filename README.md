@@ -5,23 +5,6 @@
 
 This project aims to design a SOC Tile based mesh fabric that can incorporate various functionalities, such as RISCV mini-cores, big-cores, hardware accelerators, and IO devices like UART, keyboard, VGA, DE10-Lite FPGA IO, and more.
 
-
-## Getting Started
-To see your build and run options, run the following command:  
-```python build.py -h ```  
-For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
-Please add your question in the comment section of the discussion
-
-## Prerequisite
-Before you start, make sure you have the following tools and software installed:
-- [RISCV gcc releases](https://github.com/xpack-dev-tools/riscv-none-embed-gcc-xpack/releases/) & [install](https://xpack.github.io/riscv-none-embed-gcc/install/), a Windows gcc for RISCV ISA.  
-- [Intel design SW for windows](https://www.intel.com/content/www/us/en/software-kit/660907/intel-quartus-prime-lite-edition-design-software-version-20-1-1-for-windows.html) , modelsim + quartus + MAX10 (de10-lite). used to compile, simulate & load to FPGA the HW systemverilog design.  
-### Recommendations
-To make your experience smoother, we recommend installing the following tools:
-- [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a "Unix-like" shell.  
-- [Visual Studio Code](https://code.visualstudio.com/download), a code editor that supports many programming languages.  
-
-
 # Project overview
 - The final project for 4th-year Electrical Engineering and Computer Engineering students at Bar-Ilan University and the Technion in Israel  
 - Goal: design a System-on-a-Chip (SOC) tile-based mesh fabric that integrates various IPs & functionalities  
@@ -41,8 +24,20 @@ Software Stack to run on SOC:
 The diagram below provides a general idea of the project's architecture.   
 ![image](https://user-images.githubusercontent.com/81047407/218485725-d4442e94-7129-48b9-92bb-8f2ce52a301c.png)
 
+## Getting Started
+To see your build and run options, run the following command:  
+```python build.py -h ```  
+For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
+Please add your question in the comment section of the discussion
 
-
+## Prerequisite
+Before you start, make sure you have the following tools and software installed:
+- [RISCV gcc releases](https://github.com/xpack-dev-tools/riscv-none-embed-gcc-xpack/releases/) & [install](https://xpack.github.io/riscv-none-embed-gcc/install/), a Windows gcc for RISCV ISA.  
+- [Intel design SW for windows](https://www.intel.com/content/www/us/en/software-kit/660907/intel-quartus-prime-lite-edition-design-software-version-20-1-1-for-windows.html) , modelsim + quartus + MAX10 (de10-lite). used to compile, simulate & load to FPGA the HW systemverilog design.  
+### Recommendations
+To make your experience smoother, we recommend installing the following tools:
+- [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a "Unix-like" shell.  
+- [Visual Studio Code](https://code.visualstudio.com/download), a code editor that supports many programming languages.  
 
 ## Inspiration Behind the Project:  
 This project draws inspiration from innovative players in the field of computing.  
