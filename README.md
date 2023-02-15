@@ -68,7 +68,7 @@ Additionally, make sure the following aliases are present in your `~/.aliases` f
 Then run ``` source ~/.aliases ```    
 
 
-
 ### fast access
 python build.py -h  
 python build.py -proj_name 'big_core' -debug -tests alive -app 
+python build.py -proj_name 'sc_core' -debug -tests alive -full_run
