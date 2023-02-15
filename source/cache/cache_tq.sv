@@ -39,22 +39,22 @@ logic [NUM_TQ_ENTRY-1:0] first_free;
 logic [NUM_TQ_ENTRY-1:0] fill_entries;
 logic [NUM_TQ_ENTRY-1:0] first_fill;
 
-t_reg_id [NUM_TQ_ENTRY-1:0] tq_reg_id; //** Error: ../../../source/cache/cache_tq.sv(54): (vlog-2730) Undefined variable: ''.
-logic    [NUM_TQ_ENTRY-1:0] en_tq_merge_buffer_data; //** at ../../../source/cache/cache_tq.sv(61): (vlog-2730) Undefined variable: ''.      
-logic    [NUM_TQ_ENTRY-1:0] en_tq_cl_address; //** at ../../../source/cache/cache_tq.sv(62): (vlog-2730) Undefined variable: ''.
-logic    [NUM_TQ_ENTRY-1:0] en_tq_rd_indication; //** at ../../../source/cache/cache_tq.sv(63): (vlog-2730) Undefined variable: ''.
-logic    [NUM_TQ_ENTRY-1:0] en_tq_wr_indication; //** at ../../../source/cache/cache_tq.sv(64): (vlog-2730) Undefined variable: ''.
-logic    [NUM_TQ_ENTRY-1:0] en_tq_reg_id; //** at ../../../source/cache/cache_tq.sv(65): (vlog-2730) Undefined variable: ''.
+t_reg_id [NUM_TQ_ENTRY-1:0] tq_reg_id; 
+logic    [NUM_TQ_ENTRY-1:0] en_tq_merge_buffer_data; 
+logic    [NUM_TQ_ENTRY-1:0] en_tq_cl_address; 
+logic    [NUM_TQ_ENTRY-1:0] en_tq_rd_indication; 
+logic    [NUM_TQ_ENTRY-1:0] en_tq_wr_indication; 
+logic    [NUM_TQ_ENTRY-1:0] en_tq_reg_id; 
 
-t_cl         [NUM_TQ_ENTRY-1:0] tq_merge_buffer_data; //** at ../../../source/cache/cache_tq.sv(61): (vlog-2730) Undefined variable: ''.
-t_cl_address [NUM_TQ_ENTRY-1:0] tq_cl_address; //** at ../../../source/cache/cache_tq.sv(62): (vlog-2730) Undefined variable: ''.
-logic        [NUM_TQ_ENTRY-1:0] tq_rd_indication; //** at ../../../source/cache/cache_tq.sv(63): (vlog-2730) Undefined variable: ''.
-logic        [NUM_TQ_ENTRY-1:0] tq_wr_indication; //** at ../../../source/cache/cache_tq.sv(64): (vlog-2730) Undefined variable: ''.
-t_cl         [NUM_TQ_ENTRY-1:0] next_tq_merge_buffer_data; //** at ../../../source/cache/cache_tq.sv(61): (vlog-2730) Undefined variable: ''.    
-t_cl_address [NUM_TQ_ENTRY-1:0] next_tq_cl_address; //** at ../../../source/cache/cache_tq.sv(62): (vlog-2730) Undefined variable: ''.
-logic        [NUM_TQ_ENTRY-1:0] next_tq_rd_indication; //** at ../../../source/cache/cache_tq.sv(63): (vlog-2730) Undefined variable: ''.        
-logic        [NUM_TQ_ENTRY-1:0] next_tq_wr_indication; //** at ../../../source/cache/cache_tq.sv(64): (vlog-2730) Undefined variable: ''.        
-logic        [NUM_TQ_ENTRY-1:0] next_tq_reg_id; //** at ../../../source/cache/cache_tq.sv(65): (vlog-2730) Undefined variable: ''.
+t_cl         [NUM_TQ_ENTRY-1:0] tq_merge_buffer_data; 
+t_cl_address [NUM_TQ_ENTRY-1:0] tq_cl_address;
+logic        [NUM_TQ_ENTRY-1:0] tq_rd_indication; 
+logic        [NUM_TQ_ENTRY-1:0] tq_wr_indication; 
+t_cl         [NUM_TQ_ENTRY-1:0] next_tq_merge_buffer_data; 
+t_cl_address [NUM_TQ_ENTRY-1:0] next_tq_cl_address; 
+logic        [NUM_TQ_ENTRY-1:0] next_tq_rd_indication; 
+logic        [NUM_TQ_ENTRY-1:0] next_tq_wr_indication; 
+logic        [NUM_TQ_ENTRY-1:0] next_tq_reg_id; 
 
 
 logic rd_hit_pipe_rsp_q3;
