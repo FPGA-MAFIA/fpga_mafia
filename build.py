@@ -4,8 +4,8 @@ import subprocess
 import glob
 import argparse
 from termcolor import colored
-import colorama
-colorama.init()
+#import colorama
+#colorama.init()
 
 examples = '''
 Examples:
