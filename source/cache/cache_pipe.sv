@@ -139,17 +139,17 @@ assign set_ways_free_q2 = ~rd_data_set_rsp_q2.valid;
 always_comb begin : fill_victem_way
     set_ways_victim_q2 = '0; //TODO
     dirty_evict_q2     = 1'b0;
-    any_free_way_q2    = |first_free_way_q2;
+    any_free_way_q2    = |set_ways_free_q2;
     any_lru_way_q2     = |first_lru_way_q2;
     if( cache_pipe_lu_q2.lu_op == FILL_LU ) begin
         set_ways_victim_q2 = any_free_way_q2 ? first_free_way_q2 :
                              any_lru_way_q2  ? first_lru_way_q2  : // expecting always to have at lease 1 LRU (due to the bit flip)
                                                4'b0000 ;           // not expecting to occure - this will couse a bug if it doues 
     end
-    // if entry is valid, modified and chossen as victim
+    // if entry is valid, modified and chosen as victim
     victim_and_modified_q2 = (rd_data_set_rsp_q2.valid & rd_data_set_rsp_q2.modified & set_ways_victim_q2); //the "and" will help us indicate if we choose a modified entry to evict
     // set the dirty evict bit
-    dirty_evict_q2     = !victim_and_modified_q2;
+    dirty_evict_q2     = |victim_and_modified_q2;
 
 end
 
@@ -320,7 +320,8 @@ end
 //    CACHE_MISS, send FM_FILL_REQUEST
 //======================
 //in case of Rd/Wr cache_miss send a FM fill request
-if (cache_pipe_lu_q3.miss) begin
+if (cache_pipe_lu_q3.miss && 
+   (!(cache_pipe_lu_q3.lu_op == FILL_LU))) begin
     cache2fm_req_q3.valid   =  cache_pipe_lu_q3.lu_valid; 
     cache2fm_req_q3.address = {cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset};
     cache2fm_req_q3.tq_id   =  cache_pipe_lu_q3.lu_tq_id;

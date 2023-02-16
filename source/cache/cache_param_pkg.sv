@@ -59,8 +59,8 @@ typedef logic [SET_WIDTH     -1:0]  t_set_data;
 typedef logic [ADDRESS_WIDTH -1:0]  t_address; 
 typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
 typedef logic [WORD_WIDTH -1:0]     t_word;
-typedef logic [OFFSET_WIDTH -1:0]   t_offset;
-typedef logic [OFFSET_WIDTH -1:2]   t_word_offset;
+typedef logic [MSB_OFFSET     :0]   t_offset;
+typedef logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET]   t_word_offset;
 
 
 

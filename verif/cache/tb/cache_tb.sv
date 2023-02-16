@@ -50,7 +50,9 @@ end
 if(test_name == "single_fm_req") begin
 `include "single_fm_req.sv"
 end
-
+if(test_name == "rd_modify_rd") begin
+`include "rd_modify_rd.sv"
+end
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
@@ -67,7 +69,7 @@ cache cache ( //DUT
    .cache2core_rsp     (cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
    .cache2fm_req_q3    (cache2fm_req_q3),//output  t_fm_req
-   .fm2cache_rd_rsp    (fm2cache_rd_rsp)    //input   var t_fm_rd_rsp
+   .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
 );
 
 task delay(input int cycles);
@@ -102,12 +104,14 @@ endtask
 localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
 t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
 task backdoor_fm_load();
+  $display("= backdoor_fm_load start =\n");
   for(int FM_ADDRESS =0; FM_ADDRESS < NUM_FM_CL ; FM_ADDRESS++) begin
-        back_door_fm_mem[FM_ADDRESS] = FM_ADDRESS + 'h1111;
+        back_door_fm_mem[FM_ADDRESS] = FM_ADDRESS + 'hABBA_BABA_0000_1111;
   end
     force far_memory_array.mem  = back_door_fm_mem;
     delay(5);
     release far_memory_array.mem;
+  $display("= backdoor_fm_load done =\n");
 endtask
 
 task wr_req( input logic [19:0]  address, 
@@ -116,6 +120,7 @@ task wr_req( input logic [19:0]  address,
     while (stall) begin
       delay(1); $display("-> stall! cant send write: %h ", address );
     end
+$display("wr_req %h\n", id);
     core2cache_req.valid   =  1'b1;
     core2cache_req.opcode  =  WR_OP;
     core2cache_req.address =  address;
@@ -130,6 +135,7 @@ task rd_req( input logic [19:0] address,
     while (stall) begin 
     delay(1);  $display("-> stall! cant send read: %h ", address);
     end
+$display("rd_req %h\n", id);
     core2cache_req.valid   =  1'b1;
     core2cache_req.opcode  =  RD_OP;
     core2cache_req.address =  address;
@@ -148,7 +154,7 @@ array  #(
     .clk            (clk),                                     //input
     .rst            (rst),                                     //input
     //write interface
-    .wr_en          (cache2fm_req_q3.valid),                   //input
+    .wr_en          (cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP)),                   //input
     .wr_address     (cache2fm_req_q3.address[MSB_TAG:LSB_SET]),//input
     .wr_data        (cache2fm_req_q3.data),                    //input
     //read interface
@@ -158,7 +164,7 @@ array  #(
 
 // One Cycle Latency on memory read - sample the id & Valid.
 `MAFIA_DFF(samp_fm2cache_rd_rsp[0].tq_id   ,cache2fm_req_q3.tq_id     , clk)
-`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_req_q3.valid     , clk)
+`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_req_q3.valid  && (cache2fm_req_q3.opcode == FILL_REQ_OP)   , clk)
 // Shift register to add 10 cycle latecy on FM read.
 `MAFIA_DFF(samp_fm2cache_rd_rsp[9:1]       ,samp_fm2cache_rd_rsp[8:0] , clk)
 `MAFIA_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , clk)
