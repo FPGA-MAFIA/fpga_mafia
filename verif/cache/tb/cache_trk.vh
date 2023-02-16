@@ -29,7 +29,7 @@ initial begin
     $fwrite(cache_top_trk, "                        CACHE TOP TRACKER                              \n");
     $fwrite(cache_top_trk, "==================================================================================\n");
     $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
-    $fwrite(cache_top_trk," Time  ||  OPCODE  ||   address  ||  REG_ID || tag  || Set ||    Data \n");
+    $fwrite(cache_top_trk," Time  ||  OPCODE        ||address||REG/TQ_ID|| tag  || Set ||    Data \n");
     $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
 
     cache_pipe_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_trk.log"},"w");
@@ -45,7 +45,7 @@ initial begin
     $fwrite(cache_fm_trk, "                        CACHE FAR MEMORY TRACKER                       \n");
     $fwrite(cache_fm_trk, "==================================================================================\n");
     $fwrite(cache_fm_trk,"-----------------------------------------------------------------------------------\n");
-    $fwrite(cache_fm_trk,"  Time    ||      OPCODE      ||  address      ||    Data                     TQ ID \n");
+    $fwrite(cache_fm_trk,"  Time    ||      OPCODE           ||  address      ||    Data                     TQ ID \n");
     $fwrite(cache_fm_trk,"-----------------------------------------------------------------------------------\n");
 
     fm_files_to_write[0] = cache_fm_trk;
@@ -57,7 +57,7 @@ end
 //==================================================
 always @(posedge clk) begin
     if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
-        $fwrite(cache_top_trk,"%t     RD_REQ      %h           %h      %h       %h      ( -- read request -- ) \n",
+        $fwrite(cache_top_trk,"%t     CORE_RD_REQ      %h        %h      %h       %h      ( -- read request -- ) \n",
         $realtime, 
         core2cache_req.address, 
         core2cache_req.reg_id, 
@@ -65,7 +65,7 @@ always @(posedge clk) begin
         core2cache_req.address[MSB_SET:LSB_SET]);      
     end
     if(core2cache_req.valid && (core2cache_req.opcode == WR_OP )) begin
-        $fwrite(cache_top_trk,"%t     WR_REQ      %h           %h      %h       %h      %h \n",
+        $fwrite(cache_top_trk,"%t     CORE_WR_REQ      %h        %h      %h       %h      %h \n",
         $realtime, 
         core2cache_req.address, 
         core2cache_req.reg_id, 
@@ -74,13 +74,39 @@ always @(posedge clk) begin
         core2cache_req.data);      
     end
     if(cache2core_rsp.valid) begin
-        $fwrite(cache_top_trk,"%t     RD_RSP      %h           %h      %h       %h      %h \n",
+        $fwrite(cache_top_trk,"%t     CACHE_RD_RSP     %h        %h      %h       %h      %h \n",
         $realtime, 
         cache2core_rsp.address, 
         cache2core_rsp.reg_id, 
         cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
         cache2core_rsp.address[MSB_SET:LSB_SET], 
         cache2core_rsp.data);
+    end
+    if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
+        $fwrite(cache_top_trk,"%t  CACHE_DIRTY_EVICT  %h        %h      %h       %h      %h \n",
+        $realtime, 
+        cache2fm_req_q3.address, 
+        cache2fm_req_q3.tq_id, 
+        cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
+        cache2fm_req_q3.address[MSB_SET:LSB_SET], 
+        cache2fm_req_q3.data);
+    end
+    if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == FILL_REQ_OP)) begin
+        $fwrite(cache_top_trk,"%t     CACHE_FILL_REQ   %h        %h       %h       %h      ( -- read request -- ) \n",
+        $realtime, 
+        cache2fm_req_q3.address, 
+        cache2fm_req_q3.tq_id, 
+        cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
+        cache2fm_req_q3.address[MSB_SET:LSB_SET]);
+    end
+    if(fm2cache_rd_rsp.valid) begin
+        $fwrite(cache_top_trk,"%t     FM_FILL_RSP  (see tq_id)      %h     ------    ------   %h_%h_%h_%h \n",
+        $realtime, 
+        fm2cache_rd_rsp.tq_id, 
+        fm2cache_rd_rsp.data[127:96], 
+        fm2cache_rd_rsp.data[95:64], 
+        fm2cache_rd_rsp.data[63:32], 
+        fm2cache_rd_rsp.data[31:0]);
     end
 //end
 
