@@ -59,15 +59,6 @@ To resolve this issue, make sure the following line is added to your `~/.bashrc`
 > export PATH=$PATH:/c/Users/amich/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin   
 Then run ``` source ~/.bashrc ```   
 
-
-Additionally, make sure the following aliases are present in your `~/.aliases` file:
-> alias rv_gcc='/c/Users/amich/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin/riscv-none-embed-gcc.exe'  
-> alias rv_objcopy='/c/Users/amich/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin/riscv-none-embed-objcopy.exe'  
-> alias rv_objdump='/c/Users/amich/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin/riscv-none-embed-objdump.exe'    
-
-Then run ``` source ~/.aliases ```    
-
-
 ### fast access
 python build.py -h  
 python build.py -proj_name 'big_core' -debug -tests alive -app 
