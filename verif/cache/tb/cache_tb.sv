@@ -120,7 +120,7 @@ task wr_req( input logic [19:0]  address,
     while (stall) begin
       delay(1); $display("-> stall! cant send write: %h ", address );
     end
-$display("wr_req %h\n", id);
+$display("wr_req: %h , address %h:", id, address);
     core2cache_req.valid   =  1'b1;
     core2cache_req.opcode  =  WR_OP;
     core2cache_req.address =  address;
@@ -135,7 +135,7 @@ task rd_req( input logic [19:0] address,
     while (stall) begin 
     delay(1);  $display("-> stall! cant send read: %h ", address);
     end
-$display("rd_req %h\n", id);
+$display("rd_req: %h , address %h:", id, address);
     core2cache_req.valid   =  1'b1;
     core2cache_req.opcode  =  RD_OP;
     core2cache_req.address =  address;
