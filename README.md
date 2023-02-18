@@ -1,4 +1,4 @@
-[![mafia_sanity](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_bash.yml/badge.svg)](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_bash.yml)
+[![mafia_sanity](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml/badge.svg)](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml)
 
 # FPGA Multi-Agent Fabric Integration Architecture
 ## The MAFIA Project

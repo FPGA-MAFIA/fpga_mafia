@@ -14,12 +14,12 @@ jobs:
     runs-on: [self-hosted , windows, x64]
     steps:
       - uses: actions/checkout@v2
-      - name: Run build BIG_CORE - alive test
+      - name: Run build BIG_CORE -all -app -hw -sim
         run: python build.py -proj_name 'big_core' -debug -all -app -hw -sim
-      - name: Run build MINI_CORE - alive test
+      - name: Run build MINI_CORE -all -app -hw -sim
         run: python build.py -proj_name 'mini_core' -debug -all -app -hw -sim
-      - name: Run build SC_CORE - alive test
+      - name: Run build SC_CORE -all -app -hw -sim 
         run: python build.py -proj_name 'sc_core' -debug -all -app -hw -sim
-      - name: Run build CACHE - alive test
+      - name: Run build CACHE -all -app -hw -sim 
         run: python build.py -proj_name 'cache' -debug -all -hw -sim
 
