@@ -21,4 +21,4 @@
 1520.0     CORE_RD_REQ      e8058        02      e8       05      ( -- read request -- ) 
 1540.0     CACHE_RD_RSP     e8058        00      e8       05      88888888 
 1580.0     CORE_RD_REQ      e805c        03      e8       05      ( -- read request -- ) 
-1600.0     CACHE_RD_RSP     e805c        01      e8       05      cccccccc
+1600.0     CACHE_RD_RSP     e805c        01      e8       05      cccccccc 
