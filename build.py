@@ -24,6 +24,7 @@ parser.add_argument('-hw', action='store_true', help='compile the RISCV HW into 
 parser.add_argument('-sim', action='store_true', help='start simulation')
 parser.add_argument('-full_run', action='store_true', help='compile SW, HW of the test and simulate it')
 parser.add_argument('-proj_name', default='big_core', help='insert your project name (as mentioned in the dirs name')
+parser.add_argument('-pp', action='store_true', help='run post-process on the tests')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -181,7 +182,18 @@ class Test:
             subprocess.check_output(delete_cmd, shell=True)
         except:
             print_message('[ERROR] failed to remove /target/'+self.project+'/tests/'+self.name+' directory')
+    def _post_process(self):
+        os.chdir(VERIF)
+        pp_cmd = 'python '+self.project+'_pp.py ' +self.name
+        try:
+            results = subprocess.run(pp_cmd)
+        except:
+            print_message('[ERROR] Failed to run post process ')
+            self.fail_flag = True
+        os.chdir(MODEL_ROOT)
+        
 
+        
 def print_message(msg):
     msg_type = msg.split()[0]
     try:
@@ -230,6 +242,8 @@ def main():
             test._start_simulation()
         if (args.gui):
             test._gui()
+        if (args.pp):
+            test._post_process()    
         if not args.debug:
             test._no_debug()
         print_message('******************************************************************************')
