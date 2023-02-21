@@ -3,6 +3,7 @@ import os
 import subprocess
 import glob
 import argparse
+import sys
 from termcolor import colored
 
 examples = '''
@@ -25,6 +26,7 @@ parser.add_argument('-sim', action='store_true', help='start simulation')
 parser.add_argument('-full_run', action='store_true', help='compile SW, HW of the test and simulate it')
 parser.add_argument('-proj_name', default='big_core', help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-pp', action='store_true', help='run post-process on the tests')
+parser.add_argument('-fpga', action='store_true', help='run compile & synthesis for the fpga')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -35,6 +37,7 @@ TARGET    = './target/'+args.proj_name+'/'
 MODELSIM  = './target/'+args.proj_name+'/modelsim/'
 APP       = './app/'
 TESTS     = './verif/'+args.proj_name+'/tests/'
+FPGA_ROOT = './FPGA/'+args.proj_name+'/'
 
 #####################################################################################################
 #                                           class Test
@@ -164,7 +167,7 @@ class Test:
                 self.fail_flag = True
                 print(results.stdout)
             else:
-                print(results.stdout)
+                # print(results.stdout) - TODO write the results to a file instead of to display. print the path to the file
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
         os.chdir(MODEL_ROOT)
     def _gui(self):
@@ -186,12 +189,22 @@ class Test:
         os.chdir(VERIF)
         pp_cmd = 'python '+self.project+'_pp.py ' +self.name
         try:
-            results = subprocess.run(pp_cmd)
+            return_val = subprocess.run(pp_cmd)
         except:
             print_message('[ERROR] Failed to run post process ')
             self.fail_flag = True
         os.chdir(MODEL_ROOT)
-        
+        return return_val.returncode
+
+    def _start_fpga(self):
+        os.chdir(FPGA_ROOT)
+        fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off '+self.project+' -c '+self.project+' &'
+        try:
+            subprocess.call(fpga_cmd, shell=True)
+        except:
+            print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
+            self.fail_flag = True
+        os.chdir(MODEL_ROOT)       
 
         
 def print_message(msg):
@@ -231,24 +244,45 @@ def main():
      # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
     # sys.stderr = open(log_file, "w", buffering=1)   
+    run_status = "PASSED"
     for test in tests:
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
+        print_message('******************************************************************************')
         if (args.app or args.full_run) and not test.fail_flag:
             test._compile_sw()
         if (args.hw or args.full_run) and not test.fail_flag:
             test._compile_hw()
         if (args.sim or args.full_run) and not test.fail_flag:
             test._start_simulation()
+        if (args.fpga) and not test.fail_flag:
+            test._start_fpga()
         if (args.gui):
             test._gui()
-        if (args.pp):
-            test._post_process()    
+        if (args.pp) and not test.fail_flag:
+            if (test._post_process()):# if return value is 0, then the post process is done successfully
+                test.fail_flag = True
         if not args.debug:
             test._no_debug()
-        print_message('******************************************************************************')
+        print_message(f'************************** End {test.name} **********************************')
+        print()
+        if(test.fail_flag):
+            run_status = "FAILED"
     # sys.stdout.flush()
     # sys.stderr.flush()
-    
+
+    print_message('=================================================================================')
+    print_message(f'[INFO] Run status: {run_status} ')
+    if(run_status == "FAILED"):
+        print_message('The failed tests are:')
+    for test in tests:
+        if(test.fail_flag):
+            print_message(f'[ERROR] Run failed - {test.name}')
+    print_message('=================================================================================')
+    if(run_status == "FAILED"):
+        return 1
+    else:
+        return 0
+
 if __name__ == "__main__" :
-    main()      
+    sys.exit(main())

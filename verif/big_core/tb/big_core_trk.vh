@@ -53,6 +53,7 @@ end
 
 
 
+logic [31:0] PcQ103H;
 logic [31:0] PcQ104H;
 logic [31:0] DMemAddressQ104H;
 logic [31:0] DMemWrDataQ104H;
@@ -60,7 +61,8 @@ logic        DMemWrEnQ104H;
 logic        DMemRdEnQ104H;
 `MAFIA_DFF(DMemWrEnQ104H    , big_core_top.big_core.DMemWrEnQ103H   , Clk)
 `MAFIA_DFF(DMemRdEnQ104H    , big_core_top.big_core.DMemRdEnQ103H   , Clk)
-`MAFIA_DFF(PcQ104H          , big_core_top.big_core.PcQ103H         , Clk)
+`MAFIA_DFF(PcQ103H          , big_core_top.big_core.PcQ102H         , Clk)
+`MAFIA_DFF(PcQ104H          , PcQ103H         , Clk)
 `MAFIA_DFF(DMemAddressQ104H , big_core_top.big_core.DMemAddressQ103H, Clk)
 `MAFIA_DFF(DMemWrDataQ104H  , big_core_top.big_core.DMemWrDataQ103H , Clk)
 

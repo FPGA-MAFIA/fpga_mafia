@@ -1,0 +1,19 @@
+# this is a github action that runs the python build
+
+name: mafia_fpga
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted , windows, x64]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run BIG_CORE build , then compile & synth for FPGA | -hw -sim -fpga
+        run: python build.py -proj_name 'big_core' -debug -test alive -app -hw -sim -fpga
+

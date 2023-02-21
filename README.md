@@ -55,9 +55,16 @@ Similarly, this project offers a unique, highly-integratable mesh architecture t
 
 
 ``` 'riscv-none-embed-gcc.exe' is not recognized as an internal or external command ```  
-To resolve this issue, make sure the following line is added to your `~/.bashrc` file:  
-> export PATH=$PATH:/c/Users/amich/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin   
+To resolve this issue, make sure the following line is added to your `~/.bashrc` file:   
+> export PATH=$PATH:/c/Users/'user_name'/AppData/Roaming/xPacks/riscv-none-embed-gcc/xpack-riscv-none-embed-gcc-10.2.0-1.2/bin   
+
 Then run ``` source ~/.bashrc ```   
+
+``` 'quartus_map' is not recognized as an internal or external command, ```
+To resolve this issue, make sure the following line is added to your `~/.bashrc` file:   
+> export PATH=$PATH:/c/intelFPGA_lite/20.1/quartus/bin64/   
+
+Then run ``` source ~/.bashrc ```    
 
 ### fast access
 python build.py -h  
