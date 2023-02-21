@@ -71,7 +71,7 @@ initial begin: test_seq
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force mini_top.mini_mem_wrap.i_mem.mem = IMem;
     //$readmemh({"../app/data_mem.sv"}, DMem);
-    #1us $finish;
+    #1000 $finish;
 end // test_seq
 
 
