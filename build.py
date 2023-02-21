@@ -186,11 +186,12 @@ class Test:
         os.chdir(VERIF)
         pp_cmd = 'python '+self.project+'_pp.py ' +self.name
         try:
-            results = subprocess.run(pp_cmd)
+            return_val = subprocess.run(pp_cmd)
         except:
             print_message('[ERROR] Failed to run post process ')
             self.fail_flag = True
         os.chdir(MODEL_ROOT)
+        return return_val.returncode
         
 
         
@@ -231,9 +232,11 @@ def main():
      # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
     # sys.stderr = open(log_file, "w", buffering=1)   
+    run_status = "PASSED"
     for test in tests:
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
+        print_message('******************************************************************************')
         if (args.app or args.full_run) and not test.fail_flag:
             test._compile_sw()
         if (args.hw or args.full_run) and not test.fail_flag:
@@ -242,13 +245,27 @@ def main():
             test._start_simulation()
         if (args.gui):
             test._gui()
-        if (args.pp):
-            test._post_process()    
+        if (args.pp) and not test.fail_flag:
+            # if return value is 0, then the post process is done successfully
+            if (test._post_process()):
+                test.fail_flag = True
         if not args.debug:
             test._no_debug()
-        print_message('******************************************************************************')
+        print_message(f'************************** End {test.name} **********************************')
+        print()
+        if(test.fail_flag):
+            run_status = "FAILED"
     # sys.stdout.flush()
     # sys.stderr.flush()
+
+    print_message('=================================================================================')
+    print_message(f'[INFO] Run status: {run_status} ')
+    if(run_status == "FAILED"):
+        print_message('The failed tests are:')
+    for test in tests:
+        if(test.fail_flag):
+            print_message(f'[ERROR] Run failed - {test.name}')
+    print_message('=================================================================================')
     
 if __name__ == "__main__" :
     main()      

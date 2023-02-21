@@ -3,6 +3,7 @@ from termcolor import colored, cprint
 import subprocess
 import argparse
 import difflib
+import sys
 
 parser = argparse.ArgumentParser(description= 'get test name from build')
 parser.add_argument('test_name', help='The name of the test to run pp on')
@@ -30,14 +31,6 @@ print_message('--------------------------------------------------------')
 # Path to the directory containing the tests
 base_path = "target/cache/tests"
 
-# Initialize variable to keep track of total diffs
-total_diffs = 0
-
-fails = 0
-num_tests = 0
-
-
-num_tests +=1
 # Construct the paths to the two files to compare
 file1_path = os.path.join(base_path, args.test_name, "cache_top_trk.log").replace("\\", "/")
 file2_path = os.path.join("verif", "cache", "golden_trk", "golden_" + args.test_name + "_top_trk.log").replace("\\", "/")
@@ -89,17 +82,18 @@ if os.path.exists(file2_path):
     if num_diffs > 0:
         #print(f"There are {num_diffs} differences between the two files:")
         #print(f"Please refer to" ,colored(output_path,'white',attrs=['bold']), "to see the full diff\n")
-        print_message(f"[ERROR] There are {num_diffs} differences between the two files:")
+        print_message(f"[WARNING] There are {num_diffs} differences between the two files:")
         print_message(f"[INFO] Please refer to {output_path} to see the full diff\n")
 else: 
     print_message(f"\n[INFO] No golden tracker found for test {args.test_name}")
 
 print_message('--------------------------------------------------------') 
-if total_diffs == 0:
+if num_diffs == 0:
     print(colored("\n[INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
+    sys.exit(0)
 else:
-    print_message(f"\n[WARNING] {args.test_name} have failed Post-Process")
-   
+    print_message(f"\n[ERROR] {args.test_name} have failed Post-Process")
+    sys.exit(1)
 
 #print_message('******************************************************************************')           
 
