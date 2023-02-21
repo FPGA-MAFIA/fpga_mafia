@@ -266,6 +266,10 @@ def main():
         if(test.fail_flag):
             print_message(f'[ERROR] Run failed - {test.name}')
     print_message('=================================================================================')
-    
+    if(run_status == "FAILED"):
+        return 1
+    else:
+        return 0
+
 if __name__ == "__main__" :
     main()      
