@@ -13,8 +13,8 @@ def print_message(msg):
     try:
         color = {
             '[ERROR]'   : 'red',
-            '[WARNING]' : 'red',
-            '[INFO]'    : 'yellow',
+            '[WARNING]' : 'yellow',
+            '[INFO]'    : 'green',
             '[COMMAND]' : 'cyan',
         }[msg_type]
     except:
@@ -77,9 +77,6 @@ if os.path.exists(file2_path):
     # Count the number of differences
     num_diffs = len([line for line in diff if line.startswith('+') or line.startswith('-')])
 
-    # Print the number of differences
-    print(f"There are {num_diffs} differences between the two files:")
-
     # Print the differences
     for line in diff:
         if line.startswith('+'):
@@ -89,7 +86,11 @@ if os.path.exists(file2_path):
 
 
     # Print the path to the output file
-    print(f"Please refer to" ,colored(output_path,'white',attrs=['bold']), "to see the full diff\n")
+    if num_diffs > 0:
+        #print(f"There are {num_diffs} differences between the two files:")
+        #print(f"Please refer to" ,colored(output_path,'white',attrs=['bold']), "to see the full diff\n")
+        print_message(f"[ERROR] There are {num_diffs} differences between the two files:")
+        print_message(f"[INFO] Please refer to {output_path} to see the full diff\n")
 else: 
     print_message(f"\n[INFO] No golden tracker found for test {args.test_name}")
 
