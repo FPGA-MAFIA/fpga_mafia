@@ -3,6 +3,7 @@ import os
 import subprocess
 import glob
 import argparse
+import sys
 from termcolor import colored
 
 examples = '''
@@ -272,4 +273,4 @@ def main():
         return 0
 
 if __name__ == "__main__" :
-    main()      
+    sys.exit(main())

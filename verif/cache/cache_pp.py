@@ -87,7 +87,6 @@ if os.path.exists(file2_path):
 else: 
     print_message(f"\n[INFO] No golden tracker found for test {args.test_name}")
 
-print_message('--------------------------------------------------------') 
 if num_diffs == 0:
     print(colored("\n[INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
     sys.exit(0)
@@ -95,5 +94,4 @@ else:
     print_message(f"\n[ERROR] {args.test_name} have failed Post-Process")
     sys.exit(1)
 
-#print_message('******************************************************************************')           
 
