@@ -10,7 +10,7 @@ This project aims to design a SOC Tile based mesh fabric that can incorporate va
 - Goal: design a System-on-a-Chip (SOC) tile-based mesh fabric that integrates various IPs & functionalities  
 
 Main Components:  
-- 4-way Router  
+- 4-way Router + local Endpoint  
 - 3-stage Mini Core RV32I compatible   
 - 7-stage Big Core RV32IM CSR compatible with MMIO (VGA, uart, FPGA IO, PS2 Keyboard)  
 - Memory Subsystem with L1 Instruction and Data Cache and a Memory Controller  
