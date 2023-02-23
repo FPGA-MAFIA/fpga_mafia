@@ -36,7 +36,7 @@ initial begin: trk_inst_gen
 
 end
 always @(posedge Clk) begin : inst_print
-    $fwrite(trk_inst,"%t | %8h | %32b | \n", $realtime,big_core_top.big_core.PcQ102H, big_core_top.big_core.InstructionQ102H);
+    $fwrite(trk_inst,"%t | %8h | %32b | \n", $realtime,big_core_top.big_core.PcQ102H, InstructionQ102H);
 end
 integer trk_fetch;
 initial begin: trk_fetch_gen

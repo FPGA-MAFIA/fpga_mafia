@@ -147,13 +147,13 @@ initial begin: test_seq
 end // test_seq
 
 
-`include "big_core_trk.vh"
-
-parameter EBREAK = 32'h00100073;
 logic [31:0] InstructionQ102H;
 logic [31:0] InstructionQ103H;
 `MAFIA_DFF(InstructionQ102H, big_core_top.big_core.InstructionQ101H, Clk)
 `MAFIA_DFF(InstructionQ103H, InstructionQ102H, Clk)
+`include "big_core_trk.vh"
+
+parameter EBREAK = 32'h00100073;
 
 // Ebrake detection
 always @(posedge Clk) begin : ebrake_status

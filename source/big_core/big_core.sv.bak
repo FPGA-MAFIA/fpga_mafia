@@ -38,10 +38,10 @@ module big_core (
 import big_core_pkg::*;
 // ---- Data-Path signals ----
 // Program counter
-logic [31:0]        PcQ101H, PcQ102H;
+logic [31:0]        PcQ101H, PcQ102H, PcQ103H;
 logic [31:0]        PcPlus4Q100H, PcPlus4Q101H, PcPlus4Q102H, PcPlus4Q103H, PcPlus4Q104H;
 logic [31:0]        NextPcQ10XH;
-logic [31:0]        InstructionQ101H;
+logic [31:0]        InstructionQ101H, InstructionQ102H;
 
 logic [31:1][31:0]  Register; 
 logic [31:0]        ImmediateQ101H, ImmediateQ102H;
@@ -152,6 +152,7 @@ assign InstructionQ101H         = flushQ102H ? NOP :
                                   LoadHzrdDetectQ102H ? PreviousInstructionQ101H :
                                                         PreInstructionQ101H;
 
+`MAFIA_DFF(InstructionQ102H, InstructionQ101H, Clk)
 
 // End Load and Ctrl hazard detection
 
@@ -241,6 +242,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 
 // Q101H to Q102H Flip Flops
 `MAFIA_RST_DFF(PcQ102H                  , PcQ101H               , Clk, Rst)
+`MAFIA_RST_DFF(PcQ103H                  , PcQ102H               , Clk, Rst)
 `MAFIA_RST_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk, Rst)
 `MAFIA_RST_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk, Rst)
 `MAFIA_RST_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk, Rst)
@@ -397,13 +399,13 @@ assign DMemRdEnQ103H    = SelDMemWbQ103H;
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Sign extend taking care of
-assign PostSxDMemRdDataQ104H[7:0]   =  ByteEnQ104H[0]    ? DMemRdRspQ104H[7:0]            : 8'b0;
-assign PostSxDMemRdDataQ104H[15:8]  =  ByteEnQ104H[1]    ? DMemRdRspQ104H[15:8]           :
-                                       CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[7]}}  : 8'b0;
-assign PostSxDMemRdDataQ104H[23:16] =  ByteEnQ104H[2]    ? DMemRdRspQ104H[23:16]          :
-                                       CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[15]}} : 8'b0;
-assign PostSxDMemRdDataQ104H[31:24] =  ByteEnQ104H[3]    ? DMemRdRspQ104H[31:24]          :
-                                       CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[23]}} : 8'b0;
+assign PostSxDMemRdDataQ104H[7:0]   =  ByteEnQ104H[0]         ? DMemRdRspQ104H[7:0]            : 8'b0;
+assign PostSxDMemRdDataQ104H[15:8]  =  ByteEnQ104H[1]         ? DMemRdRspQ104H[15:8]           :
+                                       CtrlSignExtQ104H       ? {8{PostSxDMemRdDataQ104H[7]}}  : 8'b0;
+assign PostSxDMemRdDataQ104H[23:16] =  ByteenaRestoreQ104H[2] ? DMemRdRspQ104H[23:16]          :
+                                       CtrlSignExtQ104H       ? {8{PostSxDMemRdDataQ104H[15]}} : 8'b0;
+assign PostSxDMemRdDataQ104H[31:24] =  ByteenaRestoreQ104H[3] ? DMemRdRspQ104H[31:24]          :
+                                       CtrlSignExtQ104H       ? {8{PostSxDMemRdDataQ104H[23]}} : 8'b0;
 
 // ---- Select what write to the register file ----
 assign WrBackDataQ104H = SelDMemWbQ104H  ? PostSxDMemRdDataQ104H : AluOutQ104H;

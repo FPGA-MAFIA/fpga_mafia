@@ -14,19 +14,20 @@ python build.py -proj_name 'big_core' -debug -tests 'alive plus_test' -full_run 
 python build.py -proj_name 'big_core' -debug -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
 python build.py -proj_name 'big_core' -debug -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
 python build.py -proj_name 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
+python build.py -proj_name 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
-parser.add_argument('-all', action='store_true', default=False, help='running all the tests')
-parser.add_argument('-tests', default='', help='list of the tests for run the script on')
-parser.add_argument('-debug', action='store_true', help='run simulation with debug flag')
-parser.add_argument('-gui', action='store_true', help='run simulation with gui')
-parser.add_argument('-app', action='store_true', help='compile the RISCV SW into SV executables')
-parser.add_argument('-hw', action='store_true', help='compile the RISCV HW into simulation')
-parser.add_argument('-sim', action='store_true', help='start simulation')
-parser.add_argument('-full_run', action='store_true', help='compile SW, HW of the test and simulate it')
-parser.add_argument('-proj_name', default='big_core', help='insert your project name (as mentioned in the dirs name')
-parser.add_argument('-pp', action='store_true', help='run post-process on the tests')
-parser.add_argument('-fpga', action='store_true', help='run compile & synthesis for the fpga')
+parser.add_argument('-all',         action='store_true', default=False, help='running all the tests')
+parser.add_argument('-tests',       default='',             help='list of the tests for run the script on')
+parser.add_argument('-debug',       action='store_true',    help='run simulation with debug flag')
+parser.add_argument('-gui',         action='store_true',    help='run simulation with gui')
+parser.add_argument('-app',         action='store_true',    help='compile the RISCV SW into SV executables')
+parser.add_argument('-hw',          action='store_true',    help='compile the RISCV HW into simulation')
+parser.add_argument('-sim',         action='store_true',    help='start simulation')
+parser.add_argument('-full_run',    action='store_true',    help='compile SW, HW of the test and simulate it')
+parser.add_argument('-proj_name',   default='big_core',     help='insert your project name (as mentioned in the dirs name')
+parser.add_argument('-pp',          action='store_true',    help='run post-process on the tests')
+parser.add_argument('-fpga',        action='store_true',    help='run compile & synthesis for the fpga')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -198,7 +199,8 @@ class Test:
 
     def _start_fpga(self):
         os.chdir(FPGA_ROOT)
-        fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off '+self.project+' -c '+self.project+' &'
+        fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' &'
+        #quartus_map --read_settings_files=on --write_settings_files=off de10_lite_big_core -c de10_lite_big_core
         try:
             subprocess.call(fpga_cmd, shell=True)
         except:

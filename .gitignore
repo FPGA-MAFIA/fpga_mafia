@@ -4,5 +4,7 @@ target/*
 transcript
 
 FPGA/*
-!FPGA/big_core/big_core.qpf
-!FPGA/big_core/big_core.qsf
+!FPGA/big_core/de10_lite_big_core_top.sdc
+!FPGA/big_core/de10_lite_big_core_top.sv
+!FPGA/big_core/de10_lite_big_core.qpf
+!FPGA/big_core/de10_lite_big_core.qsf
