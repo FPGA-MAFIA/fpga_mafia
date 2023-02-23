@@ -148,6 +148,7 @@ typedef struct packed {
     t_address    address;
     t_cl         cl_data; //Fill Req
     t_word       data; //CoreWrites req
+    logic        mb_hit_cancel;
     logic        rd_indication;
     logic        wr_indication;
 } t_lu_req ;

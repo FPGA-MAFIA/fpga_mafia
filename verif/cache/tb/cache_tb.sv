@@ -53,6 +53,12 @@ end
 if(test_name == "rd_modify_rd") begin
 `include "rd_modify_rd.sv"
 end
+if(test_name == "wr_miss_rd_hit") begin
+`include "wr_miss_rd_hit.sv"
+end
+if(test_name == "wr_miss_rd_hit_mb") begin
+`include "wr_miss_rd_hit_mb.sv"
+end
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
@@ -63,7 +69,7 @@ end// initial
 cache cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
-    //Agent Inteface                      
+    //Agent Interface                      
    .core2cache_req     (core2cache_req), //input   
    .stall              (stall),          //output  logic
    .cache2core_rsp     (cache2core_rsp), //output  t_rd_rsp

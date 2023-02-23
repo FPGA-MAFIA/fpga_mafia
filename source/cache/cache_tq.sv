@@ -33,6 +33,8 @@ t_tq_state [NUM_TQ_ENTRY-1:0] tq_state;
 t_tq_state [NUM_TQ_ENTRY-1:0] next_tq_state;
 assign stall            = '0;
 
+logic [NUM_TQ_ENTRY-1:0] rd_req_hit_mb;
+logic any_rd_hit_mb;
 
 logic [NUM_TQ_ENTRY-1:0] free_entries;
 logic [NUM_TQ_ENTRY-1:0] first_free;
@@ -40,6 +42,7 @@ logic [NUM_TQ_ENTRY-1:0] fill_entries;
 logic [NUM_TQ_ENTRY-1:0] first_fill;
 
 t_reg_id [NUM_TQ_ENTRY-1:0]     tq_reg_id; 
+logic    [NUM_TQ_ENTRY-1:0] en_tq_merge_buffer_e_modified; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_merge_buffer_data; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_cl_address; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_cl_word_offset; 
@@ -47,11 +50,13 @@ logic    [NUM_TQ_ENTRY-1:0] en_tq_rd_indication;
 logic    [NUM_TQ_ENTRY-1:0] en_tq_wr_indication; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_reg_id; 
 
+logic        [NUM_TQ_ENTRY-1:0][NUM_WORDS_IN_CL-1:0]  tq_merge_buffer_e_modified; 
 t_cl         [NUM_TQ_ENTRY-1:0] tq_merge_buffer_data; 
 t_cl_address [NUM_TQ_ENTRY-1:0] tq_cl_address;
 t_word_offset[NUM_TQ_ENTRY-1:0] tq_cl_word_offset; 
 logic        [NUM_TQ_ENTRY-1:0] tq_rd_indication; 
 logic        [NUM_TQ_ENTRY-1:0] tq_wr_indication; 
+logic        [NUM_TQ_ENTRY-1:0][NUM_WORDS_IN_CL-1:0]  next_tq_merge_buffer_e_modified; 
 t_cl         [NUM_TQ_ENTRY-1:0] next_tq_merge_buffer_data; 
 t_cl_address [NUM_TQ_ENTRY-1:0] next_tq_cl_address; 
 t_word_offset[NUM_TQ_ENTRY-1:0] next_tq_cl_word_offset; 
@@ -84,18 +89,22 @@ assign cache2core_rsp.reg_id  = tq_reg_id[pipe_lu_rsp_q3.tq_id]; //FIXME
 
 genvar TQ_GEN;
 generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_ff_block
-    `MAFIA_RST_VAL_DFF(tq_state            [TQ_GEN], next_tq_state            [TQ_GEN], clk, rst, S_IDLE)
-    `MAFIA_EN_DFF     (tq_rd_indication    [TQ_GEN], next_tq_rd_indication    [TQ_GEN], clk, en_tq_rd_indication    [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_wr_indication    [TQ_GEN], next_tq_wr_indication    [TQ_GEN], clk, en_tq_wr_indication    [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_merge_buffer_data[TQ_GEN], next_tq_merge_buffer_data[TQ_GEN], clk, en_tq_merge_buffer_data[TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_cl_address       [TQ_GEN], next_tq_cl_address       [TQ_GEN], clk, en_tq_cl_address       [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_cl_word_offset   [TQ_GEN], next_tq_cl_word_offset   [TQ_GEN], clk, en_tq_cl_word_offset   [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_reg_id           [TQ_GEN], next_tq_reg_id           [TQ_GEN], clk, en_tq_reg_id           [TQ_GEN])
+    `MAFIA_RST_VAL_DFF(tq_state                  [TQ_GEN], next_tq_state                  [TQ_GEN], clk, rst, S_IDLE)
+    `MAFIA_EN_DFF     (tq_rd_indication          [TQ_GEN], next_tq_rd_indication          [TQ_GEN], clk, en_tq_rd_indication          [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_wr_indication          [TQ_GEN], next_tq_wr_indication          [TQ_GEN], clk, en_tq_wr_indication          [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_merge_buffer_data      [TQ_GEN], next_tq_merge_buffer_data      [TQ_GEN], clk, en_tq_merge_buffer_data      [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_merge_buffer_e_modified[TQ_GEN], next_tq_merge_buffer_e_modified[TQ_GEN], clk, en_tq_merge_buffer_e_modified[TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_cl_address             [TQ_GEN], next_tq_cl_address             [TQ_GEN], clk, en_tq_cl_address             [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_cl_word_offset         [TQ_GEN], next_tq_cl_word_offset         [TQ_GEN], clk, en_tq_cl_word_offset         [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_reg_id                 [TQ_GEN], next_tq_reg_id                 [TQ_GEN], clk, en_tq_reg_id                 [TQ_GEN])
 end endgenerate
 
+logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 always_comb begin
+    new_alloc_word_offset   ='0;
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
         next_tq_state            [i] = tq_state[i];
+        next_tq_merge_buffer_e_modified[i] = '0;    //default value
         next_tq_merge_buffer_data[i] = '0;
         next_tq_cl_address       [i] = '0;
         next_tq_rd_indication    [i] = '0;
@@ -104,10 +113,11 @@ always_comb begin
         en_tq_cl_address         [i] = '0;
         en_tq_rd_indication      [i] = '0;
         en_tq_wr_indication      [i] = '0;
+        en_tq_merge_buffer_e_modified[i] = '0;
         unique casez (tq_state)
             S_IDLE                : 
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
-                if (first_free[i] && core2cache_req.valid) begin
+                if (first_free[i] && core2cache_req.valid && (!any_rd_hit_mb)) begin
                     next_tq_state[i] =  (core2cache_req.opcode == RD_OP) || ( (core2cache_req.opcode == WR_OP) )    ? S_LU_CORE :
                                                                                                                       S_ERROR   ;
                     en_tq_rd_indication   [i] = 1'b1;
@@ -115,11 +125,23 @@ always_comb begin
                     en_tq_wr_indication   [i] = 1'b1;
                     en_tq_reg_id          [i] = 1'b1;
                     en_tq_cl_address      [i] = 1'b1;
+                    en_tq_merge_buffer_e_modified[i] = 1'b1;
+                    en_tq_merge_buffer_data[i] = 1'b1;
                     next_tq_rd_indication [i] = (core2cache_req.opcode == RD_OP);
                     next_tq_wr_indication [i] = (core2cache_req.opcode == WR_OP);
                     next_tq_reg_id        [i] = core2cache_req.reg_id;
                     next_tq_cl_address    [i] = core2cache_req.address[MSB_TAG:LSB_SET];
                     next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    if(core2cache_req.opcode == WR_OP) begin
+                        //write the data to the correct word offset in the merge buffer
+                        next_tq_merge_buffer_data[i][31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data : '0;
+                        next_tq_merge_buffer_data[i][63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data : '0;
+                        next_tq_merge_buffer_data[i][95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data : '0;
+                        next_tq_merge_buffer_data[i][127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data : '0;
+                        //set the corresponding bit in the e_modified vector
+                        next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
+                    end
                 end
             S_LU_CORE: 
                 //if Cache_hit : nex_state == IDLE
@@ -130,16 +152,36 @@ always_comb begin
                                         /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR           ;
                 end                    
                
-            S_MB_WAIT_FILL                :
+            S_MB_WAIT_FILL                : begin
                 if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i)) begin
                     next_tq_state[i] = S_MB_FILL_READY;
                     en_tq_merge_buffer_data  [i] = 1'b1;
-                    next_tq_merge_buffer_data[i] = fm2cache_rd_rsp.data; //FIXME need to merge the data with the FM rd data - not override the merge_data entry
+                    // If the tq_merge_buffer_e_modified[i][x] is set, then the data in the merge buffer already has the correct data - we don't want to override it with the fill data
+                    next_tq_merge_buffer_data[i][31:0]   = tq_merge_buffer_e_modified[i][0] ? tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
+                    next_tq_merge_buffer_data[i][63:32]  = tq_merge_buffer_e_modified[i][1] ? tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
+                    next_tq_merge_buffer_data[i][95:64]  = tq_merge_buffer_e_modified[i][2] ? tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
+                    next_tq_merge_buffer_data[i][127:96] = tq_merge_buffer_e_modified[i][3] ? tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
                 end
-            S_MB_FILL_READY               :
+
+                //The case of read after write - we set the read indication and update the offset for the read rsp:
+                if(rd_req_hit_mb[i]) begin
+                    en_tq_rd_indication   [i] = 1'b1;
+                    en_tq_cl_word_offset  [i] = 1'b1;
+                    next_tq_rd_indication [i] = 1'b1;
+                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                end //if
+            end //S_MB_WAIT_FILL
+            S_MB_FILL_READY               : begin
+                if(rd_req_hit_mb[i]) begin
+                    en_tq_rd_indication   [i] = 1'b1;
+                    en_tq_cl_word_offset  [i] = 1'b1;
+                    next_tq_rd_indication [i] = 1'b1;
+                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                end //if
                 if (first_fill[i] && (!core2cache_req.valid)) begin // opportunistic pipe lookup - if no core request, then fill
                     next_tq_state[i] = S_IDLE;
                 end //if
+            end//S_MB_FILL_READY
             S_ERROR                       :
                 next_tq_state[i] = tq_state[i];
 
@@ -151,7 +193,16 @@ always_comb begin
     end //for loop   
 end //always_comb
 
+always_comb begin
+    for(int i =0; i<NUM_TQ_ENTRY; ++i) begin
+        rd_req_hit_mb[i] = core2cache_req.valid             && 
+                           (core2cache_req.opcode == RD_OP) &&
+                           (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
+                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY));
+    end
+end
 
+assign any_rd_hit_mb = |rd_req_hit_mb;
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
         free_entries[i] = (tq_state[i] == S_IDLE);
@@ -159,6 +210,8 @@ always_comb begin
     end
 end
 `FIND_FIRST(first_free, free_entries)
+//suppress the first free entry if there is a read hit in the merge buffer
+
 //FIXME - need to replace with round robin
 `FIND_FIRST(first_fill, fill_entries)
 
@@ -179,9 +232,10 @@ always_comb begin
         pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
                                  (core2cache_req.opcode == RD_OP) ? RD_LU :
                                                                     NO_LU ;
-        pipe_lu_req_q1.address = core2cache_req.address;
-        pipe_lu_req_q1.data    = core2cache_req.data;
-        pipe_lu_req_q1.tq_id   = enc_first_free;
+        pipe_lu_req_q1.address       = core2cache_req.address;
+        pipe_lu_req_q1.data          = core2cache_req.data;
+        pipe_lu_req_q1.tq_id         = enc_first_free;
+        pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb /*|| any_wr_hit_mb*/;
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
         pipe_lu_req_q1.lu_op         = FILL_LU;

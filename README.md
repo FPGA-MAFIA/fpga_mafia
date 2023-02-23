@@ -16,7 +16,7 @@ Main Components:
 - Memory Subsystem with L1 Instruction and Data Cache and a Memory Controller  
 
 Software Stack to run on SOC:
-- Simple RISCV Embeded OS
+- Simple RISCV Embedded OS
 - Software library for VGA graphical capabilities
 - Software library for accessing the FPGA MMIO and special control registers
 - Software examples demonstrating utilization of many cores for distributed calculations and parallel computation

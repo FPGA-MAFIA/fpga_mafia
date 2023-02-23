@@ -19,17 +19,17 @@ module cache_pipe
     input   logic               clk,
     input   logic               rst,
     //tq interface 
-    input   var t_lu_req            pipe_lu_req_q1,
+    input   var t_lu_req        pipe_lu_req_q1,
     output  t_lu_rsp            pipe_lu_rsp_q3,
-    // FM interface Reqiuets 
+    // FM interface Requests 
     output  t_fm_req            cache2fm_req_q3,
     //tag_array interface 
     output  t_set_rd_req        rd_set_req_q1,
-    input   var t_set_rd_rsp        rd_data_set_rsp_q2,
+    input   var t_set_rd_rsp    rd_data_set_rsp_q2,
     output  t_set_wr_req        wr_data_set_q2,
     //data_array interface 
     output  t_cl_rd_req         rd_cl_req_q2,
-    input   var t_cl_rd_rsp         rd_data_cl_rsp_q3,
+    input   var t_cl_rd_rsp     rd_data_cl_rsp_q3,
     output  t_cl_wr_req         wr_data_cl_q3
 );
 
@@ -88,6 +88,7 @@ always_comb begin
   cache_pipe_lu_q1.lu_op            = pipe_lu_req_q1.lu_op ;
   cache_pipe_lu_q1.cl_data          = pipe_lu_req_q1.cl_data;
   cache_pipe_lu_q1.data             = pipe_lu_req_q1.data;
+  cache_pipe_lu_q1.mb_hit_cancel    = pipe_lu_req_q1.mb_hit_cancel ;
   //TODO set the fill indications: fill_modified, fill_rd
 end //always_comb
 
@@ -321,7 +322,8 @@ end
 //======================
 //in case of Rd/Wr cache_miss send a FM fill request
 if (cache_pipe_lu_q3.miss && 
-   (!(cache_pipe_lu_q3.lu_op == FILL_LU))) begin
+   (!(cache_pipe_lu_q3.lu_op == FILL_LU)) &&
+   (!(cache_pipe_lu_q3.mb_hit_cancel))) begin
     cache2fm_req_q3.valid   =  cache_pipe_lu_q3.lu_valid; 
     cache2fm_req_q3.address = {cache_pipe_lu_q3.lu_tag, cache_pipe_lu_q3.lu_set, cache_pipe_lu_q3.lu_offset};
     cache2fm_req_q3.tq_id   =  cache_pipe_lu_q3.lu_tq_id;
