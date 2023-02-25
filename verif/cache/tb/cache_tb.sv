@@ -8,7 +8,7 @@ logic             rst;
 t_req             core2cache_req;
 logic             stall;
 t_rd_rsp          cache2core_rsp;
-t_fm_req       cache2fm_req_q3;
+t_fm_req          cache2fm_req_q3;
 t_fm_rd_rsp [9:0] samp_fm2cache_rd_rsp;
 t_fm_rd_rsp       fm2cache_rd_rsp;
 
@@ -59,6 +59,7 @@ end
 if(test_name == "wr_miss_rd_hit_mb") begin
 `include "wr_miss_rd_hit_mb.sv"
 end
+
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;

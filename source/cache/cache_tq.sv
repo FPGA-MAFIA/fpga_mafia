@@ -24,7 +24,6 @@ module  cache_tq
     output  t_rd_rsp        cache2core_rsp,
     //FM Interface
     input   var t_fm_rd_rsp fm2cache_rd_rsp,
-    //output 
     //Pipe Interface
     output  t_lu_req        pipe_lu_req_q1,
     input   var t_lu_rsp    pipe_lu_rsp_q3
@@ -69,19 +68,19 @@ logic rd_hit_pipe_rsp_q3;
 logic fill_with_rd_indication;
 
 assign rd_hit_pipe_rsp_q3     =   pipe_lu_rsp_q3.valid               && 
-                               (pipe_lu_rsp_q3.lu_opcode == RD_LU) &&
+                               (pipe_lu_rsp_q3.lu_op == RD_LU) &&
                                (pipe_lu_rsp_q3.lu_result == HIT);
 
 assign fill_with_rd_indication = pipe_lu_rsp_q3.valid  && 
-                                (pipe_lu_rsp_q3.lu_opcode == FILL_LU) &&
+                                (pipe_lu_rsp_q3.lu_op == FILL_LU) &&
                                 tq_rd_indication[pipe_lu_rsp_q3.tq_id];
 
 assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication;
 //take the relevant word from cache line
-assign cache2core_rsp.data    = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.data[31:0]  : 
-                                pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.data[63:32] : 
-                                pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.data[95:64] :
-                                                                                                    pipe_lu_rsp_q3.data[127:96];
+assign cache2core_rsp.data    = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
+                                pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
+                                pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.cl_data[95:64] :
+                                                                                                    pipe_lu_rsp_q3.cl_data[127:96];
 assign cache2core_rsp.address = pipe_lu_rsp_q3.address; //FIXME: address should come from tq_entry
 assign cache2core_rsp.reg_id  = tq_reg_id[pipe_lu_rsp_q3.tq_id]; //FIXME
 
@@ -114,6 +113,7 @@ always_comb begin
         en_tq_rd_indication      [i] = '0;
         en_tq_wr_indication      [i] = '0;
         en_tq_merge_buffer_e_modified[i] = '0;
+        
         unique casez (tq_state)
             S_IDLE                : 
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 

@@ -156,9 +156,9 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     t_lu_result  lu_result;
-    t_lu_opcode  lu_opcode;
+    t_lu_opcode  lu_op;
     t_tq_id      tq_id;
-    t_cl         data;
+    t_cl         cl_data;
     // t_offset     offset;
     t_address    address;
 } t_lu_rsp ;
