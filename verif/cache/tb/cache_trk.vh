@@ -22,7 +22,7 @@ integer cache_tq_trk;
 initial begin
     if ($value$plusargs ("STRING=%s", test_name))
         $display("creating tracker in test directory: target/cache/tests/%s", test_name);
-    $timeformat(-12, 1, "", 6);
+    $timeformat(-12, 0, "", 6);
     
     cache_top_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_top_trk.log"},"w");
     $fwrite(cache_top_trk, "==================================================================================\n");
@@ -46,7 +46,7 @@ initial begin
     $fwrite(cache_tq_trk,"====================================================================================================================\n");
     $fwrite(cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
     //$fwrite(cache_tq_trk," Time  ||     State      ||  RD  ||  WR  || cl adress || cl word offset|| REG ID || MB DATA  \n");
-    $fwrite(cache_tq_trk," Time  ||     State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   \n");
+    $fwrite(cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   \n");
     $fwrite(cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n");
 
 end
@@ -144,8 +144,9 @@ always @(posedge clk) begin
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
         if (cache.cache_tq.tq_state[i] != cache.cache_tq.next_tq_state[i]) begin
         //$fwrite(cache_tq_trk,"%t    %-15s     %h       %h       %h              %h           %h       %h\n",
-        $fwrite(cache_tq_trk,"%t    %-15s     %h       %h       %h      %h     %h            %h\n",
+        $fwrite(cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h\n",
         $realtime,
+        i,
         cache.cache_tq.tq_state[i].name,     
         cache.cache_tq.tq_rd_indication      [i],     
         cache.cache_tq.tq_wr_indication      [i],         

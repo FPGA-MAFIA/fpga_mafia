@@ -4,21 +4,21 @@
 -----------------------------------------------------------------------------------
  Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data 
 -----------------------------------------------------------------------------------
- 920.0     CORE_WR_REQ       e8010       00        e8     01      deadbeaf 
- 980.0     CORE_WR_REQ       e9010       01        e9     01      fafafafa 
-1040.0     CORE_WR_REQ       ea010       01        ea     01      babababa 
-1100.0     CORE_RD_REQ       e8010       01        e8     01      ( -- read request -- ) 
-1120.0     CACHE_RD_RSP      e8010       01        e8     01      deadbeaf 
-1160.0     CORE_RD_REQ       e9010       02        e9     01      ( -- read request -- ) 
-1180.0     CACHE_RD_RSP      e9010       00        e9     01      fafafafa 
-1220.0     CORE_RD_REQ       ea010       03        ea     01      ( -- read request -- ) 
-1240.0     CACHE_RD_RSP      ea010       01        ea     01      babababa 
-1280.0     CORE_WR_REQ       e8054       00        e8     05      44444444 
-1340.0     CORE_WR_REQ       e8058       01        e8     05      88888888 
-1400.0     CORE_WR_REQ       e805c       01        e8     05      cccccccc 
-1460.0     CORE_RD_REQ       e8054       01        e8     05      ( -- read request -- ) 
-1480.0     CACHE_RD_RSP      e8054       01        e8     05      44444444 
-1520.0     CORE_RD_REQ       e8058       02        e8     05      ( -- read request -- ) 
-1540.0     CACHE_RD_RSP      e8058       00        e8     05      88888888 
-1580.0     CORE_RD_REQ       e805c       03        e8     05      ( -- read request -- ) 
-1600.0     CACHE_RD_RSP      e805c       01        e8     05      cccccccc 
+   920     CORE_WR_REQ       e8010       00        e8     01      deadbeaf 
+   980     CORE_WR_REQ       e9010       01        e9     01      fafafafa 
+  1040     CORE_WR_REQ       ea010       01        ea     01      babababa 
+  1100     CORE_RD_REQ       e8010       01        e8     01      ( -- read request -- ) 
+  1120     CACHE_RD_RSP      e8010       01        e8     01      deadbeaf 
+  1160     CORE_RD_REQ       e9010       02        e9     01      ( -- read request -- ) 
+  1180     CACHE_RD_RSP      e9010       00        e9     01      fafafafa 
+  1220     CORE_RD_REQ       ea010       03        ea     01      ( -- read request -- ) 
+  1240     CACHE_RD_RSP      ea010       01        ea     01      babababa 
+  1280     CORE_WR_REQ       e8054       00        e8     05      44444444 
+  1340     CORE_WR_REQ       e8058       01        e8     05      88888888 
+  1400     CORE_WR_REQ       e805c       01        e8     05      cccccccc 
+  1460     CORE_RD_REQ       e8054       01        e8     05      ( -- read request -- ) 
+  1480     CACHE_RD_RSP      e8054       01        e8     05      44444444 
+  1520     CORE_RD_REQ       e8058       02        e8     05      ( -- read request -- ) 
+  1540     CACHE_RD_RSP      e8058       00        e8     05      88888888 
+  1580     CORE_RD_REQ       e805c       03        e8     05      ( -- read request -- ) 
+  1600     CACHE_RD_RSP      e805c       01        e8     05      cccccccc 
