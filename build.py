@@ -187,14 +187,19 @@ class Test:
         except:
             print_message('[ERROR] failed to remove /target/'+self.project+'/tests/'+self.name+' directory')
     def _post_process(self):
+        # Go to the verification directory
         os.chdir(VERIF)
+        # Construct the post process command
         pp_cmd = 'python '+self.project+'_pp.py ' +self.name
+        # Run the post process command
         try:
             return_val = subprocess.run(pp_cmd)
         except:
             print_message('[ERROR] Failed to run post process ')
             self.fail_flag = True
+        # Go back to the model directory
         os.chdir(MODEL_ROOT)
+        # Return the return code of the post process command
         return return_val.returncode
 
     def _start_fpga(self):
