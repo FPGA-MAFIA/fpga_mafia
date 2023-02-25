@@ -4,8 +4,8 @@
 -----------------------------------------------------------------------------------
  Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data 
 -----------------------------------------------------------------------------------
- 920.0     CORE_WR_REQ       10108       01        10     10      deadbeef 
- 940.0     CACHE_FILL_REQ    10108       0         10     10      ( -- read request -- ) 
- 990.0     CORE_RD_REQ       10108       02        10     10      ( -- read request -- ) 
-1050.0     FM_FILL_RSP     (see tq_id)   0        ----   ----     00000000_00000000_abbababa_00002121 
-1080.0     CACHE_RD_RSP      10108       01        10     10      deadbeef 
+   920     CORE_WR_REQ       10108       01        10     10      deadbeef 
+   940     CACHE_FILL_REQ    10108       0         10     10      ( -- read request -- ) 
+   990     CORE_RD_REQ       10108       02        10     10      ( -- read request -- ) 
+  1050     FM_FILL_RSP     (see tq_id)   0        ----   ----     00000000_00000000_abbababa_00002121 
+  1080     CACHE_RD_RSP      10108       01        10     10      deadbeef 
