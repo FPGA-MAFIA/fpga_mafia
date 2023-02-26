@@ -28,6 +28,7 @@ parser.add_argument('-full_run',    action='store_true',    help='compile SW, HW
 parser.add_argument('-proj_name',   default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-pp',          action='store_true',    help='run post-process on the tests')
 parser.add_argument('-fpga',        action='store_true',    help='run compile & synthesis for the fpga')
+parser.add_argument('-regress',     default='',             help='insert a level of regression to run on')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -241,7 +242,15 @@ def main():
     if args.all:
         test_list = os.listdir(TESTS)
         for test in test_list:
+            if 'level' in test: continue
             tests.append(Test(test, args.proj_name))
+    elif args.regress:
+        level_list = open(TESTS+args.regress, 'r').read().split('\n')
+        for test in level_list:
+            if os.path.exists(TESTS+test):
+                tests.append(Test(test, args.proj_name))
+            else:
+                print_message('[ERROR] can\'t find the test - '+test)
     else:
         for test in args.tests.split():
             test = glob.glob(TESTS+test+'*')[0]
