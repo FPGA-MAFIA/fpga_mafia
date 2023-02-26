@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import os
+import shutil
 import subprocess
 import glob
 import argparse
@@ -171,6 +172,8 @@ class Test:
             else:
                 # print(results.stdout) - TODO write the results to a file instead of to display. print the path to the file
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+        if os.path.exists('transcript'):  # copy transcript file to the test directory
+            shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         os.chdir(MODEL_ROOT)
     def _gui(self):
         os.chdir(MODELSIM)
