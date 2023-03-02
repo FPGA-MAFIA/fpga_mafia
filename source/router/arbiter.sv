@@ -20,12 +20,18 @@ logic [DATA_WIDTH-1:0]           dout ;
 //INTERNAL VARIABLE
 logic  [$clog2(NUM_CLIENTS-1):0] counter;	
 logic                            valid;
-logic [$clog2(NUM_CLIENTS-1):0]  nxt_cnt;
 logic [$clog2(NUM_CLIENTS-1):0]  nxt_counter;
 logic [$clog2(NUM_CLIENTS-1):0]  former_counter;
 logic                            next_valid;
 //counter
-assign nxt_counter=(counter+1)%NUM_CLIENTS;
+always_comb@(*) // counter% NUM_CLIENTS
+begin
+	nxt_counter = counter;
+	if (counter == NUM_CLIENTS-1)
+	nxt_counter = '0;
+	else 
+	nxt_counter = counter + 1;
+end
 `MAFIA_RST_DFF(counter,nxt_counter,clk,rst);
 
 //ack and reset former ack
