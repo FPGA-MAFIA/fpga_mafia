@@ -285,9 +285,10 @@ assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 //======================
 assign pipe_lu_rsp_q3.valid         =   cache_pipe_lu_q3.lu_valid;
 assign pipe_lu_rsp_q3.lu_op         =   cache_pipe_lu_q3.lu_op;
-assign pipe_lu_rsp_q3.lu_result     =   cache_pipe_lu_q3.hit  ? HIT   :
-                                        cache_pipe_lu_q3.miss ? MISS  : 
-                                                                NO_RSP;                      
+assign pipe_lu_rsp_q3.lu_result     =   (cache_pipe_lu_q3.lu_op == FILL_LU) ? FILL  :
+                                        cache_pipe_lu_q3.hit                ? HIT   :
+                                        cache_pipe_lu_q3.miss               ? MISS  : 
+                                                                              NO_RSP;                      
 assign pipe_lu_rsp_q3.tq_id         =   cache_pipe_lu_q3.lu_tq_id; 
 assign pipe_lu_rsp_q3.cl_data       =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                         (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)     ? rd_data_cl_rsp_q3         :
