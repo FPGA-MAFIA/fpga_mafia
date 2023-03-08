@@ -85,14 +85,16 @@ if os.path.exists(file2_path):
         #print(f"Please refer to" ,colored(output_path,'white',attrs=['bold']), "to see the full diff\n")
         print_message(f"[WARNING] There are {num_diffs} differences between the two files:")
         print_message(f"[INFO] Please refer to {output_path} to see the full diff\n")
-else: 
-    print_message(f"\n[INFO] No golden tracker found for test {args.test_name}")
 
-if num_diffs == 0:
-    print(colored("\n[INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
+    if num_diffs == 0:
+        print(colored("\n[INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
+        sys.exit(0)
+    else:
+        print_message(f"\n[ERROR] {args.test_name} have failed Post-Process")
+        sys.exit(1)
+else: 
+    print_message(f"\n[WARNING] No golden tracker found for test {args.test_name}")
     sys.exit(0)
-else:
-    print_message(f"\n[ERROR] {args.test_name} have failed Post-Process")
-    sys.exit(1)
+
 
 

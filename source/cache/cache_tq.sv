@@ -33,7 +33,9 @@ t_tq_state [NUM_TQ_ENTRY-1:0] next_tq_state;
 assign stall            = '0;
 
 logic [NUM_TQ_ENTRY-1:0] rd_req_hit_mb;
+logic [NUM_TQ_ENTRY-1:0] wr_req_hit_mb;
 logic any_rd_hit_mb;
+//logic any_wr_hit_mb;
 
 logic [NUM_TQ_ENTRY-1:0] free_entries;
 logic [NUM_TQ_ENTRY-1:0] first_free;
@@ -115,23 +117,23 @@ always_comb begin
         en_tq_merge_buffer_e_modified[i] = '0;
         
         unique casez (tq_state)
-            S_IDLE                : 
+            S_IDLE                : begin
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
-                if (first_free[i] && core2cache_req.valid && (!any_rd_hit_mb)) begin
+                if (first_free[i] && core2cache_req.valid && /*(*/(!any_rd_hit_mb)/*||(!any_wr_hit_mb))*/) begin
                     next_tq_state[i] =  (core2cache_req.opcode == RD_OP) || ( (core2cache_req.opcode == WR_OP) )    ? S_LU_CORE :
                                                                                                                       S_ERROR   ;
-                    en_tq_rd_indication   [i] = 1'b1;
-                    en_tq_cl_word_offset  [i] = 1'b1;
-                    en_tq_wr_indication   [i] = 1'b1;
-                    en_tq_reg_id          [i] = 1'b1;
-                    en_tq_cl_address      [i] = 1'b1;
-                    en_tq_merge_buffer_e_modified[i] = 1'b1;
-                    en_tq_merge_buffer_data[i] = 1'b1;
-                    next_tq_rd_indication [i] = (core2cache_req.opcode == RD_OP);
-                    next_tq_wr_indication [i] = (core2cache_req.opcode == WR_OP);
-                    next_tq_reg_id        [i] = core2cache_req.reg_id;
-                    next_tq_cl_address    [i] = core2cache_req.address[MSB_TAG:LSB_SET];
-                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    en_tq_rd_indication             [i] = 1'b1;
+                    en_tq_cl_word_offset            [i] = 1'b1;
+                    en_tq_wr_indication             [i] = 1'b1;
+                    en_tq_reg_id                    [i] = 1'b1;
+                    en_tq_cl_address                [i] = 1'b1;
+                    en_tq_merge_buffer_e_modified   [i] = 1'b1;
+                    en_tq_merge_buffer_data         [i] = 1'b1;
+                    next_tq_rd_indication           [i] = (core2cache_req.opcode == RD_OP);
+                    next_tq_wr_indication           [i] = (core2cache_req.opcode == WR_OP);
+                    next_tq_reg_id                  [i] = core2cache_req.reg_id;
+                    next_tq_cl_address              [i] = core2cache_req.address[MSB_TAG:LSB_SET];
+                    next_tq_cl_word_offset          [i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                     new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                     if(core2cache_req.opcode == WR_OP) begin
                         //write the data to the correct word offset in the merge buffer
@@ -143,12 +145,17 @@ always_comb begin
                         next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
                     end
                 end
+            end    
+
+                //FIXME: in case of write after write to same cache line we still need to write the data to mb ?
+                
             S_LU_CORE: 
                 //if Cache_hit : nex_state == IDLE
                 //if Cache_miss : next_state == MB_WAIT_FILL
                 if ((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)) begin  
                     next_tq_state[i]=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
                                         (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
+                                        (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_MB_WAIT_FILL    :
                                         /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR           ;
                 end                    
                
@@ -170,6 +177,14 @@ always_comb begin
                     next_tq_rd_indication [i] = 1'b1;
                     next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                 end //if
+                
+                // if(wr_req_hit_mb[i]) begin
+                //     en_tq_wr_indication   [i] = 1'b1;
+                //     en_tq_cl_word_offset  [i] = 1'b1;
+                //     next_tq_wr_indication [i] = 1'b1;
+                //     next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                // end //if
+
             end //S_MB_WAIT_FILL
             S_MB_FILL_READY               : begin
                 if(rd_req_hit_mb[i]) begin
@@ -178,6 +193,13 @@ always_comb begin
                     next_tq_rd_indication [i] = 1'b1;
                     next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                 end //if
+                // if(wr_req_hit_mb[i]) begin
+                //     en_tq_wr_indication   [i] = 1'b1;
+                //     en_tq_cl_word_offset  [i] = 1'b1;
+                //     next_tq_wr_indication [i] = 1'b1;
+                //     next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                // end //if
+
                 if (first_fill[i] && (!core2cache_req.valid)) begin // opportunistic pipe lookup - if no core request, then fill
                     next_tq_state[i] = S_IDLE;
                 end //if
@@ -199,10 +221,18 @@ always_comb begin
                            (core2cache_req.opcode == RD_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
                            ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY));
+    
+        // wr_req_hit_mb[i] = core2cache_req.valid             && 
+        //                    (core2cache_req.opcode == WR_OP) &&
+        //                    (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
+        //                    ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY));
+    
     end
 end
 
 assign any_rd_hit_mb = |rd_req_hit_mb;
+//assign any_wr_hit_mb = |wr_req_hit_mb;
+
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
         free_entries[i] = (tq_state[i] == S_IDLE);
