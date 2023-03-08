@@ -96,7 +96,8 @@ class Test:
                                     -Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+'\
                                     -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+'\
                                     -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
-                    print_message(f'[COMMAND] '+second_cmd)
+                    # TODO add verbosity option to print the command
+                    # print_message(f'[COMMAND] '+second_cmd)
                     subprocess.check_output(second_cmd, shell=True)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -278,13 +279,16 @@ def main():
     # sys.stdout.flush()
     # sys.stderr.flush()
 
-    print_message('=================================================================================')
-    print_message(f'[INFO] Run status: {run_status} ')
     if(run_status == "FAILED"):
         print_message('The failed tests are:')
     for test in tests:
-        if(test.fail_flag):
-            print_message(f'[ERROR] Run failed - {test.name}')
+        if(test.fail_flag==True):
+            print_message(f'[ERROR] test failed - {test.name}  - target/'+args.proj_name+'/tests/'+test.name+'/')
+        if(test.fail_flag==False):
+            print_message(f'[INFO] test Passed- {test.name}  - target/'+args.proj_name+'/tests/'+test.name+'/')
+    print_message('=================================================================================')
+    print_message(f'[INFO] Run final status: {run_status}')
+    print_message('=================================================================================')
     print_message('=================================================================================')
     if(run_status == "FAILED"):
         return 1
