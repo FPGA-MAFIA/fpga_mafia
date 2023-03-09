@@ -25,14 +25,20 @@ module cache_pipe
     output  t_fm_req            cache2fm_req_q3,
     //tag_array interface 
     output  t_set_rd_req        rd_set_req_q1,
-    input   var t_set_rd_rsp    rd_data_set_rsp_q2,
+    input   var t_set_rd_rsp    pre_rd_data_set_rsp_q2,
     output  t_set_wr_req        wr_data_set_q2,
     //data_array interface 
     output  t_cl_rd_req         rd_cl_req_q2,
-    input   var t_cl_rd_rsp     rd_data_cl_rsp_q3,
+    input   var t_cl_rd_rsp     pre_rd_data_cl_rsp_q3,
     output  t_cl_wr_req         wr_data_cl_q3
 );
 
+t_cl_rd_rsp     hazard_rd_data_cl_rsp_q4;
+t_cl_wr_req         wr_data_cl_q4;
+t_cl_rd_rsp     rd_data_cl_rsp_q3;
+t_set_rd_rsp    rd_data_set_rsp_q2;
+t_set_rd_rsp    hazard_rd_data_set_rsp_q3;
+t_set_wr_req        wr_data_set_q3;
 t_pipe_bus pre_cache_pipe_lu_q2, pre_cache_pipe_lu_q3;
 t_pipe_bus cache_pipe_lu_q1, cache_pipe_lu_q2, cache_pipe_lu_q3;
 t_word_offset                               lu_word_offset_q3;
@@ -56,6 +62,8 @@ logic [NUM_WAYS-1:0]                victim_and_modified_q2;
 logic                               dirty_evict_q2;
 logic                               any_free_way_q2;
 logic                               any_lru_way_q2;
+logic hazard_detected_q2;
+logic hazard_detected_q3;
 //==================================================================
 //       ____    _                     ___    _ 
 //      |  _ \  (_)  _ __     ___     / _ \  / |
@@ -89,6 +97,7 @@ always_comb begin
   cache_pipe_lu_q1.cl_data          = pipe_lu_req_q1.cl_data;
   cache_pipe_lu_q1.data             = pipe_lu_req_q1.data;
   cache_pipe_lu_q1.mb_hit_cancel    = pipe_lu_req_q1.mb_hit_cancel ;
+  cache_pipe_lu_q1.lu_tq_id         = pipe_lu_req_q1.tq_id; 
   //TODO set the fill indications: fill_modified, fill_rd
 end //always_comb
 
@@ -113,8 +122,12 @@ end //always_comb
 //======================
 //     Data_Hazard - accessing same set B2B 
 //====================== 
-//TODO: Detect acces to same set back2back
-
+assign hazard_detected_q2 = (cache_pipe_lu_q2.lu_set == cache_pipe_lu_q3.lu_set) && cache_pipe_lu_q3.lu_valid && cache_pipe_lu_q2.lu_valid;
+assign hazard_rd_data_set_rsp_q3.valid    = wr_data_set_q3.valid;
+assign hazard_rd_data_set_rsp_q3.tags     = wr_data_set_q3.tags;
+assign hazard_rd_data_set_rsp_q3.modified = wr_data_set_q3.modified;
+assign hazard_rd_data_set_rsp_q3.mru      = wr_data_set_q3.mru;
+assign rd_data_set_rsp_q2 = hazard_detected_q2 ? hazard_rd_data_set_rsp_q3 : pre_rd_data_set_rsp_q2;
 //======================
 //     TAG_COMPARE 
 //====================== 
@@ -214,7 +227,8 @@ always_comb begin : tag_array_update_assignment
     wr_data_set_q2.mru      =  cache_pipe_lu_q2.set_ways_mru ;
 end
 
-
+//used for forwarding unit - Solve the Hazard of read after write to the same SET
+`MAFIA_DFF(wr_data_set_q3, wr_data_set_q2, clk)
 //======================
 //    DATA_FETCH
 //======================
@@ -332,7 +346,12 @@ if (cache_pipe_lu_q3.miss &&
     cache2fm_req_q3.opcode  =  FILL_REQ_OP;
 end 
 end
-
+//======================
+//     Data_Hazard - accessing same set B2B 
+//====================== 
+assign hazard_detected_q3 = (wr_data_cl_q4.cl_address == wr_data_cl_q3.cl_address) && wr_data_cl_q4.valid;
+assign hazard_rd_data_cl_rsp_q4 = wr_data_cl_q4.data;
+assign rd_data_cl_rsp_q3  = hazard_detected_q3 ? hazard_rd_data_cl_rsp_q4  : pre_rd_data_cl_rsp_q3;
 //======================
 //    WRITE_DATA
 //======================
@@ -340,7 +359,7 @@ assign lu_word_offset_q3 = cache_pipe_lu_q3.lu_offset[MSB_WORD_OFFSET:LSB_WORD_O
 
 always_comb begin
     data_array_data_q3                   =   rd_data_cl_rsp_q3; //the current CL in data array
-    data_array_data_q3[lu_word_offset_q3]=   cache_pipe_lu_q3.data; //overide the specific word
+    data_array_data_q3[lu_word_offset_q3]=   cache_pipe_lu_q3.data; //override the specific word
     wr_data_cl_q3                        =   '0;
     wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                              (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
@@ -351,5 +370,5 @@ always_comb begin
 end
 
 
-
+`MAFIA_DFF(wr_data_cl_q4, wr_data_cl_q3, clk)
 endmodule

@@ -65,7 +65,9 @@ end
 if(test_name == "wr_after_wr_cl") begin
 `include "wr_after_wr_cl.sv"
 end
-
+if(test_name == "fill_8_tq_entries") begin
+`include "fill_8_tq_entries.sv"
+end
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
