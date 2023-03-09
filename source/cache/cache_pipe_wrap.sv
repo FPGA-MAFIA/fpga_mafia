@@ -42,11 +42,11 @@ cache_pipe cache_pipe(
     .cache2fm_req_q3     (cache2fm_req_q3),//output
     //tag_array interface
     .rd_set_req_q1          (rd_set_req_q1),     //output
-    .rd_data_set_rsp_q2 (rd_data_set_rsp_q2),//input
+    .pre_rd_data_set_rsp_q2 (rd_data_set_rsp_q2),//input
     .wr_data_set_q2         (wr_data_set_q2),    //output
     //data_array interface
     .rd_cl_req_q2           (rd_cl_req_q2),      //output
-    .rd_data_cl_rsp_q3      (rd_data_cl_rsp_q3), //input
+    .pre_rd_data_cl_rsp_q3  (rd_data_cl_rsp_q3), //input
     .wr_data_cl_q3          (wr_data_cl_q3)      //output
 );
 
