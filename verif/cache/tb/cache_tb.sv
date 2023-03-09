@@ -59,7 +59,18 @@ end
 if(test_name == "wr_miss_rd_hit_mb") begin
 `include "wr_miss_rd_hit_mb.sv"
 end
-
+if(test_name == "wr_miss_wr_hit") begin
+`include "wr_miss_wr_hit.sv"
+end
+if(test_name == "wr_after_wr_cl") begin
+`include "wr_after_wr_cl.sv"
+end
+if(test_name == "fill_8_tq_entries") begin
+`include "fill_8_tq_entries.sv"
+end
+if(test_name == "wr_b2b_same_cl") begin
+`include "wr_b2b_same_cl.sv"
+end
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;

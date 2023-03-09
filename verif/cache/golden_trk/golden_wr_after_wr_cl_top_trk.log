@@ -1,0 +1,20 @@
+==================================================================================
+                      CACHE TOP TRACKER  -  Test: wr_after_wr_cl
+==================================================================================
+-----------------------------------------------------------------------------------
+ Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data 
+-----------------------------------------------------------------------------------
+   900     CORE_WR_REQ       10100       01        10     10      aaaaaaaa 
+   920     CACHE_FILL_REQ    10100       0         10     10      ( -- read request -- ) 
+   950     CORE_WR_REQ       10104       02        10     10      bbbbbbbb 
+  1000     CORE_WR_REQ       10108       03        10     10      cccccccc 
+  1030     FM_FILL_RSP     (see tq_id)   0        ----   ----     00000000_00000000_abbababa_00002121 
+  1050     CORE_WR_REQ       1010c       04        10     10      dddddddd 
+  1100     CORE_RD_REQ       10100       05        10     10      ( -- read request -- ) 
+  1120     CACHE_RD_RSP      10100       01        10     10      aaaaaaaa 
+  1140     CORE_RD_REQ       10104       06        10     10      ( -- read request -- ) 
+  1160     CACHE_RD_RSP      10104       00        10     10      bbbbbbbb 
+  1180     CORE_RD_REQ       10108       07        10     10      ( -- read request -- ) 
+  1200     CACHE_RD_RSP      10108       01        10     10      cccccccc 
+  1220     CORE_RD_REQ       1010c       08        10     10      ( -- read request -- ) 
+  1240     CACHE_RD_RSP      1010c       00        10     10      dddddddd 
