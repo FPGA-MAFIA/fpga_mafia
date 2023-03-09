@@ -3,7 +3,7 @@
 // Description: The arbiter module.
 //
 module arbiter #(parameter int NUM_CLIENTS=4,
-				parameter int DATA_WIDTH=8)
+				parameter int DATA_WIDTH=32)
 	(
 	 input  logic                           clk,
 	 input  logic                           rst,
@@ -11,12 +11,12 @@ module arbiter #(parameter int NUM_CLIENTS=4,
 	 input  logic [DATA_WIDTH-1:0]          din [0:NUM_CLIENTS-1],
 	 output logic [$clog2(NUM_CLIENTS-1):0] src_num,           
 	 output logic                           valid,
-	 output logic [NUM_CLIENTS-1:0]         ack ,
+	 //output logic [NUM_CLIENTS-1:0]         ack ,
 	 output logic	[DATA_WIDTH-1:0]	    dout 
 	);
-logic [$clog2(NUM_CLIENTS-1):0]  src_num;	
-logic  [NUM_CLIENTS-1:0]         ack;
-logic [DATA_WIDTH-1:0]           dout ;
+//logic [$clog2(NUM_CLIENTS-1):0]  src_num;	
+//logic  [NUM_CLIENTS-1:0]         ack;
+//logic [DATA_WIDTH-1:0]           dout ;
 //INTERNAL VARIABLE
 logic  [$clog2(NUM_CLIENTS-1):0] counter;	
 logic                            valid;
@@ -34,12 +34,12 @@ begin
 end
 `MAFIA_RST_DFF(counter,nxt_counter,clk,rst);
 
-//ack and reset former ack
-assign former_counter=(counter==0)? (NUM_CLIENTS-1):(counter-1); //maybe needed another ff
-`MAFIA_RST_DFF(ack[former_counter],'0,clk,rst);
-`MAFIA_EN_RST_DFF(ack[counter],1'b1,clk,req[counter],rst);
+//ack and reset former ack - TODO - 
+//assign former_counter=(counter==0)? (NUM_CLIENTS-1):(counter-1); //maybe needed another ff
+//`MAFIA_RST_DFF(ack[former_counter],'0,clk,rst);
+//`MAFIA_EN_RST_DFF(ack[counter],1'b1,clk,req[counter],rst);
 
-//valid
+//valid 
 assign next_valid = req[counter] ? 1'b1 : 0;
 `MAFIA_RST_DFF(valid,next_valid,clk,rst);
 
