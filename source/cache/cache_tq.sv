@@ -170,45 +170,8 @@ always_comb begin
                     next_tq_merge_buffer_data[i][127:96] = tq_merge_buffer_e_modified[i][3] ? tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
                 end
 
-                //The case of read after write - we set the read indication and update the offset for the read rsp:
-                if(rd_req_hit_mb[i]) begin
-                    en_tq_rd_indication   [i] = 1'b1;
-                    en_tq_cl_word_offset  [i] = 1'b1;
-                    next_tq_rd_indication [i] = 1'b1;
-                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
-                end //if
-                
-                if(wr_req_hit_mb[i]) begin
-                    en_tq_wr_indication     [i] = 1'b1;
-                    en_tq_merge_buffer_data [i] = 1'b1;
-                    en_tq_merge_buffer_e_modified   [i] = 1'b1;
-                    
-                    next_tq_wr_indication   [i] = 1'b1;
-                    //write the data to the correct word offset in the merge buffer
-                    next_tq_merge_buffer_data[i][31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data :  tq_merge_buffer_data[i][31:0]  ;
-                    next_tq_merge_buffer_data[i][63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data :  tq_merge_buffer_data[i][63:32] ;
-                    next_tq_merge_buffer_data[i][95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data :  tq_merge_buffer_data[i][95:64] ;
-                    next_tq_merge_buffer_data[i][127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data :  tq_merge_buffer_data[i][127:96];
-                    //set the corresponding bit in the e_modified vector
-                    next_tq_merge_buffer_e_modified[i]                        = tq_merge_buffer_e_modified[i];
-                    next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
-                end //if
-
             end //S_MB_WAIT_FILL
             S_MB_FILL_READY               : begin
-                if(rd_req_hit_mb[i]) begin
-                    en_tq_rd_indication   [i] = 1'b1;
-                    en_tq_cl_word_offset  [i] = 1'b1;
-                    next_tq_rd_indication [i] = 1'b1;
-                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
-                end //if
-                if(wr_req_hit_mb[i]) begin
-                    en_tq_wr_indication   [i] = 1'b1;
-                    en_tq_cl_word_offset  [i] = 1'b1;
-                    next_tq_wr_indication [i] = 1'b1;
-                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
-                end //if
-
                 if (first_fill[i] && (!core2cache_req.valid)) begin // opportunistic pipe lookup - if no core request, then fill
                     next_tq_state[i] = S_IDLE;
                 end //if
@@ -221,6 +184,34 @@ always_comb begin
             end
 
         endcase //casez
+        //==================================================================================================
+        //  Merge buffer hit logic
+        //==================================================================================================
+                // The case of read after write - we set the read indication and update the offset for the read rsp:
+                // an entry that is already set as read indication will merge to the same entry in the merge buffer
+                if(rd_req_hit_mb[i]) begin
+                    en_tq_rd_indication   [i] = 1'b1;
+                    en_tq_cl_word_offset  [i] = 1'b1;
+                    next_tq_rd_indication [i] = 1'b1;
+                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                end //if
+                
+                // The case of write after write - we set the write indication and update the merge buffer data:
+                if(wr_req_hit_mb[i]) begin
+                    en_tq_wr_indication          [i] = 1'b1;
+                    en_tq_merge_buffer_data      [i] = 1'b1;
+                    en_tq_merge_buffer_e_modified[i] = 1'b1;
+                    next_tq_wr_indication        [i] = 1'b1;
+                    //write the data to the correct word offset in the merge buffer
+                    next_tq_merge_buffer_data[i][31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data :  tq_merge_buffer_data[i][31:0]  ;
+                    next_tq_merge_buffer_data[i][63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data :  tq_merge_buffer_data[i][63:32] ;
+                    next_tq_merge_buffer_data[i][95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data :  tq_merge_buffer_data[i][95:64] ;
+                    next_tq_merge_buffer_data[i][127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data :  tq_merge_buffer_data[i][127:96];
+                    //set the corresponding bit in the e_modified vector
+                    next_tq_merge_buffer_e_modified[i]                        = tq_merge_buffer_e_modified[i];
+                    next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
+                end //if
+
     end //for loop   
 end //always_comb
 
@@ -235,7 +226,7 @@ always_comb begin
         wr_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == WR_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
-                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY));
+                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
     
     end
 end
