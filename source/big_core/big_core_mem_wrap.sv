@@ -94,14 +94,32 @@ assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDM
                                                                       PreShiftDMemRdDataQ104H         ; 
 
 // Instantiating the mafia_asap_5pl_i_mem instruction memory
+`ifdef SIM_ONLY
 i_mem i_mem (
     .Clk            (Clk),
     .address        (PcQ100H[31:2]),
     .q              (InstructionQ101H)
 );
+`else 
+i_mem	i_mem_inst (
+    .clock      ( Clk ),
+    //Core interface
+    .address_a  ( PcQ100H[31:2] ),
+    .data_a     ( '0 ),
+    .wren_a     ( '0 ),
+    .q_a        ( InstructionQ101H ),
+    //IO interface
+    .address_b  ( '0 ),
+    .data_b     ( '0),
+    .wren_b     ( '0 ),
+    .q_b        ( )
+);
+`endif  
+
 
 // Instantiating the mafia_asap_5pl_d_mem data memory
 
+`ifdef SIM_ONLY
  d_mem d_mem (
     .Clk            (Clk),
     .data           (ShiftDMemWrDataQ103H),
@@ -111,11 +129,29 @@ i_mem i_mem (
     .rden           (DMemRdEnQ103H && MatchDMemRegionQ103H),
     .q              (PreShiftDMemRdDataQ104H)
 );
+`else 
+d_mem	d_mem_inst (
+    .clock ( Clk ),
+       //Core interface
+    .address_a ( DMemAddressQ103H[31:2] ),
+    .byteena_a ( ShiftDMemByteEnQ103H ),
+    .data_a ( ShiftDMemWrDataQ103H ),
+    .wren_a ( DMemWrEnQ103H && MatchDMemRegionQ103H ),
+    .q_a ( PreShiftDMemRdDataQ104H ),
+       //IO interface
+    .address_b ( '0 ),
+    .byteena_b ( '0),
+    .data_b ( '0 ),
+    .wren_b ( '0 ),
+    .q_b ( )
+);
+`endif  
+
 
 
 // Instantiating the mafia_asap_5pl_cr_mem data memory
 //mafia_asap_5pl_cr_mem mafia_asap_5pl_cr_mem (
-//    .Clk            (Clk),
+//    .Clk              (Clk),
 //    .Rst              (Rst),
 //    .data             (DMemWrDataQ103H),
 //    .address          (DMemAddressQ103H),
@@ -133,8 +169,18 @@ i_mem i_mem (
 //    .SEG7_5           (SEG7_5),
 //    .LED              (LED)
 //);
-
-// Instantiating the mafia_asap_5pl_vga_ctrl
+assign SEG7_0 = '0;            // CR_MEM
+assign SEG7_1 = '0;            // CR_MEM
+assign SEG7_2 = '0;            // CR_MEM
+assign SEG7_3 = '0;            // CR_MEM
+assign SEG7_4 = '0;            // CR_MEM
+assign SEG7_5 = '0;            // CR_MEM
+assign LED    = '0;               // CR_MEM
+assign RED    = '0;
+assign GREEN  = '0;
+assign BLUE   = '0;
+assign h_sync = '0;
+assign v_sync = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
 //mafia_asap_5pl_vga_ctrl mafia_asap_5pl_vga_ctrl (
 //    .CLK_50            (Clk),
 //    .Reset             (Rst),
