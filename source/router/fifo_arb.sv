@@ -1,6 +1,7 @@
 
 //File Name: fifo_arbiter.sv
 //Description: The fifo_arbiter module.
+`include "macros.sv"
 
 module fifo_arb
  import router_pkg::*;
@@ -38,9 +39,12 @@ input  logic             in_ready_arb_fifo2,
 input  logic             in_ready_arb_fifo3
 );
 t_tile_trans din[3:0];
+t_tile_trans dout_fifo[3:0];
+
 logic [3:0] push;
 logic [3:0] full;
 logic [3:0] empty;
+logic [1:0] src_num;;
 always_comb begin
 din[0] = alloc_req0;
 din[1] = alloc_req1;
@@ -64,25 +68,25 @@ end
 					     .rst(rst),
 					     .push(push[i]), // valid_alloc_req#
 					     .push_data(din[i]),// alloc_req#
-					     .pop(fifo_winner[i]),//arbiter chose this fifo to pop.
-					     .pop_data(arb_candidate[i]), // arbiter input
+					     .pop(fifo_pop[i]),//arbiter chose this fifo to pop.
+					     .pop_data(dout_fifo[i]), // arbiter input
 					     .full(full[i]),//out_ready_fifo#
 					     .empty(empty[i]));// indication to arbiter that the fifo is empty
 		end
 	endgenerate
 
-arbiter #(.NUM_CLIENTS(NUM_CLIENTS),
-.DATA_WIDTH =(DATA_WIDTH))
+arbiter #(.NUM_CLIENTS(4),
+.DATA_WIDTH(32))
 arb 
 	(
 	.clk(clk),
 	.rst(rst),
-	req[0], // input from each fifo - not empty indication, valid candidate.
-	din [0:NUM_CLIENTS-1], // input from each fifo, pop_data_arb candidate.
-	src_num(), // the arbiter winner use to fifo pop.        
-	valid(valid_arb_winner),
-	dout(winner_req)
+	.req(empty[3:0]), // input from each fifo - not empty indication, valid candidate.
+	.din(dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
+	.src_num(src_num[1:0]), // the arbiter winner use to fifo pop.        
+	.valid(valid_arb_winner),
+	.dout(winner_req)
 	);
-`MAFIA_DECODER(fifo_winner[3:0],valid_arb_winner,src_num[1:0])
+`DECODER(full,src_num,valid_arb_winner) //- the arbiter should do that - no?
 
 endmodule
