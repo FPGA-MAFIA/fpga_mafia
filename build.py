@@ -219,7 +219,6 @@ class Test:
     def _start_fpga(self):
         os.chdir(FPGA_ROOT)
         fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' &'
-        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./output_files/*'
         #quartus_map --read_settings_files=on --write_settings_files=off de10_lite_big_core -c de10_lite_big_core
         try:
             print_message(f'[COMMAND] FPGA : -'+fpga_cmd+'')
@@ -227,12 +226,13 @@ class Test:
         except:
             print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
             self.fail_flag = True
+        os.chdir(MODEL_ROOT)       
         print_message('/////////////////////////////////////////////////////////////////////////////////')
+        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.proj_name+'/output_files/*'
         print_message(f'[COMMAND] '+find_war_err_cmd)
         subprocess.call(find_war_err_cmd, shell=True)
         print_message(f'[INFO] FPGA results: - FPGA/'+args.proj_name+'/output_files/')
         print_message('/////////////////////////////////////////////////////////////////////////////////')
-        os.chdir(MODEL_ROOT)       
 
         
 def print_message(msg):
