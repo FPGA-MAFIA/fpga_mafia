@@ -1,5 +1,5 @@
 /* VGA defines */
-#define VGA_MEM_BASE       0x00005000
+#define VGA_MEM_BASE       0x00100000
 #define VGA_MEM_SIZE_BYTES 38400
 #define VGA_MEM_SIZE_WORDS 9600
 #define LINE               320

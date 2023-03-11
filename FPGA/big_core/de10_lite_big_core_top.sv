@@ -64,6 +64,7 @@ module de10_lite_big_core_top(
 );
 
 
+import big_core_pkg::*;
 
 //=======================================================
 //  REG/WIRE declarations
@@ -72,23 +73,48 @@ module de10_lite_big_core_top(
 //=======================================================
 //  Structural coding
 //=======================================================
+t_fpga_out fpga_out;
+t_vga_out vga_out;
 
-big_core big_core (
-	.Clk                   (MAX10_CLK1_50), //    input  logic        Clk,
-	.Rst                   (~KEY[0] ),      //    input  logic        Rst,
-    // Instruction Memory
-	.PcQ100H               (),              //    output logic [31:0] PcQ100H,             // To I_MEM
-	.PreInstructionQ101H   ({SW[9:0],SW[9:0],SW[9:0],SW[1:0]} ), //    input  logic [31:0] PreInstructionQ101H, // From I_MEM
-    // Data Memory
-	.DMemWrDataQ103H       ( ),             //    output logic [31:0] DMemWrDataQ103H,     // To D_MEM
-	.DMemAddressQ103H      ( ),             //    output logic [31:0] DMemAddressQ103H,    // To D_MEM
-	.DMemByteEnQ103H       ( ),             //    output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
-	.DMemWrEnQ103H         ( ),             //    output logic        DMemWrEnQ103H,       // To D_MEM
-	.DMemRdEnQ103H         ( ),             //    output logic        DMemRdEnQ103H,       // To D_MEM
-	.DMemRdRspQ104H        ({SW[9:0],SW[9:0],SW[9:0],SW[1:0]})//    input  logic [31:0] DMemRdRspQ104H       // From D_MEM
+//big_core_top big_core_top (
+//.Clk      (MAX10_CLK1_50),    //input  logic        Clk,
+//.Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
+//// FPGA interface inputs              
+//.Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
+//.Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
+//.Switch   (SW),    	   //input  logic [9:0] Switch,   // CR_MEM
+//// FPGA interface outputs
+//.fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
+//// VGA output
+//.vga_out   (vga_out)    //output logic       v_sync,
+//);
+//
+big_core_top big_core_top (
+.Clk      (MAX10_CLK1_50),    //input  logic        Clk,
+.Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
+// FPGA interface inputs              
+.Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
+.Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
+.Switch   (SW),    	   //input  logic [9:0] Switch,   // CR_MEM
+// FPGA interface outputs
+.fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
+// VGA output
+.vga_out   (vga_out)    //output logic       v_sync,
 );
 
 
+assign HEX0 	= fpga_out.SEG7_0;
+assign HEX1 	= fpga_out.SEG7_1;
+assign HEX2 	= fpga_out.SEG7_2;
+assign HEX3 	= fpga_out.SEG7_3;
+assign HEX4 	= fpga_out.SEG7_4;
+assign HEX5 	= fpga_out.SEG7_5;
+assign LEDR 	= fpga_out.LED;
+assign VGA_R 	= vga_out.VGA_R;
+assign VGA_G 	= vga_out.VGA_G;
+assign VGA_B 	= vga_out.VGA_B;
+assign VGA_HS 	= vga_out.VGA_HS;
+assign VGA_VS 	= vga_out.VGA_VS;
 
 // =======================================================	
 //  This logic is just to clean all the warnings	
@@ -104,18 +130,6 @@ big_core big_core (
 `MAFIA_DFF(DRAM_RAS_N      , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_UDQM       , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_WE_N       , SW[0]   , MAX10_CLK1_50)
-`MAFIA_DFF(HEX0[7:0]       , SW[7:0] , MAX10_CLK1_50)
-`MAFIA_DFF(HEX1[7:0]       , SW[7:0] , MAX10_CLK1_50)
-`MAFIA_DFF(HEX2[7:0]       , SW[7:0] , MAX10_CLK1_50)
-`MAFIA_DFF(HEX3[7:0]       , SW[7:0] , MAX10_CLK1_50)
-`MAFIA_DFF(HEX4[7:0]       , SW[7:0] , MAX10_CLK1_50)
-`MAFIA_DFF(HEX5[7:0]       , SW[7:0] , MAX10_CLK1_50)
-`MAFIA_DFF(LEDR[9:0]       , SW[9:0] , MAX10_CLK1_50)
-`MAFIA_DFF(VGA_B[3:0]      , SW[3:0] , MAX10_CLK1_50)
-`MAFIA_DFF(VGA_G[3:0]      , SW[3:0] , MAX10_CLK1_50)
-`MAFIA_DFF(VGA_R[3:0]      , SW[3:0] , MAX10_CLK1_50)
-`MAFIA_DFF(VGA_HS          , SW[0]   , MAX10_CLK1_50)
-`MAFIA_DFF(VGA_VS          , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(GSENSOR_CS_N    , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(GSENSOR_SCLK    , SW[0]   , MAX10_CLK1_50)
 // inputs:
@@ -138,9 +152,9 @@ logic [35:0]	NEXT_GPIO;
 `MAFIA_DFF( NEXT_GPIO [35:0]      , {SW[9:0],SW[9:0],SW[9:0],SW[5:0]} , MAX10_CLK2_50)
 assign GSENSOR_SDI 		= temp ? NEXT_GSENSOR_SDI 		: 'Z;
 assign GSENSOR_SDO 		= temp ? NEXT_GSENSOR_SDO 		: 'Z;
-assign ARDUINO_RESET_N 	= temp ? NEXT_ARDUINO_RESET_N 	: 'Z;
+assign ARDUINO_RESET_N 	= temp ? NEXT_ARDUINO_RESET_N : 'Z;
 assign DRAM_DQ[15:0] 	= temp ? NEXT_DRAM_DQ[15:0] 	: 'Z;
-assign ARDUINO_IO[15:0] = temp ? NEXT_ARDUINO_IO[15:0]  : 'Z;
+assign ARDUINO_IO[15:0] = temp ? NEXT_ARDUINO_IO[15:0]: 'Z;
 assign GPIO[35:0] 		= temp ? NEXT_GPIO[35:0] 		: 'Z;
 
 endmodule

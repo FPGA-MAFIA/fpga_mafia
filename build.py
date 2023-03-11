@@ -48,9 +48,9 @@ FPGA_ROOT = './FPGA/'+args.proj_name+'/'
 class Test:
     hw_compilation = False
     I_MEM_OFFSET = str(0x00000000)
-    I_MEM_LENGTH = str(0x00002000)
-    D_MEM_OFFSET = str(0x00002000)
-    D_MEM_LENGTH = str(0x00002000)
+    I_MEM_LENGTH = str(0x00010000)
+    D_MEM_OFFSET = str(0x00010000)
+    D_MEM_LENGTH = str(0x0000F000)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
@@ -156,8 +156,8 @@ class Test:
                     #print(results.stdout)
                     with open("hw_compile.log", "w") as file:
                         file.write(results.stdout)
-                    print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
-                    print_message('compile results: target/'+self.project+'/modelsim/hw_compile.log')
+                    print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                    print_message(' compile results >>>>> target/'+self.project+'/modelsim/hw_compile.log')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         os.chdir(MODEL_ROOT)
@@ -178,6 +178,7 @@ class Test:
             else:
                 # print(results.stdout) - TODO write the results to a file instead of to display. print the path to the file
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                print_message(' compile results >>>>> target/'+self.project+'/tests/'+self.name+'/'+self.name+'_transcript')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
             shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         os.chdir(MODEL_ROOT)
@@ -218,7 +219,6 @@ class Test:
     def _start_fpga(self):
         os.chdir(FPGA_ROOT)
         fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' &'
-        find_war_err_cmd = 'grep -ri --color "error\|warning" ./output_files/*'
         #quartus_map --read_settings_files=on --write_settings_files=off de10_lite_big_core -c de10_lite_big_core
         try:
             print_message(f'[COMMAND] FPGA : -'+fpga_cmd+'')
@@ -226,12 +226,13 @@ class Test:
         except:
             print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
             self.fail_flag = True
+        os.chdir(MODEL_ROOT)       
         print_message('/////////////////////////////////////////////////////////////////////////////////')
+        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.proj_name+'/output_files/*'
         print_message(f'[COMMAND] '+find_war_err_cmd)
         subprocess.call(find_war_err_cmd, shell=True)
         print_message(f'[INFO] FPGA results: - FPGA/'+args.proj_name+'/output_files/')
         print_message('/////////////////////////////////////////////////////////////////////////////////')
-        os.chdir(MODEL_ROOT)       
 
         
 def print_message(msg):
