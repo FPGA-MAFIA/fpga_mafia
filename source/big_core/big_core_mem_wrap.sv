@@ -30,19 +30,8 @@ module big_core_mem_wrap
     input  logic       Button_1,          // CR_MEM
     input  logic [9:0] Switch,            // CR_MEM
     // FPGA interface outputs
-    output logic [7:0] SEG7_0,            // CR_MEM
-    output logic [7:0] SEG7_1,            // CR_MEM
-    output logic [7:0] SEG7_2,            // CR_MEM
-    output logic [7:0] SEG7_3,            // CR_MEM
-    output logic [7:0] SEG7_4,            // CR_MEM
-    output logic [7:0] SEG7_5,            // CR_MEM
-    output logic [9:0] LED,               // CR_MEM
-    // VGA output
-    output logic [3:0]  RED,
-    output logic [3:0]  GREEN,
-    output logic [3:0]  BLUE,
-    output logic        h_sync,
-    output logic        v_sync
+    output t_fpga_out  fpga_out,          // CR_MEM output to FPGA
+    output t_vga_out   vga_out            // VGA output to FPGA
 );
 
 // Control signals
@@ -57,7 +46,7 @@ logic [31:0] ShiftDMemWrDataQ103H;
 logic [3:0]  ShiftDMemByteEnQ103H;
 logic [31:0] PreCRMemRdDataQ104H;
 logic [31:0] PreVGAMemRdDataQ104H;
-
+assign PreVGAMemRdDataQ104H ='0;
 always_comb begin
     MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
     MatchDMemRegionQ103H   = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= D_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= D_MEM_REGION_ROOF));
@@ -150,37 +139,22 @@ d_mem	d_mem_inst (
 
 
 // Instantiating the mafia_asap_5pl_cr_mem data memory
-//mafia_asap_5pl_cr_mem mafia_asap_5pl_cr_mem (
-//    .Clk              (Clk),
-//    .Rst              (Rst),
-//    .data             (DMemWrDataQ103H),
-//    .address          (DMemAddressQ103H),
-//    .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
-//    .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
-//    .q                (PreCRMemRdDataQ104H),
-//    .Button_0         (Button_0),
-//    .Button_1         (Button_1),
-//    .Switch           (Switch),
-//    .SEG7_0           (SEG7_0),
-//    .SEG7_1           (SEG7_1),
-//    .SEG7_2           (SEG7_2),
-//    .SEG7_3           (SEG7_3),
-//    .SEG7_4           (SEG7_4),
-//    .SEG7_5           (SEG7_5),
-//    .LED              (LED)
-//);
-assign SEG7_0 = '0;            // CR_MEM
-assign SEG7_1 = '0;            // CR_MEM
-assign SEG7_2 = '0;            // CR_MEM
-assign SEG7_3 = '0;            // CR_MEM
-assign SEG7_4 = '0;            // CR_MEM
-assign SEG7_5 = '0;            // CR_MEM
-assign LED    = '0;               // CR_MEM
-assign RED    = '0;
-assign GREEN  = '0;
-assign BLUE   = '0;
-assign h_sync = '0;
-assign v_sync = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
+big_core_cr_mem big_core_cr_mem (
+    .Clk              (Clk),
+    .Rst              (Rst),
+    .data             (DMemWrDataQ103H),
+    .address          (DMemAddressQ103H),
+    .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
+    .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
+    .q                (PreCRMemRdDataQ104H),
+    .Button_0         (Button_0),
+    .Button_1         (Button_1),
+    .Switch           (Switch),
+    .fpga_out         (fpga_out)
+);
+
+
+assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
 //mafia_asap_5pl_vga_ctrl mafia_asap_5pl_vga_ctrl (
 //    .CLK_50            (Clk),
 //    .Reset             (Rst),
@@ -190,11 +164,11 @@ assign v_sync = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
 //    .wren              (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
 //    .rden              (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
 //    .q                 (PreVGAMemRdDataQ104H),
-//    .RED               (RED),
-//    .GREEN             (GREEN),
-//    .BLUE              (BLUE),
-//    .h_sync            (h_sync),
-//    .v_sync            (v_sync)
+//    .RED               (vga_out.VGA_R),
+//    .GREEN             (vga_out.VGA_G),
+//    .BLUE              (vga_out.VGA_B),
+//    .h_sync            (vga_out.VGA_HS),
+//    .v_sync            (vga_out.VGA_VS)
 //);
 
 endmodule // Module mafia_asap_5pl_mem_wrap

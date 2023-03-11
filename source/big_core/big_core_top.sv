@@ -12,7 +12,9 @@
 // This module serves as the top module of the core, memory and FPGA.
 `include "macros.sv"
 
-module big_core_top (
+module big_core_top 
+import big_core_pkg::*;  
+(
     input  logic        Clk,
     input  logic        Rst,
     
@@ -21,21 +23,10 @@ module big_core_top (
     input  logic       Button_1, // CR_MEM
     input  logic [9:0] Switch,   // CR_MEM
     // FPGA interface outputs
-    output logic [7:0] SEG7_0,   // CR_MEM
-    output logic [7:0] SEG7_1,   // CR_MEM
-    output logic [7:0] SEG7_2,   // CR_MEM
-    output logic [7:0] SEG7_3,   // CR_MEM
-    output logic [7:0] SEG7_4,   // CR_MEM
-    output logic [7:0] SEG7_5,   // CR_MEM
-    output logic [9:0] LED,      // CR_MEM
+    output t_fpga_out fpga_out,      // CR_MEM
     // VGA output
-    output logic [3:0] RED,
-    output logic [3:0] GREEN,
-    output logic [3:0] BLUE,
-    output logic       h_sync,
-    output logic       v_sync          
+    output t_vga_out       vga_out  // VGA_OUTPUT          
 );
-import big_core_pkg::*;  
 
 //=========================================
 //     Core - Memory interface
@@ -82,18 +73,8 @@ big_core_mem_wrap big_core_mem_wrap (
     .Button_0         (Button_0),            // CR_MEM
     .Button_1         (Button_1),            // CR_MEM
     .Switch           (Switch),              // CR_MEM
-    .SEG7_0           (SEG7_0),              // CR_MEM
-    .SEG7_1           (SEG7_1),              // CR_MEM
-    .SEG7_2           (SEG7_2),              // CR_MEM
-    .SEG7_3           (SEG7_3),              // CR_MEM
-    .SEG7_4           (SEG7_4),              // CR_MEM
-    .SEG7_5           (SEG7_5),              // CR_MEM
-    .LED              (LED),                 // CR_MEM
-    .RED              (RED),                 // VGA_OUTPUT
-    .GREEN            (GREEN),               // VGA_OUTPUT
-    .BLUE             (BLUE),                // VGA_OUTPUT
-    .h_sync           (h_sync),              // VGA_OUTPUT
-    .v_sync           (v_sync)               // VGA_OUTPUT
+    .fpga_out         (fpga_out),            // CR_MEM
+    .vga_out          (vga_out)              // VGA_OUTPUT
 );
 
 endmodule // Module big_core_top

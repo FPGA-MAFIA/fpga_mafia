@@ -48,9 +48,9 @@ FPGA_ROOT = './FPGA/'+args.proj_name+'/'
 class Test:
     hw_compilation = False
     I_MEM_OFFSET = str(0x00000000)
-    I_MEM_LENGTH = str(0x00002000)
-    D_MEM_OFFSET = str(0x00002000)
-    D_MEM_LENGTH = str(0x00002000)
+    I_MEM_LENGTH = str(0x00010000)
+    D_MEM_OFFSET = str(0x00010000)
+    D_MEM_LENGTH = str(0x0000F000)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
@@ -219,7 +219,7 @@ class Test:
     def _start_fpga(self):
         os.chdir(FPGA_ROOT)
         fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' &'
-        find_war_err_cmd = 'grep -ri --color "error\|warning" ./output_files/*'
+        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./output_files/*'
         #quartus_map --read_settings_files=on --write_settings_files=off de10_lite_big_core -c de10_lite_big_core
         try:
             print_message(f'[COMMAND] FPGA : -'+fpga_cmd+'')

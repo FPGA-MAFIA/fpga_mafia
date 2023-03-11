@@ -64,6 +64,7 @@ module de10_lite_big_core_top(
 );
 
 
+import big_core_pkg::*;
 
 //=======================================================
 //  REG/WIRE declarations
@@ -72,7 +73,22 @@ module de10_lite_big_core_top(
 //=======================================================
 //  Structural coding
 //=======================================================
+t_fpga_out fpga_out;
+t_vga_out vga_out;
 
+//big_core_top big_core_top (
+//.Clk      (MAX10_CLK1_50),    //input  logic        Clk,
+//.Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
+//// FPGA interface inputs              
+//.Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
+//.Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
+//.Switch   (SW),    	   //input  logic [9:0] Switch,   // CR_MEM
+//// FPGA interface outputs
+//.fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
+//// VGA output
+//.vga_out   (vga_out)    //output logic       v_sync,
+//);
+//
 big_core_top big_core_top (
 .Clk      (MAX10_CLK1_50),    //input  logic        Clk,
 .Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
@@ -81,20 +97,24 @@ big_core_top big_core_top (
 .Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
 .Switch   (SW),    	   //input  logic [9:0] Switch,   // CR_MEM
 // FPGA interface outputs
-.SEG7_0   (HEX0),    //output logic [7:0] SEG7_0,   // CR_MEM
-.SEG7_1   (HEX1),    //output logic [7:0] SEG7_1,   // CR_MEM
-.SEG7_2   (HEX2),    //output logic [7:0] SEG7_2,   // CR_MEM
-.SEG7_3   (HEX3),    //output logic [7:0] SEG7_3,   // CR_MEM
-.SEG7_4   (HEX4),    //output logic [7:0] SEG7_4,   // CR_MEM
-.SEG7_5   (HEX5),    //output logic [7:0] SEG7_5,   // CR_MEM
-.LED      (LEDR),    //output logic [9:0] LED,      // CR_MEM
+.fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
 // VGA output
-.RED      (VGA_R),    //output logic [3:0] RED,
-.GREEN    (VGA_G),    //output logic [3:0] GREEN,
-.BLUE     (VGA_B),    //output logic [3:0] BLUE,
-.h_sync   (VGA_HS),    //output logic       h_sync,
-.v_sync   (VGA_VS)    //output logic       v_sync,
+.vga_out   (vga_out)    //output logic       v_sync,
 );
+
+
+assign HEX0 	= fpga_out.SEG7_0;
+assign HEX1 	= fpga_out.SEG7_1;
+assign HEX2 	= fpga_out.SEG7_2;
+assign HEX3 	= fpga_out.SEG7_3;
+assign HEX4 	= fpga_out.SEG7_4;
+assign HEX5 	= fpga_out.SEG7_5;
+assign LEDR 	= fpga_out.LED;
+assign VGA_R 	= vga_out.VGA_R;
+assign VGA_G 	= vga_out.VGA_G;
+assign VGA_B 	= vga_out.VGA_B;
+assign VGA_HS 	= vga_out.VGA_HS;
+assign VGA_VS 	= vga_out.VGA_VS;
 
 // =======================================================	
 //  This logic is just to clean all the warnings	
@@ -110,18 +130,6 @@ big_core_top big_core_top (
 `MAFIA_DFF(DRAM_RAS_N      , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_UDQM       , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_WE_N       , SW[0]   , MAX10_CLK1_50)
-//`MAFIA_DFF(HEX0[7:0]       , SW[7:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(HEX1[7:0]       , SW[7:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(HEX2[7:0]       , SW[7:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(HEX3[7:0]       , SW[7:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(HEX4[7:0]       , SW[7:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(HEX5[7:0]       , SW[7:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(LEDR[9:0]       , SW[9:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(VGA_B[3:0]      , SW[3:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(VGA_G[3:0]      , SW[3:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(VGA_R[3:0]      , SW[3:0] , MAX10_CLK1_50)
-//`MAFIA_DFF(VGA_HS          , SW[0]   , MAX10_CLK1_50)
-//`MAFIA_DFF(VGA_VS          , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(GSENSOR_CS_N    , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(GSENSOR_SCLK    , SW[0]   , MAX10_CLK1_50)
 // inputs:
