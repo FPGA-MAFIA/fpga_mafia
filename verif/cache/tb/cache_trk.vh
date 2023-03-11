@@ -46,8 +46,8 @@ initial begin
     $fwrite(cache_tq_trk,"====================================================================================================================\n");
     $fwrite(cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
     //$fwrite(cache_tq_trk," Time  ||     State      ||  RD  ||  WR  || cl adress || cl word offset|| REG ID || MB DATA  \n");
-    $fwrite(cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   \n");
-    $fwrite(cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n");
+    $fwrite(cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
+    $fwrite(cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
 end
 
@@ -142,19 +142,22 @@ always @(posedge clk) begin
 // // tracker on TQ
 // //==================================================
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
-        if (cache.cache_tq.tq_state[i] != cache.cache_tq.next_tq_state[i]) begin
+        if ((cache.cache_tq.tq_state[i] != cache.cache_tq.next_tq_state[i]) ||
+             ((cache.cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (cache.cache_tq.rd_req_hit_mb[i] || cache.cache_tq.wr_req_hit_mb[i]) )
+             ) begin
         //$fwrite(cache_tq_trk,"%t    %-15s     %h       %h       %h              %h           %h       %h\n",
-        $fwrite(cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h\n",
+        $fwrite(cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
         $realtime,
         i,
-        cache.cache_tq.tq_state[i].name,     
-        cache.cache_tq.tq_rd_indication      [i],     
-        cache.cache_tq.tq_wr_indication      [i],         
-        cache.cache_tq.tq_cl_address         [i],
-        cache.cache_tq.tq_merge_buffer_data  [i],      
-        cache.cache_tq.tq_cl_word_offset     [i],     
-        cache.cache_tq.tq_reg_id             [i]
-            
+        cache.cache_tq.next_tq_state              [i].name,     
+        cache.cache_tq.next_tq_rd_indication      [i],     
+        cache.cache_tq.next_tq_wr_indication      [i],         
+        cache.cache_tq.next_tq_cl_address         [i],
+        cache.cache_tq.next_tq_merge_buffer_data  [i],      
+        cache.cache_tq.next_tq_cl_word_offset     [i],     
+        cache.cache_tq.next_tq_reg_id             [i],
+        //cache.cache_tq.any_rd_hit_mb,
+        //cache.cache_tq.any_wr_hit_mb
         );
 
 

@@ -1,0 +1,46 @@
+==================================================================================
+                      CACHE TOP TRACKER  -  Test: fill_8_tq_entries
+==================================================================================
+-----------------------------------------------------------------------------------
+ Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data 
+-----------------------------------------------------------------------------------
+   870     CORE_WR_REQ       01010       01        01     01      00001111 
+   880     CORE_WR_REQ       01020       02        01     02      00002222 
+   890     CORE_WR_REQ       01030       03        01     03      00003333 
+   890     CACHE_FILL_REQ    01010       0         01     01      ( -- read request -- ) 
+   900     CORE_WR_REQ       01040       04        01     04      00004444 
+   900     CACHE_FILL_REQ    01020       1         01     02      ( -- read request -- ) 
+   910     CORE_WR_REQ       01050       05        01     05      00005555 
+   910     CACHE_FILL_REQ    01030       2         01     03      ( -- read request -- ) 
+   920     CORE_WR_REQ       01060       06        01     06      00006666 
+   920     CACHE_FILL_REQ    01040       3         01     04      ( -- read request -- ) 
+   930     CORE_WR_REQ       01070       07        01     07      00007777 
+   930     CACHE_FILL_REQ    01050       4         01     05      ( -- read request -- ) 
+   940     CORE_WR_REQ       01080       08        01     08      00008888 
+   940     CACHE_FILL_REQ    01060       5         01     06      ( -- read request -- ) 
+   950     CACHE_FILL_REQ    01070       6         01     07      ( -- read request -- ) 
+   960     CACHE_FILL_REQ    01080       7         01     08      ( -- read request -- ) 
+  1000     FM_FILL_RSP     (see tq_id)   0        ----   ----     00000000_00000000_abbababa_00001212 
+  1010     FM_FILL_RSP     (see tq_id)   1        ----   ----     00000000_00000000_abbababa_00001213 
+  1020     FM_FILL_RSP     (see tq_id)   2        ----   ----     00000000_00000000_abbababa_00001214 
+  1030     FM_FILL_RSP     (see tq_id)   3        ----   ----     00000000_00000000_abbababa_00001215 
+  1040     FM_FILL_RSP     (see tq_id)   4        ----   ----     00000000_00000000_abbababa_00001216 
+  1050     CORE_RD_REQ       01010       09        01     01      ( -- read request -- ) 
+  1050     FM_FILL_RSP     (see tq_id)   5        ----   ----     00000000_00000000_abbababa_00001217 
+  1060     CORE_RD_REQ       01020       0a        01     02      ( -- read request -- ) 
+  1060     FM_FILL_RSP     (see tq_id)   6        ----   ----     00000000_00000000_abbababa_00001218 
+  1070     CORE_RD_REQ       01030       0b        01     03      ( -- read request -- ) 
+  1070     CACHE_RD_RSP      01010       00        01     01      00001111 
+  1070     FM_FILL_RSP     (see tq_id)   7        ----   ----     00000000_00000000_abbababa_00001219 
+  1080     CORE_RD_REQ       01040       0c        01     04      ( -- read request -- ) 
+  1080     CACHE_RD_RSP      01020       01        01     02      00002222 
+  1090     CORE_RD_REQ       01050       0d        01     05      ( -- read request -- ) 
+  1090     CACHE_RD_RSP      01030       00        01     03      00003333 
+  1100     CORE_RD_REQ       01060       0e        01     06      ( -- read request -- ) 
+  1100     CACHE_RD_RSP      01040       01        01     04      00004444 
+  1110     CORE_RD_REQ       01070       0f        01     07      ( -- read request -- ) 
+  1120     CORE_RD_REQ       01080       10        01     08      ( -- read request -- ) 
+  1150     CACHE_RD_RSP      01050       00        01     05      00005555 
+  1160     CACHE_RD_RSP      01060       01        01     06      00006666 
+  1170     CACHE_RD_RSP      01070       00        01     07      00007777 
+  1180     CACHE_RD_RSP      01080       00        01     08      00008888 

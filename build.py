@@ -98,7 +98,8 @@ class Test:
                                     -Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+'\
                                     -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+'\
                                     -nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
-                    print_message(f'[COMMAND] '+second_cmd)
+                    # TODO add verbosity option to print the command
+                    # print_message(f'[COMMAND] '+second_cmd)
                     subprocess.check_output(second_cmd, shell=True)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -141,6 +142,7 @@ class Test:
             comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.project+'_list.f'
             try:
                 #results = subprocess.check_output(comp_sim_cmd, shell=True, stderr=subprocess.STDOUT).decode()
+                print_message(f'[COMMAND] '+comp_sim_cmd)
                 results = subprocess.run(comp_sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -151,8 +153,11 @@ class Test:
                     self.fail_flag = True
                     print(results.stdout)
                 else:
-                    print(results.stdout)
+                    #print(results.stdout)
+                    with open("hw_compile.log", "w") as file:
+                        file.write(results.stdout)
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
+                    print_message('compile results: target/'+self.project+'/modelsim/hw_compile.log')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         os.chdir(MODEL_ROOT)
@@ -161,6 +166,7 @@ class Test:
         print_message('[INFO] Now running simulation ...')
         sim_cmd = 'vsim.exe work.'+self.project+'_tb -c -do "run -all" +STRING='+self.name
         try:
+            print_message(f'[COMMAND] '+sim_cmd)
             results = subprocess.run(sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -179,6 +185,7 @@ class Test:
         os.chdir(MODELSIM)
         gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb +STRING='+self.name+' &'
         try:
+            print_message(f'[COMMAND] '+gui_cmd+'')
             subprocess.call(gui_cmd, shell=True)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -187,6 +194,7 @@ class Test:
     def _no_debug(self):
         delete_cmd = 'rm -rf '+TARGET+'tests/'+self.name
         try:
+            print_message(f'[COMMAND] '+delete_cmd)
             subprocess.check_output(delete_cmd, shell=True)
         except:
             print_message('[ERROR] failed to remove /target/'+self.project+'/tests/'+self.name+' directory')
@@ -197,6 +205,7 @@ class Test:
         pp_cmd = 'python '+self.project+'_pp.py ' +self.name
         # Run the post process command
         try:
+            print_message(f'[COMMAND] '+pp_cmd)
             return_val = subprocess.run(pp_cmd)
         except:
             print_message('[ERROR] Failed to run post process ')
@@ -209,12 +218,19 @@ class Test:
     def _start_fpga(self):
         os.chdir(FPGA_ROOT)
         fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' &'
+        find_war_err_cmd = 'grep -ri --color "error\|warning" ./output_files/*'
         #quartus_map --read_settings_files=on --write_settings_files=off de10_lite_big_core -c de10_lite_big_core
         try:
+            print_message(f'[COMMAND] FPGA : -'+fpga_cmd+'')
             subprocess.call(fpga_cmd, shell=True)
         except:
             print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
             self.fail_flag = True
+        print_message('/////////////////////////////////////////////////////////////////////////////////')
+        print_message(f'[COMMAND] '+find_war_err_cmd)
+        subprocess.call(find_war_err_cmd, shell=True)
+        print_message(f'[INFO] FPGA results: - FPGA/'+args.proj_name+'/output_files/')
+        print_message('/////////////////////////////////////////////////////////////////////////////////')
         os.chdir(MODEL_ROOT)       
 
         
@@ -290,13 +306,16 @@ def main():
     # sys.stdout.flush()
     # sys.stderr.flush()
 
-    print_message('=================================================================================')
-    print_message(f'[INFO] Run status: {run_status} ')
     if(run_status == "FAILED"):
         print_message('The failed tests are:')
     for test in tests:
-        if(test.fail_flag):
-            print_message(f'[ERROR] Run failed - {test.name}')
+        if(test.fail_flag==True):
+            print_message(f'[ERROR] test failed - {test.name}  - target/'+args.proj_name+'/tests/'+test.name+'/')
+        if(test.fail_flag==False):
+            print_message(f'[INFO] test Passed- {test.name}  - target/'+args.proj_name+'/tests/'+test.name+'/')
+    print_message('=================================================================================')
+    print_message(f'[INFO] Run final status: {run_status}')
+    print_message('=================================================================================')
     print_message('=================================================================================')
     if(run_status == "FAILED"):
         return 1

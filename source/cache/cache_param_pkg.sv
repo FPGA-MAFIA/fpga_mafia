@@ -88,6 +88,7 @@ typedef enum logic {
 typedef enum logic [1:0] {
     NO_RSP  = 2'b00,
     HIT     = 2'b01,
+    FILL    = 2'b10,
     MISS    = 2'b11
 } t_lu_result ;
 
