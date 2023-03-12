@@ -15,5 +15,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run BIG_CORE build , then compile & synth for FPGA | -hw -sim -fpga
-        run: python build.py -proj_name 'big_core' -debug -test alive -app -hw -sim -fpga
+        run: python build.py -dut 'big_core' -debug -test alive -app -hw -sim -fpga
 
