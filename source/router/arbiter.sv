@@ -11,7 +11,7 @@ module arbiter #(parameter int NUM_CLIENTS=4,
 	 input  logic                           rst,
 	 input  var   [NUM_CLIENTS-1:0]  				  valid_candidate ,
 	 input  var   [NUM_CLIENTS-1:0]  [DATA_WIDTH-1:0] candidate ,
-	 output logic [$clog2(NUM_CLIENTS-1):0] winner_id,           
+	 output logic [NUM_CLIENTS-1:0] winner_dec_id,           
 	 output logic                           valid,
 	 //output logic [NUM_CLIENTS-1:0]         ack ,
 	 output logic	[DATA_WIDTH-1:0]	    winner 
@@ -24,6 +24,7 @@ logic  [$clog2(NUM_CLIENTS-1):0] counter;
 logic [$clog2(NUM_CLIENTS-1):0]  nxt_counter;
 logic [$clog2(NUM_CLIENTS-1):0]  former_counter;
 logic                            next_valid;
+logic [$clog2(NUM_CLIENTS)-1:0] winner_id;           
 //counter
 always@(*) // counter% NUM_CLIENTS
 begin
@@ -46,7 +47,10 @@ assign next_valid = valid_candidate[counter] ? 1'b1 : 0;
 
 //winner_id
 `MAFIA_EN_RST_DFF(winner_id, counter, clk, valid_candidate[counter], rst)
-
+always_comb begin
+	winner_dec_id = '0;
+	if(valid) winner_dec_id[winner_id] = 1'b1;
+end
 //winner
 `MAFIA_EN_RST_DFF(winner, candidate[counter], clk, valid_candidate[counter], rst)
 

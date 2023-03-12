@@ -78,15 +78,17 @@ end
         end
     endgenerate
 
-arbiter #(.NUM_CLIENTS(4),
-.DATA_WIDTH(32))
+arbiter #(
+	.NUM_CLIENTS(4),
+	.DATA_WIDTH($bits(t_tile_trans))
+	)
 arb 
     (
     .clk(clk),
     .rst(rst),
     .valid_candidate(empty[3:0]), // input from each fifo - not empty indication, valid candidate.
     .candidate(dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
-    .winner_id(fifo_pop[3:0]), // the arbiter winner use to fifo pop.        
+    .winner_dec_id(fifo_pop[3:0]), // the arbiter winner use to fifo pop.        
     .valid(winner_valid),
     .winner(winner_req)
 );

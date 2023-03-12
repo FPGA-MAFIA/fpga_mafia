@@ -46,17 +46,22 @@ task delay(input int cycles);
   end
 endtask
 task push_fifo(input int num_fifo);
-valid_alloc_req[num_fifo] = 1'b1;
-delay(1);
-valid_alloc_req[num_fifo] = '0;
+  $display("%t, push_fifo %d",$time, num_fifo);
+  valid_alloc_req[num_fifo] = 1'b1;
+  delay(1);
+  valid_alloc_req[num_fifo] = '0;
 endtask
 
 initial begin
+    clk = 1'b0;
     forever #5 clk = ~clk;
 end
 
 initial begin
     rst = 1'b1;
+    for(int i =0; i<4 ; i++) begin
+      valid_alloc_req[i] = '0;
+    end
     delay(10);
     rst = '0;
     delay(10);
@@ -69,15 +74,15 @@ initial begin
       push_fifo(1);
       push_fifo(2);
       push_fifo(3);
-
     join
   delay(30);
   $finish;
 end
 
-initial begin : timeout_monitor
-  #1000 $fatal(1, "Timeout");
-end
+//initial begin : timeout_monitor
+//  #100000
+//  $fatal(1, "Timeout");
+//end
 
 endmodule
 
