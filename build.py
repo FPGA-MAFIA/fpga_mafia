@@ -253,6 +253,8 @@ def print_message(msg):
 #####################################################################################################       
 def main():
     os.chdir(MODEL_ROOT)
+    test = 'grep -ri --color "abd_setting_the_color" README.md'
+    subprocess.call(test, shell=True)
     if not os.path.exists('target/'+args.dut+'/tests/'):
         os.makedirs('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
