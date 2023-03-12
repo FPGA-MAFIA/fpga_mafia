@@ -9,16 +9,16 @@ module arbiter #(parameter int NUM_CLIENTS=4,
 	(
 	 input  logic                           clk,
 	 input  logic                           rst,
-	 input  var                           req [NUM_CLIENTS-1:0],
-	 input  var [DATA_WIDTH-1:0]          din [0:NUM_CLIENTS-1],
-	 output logic [$clog2(NUM_CLIENTS-1):0] src_num,           
+	 input  var   [NUM_CLIENTS-1:0]  				  valid_candidate ,
+	 input  var   [NUM_CLIENTS-1:0]  [DATA_WIDTH-1:0] candidate ,
+	 output logic [$clog2(NUM_CLIENTS-1):0] winner_id,           
 	 output logic                           valid,
 	 //output logic [NUM_CLIENTS-1:0]         ack ,
-	 output logic	[DATA_WIDTH-1:0]	    dout 
+	 output logic	[DATA_WIDTH-1:0]	    winner 
 	);
-//logic [$clog2(NUM_CLIENTS-1):0]  src_num;	
+//logic [$clog2(NUM_CLIENTS-1):0]  winner_id;	
 //logic  [NUM_CLIENTS-1:0]         ack;
-//logic [DATA_WIDTH-1:0]           dout ;
+//logic [DATA_WIDTH-1:0]           winner ;
 //INTERNAL VARIABLE
 logic  [$clog2(NUM_CLIENTS-1):0] counter;	
 logic [$clog2(NUM_CLIENTS-1):0]  nxt_counter;
@@ -38,17 +38,17 @@ end
 //ack and reset former ack - TODO - 
 //assign former_counter=(counter==0)? (NUM_CLIENTS-1):(counter-1); //maybe needed another ff
 //`MAFIA_RST_DFF(ack[former_counter],'0,clk,rst);
-//`MAFIA_EN_RST_DFF(ack[counter],1'b1,clk,req[counter],rst);
+//`MAFIA_EN_RST_DFF(ack[counter],1'b1,clk,valid_candidate[counter],rst);
 
 //valid 
-assign next_valid = req[counter] ? 1'b1 : 0;
+assign next_valid = valid_candidate[counter] ? 1'b1 : 0;
 `MAFIA_RST_DFF(valid,next_valid,clk,rst)
 
-//src_num
-`MAFIA_EN_RST_DFF(src_num, counter, clk, req[counter], rst)
+//winner_id
+`MAFIA_EN_RST_DFF(winner_id, counter, clk, valid_candidate[counter], rst)
 
-//dout
-`MAFIA_EN_RST_DFF(dout, din[counter], clk, req[counter], rst)
+//winner
+`MAFIA_EN_RST_DFF(winner, candidate[counter], clk, valid_candidate[counter], rst)
 
 endmodule : arbiter
 
