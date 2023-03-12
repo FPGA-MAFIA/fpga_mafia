@@ -118,9 +118,7 @@ initial begin: test_seq
         $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
     end
     #10000
-    $display("===================\n test %s ended timeout \n=====================", test_name);
-    $finish;
-
+    end_tb("timeout");
 end // test_seq
 
 
@@ -130,15 +128,18 @@ parameter EBREAK = 32'h00100073;
 // EBREAK detection
 always @(posedge Clk) begin : ebrake_status
     if (EBREAK == sc_core.Instruction) begin // ebrake instruction opcode
-        $display("===================\n test %s ended with EBREAK \n=====================", test_name);
-        end_tb();
-        $finish;
-        //end_tb("The test ended");
+        end_tb("ended with EBREAK");
     end
 end
 
-task end_tb;
-        // VGA memory snapshot - simulate a screen
+task end_tb (string eot_msg);
+print_vga_screen();
+$display("===================\n End of test %s - with message: %s \n=====================", test_name, eot_msg);
+$finish;
+endtask
+
+task print_vga_screen ;
+// VGA memory snapshot - simulate a screen
     integer fd1;
     string draw;
     fd1 = $fopen({"../../../target/sc_core/tests/",test_name,"/screen.log"},"w");
@@ -155,7 +156,7 @@ task end_tb;
             $fwrite(fd1,"\n");
         end
     end
-endtask
 
+endtask
 endmodule //big_core_tb
 

@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import os
+import shutil
 import subprocess
 import glob
 import argparse
@@ -28,6 +29,7 @@ parser.add_argument('-full_run',    action='store_true',    help='compile SW, HW
 parser.add_argument('-proj_name',   default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-pp',          action='store_true',    help='run post-process on the tests')
 parser.add_argument('-fpga',        action='store_true',    help='run compile & synthesis for the fpga')
+parser.add_argument('-regress',     default='',             help='insert a level of regression to run on')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -46,9 +48,9 @@ FPGA_ROOT = './FPGA/'+args.proj_name+'/'
 class Test:
     hw_compilation = False
     I_MEM_OFFSET = str(0x00000000)
-    I_MEM_LENGTH = str(0x00002000)
-    D_MEM_OFFSET = str(0x00002000)
-    D_MEM_LENGTH = str(0x00002000)
+    I_MEM_LENGTH = str(0x00010000)
+    D_MEM_OFFSET = str(0x00010000)
+    D_MEM_LENGTH = str(0x0000F000)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
@@ -140,6 +142,7 @@ class Test:
             comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.project+'_list.f'
             try:
                 #results = subprocess.check_output(comp_sim_cmd, shell=True, stderr=subprocess.STDOUT).decode()
+                print_message(f'[COMMAND] '+comp_sim_cmd)
                 results = subprocess.run(comp_sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -150,8 +153,11 @@ class Test:
                     self.fail_flag = True
                     print(results.stdout)
                 else:
-                    print(results.stdout)
-                    print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1])+'\n')
+                    #print(results.stdout)
+                    with open("hw_compile.log", "w") as file:
+                        file.write(results.stdout)
+                    print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                    print_message(' compile results >>>>> target/'+self.project+'/modelsim/hw_compile.log')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         os.chdir(MODEL_ROOT)
@@ -160,6 +166,7 @@ class Test:
         print_message('[INFO] Now running simulation ...')
         sim_cmd = 'vsim.exe work.'+self.project+'_tb -c -do "run -all" +STRING='+self.name
         try:
+            print_message(f'[COMMAND] '+sim_cmd)
             results = subprocess.run(sim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -171,11 +178,15 @@ class Test:
             else:
                 # print(results.stdout) - TODO write the results to a file instead of to display. print the path to the file
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                print_message(' compile results >>>>> target/'+self.project+'/tests/'+self.name+'/'+self.name+'_transcript')
+        if os.path.exists('transcript'):  # copy transcript file to the test directory
+            shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         os.chdir(MODEL_ROOT)
     def _gui(self):
         os.chdir(MODELSIM)
         gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb +STRING='+self.name+' &'
         try:
+            print_message(f'[COMMAND] '+gui_cmd+'')
             subprocess.call(gui_cmd, shell=True)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -184,6 +195,7 @@ class Test:
     def _no_debug(self):
         delete_cmd = 'rm -rf '+TARGET+'tests/'+self.name
         try:
+            print_message(f'[COMMAND] '+delete_cmd)
             subprocess.check_output(delete_cmd, shell=True)
         except:
             print_message('[ERROR] failed to remove /target/'+self.project+'/tests/'+self.name+' directory')
@@ -194,6 +206,7 @@ class Test:
         pp_cmd = 'python '+self.project+'_pp.py ' +self.name
         # Run the post process command
         try:
+            print_message(f'[COMMAND] '+pp_cmd)
             return_val = subprocess.run(pp_cmd)
         except:
             print_message('[ERROR] Failed to run post process ')
@@ -208,11 +221,18 @@ class Test:
         fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' &'
         #quartus_map --read_settings_files=on --write_settings_files=off de10_lite_big_core -c de10_lite_big_core
         try:
+            print_message(f'[COMMAND] FPGA : -'+fpga_cmd+'')
             subprocess.call(fpga_cmd, shell=True)
         except:
             print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
             self.fail_flag = True
         os.chdir(MODEL_ROOT)       
+        print_message('/////////////////////////////////////////////////////////////////////////////////')
+        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.proj_name+'/output_files/*'
+        print_message(f'[COMMAND] '+find_war_err_cmd)
+        subprocess.call(find_war_err_cmd, shell=True)
+        print_message(f'[INFO] FPGA results: - FPGA/'+args.proj_name+'/output_files/')
+        print_message('/////////////////////////////////////////////////////////////////////////////////')
 
         
 def print_message(msg):
@@ -242,7 +262,15 @@ def main():
     if args.all:
         test_list = os.listdir(TESTS)
         for test in test_list:
+            if 'level' in test: continue
             tests.append(Test(test, args.proj_name))
+    elif args.regress:
+        level_list = open(TESTS+args.regress, 'r').read().split('\n')
+        for test in level_list:
+            if os.path.exists(TESTS+test):
+                tests.append(Test(test, args.proj_name))
+            else:
+                print_message('[ERROR] can\'t find the test - '+test)
     else:
         for test in args.tests.split():
             test = glob.glob(TESTS+test+'*')[0]
