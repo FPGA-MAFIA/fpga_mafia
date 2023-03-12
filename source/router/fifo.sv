@@ -15,7 +15,6 @@ module fifo #(parameter int DATA_WIDTH = 8,
 	 output logic				     full,
 	 output logic				     empty
 	 );
-logic [DATA_WIDTH-1:0] pop_data;
 //INTERNAL VARIABLES
 logic [FIFO_DEPTH-1:0] w_counter;//point to next cell in memory that will be writen  
 logic [FIFO_DEPTH-1:0] r_counter;//point to next cell will readen
