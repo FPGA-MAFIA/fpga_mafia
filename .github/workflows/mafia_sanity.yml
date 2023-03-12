@@ -15,11 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run build BIG_CORE -all -app -hw -sim
-        run: python build.py -proj_name 'big_core' -debug -all -app -hw -sim
+        run: python build.py -dut 'big_core' -debug -all -app -hw -sim
       - name: Run build MINI_CORE -all -app -hw -sim
-        run: python build.py -proj_name 'mini_core' -debug -all -app -hw -sim
+        run: python build.py -dut 'mini_core' -debug -all -app -hw -sim
       - name: Run build SC_CORE -all -app -hw -sim 
-        run: python build.py -proj_name 'sc_core' -debug -all -app -hw -sim
+        run: python build.py -dut 'sc_core' -debug -all -app -hw -sim
       - name: Run build CACHE -all -hw -sim -pp
-        run: python build.py -proj_name 'cache' -debug -all -hw -sim -pp
+        run: python build.py -dut 'cache' -debug -all -hw -sim -pp
 

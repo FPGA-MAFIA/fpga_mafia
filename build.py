@@ -9,13 +9,13 @@ from termcolor import colored
 
 examples = '''
 Examples:
-python build.py -proj_name 'big_core' -debug -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
-python build.py -proj_name 'big_core'        -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
-python build.py -proj_name 'big_core' -debug -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
-python build.py -proj_name 'big_core' -debug -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
-python build.py -proj_name 'big_core' -debug -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
-python build.py -proj_name 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
-python build.py -proj_name 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
+python build.py -dut 'big_core' -debug -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
+python build.py -dut 'big_core'        -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
+python build.py -dut 'big_core' -debug -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
+python build.py -dut 'big_core' -debug -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
+python build.py -dut 'big_core' -debug -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
+python build.py -dut 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
+python build.py -dut 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all',         action='store_true', default=False, help='running all the tests')
@@ -26,21 +26,21 @@ parser.add_argument('-app',         action='store_true',    help='compile the RI
 parser.add_argument('-hw',          action='store_true',    help='compile the RISCV HW into simulation')
 parser.add_argument('-sim',         action='store_true',    help='start simulation')
 parser.add_argument('-full_run',    action='store_true',    help='compile SW, HW of the test and simulate it')
-parser.add_argument('-proj_name',   default='big_core',     help='insert your project name (as mentioned in the dirs name')
+parser.add_argument('-dut',   default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-pp',          action='store_true',    help='run post-process on the tests')
 parser.add_argument('-fpga',        action='store_true',    help='run compile & synthesis for the fpga')
 parser.add_argument('-regress',     default='',             help='insert a level of regression to run on')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
-VERIF     = './verif/'+args.proj_name+'/'
-TB        = './verif/'+args.proj_name+'/tb/'
-SOURCE    = './source/'+args.proj_name+'/'
-TARGET    = './target/'+args.proj_name+'/'
-MODELSIM  = './target/'+args.proj_name+'/modelsim/'
+VERIF     = './verif/'+args.dut+'/'
+TB        = './verif/'+args.dut+'/tb/'
+SOURCE    = './source/'+args.dut+'/'
+TARGET    = './target/'+args.dut+'/'
+MODELSIM  = './target/'+args.dut+'/modelsim/'
 APP       = './app/'
-TESTS     = './verif/'+args.proj_name+'/tests/'
-FPGA_ROOT = './FPGA/'+args.proj_name+'/'
+TESTS     = './verif/'+args.dut+'/tests/'
+FPGA_ROOT = './FPGA/'+args.dut+'/'
 
 #####################################################################################################
 #                                           class Test
@@ -228,10 +228,10 @@ class Test:
             self.fail_flag = True
         os.chdir(MODEL_ROOT)       
         print_message('/////////////////////////////////////////////////////////////////////////////////')
-        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.proj_name+'/output_files/*'
+        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.dut+'/output_files/*'
         print_message(f'[COMMAND] '+find_war_err_cmd)
         subprocess.call(find_war_err_cmd, shell=True)
-        print_message(f'[INFO] FPGA results: - FPGA/'+args.proj_name+'/output_files/')
+        print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
         print_message('/////////////////////////////////////////////////////////////////////////////////')
 
         
@@ -252,10 +252,9 @@ def print_message(msg):
 #                                           main
 #####################################################################################################       
 def main():
-    
     os.chdir(MODEL_ROOT)
-    if not os.path.exists('target/'+args.proj_name+'/tests/'):
-        os.makedirs('target/'+args.proj_name+'/tests/')
+    if not os.path.exists('target/'+args.dut+'/tests/'):
+        os.makedirs('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
     
     tests = []
@@ -263,19 +262,19 @@ def main():
         test_list = os.listdir(TESTS)
         for test in test_list:
             if 'level' in test: continue
-            tests.append(Test(test, args.proj_name))
+            tests.append(Test(test, args.dut))
     elif args.regress:
         level_list = open(TESTS+args.regress, 'r').read().split('\n')
         for test in level_list:
             if os.path.exists(TESTS+test):
-                tests.append(Test(test, args.proj_name))
+                tests.append(Test(test, args.dut))
             else:
                 print_message('[ERROR] can\'t find the test - '+test)
     else:
         for test in args.tests.split():
             test = glob.glob(TESTS+test+'*')[0]
             test = test.replace('\\', '/').split('/')[-1]
-            tests.append(Test(test, args.proj_name))
+            tests.append(Test(test, args.dut))
 
      # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
@@ -311,9 +310,9 @@ def main():
         print_message('The failed tests are:')
     for test in tests:
         if(test.fail_flag==True):
-            print_message(f'[ERROR] test failed - {test.name}  - target/'+args.proj_name+'/tests/'+test.name+'/')
+            print_message(f'[ERROR] test failed - {test.name}  - target/'+args.dut+'/tests/'+test.name+'/')
         if(test.fail_flag==False):
-            print_message(f'[INFO] test Passed- {test.name}  - target/'+args.proj_name+'/tests/'+test.name+'/')
+            print_message(f'[INFO] test Passed- {test.name}  - target/'+args.dut+'/tests/'+test.name+'/')
     print_message('=================================================================================')
     print_message(f'[INFO] Run final status: {run_status}')
     print_message('=================================================================================')
