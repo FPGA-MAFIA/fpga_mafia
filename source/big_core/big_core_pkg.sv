@@ -18,18 +18,16 @@ package big_core_pkg;
     
 
 
-parameter I_MEM_SIZE   = 'h2000;
-parameter I_MEM_OFFSET = 'h0;
-parameter D_MEM_SIZE   = 'h3000;
-parameter D_MEM_OFFSET = 'h2000;
+parameter I_MEM_SIZE   = 'h1_0000;
+parameter I_MEM_OFFSET = 'h0_0000;
+parameter D_MEM_SIZE   = 'h1_0000;
+parameter D_MEM_OFFSET = 'h1_0000;
 
-parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
-parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
-parameter CR_MEM_MSB  = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
-parameter VGA_MEM_MSB = 'h11600-1;                  // VGA_MEM 0x8000 - 0x115FF
+parameter I_MEM_MSB   = I_MEM_SIZE-1;               
+parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  
 // Region bits
 parameter LSB_REGION = 0;
-parameter MSB_REGION = 15;
+parameter MSB_REGION = 23;
 
 // VGA Region bits
 parameter VGA_MSB_REGION = 19;
@@ -38,21 +36,18 @@ parameter VGA_MSB_REGION = 19;
 parameter I_MEM_REGION_FLOOR   = 'h0                    ;
 parameter I_MEM_REGION_ROOF    = I_MEM_MSB              ;
 
-parameter D_MEM_REGION_FLOOR   = I_MEM_REGION_ROOF  + 1 ;
-parameter D_MEM_REGION_ROOF    = D_MEM_MSB              ;
+parameter D_MEM_REGION_FLOOR   = D_MEM_OFFSET;
+parameter D_MEM_REGION_ROOF    = D_MEM_OFFSET +  D_MEM_SIZE - 1;
 
-parameter CR_MEM_REGION_FLOOR  = D_MEM_REGION_ROOF  + 1 ;
-parameter CR_MEM_REGION_ROOF   = CR_MEM_MSB             ;
+parameter CR_MEM_OFFSET       = 'h0010_0000;
+parameter CR_MEM_REGION_FLOOR = CR_MEM_OFFSET;
+parameter CR_MEM_REGION_ROOF  = 'h0020_0000 -4;
 
-parameter VGA_MEM_REGION_FLOOR = CR_MEM_REGION_ROOF + 1 ;
-parameter VGA_MEM_REGION_ROOF  = VGA_MEM_MSB            ;
-
-// define data memory sizes
-parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
 
 // define VGA memory sizes
-parameter SIZE_VGA_MEM       = 38400; 
-
+parameter SIZE_VGA_MEM          = 38400; 
+parameter VGA_MEM_REGION_FLOOR  = 'h20_0000;
+parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 
 parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
 
@@ -101,7 +96,53 @@ typedef enum logic [6:0] {
    SYSCAL = 7'b1110011
 } t_opcode ;
 
+typedef struct packed {
+    logic [7:0] SEG7_0;
+    logic [7:0] SEG7_1;
+    logic [7:0] SEG7_2;
+    logic [7:0] SEG7_3;
+    logic [7:0] SEG7_4;
+    logic [7:0] SEG7_5;
+    logic [9:0] LED;
+} t_fpga_out;
+
+typedef struct packed {
+    logic [3:0] VGA_R;
+    logic [3:0] VGA_G;
+    logic [3:0] VGA_B;
+    logic       VGA_VS;
+    logic       VGA_HS;
+} t_vga_out;
+
+
+// CR Address Offsets
+parameter CR_SEG7_0    = CR_MEM_OFFSET + 'h0  ; // RW 8 bit
+parameter CR_SEG7_1    = CR_MEM_OFFSET + 'h4  ; // RW 8 bit
+parameter CR_SEG7_2    = CR_MEM_OFFSET + 'h8  ; // RW 8 bit
+parameter CR_SEG7_3    = CR_MEM_OFFSET + 'hC  ; // RW 8 bit
+parameter CR_SEG7_4    = CR_MEM_OFFSET + 'h10 ; // RW 8 bit
+parameter CR_SEG7_5    = CR_MEM_OFFSET + 'h14 ; // RW 8 bit
+parameter CR_LED       = CR_MEM_OFFSET + 'h18 ; // RW 10 bit
+parameter CR_Button_0  = CR_MEM_OFFSET + 'h1C ; // RO 1 bit
+parameter CR_Button_1  = CR_MEM_OFFSET + 'h20 ; // RO 1 bit
+parameter CR_Switch    = CR_MEM_OFFSET + 'h24 ; // RO 10 bit
+
+
+typedef struct packed { // RO
+    logic       Button_0;
+    logic       Button_1;
+    logic [9:0] Switch;
+} t_cr_ro ;
+
+typedef struct packed { // RW
+    logic [7:0]  SEG7_0;
+    logic [7:0]  SEG7_1;
+    logic [7:0]  SEG7_2;
+    logic [7:0]  SEG7_3;
+    logic [7:0]  SEG7_4;
+    logic [7:0]  SEG7_5;
+    logic [9:0]  LED;
+} t_cr_rw ;
 
 endpackage
-
 `endif 

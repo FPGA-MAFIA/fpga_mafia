@@ -40,23 +40,11 @@ logic        Button_1;
 logic [9:0]  Switch;
 
 // FPGA interface outputs
-logic [7:0]  SEG7_0;
-logic [7:0]  SEG7_1;
-logic [7:0]  SEG7_2;
-logic [7:0]  SEG7_3;
-logic [7:0]  SEG7_4;
-logic [7:0]  SEG7_5;
-logic [9:0]  LED;
+t_fpga_out  fpga_out;
+t_fpga_out  next_fpga_out;
+t_vga_out   vga_out;
 
-//=========================================
-//     VGA - Core interface
-//=========================================
-// VGA output
-logic [3:0]  RED;
-logic [3:0]  GREEN;
-logic [3:0]  BLUE;
-logic        h_sync;
-logic        v_sync;
+`MAFIA_DFF(fpga_out, next_fpga_out, Clk)
 
 //=========================================
 // Instantiating the big_core core
@@ -82,19 +70,10 @@ big_core_top big_core_top(
     .Button_0       (Button_0),
     .Button_1       (Button_1),
     .Switch         (Switch  ),
-    .SEG7_0         (SEG7_0  ),
-    .SEG7_1         (SEG7_1  ),
-    .SEG7_2         (SEG7_2  ),
-    .SEG7_3         (SEG7_3  ),
-    .SEG7_4         (SEG7_4  ),
-    .SEG7_5         (SEG7_5  ),
-    .LED            (LED     ),
-    .RED            (RED     ),
-    .GREEN          (GREEN   ),
-    .BLUE           (BLUE    ),
-    .h_sync         (h_sync  ),
-    .v_sync         (v_sync  ) 
+    .fpga_out       (next_fpga_out),
+    .vga_out        (vga_out  ) 
 );
+
 // ========================
 // clock gen
 // ========================
@@ -158,6 +137,7 @@ parameter EBREAK = 32'h00100073;
 // Ebrake detection
 always @(posedge Clk) begin : ebrake_status
     if (EBREAK == InstructionQ103H) begin // ebrake instruction opcode
+        $display("fpga_out = %p", fpga_out);
         $display("===================\n test %s ended with Ebreake \n=====================", test_name);
         $finish;
         //end_tb("The test ended");
