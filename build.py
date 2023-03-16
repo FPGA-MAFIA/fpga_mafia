@@ -175,6 +175,7 @@ class Test:
             if len(results.stdout.split('Error')) > 2:
                 self.fail_flag = True
                 print(results.stdout)
+                print_message(' compile results >>>>> target/'+self.project+'/tests/'+self.name+'/'+self.name+'_transcript')
             else:
                 # print(results.stdout) - TODO write the results to a file instead of to display. print the path to the file
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
