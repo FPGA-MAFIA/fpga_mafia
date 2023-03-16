@@ -18,6 +18,8 @@
 integer cache_top_trk;
 integer cache_pipe_trk;
 integer cache_tq_trk;
+integer cache_ref_gold_trk;
+integer cache_ref_trk;
 
 initial begin
     if ($value$plusargs ("STRING=%s", test_name))
@@ -49,12 +51,28 @@ initial begin
     $fwrite(cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
     $fwrite(cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
+    cache_ref_gold_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
+    cache_ref_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_trk.log"},"w");
+    $fwrite(cache_ref_gold_trk,"====================================================================================================================\n");
+    $fwrite(cache_ref_gold_trk,"                      Core<->Cache  -  Test: ",test_name,"\n");
+    $fwrite(cache_ref_gold_trk,"====================================================================================================================\n");
+    $fwrite(cache_ref_gold_trk,"-----------------------------------------------------------------------------------\n");
+    //$fwrite(cache_ref_gold_trk,"   OPCODE        || address ||REG      || tag  || Set ||    Data \n");
+    $fwrite(cache_ref_gold_trk," ||   OPCODE        || address  || tag  || Set ||    Data \n");
+    $fwrite(cache_ref_gold_trk,"-----------------------------------------------------------------------------------\n");
+    $fwrite(cache_ref_trk,"====================================================================================================================\n");
+    $fwrite(cache_ref_trk,"                      Core<->Cache  -  Test: ",test_name,"\n");
+    $fwrite(cache_ref_trk,"====================================================================================================================\n");
+    $fwrite(cache_ref_trk,"-----------------------------------------------------------------------------------\n");
+    //$fwrite(cache_ref_trk,"   OPCODE        || address ||REG      || tag  || Set ||    Data \n");
+    $fwrite(cache_ref_trk," ||   OPCODE        || address  || tag  || Set ||    Data \n");
+    $fwrite(cache_ref_trk,"-----------------------------------------------------------------------------------\n");
 end
 
+always @(posedge clk) begin
 //==================================================
 // tracker of the Cache Top Level Interface
 //==================================================
-always @(posedge clk) begin
     if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
         $fwrite(cache_top_trk,"%t     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
         $realtime, 
@@ -163,5 +181,50 @@ always @(posedge clk) begin
 
         end
     end    
+
+
+
+//==================================================
+// tracker of reference model - core<->cache
+//==================================================
+    if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
+        //$fwrite(cache_ref_gold_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
+        $fwrite(cache_ref_gold_trk,"     CORE_RD_REQ       %h         %h     %h      ( -- read request -- ) \n",
+        core2cache_req.address, 
+        //core2cache_req.reg_id, 
+        core2cache_req.address[MSB_TAG:LSB_TAG] , 
+        core2cache_req.address[MSB_SET:LSB_SET]);      
+    end
+    if(ref_cache2core_rsp.valid) begin
+        //$fwrite(cache_ref_gold_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
+        $fwrite(cache_ref_gold_trk,"     CACHE_RD_RSP      %h         %h     %h      %h \n",
+        ref_cache2core_rsp.address, 
+        //ref_cache2core_rsp.reg_id, 
+        ref_cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
+        ref_cache2core_rsp.address[MSB_SET:LSB_SET], 
+        ref_cache2core_rsp.data);
+    end
+
+//==================================================
+// tracker of reference model - core<->cache
+//==================================================
+    if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
+        //$fwrite(cache_ref_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
+        $fwrite(cache_ref_trk,"     CORE_RD_REQ       %h         %h     %h      ( -- read request -- ) \n",
+        core2cache_req.address, 
+        //core2cache_req.reg_id, 
+        core2cache_req.address[MSB_TAG:LSB_TAG] , 
+        core2cache_req.address[MSB_SET:LSB_SET]);      
+    end
+    if(cache2core_rsp.valid) begin
+        //$fwrite(cache_ref_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
+        $fwrite(cache_ref_trk,"     CACHE_RD_RSP      %h         %h     %h      %h \n",
+        cache2core_rsp.address, 
+        //cache2core_rsp.reg_id, 
+        cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
+        cache2core_rsp.address[MSB_SET:LSB_SET], 
+        cache2core_rsp.data);
+    end
+
 
 end //always(posedge)

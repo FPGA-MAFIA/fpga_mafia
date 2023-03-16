@@ -105,13 +105,7 @@ typedef enum logic [1:0] {
     FILL_REQ_OP    = 2'b11
 } t_fm_req_op ;
 
-typedef struct packed {
-    logic         valid;
-    t_reg_id     reg_id;
-    t_opcode      opcode;
-    t_address     address;
-    t_word          data;    
-} t_req ;
+
 
 typedef struct packed {
     logic         valid;
@@ -135,10 +129,21 @@ typedef struct packed {
     t_cl        data;
 } t_fm_rd_rsp ;
 
+
+// Core -> Cache request
+typedef struct packed {
+    logic        valid;
+    t_reg_id     reg_id;
+    t_opcode     opcode;
+    t_address    address;
+    t_word       data;    
+} t_req ;
+
+// Cache -> Core response
 typedef struct packed {
     logic        valid;
     t_address    address;
-    t_word         data;
+    t_word       data;
    t_reg_id      reg_id;
 } t_rd_rsp ;
 

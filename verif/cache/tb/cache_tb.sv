@@ -30,6 +30,33 @@ logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
 
 
 
+logic [7:0] my_vector ;
+assign my_vector = 8'b00000101;
+
+int test_one_hot;
+int test_countbits;
+//int test_decode;
+//int test_encode;
+int test_bits;
+int test_clog2;
+
+initial begin 
+   assign test_one_hot = $onehot(my_vector);
+   assign test_countbits = $countbits(my_vector,1);
+   //assign test_decode = $(my_vector);
+   //assign test_encode = $encode(my_vector);
+   assign test_bits = $bits(my_vector);
+   assign test_clog2 = $clog2(my_vector);
+   $display("is my_vector one hot? %0d", test_one_hot);
+   $display("The number of 1's in my_vector is %0d", test_countbits);
+   //$display("The decode is: %0d", test_decode);
+   //$display("The encode is: %0d", test_encode);
+   $display("The number of bits are: %0d", test_bits);
+  $display("The clog2 is: %0d", test_clog2);
+end
+
+
+
 string test_name;
 initial begin : start_test
     if ($value$plusargs ("STRING=%s", test_name))
@@ -127,8 +154,10 @@ task backdoor_fm_load();
         back_door_fm_mem[FM_ADDRESS] = FM_ADDRESS + 'hABBA_BABA_0000_1111;
   end
     force far_memory_array.mem  = back_door_fm_mem;
+    force cache_ref_model.mem  = back_door_fm_mem;
     delay(5);
     release far_memory_array.mem;
+    release cache_ref_model.mem;
   $display("= backdoor_fm_load done =\n");
 endtask
 
@@ -188,6 +217,13 @@ array  #(
 `MAFIA_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , clk)
 
 
-
+t_rd_rsp          ref_cache2core_rsp;
+cache_ref_model cache_ref_model (
+    .clk                (clk),            //input   logic
+    .rst                (rst),            //input   logic
+    //Agent Interface                      
+    .core2cache_req     (core2cache_req), //input   
+    .cache2core_rsp     (ref_cache2core_rsp)  //output  t_rd_rsp
+);
 
 endmodule // test_tb
