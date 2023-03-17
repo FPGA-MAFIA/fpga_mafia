@@ -68,5 +68,5 @@ Then run ``` source ~/.bashrc ```
 
 ### fast access
 python build.py -h  
-python build.py -proj_name 'big_core' -debug -tests alive -app 
-python build.py -proj_name 'sc_core' -debug -tests alive -full_run
+python build.py -dut 'big_core' -debug -tests alive -app 
+python build.py -dut 'sc_core' -debug -tests alive -full_run

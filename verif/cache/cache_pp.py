@@ -32,8 +32,14 @@ print_message('--------------------------------------------------------')
 base_path = "target/cache/tests"
 
 # Construct the paths to the two files to compare
-file1_path = os.path.join(base_path, args.test_name, "cache_top_trk.log").replace("\\", "/")
-file2_path = os.path.join("verif", "cache", "golden_trk", "golden_" + args.test_name + "_top_trk.log").replace("\\", "/")
+file1_path = os.path.join(base_path, args.test_name, "cache_ref_trk.log").replace("\\", "/")
+file2_path = os.path.join(base_path, args.test_name, "cache_ref_gold_trk.log").replace("\\", "/")
+
+
+
+# TODO add a section that can reorder the read request & read responses in both ref & ref_gold so it can be compared.
+# you may overwrite the ref_gold_trk.log with the reordered ref_gold_trk.log
+# this is done my first creating a new file and then overwriting the old one with the new one
 
 if os.path.exists(file2_path):
     # Open the two files
