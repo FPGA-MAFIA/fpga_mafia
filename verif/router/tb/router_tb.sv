@@ -1,3 +1,4 @@
+`include "macros.sv"
 module router_tb;
 import router_pkg::*;
 logic              clk;
@@ -8,7 +9,14 @@ logic        [3:0] out_ready_fifo;
 t_tile_trans       winner_req;
 logic        [3:0] in_ready_arb_fifo;
 logic              winner_valid;
-
+logic        [1:0] src_num; // the decimal number of fifo
+logic        [3:0] num_of_fifo; // one hot vector of valid - which fifo is on.
+string test_name;
+initial begin : start_test
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("STRING value %s", test_name);
+$display("================\n     START\n================\n");
+end
 fifo_arb fifo_arb_ins(
 .clk                (clk),
 .rst                (rst),
@@ -39,6 +47,9 @@ alloc_req[i].opcode = WR;
 alloc_req[i].requestor_id = '0;
 alloc_req[i].next_tile_fifo_arb_id = NORTH;
 end
+//`ENCODER(num_of_fifo,1,valid_alloc_req)
+num_of_fifo = '0;
+//`include "fifo_arb_trk.vh"
 end
 task delay(input int cycles);
   for(int i =0; i< cycles; i++) begin
@@ -69,16 +80,16 @@ initial begin
     delay(10);
     push_fifo(0);
     delay(10);
-    fork
-      push_fifo(0);
-      push_fifo(1);
-      push_fifo(2);
-      push_fifo(3);
-    join
+   // fork - hard to work with trk's.
+   //   push_fifo(0);
+   //   push_fifo(1);
+   //   push_fifo(2);
+   //   push_fifo(3);
+   // join
   delay(30);
   $finish;
 end
-
+`include "fifo_arb_trk.vh"
 //initial begin : timeout_monitor
 //  #100000
 //  $fatal(1, "Timeout");
