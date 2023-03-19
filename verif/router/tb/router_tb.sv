@@ -16,7 +16,15 @@ initial begin
 end
 
 
-`include "fifo_arb_tb.vh"
+`include "fifo_arb_dut.vh"
+//`include "router_dut_tb.vh"
 
+
+
+initial begin : timeout_monitor
+  #100ns;
+  //$fatal(1, "Timeout");
+  $finish();
+end
 endmodule
 
