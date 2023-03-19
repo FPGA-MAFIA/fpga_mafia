@@ -1,58 +1,55 @@
-//
 // File Name: arbiter.sv
 // Description: The arbiter module.
-//
 `include "macros.sv"
 
 module arbiter #(parameter int NUM_CLIENTS=4,
 				parameter int DATA_WIDTH=32)
 	(
-	 input  logic                           clk,
-	 input  logic                           rst,
+	 input  logic                        		      clk,
+	 input  logic                         			  rst,
+	 // ctrl path
 	 input  var   [NUM_CLIENTS-1:0]  				  valid_candidate ,
+	 output logic [NUM_CLIENTS-1:0] 				  winner_dec_id,           
+	 // data path
 	 input  var   [NUM_CLIENTS-1:0]  [DATA_WIDTH-1:0] candidate ,
-	 output logic [NUM_CLIENTS-1:0] winner_dec_id,           
-	 output logic                           valid,
-	 //output logic [NUM_CLIENTS-1:0]         ack ,
-	 output logic	[DATA_WIDTH-1:0]	    winner 
+	 output logic                          			  valid_winner,
+	 output logic [DATA_WIDTH-1:0]	   			 	  winner 
 	);
-//logic [$clog2(NUM_CLIENTS-1):0]  winner_id;	
-//logic  [NUM_CLIENTS-1:0]         ack;
-//logic [DATA_WIDTH-1:0]           winner ;
-//INTERNAL VARIABLE
-logic  [$clog2(NUM_CLIENTS-1):0] counter;	
-logic [$clog2(NUM_CLIENTS-1):0]  nxt_counter;
-logic [$clog2(NUM_CLIENTS-1):0]  former_counter;
-logic                            next_valid;
-logic [$clog2(NUM_CLIENTS)-1:0] winner_id;           
-//counter
-always@(*) // counter% NUM_CLIENTS
-begin
-	nxt_counter = counter;
-	if (counter == NUM_CLIENTS-1)
-	nxt_counter = '0;
-	else 
-	nxt_counter = counter + 1;
-end
-`MAFIA_RST_DFF(counter,nxt_counter,clk,rst)
 
-//ack and reset former ack - TODO - 
-//assign former_counter=(counter==0)? (NUM_CLIENTS-1):(counter-1); //maybe needed another ff
-//`MAFIA_RST_DFF(ack[former_counter],'0,clk,rst);
-//`MAFIA_EN_RST_DFF(ack[counter],1'b1,clk,valid_candidate[counter],rst);
+logic [NUM_CLIENTS-1:0] last_winner;
+logic [NUM_CLIENTS-1:0] mask_out;
+logic [NUM_CLIENTS-1:0] mask_candidate;
+logic [NUM_CLIENTS-1:0] first_top;
+logic [NUM_CLIENTS-1:0] first_bottom;
+logic hit_top;
 
-//valid 
-assign next_valid = valid_candidate[counter] ? 1'b1 : 0;
-`MAFIA_RST_DFF(valid,next_valid,clk,rst)
-
-//winner_id
-`MAFIA_EN_RST_DFF(winner_id, counter, clk, valid_candidate[counter], rst)
+`MAFIA_EN_RST_DFF(last_winner , winner_dec_id , clk, valid_winner, rst)
 always_comb begin
-	winner_dec_id = '0;
-	if(valid) winner_dec_id[winner_id] = 1'b1;
+        mask_out = '0;
+    for(int i =0; i < NUM_CLIENTS; i++ )begin
+        mask_out[i] = (last_winner > i);
+    end
 end
-//winner
-`MAFIA_EN_RST_DFF(winner, candidate[counter], clk, valid_candidate[counter], rst)
+assign mask_candidate = (valid_candidate & (~mask_out));
+`FIND_FIRST(first_top    , mask_candidate)
+`FIND_FIRST(first_bottom , valid_candidate)
 
-endmodule : arbiter
+assign hit_top = (|first_top);
+assign winner_dec_id = hit_top ? first_top : first_bottom;
+assign valid_winner = (|winner_dec_id);
+
+always_comb begin
+	winner = '0;
+	for(int i =0; i < NUM_CLIENTS; i++ )begin
+		winner = winner_dec_id[i] ? candidate[i] : winner;
+	end
+end
+
+//====================
+// winner_dec_id[1:0]       = 2'b10  ;
+// mask_out[3:0]     = 4'b0011;
+// candidate[3:0]    = 4'b1101;
+// first_top[3:0]    = 4'b0100;
+// first_bottom[3:0] = 4'b0001;
+endmodule
 
