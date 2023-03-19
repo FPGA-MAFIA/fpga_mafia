@@ -10,7 +10,7 @@ t_tile_trans       winner_req;
 logic        [3:0] in_ready_arb_fifo;
 logic              winner_valid;
 logic        [1:0] src_num; // the decimal number of fifo
-logic        [3:0] num_of_fifo; // one hot vector of valid - which fifo is on.
+static int         num_of_fifo; // one hot vector of valid - which fifo is on.
 string test_name;
 initial begin : start_test
     if ($value$plusargs ("STRING=%s", test_name))
@@ -49,7 +49,7 @@ alloc_req[i].next_tile_fifo_arb_id = NORTH;
 end
 //`ENCODER(num_of_fifo,1,valid_alloc_req)
 num_of_fifo = '0;
-//`include "fifo_arb_trk.vh"
+
 end
 task delay(input int cycles);
   for(int i =0; i< cycles; i++) begin
@@ -80,6 +80,12 @@ initial begin
     delay(10);
     push_fifo(0);
     delay(10);
+    forever begin
+      for (int num_of_fifo=0; num_of_fifo<4; num_of_fifo++) begin
+       push_fifo(num_of_fifo);
+       delay(100);
+      end
+    end
    // fork - hard to work with trk's.
    //   push_fifo(0);
    //   push_fifo(1);
@@ -90,10 +96,11 @@ initial begin
   $finish;
 end
 `include "fifo_arb_trk.vh"
-//initial begin : timeout_monitor
-//  #100000
-//  $fatal(1, "Timeout");
-//end
+initial begin : timeout_monitor
+  #100ns;
+  //$fatal(1, "Timeout");
+  $finish();
+end
 
 endmodule
 

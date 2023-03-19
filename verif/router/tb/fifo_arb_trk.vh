@@ -29,7 +29,7 @@ initial begin
     $fwrite(fifo_arb_top_trk, "                      FIFO_ARB TOP TRACKER  -  Test: ",test_name,"\n");
     $fwrite(fifo_arb_top_trk, "==================================================================================\n");
     $fwrite(fifo_arb_top_trk,"-----------------------------------------------------------------------------------\n");
-    $fwrite(fifo_arb_top_trk," Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data \n");
+    $fwrite(fifo_arb_top_trk," Time  || input from fifo: ||  ADDRESS        || opcode ||DATA|| requestor_id  || next_tile \n");
     $fwrite(fifo_arb_top_trk,"-----------------------------------------------------------------------------------\n");
 
 end
@@ -39,9 +39,9 @@ always @(posedge clk) begin
 // tracker of the fifo_arb Top Level Interface
 //==================================================
     if(valid_alloc_req != '0) begin // if there is any valid req
-        $fwrite(fifo_arb_top_trk,"%t     input from fifo %0d       %h       %h        %h     %h      %s \n",
+        $fwrite(fifo_arb_top_trk,"%t     input from fifo %0d         %h       %h        %h     %h      %s \n",
         $realtime, 
-        src_num,
+        num_of_fifo,
         alloc_req[num_of_fifo].address,  
         alloc_req[num_of_fifo].opcode, 
         alloc_req[num_of_fifo].data , 
@@ -49,7 +49,7 @@ always @(posedge clk) begin
         alloc_req[num_of_fifo].next_tile_fifo_arb_id);      
     end
     if(winner_valid) begin
-        $fwrite(fifo_arb_top_trk,"%t     OUTPUT-WINNER FIFO       %h       %h        %h     %h      %h \n",
+        $fwrite(fifo_arb_top_trk,"%t     OUTPUT-WINNER FIFO        %h       %h        %h     %h      %s \n",
         $realtime, 
         winner_req.address,  
         winner_req.opcode, 
@@ -57,12 +57,12 @@ always @(posedge clk) begin
         winner_req.requestor_id,
         winner_req.next_tile_fifo_arb_id);  
     end
-    if(out_ready_fifo != 0) begin
-        $fwrite(fifo_arb_top_trk,"%t     OUTPUT-FULL INDICATION      \n",
-        $realtime, 
-        out_ready_fifo
-        );
-    end
+   // if(out_ready_fifo != 0) begin
+   //     $fwrite(fifo_arb_top_trk,"%t     OUTPUT-FULL INDICATION      \n",
+   //     $realtime, 
+   //     out_ready_fifo
+   //     );
+   // end
    
     end    
 
