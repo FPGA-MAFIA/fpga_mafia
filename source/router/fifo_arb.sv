@@ -66,7 +66,7 @@ end
     generate
         for (i=0; i<NUM_CLIENTS; i=i+1)begin
             fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
-                inside_fifo  (.clk      (clk),
+                inside_fifo  (.clk       (clk),
                               .rst       (rst),
                               .push      (push[i]), // valid_alloc_req#
                               .push_data (din[i]),// alloc_req#
@@ -86,11 +86,11 @@ arb
     (
     .clk(clk),
     .rst(rst),
-    .valid_candidate(empty[3:0]), // input from each fifo - not empty indication, valid candidate.
-    .candidate(dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
-    .winner_dec_id(fifo_pop[3:0]), // the arbiter winner use to fifo pop.        
-    .valid(winner_valid),
-    .winner(winner_req)
+    .valid_candidate(~empty[3:0]),    // input from each fifo - not empty indication, valid candidate.
+    .candidate      (dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
+    .winner_dec_id  (fifo_pop[3:0]),  // the arbiter winner use to fifo pop.        
+    .valid_winner   (winner_valid),
+    .winner         (winner_req)
 );
 
 endmodule

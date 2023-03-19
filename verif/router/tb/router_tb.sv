@@ -41,14 +41,13 @@ fifo_arb fifo_arb_ins(
 );
 always_comb begin
 for(int i = 0 ; i<4 ; i++) begin
-alloc_req[i].data = i;
-alloc_req[i].address = i;
+alloc_req[i].data = i+10;
+alloc_req[i].address = i+10;
 alloc_req[i].opcode = WR;
-alloc_req[i].requestor_id = '0;
+alloc_req[i].requestor_id = '0+10;
 alloc_req[i].next_tile_fifo_arb_id = NORTH;
 end
 //`ENCODER(num_of_fifo,1,valid_alloc_req)
-num_of_fifo = '0;
 
 end
 task delay(input int cycles);
@@ -80,25 +79,25 @@ initial begin
     delay(10);
     push_fifo(0);
     delay(10);
-    forever begin
-      for (int num_of_fifo=0; num_of_fifo<4; num_of_fifo++) begin
-       push_fifo(num_of_fifo);
-       delay(100);
-      end
-    end
-   // fork - hard to work with trk's.
-   //   push_fifo(0);
-   //   push_fifo(1);
-   //   push_fifo(2);
-   //   push_fifo(3);
-   // join
+    //forever begin
+    //  for (int num_of_fifo=0; num_of_fifo<4; num_of_fifo++) begin
+    //   push_fifo(num_of_fifo);
+    //   delay(100);
+    //  end
+    //end
+    fork // - hard to work with trk's.
+      push_fifo(0);
+      push_fifo(1);
+      push_fifo(2);
+      push_fifo(3);
+    join
   delay(30);
   $finish;
 end
 `include "fifo_arb_trk.vh"
 initial begin : timeout_monitor
   #100ns;
-  //$fatal(1, "Timeout");
+  $fatal(1, "Timeout");
   $finish();
 end
 
