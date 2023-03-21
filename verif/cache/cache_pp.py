@@ -4,6 +4,7 @@ import subprocess
 import argparse
 import difflib
 import sys
+import ref_orderer
 
 parser = argparse.ArgumentParser(description= 'get test name from build')
 parser.add_argument('test_name', help='The name of the test to run pp on')
@@ -25,6 +26,7 @@ def print_message(msg):
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 os.chdir(MODEL_ROOT)
 
+
 print_message('--------------------------------------------------------')
 print_message("     Cache Post-Process  : "+args.test_name )
 print_message('--------------------------------------------------------')
@@ -35,11 +37,10 @@ base_path = "target/cache/tests"
 file1_path = os.path.join(base_path, args.test_name, "cache_ref_trk.log").replace("\\", "/")
 file2_path = os.path.join(base_path, args.test_name, "cache_ref_gold_trk.log").replace("\\", "/")
 
+#Reorder the ref_trk files by pairs of Req/rsp
+ref_orderer.orderer_func(file1_path)
+ref_orderer.orderer_func(file2_path)
 
-
-# TODO add a section that can reorder the read request & read responses in both ref & ref_gold so it can be compared.
-# you may overwrite the ref_gold_trk.log with the reordered ref_gold_trk.log
-# this is done my first creating a new file and then overwriting the old one with the new one
 
 if os.path.exists(file2_path):
     # Open the two files
