@@ -148,9 +148,8 @@ class Test:
                 Test.hw_compilation = True
                 if len(results.stdout.split('Error')) > 2:
                     self.fail_flag = True
-                    print(results.stdout)
+                    print_message(results.stdout)
                 else:
-                    #print(results.stdout)
                     with open("hw_compile.log", "w") as file:
                         file.write(results.stdout)
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
@@ -170,7 +169,7 @@ class Test:
         else:
             if len(results.stdout.split('Error')) > 2:
                 self.fail_flag = True
-                print(results.stdout)
+                print_message(results.stdout)
             else:
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
             print_message('=== Simulation results >>>>> target/'+self.project+'/tests/'+self.name+'/'+self.name+'_transcript')
@@ -199,7 +198,7 @@ class Test:
         try:
             pp_cmd = 'python '+self.project+'_pp.py ' +self.name
             return_val = run_cmd_with_capture(pp_cmd)
-            print(colored(return_val.stdout,'yellow',attrs=['bold']))        
+            print_message(colored(return_val.stdout,'yellow',attrs=['bold']))        
         except:
             print_message('[ERROR] Failed to run post process ')
             self.fail_flag = True
@@ -219,7 +218,7 @@ class Test:
         chdir(MODEL_ROOT)       
         find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.dut+'/output_files/*'
         results = run_cmd_with_capture(find_war_err_cmd)
-        print(results.stdout)
+        print_message(results.stdout)
         print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
 
         
