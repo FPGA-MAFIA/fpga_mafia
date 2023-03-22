@@ -198,8 +198,8 @@ class Test:
         # Run the post process command
         try:
             pp_cmd = 'python '+self.project+'_pp.py ' +self.name
-            print_message(f'[COMMAND] '+pp_cmd)
-            return_val = subprocess.run(pp_cmd)
+            return_val = run_cmd_with_capture(pp_cmd)
+            print(colored(return_val.stdout,'yellow',attrs=['bold']))        
         except:
             print_message('[ERROR] Failed to run post process ')
             self.fail_flag = True
