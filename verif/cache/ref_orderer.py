@@ -6,8 +6,8 @@ import itertools
 def orderer_func(arg1):
     N = 6
     input_filename = arg1
-    output_filename = "verif/cache/output.log"
-    temp_filename  = "verif/cache/temp.log"
+    output_filename = "target/cache/output.log"
+    temp_filename  = "target/cache/temp.log"
 
     # Open input and output files
     with open(input_filename, 'r') as input_file, open(output_filename, 'w') as output_file:      
