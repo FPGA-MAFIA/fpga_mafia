@@ -14,10 +14,10 @@ def print_message(msg):
     msg_type = msg.split()[0]
     try:
         color = {
-            '[ERROR]'   : 'red',
-            '[WARNING]' : 'yellow',
-            '[INFO]'    : 'green',
-            '[COMMAND]' : 'cyan',
+            '[PP_ERROR]'   : 'red',
+            '[PP_WARNING]' : 'yellow',
+            '[PP_INFO]'    : 'green',
+            '[PP_COMMAND]' : 'cyan',
         }[msg_type]
     except:
         color = 'blue'
@@ -90,17 +90,17 @@ if os.path.exists(file2_path):
     if num_diffs > 0:
         #print(f"There are {num_diffs} differences between the two files:")
         #print(f"Please refer to" ,colored(output_path,'white',attrs=['bold']), "to see the full diff\n")
-        print_message(f"[WARNING] There are {num_diffs} differences between the two files:")
-        print_message(f"[INFO] Please refer to {output_path} to see the full diff\n")
+        print_message(f"[PP_WARNING] There are {num_diffs} differences between the two files:")
+        print_message(f"[PP_INFO] Please refer to {output_path} to see the full diff\n")
 
     if num_diffs == 0:
-        print(colored("\n[INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
+        print(colored("\n[PP_INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
         sys.exit(0)
     else:
-        print_message(f"\n[ERROR] {args.test_name} have failed Post-Process")
+        print_message(f"\n[PP_ERROR] {args.test_name} have failed Post-Process")
         sys.exit(1)
 else: 
-    print_message(f"\n[WARNING] No golden tracker found for test {args.test_name}")
+    print_message(f"\n[PP_WARNING] No golden tracker found for test {args.test_name}")
     sys.exit(0)
 
 
