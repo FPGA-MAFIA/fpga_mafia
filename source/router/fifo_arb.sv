@@ -61,7 +61,7 @@ out_ready_fifo1 = !full[1];
 out_ready_fifo2 = !full[2];
 out_ready_fifo3 = !full[3];
 end
-//*************************** NOT GOOD SIGNALS - CORRECT IT*************************** 
+
     genvar i;
     generate
         for (i=0; i<NUM_CLIENTS; i=i+1)begin
