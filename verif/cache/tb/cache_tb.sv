@@ -69,6 +69,19 @@ end
 if(test_name == "wr_b2b_same_cl") begin
 `include "wr_b2b_same_cl.sv"
 end
+if(test_name == "wr_b2b_hit") begin
+`include "wr_b2b_hit.sv"
+end
+if(test_name == "rd_b2b_hit") begin
+`include "rd_b2b_hit.sv"
+end
+if(test_name == "rd_b2b_same_cl") begin
+`include "rd_b2b_same_cl.sv"
+end
+if(test_name == "rd_b2b_diff_cl") begin
+`include "rd_b2b_diff_cl.sv"
+end
+
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;

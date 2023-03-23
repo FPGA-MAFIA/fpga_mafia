@@ -99,9 +99,6 @@ if os.path.exists(file2_path):
     else:
         print_message(f"\n[PP_ERROR] {args.test_name} have failed Post-Process")
         sys.exit(1)
-else: 
-    print_message(f"\n[PP_WARNING] No golden tracker found for test {args.test_name}")
-    sys.exit(0)
 
 
 
