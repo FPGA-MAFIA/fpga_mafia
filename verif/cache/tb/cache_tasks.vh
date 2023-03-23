@@ -84,8 +84,8 @@ endtask
 //=======================================================
 //=======================================================
 //systemverilog task to create the pull of tags and sets to be used in the test
-task create_addrs_pull(output logic [7:0] tag_pull [NUM_TAG_PULL:0],
-                       output logic [7:0] set_pull [NUM_SET_PULL:0]);
+task create_addrs_pull(output logic [7:0] tag_pull [MAX_NUM_TAG_PULL:0],
+                       output logic [7:0] set_pull [MAX_NUM_SET_PULL:0]);
     int i;
     for (i = 0; i < NUM_TAG_PULL; i = i + 1) begin
         tag_pull[i] = $urandom_range(8'h00, 8'hFF);

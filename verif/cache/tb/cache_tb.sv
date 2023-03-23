@@ -15,15 +15,18 @@ t_fm_rd_rsp       fm2cache_rd_rsp;
 
 
 //default values - override in test
-parameter int MAX_REQ_DELAY = 20;
-parameter int MIN_REQ_DELAY = 15;
-parameter int NUM_REQ       = 30;
-parameter int RD_RATIO      = 25; //30% read , 70% write
-parameter int NUM_SET_PULL  = 2;
-parameter int NUM_TAG_PULL  = 2;
+int MAX_REQ_DELAY;
+int MIN_REQ_DELAY;
+int NUM_REQ      ;
+int RD_RATIO     ;
+int NUM_SET_PULL ;//Max is MAX_NUM_SET_PULL
+int NUM_TAG_PULL ;//Max is MAX_NUM_TAG_PULL
 
-logic [7:0] tag_pull [NUM_TAG_PULL:0];
-logic [7:0] set_pull [NUM_SET_PULL:0];
+parameter MAX_NUM_SET_PULL  = 50;  //Max is 
+parameter MAX_NUM_TAG_PULL  = 50;
+
+logic [7:0] tag_pull [MAX_NUM_TAG_PULL:0];
+logic [7:0] set_pull [MAX_NUM_SET_PULL:0];
 
 //==================
 //      clk Gen

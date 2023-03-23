@@ -270,7 +270,8 @@ always_comb begin
   cache_pipe_lu_q2.set_ways_modified    =   set_ways_modified_q2;
   cache_pipe_lu_q2.hit                  =   |way_tag_match_q2;
   cache_pipe_lu_q2.miss                 =   !(|way_tag_match_q2) && (cache_pipe_lu_q2.lu_valid);
-  cache_pipe_lu_q2.data_array_address   =   {cache_pipe_lu_q2.lu_set , cache_pipe_lu_q2.set_ways_enc_hit};
+  cache_pipe_lu_q2.data_array_address   =   (cache_pipe_lu_q2.lu_op == FILL_LU) ? {cache_pipe_lu_q2.lu_set , set_ways_enc_victim_q2} :
+                                                                                  {cache_pipe_lu_q2.lu_set , way_tag_enc_match_q2}   ;
   cache_pipe_lu_q2.dirty_evict          =  dirty_evict_q2;
 
 end //always_comb
@@ -364,9 +365,9 @@ always_comb begin
     wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                              (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
                                                                                                             '0; 
-    wr_data_cl_q3.cl_address             =   cache_pipe_lu_q3.data_array_address;
-    wr_data_cl_q3.valid                  =   (cache_pipe_lu_q3.lu_valid &&   
-                                             ((cache_pipe_lu_q3.lu_op == WR_LU)|| (cache_pipe_lu_q3.lu_op == FILL_LU)));
+    wr_data_cl_q3.cl_address             =  cache_pipe_lu_q3.data_array_address;
+    wr_data_cl_q3.valid                  =  (cache_pipe_lu_q3.lu_valid && ((cache_pipe_lu_q3.lu_op == WR_LU) && cache_pipe_lu_q3.hit)) ||
+                                            (cache_pipe_lu_q3.lu_valid && (cache_pipe_lu_q3.lu_op == FILL_LU));
 end
 
 
