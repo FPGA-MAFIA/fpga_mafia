@@ -101,10 +101,13 @@ if(test_name == "rd_b2b_diff_cl") begin
 end else
 if(test_name == "rand_simple") begin
 `include "rand_simple.sv"
-end else/*
+end else
+if(test_name == "rand_set_stress") begin
+`include "rand_set_stress.sv"
+end else
 if(test_name == "many_tag_one_set") begin
 `include "many_tag_one_set.sv"
-end else*/ begin
+end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test %s not found", test_name);
     $display("=============================================");
