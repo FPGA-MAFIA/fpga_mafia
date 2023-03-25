@@ -121,9 +121,10 @@ class Test:
                             self.fail_flag = True
                         else:
                             if(args.cmd==False):
+                                print(mem_offset)
                                 memories = open('inst_mem.sv', 'r').read()
                                 with open('data_mem.sv', 'w') as dmem:
-                                    if (len(memories.split('@'))>2):
+                                    if (hex(int(Test.D_MEM_OFFSET)).split('x')[-1] in memories): # checkig if data memory is exist
                                         dmem.write('@'+memories.split('@')[-1])
                                     else:
                                         pass
@@ -263,6 +264,9 @@ def run_cmd_with_capture(cmd):
 #####################################################################################################       
 def main():
     os.chdir(MODEL_ROOT)
+    if not os.path.exists(SOURCE):
+        print_message(f'[ERROR] There is no dut \'{args.dut}\'')
+        exit(1)
     if not os.path.exists('target/'+args.dut+'/tests/'):
         os.makedirs('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
@@ -274,17 +278,27 @@ def main():
             if 'level' in test: continue
             tests.append(Test(test, args.dut))
     elif args.regress:
-        level_list = open(REGRESS+args.regress, 'r').read().split('\n')
-        for test in level_list:
-            if os.path.exists(TESTS+test):
-                tests.append(Test(test, args.dut))
-            else:
-                print_message('[ERROR] can\'t find the test - '+test)
+        try:
+            level_list = open(REGRESS+args.regress, 'r').read().split('\n')
+        except:
+            print_message(f'[ERROR] Failed to find the regression file \'{args.regress}\' in your tests directory')
+            exit(1)
+        else:
+            for test in level_list:
+                if os.path.exists(TESTS+test):
+                    tests.append(Test(test, args.dut))
+                else:
+                    print_message('[ERROR] can\'t find the test - '+test)
     else:
         for test in args.tests.split():
-            test = glob.glob(TESTS+test+'*')[0]
-            test = test.replace('\\', '/').split('/')[-1]
-            tests.append(Test(test, args.dut))
+            try:
+                test = glob.glob(TESTS+test+'*')[0]
+            except:
+                print_message(f'[ERROR] There is no test {test} in your tests directory')
+                exit(1)
+            else:
+                test = test.replace('\\', '/').split('/')[-1]
+                tests.append(Test(test, args.dut))
 
      # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
