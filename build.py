@@ -44,6 +44,7 @@ TARGET    = './target/'+args.dut+'/'
 MODELSIM  = './target/'+args.dut+'/modelsim/'
 APP       = './app/'
 TESTS     = './verif/'+args.dut+'/tests/'
+REGRESS   = './verif/'+args.dut+'/regress/'
 FPGA_ROOT = './FPGA/'+args.dut+'/'
 
 #####################################################################################################
@@ -273,7 +274,7 @@ def main():
             if 'level' in test: continue
             tests.append(Test(test, args.dut))
     elif args.regress:
-        level_list = open(TESTS+args.regress, 'r').read().split('\n')
+        level_list = open(REGRESS+args.regress, 'r').read().split('\n')
         for test in level_list:
             if os.path.exists(TESTS+test):
                 tests.append(Test(test, args.dut))

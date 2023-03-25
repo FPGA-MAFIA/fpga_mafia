@@ -102,6 +102,9 @@ end
 if(test_name == "rand_simple") begin
 `include "rand_simple.sv"
 end
+if(test_name == "many_tag_one_set") begin
+`include "many_tag_one_set.sv"
+end
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
