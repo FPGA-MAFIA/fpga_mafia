@@ -77,7 +77,7 @@ endtask
 task check_correct_output();
 forever begin
   wait(fifo_arb_ins.winner_valid == 1'b1);
-  assert(fifo_arb_ins.winner_req == fifo_arb_ins.fifo_pop)// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
+  assert(fifo_arb_ins.winner_req == fifo_arb_ins.inside_fifo[fifo_arb_ins.arb.winner].fifo_array[fifo_arb_ins.inside_fifo[fifo_arb_ins.arb.winner].rd_ptr-1])// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
     else $error("output is different than fifo");
   wait(winner_valid == 1'b0);
 end
