@@ -52,10 +52,13 @@ FPGA_ROOT = './FPGA/'+args.dut+'/'
 #####################################################################################################
 class Test:
     hw_compilation = False
-    I_MEM_OFFSET = str(0x00000000)
+    I_MEM_OFFSET = str(0x00000000) # -> 0x0000FFFF
     I_MEM_LENGTH = str(0x00010000)
-    D_MEM_OFFSET = str(0x00010000)
+    D_MEM_OFFSET = str(0x00010000) # -> 0x0001EFFF
     D_MEM_LENGTH = str(0x0000F000)
+    # SCRATCH_D_MEM_OFFSET = str(0x0001F000) # -> 0x0001FFFF
+    # SCRATCH_D_MEM_LENGTH = str(0x00001000)
+    # Total of 128KB of memory (64KB for I_MEM and 64KB for D_MEM+SCRATCH_D_MEM)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
