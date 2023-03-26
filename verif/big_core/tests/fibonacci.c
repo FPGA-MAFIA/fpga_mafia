@@ -9,7 +9,7 @@ int fibonacci(int n) {
 int main() {
     int n = 10;
     int res = fibonacci(n);
-    MEM_SCRATCH[0]=res;
+    D_MEM_SCRATCH[0]=res;
     return 0;
 }
 

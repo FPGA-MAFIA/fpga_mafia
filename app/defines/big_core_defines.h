@@ -1,5 +1,5 @@
 #define SCRATCH_OFFSET   0x0001F000
-#define MEM_SCRATCH ((volatile int *) (SCRATCH_OFFSET))
+#define D_MEM_SCRATCH ((volatile int *) (SCRATCH_OFFSET))
 
 #define D_MEM_BASE   0x00010000
 #define CR_MEM_BASE  0x00100000

@@ -4,8 +4,8 @@ int main()  {
     x = 17;  
     y = 11;  
     z = x*y;  
-    MEM_SCRATCH[0]=z;
+    D_MEM_SCRATCH[0]=z;
     WRITE_REG(CR_LED, 0xf);
     READ_REG(z,CR_LED);
-    MEM_SCRATCH[1]=z;
+    D_MEM_SCRATCH[1]=z;
 }  // main()

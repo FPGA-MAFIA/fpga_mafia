@@ -16,7 +16,7 @@ void bubbleSort(int arr[], int n) {
 
 void eot(int arr[]) {
     for(int i =0; i<7; i++){
-        MEM_SCRATCH[i]=arr[i];
+        D_MEM_SCRATCH[i]=arr[i];
     }
 }
 int main() {

@@ -13,7 +13,6 @@
 // (2) load backdoor the I_MEM & D_MEM.
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
-`define NO_WARNING_ON_FILE_NOT_FOUND
 
 `include "macros.sv"
 

@@ -83,14 +83,14 @@ assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDM
                                                                       PreShiftDMemRdDataQ104H         ; 
 
 // Instantiating the mafia_asap_5pl_i_mem instruction memory
-`ifdef SIM_ONLY
-i_mem i_mem (
-    .Clk            (Clk),
-    .address        (PcQ100H[31:2]),
-    .q              (InstructionQ101H)
-);
-`else 
-i_mem	i_mem_inst (
+// `ifdef SIM_ONLY
+// i_mem i_mem (
+//     .Clk            (Clk),
+//     .address        (PcQ100H[31:2]),
+//     .q              (InstructionQ101H)
+// );
+// `else 
+i_mem	i_mem (
     .clock      ( Clk ),
     //Core interface
     .address_a  ( PcQ100H[31:2] ),
@@ -103,20 +103,27 @@ i_mem	i_mem_inst (
     .wren_b     ( '0 ),
     .q_b        ( )
 );
-`endif  
+// `endif  
 
 
 // Instantiating the mafia_asap_5pl_d_mem data memory
 
 `ifdef SIM_ONLY
  d_mem d_mem (
-    .Clk            (Clk),
-    .data           (ShiftDMemWrDataQ103H),
-    .address        (DMemAddressQ103H[31:2]),
-    .byteena        (ShiftDMemByteEnQ103H),
-    .wren           (DMemWrEnQ103H && MatchDMemRegionQ103H),
-    .rden           (DMemRdEnQ103H && MatchDMemRegionQ103H),
-    .q              (PreShiftDMemRdDataQ104H)
+    .clock            (Clk),
+    .data_a           (ShiftDMemWrDataQ103H),
+    .address_a        (DMemAddressQ103H[31:2]),
+    .byteena_a        (ShiftDMemByteEnQ103H),
+    .wren_a           (DMemWrEnQ103H && MatchDMemRegionQ103H),
+    .rden_a           (DMemRdEnQ103H && MatchDMemRegionQ103H),
+    .q_a              (PreShiftDMemRdDataQ104H),
+    
+    .data_b           ('0),
+    .address_b        ('0),
+    .byteena_b        ('0),
+    .wren_b           ('0),
+    .rden_b           ('0),
+    .q_b              ()
 );
 `else 
 d_mem	d_mem_inst (
@@ -155,7 +162,7 @@ big_core_cr_mem big_core_cr_mem (
 
 
 assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
-//mafia_asap_5pl_vga_ctrl mafia_asap_5pl_vga_ctrl (
+// big_core_vga_ctrl big_core_vga_ctrl (
 //    .CLK_50            (Clk),
 //    .Reset             (Rst),
 //    .data              (DMemWrDataQ103H),
@@ -169,6 +176,6 @@ assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
 //    .BLUE              (vga_out.VGA_B),
 //    .h_sync            (vga_out.VGA_HS),
 //    .v_sync            (vga_out.VGA_VS)
-//);
+// );
 
 endmodule // Module mafia_asap_5pl_mem_wrap

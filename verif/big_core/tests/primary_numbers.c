@@ -13,7 +13,7 @@ int isPrime(int n) {
 }
 void eot(int *list, int size){
     for(int i = 0; i<size; i++){
-        MEM_SCRATCH[i]=list[i];
+        D_MEM_SCRATCH[i]=list[i];
     }
 }
 int main() {
