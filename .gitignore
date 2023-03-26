@@ -10,3 +10,4 @@ FPGA/*
 !FPGA/big_core/mif/*
 !FPGA/big_core/de10_lite_big_core.qpf
 !FPGA/big_core/de10_lite_big_core.qsf
+verif/cache/__pycache__

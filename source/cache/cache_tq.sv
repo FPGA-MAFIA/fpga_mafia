@@ -43,7 +43,6 @@ logic [NUM_TQ_ENTRY-1:0] first_free;
 logic [NUM_TQ_ENTRY-1:0] fill_entries;
 logic [NUM_TQ_ENTRY-1:0] first_fill;
 
-t_reg_id [NUM_TQ_ENTRY-1:0]     tq_reg_id; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_merge_buffer_e_modified; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_merge_buffer_data; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_cl_address; 
@@ -58,13 +57,14 @@ t_cl_address [NUM_TQ_ENTRY-1:0] tq_cl_address;
 t_word_offset[NUM_TQ_ENTRY-1:0] tq_cl_word_offset; 
 logic        [NUM_TQ_ENTRY-1:0] tq_rd_indication; 
 logic        [NUM_TQ_ENTRY-1:0] tq_wr_indication; 
+t_reg_id     [NUM_TQ_ENTRY-1:0] tq_reg_id; 
 logic        [NUM_TQ_ENTRY-1:0][NUM_WORDS_IN_CL-1:0]  next_tq_merge_buffer_e_modified; 
 t_cl         [NUM_TQ_ENTRY-1:0] next_tq_merge_buffer_data; 
 t_cl_address [NUM_TQ_ENTRY-1:0] next_tq_cl_address; 
 t_word_offset[NUM_TQ_ENTRY-1:0] next_tq_cl_word_offset; 
 logic        [NUM_TQ_ENTRY-1:0] next_tq_rd_indication; 
 logic        [NUM_TQ_ENTRY-1:0] next_tq_wr_indication; 
-logic        [NUM_TQ_ENTRY-1:0] next_tq_reg_id; 
+t_reg_id     [NUM_TQ_ENTRY-1:0] next_tq_reg_id; 
 
 
 logic rd_hit_pipe_rsp_q3;
@@ -108,17 +108,22 @@ always_comb begin
     end
     new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
-        next_tq_state            [i] = tq_state[i];
+        next_tq_state                  [i] = tq_state[i];
         next_tq_merge_buffer_e_modified[i] = '0;    //default value
         next_tq_merge_buffer_data[i] = '0;
         next_tq_cl_address       [i] = '0;
         next_tq_rd_indication    [i] = '0;
         next_tq_wr_indication    [i] = '0;
-        en_tq_merge_buffer_data  [i] = '0;
-        en_tq_cl_address         [i] = '0;
+        next_tq_reg_id           [i] = '0;
+        next_tq_cl_word_offset   [i] = '0;
+
         en_tq_rd_indication      [i] = '0;
         en_tq_wr_indication      [i] = '0;
+        en_tq_cl_word_offset     [i] = '0;
+        en_tq_reg_id             [i] = '0;
+        en_tq_cl_address         [i] = '0;
         en_tq_merge_buffer_e_modified[i] = '0;
+        en_tq_merge_buffer_data  [i] = '0;
         unique casez (tq_state[i])
             S_IDLE                : begin
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
@@ -126,8 +131,8 @@ always_comb begin
                     next_tq_state[i] =  ((core2cache_req.opcode == RD_OP) || ( core2cache_req.opcode == WR_OP)) ? S_LU_CORE :
                                                                                                                   S_ERROR   ;
                     en_tq_rd_indication             [i] = 1'b1;
-                    en_tq_cl_word_offset            [i] = 1'b1;
                     en_tq_wr_indication             [i] = 1'b1;
+                    en_tq_cl_word_offset            [i] = 1'b1;
                     en_tq_reg_id                    [i] = 1'b1;
                     en_tq_cl_address                [i] = 1'b1;
                     en_tq_merge_buffer_e_modified   [i] = 1'b1;
@@ -192,8 +197,10 @@ always_comb begin
                 if(rd_req_hit_mb[i]) begin
                     en_tq_rd_indication   [i] = 1'b1;
                     en_tq_cl_word_offset  [i] = 1'b1;
+                    en_tq_reg_id          [i] = 1'b1;
                     next_tq_rd_indication [i] = 1'b1;
                     next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    next_tq_reg_id        [i] = core2cache_req.reg_id;
                 end //if
                 
                 // The case of write after write - we set the write indication and update the merge buffer data:
@@ -279,6 +286,8 @@ always_comb begin
         pipe_lu_req_q1.data          = core2cache_req.data;
         pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb : enc_first_free;
         pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
+        pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
+        pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
         pipe_lu_req_q1.lu_op         = FILL_LU;
