@@ -44,6 +44,7 @@ TARGET    = './target/'+args.dut+'/'
 MODELSIM  = './target/'+args.dut+'/modelsim/'
 APP       = './app/'
 TESTS     = './verif/'+args.dut+'/tests/'
+REGRESS   = './verif/'+args.dut+'/regress/'
 FPGA_ROOT = './FPGA/'+args.dut+'/'
 
 #####################################################################################################
@@ -278,7 +279,7 @@ def main():
             tests.append(Test(test, args.dut))
     elif args.regress:
         try:
-            level_list = open(TESTS+args.regress, 'r').read().split('\n')
+            level_list = open(REGRESS+args.regress, 'r').read().split('\n')
         except:
             print_message(f'[ERROR] Failed to find the regression file \'{args.regress}\' in your tests directory')
             exit(1)
