@@ -1,3 +1,15 @@
+//------------------------------------------------------------
+// Title : fibonacci test
+// Project : big_core
+//------------------------------------------------------------
+// File : fibonacci.c
+// Author : Daniel Kaufman
+// Adviser : Amichai Ben-David
+// Created : 01/2023
+//------------------------------------------------------------
+// Description :
+// This program calculates the nth Fibonacci number
+//------------------------------------------------------------
 #include "../../../app/defines/big_core_defines.h"
 
 int fibonacci(int n) {

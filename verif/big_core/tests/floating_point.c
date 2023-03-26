@@ -1,3 +1,16 @@
+//------------------------------------------------------------
+// Title : floating points test
+// Project : big_core
+//------------------------------------------------------------
+// File : floating_points.c
+// Author : Daniel Kaufman
+// Adviser : Amichai Ben-David
+// Created : 01/2023
+//------------------------------------------------------------
+// Description :
+// This program performs basic floating-point
+// arithmetic operations. 
+//------------------------------------------------------------
 #include "../../../app/defines/big_core_defines.h"
 
 int main() {
