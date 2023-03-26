@@ -70,7 +70,7 @@ end endgenerate
 task check_correct_output();
 forever begin
   wait(fifo_arb_ins.winner_valid == 1'b1);
-  assert(fifo_arb_ins.winner_req == winner_xmr)// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
+  assert(fifo_arb_ins.winner_req == final_winner_xmr)// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
     else $error("output is different than fifo");
   wait(winner_valid == 1'b0);
 end
@@ -80,6 +80,7 @@ initial begin
   fork begin
       run_test(test_name);
   end
+//FIXME - disable checkers for now, need to fix them
 //  begin // checkers
 //      check_correct_output();
 //  end
