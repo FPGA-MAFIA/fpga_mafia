@@ -1,3 +1,16 @@
+//------------------------------------------------------------
+// Title : bubblesort
+// Project : big_core
+//------------------------------------------------------------
+// File : bubblesort.c
+// Author : Daniel Kaufman
+// Adviser : Amichai Ben-David
+// Created : 01/2023
+//------------------------------------------------------------
+// Description :
+// This program implements the bubble sort algorithm to sort
+// an array of integers in ascending order.
+//------------------------------------------------------------
 #include "../../../app/defines/big_core_defines.h"
 
 
