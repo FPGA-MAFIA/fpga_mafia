@@ -14,10 +14,10 @@ def print_message(msg):
     msg_type = msg.split()[0]
     try:
         color = {
-            '[ERROR]'   : 'red',
-            '[WARNING]' : 'yellow',
-            '[INFO]'    : 'green',
-            '[COMMAND]' : 'cyan',
+            '[PP_ERROR]'   : 'red',
+            '[PP_WARNING]' : 'yellow',
+            '[PP_INFO]'    : 'green',
+            '[PP_COMMAND]' : 'cyan',
         }[msg_type]
     except:
         color = 'blue'
@@ -32,11 +32,13 @@ print_message("     Cache Post-Process  : "+args.test_name )
 print_message('--------------------------------------------------------')
 # Path to the directory containing the tests
 base_path = "target/cache/tests"
+# Construct the path to the transcript file
+transcript = args.test_name+"_transcript"
+file_transcript = os.path.join(base_path, args.test_name, transcript).replace("\\", "/")
 
 # Construct the paths to the two files to compare
 file1_path = os.path.join(base_path, args.test_name, "cache_ref_trk.log").replace("\\", "/")
 file2_path = os.path.join(base_path, args.test_name, "cache_ref_gold_trk.log").replace("\\", "/")
-
 #Reorder the ref_trk files by pairs of Req/rsp
 ref_orderer.orderer_func(file1_path)
 ref_orderer.orderer_func(file2_path)
@@ -90,20 +92,21 @@ if os.path.exists(file2_path):
     if num_diffs > 0:
         #print(f"There are {num_diffs} differences between the two files:")
         #print(f"Please refer to" ,colored(output_path,'white',attrs=['bold']), "to see the full diff\n")
-        print_message(f"[WARNING] There are {num_diffs} differences between the two files:")
-        print_message(f"[INFO] Please refer to {output_path} to see the full diff\n")
+        print_message(f"[PP_WARNING] There are {num_diffs} differences between the two files:")
+        print_message(f"[PP_INFO] Please refer to {output_path} to see the full diff\n")
 
+    #check if the test have failed: 
+    # 1) the test has the string "ERROR" in the transcript
+    # 2) number of diff > 0 
+    if("ERROR" in open(file_transcript).read()):
+        print_message(f"\n[PP_ERROR] {args.test_name} has failed - See Error in the test transcript\n"+file_transcript)
+        sys.exit(1)
     if num_diffs == 0:
-        print(colored("\n[INFO] Post-Process finish succesfuly ",'green',attrs=['bold']))
+        print(colored("\n[PP_INFO] Post-Process finish successfully ",'green',attrs=['bold']))
         sys.exit(0)
     else:
-        print_message(f"\n[ERROR] {args.test_name} have failed Post-Process")
+        print_message(f"\n[PP_ERROR] {args.test_name} have failed Post-Process")
         sys.exit(1)
-
-#No need anymore because of level0
-# else: 
-#     print_message(f"\n[WARNING] No golden tracker found for test {args.test_name}")
-#     sys.exit(0)
 
 
 
