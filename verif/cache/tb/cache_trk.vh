@@ -98,7 +98,7 @@ always @(posedge clk) begin
         cache2core_rsp.data);
     end
     if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
-        $fwrite(cache_top_trk,"%t  CACHE_DIRTY_EVICT   %h       %h        %h     %h      %h \n",
+        $fwrite(cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h \n",
         $realtime, 
         cache2fm_req_q3.address, 
         cache2fm_req_q3.tq_id, 

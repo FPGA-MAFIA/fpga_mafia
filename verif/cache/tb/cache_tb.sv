@@ -12,6 +12,22 @@ t_fm_req          cache2fm_req_q3;
 t_fm_rd_rsp [9:0] samp_fm2cache_rd_rsp;
 t_fm_rd_rsp       fm2cache_rd_rsp;
 
+
+
+//default values - override in test
+int MAX_REQ_DELAY;
+int MIN_REQ_DELAY;
+int NUM_REQ      ;
+int RD_RATIO     ;
+int NUM_SET_PULL ;//Max is MAX_NUM_SET_PULL
+int NUM_TAG_PULL ;//Max is MAX_NUM_TAG_PULL
+
+parameter MAX_NUM_SET_PULL  = 50;  //Max is 
+parameter MAX_NUM_TAG_PULL  = 50;
+
+logic [7:0] tag_pull [MAX_NUM_TAG_PULL:0];
+logic [7:0] set_pull [MAX_NUM_SET_PULL:0];
+
 //==================
 //      clk Gen
 //==================
@@ -23,16 +39,18 @@ initial begin: clock_gen
 end// clock_gen
 
 t_set_rd_rsp back_door_entry ;
-
+localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
+t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
 logic [SET_WIDTH-1:0] tag_mem   [(2**SET_ADRS_WIDTH)-1:0];
 logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
 
 
 string test_name;
 initial begin : start_test
-    if ($value$plusargs ("STRING=%s", test_name))
+    if ($value$plusargs ("STRING=%s", test_name)) begin
         $display("STRING value %s", test_name);
-$display("================\n     START\n================\n");
+    end
+    $display("================\n     START\n================\n");
             rst= 1'b1;
             core2cache_req     = '0;
 //exit reset
@@ -44,50 +62,65 @@ if(test_name == "cache_alive") begin
 end else 
 if(test_name == "cache_alive_2") begin
 `include "cache_alive_2.sv"
-end
+end else
 if(test_name == "single_fm_req") begin
 `include "single_fm_req.sv"
-end
+end else
 if(test_name == "rd_modify_rd") begin
 `include "rd_modify_rd.sv"
-end
+end else
 if(test_name == "wr_miss_rd_hit") begin
 `include "wr_miss_rd_hit.sv"
-end
+end else
 if(test_name == "wr_miss_rd_hit_mb") begin
 `include "wr_miss_rd_hit_mb.sv"
-end
+end else
 if(test_name == "wr_miss_wr_hit") begin
 `include "wr_miss_wr_hit.sv"
-end
+end else
 if(test_name == "wr_after_wr_cl") begin
 `include "wr_after_wr_cl.sv"
-end
+end else
 if(test_name == "fill_8_tq_entries") begin
 `include "fill_8_tq_entries.sv"
-end
+end else
 if(test_name == "wr_b2b_same_cl") begin
 `include "wr_b2b_same_cl.sv"
-end
+end else
 if(test_name == "wr_b2b_hit") begin
 `include "wr_b2b_hit.sv"
-end
+end else
 if(test_name == "rd_b2b_hit") begin
 `include "rd_b2b_hit.sv"
-end
+end else
 if(test_name == "rd_b2b_same_cl") begin
 `include "rd_b2b_same_cl.sv"
-end
+end else
 if(test_name == "rd_b2b_diff_cl") begin
 `include "rd_b2b_diff_cl.sv"
+end else
+if(test_name == "rand_simple") begin
+`include "rand_simple.sv"
+end else
+if(test_name == "rand_set_stress") begin
+`include "rand_set_stress.sv"
+end else
+if(test_name == "many_tag_one_set") begin
+`include "many_tag_one_set.sv"
+end else begin
+    $display("\n\n=============================================");
+    $display("ERROR: Test %s not found", test_name);
+    $display("=============================================");
+    delay(80); $finish;
+    $finish;
 end
-
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;
 end// initial
 
 `include "cache_trk.vh"
+`include "cache_tasks.vh"
 
 cache cache ( //DUT
    .clk                (clk),            //input   logic
@@ -101,79 +134,6 @@ cache cache ( //DUT
    .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
 );
 
-task delay(input int cycles);
-  for(int i =0; i< cycles; i++) begin
-    @(posedge clk);
-  end
-endtask
-
-task backdoor_cache_load();
-
-  for(int SET =0; SET< NUM_SET ; SET++) begin
-    for(int WAY =0; WAY< NUM_WAYS; WAY++) begin
-        back_door_entry.tags    [WAY] = WAY + 1000;
-        back_door_entry.valid   [WAY] = 1'b1;
-        back_door_entry.modified[WAY] = 1'b0;
-        back_door_entry.mru     [WAY] = 1'b0;
-    end
-    tag_mem[SET]  = back_door_entry;
-  end
-
-  for(int D_WAY = 0; D_WAY< (SET_ADRS_WIDTH + WAY_WIDTH) ; D_WAY++) begin
-    data_mem[D_WAY]  = 'h5000+D_WAY;
-  end
-    force cache.cache_pipe_wrap.tag_array.mem  = tag_mem;
-    force cache.cache_pipe_wrap.data_array.mem = data_mem;
-    delay(5);
-
-    release cache.cache_pipe_wrap.data_array.mem;
-    release cache.cache_pipe_wrap.tag_array.mem;
-endtask
-
-localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
-t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
-task backdoor_fm_load();
-  $display("= backdoor_fm_load start =\n");
-  for(int FM_ADDRESS =0; FM_ADDRESS < NUM_FM_CL ; FM_ADDRESS++) begin
-        back_door_fm_mem[FM_ADDRESS] = FM_ADDRESS + 'hABBA_BABA_0000_1111;
-  end
-    force far_memory_array.mem  = back_door_fm_mem;
-    force cache_ref_model.mem  = back_door_fm_mem;
-    delay(5);
-    release far_memory_array.mem;
-    release cache_ref_model.mem;
-  $display("= backdoor_fm_load done =\n");
-endtask
-
-task wr_req( input logic [19:0]  address, 
-             input logic [127:0] data ,
-             input logic [4:0]   id );
-    while (stall) begin
-      delay(1); $display("-> stall! cant send write: %h ", address );
-    end
-$display("wr_req: %h , address %h:", id, address);
-    core2cache_req.valid   =  1'b1;
-    core2cache_req.opcode  =  WR_OP;
-    core2cache_req.address =  address;
-    core2cache_req.data    =  data;
-    core2cache_req.reg_id  =  id;
-    delay(1); 
-    core2cache_req     = '0;
-endtask
-
-task rd_req( input logic [19:0] address,
-             input logic [4:0] id); 
-    while (stall) begin 
-    delay(1);  $display("-> stall! cant send read: %h ", address);
-    end
-$display("rd_req: %h , address %h:", id, address);
-    core2cache_req.valid   =  1'b1;
-    core2cache_req.opcode  =  RD_OP;
-    core2cache_req.address =  address;
-    core2cache_req.reg_id  =  id;
-    delay(1);
-    core2cache_req     = '0;
-endtask
 
 //============================
 //          Far Memory ARRAY

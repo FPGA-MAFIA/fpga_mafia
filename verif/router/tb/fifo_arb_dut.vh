@@ -5,8 +5,7 @@ t_tile_trans       winner_req;
 logic        [3:0] in_ready_arb_fifo;
 logic              winner_valid;
 logic        [1:0] src_num; // the decimal number of fifo
-static int         num_of_fifo; // one hot vector of valid - which fifo is on.
-string test_name;
+
 
 `include "fifo_arb_trk.vh"
 
@@ -48,19 +47,13 @@ always_comb begin
 end
 
 
-// simple push task used by sequencer
-task push_fifo(input int num_fifo);
-  $display("%t, push_fifo %d",$time, num_fifo);
-  valid_alloc_req[num_fifo] = 1'b1;
-  delay(1);
-  valid_alloc_req[num_fifo] = '0;
-endtask
 
 
-initial begin
+
+/*initial begin
 if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
-if(test_name == "fifo_arb") begin
+if(test_name == "fifo_arb_diff_num_activ_fifo") begin
 $display("================\n     START\n================\n");
     rst = 1'b1;
     for(int i =0; i<4 ; i++) begin
@@ -89,4 +82,4 @@ $display("================\n     START\n================\n");
   $finish;
 
 end// if alive
-end
+end*/

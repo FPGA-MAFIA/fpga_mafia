@@ -286,6 +286,8 @@ always_comb begin
         pipe_lu_req_q1.data          = core2cache_req.data;
         pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb : enc_first_free;
         pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
+        pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
+        pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
         pipe_lu_req_q1.lu_op         = FILL_LU;

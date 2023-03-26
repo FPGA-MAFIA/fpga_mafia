@@ -8,3 +8,6 @@ wr_b2b_same_cl.sv
 wr_miss_rd_hit_mb.sv
 wr_miss_rd_hit.sv
 wr_miss_wr_hit.sv
+rand_simple.sv
+many_tag_one_set.sv
+rand_set_stress.sv
