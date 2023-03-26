@@ -27,7 +27,7 @@ module arbiter #(parameter int NUM_CLIENTS=4,
 	 // data path
 	 input  var   [NUM_CLIENTS-1:0]  [DATA_WIDTH-1:0] candidate ,
 	 output logic                          			  valid_winner,
-	 output logic [DATA_WIDTH-1:0]	   			 	  winner 
+	 output logic [DATA_WIDTH-1:0]	   			 	  data_winner 
 	);
 
 logic [NUM_CLIENTS-1:0] last_winner;
@@ -52,10 +52,13 @@ assign hit_top = (|first_top);
 assign winner_dec_id = hit_top ? first_top : first_bottom;
 assign valid_winner = (|winner_dec_id);
 
+//====================
+// Mux out the data_winner
+//====================
 always_comb begin
-	winner = '0;
+	data_winner = '0;
 	for(int i =0; i < NUM_CLIENTS; i++ )begin
-		winner = winner_dec_id[i] ? candidate[i] : winner;
+		data_winner = winner_dec_id[i] ? candidate[i] : data_winner;
 	end
 end
 

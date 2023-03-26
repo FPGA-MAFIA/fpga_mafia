@@ -63,9 +63,8 @@ out_ready_fifo3 = !full[3];
 end
 
     genvar i;
-    generate
-        for (i=0; i<NUM_CLIENTS; i=i+1)begin
-            fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
+    generate for (i=0; i<NUM_CLIENTS; i=i+1) begin : gen_fifo
+            fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(4))
                 inside_fifo  (.clk       (clk),
                               .rst       (rst),
                               .push      (push[i]), // valid_alloc_req#
@@ -75,8 +74,7 @@ end
                               .full      (full[i]),//out_ready_fifo#
                               .empty     (empty[i])
                              );// indication to arbiter that the fifo is empty
-        end
-    endgenerate
+    end endgenerate
 
 arbiter #(
 	.NUM_CLIENTS(4),
@@ -90,7 +88,7 @@ arb
     .candidate      (dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
     .winner_dec_id  (fifo_pop[3:0]),  // the arbiter winner use to fifo pop.        
     .valid_winner   (winner_valid),
-    .winner         (winner_req)
+    .data_winner    (winner_req)
 );
 
 endmodule
