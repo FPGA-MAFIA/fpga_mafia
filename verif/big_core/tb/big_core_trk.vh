@@ -84,3 +84,22 @@ always @(posedge Clk) begin : memory_access_print
     $fwrite(trk_memory_access,"%t | %8h | read   | %8h | %8h \n", $realtime, PcQ104H, DMemAddressQ104H, big_core_top.big_core.DMemRdRspQ104H);
     end
 end
+
+integer trk_rf;
+initial begin: trk_rf_gen
+    trk_rf = $fopen({"../../../target/big_core/tests/",test_name,"/trk_rf.log"},"w");
+    $fwrite(trk_rf,"--------------------------------------------------------------------\n");
+    $fwrite(trk_rf,"   Time  | PC       | reg_dst | wr_data                               \n");
+    $fwrite(trk_rf,"--------------------------------------------------------------------\n");  
+end
+always @(posedge Clk) begin : rf_print
+    if(big_core_top.big_core.CtrlRegWrEnQ104H) begin
+        $fwrite(trk_rf,"%8t | %8h |   %8h  | %8h          \n", 
+        $realtime,
+        PcQ104H,                                   // PC
+        big_core_top.big_core.RegDstQ104H,         // reg_dst
+        big_core_top.big_core.RegWrDataQ104H);      // wr_data
+        //TODO - see how we can maybe detect what was the instruction that resulted in this write
+    end
+end
+

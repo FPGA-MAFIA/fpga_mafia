@@ -23,8 +23,6 @@ module d_mem (
     input  logic [3:0]  byteena_b,
     input  logic        wren_a,
     input  logic        wren_b,
-    input  logic        rden_a,
-    input  logic        rden_b,
     output logic [31:0] q_a,
     output logic [31:0] q_b
 );
@@ -65,8 +63,8 @@ end
 
 `MAFIA_DFF(DMem , NextDMem , clock)
 // This is the load
-assign pre_q_a = rden_a ? {DMem[address_a_aligned+3], DMem[address_a_aligned+2], DMem[address_a_aligned+1], DMem[address_a_aligned+0]} : '0;
-assign pre_q_b = rden_b ? {DMem[address_b_aligned+3], DMem[address_b_aligned+2], DMem[address_b_aligned+1], DMem[address_b_aligned+0]} : '0;
+assign pre_q_a = {DMem[address_a_aligned+3], DMem[address_a_aligned+2], DMem[address_a_aligned+1], DMem[address_a_aligned+0]};
+assign pre_q_b = {DMem[address_b_aligned+3], DMem[address_b_aligned+2], DMem[address_b_aligned+1], DMem[address_b_aligned+0]};
 
 // Sample the data load - synchorus load
 `MAFIA_DFF(q_a, pre_q_a, clock)

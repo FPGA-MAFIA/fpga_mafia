@@ -64,21 +64,12 @@ logic        RstCountBitOffset, RstCountByteOffset, RstCountWordOffset;
 //Reset For Clk Simulation 
 //=========================
 assign SampleReset[0] = Reset;
-`MAFIA_MSFF(SampleReset[4:1], SampleReset[3:0], CLK_50)
+`MAFIA_DFF(SampleReset[4:1], SampleReset[3:0], CLK_50)
 
 //=========================
 //gen Clock 25Mhz
 //=========================
-`ifdef SIMULATION_ON
-    `MAFIA_RST_MSFF(CLK_25, !CLK_25, CLK_50, Reset)
-`elsif FPGA_ON
-// The VGA works without the PLL - SImulation clock devider version works just fine.
-//pll_25 pll_25 (
-//    .inclk0 (CLK_50),    // input
-//    .c0     (CLK_25)     // output
-//); 
-    `MAFIA_RST_MSFF(CLK_25, !CLK_25, CLK_50, Reset)
-`endif // FPGA_ON
+`MAFIA_RST_DFF(CLK_25, !CLK_25, CLK_50, Reset)
 
 //=========================
 // VGA sync Machine
@@ -97,7 +88,7 @@ big_core_vga_sync_gen vga_sync_inst (
 // VGA Display Line #
 //=========================
 assign LineQ0   = pixel_y[8:0];
-`MAFIA_MSFF(LineQ1 , LineQ0 , CLK_25)
+`MAFIA_DFF(LineQ1 , LineQ0 , CLK_25)
 
 //=========================
 // Read CurrentPixelQ2 using VGA Virtual Address -> Physical Address in RAM
@@ -107,22 +98,21 @@ assign EnCountWordOffset  = (CountBitOffsetQ1 == 3'b111);
 assign RstCountBitOffset  = SampleReset[4] || (!inDisplayArea);
 assign RstCountByteOffset = SampleReset[4];
 assign RstCountWordOffset = SampleReset[4] || ((CountWordOffsetQ1 == 8'd79) && EnCountWordOffset);
-`MAFIA_RST_MSFF   (CountBitOffsetQ1 , (CountBitOffsetQ1 +3'b01), CLK_25, RstCountBitOffset )
-`MAFIA_EN_RST_MSFF(CountByteOffsetQ1, (CountByteOffsetQ1+2'b01), CLK_25, EnCountByteOffset, RstCountByteOffset)
-`MAFIA_EN_RST_MSFF(CountWordOffsetQ1, (CountWordOffsetQ1+8'b01), CLK_25, EnCountWordOffset, RstCountWordOffset)
+`MAFIA_RST_DFF   (CountBitOffsetQ1 , (CountBitOffsetQ1 +3'b01), CLK_25, RstCountBitOffset )
+`MAFIA_EN_RST_DFF(CountByteOffsetQ1, (CountByteOffsetQ1+2'b01), CLK_25, EnCountByteOffset, RstCountByteOffset)
+`MAFIA_EN_RST_DFF(CountWordOffsetQ1, (CountWordOffsetQ1+8'b01), CLK_25, EnCountWordOffset, RstCountWordOffset)
 
 assign WordOffsetQ1 = ((LineQ1[8:2])*8'd80 + CountWordOffsetQ1);
 
 // Align latency
-`MAFIA_MSFF(CountBitOffsetQ2  , CountBitOffsetQ1  , CLK_25)
-`MAFIA_MSFF(CountByteOffsetQ2 , CountByteOffsetQ1 , CLK_25)
+`MAFIA_DFF(CountBitOffsetQ2  , CountBitOffsetQ1  , CLK_25)
+`MAFIA_DFF(CountByteOffsetQ2 , CountByteOffsetQ1 , CLK_25)
 
 assign CurentPixelQ2 = RdDataQ2[{CountByteOffsetQ2,CountBitOffsetQ2}];
 
 //=========================
 // VGA memory
 //=========================
-`ifdef SIMULATION_ON
 vga_mem vga_mem (
     .clock_a        (CLK_50),
     .clock_b        (CLK_25),
@@ -138,25 +128,7 @@ vga_mem vga_mem (
     .address_b      (WordOffsetQ1), // Word offset (not Byte)
     .q_b            (RdDataQ2)
 );
-`else
-vga_mem_fpga vga_mem(
-	//CORE interface
-    .clock_a        (CLK_50),
-    .wren_a         (CtrlVgaMemWrEnQ503),
-    .byteena_a      (CtrlVGAMemByteEn),
-    .address_a      (F2C_ReqAddressQ503H[31:2]),
-    .data_a         (F2C_ReqDataQ503H),
-    .rden_a         (CtrlVgaMemRdEnQ503),	
-    .q_a            (VgaRspDataQ504H),
-    //VGA interface
-    .clock_b        (CLK_25),
-    .wren_b         (1'b0),
-    .address_b      (WordOffsetQ1),
-    .data_b         ('0),
-    .rden_b         (1'b1),
-    .q_b            (RdDataQ2)
-    );
-`endif
+
 
 //assign NextRED   = (inDisplayArea) ? 4'b1111 : '0;//{4{CurentPixelQ2}} : '0;
 //assign NextGREEN = (inDisplayArea) ? 4'b1111 : '0;//{4{CurentPixelQ2}} : '0;
@@ -164,10 +136,10 @@ vga_mem_fpga vga_mem(
 assign NextRED   = (inDisplayArea) ? {4{CurentPixelQ2}} : '0;
 assign NextGREEN = (inDisplayArea) ? {4{CurentPixelQ2}} : '0;
 assign NextBLUE  = (inDisplayArea) ? {4{CurentPixelQ2}} : '0;
-`MAFIA_MSFF(RED    , NextRED     , CLK_25)
-`MAFIA_MSFF(GREEN  , NextGREEN   , CLK_25)
-`MAFIA_MSFF(BLUE   , NextBLUE    , CLK_25)
-`MAFIA_MSFF(h_sync , next_h_sync , CLK_25)
-`MAFIA_MSFF(v_sync , next_v_sync , CLK_25)
+`MAFIA_DFF(RED    , NextRED     , CLK_25)
+`MAFIA_DFF(GREEN  , NextGREEN   , CLK_25)
+`MAFIA_DFF(BLUE   , NextBLUE    , CLK_25)
+`MAFIA_DFF(h_sync , next_h_sync , CLK_25)
+`MAFIA_DFF(v_sync , next_v_sync , CLK_25)
 
 endmodule // Module rvc_asap_5pl_vga_ctrl

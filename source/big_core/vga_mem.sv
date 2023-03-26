@@ -61,15 +61,15 @@ end
 // ================
 // The Memory:
 // ================
-`MAFIA_MSFF(VGAMem , NextVGAMem , clock_a)
+`MAFIA_DFF(VGAMem , NextVGAMem , clock_a)
 // ================
 
 // This is the read from the core
 assign pre_q_a   =  rden_a  ? {VGAMem[address_a_byte+3], VGAMem[address_a_byte+2], VGAMem[address_a_byte+1], VGAMem[address_a_byte+0]} : '0;
-`MAFIA_MSFF(q_a, pre_q_a, clock_a)// Sample the data load - synchorus load
+`MAFIA_DFF(q_a, pre_q_a, clock_a)// Sample the data load - synchorus load
 
 // This is the read from the vga controller
 assign pre_q_b   = {VGAMem[address_b_byte+3], VGAMem[address_b_byte+2], VGAMem[address_b_byte+1], VGAMem[address_b_byte+0]};
-`MAFIA_MSFF(q_b, pre_q_b, clock_b)// sample the read - synchorus read
+`MAFIA_DFF(q_b, pre_q_b, clock_b)// sample the read - synchorus read
 
 endmodule // Module vga_mem
