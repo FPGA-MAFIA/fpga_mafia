@@ -121,7 +121,6 @@ class Test:
                             self.fail_flag = True
                         else:
                             if(args.cmd==False):
-                                print(mem_offset)
                                 memories = open('inst_mem.sv', 'r').read()
                                 with open('data_mem.sv', 'w') as dmem:
                                     if (hex(int(Test.D_MEM_OFFSET)).split('x')[-1] in memories): # checkig if data memory is exist

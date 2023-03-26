@@ -1,3 +1,4 @@
+#define VGA_MEM_BASE 0x00FF0000
 #include "../../../app/defines/graphic_vga.h"
 
 int main()  {  

@@ -2,8 +2,8 @@
 #define D_MEM_SCRATCH ((volatile int *) (SCRATCH_OFFSET))
 
 #define D_MEM_BASE   0x00010000
-#define CR_MEM_BASE  0x00100000
-#define VGA_MEM_BASE 0x00200000
+#define VGA_MEM_BASE 0x00FF0000
+#define CR_MEM_BASE  0x00FE0000
 
 #define WRITE_REG(REG,VAL) (*REG) = VAL
 #define READ_REG(VAL,REG)  VAL    = (*REG)

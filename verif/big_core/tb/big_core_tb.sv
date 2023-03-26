@@ -138,11 +138,30 @@ always @(posedge Clk) begin : ebrake_status
     if (EBREAK == InstructionQ103H) begin // ebrake instruction opcode
         $display("fpga_out = %p", fpga_out);
         $display("===================\n test %s ended with Ebreake \n=====================", test_name);
+        print_vga_screen();
         $finish;
         //end_tb("The test ended");
     end
 end
 
-
+task print_vga_screen ;
+// VGA memory snapshot - simulate a screen
+    integer fd1;
+    string draw;
+    fd1 = $fopen({"../../../target/big_core/tests/",test_name,"/screen.log"},"w");
+    if (fd1) $display("File was open successfully : %0d", fd1);
+    else $display("File was not open successfully : %0d", fd1);
+    for (int i = 0 ; i < SIZE_VGA_MEM; i = i+320) begin // Lines
+        for (int j = 0 ; j < 4; j = j+1) begin // Bytes
+            for (int k = 0 ; k < 320; k = k+4) begin // Words
+                for (int l = 0 ; l < 8; l = l+1) begin // Bits  
+                    draw = (big_core_top.big_core_mem_wrap.big_core_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    $fwrite(fd1,"%s",draw);
+                end        
+            end 
+            $fwrite(fd1,"\n");
+        end
+    end
+endtask
 endmodule //big_core_tb
 
