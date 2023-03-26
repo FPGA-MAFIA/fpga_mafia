@@ -46,7 +46,7 @@ logic [31:0] ShiftDMemWrDataQ103H;
 logic [3:0]  ShiftDMemByteEnQ103H;
 logic [31:0] PreCRMemRdDataQ104H;
 logic [31:0] PreVGAMemRdDataQ104H;
-assign PreVGAMemRdDataQ104H ='0;
+//`assign PreVGAMemRdDataQ104H ='0;
 always_comb begin
     MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
     MatchDMemRegionQ103H   = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= D_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= D_MEM_REGION_ROOF));

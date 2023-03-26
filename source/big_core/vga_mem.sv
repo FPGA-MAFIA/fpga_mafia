@@ -24,10 +24,11 @@ import big_core_pkg::*;
     input  logic [3:0]  byteena_a,
     input  logic        wren_a,
     // Read core
-    input  logic        rden_a,
     output logic [31:0] q_a,
     // Read vga controller
-    input  logic [29:0] address_b,
+    input  logic        wren_b,
+    input  logic [31:0] data_b,
+    input  logic [13:0] address_b,
     output logic [31:0] q_b
 );
 // Memory array (behavrial - not for FPGA/ASIC)
@@ -65,7 +66,7 @@ end
 // ================
 
 // This is the read from the core
-assign pre_q_a   =  rden_a  ? {VGAMem[address_a_byte+3], VGAMem[address_a_byte+2], VGAMem[address_a_byte+1], VGAMem[address_a_byte+0]} : '0;
+assign pre_q_a   = {VGAMem[address_a_byte+3], VGAMem[address_a_byte+2], VGAMem[address_a_byte+1], VGAMem[address_a_byte+0]};
 `MAFIA_DFF(q_a, pre_q_a, clock_a)// Sample the data load - synchorus load
 
 // This is the read from the vga controller

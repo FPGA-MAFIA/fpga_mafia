@@ -121,10 +121,12 @@ vga_mem vga_mem (
     .address_a      (F2C_ReqAddressQ503H[31:2]),
     .byteena_a      (CtrlVGAMemByteEn),
     .wren_a         (CtrlVgaMemWrEnQ503),
-    // Read from core
-    .rden_a         (CtrlVgaMemRdEnQ503),
+    // Read from core`
+    //.rden_a         (CtrlVgaMemRdEnQ503),
     .q_a            (VgaRspDataQ504H),
     // Read from vga controller
+    .wren_b         ('0),
+    .data_b         ('0),
     .address_b      (WordOffsetQ1), // Word offset (not Byte)
     .q_b            (RdDataQ2)
 );
