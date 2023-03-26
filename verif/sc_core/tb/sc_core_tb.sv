@@ -156,7 +156,7 @@ task print_vga_screen ;
             $fwrite(fd1,"\n");
         end
     end
-
 endtask
+
 endmodule //big_core_tb
 

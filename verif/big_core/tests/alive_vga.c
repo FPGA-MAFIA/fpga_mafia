@@ -1,24 +1,18 @@
 //------------------------------------------------------------
-// Title : alive test
+// Title : alive vga test
 // Project : big_core
 //------------------------------------------------------------
-// File : alive.c
+// File : alive_vga.c
 // Author : Daniel Kaufman
 // Adviser : Amichai Ben-David
-// Created : 01/2023
+// Created : 03/2023
 //------------------------------------------------------------
 // Description :
-// This program is a basic sanity test for the target device.
+// This program is a basic sanity test for the vga operators.
 //------------------------------------------------------------
 #include "../../../app/defines/big_core_defines.h"
+#include "../../../app/defines/graphic_vga.h"
 int main()  {  
-    int x,y,z;  
-    x = 17;  
-    y = 11;  
-    z = x*y;  
-    D_MEM_SCRATCH[0]=z;
-    WRITE_REG(CR_LED, 0xf);
-    READ_REG(z,CR_LED);
-    D_MEM_SCRATCH[1]=z;
+    rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
     return 0;
 }  // main()

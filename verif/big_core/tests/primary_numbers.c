@@ -1,3 +1,15 @@
+//------------------------------------------------------------
+// Title : primary numbers test
+// Project : big_core
+//------------------------------------------------------------
+// File : primary_numbers.c
+// Author : Daniel Kaufman
+// Adviser : Amichai Ben-David
+// Created : 01/2023
+//------------------------------------------------------------
+// Description :
+// This program finds all prime numbers up to a given number n 
+//------------------------------------------------------------
 #include "../../../app/defines/big_core_defines.h"
 
 int isPrime(int n) {
@@ -13,7 +25,7 @@ int isPrime(int n) {
 }
 void eot(int *list, int size){
     for(int i = 0; i<size; i++){
-        MEM_SCRATCH[i]=list[i];
+        D_MEM_SCRATCH[i]=list[i];
     }
 }
 int main() {
