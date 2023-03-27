@@ -92,7 +92,7 @@ class Test:
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+''+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
