@@ -10,7 +10,7 @@
 // Description :
 // This program finds all prime numbers up to a given number n 
 //------------------------------------------------------------
-#include "../../../app/defines/big_core_defines.h"
+#include "big_core_defines.h"
 
 int isPrime(int n) {
     if (n <= 1) return 0;

@@ -31,7 +31,7 @@ initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../../target/big_core/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
-    $fwrite(trk_inst," Time  | PC       | Instraction                      |\n");
+    $fwrite(trk_inst," Time  | PC       | Instruction                      |\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
 
 end

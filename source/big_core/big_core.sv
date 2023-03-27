@@ -49,7 +49,7 @@ logic [4:0]         ShamtQ102H;
 logic [31:0]        AluIn1Q102H;
 logic [31:0]        AluIn2Q102H;
 logic [31:0]        AluOutQ102H, AluOutQ103H, AluOutQ104H;
-logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H, RegRdData1Q103H;
+logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H;
 logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
 logic [31:0]        RegWrDataQ104H; 
 logic [31:0]        WrBackDataQ104H;

@@ -118,8 +118,9 @@ initial begin: test_seq
     end
 
 
-    #100000
-    $display("===================\n test %s ended timeout \n=====================", test_name);
+    #1000000
+    print_vga_screen();
+    $error(" Timeout \n===================\n test %s ended timeout \n=====================", test_name);
     $finish;
 
 end // test_seq

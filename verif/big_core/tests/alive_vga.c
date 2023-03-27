@@ -10,9 +10,11 @@
 // Description :
 // This program is a basic sanity test for the vga operators.
 //------------------------------------------------------------
-#include "../../../app/defines/big_core_defines.h"
+#include "big_core_defines.h"
 #include "../../../app/defines/graphic_vga.h"
 int main()  {  
     rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
+    int test = 123456789;
+    rvc_print_int(test);
     return 0;
 }  // main()
