@@ -92,7 +92,7 @@ class Test:
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+''+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -102,9 +102,13 @@ class Test:
             else:
                 try:
                     rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
+                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
                     i_mem_offset = '-Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+' -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+' '
                     d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
+                    crt0_file    = '../../../../../app/crt0.S '
+                    mem_layout   = '-Wl,-Map='+self.name+'.map '
+                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     crt0_file    = '../../../../../app/crt0.S '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
                     second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
