@@ -1,4 +1,4 @@
-#include "../../../app/defines/big_core_defines.h"
+#include "big_core_defines.h"
 
 int gcd(int a, int b) {
     if (b == 0) return a;

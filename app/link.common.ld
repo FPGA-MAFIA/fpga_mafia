@@ -13,8 +13,6 @@ _stack_start   = ORIGIN(global_data) + LENGTH(global_data);
         . = ALIGN(4);  
         *(.start);  
         *(.text);  
-        . = ORIGIN(i_mem) + LENGTH(i_mem) - 1;  
-        BYTE(0);  
     }  > i_mem  
         .data : {  
         . = ALIGN(4);  

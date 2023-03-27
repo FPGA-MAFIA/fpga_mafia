@@ -10,7 +10,7 @@
 // Description :
 // This program is a basic sanity test for the vga operators.
 //------------------------------------------------------------
-#include "../../../app/defines/big_core_defines.h"
+#include "big_core_defines.h"
 #include "../../../app/defines/graphic_vga.h"
 int main()  {  
     rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");

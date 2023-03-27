@@ -10,7 +10,7 @@
 // Description :
 // This program is a basic sanity test for the target device.
 //------------------------------------------------------------
-#include "../../../app/defines/big_core_defines.h"
+#include "big_core_defines.h"
 int main()  {  
     int x,y,z;  
     x = 17;  

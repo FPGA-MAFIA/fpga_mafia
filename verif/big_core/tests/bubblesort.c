@@ -11,7 +11,7 @@
 // This program implements the bubble sort algorithm to sort
 // an array of integers in ascending order.
 //------------------------------------------------------------
-#include "../../../app/defines/big_core_defines.h"
+#include "big_core_defines.h"
 
 
 void bubbleSort(int arr[], int n) {
