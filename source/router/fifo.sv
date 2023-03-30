@@ -21,14 +21,7 @@ module fifo #(parameter int DATA_WIDTH = 8,
     output logic                   empty
     );
 
-
-//8 -> 3
-//7 -> 3
-//..
-//4 -> 2
-
-
-localparam MSB_PTR = $clog2(FIFO_DEPTH);
+localparam MSB_PTR = $clog2(FIFO_DEPTH)-1;
 
 logic [FIFO_DEPTH-1:0] [DATA_WIDTH-1:0] fifo_array;
 logic [FIFO_DEPTH-1:0] [DATA_WIDTH-1:0] next_fifo_array;
