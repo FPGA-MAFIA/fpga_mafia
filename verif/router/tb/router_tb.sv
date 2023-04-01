@@ -1,9 +1,14 @@
 `include "macros.sv"
+parameter NUM_CLIENTS = 4 ;
 //`include "uvm_macros.svh"
 module router_tb;
 import router_pkg::*;
 logic              clk;
 logic              rst;
+static t_tile_trans ref_fifo_Q [NUM_CLIENTS-1:0][$];
+static t_tile_trans ref_outputs_Q [$];  
+//static t_tile_trans ref_fifo_Q [$];
+//static int try_q [$];
 string test_name;
 // instansiation of DUT's - trk inside.
 `include "fifo_arb_dut.vh"
@@ -34,11 +39,15 @@ task run_test(input string test);
   if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
   else $fatal("CANNOT FINT TEST %s at time %t",test_name , $time());
-  if(test == "simple_test") begin
-
+  delay(30);
+  if(test == "simple") begin
+     `include "simple.sv"
   end
   if(test == "fifo_arb_dif_num_active_fifo")begin
-     `include "fifo_arb_dif_num_active_fifo.sv" // TODO- WHY INCLUDE NOT WORKING??
+     `include "fifo_arb_dif_num_active_fifo.sv" 
+  end
+  if(test == "single_fifo_full_BW")begin
+    `include "single_fifo_full_BW.sv"
   end
 endtask
 // DUT related tasks
@@ -70,27 +79,133 @@ end endgenerate
 task check_correct_output();
 forever begin
   wait(fifo_arb_ins.winner_valid == 1'b1);
-  assert(fifo_arb_ins.winner_req == final_winner_xmr)// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
-    else $error("output is different than fifo");
+  if(fifo_arb_ins.winner_req == final_winner_xmr)
+    $display("fifo_ok");// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
+  else $error("output is different than fifo");
   wait(winner_valid == 1'b0);
 end
 endtask
 
-initial begin
+task get_inputs();
+//forever begin
+for(int i = 0; i<4; i++) begin
+  automatic int index = i;
   fork begin
-      run_test(test_name);
+    //forever begin
+      $display("this is thred %0d",index);
+      wait(valid_alloc_req[index] == 1'b1);
+      $display("input of fifo number %0d",index);
+       ref_fifo_Q[index].push_back(alloc_req[index]);
+       $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[0].size(),ref_fifo_Q[0],$time);
+       //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
+      wait(valid_alloc_req[index] == 1'b0);  
+    //end
+  end join
+end
+//end
+endtask
+
+task try();
+for(int i = 0; i<10; i++)begin
+      //$display("pre fork: this is thred %0d",i);
+
+  automatic int j = i;
+fork begin
+      $display("in fork: this is thred %0d",i);
+
+  //$display("j inside fork push - %0d",j);
+  delay(5);
+  ref_fifo_Q[j%4].push_back(j%4);
+  //$display("size: %0d, element in array: %p at time %t",ref_fifo_Q[j%4].size(),ref_fifo_Q,$time);
+end join
+end
+endtask
+task try_pop();
+for(int i = 0; i<10; i++)begin
+automatic int j = i;
+fork begin
+  //$display("j inside fork pop - %0d",j);
+  delay(7);
+  ref_fifo_Q[0].pop_front();
+  $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[0].size(),ref_fifo_Q[0],$time);
+  end join
+end
+endtask
+
+task get_outputs();
+fork
+forever begin
+  wait(winner_valid == 1'b1);
+  ref_outputs_Q.push_back(winner_req);
+  $display("this is the outputs array %p @ time %t",ref_outputs_Q,$time);
+  wait(winner_valid == 1'b0);
+end
+join_none
+endtask
+task DI_checker();
+foreach(ref_fifo_Q[i])begin
+  foreach(ref_fifo_Q[i][j])begin
+    foreach(ref_outputs_Q[k])begin
+        $display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
+        $display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
+      if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
+        $display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
+        $display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
+
+        ref_fifo_Q[i].delete(j);
+        ref_outputs_Q.delete(k);
+        $display("after delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
+      end
+    end
+    //if(ref_outputs_Q.find(ref_fifo_Q[i][j] , with (item1,item2) item1 === item2) ==-1)begin
+      //$error("trans in fifo %0d and element %0d didnt get out of fifo_arb",i,j);
+      $display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
+    end
   end
-//FIXME - disable checkers for now, need to fix them
-//  begin // checkers
-//      check_correct_output();
+endtask
+//task DI_checker();
+//  t_tile_trans item1, item2;
+//  foreach (ref_fifo_Q[i]) begin
+//    foreach (ref_fifo_Q[i][j]) begin
+//      item1 = ref_fifo_Q[i][j];
+//      int match = 0;
+//      foreach (ref_outputs_Q[k]) begin
+//        item2 = ref_outputs_Q[k];
+//        if (item2 === item1) begin
+//          match = 1;
+//          break;
+//        end
+//      end
+//      if (!match) begin
+//        $error("trans in fifo %0d and element %0d didnt get out of fifo_arb", i, j);
+//      end
+//    end
 //  end
-   join_any
+//endtask
+
+
+
+
+initial begin
+  fork 
+      run_test(test_name);
+      //try();
+      //try_pop();
+  
+//FIXME - disable checkers for now, need to fix them
+   // checkers
+      //check_correct_output();
+      get_inputs();
+      get_outputs();
+  
+   join
+   DI_checker();
    delay(30);
    $finish();
 end
 
 initial begin : timeout_monitor
-  #150ns;
+  #2us;
   //$fatal(1, "Timeout");
   $finish();
 end
