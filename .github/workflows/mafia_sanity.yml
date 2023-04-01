@@ -15,13 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run build BIG_CORE -all -app -hw -sim
-        run: python build.py -dut 'big_core' -debug -all -app -hw -sim
+        run:  python build.py -dut 'big_core' -debug -regress level0 -app -hw -sim
       - name: Run build MINI_CORE -all -app -hw -sim
-        run: python build.py -dut 'mini_core' -debug -all -app -hw -sim
+        run:  python build.py -dut 'mini_core' -debug -all -app -hw -sim
       - name: Run build SC_CORE -all -app -hw -sim 
-        run: python build.py -dut 'sc_core' -debug -all -app -hw -sim
+        run:  python build.py -dut 'sc_core' -debug -all -app -hw -sim
       - name: Run build CACHE -all -hw -sim -pp
-        run: python build.py -dut 'cache' -debug -regress level0 -hw -sim -pp
-      - name: Run build ROUTer -regress level0 -hw -sim
-        run: python build.py -dut 'router' -debug -regress level0 -hw -sim
+        run:  python build.py -dut 'cache' -debug -regress level0 -hw -sim -pp
+      - name: Run build ROUTER -regress level0 -hw -sim
+        run:  python build.py -dut 'router' -debug -regress level0 -hw -sim
 

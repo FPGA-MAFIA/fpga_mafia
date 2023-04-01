@@ -103,7 +103,6 @@ always_comb begin
   cache_pipe_lu_q1.lu_tq_id         = pipe_lu_req_q1.tq_id; 
   cache_pipe_lu_q1.fill_modified    = pipe_lu_req_q1.wr_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.fill_rd          = pipe_lu_req_q1.rd_indication && pipe_lu_req_q1.lu_op == FILL_LU;
- //TODO set the fill indications: fill_modified, fill_rd
 end //always_comb
 
 //==================================================================
@@ -208,6 +207,9 @@ always_comb begin
         set_ways_tags_q2[set_ways_enc_victim_q2]  = cache_pipe_lu_q2.lu_tag;  // updating the way victim entry only - the rest of the ways are updated in the defuat value
         if(cache_pipe_lu_q2.fill_modified) begin //the fill has modified data from the merge buffer
             set_ways_modified_q2 = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.modified;// adding the way victim to location to the current modified vec
+        end
+        else begin //clear the modified bit in the victim way
+            set_ways_modified_q2 = ~cache_pipe_lu_q2.set_ways_victim & rd_data_set_rsp_q2.modified;// adding the way victim to location to the current modified vec
         end
     end
 

@@ -9,28 +9,29 @@
 
 `include "macros.sv"
 module fifo #(parameter int DATA_WIDTH = 8, 
-			  parameter int FIFO_DEPTH = 3)
-	(
-	 input  logic					 clk,
-	 input  logic				     rst,
-	 input  logic					 push,
-	 input  logic[DATA_WIDTH-1:0]    push_data,
-	 input  logic					 pop,
-	 output logic [DATA_WIDTH-1:0]   pop_data,
-	 output logic				     full,
-	 output logic				     empty
-	 );
+           	  parameter int FIFO_DEPTH = 3)
+    (
+    input  logic                   clk,
+    input  logic                   rst,
+    input  logic                   push,
+    input  logic[DATA_WIDTH-1:0]   push_data,
+    input  logic                   pop,
+    output logic [DATA_WIDTH-1:0]  pop_data,
+    output logic                   full,
+    output logic                   empty
+    );
 
+localparam MSB_PTR = $clog2(FIFO_DEPTH)-1;
 
 logic [FIFO_DEPTH-1:0] [DATA_WIDTH-1:0] fifo_array;
 logic [FIFO_DEPTH-1:0] [DATA_WIDTH-1:0] next_fifo_array;
-logic [FIFO_DEPTH-1:0] rd_ptr;
-logic [FIFO_DEPTH-1:0] next_rd_ptr;
-logic [FIFO_DEPTH-1:0] wr_ptr;
-logic [FIFO_DEPTH-1:0] next_wr_ptr;
+logic [MSB_PTR:0] rd_ptr;
+logic [MSB_PTR:0] next_rd_ptr;
+logic [MSB_PTR:0] wr_ptr;
+logic [MSB_PTR:0] next_wr_ptr;
 
 // The FIFO flop array:
-`MAFIA_DFF(fifo_array, next_fifo_array,	clk)
+`MAFIA_DFF(fifo_array, next_fifo_array,    clk)
 
 `MAFIA_RST_DFF(rd_ptr, next_rd_ptr, clk, rst)
 `MAFIA_RST_DFF(wr_ptr, next_wr_ptr, clk, rst)
@@ -39,18 +40,18 @@ logic [FIFO_DEPTH-1:0] next_wr_ptr;
 assign empty = (wr_ptr == rd_ptr);
 assign full  = (wr_ptr == (rd_ptr + FIFO_DEPTH - 1));
 always_comb begin : fifo_array_assign
-	//default values:
-	next_fifo_array = fifo_array;
-	next_rd_ptr = rd_ptr;
-	next_wr_ptr = wr_ptr;
-	if (push) begin
-		next_fifo_array[wr_ptr] = push_data;
-		next_wr_ptr = (wr_ptr != (FIFO_DEPTH - 1)) ? (wr_ptr + 1) : '0;
-	end
-	if (pop) begin
-		pop_data = fifo_array[rd_ptr];
-		next_rd_ptr = (rd_ptr != (FIFO_DEPTH - 1)) ? (rd_ptr + 1) : '0;
-	end
+    //default values:
+    next_fifo_array = fifo_array;
+    next_rd_ptr = rd_ptr;
+    next_wr_ptr = wr_ptr;
+    if (push) begin
+        next_fifo_array[wr_ptr] = push_data;
+        next_wr_ptr = (wr_ptr != (FIFO_DEPTH - 1)) ? (wr_ptr + 1) : '0;
+    end
+    if (pop) begin
+        pop_data = fifo_array[rd_ptr];
+        next_rd_ptr = (rd_ptr != (FIFO_DEPTH - 1)) ? (rd_ptr + 1) : '0;
+    end
 end
 
 endmodule : fifo

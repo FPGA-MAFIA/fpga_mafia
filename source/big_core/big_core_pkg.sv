@@ -30,23 +30,23 @@ parameter LSB_REGION = 0;
 parameter MSB_REGION = 23;
 
 // VGA Region bits
-parameter VGA_MSB_REGION = 19;
+parameter VGA_MSB_REGION = 23;
 
 // Encoded regions
-parameter I_MEM_REGION_FLOOR   = 'h0                    ;
-parameter I_MEM_REGION_ROOF    = I_MEM_MSB              ;
+parameter I_MEM_REGION_FLOOR   = 'h0;
+parameter I_MEM_REGION_ROOF    = I_MEM_MSB;
 
 parameter D_MEM_REGION_FLOOR   = D_MEM_OFFSET;
 parameter D_MEM_REGION_ROOF    = D_MEM_OFFSET +  D_MEM_SIZE - 1;
 
-parameter CR_MEM_OFFSET       = 'h0010_0000;
+parameter CR_MEM_OFFSET       = 'h00FE_0000;
 parameter CR_MEM_REGION_FLOOR = CR_MEM_OFFSET;
-parameter CR_MEM_REGION_ROOF  = 'h0020_0000 -4;
+parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 -4;
 
 
 // define VGA memory sizes
 parameter SIZE_VGA_MEM          = 38400; 
-parameter VGA_MEM_REGION_FLOOR  = 'h20_0000;
+parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
 parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 
 parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0

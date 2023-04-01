@@ -59,53 +59,39 @@ $display("====== Reset Done =======\n");
 //start test
 if(test_name == "cache_alive") begin
 `include "cache_alive.sv"
-end else 
-if(test_name == "cache_alive_2") begin
+end else if(test_name == "cache_alive_2") begin
 `include "cache_alive_2.sv"
-end else
-if(test_name == "single_fm_req") begin
+end else if(test_name == "single_fm_req") begin
 `include "single_fm_req.sv"
-end else
-if(test_name == "rd_modify_rd") begin
+end else if(test_name == "rd_modify_rd") begin
 `include "rd_modify_rd.sv"
-end else
-if(test_name == "wr_miss_rd_hit") begin
+end else if(test_name == "wr_miss_rd_hit") begin
 `include "wr_miss_rd_hit.sv"
-end else
-if(test_name == "wr_miss_rd_hit_mb") begin
+end else if(test_name == "wr_miss_rd_hit_mb") begin
 `include "wr_miss_rd_hit_mb.sv"
-end else
-if(test_name == "wr_miss_wr_hit") begin
+end else if(test_name == "wr_miss_wr_hit") begin
 `include "wr_miss_wr_hit.sv"
-end else
-if(test_name == "wr_after_wr_cl") begin
+end else if(test_name == "wr_after_wr_cl") begin
 `include "wr_after_wr_cl.sv"
-end else
-if(test_name == "fill_8_tq_entries") begin
+end else if(test_name == "fill_8_tq_entries") begin
 `include "fill_8_tq_entries.sv"
-end else
-if(test_name == "wr_b2b_same_cl") begin
+end else if(test_name == "wr_b2b_same_cl") begin
 `include "wr_b2b_same_cl.sv"
-end else
-if(test_name == "wr_b2b_hit") begin
+end else if(test_name == "wr_b2b_hit") begin
 `include "wr_b2b_hit.sv"
-end else
-if(test_name == "rd_b2b_hit") begin
+end else if(test_name == "rd_b2b_hit") begin
 `include "rd_b2b_hit.sv"
-end else
-if(test_name == "rd_b2b_same_cl") begin
+end else if(test_name == "rd_b2b_same_cl") begin
 `include "rd_b2b_same_cl.sv"
-end else
-if(test_name == "rd_b2b_diff_cl") begin
+end else if(test_name == "rd_b2b_diff_cl") begin
 `include "rd_b2b_diff_cl.sv"
-end else
-if(test_name == "rand_simple") begin
+end else if(test_name == "rand_simple") begin
 `include "rand_simple.sv"
-end else
-if(test_name == "rand_set_stress") begin
+end else if(test_name == "rand_set_stress") begin
 `include "rand_set_stress.sv"
-end else
-if(test_name == "many_tag_one_set") begin
+end else  if(test_name == "rand_wr") begin
+`include "rand_wr.sv"
+end else  if(test_name == "many_tag_one_set") begin
 `include "many_tag_one_set.sv"
 end else begin
     $display("\n\n=============================================");

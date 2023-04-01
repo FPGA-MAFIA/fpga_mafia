@@ -1,4 +1,17 @@
-#include "../../../app/defines/big_core_defines.h"
+//------------------------------------------------------------
+// Title : bubblesort
+// Project : big_core
+//------------------------------------------------------------
+// File : bubblesort.c
+// Author : Daniel Kaufman
+// Adviser : Amichai Ben-David
+// Created : 01/2023
+//------------------------------------------------------------
+// Description :
+// This program implements the bubble sort algorithm to sort
+// an array of integers in ascending order.
+//------------------------------------------------------------
+#include "big_core_defines.h"
 
 
 void bubbleSort(int arr[], int n) {
@@ -16,7 +29,7 @@ void bubbleSort(int arr[], int n) {
 
 void eot(int arr[]) {
     for(int i =0; i<7; i++){
-        MEM_SCRATCH[i]=arr[i];
+        D_MEM_SCRATCH[i]=arr[i];
     }
 }
 int main() {

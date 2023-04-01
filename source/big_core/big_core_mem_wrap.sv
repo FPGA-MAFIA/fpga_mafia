@@ -46,7 +46,7 @@ logic [31:0] ShiftDMemWrDataQ103H;
 logic [3:0]  ShiftDMemByteEnQ103H;
 logic [31:0] PreCRMemRdDataQ104H;
 logic [31:0] PreVGAMemRdDataQ104H;
-assign PreVGAMemRdDataQ104H ='0;
+//`assign PreVGAMemRdDataQ104H ='0;
 always_comb begin
     MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
     MatchDMemRegionQ103H   = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= D_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= D_MEM_REGION_ROOF));
@@ -83,14 +83,14 @@ assign PreDMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDM
                                                                       PreShiftDMemRdDataQ104H         ; 
 
 // Instantiating the mafia_asap_5pl_i_mem instruction memory
-`ifdef SIM_ONLY
-i_mem i_mem (
-    .Clk            (Clk),
-    .address        (PcQ100H[31:2]),
-    .q              (InstructionQ101H)
-);
-`else 
-i_mem	i_mem_inst (
+// `ifdef SIM_ONLY
+// i_mem i_mem (
+//     .Clk            (Clk),
+//     .address        (PcQ100H[31:2]),
+//     .q              (InstructionQ101H)
+// );
+// `else 
+i_mem	i_mem (
     .clock      ( Clk ),
     //Core interface
     .address_a  ( PcQ100H[31:2] ),
@@ -103,38 +103,26 @@ i_mem	i_mem_inst (
     .wren_b     ( '0 ),
     .q_b        ( )
 );
-`endif  
+// `endif  
 
 
 // Instantiating the mafia_asap_5pl_d_mem data memory
 
-`ifdef SIM_ONLY
  d_mem d_mem (
-    .Clk            (Clk),
-    .data           (ShiftDMemWrDataQ103H),
-    .address        (DMemAddressQ103H[31:2]),
-    .byteena        (ShiftDMemByteEnQ103H),
-    .wren           (DMemWrEnQ103H && MatchDMemRegionQ103H),
-    .rden           (DMemRdEnQ103H && MatchDMemRegionQ103H),
-    .q              (PreShiftDMemRdDataQ104H)
+    .clock            (Clk),
+    //Core interface
+    .data_a           (ShiftDMemWrDataQ103H),
+    .address_a        (DMemAddressQ103H[31:2]),
+    .byteena_a        (ShiftDMemByteEnQ103H),
+    .wren_a           (DMemWrEnQ103H && MatchDMemRegionQ103H),
+    .q_a              (PreShiftDMemRdDataQ104H),
+    //Fabric access interface
+    .data_b           ('0),
+    .address_b        ('0),
+    .byteena_b        ('0),
+    .wren_b           ('0),
+    .q_b              ()
 );
-`else 
-d_mem	d_mem_inst (
-    .clock ( Clk ),
-       //Core interface
-    .address_a ( DMemAddressQ103H[31:2] ),
-    .byteena_a ( ShiftDMemByteEnQ103H ),
-    .data_a ( ShiftDMemWrDataQ103H ),
-    .wren_a ( DMemWrEnQ103H && MatchDMemRegionQ103H ),
-    .q_a ( PreShiftDMemRdDataQ104H ),
-       //IO interface
-    .address_b ( '0 ),
-    .byteena_b ( '0),
-    .data_b ( '0 ),
-    .wren_b ( '0 ),
-    .q_b ( )
-);
-`endif  
 
 
 
@@ -154,21 +142,27 @@ big_core_cr_mem big_core_cr_mem (
 );
 
 
-assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
-//mafia_asap_5pl_vga_ctrl mafia_asap_5pl_vga_ctrl (
-//    .CLK_50            (Clk),
-//    .Reset             (Rst),
-//    .data              (DMemWrDataQ103H),
-//    .address           (DMemAddressQ103H),
-//    .byteena           (DMemByteEnQ103H),
-//    .wren              (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
-//    .rden              (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
-//    .q                 (PreVGAMemRdDataQ104H),
-//    .RED               (vga_out.VGA_R),
-//    .GREEN             (vga_out.VGA_G),
-//    .BLUE              (vga_out.VGA_B),
-//    .h_sync            (vga_out.VGA_HS),
-//    .v_sync            (vga_out.VGA_VS)
-//);
+//assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
+logic [31:0] VgaAddressWithOffsetQ103H;
+assign VgaAddressWithOffsetQ103H = DMemAddressQ103H - VGA_MEM_REGION_FLOOR;
+big_core_vga_ctrl big_core_vga_ctrl (
+   .CLK_50            (Clk),
+   .Reset             (Rst),
+   // Core interface
+   // write
+   .F2C_ReqDataQ503H   (DMemWrDataQ103H),
+   .F2C_ReqAddressQ503H(VgaAddressWithOffsetQ103H),
+   .CtrlVGAMemByteEn   (DMemByteEnQ103H),
+   .CtrlVgaMemWrEnQ503 (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
+   // read
+   .CtrlVgaMemRdEnQ503 (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
+   .VgaRspDataQ504H    (PreVGAMemRdDataQ104H),
+   // VGA output
+   .RED               (vga_out.VGA_R),
+   .GREEN             (vga_out.VGA_G),
+   .BLUE              (vga_out.VGA_B),
+   .h_sync            (vga_out.VGA_HS),
+   .v_sync            (vga_out.VGA_VS)
+);
 
 endmodule // Module mafia_asap_5pl_mem_wrap

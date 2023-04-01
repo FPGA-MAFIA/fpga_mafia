@@ -52,10 +52,13 @@ FPGA_ROOT = './FPGA/'+args.dut+'/'
 #####################################################################################################
 class Test:
     hw_compilation = False
-    I_MEM_OFFSET = str(0x00000000)
+    I_MEM_OFFSET = str(0x00000000) # -> 0x0000FFFF
     I_MEM_LENGTH = str(0x00010000)
-    D_MEM_OFFSET = str(0x00010000)
+    D_MEM_OFFSET = str(0x00010000) # -> 0x0001EFFF
     D_MEM_LENGTH = str(0x0000F000)
+    # SCRATCH_D_MEM_OFFSET = str(0x0001F000) # -> 0x0001FFFF
+    # SCRATCH_D_MEM_LENGTH = str(0x00001000)
+    # Total of 128KB of memory (64KB for I_MEM and 64KB for D_MEM+SCRATCH_D_MEM)
     def __init__(self, name, project):
         self.name = name.split('.')[0]
         self.file_name = name
@@ -84,10 +87,12 @@ class Test:
             cs_path =  self.name+'_rv32i.c.s' if not self.assembly else '../../../../../'+self.path
             elf_path = self.name+'_rv32i.elf'
             txt_path = self.name+'_rv32i_elf.txt'
+            data_init_path = self.name+'_data_init.txt'
+            search_path  = '-I ../../../../../app/defines '
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i ../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -96,11 +101,17 @@ class Test:
                 self.fail_flag = True
             else:
                 try:
-                    rv32i_gcc    = 'riscv-none-embed-gcc.exe  -O3 -march=rv32i '
+                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
+                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
                     i_mem_offset = '-Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+' -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+' '
                     d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
-                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld '+mem_offset+'-nostartfiles -D__riscv__ ../../../../../app/crt0.S '+cs_path+' -o '+elf_path
+                    crt0_file    = '../../../../../app/crt0.S '
+                    mem_layout   = '-Wl,-Map='+self.name+'.map '
+                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
+                    crt0_file    = '../../../../../app/crt0.S '
+                    mem_layout   = '-Wl,-Map='+self.name+'.map '
+                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -121,15 +132,30 @@ class Test:
                             self.fail_flag = True
                         else:
                             if(args.cmd==False):
-                                print(mem_offset)
+                                # copy the inst_mem to a new file, call it og_inst_mem.sv
+                                os.system('cp inst_mem.sv og_inst_mem.sv')
+                                # same the content of the inst_mem.sv to the variable "memories"
                                 memories = open('inst_mem.sv', 'r').read()
-                                with open('data_mem.sv', 'w') as dmem:
-                                    if (hex(int(Test.D_MEM_OFFSET)).split('x')[-1] in memories): # checkig if data memory is exist
-                                        dmem.write('@'+memories.split('@')[-1])
-                                    else:
-                                        pass
-                                with open('inst_mem.sv', 'w') as imem:
-                                    imem.write('@'+memories.split('@')[1])
+                                #The string that we want to search for to check if the data memory is exist
+                                # example: @00010000
+                                dmem_string = '@{:08x}'.format(int(Test.D_MEM_OFFSET))
+                                #print_message(dmem_string)
+                                if dmem_string in memories:
+                                    print_message('[INFO] Data memory exist')
+                                    # save the content before D_MEM_OFFSET to inst_mem.sv
+                                    # save the content after D_MEM_OFFSET to data_mem.sv
+                                        # Split the memories string into two parts - before and after D_MEM_OFFSET
+                                    inst_mem, data_mem = memories.split(dmem_string)
+                                    # Save the content before D_MEM_OFFSET to inst_mem.sv
+                                    with open('inst_mem.sv', 'w') as imem:
+                                        imem.write(inst_mem)
+                                    # Save the content after D_MEM_OFFSET to data_mem.sv
+                                    with open('data_mem.sv', 'w') as dmem:
+                                        dmem.write(dmem_string + data_mem)
+                                else:
+                                    print_message('[INFO] data memory dos not exist')
+                                    # Leave the inst_mem.sv as it is - there is no D_MEM_OFFSET in the inst_mem.sv
+
             if not self.fail_flag:
                 print_message('[INFO] SW compilation finished with no errors\n')
         else:
