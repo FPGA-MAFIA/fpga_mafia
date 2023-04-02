@@ -96,7 +96,7 @@ for(int i = 0; i<4; i++) begin
       wait(valid_alloc_req[index] == 1'b1);
       $display("input of fifo number %0d",index);
        ref_fifo_Q[index].push_back(alloc_req[index]);
-       $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[0].size(),ref_fifo_Q[0],$time);
+       $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[index].size(),ref_fifo_Q[index],$time);
        //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
       wait(valid_alloc_req[index] == 1'b0);  
     //end
@@ -136,6 +136,8 @@ task get_outputs();
 fork
 forever begin
   wait(winner_valid == 1'b1);
+  #1;
+  $display("winner req is: %p at time %t",winner_req,$time);
   ref_outputs_Q.push_back(winner_req);
   $display("this is the outputs array %p @ time %t",ref_outputs_Q,$time);
   wait(winner_valid == 1'b0);
@@ -146,15 +148,16 @@ task DI_checker();
 foreach(ref_fifo_Q[i])begin
   foreach(ref_fifo_Q[i][j])begin
     foreach(ref_outputs_Q[k])begin
+        //$display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
+        //$display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
+      if($bits(ref_fifo_Q[i][j]) == $bits(ref_outputs_Q[k]))begin
         $display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
-        $display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
-      if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
-        $display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
-        $display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
+        $display("before delete: this is ref_outputs_Q[%0d]: %p",k,ref_outputs_Q[k]);
 
         ref_fifo_Q[i].delete(j);
         ref_outputs_Q.delete(k);
         $display("after delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
+        break;
       end
     end
     //if(ref_outputs_Q.find(ref_fifo_Q[i][j] , with (item1,item2) item1 === item2) ==-1)begin
@@ -199,6 +202,9 @@ initial begin
       get_outputs();
   
    join
+   $display("ref_outputs is %p",ref_fifo_Q);
+   for(int i = 0 ; i<4;i++)
+   $display("this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
    DI_checker();
    delay(30);
    $finish();
