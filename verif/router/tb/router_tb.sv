@@ -24,14 +24,19 @@ initial begin
     forever #5 clk = ~clk;
 end
 // RST 
-initial begin
+task rst_ins();
+    in_north_req       = '0;
+    in_north_req_valid = '0;
+    in_south_req_valid = '0;
+    in_east_req_valid = '0;
+    in_west_req_valid = '0;
     rst = 1'b1;
     for(int i =0; i<4 ; i++) begin
       valid_alloc_req[i] = '0;
     end
     delay(10);
     rst = '0;
-end
+endtask
 // ***   tasks
 //  general
 task delay(input int cycles);
@@ -151,16 +156,17 @@ forever begin
 end
 join_none
 endtask
-task DI_checker();
+task DI_checker(); // pseudo ref_model
 foreach(ref_fifo_Q[i])begin
   foreach(ref_fifo_Q[i][j])begin
     foreach(ref_outputs_Q[k])begin
         //$display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
         //$display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
-      if($bits(ref_fifo_Q[i][j]) == $bits(ref_outputs_Q[k]))begin
-        $display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
-        $display("before delete: this is ref_outputs_Q[%0d]: %p",k,ref_outputs_Q[k]);
+      if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
+        $display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
+        $display("before delete: this is ref_outputs_Q[%0d]: %p with bits: %0b",k,ref_outputs_Q[k],$bits(ref_outputs_Q[k]));
 
+      $display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
         ref_fifo_Q[i].delete(j);
         ref_outputs_Q.delete(k);
         $display("after delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
@@ -169,54 +175,31 @@ foreach(ref_fifo_Q[i])begin
     end
     //if(ref_outputs_Q.find(ref_fifo_Q[i][j] , with (item1,item2) item1 === item2) ==-1)begin
       //$error("trans in fifo %0d and element %0d didnt get out of fifo_arb",i,j);
-      $display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
+    end
+  end
+  if(ref_outputs_Q.size()!= 0)begin
+    $error("output list not empty ,data is %p",ref_outputs_Q);
+  end
+  for(int i=0;i<4;i++)begin
+    if(ref_fifo_Q[i].size() != 0)begin
+       $error("input list not empty for fifo %0d ,data is %p",i,ref_fifo_Q[i]);
     end
   end
 endtask
-//task DI_checker();
-//  t_tile_trans item1, item2;
-//  foreach (ref_fifo_Q[i]) begin
-//    foreach (ref_fifo_Q[i][j]) begin
-//      item1 = ref_fifo_Q[i][j];
-//      int match = 0;
-//      foreach (ref_outputs_Q[k]) begin
-//        item2 = ref_outputs_Q[k];
-//        if (item2 === item1) begin
-//          match = 1;
-//          break;
-//        end
-//      end
-//      if (!match) begin
-//        $error("trans in fifo %0d and element %0d didnt get out of fifo_arb", i, j);
-//      end
-//    end
-//  end
-//endtask
-
-
-
 
 initial begin
-in_north_req       = '0;
-in_north_req_valid = '0;
-in_south_req_valid = '0;
-in_east_req_valid = '0;
-in_west_req_valid = '0;
+  rst_ins();
   fork 
       run_test(test_name);
       //try();
       //try_pop();
-  
-//FIXME - disable checkers for now, need to fix them
-   // checkers
-      //check_correct_output();
       get_inputs();
       get_outputs();
   
    join
    $display("ref_outputs is %p",ref_fifo_Q);
    for(int i = 0 ; i<4;i++)
-   $display("this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
+      $display("this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
    DI_checker();
    delay(30);
    $finish();
@@ -228,56 +211,7 @@ initial begin : timeout_monitor
   $finish();
 end
 
-router router_inst
-(
- .clk                  (clk),         //   input   logic               clk,
- .rst                  (rst),         //   input   logic               rst,
- .local_tile_id        (8'h3_3),     //   input   t_tile_id           local_tile_id,
- //========================================
- // North Interface
- //========================================
- // input request & output ready
- .in_north_req_valid   (in_north_req_valid),//   input   logic               in_north_req_valid,
- .in_north_req         (in_north_req),              //   input   t_tile_trans            in_north_req,
- .out_north_ready      (               ),   //   output  t_fab_ready         out_north_ready, // .east_arb, .west_arb, .south_arb
- // output request & input ready
- .out_north_req_valid  (                   ),//   output  logic               out_north_req_valid,
- .out_north_req        (             ),      //   output  t_tile_trans            out_north_req,
- .in_north_ready       (5'b11111),     //   input   t_fab_ready         in_north_ready, // east_arb, west_arb, north_arb
- //========================================
- // East Interface
- //========================================
- // input request & output ready
- .in_east_req_valid    (in_east_req_valid),  //   input   logic               in_east_req_valid,
- .in_east_req          ('0),        //   input   t_tile_trans            in_east_req,
- .out_east_ready       (              ),     //   output  t_fab_ready         out_east_ready, // .north_arb, .west_arb, .south_arb
- // output request & input ready
- .out_east_req_valid   (                  ), //   output  logic               out_east_req_valid,
- .out_east_req         (            ),       //   output  t_tile_trans            out_east_req,
- .in_east_ready        (5'b11111),      //   input   t_fab_ready         in_east_ready, // north_arb, east_arb, south_arb
- //========================================
- // West Interface
- //========================================
- // input request & output ready
- .in_west_req_valid    (in_west_req_valid),  //   input   logic               in_west_req_valid,
- .in_west_req          ('0),        //   input   t_tile_trans            in_west_req,
- .out_west_ready       (              ),     //   output  t_fab_ready         out_west_ready, // .north_arb, .east_arb, .south_arb
- // output request & input ready
- .out_west_req_valid   (                  ), //   output  logic               out_west_req_valid,
- .out_west_req         (            ),       //   output  t_tile_trans            out_west_req,
- .in_west_ready        (5'b11111),      //   input   t_fab_ready         in_west_ready, // north_arb, west_arb, south_arb
- //========================================
- // South Interface
- //========================================
- // input request & output ready
- .in_south_req_valid   (in_south_req_valid), //   input   logic               in_south_req_valid,
- .in_south_req         ('0),       //   input   t_tile_trans            in_south_req,
- .out_south_ready      (               ),    //   output  t_fab_ready         out_south_ready, // .north_arb, .east_arb, .west_arb
- // output request & input ready
- .out_south_req_valid  (                   ),//   output  logic               out_south_req_valid,
- .out_south_req        (             ),      //   output  t_tile_trans            out_south_req,
- .in_south_ready       (5'b11111)      //   input   t_fab_ready         in_south_ready  // south_arb, east_arb, west_arb
-);
+// need to include router_dut.sv
 
 endmodule
 
