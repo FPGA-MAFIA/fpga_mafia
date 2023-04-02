@@ -22,45 +22,45 @@ import router_pkg::*;
     //========================================
     // input request & output ready
     input   logic               in_north_req_valid,
-    input   t_fab_req           in_north_req,
+    input   t_tile_trans            in_north_req,
     output  t_fab_ready         out_north_ready, // .east_arb, .west_arb, .south_arb
     // output request & input ready
     output  logic               out_north_req_valid,
-    output  t_fab_req           out_north_req,
-    input   t_fab_ready         in_north_ready, // east_arb, west_arb, south_arb
+    output  t_tile_trans            out_north_req,
+    input   t_fab_ready         in_north_ready, // east_arb, west_arb, north_arb
     //========================================
     // East Interface
     //========================================
     // input request & output ready
     input   logic               in_east_req_valid,
-    input   t_fab_req           in_east_req,
+    input   t_tile_trans            in_east_req,
     output  t_fab_ready         out_east_ready, // .north_arb, .west_arb, .south_arb
     // output request & input ready
     output  logic               out_east_req_valid,
-    output  t_fab_req           out_east_req,
-    input   t_fab_ready         in_east_ready, // north_arb, west_arb, south_arb
+    output  t_tile_trans            out_east_req,
+    input   t_fab_ready         in_east_ready, // north_arb, east_arb, south_arb
     //========================================
     // West Interface
     //========================================
     // input request & output ready
     input   logic               in_west_req_valid,
-    input   t_fab_req           in_west_req,
+    input   t_tile_trans            in_west_req,
     output  t_fab_ready         out_west_ready, // .north_arb, .east_arb, .south_arb
     // output request & input ready
     output  logic               out_west_req_valid,
-    output  t_fab_req           out_west_req,
-    input   t_fab_ready         in_west_ready, // north_arb, east_arb, south_arb
+    output  t_tile_trans            out_west_req,
+    input   t_fab_ready         in_west_ready, // north_arb, west_arb, south_arb
     //========================================
     // South Interface
     //========================================
     // input request & output ready
     input   logic               in_south_req_valid,
-    input   t_fab_req           in_south_req,
+    input   t_tile_trans            in_south_req,
     output  t_fab_ready         out_south_ready, // .north_arb, .east_arb, .west_arb
     // output request & input ready
     output  logic               out_south_req_valid,
-    output  t_fab_req           out_south_req,
-    input   t_fab_ready         in_south_ready  // north_arb, east_arb, west_arb
+    output  t_tile_trans            out_south_req,
+    input   t_fab_ready         in_south_ready  // south_arb, east_arb, west_arb
 );
 
 //==============================
