@@ -22,45 +22,45 @@ import router_pkg::*;
     //========================================
     // input request & output ready
     input   logic               in_north_req_valid,
-    input   t_tile_trans            in_north_req,
+    input   var t_tile_trans            in_north_req,
     output  t_fab_ready         out_north_ready, // .east_arb, .west_arb, .south_arb
     // output request & input ready
     output  logic               out_north_req_valid,
-    output  t_tile_trans            out_north_req,
-    input   t_fab_ready         in_north_ready, // east_arb, west_arb, north_arb
+    output  t_tile_trans        out_north_req,
+    input   var t_fab_ready         in_north_ready, // east_arb, west_arb, north_arb
     //========================================
     // East Interface
     //========================================
     // input request & output ready
     input   logic               in_east_req_valid,
-    input   t_tile_trans            in_east_req,
+    input   var t_tile_trans            in_east_req,
     output  t_fab_ready         out_east_ready, // .north_arb, .west_arb, .south_arb
     // output request & input ready
     output  logic               out_east_req_valid,
     output  t_tile_trans            out_east_req,
-    input   t_fab_ready         in_east_ready, // north_arb, east_arb, south_arb
+    input   var t_fab_ready         in_east_ready, // north_arb, east_arb, south_arb
     //========================================
     // West Interface
     //========================================
     // input request & output ready
     input   logic               in_west_req_valid,
-    input   t_tile_trans            in_west_req,
+    input   var t_tile_trans            in_west_req,
     output  t_fab_ready         out_west_ready, // .north_arb, .east_arb, .south_arb
     // output request & input ready
     output  logic               out_west_req_valid,
     output  t_tile_trans            out_west_req,
-    input   t_fab_ready         in_west_ready, // north_arb, west_arb, south_arb
+    input   var t_fab_ready         in_west_ready, // north_arb, west_arb, south_arb
     //========================================
     // South Interface
     //========================================
     // input request & output ready
     input   logic               in_south_req_valid,
-    input   t_tile_trans            in_south_req,
+    input   var t_tile_trans            in_south_req,
     output  t_fab_ready         out_south_ready, // .north_arb, .east_arb, .west_arb
     // output request & input ready
     output  logic               out_south_req_valid,
     output  t_tile_trans            out_south_req,
-    input   t_fab_ready         in_south_ready  // south_arb, east_arb, west_arb
+    input   var t_fab_ready         in_south_ready  // south_arb, east_arb, west_arb
 );
 
 //==============================
@@ -101,23 +101,27 @@ fifo_arb fifo_arb_north (
 .valid_alloc_req0(in_south_req_valid_match_north),
 .valid_alloc_req1(in_east_req_valid_match_north ),
 .valid_alloc_req2(in_west_req_valid_match_north ),
+.valid_alloc_req3(),// placeholder for local mini_core
 .alloc_req0      (in_south_req), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req1      (in_east_req ), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req2      (in_west_req ), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
+.alloc_req3      (),// placeholder for local mini_core
 // Output
 .out_ready_fifo0(out_south_ready.north_arb), //output
 .out_ready_fifo1(out_east_ready.north_arb ), //output
 .out_ready_fifo2(out_west_ready.north_arb ), //output
+.out_ready_fifo3(), //output placeholder for local mini_core
 //==============================
 //  Output to North tile
 //==============================
 // Output
-.valid_winner_req(out_north_req_valid),
+.winner_valid(out_north_req_valid),
 .winner_req      (out_north_req),
 // Input
 .in_ready_arb_fifo0(in_north_ready.north_arb),//input
 .in_ready_arb_fifo1(in_north_ready.east_arb), //input
 .in_ready_arb_fifo2(in_north_ready.west_arb), //input
+.in_ready_arb_fifo3()  //input placeholder for local mini_core
 );
 
 //==============================
@@ -137,23 +141,27 @@ fifo_arb fifo_arb_east (
 .valid_alloc_req0(in_north_req_valid_match_east),
 .valid_alloc_req1(in_south_req_valid_match_east),
 .valid_alloc_req2(in_west_req_valid_match_east),
+.valid_alloc_req3(),// placeholder for local mini_core
 .alloc_req0      (in_north_req), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req1      (in_south_req), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req2      (in_west_req),  //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
+.alloc_req3      (),// placeholder for local mini_core
 // Output
 .out_ready_fifo0(out_north_ready.east_arb), //output
 .out_ready_fifo1(out_south_ready.east_arb), //output
 .out_ready_fifo2(out_west_ready.east_arb),  //output
+.out_ready_fifo3(), //output placeholder for local mini_core
 //==============================
 //  Output to East tile
 //==============================
 // Output
-.valid_winner_req(out_east_req_valid),
+.winner_valid(out_east_req_valid),
 .winner_req      (out_east_req),
 // Input
 .in_ready_arb_fifo0(in_east_ready.north_arb),//input
 .in_ready_arb_fifo1(in_east_ready.south_arb),//input
 .in_ready_arb_fifo2(in_east_ready.west_arb), //input
+.in_ready_arb_fifo3()  //input placeholder for local mini_core
 );
 
 
@@ -174,22 +182,26 @@ fifo_arb fifo_arb_south (
 .valid_alloc_req0(in_north_req_valid_match_south),
 .valid_alloc_req1(in_east_req_valid_match_south ),
 .valid_alloc_req2(in_west_req_valid_match_south ),
+.valid_alloc_req3(),// placeholder for local mini_core
 .alloc_req0      (in_north_req), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req1      (in_east_req ), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req2      (in_west_req ), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
+.alloc_req3      (),// placeholder for local mini_core
 // Output
 .out_ready_fifo0(out_north_ready.south_arb), //output
 .out_ready_fifo1(out_east_ready.south_arb ), //output
 .out_ready_fifo2(out_west_ready.south_arb ), //output
+.out_ready_fifo3(), //output placeholder for local mini_core
 //==============================
 //  Output to South tile
 //==============================
-.valid_winner_req(out_south_req_valid),
+.winner_valid(out_south_req_valid),
 .winner_req      (out_south_req),
 // Input
 .in_ready_arb_fifo0(in_south_ready.north_arb),//input
 .in_ready_arb_fifo1(in_south_ready.east_arb), //input
 .in_ready_arb_fifo2(in_south_ready.west_arb), //input
+.in_ready_arb_fifo3()  //input placeholder for local mini_core
 );
 
 //==============================
@@ -209,22 +221,26 @@ fifo_arb fifo_arb_west (
 .valid_alloc_req0(in_north_req_valid_match_west),
 .valid_alloc_req1(in_east_req_valid_match_west ),
 .valid_alloc_req2(in_south_req_valid_match_west),
+.valid_alloc_req3(),// placeholder for local mini_core
 .alloc_req0      (in_north_req), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req1      (in_east_req ), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
 .alloc_req2      (in_south_req), //input {VALID, ADDRESS, DATA, OPCODE, REQUESTOR_ID}
+.alloc_req3      (),// placeholder for local mini_core
 // Output
 .out_ready_fifo0(out_north_ready.west_arb), //output
 .out_ready_fifo1(out_east_ready.west_arb ), //output
 .out_ready_fifo2(out_south_ready.west_arb), //output
+.out_ready_fifo3(), //output placeholder for local mini_core
 //==============================
 //  Output to West tile
 //==============================
-.valid_winner_req(out_west_req_valid),
+.winner_valid    (out_west_req_valid),
 .winner_req      (out_west_req),
 // Input
 .in_ready_arb_fifo0(in_west_ready.north_arb),//input
 .in_ready_arb_fifo1(in_west_ready.east_arb), //input
 .in_ready_arb_fifo2(in_west_ready.south_arb),//input
+.in_ready_arb_fifo3()  //input placeholder for local mini_core
 );
 
 

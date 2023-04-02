@@ -7,6 +7,12 @@ logic              clk;
 logic              rst;
 static t_tile_trans ref_fifo_Q [NUM_CLIENTS-1:0][$];
 static t_tile_trans ref_outputs_Q [$];  
+logic in_north_req_valid;
+logic in_south_req_valid;
+logic in_east_req_valid;
+logic in_west_req_valid;
+t_tile_trans in_north_req;
+
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
 string test_name;
@@ -40,15 +46,16 @@ task run_test(input string test);
         $display("STRING value %s", test_name);
   else $fatal("CANNOT FINT TEST %s at time %t",test_name , $time());
   delay(30);
-  if(test == "simple") begin
+  if (test == "simple") begin
      `include "simple.sv"
-  end
-  if(test == "fifo_arb_dif_num_active_fifo")begin
+  end else if(test == "fifo_arb_dif_num_active_fifo")begin
      `include "fifo_arb_dif_num_active_fifo.sv" 
-  end
-  if(test == "single_fifo_full_BW")begin
+  end else if(test == "single_fifo_full_BW")begin
     `include "single_fifo_full_BW.sv"
+  end else if(test == "alive_router")begin
+    `include "alive_router.sv"
   end
+
 endtask
 // DUT related tasks
 task push_fifo(input int num_fifo);
@@ -190,6 +197,11 @@ endtask
 
 
 initial begin
+in_north_req       = '0;
+in_north_req_valid = '0;
+in_south_req_valid = '0;
+in_east_req_valid = '0;
+in_west_req_valid = '0;
   fork 
       run_test(test_name);
       //try();
@@ -215,5 +227,57 @@ initial begin : timeout_monitor
   //$fatal(1, "Timeout");
   $finish();
 end
+
+router router_inst
+(
+ .clk                  (clk),         //   input   logic               clk,
+ .rst                  (rst),         //   input   logic               rst,
+ .local_tile_id        (8'h3_3),     //   input   t_tile_id           local_tile_id,
+ //========================================
+ // North Interface
+ //========================================
+ // input request & output ready
+ .in_north_req_valid   (in_north_req_valid),//   input   logic               in_north_req_valid,
+ .in_north_req         (in_north_req),              //   input   t_tile_trans            in_north_req,
+ .out_north_ready      (               ),   //   output  t_fab_ready         out_north_ready, // .east_arb, .west_arb, .south_arb
+ // output request & input ready
+ .out_north_req_valid  (                   ),//   output  logic               out_north_req_valid,
+ .out_north_req        (             ),      //   output  t_tile_trans            out_north_req,
+ .in_north_ready       (5'b11111),     //   input   t_fab_ready         in_north_ready, // east_arb, west_arb, north_arb
+ //========================================
+ // East Interface
+ //========================================
+ // input request & output ready
+ .in_east_req_valid    (in_east_req_valid),  //   input   logic               in_east_req_valid,
+ .in_east_req          ('0),        //   input   t_tile_trans            in_east_req,
+ .out_east_ready       (              ),     //   output  t_fab_ready         out_east_ready, // .north_arb, .west_arb, .south_arb
+ // output request & input ready
+ .out_east_req_valid   (                  ), //   output  logic               out_east_req_valid,
+ .out_east_req         (            ),       //   output  t_tile_trans            out_east_req,
+ .in_east_ready        (5'b11111),      //   input   t_fab_ready         in_east_ready, // north_arb, east_arb, south_arb
+ //========================================
+ // West Interface
+ //========================================
+ // input request & output ready
+ .in_west_req_valid    (in_west_req_valid),  //   input   logic               in_west_req_valid,
+ .in_west_req          ('0),        //   input   t_tile_trans            in_west_req,
+ .out_west_ready       (              ),     //   output  t_fab_ready         out_west_ready, // .north_arb, .east_arb, .south_arb
+ // output request & input ready
+ .out_west_req_valid   (                  ), //   output  logic               out_west_req_valid,
+ .out_west_req         (            ),       //   output  t_tile_trans            out_west_req,
+ .in_west_ready        (5'b11111),      //   input   t_fab_ready         in_west_ready, // north_arb, west_arb, south_arb
+ //========================================
+ // South Interface
+ //========================================
+ // input request & output ready
+ .in_south_req_valid   (in_south_req_valid), //   input   logic               in_south_req_valid,
+ .in_south_req         ('0),       //   input   t_tile_trans            in_south_req,
+ .out_south_ready      (               ),    //   output  t_fab_ready         out_south_ready, // .north_arb, .east_arb, .west_arb
+ // output request & input ready
+ .out_south_req_valid  (                   ),//   output  logic               out_south_req_valid,
+ .out_south_req        (             ),      //   output  t_tile_trans            out_south_req,
+ .in_south_ready       (5'b11111)      //   input   t_fab_ready         in_south_ready  // south_arb, east_arb, west_arb
+);
+
 endmodule
 
