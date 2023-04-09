@@ -22,45 +22,45 @@ import router_pkg::*;
     //========================================
     // input request & output ready
     input   logic               in_north_req_valid,
-    input   var t_tile_trans            in_north_req,
+    input   var t_tile_trans    in_north_req,
     output  t_fab_ready         out_north_ready, // .east_arb, .west_arb, .south_arb
     // output request & input ready
     output  logic               out_north_req_valid,
     output  t_tile_trans        out_north_req,
-    input   var t_fab_ready         in_north_ready, // east_arb, west_arb, north_arb
+    input   var t_fab_ready     in_north_ready, // east_arb, west_arb, north_arb
     //========================================
     // East Interface
     //========================================
     // input request & output ready
     input   logic               in_east_req_valid,
-    input   var t_tile_trans            in_east_req,
+    input   var t_tile_trans    in_east_req,
     output  t_fab_ready         out_east_ready, // .north_arb, .west_arb, .south_arb
     // output request & input ready
     output  logic               out_east_req_valid,
-    output  t_tile_trans            out_east_req,
-    input   var t_fab_ready         in_east_ready, // north_arb, east_arb, south_arb
+    output  t_tile_trans        out_east_req,
+    input   var t_fab_ready     in_east_ready, // north_arb, east_arb, south_arb
     //========================================
     // West Interface
     //========================================
     // input request & output ready
     input   logic               in_west_req_valid,
-    input   var t_tile_trans            in_west_req,
+    input   var t_tile_trans    in_west_req,
     output  t_fab_ready         out_west_ready, // .north_arb, .east_arb, .south_arb
     // output request & input ready
     output  logic               out_west_req_valid,
-    output  t_tile_trans            out_west_req,
-    input   var t_fab_ready         in_west_ready, // north_arb, west_arb, south_arb
+    output  t_tile_trans        out_west_req,
+    input   var t_fab_ready     in_west_ready, // north_arb, west_arb, south_arb
     //========================================
     // South Interface
     //========================================
     // input request & output ready
     input   logic               in_south_req_valid,
-    input   var t_tile_trans            in_south_req,
+    input   var t_tile_trans    in_south_req,
     output  t_fab_ready         out_south_ready, // .north_arb, .east_arb, .west_arb
     // output request & input ready
     output  logic               out_south_req_valid,
-    output  t_tile_trans            out_south_req,
-    input   var t_fab_ready         in_south_ready  // south_arb, east_arb, west_arb
+    output  t_tile_trans        out_south_req,
+    input   var t_fab_ready     in_south_ready  // south_arb, east_arb, west_arb
 );
 
 //==============================
@@ -115,7 +115,7 @@ fifo_arb fifo_arb_north (
 //  Output to North tile
 //==============================
 // Output
-.winner_valid(out_north_req_valid),
+.winner_req_valid(out_north_req_valid),
 .winner_req      (out_north_req),
 // Input
 .in_ready_arb_fifo0(in_north_ready.north_arb),//input
@@ -155,7 +155,7 @@ fifo_arb fifo_arb_east (
 //  Output to East tile
 //==============================
 // Output
-.winner_valid(out_east_req_valid),
+.winner_req_valid(out_east_req_valid),
 .winner_req      (out_east_req),
 // Input
 .in_ready_arb_fifo0(in_east_ready.north_arb),//input
@@ -195,7 +195,7 @@ fifo_arb fifo_arb_south (
 //==============================
 //  Output to South tile
 //==============================
-.winner_valid(out_south_req_valid),
+.winner_req_valid(out_south_req_valid),
 .winner_req      (out_south_req),
 // Input
 .in_ready_arb_fifo0(in_south_ready.north_arb),//input
@@ -234,7 +234,7 @@ fifo_arb fifo_arb_west (
 //==============================
 //  Output to West tile
 //==============================
-.winner_valid    (out_west_req_valid),
+.winner_req_valid    (out_west_req_valid),
 .winner_req      (out_west_req),
 // Input
 .in_ready_arb_fifo0(in_west_ready.north_arb),//input

@@ -54,7 +54,7 @@ always @(posedge clk) begin
             alloc_req[i].next_tile_fifo_arb_id);      
         end
     end //for loop
-    if(winner_valid) begin
+    if(winner_req_valid) begin
         $fwrite(fifo_arb_top_trk,"%t     output from fifo %4b  %h       %-7s %h     %h      %s \n",
         $realtime, 
         fifo_arb_ins.fifo_pop,

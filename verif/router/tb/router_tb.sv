@@ -91,11 +91,11 @@ end endgenerate
 
 task check_correct_output();
 forever begin
-  wait(fifo_arb_ins.winner_valid == 1'b1);
+  wait(fifo_arb_ins.winner_req_valid == 1'b1);
   if(fifo_arb_ins.winner_req == final_winner_xmr)
     $display("fifo_ok");// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
   else $error("output is different than fifo");
-  wait(winner_valid == 1'b0);
+  wait(winner_req_valid == 1'b0);
 end
 endtask
 
@@ -138,12 +138,12 @@ endtask
 task get_outputs();
 fork
 forever begin
-  wait(winner_valid == 1'b1);
+  wait(winner_req_valid == 1'b1);
   #1;
   $display("winner req is: %p at time %t",winner_req,$time);
   ref_outputs_Q.push_back(winner_req);
   $display("this is the outputs array %p @ time %t",ref_outputs_Q,$time);
-  wait(winner_valid == 1'b0);
+  wait(winner_req_valid == 1'b0);
 end
 join
 endtask

@@ -32,7 +32,7 @@ output logic             out_ready_fifo3,
 //==============================
 // Output
 output var t_tile_trans     winner_req,
-output logic     			winner_valid,
+output logic     			winner_req_valid,
 // Input
 input  logic             in_ready_arb_fifo0, // used by arb to choose winner
 input  logic             in_ready_arb_fifo1,
@@ -87,7 +87,7 @@ arb
     .valid_candidate(~empty[3:0]),    // input from each fifo - not empty indication, valid candidate.
     .candidate      (dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
     .winner_dec_id  (fifo_pop[3:0]),  // the arbiter winner use to fifo pop.        
-    .valid_winner   (winner_valid),
+    .valid_winner   (winner_req_valid),
     .data_winner    (winner_req)
 );
 
