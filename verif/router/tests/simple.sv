@@ -6,6 +6,6 @@ for (int i = 0; i<4; i++)begin
     delay(3);
 end*/
 for (int i = 0; i<4; i++)begin
-    push_fifo(i);
+    gen_trans(i);
     delay(3);
 end

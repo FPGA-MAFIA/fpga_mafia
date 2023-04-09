@@ -12,6 +12,7 @@ logic in_south_req_valid;
 logic in_east_req_valid;
 logic in_west_req_valid;
 t_tile_trans in_north_req;
+t_tile_trans input_gen [3:0];
 
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
@@ -112,25 +113,15 @@ for(int i = 0; i<4; i++) begin
        //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
       wait(valid_alloc_req[index] == 1'b0);  
     //end
-  end join
+  end join_none
 end
 //end
 endtask
 
 task try();
-for(int i = 0; i<10; i++)begin
-      //$display("pre fork: this is thred %0d",i);
-
-  automatic int j = i;
-fork begin
-      $display("in fork: this is thred %0d",i);
-
-  //$display("j inside fork push - %0d",j);
-  delay(5);
-  ref_fifo_Q[j%4].push_back(j%4);
-  //$display("size: %0d, element in array: %p at time %t",ref_fifo_Q[j%4].size(),ref_fifo_Q,$time);
-end join
-end
+int try;
+try = $urandom_range(0,100); 
+$display("###########    this is try num: %0d",try);
 endtask
 task try_pop();
 for(int i = 0; i<10; i++)begin
@@ -154,23 +145,21 @@ forever begin
   $display("this is the outputs array %p @ time %t",ref_outputs_Q,$time);
   wait(winner_valid == 1'b0);
 end
-join_none
+join
 endtask
 task DI_checker(); // pseudo ref_model
+automatic bit check = 0;
 foreach(ref_fifo_Q[i])begin
   foreach(ref_fifo_Q[i][j])begin
     foreach(ref_outputs_Q[k])begin
-        //$display("before delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
-        //$display("before delete: this is ref_outputs_Q: %p",ref_outputs_Q[k]);
       if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
-        $display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
-        $display("before delete: this is ref_outputs_Q[%0d]: %p with bits: %0b",k,ref_outputs_Q[k],$bits(ref_outputs_Q[k]));
-
-      $display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
+        //$display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
+        //$display("before delete: this is ref_outputs_Q[%0d]: %p with bits: %0b",k,ref_outputs_Q[k],$bits(ref_outputs_Q[k]));
+        //$display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
         ref_fifo_Q[i].delete(j);
         ref_outputs_Q.delete(k);
-        $display("after delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
-        break;
+        //$display("after delete: this is ref_fifo_Q[%0d]: %p",i,ref_fifo_Q[i]);
+        //break;
       end
     end
     //if(ref_outputs_Q.find(ref_fifo_Q[i][j] , with (item1,item2) item1 === item2) ==-1)begin
@@ -179,16 +168,41 @@ foreach(ref_fifo_Q[i])begin
   end
   if(ref_outputs_Q.size()!= 0)begin
     $error("output list not empty ,data is %p",ref_outputs_Q);
+    check = 1'b1;
   end
   for(int i=0;i<4;i++)begin
     if(ref_fifo_Q[i].size() != 0)begin
+      check = 1'b1;
        $error("input list not empty for fifo %0d ,data is %p",i,ref_fifo_Q[i]);
-    end
+    end   
   end
+  if(check == 1'b0)
+    $display("DI CHECKER: DATA IS CORRECT");
+endtask
+task rand_data();
+  delay(1);
+  //t_tile_opcode opcode_t;
+  //int index_opcode = 0;
+  //automatic int index_next_tile = 0;
+  //index_opcode = $urandom_range(0,3);
+  //index_next_tile = $urandom_range(0,6);
+    for(int i = 0 ; i<4 ; i++) begin
+        alloc_req[i].data = $urandom_range(0,2^32-1);
+        alloc_req[i].address = $urandom_range(0,2^32-1);
+        alloc_req[i].opcode = WR;
+        alloc_req[i].requestor_id = $urandom_range(0,2^10-1);
+        alloc_req[i].next_tile_fifo_arb_id = NORTH;
+        //$display("#########################alloc_req is %p for fifo %0d time: %t#######################################",alloc_req[i],i,$time());
+end
 endtask
 
+task gen_trans(input int num_fifo);
+rand_data();
+push_fifo(num_fifo);
+endtask
 initial begin
   rst_ins();
+
   fork 
       run_test(test_name);
       //try();
@@ -206,7 +220,7 @@ initial begin
 end
 
 initial begin : timeout_monitor
-  #2us;
+  #20us;
   //$fatal(1, "Timeout");
   $finish();
 end
