@@ -13,7 +13,7 @@
 +incdir+../../../source/common/
 //RTL FIles
 ../../../source/router/router_pkg.sv
-//../../../source/router/router.sv
+../../../source/router/router.sv
 ../../../source/router/fifo_arb.sv
 ../../../source/router/arbiter.sv
 ../../../source/router/fifo.sv

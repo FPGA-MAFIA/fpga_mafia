@@ -35,16 +35,17 @@ fifo_arb fifo_arb_ins(
 
 
 //defalut value for the inputs
-always_comb begin
-    for(int i = 0 ; i<4 ; i++) begin
-        alloc_req[i].data = i+10;
-        alloc_req[i].address = i+10;
-        alloc_req[i].opcode = WR;
-        alloc_req[i].requestor_id = '0+10;
-        alloc_req[i].next_tile_fifo_arb_id = NORTH;
-    end
-    //`ENCODER(num_of_fifo,1,valid_alloc_req)
-end
+//always_comb begin
+//    for(int i = 0 ; i<4 ; i++) begin
+//      alloc_req[i] = input_gen[i];
+//       // alloc_req[i].data = i+10;
+//       // alloc_req[i].address = i+10;
+//       // alloc_req[i].opcode = WR;
+//       // alloc_req[i].requestor_id = '0+10;
+//       // alloc_req[i].next_tile_fifo_arb_id = NORTH;
+//    end
+//    //`ENCODER(num_of_fifo,1,valid_alloc_req)
+//end
 
 
 

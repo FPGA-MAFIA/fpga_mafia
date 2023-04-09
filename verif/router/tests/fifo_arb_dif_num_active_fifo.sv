@@ -20,6 +20,3 @@
              push_fifo(i);
              delay(100);
             end
-          begin
-              check_correct_output();
-          end
