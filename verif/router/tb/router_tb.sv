@@ -1,11 +1,11 @@
 `include "macros.sv"
-parameter NUM_CLIENTS = 4 ;
+parameter V_NUM_CLIENTS = 4 ;
 //`include "uvm_macros.svh"
 module router_tb;
 import router_pkg::*;
 logic              clk;
 logic              rst;
-static t_tile_trans ref_fifo_Q [NUM_CLIENTS-1:0][$];
+static t_tile_trans ref_fifo_Q [V_NUM_CLIENTS-1:0][$];
 static t_tile_trans ref_outputs_Q [$];  
 logic in_north_req_valid;
 logic in_south_req_valid;
@@ -18,7 +18,7 @@ static int cnt;
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
 string test_name;
-// instansiation of DUT's - trk inside.
+// instantiation of DUT's - trk inside.
 `include "fifo_arb_dut.vh"
 //`include "router_dut.vh"
 // CLK GEN
@@ -67,6 +67,8 @@ task run_test(input string test);
   end
 
 endtask
+
+
 // DUT related tasks
 task automatic push_fifo(input int num_fifo);
   $display("%t, push_fifo %d",$time, num_fifo);

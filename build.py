@@ -19,6 +19,8 @@ python build.py -dut 'big_core' -debug -tests 'alive' -hw                  -> co
 python build.py -dut 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
 python build.py -dut 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
 python build.py -dut 'big_core' -debug -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
+python build.py -dut 'router' -debug -tests simple -hw -sim -param '\-gV_NUM_FIFO=4' -> using parameter override in simulation
+python build.py -dut 'router' -debug -tests all_fifo_full_BW -hw -sim -param '\-gV_REQUESTS=4' -> using parameter override in simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
@@ -34,6 +36,7 @@ parser.add_argument('-pp',        action='store_true',    help='run post-process
 parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-cmd',       action='store_true',   help='dont run the script, just print the commands')
+parser.add_argument('-param',     default='',             help='used for overriding parameter values in simulation')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -185,11 +188,12 @@ class Test:
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         chdir(MODEL_ROOT)
-    def _start_simulation(self):
+    def _start_simulation(self, parameter):
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
-            sim_cmd = 'vsim.exe work.'+self.project+'_tb -c -do "run -all" +STRING='+self.name
+            # if -param exists, add the parameters to the simulation command
+            sim_cmd = 'vsim.exe work.' + self.project + '_tb -c -do "run -all" ' + parameter + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -204,10 +208,10 @@ class Test:
         if os.path.exists('transcript'):  # copy transcript file to the test directory
             shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         chdir(MODEL_ROOT)
-    def _gui(self):
+    def _gui(self, parameter):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb +STRING='+self.name+' &'
+            gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb ' + parameter + ' +STRING='+self.name+' &'
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -249,7 +253,6 @@ class Test:
         print_message(results.stdout)
         print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
 
-        
 def print_message(msg):
     msg_type = msg.split()[0]
     try:
@@ -330,6 +333,11 @@ def main():
     # sys.stdout = open(log_file, "w", buffering=1)
     # sys.stderr = open(log_file, "w", buffering=1)   
     run_status = "PASSED"
+    # if args.param collect the parameters from the command and save them as a string
+    if args.param:
+        parameter = args.param # save the parameters as a string
+        parameter = parameter.replace('\\','')# remove the backslash
+
     for test in tests:
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
@@ -339,11 +347,11 @@ def main():
         if (args.hw or args.full_run) and not test.fail_flag:
             test._compile_hw()
         if (args.sim or args.full_run) and not test.fail_flag:
-            test._start_simulation()
+            test._start_simulation(parameter)
         if (args.fpga) and not test.fail_flag:
             test._start_fpga()
         if (args.gui):
-            test._gui()
+            test._gui(parameter)
         if (args.pp) and not test.fail_flag:
             if (test._post_process()):# if return value is 0, then the post process is done successfully
                 test.fail_flag = True
