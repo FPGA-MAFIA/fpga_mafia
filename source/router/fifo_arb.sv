@@ -11,7 +11,7 @@ module fifo_arb
 input  logic clk,
 input  logic rst,
 //==============================
-//  New alloc from neighber Tiles
+//  New alloc from neighbor Tiles
 //==============================
 // Input
 input  logic             valid_alloc_req0, // can rewrite more generic with logic [NUM_CLIENTS-1:0] valid_alloc_req;

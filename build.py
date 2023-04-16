@@ -19,8 +19,8 @@ python build.py -dut 'big_core' -debug -tests 'alive' -hw                  -> co
 python build.py -dut 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
 python build.py -dut 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
 python build.py -dut 'big_core' -debug -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
-python build.py -dut 'router' -debug -tests simple -hw -sim -param '\-gV_NUM_FIFO=4' -> using parameter override in simulation
-python build.py -dut 'router' -debug -tests all_fifo_full_BW -hw -sim -param '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'router' -debug -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
+python build.py -dut 'router' -debug -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
@@ -35,8 +35,8 @@ parser.add_argument('-dut',       default='big_core',     help='insert your proj
 parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
 parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
-parser.add_argument('-cmd',       action='store_true',   help='dont run the script, just print the commands')
-parser.add_argument('-param',     default='',             help='used for overriding parameter values in simulation')
+parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
+parser.add_argument('-params',     default=' ',             help='used for overriding parameter values in simulation')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -53,6 +53,17 @@ FPGA_ROOT = './FPGA/'+args.dut+'/'
 #####################################################################################################
 #                                           class Test
 #####################################################################################################
+# This class is used for creating a test object
+# Each test object has the following attributes:
+#   name:           name of the test
+#   file_name:      name of the test file
+#   assembly:       True if the test is written in assembly, False if it is written in C
+#   project:        name of the project
+#   target:         path to the test directory
+#   gcc_dir:        path to the gcc directory
+#   path:           path to the test file
+#   fail_flag:      True if the test failed, False otherwise
+#####################################################################################################
 class Test:
     hw_compilation = False
     I_MEM_OFFSET = str(0x00000000) # -> 0x0000FFFF
@@ -62,14 +73,16 @@ class Test:
     # SCRATCH_D_MEM_OFFSET = str(0x0001F000) # -> 0x0001FFFF
     # SCRATCH_D_MEM_LENGTH = str(0x00001000)
     # Total of 128KB of memory (64KB for I_MEM and 64KB for D_MEM+SCRATCH_D_MEM)
-    def __init__(self, name, project):
+    def __init__(self, name, params, dut):
         self.name = name.split('.')[0]
         self.file_name = name
         self.assembly = True if self.file_name[-1] == 's' else False
-        self.project = project 
+        self.dut = dut 
         self.target , self.gcc_dir = self._create_test_dir()
         self.path = TESTS+self.file_name
         self.fail_flag = False
+        # the tests parameters
+        self.params = params # FIXME ABD
     def _create_test_dir(self):
         if not os.path.exists(TARGET):
             mkdir(TARGET)
@@ -170,7 +183,7 @@ class Test:
         print_message('[INFO] Starting to compile HW ...')
         if not Test.hw_compilation:
             try:
-                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.project+'_list.f'
+                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.dut+'_list.f'
                 results = run_cmd_with_capture(comp_sim_cmd) 
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -184,16 +197,15 @@ class Test:
                     with open("hw_compile.log", "w") as file:
                         file.write(results.stdout)
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
-                    print_message('=== Compile results >>>>> target/'+self.project+'/modelsim/hw_compile.log')
+                    print_message('=== Compile results >>>>> target/'+self.dut+'/modelsim/hw_compile.log')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         chdir(MODEL_ROOT)
-    def _start_simulation(self, parameter):
+    def _start_simulation(self):
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
-            # if -param exists, add the parameters to the simulation command
-            sim_cmd = 'vsim.exe work.' + self.project + '_tb -c -do "run -all" ' + parameter + ' +STRING=' + self.name
+            sim_cmd = 'vsim.exe work.' + self.dut + '_tb -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -204,14 +216,14 @@ class Test:
                 print_message(results.stdout)
             else:
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
-            print_message('=== Simulation results >>>>> target/'+self.project+'/tests/'+self.name+'/'+self.name+'_transcript')
+            print_message('=== Simulation results >>>>> target/'+self.dut+'/tests/'+self.name+'/'+self.name+'_transcript')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
             shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         chdir(MODEL_ROOT)
-    def _gui(self, parameter):
+    def _gui(self):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+self.project+'_tb ' + parameter + ' +STRING='+self.name+' &'
+            gui_cmd = 'vsim.exe -gui work.'+self.dut+'_tb ' + self.params + ' +STRING='+self.name+' &'
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -222,13 +234,13 @@ class Test:
             delete_cmd = 'rm -rf '+TARGET+'tests/'+self.name
             run_cmd(delete_cmd)
         except:
-            print_message('[ERROR] failed to remove /target/'+self.project+'/tests/'+self.name+' directory')
+            print_message('[ERROR] failed to remove /target/'+self.dut+'/tests/'+self.name+' directory')
     def _post_process(self):
         # Go to the verification directory
         chdir(VERIF)
         # Run the post process command
         try:
-            pp_cmd = 'python '+self.project+'_pp.py ' +self.name
+            pp_cmd = 'python '+self.dut+'_pp.py ' +self.name
             return_val = run_cmd_with_capture(pp_cmd)
             print_message(colored(return_val.stdout,'yellow',attrs=['bold']))        
         except:
@@ -242,7 +254,7 @@ class Test:
     def _start_fpga(self):
         chdir(FPGA_ROOT)
         try:
-            fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.project+' -c de10_lite_'+self.project+' '
+            fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.dut+' -c de10_lite_'+self.dut+' '
             results = run_cmd_with_capture(fpga_cmd)
         except:
             print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
@@ -300,25 +312,56 @@ def main():
         os.makedirs('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
     
+    # the tests list declared - will be filled using one of the arguments: all, regress, tests
     tests = []
+
+    # make sure not using '-all', '-regress', 'tests' together
+    if (args.all and args.regress) or (args.all and args.tests) or (args.regress and args.tests):
+        print_message('[ERROR] can\'t use any combination of: -all, -regress, tests')
+        exit(1)
+    # make sure using at least one of '-all', '-regress', 'tests'
+    if not (args.all or args.regress or args.tests):
+        print_message('[ERROR] must use at least one of: -all, -regress, tests')
+        exit(1)
+
+
+    # if args.params collect the parameters from the command and save them as a string
+    if args.params:
+        parameter = args.params # save the parameters as a string
+        parameter = parameter.replace('\\','')# remove the backslash
+    else:
+        parameter = ''
+
+    # get the tests list
     if args.all:
         test_list = os.listdir(TESTS)
         for test in test_list:
             if 'level' in test: continue
-            tests.append(Test(test, args.dut))
+            tests.append(Test(test, parameter, args.dut))
     elif args.regress:
         try:
-            level_list = open(REGRESS+args.regress, 'r').read().split('\n')
+            #use the firs column of the regression file as the tests list
+            level_list = [line.split()[0] for line in open(REGRESS+args.regress)]
+            # trying to debug why this is not working printing level_list
+            print_message(f'[INFO] level_list: {level_list}')
+            # the rest of the columns are the tests parameters
+            # if there is no parameters for a test, the default parameters will be used for that line
+            params_list = [line.split()[1:] for line in open(REGRESS+args.regress)] 
+            print_message(f'[INFO] params_list: {params_list}')
         except:
             print_message(f'[ERROR] Failed to find the regression file \'{args.regress}\' in your tests directory')
             exit(1)
         else:
             for test in level_list:
-                if os.path.exists(TESTS+test):
-                    tests.append(Test(test, args.dut))
+                if os.path.exists(TESTS+test+".sv"):
+                    # add the test to the tests list with the corresponding parameters
+                    # print for debug the test, the parameters and the dut
+                    test_params = params_list[level_list.index(test)][0] if params_list[level_list.index(test)] else ""
+                    print_message(f'[INFO] test: {test}, params_list: {test_params}, dut: {args.dut}')
+                    tests.append(Test(test, test_params, args.dut))
                 else:
                     print_message('[ERROR] can\'t find the test - '+test)
-    else:
+    elif args.tests:
         for test in args.tests.split():
             try:
                 test = glob.glob(TESTS+test+'*')[0]
@@ -327,16 +370,14 @@ def main():
                 exit(1)
             else:
                 test = test.replace('\\', '/').split('/')[-1]
-                tests.append(Test(test, args.dut))
+                tests.append(Test(test, parameter, args.dut))
 
-     # Redirect stdout and stderr to log file
+    # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
     # sys.stderr = open(log_file, "w", buffering=1)   
-    run_status = "PASSED"
-    # if args.param collect the parameters from the command and save them as a string
-    if args.param:
-        parameter = args.param # save the parameters as a string
-        parameter = parameter.replace('\\','')# remove the backslash
+    run_status = "PASSED" # default value for run status
+
+
 
     for test in tests:
         print_message('******************************************************************************')
@@ -347,11 +388,11 @@ def main():
         if (args.hw or args.full_run) and not test.fail_flag:
             test._compile_hw()
         if (args.sim or args.full_run) and not test.fail_flag:
-            test._start_simulation(parameter)
+            test._start_simulation()
         if (args.fpga) and not test.fail_flag:
             test._start_fpga()
         if (args.gui):
-            test._gui(parameter)
+            test._gui()
         if (args.pp) and not test.fail_flag:
             if (test._post_process()):# if return value is 0, then the post process is done successfully
                 test.fail_flag = True
