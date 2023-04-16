@@ -358,7 +358,7 @@ def main():
                     # add the test to the tests list with the corresponding parameters
                     # print for debug the test, the parameters and the dut
                     test_params = params_list[level_list.index(test)][0] if params_list[level_list.index(test)] else ""
-                    print_message(f'[INFO] test: {test}, params_list: {test_params}, dut: {args.dut}')
+                    print_message(f'[INFO] test: {test}, params: {test_params}, dut: {args.dut}')
                     tests.append(Test(test, test_params, args.dut))
                 else:
                     print_message('[ERROR] can\'t find the test - '+test)
