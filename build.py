@@ -314,6 +314,7 @@ def main():
     
     # the tests list declared - will be filled using one of the arguments: all, regress, tests
     tests = []
+    run_status = "PASSED" # default value for run status
 
     # make sure not using '-all', '-regress', 'tests' together
     if (args.all and args.regress) or (args.all and args.tests) or (args.regress and args.tests):
@@ -353,7 +354,7 @@ def main():
             exit(1)
         else:
             for test in level_list:
-                if os.path.exists(TESTS+test+".sv"):
+                if os.path.exists(TESTS+test+".sv") or os.path.exists(TESTS+test):
                     # add the test to the tests list with the corresponding parameters
                     # print for debug the test, the parameters and the dut
                     test_params = params_list[level_list.index(test)][0] if params_list[level_list.index(test)] else ""
@@ -361,6 +362,7 @@ def main():
                     tests.append(Test(test, test_params, args.dut))
                 else:
                     print_message('[ERROR] can\'t find the test - '+test)
+                    exit(1)
     elif args.tests:
         for test in args.tests.split():
             try:
@@ -375,7 +377,6 @@ def main():
     # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
     # sys.stderr = open(log_file, "w", buffering=1)   
-    run_status = "PASSED" # default value for run status
 
 
 
