@@ -84,11 +84,15 @@ endtask
 //=======================================================
 //=======================================================
 //systemverilog task to create the pull of tags and sets to be used in the test
-task create_addrs_pull(output logic [7:0] tag_pull [MAX_NUM_TAG_PULL:0],
-                       output logic [7:0] set_pull [MAX_NUM_SET_PULL:0]);
+task create_addrs_pull(input int local_num_tag_pull = V_MAX_NUM_TAG_PULL, // default values
+                       input int local_num_set_pull = V_MAX_NUM_SET_PULL, // default values
+                       output logic [7:0] tag_pull [V_MAX_NUM_TAG_PULL:0],
+                       output logic [7:0] set_pull [V_MAX_NUM_SET_PULL:0]);
     int i;
-    for (i = 0; i < NUM_TAG_PULL; i = i + 1) begin
+    for (i = 0; i < local_num_tag_pull+1; i = i + 1) begin
         tag_pull[i] = $urandom_range(8'h00, 8'hFF);
+    end
+    for (i = 0; i < local_num_set_pull+1; i = i + 1) begin
         set_pull[i] = $urandom_range(8'h00, 8'hFF);
     end
 endtask
@@ -97,15 +101,17 @@ endtask
 
 //=======================================================
 //=======================================================
-task create_addrs(output logic [19:0] addr);
+task create_addrs(input int local_num_tag_pull, 
+                  input int local_num_set_pull, 
+                  output logic [19:0] addr);
     // assign the tag bits to the addr[19:12]
     // choose random tag from the tag_pull
     logic [7:0] rand_num;
-    rand_num = $urandom_range(0, NUM_TAG_PULL - 1);
+    rand_num = $urandom_range(0, local_num_tag_pull - 1);
     addr[19:12] = tag_pull[rand_num];
     // assign the set bits for the addr[11:4]
     // choose random set from the set_pull
-    rand_num = $urandom_range(0, NUM_SET_PULL - 1);
+    rand_num = $urandom_range(0, local_num_set_pull - 1);
     addr[11:4] = set_pull[rand_num];
     // assign random offset bits for the addr[3:0]
     addr[3:2] = $urandom_range(0, 3);
@@ -114,28 +120,43 @@ endtask
 
 //=======================================================
 //=======================================================
-task random_wr(); 
+task random_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // default values
+               input int local_max_req_delay = V_MAX_REQ_DELAY, // default values
+               input int local_num_tag_pull  = V_NUM_TAG_PULL, // default values
+               input int local_num_set_pull  = V_NUM_SET_PULL  // default values
+              ); 
     logic [19:0] addr;
     logic [31:0] data;
     logic [4:0]  id;
     int i;
-    create_addrs(addr);
+    create_addrs(.local_num_tag_pull(local_num_tag_pull), 
+                 .local_num_set_pull(local_num_set_pull), 
+                 .addr(addr)
+                 );
     data = $urandom_range(0, 32'hFFFFFFFF);
     id = $urandom_range(0, 5'd31);
     wr_req(addr, data, id);
-    i = $urandom_range(MIN_REQ_DELAY, MAX_REQ_DELAY);
+    i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
 endtask
 
 //=======================================================
 //=======================================================
-task random_rd(); 
+task random_rd(
+                input int local_min_req_delay = V_MIN_REQ_DELAY, // default values
+                input int local_max_req_delay = V_MAX_REQ_DELAY, // default values
+                input int local_num_tag_pull  = V_NUM_TAG_PULL, // default values
+                input int local_num_set_pull  = V_NUM_SET_PULL  // default values
+              ); 
     logic [19:0] addr;
     logic [4:0]  id;
     int i;
-    create_addrs(addr);
+    create_addrs(.local_num_tag_pull(local_num_tag_pull), 
+                 .local_num_set_pull(local_num_set_pull), 
+                 .addr(addr)
+                 );
     id = $urandom_range(0, 5'd31);
     rd_req(addr, id);
-    i = $urandom_range(MIN_REQ_DELAY, MAX_REQ_DELAY);
+    i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
 endtask

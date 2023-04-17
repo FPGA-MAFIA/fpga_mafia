@@ -347,17 +347,19 @@ def main():
             print_message(f'[INFO] level_list: {level_list}')
             # the rest of the columns are the tests parameters
             # if there is no parameters for a test, the default parameters will be used for that line
-            params_list = [line.split()[1:] for line in open(REGRESS+args.regress)] 
+            params_list = [line.split()[1:] for line in open(REGRESS+args.regress)]
             print_message(f'[INFO] params_list: {params_list}')
         except:
             print_message(f'[ERROR] Failed to find the regression file \'{args.regress}\' in your tests directory')
             exit(1)
         else:
-            for test in level_list:
+            for idx, test in enumerate(level_list):
                 if os.path.exists(TESTS+test+".sv") or os.path.exists(TESTS+test):
                     # add the test to the tests list with the corresponding parameters
                     # print for debug the test, the parameters and the dut
-                    test_params = params_list[level_list.index(test)][0] if params_list[level_list.index(test)] else ""
+                    # test_params = params_list[level_list.index(test)][0] if params_list[level_list.index(test)] else ""
+                    # print_message(f'[INFO] test: {test}, params: {test_params}, dut: {args.dut}')
+                    test_params = ' '.join(params_list[idx]) if params_list[idx] else ""
                     print_message(f'[INFO] test: {test}, params: {test_params}, dut: {args.dut}')
                     tests.append(Test(test, test_params, args.dut))
                 else:
