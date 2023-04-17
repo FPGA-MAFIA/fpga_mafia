@@ -18,15 +18,15 @@ int LOCAL_NUM_TAG_PULL; // used for setting the number of tag pulls from test it
 int LOCAL_NUM_SET_PULL; // used for setting the number of tag pulls from test itself
 
 //default values - override from command line
-parameter V_MAX_REQ_DELAY= 16;
-parameter V_MIN_REQ_DELAY= 15;
-parameter V_NUM_REQ      = 50;
-parameter V_RD_RATIO     = 25;
-parameter V_NUM_SET_PULL = 2 ;//Max is MAX_NUM_SET_PULL
-parameter V_NUM_TAG_PULL = 2 ;//Max is MAX_NUM_TAG_PULL
+parameter V_MAX_REQ_DELAY=16;
+parameter V_MIN_REQ_DELAY=15;
+parameter V_NUM_REQ      =50;
+parameter V_RD_RATIO     =25;
+parameter V_NUM_SET_PULL =2 ;//Max is MAX_NUM_SET_PULL
+parameter V_NUM_TAG_PULL =2 ;//Max is MAX_NUM_TAG_PULL
 
-parameter V_MAX_NUM_SET_PULL  = 50;  //Max is 
-parameter V_MAX_NUM_TAG_PULL  = 50;
+parameter V_MAX_NUM_SET_PULL  = 50; //the theory MAX is 2^SET_ADRS_WIDTH (2^8=256)  
+parameter V_MAX_NUM_TAG_PULL  = 50; //the theory MAX is 2^SET_ADRS_WIDTH (2^8=256)  
 
 logic [7:0] tag_pull [V_MAX_NUM_TAG_PULL:0];
 logic [7:0] set_pull [V_MAX_NUM_SET_PULL:0];
@@ -94,12 +94,15 @@ end else if(test_name == "rand_set_stress") begin
 `include "rand_set_stress.sv"
 end else  if(test_name == "rand_wr") begin
 `include "rand_wr.sv"
+end else  if(test_name == "rand") begin
+`include "rand.sv"
 end else  if(test_name == "many_tag_one_set") begin
 `include "many_tag_one_set.sv"
 end else begin
     $display("\n\n=============================================");
-    $display("ERROR: Test %s not found", test_name);
+    $display("ERROR: Test \'%s\' not found", test_name);
     $display("=============================================");
+    $error("ERROR: Test \'%s\' not found", test_name);
     delay(80); $finish;
     $finish;
 end
