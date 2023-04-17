@@ -16,10 +16,11 @@
 
 
 integer cache_top_trk;
-integer cache_pipe_trk;
+integer cache_pipe_io_trk;
 integer cache_tq_trk;
 integer cache_ref_gold_trk;
 integer cache_ref_trk;
+integer cache_pipe_stages_trk;
 
 initial begin
     if ($value$plusargs ("STRING=%s", test_name))
@@ -34,13 +35,21 @@ initial begin
     $fwrite(cache_top_trk," Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data \n");
     $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
 
-    cache_pipe_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_trk.log"},"w");
-    $fwrite(cache_pipe_trk,"==========================================================================================\n");
-    $fwrite(cache_pipe_trk,"                      CACHE PIPE TRACKER  -  Test: ",test_name,"\n"); 
-    $fwrite(cache_pipe_trk,"==========================================================================================\n");
-    $fwrite(cache_pipe_trk,"------------------------------------------------------------------------------------------\n");
-    $fwrite(cache_pipe_trk,"  Time  ||REQ/RSP||  OPCODE  || TQ ID ||  address  || rd ind || wr ind || Data/Result ||   CL־Data \n");
-    $fwrite(cache_pipe_trk,"------------------------------------------------------------------------------------------\n");
+    cache_pipe_io_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_io_trk.log"},"w");
+    $fwrite(cache_pipe_io_trk,"==========================================================================================\n");
+    $fwrite(cache_pipe_io_trk,"                      CACHE PIPE I/O TRACKER  -  Test: ",test_name,"\n"); 
+    $fwrite(cache_pipe_io_trk,"==========================================================================================\n");
+    $fwrite(cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
+    $fwrite(cache_pipe_io_trk,"  Time  ||REQ/RSP||  OPCODE  || TQ ID ||  address  || rd ind || wr ind || Data/Result ||   CL־Data \n");
+    $fwrite(cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
+
+    cache_pipe_io_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_stages_trk.log"},"w");
+    $fwrite(cache_pipe_io_trk,"==========================================================================================\n");
+    $fwrite(cache_pipe_io_trk,"                      CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
+    $fwrite(cache_pipe_io_trk,"==========================================================================================\n");
+    $fwrite(cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
+    $fwrite(cache_pipe_io_trk,"  Time  || OPCODE  || set_way_mru||  mb_hit_cancel  || taf ||set || Data                  \n");
+    $fwrite(cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
 
     cache_tq_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_tq_trk.log"},"w");
     $fwrite(cache_tq_trk,"====================================================================================================================\n");
@@ -65,6 +74,8 @@ initial begin
     $fwrite(cache_ref_trk,"-----------------------------------------------------------------------------------\n");
     $fwrite(cache_ref_trk,"   OPCODE        || address ||REG      || tag  || Set ||    Data \n");
     $fwrite(cache_ref_trk,"-----------------------------------------------------------------------------------\n");
+
+
 end
 
 always @(posedge clk) begin
@@ -130,7 +141,7 @@ always @(posedge clk) begin
 
  //===== Request Tracker =====   
     if(cache.cache_pipe_wrap.pipe_lu_req_q1.valid) begin
-        $fwrite(cache_pipe_trk,"%t      Request   %-7s    %h        %h        %h         %h        %h      %h\n",
+        $fwrite(cache_pipe_io_trk,"%t      Request   %-7s    %h        %h        %h         %h        %h      %h\n",
         $realtime,
         cache.cache_pipe_wrap.pipe_lu_req_q1.lu_op.name(), 
         cache.cache_pipe_wrap.pipe_lu_req_q1.tq_id, 
@@ -144,7 +155,7 @@ always @(posedge clk) begin
 
  //===== Response Tracker =====   
     if(cache.cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
-        $fwrite(cache_pipe_trk,"%t      Response  %-7s    %h        %h      (---lu resp---)         %-4h       %h\n",
+        $fwrite(cache_pipe_io_trk,"%t      Response  %-7s    %h        %h      (---lu resp---)         %-4h       %h\n",
         $realtime,
         cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(),
         cache.cache_pipe_wrap.pipe_lu_rsp_q3.tq_id,
@@ -153,6 +164,25 @@ always @(posedge clk) begin
         cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
     end
 
+
+// //==================================================
+// // tracker on Pipe Stages
+// //==================================================
+
+  if(cache.cache_pipe.cache_pipe_lu_q2.valid) begin
+        $fwrite(cache_pipe_io_trk,"%t      %h    %h        %h    %h     %h   %h    %h\n",
+        $realtime,
+        cache.cache_pipe.cache_pipe_lu_q2.lu_op.name(),
+        cache.cache_pipe.cache_pipe_lu_q2.tq_id,
+        cache.cache_pipe.cache_pipe_lu_q2.set_way_mru,
+        cache.cache_pipe.cache_pipe_lu_q2.mb_hit_cancel, 
+        cache.cache_pipe.cache_pipe_lu_q2.lu_tag,
+        cache.cache_pipe.cache_pipe_lu_q2.lu_set,
+        cache.cache_pipe.cache_pipe_lu_q2.data
+        );     
+    end
+
+ $fwrite(cache_pipe_io_trk,"  Time  || OPCODE  || set_way_mru||  mb_hit_cancel  || tag ||set || Data                  \n");
 
 // //==================================================
 // // tracker on TQ
@@ -179,7 +209,6 @@ always @(posedge clk) begin
 
         end
     end    
-
 
 
 //==================================================
