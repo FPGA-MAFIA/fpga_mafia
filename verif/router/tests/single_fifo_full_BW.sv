@@ -1,6 +1,6 @@
-parameter REQUESTS = 10;
-parameter PUSHED_FIFO = 0;
-for(int i=0;i<REQUESTS; i++)begin
-    gen_trans(PUSHED_FIFO);
+parameter V_REQUESTS = 10;
+parameter V_PUSHED_FIFO = 0;
+for(int i=0;i<V_REQUESTS; i++)begin
+    gen_trans(V_PUSHED_FIFO);
     $display("item number: %d",i);
 end

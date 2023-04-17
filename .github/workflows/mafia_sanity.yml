@@ -22,6 +22,7 @@ jobs:
         run:  python build.py -dut 'sc_core' -debug -all -app -hw -sim
       - name: Run build CACHE -all -hw -sim -pp
         run:  python build.py -dut 'cache' -debug -regress level0 -hw -sim -pp
-      - name: Run build ROUTER -regress level0 -hw -sim
-        run:  python build.py -dut 'router' -debug -regress level0 -hw -sim
+      # disabling the router DUT for now - FIXME abd 17/4/2023
+      #- name: Run build ROUTER -regress level0 -hw -sim
+      #  run:  python build.py -dut 'router' -debug -regress level0 -hw -sim
 

@@ -1,11 +1,11 @@
 `include "macros.sv"
-parameter NUM_CLIENTS = 4 ;
+parameter V_NUM_CLIENTS = 4 ;
 //`include "uvm_macros.svh"
 module router_tb;
 import router_pkg::*;
 logic              clk;
 logic              rst;
-static t_tile_trans ref_fifo_Q [NUM_CLIENTS-1:0][$];
+static t_tile_trans ref_fifo_Q [V_NUM_CLIENTS-1:0][$];
 static t_tile_trans ref_outputs_Q [$];  
 logic in_north_req_valid;
 logic in_south_req_valid;
@@ -13,12 +13,14 @@ logic in_east_req_valid;
 logic in_west_req_valid;
 t_tile_trans in_north_req;
 t_tile_trans input_gen [3:0];
+static int cnt;
 
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
 string test_name;
-// instansiation of DUT's - trk inside.
+// instantiation of DUT's - trk inside.
 `include "fifo_arb_dut.vh"
+//`include "router_dut.vh"
 // CLK GEN
 initial begin
     clk = 1'b0;
@@ -40,7 +42,7 @@ task rst_ins();
 endtask
 // ***   tasks
 //  general
-task delay(input int cycles);
+task automatic delay(input int cycles);
   for(int i =0; i< cycles; i++) begin
     @(posedge clk);
   end
@@ -60,11 +62,15 @@ task run_test(input string test);
     `include "single_fifo_full_BW.sv"
   end else if(test == "alive_router")begin
     `include "alive_router.sv"
+  end else if(test == "all_fifo_full_BW")begin
+    `include "all_fifo_full_BW.sv"
   end
 
 endtask
+
+
 // DUT related tasks
-task push_fifo(input int num_fifo);
+task automatic push_fifo(input int num_fifo);
   $display("%t, push_fifo %d",$time, num_fifo);
   valid_alloc_req[num_fifo] = 1'b1;
   delay(1);
@@ -89,7 +95,7 @@ end endgenerate
   assign final_winner_xmr = winner_xmr[fifo_winner_xmr];
 
 
-task check_correct_output();
+task automatic check_correct_output();
 forever begin
   wait(fifo_arb_ins.winner_req_valid == 1'b1);
   if(fifo_arb_ins.winner_req == final_winner_xmr)
@@ -99,18 +105,18 @@ forever begin
 end
 endtask
 
-task get_inputs();
+task automatic get_inputs();
 //forever begin
 for(int i = 0; i<4; i++) begin
   automatic int index = i;
   fork begin
     //forever begin
-      $display("this is thred %0d",index);
+      $display("this is thred %0d at time %t",index,$time);
       wait(valid_alloc_req[index] == 1'b1);
-      $display("input of fifo number %0d",index);
+      $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$ input of fifo number %0d",index);
        ref_fifo_Q[index].push_back(alloc_req[index]);
        $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[index].size(),ref_fifo_Q[index],$time);
-       //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
+       $display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
       wait(valid_alloc_req[index] == 1'b0);  
     //end
   end join_none
@@ -135,17 +141,18 @@ fork begin
 end
 endtask
 
-task get_outputs();
+task automatic get_outputs();
 fork
 forever begin
   wait(winner_req_valid == 1'b1);
-  #1;
-  $display("winner req is: %p at time %t",winner_req,$time);
+  cnt = cnt + 1;
+  //#1;
+  $display("winner req is: %p at time %t and cnt = %d",winner_req,$time,cnt);
   ref_outputs_Q.push_back(winner_req);
   $display("this is the outputs array %p @ time %t",ref_outputs_Q,$time);
   wait(winner_req_valid == 1'b0);
 end
-join
+join_none
 endtask
 task DI_checker(); // pseudo ref_model
 automatic bit check = 0;
@@ -153,7 +160,7 @@ foreach(ref_fifo_Q[i])begin
   foreach(ref_fifo_Q[i][j])begin
     foreach(ref_outputs_Q[k])begin
       if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
-        //$display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
+        $display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
         //$display("before delete: this is ref_outputs_Q[%0d]: %p with bits: %0b",k,ref_outputs_Q[k],$bits(ref_outputs_Q[k]));
         //$display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
         ref_fifo_Q[i].delete(j);
@@ -179,7 +186,7 @@ foreach(ref_fifo_Q[i])begin
   if(check == 1'b0)
     $display("DI CHECKER: DATA IS CORRECT");
 endtask
-task rand_data();
+task automatic rand_data();
   delay(1);
   //t_tile_opcode opcode_t;
   //int index_opcode = 0;
@@ -196,7 +203,7 @@ task rand_data();
 end
 endtask
 
-task gen_trans(input int num_fifo);
+task automatic gen_trans(input int num_fifo);
 rand_data();
 push_fifo(num_fifo);
 endtask
@@ -211,6 +218,7 @@ initial begin
       get_outputs();
   
    join
+   wait(cnt == 3);
    $display("ref_outputs is %p",ref_fifo_Q);
    for(int i = 0 ; i<4;i++)
       $display("this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
@@ -220,8 +228,9 @@ initial begin
 end
 
 initial begin : timeout_monitor
-  #20us;
+  #2us;
   //$fatal(1, "Timeout");
+  $error("timeout test");
   $finish();
 end
 

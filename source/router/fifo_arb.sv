@@ -11,7 +11,7 @@ module fifo_arb
 input  logic clk,
 input  logic rst,
 //==============================
-//  New alloc from neighber Tiles
+//  New alloc from neighbor Tiles
 //==============================
 // Input
 input  logic             valid_alloc_req0, // can rewrite more generic with logic [NUM_CLIENTS-1:0] valid_alloc_req;
@@ -91,4 +91,21 @@ arb
     .data_winner    (winner_req)
 );
 
+
+
+// =================================
+// Assertion for illegal input
+// =================================
+// FIFO 0:
+// assert if fifo is full -> no new data can be pushed. (valid_alloc_req# = 1'b1)
+
+//// Define the property
+//property push_data_when_full_prop;
+//  @(posedge clk) disable iff(!rst) (full[0] == 1'b1) |-> (push[0] == 1'b0);
+//endproperty
+//
+//// Use the property in an assertion
+//assert push_data_when_full_assert: push_data_when_full_prop else $error("New data was pushed when fifo is full");
+//
+// If the arbiter chose a fifo to pop, the fifo must not be empty.
 endmodule

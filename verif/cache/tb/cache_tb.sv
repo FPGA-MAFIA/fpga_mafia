@@ -14,19 +14,22 @@ t_fm_rd_rsp       fm2cache_rd_rsp;
 
 
 
-//default values - override in test
-int MAX_REQ_DELAY;
-int MIN_REQ_DELAY;
-int NUM_REQ      ;
-int RD_RATIO     ;
-int NUM_SET_PULL ;//Max is MAX_NUM_SET_PULL
-int NUM_TAG_PULL ;//Max is MAX_NUM_TAG_PULL
+int LOCAL_NUM_TAG_PULL; // used for setting the number of tag pulls from test itself
+int LOCAL_NUM_SET_PULL; // used for setting the number of tag pulls from test itself
 
-parameter MAX_NUM_SET_PULL  = 50;  //Max is 
-parameter MAX_NUM_TAG_PULL  = 50;
+//default values - override from command line
+parameter V_MAX_REQ_DELAY= 16;
+parameter V_MIN_REQ_DELAY= 15;
+parameter V_NUM_REQ      = 50;
+parameter V_RD_RATIO     = 25;
+parameter V_NUM_SET_PULL = 2 ;//Max is MAX_NUM_SET_PULL
+parameter V_NUM_TAG_PULL = 2 ;//Max is MAX_NUM_TAG_PULL
 
-logic [7:0] tag_pull [MAX_NUM_TAG_PULL:0];
-logic [7:0] set_pull [MAX_NUM_SET_PULL:0];
+parameter V_MAX_NUM_SET_PULL  = 50;  //Max is 
+parameter V_MAX_NUM_TAG_PULL  = 50;
+
+logic [7:0] tag_pull [V_MAX_NUM_TAG_PULL:0];
+logic [7:0] set_pull [V_MAX_NUM_SET_PULL:0];
 
 //==================
 //      clk Gen

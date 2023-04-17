@@ -1,4 +1,4 @@
-fill_8_tq_entries.sv
-rand_simple.sv
-many_tag_one_set.sv
-rand_set_stress.sv
+fill_8_tq_entries
+rand_simple
+many_tag_one_set
+rand_set_stress

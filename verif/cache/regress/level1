@@ -1,0 +1,3 @@
+rand_simple -gV_NUM_REQ=1  -gV_RD_RATIO=100
+rand_simple -gV_NUM_REQ=5  -gV_RD_RATIO=25 
+rand_simple -gV_NUM_REQ=10 -gV_RD_RATIO=25 
