@@ -7,8 +7,6 @@ import argparse
 import sys
 from termcolor import colored
 
-
-
 examples = '''
 Examples:
 python build.py -dut 'big_core' -debug -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
@@ -36,7 +34,7 @@ parser.add_argument('-pp',        action='store_true',    help='run post-process
 parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
-parser.add_argument('-params',     default=' ',             help='used for overriding parameter values in simulation')
+parser.add_argument('-params',    default=' ',             help='used for overriding parameter values in simulation')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -160,7 +158,7 @@ class Test:
                                     print_message('[INFO] Data memory exist')
                                     # save the content before D_MEM_OFFSET to inst_mem.sv
                                     # save the content after D_MEM_OFFSET to data_mem.sv
-                                        # Split the memories string into two parts - before and after D_MEM_OFFSET
+                                    # Split the memories string into two parts - before and after D_MEM_OFFSET
                                     inst_mem, data_mem = memories.split(dmem_string)
                                     # Save the content before D_MEM_OFFSET to inst_mem.sv
                                     with open('inst_mem.sv', 'w') as imem:
@@ -379,8 +377,6 @@ def main():
     # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)
     # sys.stderr = open(log_file, "w", buffering=1)   
-
-
 
     for test in tests:
         print_message('******************************************************************************')
