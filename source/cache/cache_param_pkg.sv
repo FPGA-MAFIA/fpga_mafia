@@ -169,6 +169,7 @@ typedef struct packed {
     t_reg_id      reg_id;
     // t_offset     offset;
     t_address    address;
+    logic        rd_indication;
 } t_lu_rsp ;
 
 
@@ -232,6 +233,7 @@ typedef struct packed {
     t_reg_id                                reg_id;
     logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
+    logic                                   rd_indication;
 } t_pipe_bus; 
 
 

@@ -93,7 +93,7 @@ assign rd_hit_pipe_rsp_q3     = pipe_lu_rsp_q3.valid               &&
 
 assign fill_with_rd_indication = pipe_lu_rsp_q3.valid  && 
                                 (pipe_lu_rsp_q3.lu_op == FILL_LU) &&
-                                tq_rd_indication[pipe_lu_rsp_q3.tq_id];
+                                pipe_lu_rsp_q3.rd_indication;
 
 assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication;
 //take the relevant word from cache line
