@@ -20,6 +20,7 @@ module cache_pipe
     input   logic               rst,
     //tq interface 
     input   var t_lu_req        pipe_lu_req_q1,
+    output  var t_early_lu_rsp  pipe_early_lu_rsp_q2,
     output  t_lu_rsp            pipe_lu_rsp_q3,
     // FM interface Requests 
     output  t_fm_req            cache2fm_req_q3,
@@ -93,6 +94,7 @@ logic hazard_detected_q3;
 always_comb begin
   cache_pipe_lu_q1 ='0; //this is the default value
   cache_pipe_lu_q1.lu_valid         = pipe_lu_req_q1.valid ;
+  cache_pipe_lu_q1.reg_id           = pipe_lu_req_q1.reg_id ;
   cache_pipe_lu_q1.lu_offset        = pipe_lu_req_q1.address[MSB_OFFSET:LSB_OFFSET];
   cache_pipe_lu_q1.lu_set           = pipe_lu_req_q1.address[MSB_SET:LSB_SET];
   cache_pipe_lu_q1.lu_tag           = pipe_lu_req_q1.address[MSB_TAG:LSB_TAG]; 
@@ -288,6 +290,9 @@ end //always_comb
 assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 
 
+assign pipe_early_lu_rsp_q2.rd_miss       = cache_pipe_lu_q2.miss && (cache_pipe_lu_q2.lu_op == RD_LU);
+assign pipe_early_lu_rsp_q2.alloc_rd_fill = cache_pipe_lu_q2.fill_rd;
+
 //==================================================================
 `MAFIA_DFF(pre_cache_pipe_lu_q3, cache_pipe_lu_q2, clk)
 //==================================================================
@@ -317,6 +322,7 @@ assign pipe_lu_rsp_q3.cl_data       =   (cache_pipe_lu_q3.lu_op == FILL_LU)     
                                         (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)     ? rd_data_cl_rsp_q3         :
                                                                                                         '0;    
 assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset};
+assign pipe_lu_rsp_q3.reg_id        =    cache_pipe_lu_q3.reg_id;
 
 //======================
 //    assign PIPE BUS

@@ -157,6 +157,7 @@ typedef struct packed {
     logic        mb_hit_cancel;
     logic        rd_indication;
     logic        wr_indication;
+    t_reg_id      reg_id;
 } t_lu_req ;
 
 typedef struct packed {
@@ -165,6 +166,7 @@ typedef struct packed {
     t_lu_opcode  lu_op;
     t_tq_id      tq_id;
     t_cl         cl_data;
+    t_reg_id      reg_id;
     // t_offset     offset;
     t_address    address;
 } t_lu_rsp ;
@@ -227,9 +229,14 @@ typedef struct packed {
     t_word                                  data;
     logic                                   fill_modified;
     logic                                   fill_rd;
+    t_reg_id                                reg_id;
     logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
 } t_pipe_bus; 
 
 
+typedef struct packed {
+    logic rd_miss;
+    logic alloc_rd_fill;
+} t_early_lu_rsp;
 endpackage

@@ -11,3 +11,5 @@ wr_miss_wr_hit
 rand_simple
 many_tag_one_set
 rand_set_stress
+read_miss_stall_handle
+b2b_rd_miss_reissue
