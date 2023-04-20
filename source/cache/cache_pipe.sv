@@ -289,11 +289,13 @@ always_comb begin
 end //always_comb
 
 //data array read
-assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
+assign rd_cl_req_q2.data_array_address = cache_pipe_lu_q2.data_array_address;
 
 
-assign pipe_early_lu_rsp_q2.rd_miss       = cache_pipe_lu_q2.miss && (cache_pipe_lu_q2.lu_op == RD_LU);
-assign pipe_early_lu_rsp_q2.alloc_rd_fill = cache_pipe_lu_q2.fill_rd;
+assign pipe_early_lu_rsp_q2.rd_miss       = cache_pipe_lu_q2.miss && (cache_pipe_lu_q2.lu_op == RD_LU) && cache_pipe_lu_q2.lu_valid;
+assign pipe_early_lu_rsp_q2.alloc_rd_fill = cache_pipe_lu_q2.fill_rd && cache_pipe_lu_q2.lu_valid;
+assign pipe_early_lu_rsp_q2.lu_tq_id      = cache_pipe_lu_q2.lu_tq_id;
+assign pipe_early_lu_rsp_q2.cl_address    = {cache_pipe_lu_q2.lu_tag, cache_pipe_lu_q2.lu_set};
 
 //==================================================================
 `MAFIA_DFF(pre_cache_pipe_lu_q3, cache_pipe_lu_q2, clk)
@@ -369,7 +371,7 @@ end
 //======================
 //     Data_Hazard - accessing same set B2B 
 //====================== 
-assign hazard_detected_q3 = (wr_data_cl_q4.cl_address == wr_data_cl_q3.cl_address) && wr_data_cl_q4.valid;
+assign hazard_detected_q3 = (wr_data_cl_q4.data_array_address == wr_data_cl_q3.data_array_address) && wr_data_cl_q4.valid;
 assign hazard_rd_data_cl_rsp_q4 = wr_data_cl_q4.data;
 assign rd_data_cl_rsp_q3  = hazard_detected_q3 ? hazard_rd_data_cl_rsp_q4  : pre_rd_data_cl_rsp_q3;
 //======================
@@ -384,7 +386,7 @@ always_comb begin
     wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                              (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
                                                                                                             '0; 
-    wr_data_cl_q3.cl_address             =  cache_pipe_lu_q3.data_array_address;
+    wr_data_cl_q3.data_array_address     =  cache_pipe_lu_q3.data_array_address;
     wr_data_cl_q3.valid                  =  (cache_pipe_lu_q3.lu_valid && ((cache_pipe_lu_q3.lu_op == WR_LU) && cache_pipe_lu_q3.hit)) ||
                                             (cache_pipe_lu_q3.lu_valid && (cache_pipe_lu_q3.lu_op == FILL_LU));
 end

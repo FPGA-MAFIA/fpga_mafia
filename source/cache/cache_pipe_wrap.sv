@@ -86,7 +86,7 @@ array  #(
     .rst            (rst),                     //input
     //write interface
     .wr_en          (wr_data_cl_q3.valid),     //input
-    .wr_address     (wr_data_cl_q3.cl_address),//input
+    .wr_address     (wr_data_cl_q3.data_array_address),//input
     .wr_data        (wr_data_cl_q3.data),      //input
     //read interface
     .rd_address     (rd_cl_req_q2),            //input

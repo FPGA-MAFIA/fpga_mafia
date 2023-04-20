@@ -195,7 +195,7 @@ typedef struct packed {
 
 
 typedef struct packed {
-    logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0] cl_address;
+    logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0] data_array_address;
 } t_cl_rd_req ;
 
 typedef struct packed {
@@ -204,7 +204,7 @@ typedef struct packed {
 
 typedef struct packed {
     logic                                  valid;
-    logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0] cl_address;
+    logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0] data_array_address;
     logic [CL_WIDTH-1:0]                   data;
 } t_cl_wr_req ;
 
@@ -238,7 +238,9 @@ typedef struct packed {
 
 
 typedef struct packed {
-    logic rd_miss;
-    logic alloc_rd_fill;
+    logic        rd_miss;
+    logic        alloc_rd_fill;
+    t_tq_id      lu_tq_id;
+    t_cl_address cl_address;
 } t_early_lu_rsp;
 endpackage

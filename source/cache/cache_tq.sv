@@ -79,9 +79,35 @@ logic tq_full;
 logic rd_hit_pipe_rsp_q3;
 logic fill_with_rd_indication;
 
+t_tq_id      rd_miss_tq_id;
+t_cl_address rd_miss_cl_address;
+
+logic free_exists;
+logic wr_hit_exists;
+logic rd_hit_exists;
+logic fill_exists;
+t_tq_id enc_first_free;
+t_tq_id enc_first_fill;
+t_tq_id enc_wr_req_hit_mb;
+t_tq_id enc_rd_req_hit_mb;
+
+//remember the last request that was cancelled due to a miss - will be reissued when the miss is served
 assign en_reissue_req   = pipe_early_lu_rsp_q2.rd_miss;
 `MAFIA_EN_DFF(reissue_req, pre_core2cache_req, clk, en_reissue_req)
-assign sel_reissue      = stall_rd_miss_q && pipe_early_lu_rsp_q2.alloc_rd_fill;
+//remember the what request read missed - used to determine if the read miss was served by the fill
+`MAFIA_EN_DFF(rd_miss_tq_id,      pipe_early_lu_rsp_q2.lu_tq_id,   clk, en_reissue_req)
+`MAFIA_EN_DFF(rd_miss_cl_address, pipe_early_lu_rsp_q2.cl_address, clk, en_reissue_req)
+
+
+logic set_rd_miss_was_filled;
+logic rd_miss_was_filled;
+assign set_rd_miss_was_filled = stall_rd_miss_q                                         && 
+                                pipe_early_lu_rsp_q2.alloc_rd_fill                      && 
+                                (pipe_early_lu_rsp_q2.lu_tq_id   == rd_miss_tq_id)      && 
+                                (pipe_early_lu_rsp_q2.cl_address == rd_miss_cl_address) ; 
+
+`MAFIA_EN_RST_DFF(rd_miss_was_filled,  1'b1,   clk, set_rd_miss_was_filled, (rst || sel_reissue) )
+assign sel_reissue = rd_miss_was_filled  && (!fill_exists);
 assign core2cache_req = sel_reissue ? reissue_req       : // While stall & alloc_rd_fill , reissue the request. (the rd miss was served by the fill)
                         stall       ? '0                : // While stall, don't send new request from core
                                       pre_core2cache_req; // else, send the request from core
@@ -271,7 +297,7 @@ end
 
 //sticky stall indication - used for read miss stall logic
 assign set_rd_miss_stall = pipe_early_lu_rsp_q2.rd_miss;
-assign rst_rd_miss_stall = pipe_early_lu_rsp_q2.alloc_rd_fill;
+assign rst_rd_miss_stall = sel_reissue;
 // This is an implementation of a set_rst flop using a en_rst flop
 `MAFIA_EN_RST_DFF(stall_rd_miss_q,            // output
                   1'b1 ,  
@@ -299,22 +325,17 @@ end
 //FIXME - need to replace with round robin
 `FIND_FIRST(first_fill, fill_entries)
 
-logic free_exists;
-logic wr_hit_exists;
-logic fill_exists;
-t_tq_id enc_first_free;
-t_tq_id enc_first_fill;
-t_tq_id enc_wr_req_hit_mb;
 `ENCODER(enc_first_free, free_exists, first_free)
 `ENCODER(enc_first_fill, fill_exists, first_fill)
 `ENCODER(enc_wr_req_hit_mb, wr_hit_exists, wr_req_hit_mb)
+`ENCODER(enc_rd_req_hit_mb, rd_hit_exists, rd_req_hit_mb)
 
 //=================
 // Pipe lookup mux - core request vs fill request
 //=================
 always_comb begin
     pipe_lu_req_q1 = '0;
-    if(core2cache_req.valid) begin
+    if(core2cache_req.valid && (!pipe_early_lu_rsp_q2.rd_miss)) begin
         pipe_lu_req_q1.valid   = core2cache_req.valid;
         pipe_lu_req_q1.reg_id  = core2cache_req.reg_id;
         pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
@@ -322,7 +343,9 @@ always_comb begin
                                                                     NO_LU ;
         pipe_lu_req_q1.address       = core2cache_req.address;
         pipe_lu_req_q1.data          = core2cache_req.data;
-        pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb : enc_first_free;
+        pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb :
+                                       any_rd_hit_mb ? enc_rd_req_hit_mb :
+                                                       enc_first_free    ;
         pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
         pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
         pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
@@ -338,9 +361,7 @@ always_comb begin
     end //else if
 
     //incase of a read miss, we need to cancel the request and re-issue it later from the re-issue buffer
-    if(pipe_early_lu_rsp_q2.rd_miss) begin
-        pipe_lu_req_q1.valid   = '0;
-    end
+
 
 
 end
