@@ -11,6 +11,8 @@ task run_fifo_arb_test(input string test);
     `include "fifo_arb_single_fifo_full_BW.sv"
   end else if(test == "fifo_arb_all_fifo_full_BW")begin
     `include "fifo_arb_all_fifo_full_BW.sv"
+  end else if(test == "fifo_arb_Assertion_test")begin
+    `include "fifo_arb_Assertion_test.sv"
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end
@@ -18,76 +20,80 @@ endtask
 
 // fifo_arb DUT related tasks
 task automatic push_fifo(input int num_fifo);
-  $display("%t, push_fifo %d",$time, num_fifo);
+  //$display("%t, push_fifo %d",$time, num_fifo);
+  if(test_name == "fifo_arb_Assertion_test")begin
   valid_alloc_req[num_fifo] = 1'b1;
   delay(1);
   valid_alloc_req[num_fifo] = '0;
+   end
+  else begin
+  if(full[num_fifo] !== 1'b1)begin
+  valid_alloc_req[num_fifo] = 1'b1;
+  delay(1);
+  valid_alloc_req[num_fifo] = '0;
+  end
+  end
 endtask
 
-task automatic check_correct_output();
-forever begin
-  wait(fifo_arb_ins.winner_req_valid == 1'b1);
-  if(fifo_arb_ins.winner_req == final_winner_xmr)
-    $display("fifo_ok");// not good!!! need to check if output of winner fifo i.e inside_fifo[winner_dec_id] [rd_ptr-1] == winner_req
-  else $error("output is different than fifo");
-  wait(winner_req_valid == 1'b0);
-end
-endtask
 
-task automatic get_inputs();
+task automatic fifo_arb_get_inputs();
 //forever begin
 for(int i = 0; i<4; i++) begin
   automatic int index = i;
   fork begin
-    //forever begin
+    forever begin
       $display("this is thred %0d at time %t",index,$time);
       wait(valid_alloc_req[index] == 1'b1);
-      $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$ input of fifo number %0d",index);
+      cnt_in = cnt_in + 1;
+      $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$ input of fifo number %0d and CNT_IN = %0d",index,cnt_in);
        ref_fifo_Q[index].push_back(alloc_req[index]);
-       $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[index].size(),ref_fifo_Q[index],$time);
-       $display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
+       //$display("size: %0d, element in array: %p at time %t",ref_fifo_Q[index].size(),ref_fifo_Q[index],$time);
+       //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
       wait(valid_alloc_req[index] == 1'b0);  
-    //end
+    end
   end join_none
 end
 //end
 endtask
 
-
-
-
-task try_pop();
-for(int i = 0; i<10; i++)begin
-automatic int j = i;
-fork begin
-  //$display("j inside fork pop - %0d",j);
-  delay(7);
-  ref_fifo_Q[0].pop_front();
-  $display("size: %0d, element in array: %p at time %t",ref_fifo_Q[0].size(),ref_fifo_Q[0],$time);
-  end join
-end
-endtask
-
-task automatic get_outputs();
+task automatic fifo_arb_get_outputs();
 fork
 forever begin
-  wait(winner_req_valid == 1'b1);
-  cnt = cnt + 1;
-  //#1;
-  $display("winner req is: %p at time %t and cnt = %d",winner_req,$time,cnt);
+
+  @(winner_req);
+  #1;
+  if(winner_req_valid == 1'b1)begin
+    cnt_out = cnt_out + 1;
   ref_outputs_Q.push_back(winner_req);
-  $display("this is the outputs array %p @ time %t",ref_outputs_Q,$time);
-  wait(winner_req_valid == 1'b0);
+  $display("CNT OUT = %0d",cnt_out);
+  //$display("this is the outputs array %p @ with size %d time %t",ref_outputs_Q,ref_outputs_Q.size(),$time);
+  end
 end
 join_none
 endtask
-task DI_checker(); // pseudo ref_model
+
+task automatic fifo_arb_check_empty_full();
+$display("@@@@@@@@@@@this is full signal %b",full);
+fork
+    forever begin 
+        @(full);
+        $display("@@@@@@@@@@@this is full signal %b",full);
+    end
+    forever begin 
+        @(empty);
+        $display("@@@@@@@@@@@this is empty signal %b",empty);
+    end
+
+join_none
+endtask
+
+task fifo_arb_DI_checker(); // pseudo ref_model
 automatic bit check = 0;
-foreach(ref_fifo_Q[i])begin
-  foreach(ref_fifo_Q[i][j])begin
+repeat(5)begin// TODO - check why we nust have this repeat, and if we must then how many loops?
+  foreach(ref_fifo_Q[i,j])begin
     foreach(ref_outputs_Q[k])begin
       if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
-        $display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
+        //$display("before delete: this is ref_fifo_Q[%0d]: %p with bits: %0b",i,ref_fifo_Q[i],$bits(ref_fifo_Q[i]));
         //$display("before delete: this is ref_outputs_Q[%0d]: %p with bits: %0b",k,ref_outputs_Q[k],$bits(ref_outputs_Q[k]));
         //$display("this is item i = %0d , j = %0d and value: %p",i,j,ref_fifo_Q[i][j]);
         ref_fifo_Q[i].delete(j);
@@ -96,8 +102,7 @@ foreach(ref_fifo_Q[i])begin
         //break;
       end
     end
-    //if(ref_outputs_Q.find(ref_fifo_Q[i][j] , with (item1,item2) item1 === item2) ==-1)begin
-      //$error("trans in fifo %0d and element %0d didnt get out of fifo_arb",i,j);
+
     end
   end
   if(ref_outputs_Q.size()!= 0)begin
@@ -116,7 +121,7 @@ endtask
 
 
 
-task automatic rand_data();
+task automatic fifo_arb_rand_data();
   delay(1);
   //t_tile_opcode opcode_t;
   //int index_opcode = 0;
@@ -135,7 +140,7 @@ endtask
 
 
 
-task automatic gen_trans(input int num_fifo);
-rand_data();
+task automatic fifo_arb_gen_trans(input int num_fifo);
+fifo_arb_rand_data();
 push_fifo(num_fifo);
 endtask

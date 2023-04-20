@@ -1,5 +1,6 @@
 `include "macros.sv"
 parameter V_NUM_CLIENTS = 4 ;
+parameter V_FIFO_DEPTH = 2;
 //`include "uvm_macros.svh"
 module router_tb;
 import router_pkg::*;
@@ -7,13 +8,10 @@ logic              clk;
 logic              rst;
 static t_tile_trans ref_fifo_Q [V_NUM_CLIENTS-1:0][$];
 static t_tile_trans ref_outputs_Q [$];  
-
-static int cnt;
-logic [1:0] rd_ptr_xmr [3:0];
-t_tile_trans winner_xmr[3:0];
-logic [1:0] fifo_winner_xmr;
-logic [1:0]  final_rd_ptr_xmr;
-t_tile_trans final_winner_xmr;
+static int cnt_in;
+static int cnt_out;
+static bit [3:0] empty;
+static bit [3:0] full;
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
 string test_name;
@@ -29,6 +27,9 @@ initial begin
     clk = 1'b0;
     forever #5 clk = ~clk;
 end
+
+assign full = fifo_arb_ins.full;
+assign empty = fifo_arb_ins.empty;
 
 // =============================
 // RST gen
@@ -64,15 +65,6 @@ endtask
 // checkers fifo_arb
 // =============================
 
-genvar FIFO_E;
-generate for(FIFO_E =0; FIFO_E<4; FIFO_E++) begin
-  assign rd_ptr_xmr[FIFO_E]      = fifo_arb_ins.gen_fifo[FIFO_E].inside_fifo.rd_ptr;
-  assign winner_xmr[FIFO_E]      = fifo_arb_ins.gen_fifo[FIFO_E].inside_fifo.fifo_array[rd_ptr_xmr[FIFO_E]-1];
-end endgenerate
-
-  assign fifo_winner_xmr  = $clog2(fifo_arb_ins.arb.winner_dec_id); //FIXME - use proper encoder
-  assign final_rd_ptr_xmr = rd_ptr_xmr[fifo_winner_xmr];
-  assign final_winner_xmr = winner_xmr[fifo_winner_xmr];
 
 // =============================
 // checkers router
@@ -133,17 +125,23 @@ initial begin
     $display("this is fifo_arb test");
   fork 
       run_fifo_arb_test(test_name);
-      //try();
-      //try_pop();
-      get_inputs();
-      get_outputs();
+      fifo_arb_get_inputs();
+      fifo_arb_get_outputs();
+      //fifo_arb_check_empty_full();
   
    join
-   wait(cnt == 3);
-   $display("ref_outputs is %p",ref_fifo_Q);
-   for(int i = 0 ; i<4;i++)
-      $display("[INFO] : this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
-   DI_checker();
+   fork
+    #1000;
+    wait((cnt_in == cnt_out)&& cnt_out > 0); 
+   join_any
+   //#1000;
+   //$display("ref_outputs is %p",ref_fifo_Q);
+   //for(int i = 0 ; i<4;i++)
+   //   $display("[INFO] : this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
+
+  if(test_name !== "fifo_arb_Assertion_test")begin
+   fifo_arb_DI_checker();
+  end
    delay(30);
    $finish();
 //======================
@@ -154,6 +152,8 @@ initial begin
     fork
     run_router_test(test_name);
     join 
+   delay(30);
+   $finish();
 //======================
 // Error test name detected
 //======================

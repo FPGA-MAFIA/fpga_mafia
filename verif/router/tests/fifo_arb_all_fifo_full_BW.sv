@@ -9,7 +9,7 @@ for(int i = 0; i<V_NUM_FIFO; i++) begin
         delay_ps = $urandom_range(0, 100)/10;
         #(delay_ps);   
         $display("fifo %d and request %d at time: %t",fifo,j,$time);
-        gen_trans(fifo);
+        fifo_arb_gen_trans(fifo);
     end
   end join_none
 end
