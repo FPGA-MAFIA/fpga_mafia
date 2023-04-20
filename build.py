@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import time
 import os
 import shutil
 import subprocess
@@ -79,6 +80,7 @@ class Test:
         self.target , self.gcc_dir = self._create_test_dir()
         self.path = TESTS+self.file_name
         self.fail_flag = False
+        self.duration = 0
         # the tests parameters
         self.params = params # FIXME ABD
     def _create_test_dir(self):
@@ -379,6 +381,7 @@ def main():
     # sys.stderr = open(log_file, "w", buffering=1)   
 
     for test in tests:
+        start_test_time = time.time()
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
         print_message('******************************************************************************')
@@ -397,6 +400,12 @@ def main():
                 test.fail_flag = True
         if not args.debug:
             test._no_debug()
+
+        # print the test execution time
+        end_test_time = time.time()
+        test.duration = end_test_time - start_test_time
+        print_message(f"[INFO] test execution took {test.duration:.2f} seconds.")
+
         print_message(f'************************** End {test.name} **********************************')
         print()
         if(test.fail_flag):
@@ -408,9 +417,10 @@ def main():
         print_message('The failed tests are:')
     for test in tests:
         if(test.fail_flag==True):
-            print_message(f'[ERROR] test failed - {test.name}  - target/'+args.dut+'/tests/'+test.name+'/')
+            print_message(f'[ERROR] test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
         if(test.fail_flag==False):
-            print_message(f'[INFO] test Passed- {test.name}  - target/'+args.dut+'/tests/'+test.name+'/')
+            print_message(f'[INFO] test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
+
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')
     print_message('=================================================================================')
@@ -424,4 +434,10 @@ def main():
         return 0
 
 if __name__ == "__main__" :
-    sys.exit(main())
+    start_time = time.time()
+    exit_status = main()
+    end_time = time.time()
+    duration = end_time - start_time
+    print_message(f"[INFO] Script execution took {duration:.2f} seconds.")
+
+    sys.exit(exit_status)
