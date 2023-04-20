@@ -1,3 +1,12 @@
+logic in_north_req_valid;
+logic in_south_req_valid;
+logic in_east_req_valid;
+logic in_west_req_valid;
+
+t_tile_trans in_north_req;
+t_tile_trans input_gen [3:0];
+
+
 router router_inst // TODO - add logic to outputs. 
 (
  .clk                  (clk),         //   input   logic               clk,
