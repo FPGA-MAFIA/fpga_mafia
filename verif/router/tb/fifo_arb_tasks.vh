@@ -3,14 +3,14 @@ task run_fifo_arb_test(input string test);
   // ====================
   // fifo_arb tests:
   // ====================
-  if (test == "simple") begin
-     `include "simple.sv"
+  if (test == "fifo_arb_simple") begin
+     `include "fifo_arb_simple.sv"
   end else if(test == "fifo_arb_dif_num_active_fifo")begin
      `include "fifo_arb_dif_num_active_fifo.sv" 
-  end else if(test == "single_fifo_full_BW")begin
-    `include "single_fifo_full_BW.sv"
-  end else if(test == "all_fifo_full_BW")begin
-    `include "all_fifo_full_BW.sv"
+  end else if(test == "fifo_arb_single_fifo_full_BW")begin
+    `include "fifo_arb_single_fifo_full_BW.sv"
+  end else if(test == "fifo_arb_all_fifo_full_BW")begin
+    `include "fifo_arb_all_fifo_full_BW.sv"
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end

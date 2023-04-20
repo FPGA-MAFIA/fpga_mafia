@@ -132,7 +132,7 @@ initial begin
   if(fifo_arb_test_true == 1) begin
     $display("this is fifo_arb test");
   fork 
-      run_test(test_name);
+      run_fifo_arb_test(test_name);
       //try();
       //try_pop();
       get_inputs();
@@ -151,7 +151,9 @@ initial begin
 //======================
   end else if(router_test_true == 1) begin
     $display("[INFO] : this is router test");
-
+    fork
+    run_router_test(test_name);
+    join 
 //======================
 // Error test name detected
 //======================

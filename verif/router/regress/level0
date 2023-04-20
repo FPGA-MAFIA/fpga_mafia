@@ -1,4 +1,4 @@
 alive_router                    -gV_REQUESTS=3
 fifo_arb_dif_num_active_fifo    -gV_REQUESTS=3
-simple                          -gV_REQUESTS=2
-single_fifo_full_BW             -gV_REQUESTS=2
+fifo_arb_simple                 -gV_REQUESTS=2
+fifo_arb_single_fifo_full_BW    -gV_REQUESTS=2
