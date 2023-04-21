@@ -53,6 +53,23 @@ always_comb begin : fifo_array_assign
         next_rd_ptr = (rd_ptr != (FIFO_DEPTH - 1)) ? (rd_ptr + 1) : '0;
     end
 end
+// Assertion for push when full
+//assert property (@(posedge clk) disable iff (rst) (full |-> !push)) else $error("Push when full"); // iff -> if and only if.
 
+// Assertion for pop when empty
+//assert property (@(posedge clk) disable iff (rst) (empty |-> !pop)) else $error("Pop when empty");
+// Assertion for push when full
+always @(posedge clk) begin
+  if (full && push) begin
+    $error("Assertion: Push when full");//the syntax above not working - this is the same logic
+  end
+end
+
+// Assertion for pop when empty
+always @(posedge clk) begin
+  if (empty && pop) begin
+    $error("Assertion: Pop when empty");
+  end
+end
 endmodule : fifo
 

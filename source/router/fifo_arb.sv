@@ -6,7 +6,8 @@
 module fifo_arb
  import router_pkg::*;
  #(parameter DATA_WIDTH = 32,
-                parameter NUM_CLIENTS = 4)
+                parameter NUM_CLIENTS = 4,
+                parameter FIFO_ARB_FIFO_DEPTH = 4)
 (
 input  logic clk,
 input  logic rst,
@@ -64,7 +65,7 @@ end
 
     genvar i;
     generate for (i=0; i<NUM_CLIENTS; i=i+1) begin : gen_fifo
-            fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(4))
+            fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(FIFO_ARB_FIFO_DEPTH))
                 inside_fifo  (.clk       (clk),
                               .rst       (rst),
                               .push      (push[i]), // valid_alloc_req#
