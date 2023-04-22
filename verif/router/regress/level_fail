@@ -1,0 +1,2 @@
+router_alive                    -gV_REQUESTS=3
+fifo_arb_dif_num_active_fifo    -gV_REQUESTS=3
