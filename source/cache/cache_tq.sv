@@ -335,8 +335,8 @@ end
 //=================
 always_comb begin
     pipe_lu_req_q1 = '0;
-    if(core2cache_req.valid && (!pipe_early_lu_rsp_q2.rd_miss)) begin
-        pipe_lu_req_q1.valid   = core2cache_req.valid;
+    if(core2cache_req.valid) begin
+        pipe_lu_req_q1.valid   = core2cache_req.valid  && (!pipe_early_lu_rsp_q2.rd_miss);
         pipe_lu_req_q1.reg_id  = core2cache_req.reg_id;
         pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
                                  (core2cache_req.opcode == RD_OP) ? RD_LU :
