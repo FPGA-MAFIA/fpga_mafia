@@ -170,6 +170,7 @@ typedef struct packed {
     // t_offset     offset;
     t_address    address;
     logic        rd_indication;
+    logic        wr_match_in_pipe;
 } t_lu_rsp ;
 
 

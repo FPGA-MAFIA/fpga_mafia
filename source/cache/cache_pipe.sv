@@ -311,7 +311,12 @@ assign pipe_early_lu_rsp_q2.cl_address    = {cache_pipe_lu_q2.lu_tag, cache_pipe
 //
 //==================================================================
 
-
+//======================
+//    assign PIPE BUS
+//======================
+always_comb begin
+  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q3; //this is the default value
+end
 //======================
 //    TQ_UPDATE -> PIPE_LU_RSP_q3
 //======================
@@ -329,13 +334,16 @@ assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_
 assign pipe_lu_rsp_q3.reg_id        =    cache_pipe_lu_q3.reg_id;
 assign pipe_lu_rsp_q3.rd_indication =    cache_pipe_lu_q3.rd_indication;
 
-//======================
-//    assign PIPE BUS
-//======================
-always_comb begin
-  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q3; //this is the default value
-end
+logic wr_match_in_pipe_q1_q3;
+logic wr_match_in_pipe_q2_q3;
+assign wr_match_in_pipe_q2_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set} == {cache_pipe_lu_q2.lu_tag,cache_pipe_lu_q2.lu_set}) && //Match address q3 and q2
+                                ( cache_pipe_lu_q3.lu_valid        && cache_pipe_lu_q2.lu_valid)             && //Both valid q3 and q2
+                                ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q2.lu_op == WR_LU);        //Both write q3 and q2
 
+assign wr_match_in_pipe_q1_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set} == {cache_pipe_lu_q1.lu_tag,cache_pipe_lu_q1.lu_set}) && //Match address q3 and q1
+                                ( cache_pipe_lu_q3.lu_valid        && cache_pipe_lu_q1.lu_valid)             && //Both valid q3 and q1
+                                ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q1.lu_op == WR_LU);        //Both write q3 and q1
+assign pipe_lu_rsp_q3.wr_match_in_pipe = wr_match_in_pipe_q1_q3 || wr_match_in_pipe_q2_q3;
 
 `MAFIA_DFF(og_set_ways_tags_q3,    og_set_ways_tags_q2, clk)
 `MAFIA_DFF(set_ways_enc_victim_q3, set_ways_enc_victim_q2, clk)
