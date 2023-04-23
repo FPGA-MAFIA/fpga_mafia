@@ -23,11 +23,12 @@ initial begin : default_values
     end
 end
 
+
 router router_inst // TODO - a4d logic to outputs. 
 (
  .clk                  (clk),     //   input   logic      clk,
  .rst                  (rst),     //   input   logic      rst,
- .local_tile_id        (8'h3_3),  //   input   t_tile_id  local_tile_id,
+ .local_tile_id        (8'h33),   //   input   t_tile_id  local_tile_id,
  //========================================
  // North Interface
  //========================================

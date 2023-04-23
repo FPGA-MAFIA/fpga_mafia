@@ -24,9 +24,11 @@ string test_name;
 // instantiation of DUT's - trk inside.
 `include "fifo_arb_dut.vh"
 `include "fifo_arb_tasks.vh"
+`include "fifo_arb_trk.vh"
 
 `include "router_dut.vh"
 `include "router_tasks.vh"
+`include "router_trk.vh"
 // =============================
 // CLK GEN
 // =============================
