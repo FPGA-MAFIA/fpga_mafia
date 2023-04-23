@@ -22,11 +22,11 @@ typedef enum logic[1:0] {
 
 typedef enum logic[2:0] {  
  NULL_CARDINAL =     3'b000 ,
- NORTH =     3'b001 ,
- SOUTH =     3'b010 ,
- EAST =     3'b011 ,
- WEST =     3'b100 ,
- LOCAL =     3'b111 
+ NORTH         =     3'b001 ,
+ SOUTH         =     3'b010 ,
+ EAST          =     3'b011 ,
+ WEST          =     3'b100 ,
+ LOCAL         =     3'b101 
 } t_cardinal;
 
 typedef logic [7:0] t_tile_id;

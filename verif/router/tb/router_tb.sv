@@ -15,6 +15,9 @@ static int cnt_in;
 static int cnt_out;
 static bit [3:0] empty;
 static bit [3:0] full;
+
+int router_test_true;
+int fifo_arb_test_true;
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
 string test_name;
@@ -110,8 +113,6 @@ initial begin : timeout_monitor
 end
 
 
-int router_test_true;
-int fifo_arb_test_true;
 // =============================
 //  This is the main test sequence
 // =============================
@@ -123,13 +124,12 @@ initial begin
   else $fatal("CANNOT FIND TEST %s at time %t",test_name , $time());
   // check what is the test prefix fifo_arb or router
   find_string(.str(test_name), .substr("router")  , .found(router_test_true));
-
   find_string(.str(test_name), .substr("fifo_arb"), .found(fifo_arb_test_true));
 
 //=======================
 // The FIFO_ARB sequence
 //=======================
-  if(fifo_arb_test_true == 1) begin
+  if(fifo_arb_test_true) begin
     $display("==============================");
     $display("[INFO] this is FIFO_ARB test");
     $display("==============================");
@@ -157,7 +157,7 @@ initial begin
 //======================
 // The ROUTER sequence
 //======================
-  end else if(router_test_true == 1) begin
+  end else if(router_test_true) begin
     $display("==============================");
     $display("[INFO] : this is ROUTER test");
     $display("==============================");
