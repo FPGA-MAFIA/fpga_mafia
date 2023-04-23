@@ -308,7 +308,7 @@ always_comb begin
                            (core2cache_req.opcode == RD_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
                            (!tq_rd_indication[i])           && //if the entry is already set as read indication, then we don't merge to the same entry
-                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY));
+                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
     
         wr_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == WR_OP) &&
