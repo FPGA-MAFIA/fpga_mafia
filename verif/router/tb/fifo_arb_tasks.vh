@@ -5,8 +5,6 @@ task run_fifo_arb_test(input string test);
   // ====================
   if (test == "fifo_arb_simple") begin
      `include "fifo_arb_simple.sv"
-  end else if(test == "fifo_arb_dif_num_active_fifo")begin
-     `include "fifo_arb_dif_num_active_fifo.sv" 
   end else if(test == "fifo_arb_single_fifo_full_BW")begin
     `include "fifo_arb_single_fifo_full_BW.sv"
   end else if(test == "fifo_arb_all_fifo_full_BW")begin
@@ -21,17 +19,16 @@ endtask
 // fifo_arb DUT related tasks
 task automatic push_fifo(input int num_fifo);
   //$display("%t, push_fifo %d",$time, num_fifo);
-  if(test_name == "fifo_arb_Assertion_test")begin
-  valid_alloc_req[num_fifo] = 1'b1;
-  delay(1);
-  valid_alloc_req[num_fifo] = '0;
-   end
-  else begin
-  if(full[num_fifo] !== 1'b1)begin
-  valid_alloc_req[num_fifo] = 1'b1;
-  delay(1);
-  valid_alloc_req[num_fifo] = '0;
-  end
+  if(V_NO_BACK_PRESSURE)begin
+    valid_alloc_req[num_fifo] = 1'b1;
+    delay(1);
+    valid_alloc_req[num_fifo] = '0;
+  end else begin
+    if(full[num_fifo] !== 1'b1)begin
+      valid_alloc_req[num_fifo] = 1'b1;
+      delay(1);
+      valid_alloc_req[num_fifo] = '0;
+    end
   end
 endtask
 

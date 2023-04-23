@@ -1,5 +1,5 @@
-parameter V_REQUESTS = 20;
-parameter V_NUM_FIFO  = 4;
+//parameter V_REQUESTS = 20;
+//parameter V_NUM_FIFO  = 4;
 int delay_ps;
 for(int i = 0; i<V_NUM_FIFO; i++) begin
   automatic int fifo = i;

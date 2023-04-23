@@ -385,31 +385,35 @@ def main():
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
         print_message('******************************************************************************')
-        if (args.app or args.full_run) and not test.fail_flag:
-            test._compile_sw()
-        if (args.hw or args.full_run) and not test.fail_flag:
-            test._compile_hw()
-        if (args.sim or args.full_run) and not test.fail_flag:
-            test._start_simulation()
-        if (args.fpga) and not test.fail_flag:
-            test._start_fpga()
-        if (args.gui):
-            test._gui()
-        if (args.pp) and not test.fail_flag:
-            if (test._post_process()):# if return value is 0, then the post process is done successfully
-                test.fail_flag = True
-        if not args.debug:
-            test._no_debug()
+        if(run_status == "FAILED"):
+            print_message('[ERROR] previous test failed, skipping test - '+test.name+'\n')
+            test.fail_flag = True
+        else:
+            if (args.app or args.full_run) and not test.fail_flag:
+                test._compile_sw()
+            if (args.hw or args.full_run) and not test.fail_flag:
+                test._compile_hw()
+            if (args.sim or args.full_run) and not test.fail_flag:
+                test._start_simulation()
+            if (args.fpga) and not test.fail_flag:
+                test._start_fpga()
+            if (args.gui):
+                test._gui()
+            if (args.pp) and not test.fail_flag:
+                if (test._post_process()):# if return value is 0, then the post process is done successfully
+                    test.fail_flag = True
+            if not args.debug:
+                test._no_debug()
 
-        # print the test execution time
-        end_test_time = time.time()
-        test.duration = end_test_time - start_test_time
-        print_message(f"[INFO] test execution took {test.duration:.2f} seconds.")
+            # print the test execution time
+            end_test_time = time.time()
+            test.duration = end_test_time - start_test_time
+            print_message(f"[INFO] test execution took {test.duration:.2f} seconds.")
 
-        print_message(f'************************** End {test.name} **********************************')
-        print()
-        if(test.fail_flag):
-            run_status = "FAILED"
+            print_message(f'************************** End {test.name} **********************************')
+            print()
+            if(test.fail_flag):
+                run_status = "FAILED"
     # sys.stdout.flush()
     # sys.stderr.flush()
 

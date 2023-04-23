@@ -1,0 +1,1 @@
+fifo_arb_all_fifo_full_BW   -gV_REQUESTS=20 -gV_FIFO_DEPTH=4 -gV_NUM_FIFO=4 -gV_MAX_DELAY=1

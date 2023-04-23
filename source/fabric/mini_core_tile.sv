@@ -1,0 +1,1 @@
+//The mini_core_tile is a module that connects the mini_core & the router + IO to the fabric

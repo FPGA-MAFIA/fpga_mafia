@@ -1,13 +1,13 @@
-parameter V_REQUESTS = 1;
-parameter V_NUM_FIFO  = 4;
-int delay_ps;
+//parameter V_REQUESTS = 1;
+//parameter V_NUM_FIFO  = 4;
+int cycle_delay;
 for(int i = 0; i<V_NUM_FIFO; i++) begin
   automatic int fifo = i;
   fork begin 
     $display("this is fifo %d at time %t",fifo,$time);
     for(int j = 0; j < V_REQUESTS; j++)begin
-        delay_ps = $urandom_range(0, 100)/10;
-        #(delay_ps);   
+        cycle_delay = $urandom_range(0, V_MAX_DELAY);
+        delay(cycle_delay);  
         $display("fifo %d and request %d at time: %t",fifo,j,$time);
         fifo_arb_gen_trans(fifo);
     end

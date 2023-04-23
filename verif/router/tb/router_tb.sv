@@ -1,12 +1,15 @@
 `include "macros.sv"
-parameter V_NUM_CLIENTS = 4 ;
-parameter V_FIFO_DEPTH = 2;
 //`include "uvm_macros.svh"
 module router_tb;
 import router_pkg::*;
+parameter V_REQUESTS   = 1;
+parameter V_FIFO_DEPTH = 4; // currently this value causes failure in the test due to FIFO size must be grater than 3
+parameter V_NUM_FIFO   = 4;  // number of fifos to exercise in the test (HW is always 4, simulation may stimuli only some of them)
+parameter V_NO_BACK_PRESSURE = 0; // used to disable back pressure in the test which will cause a failure in the test
+parameter V_MAX_DELAY  = 5; // max delay in the test
 logic              clk;
 logic              rst;
-static t_tile_trans ref_fifo_Q [V_NUM_CLIENTS-1:0][$];
+static t_tile_trans ref_fifo_Q [3:0][$]; // see if we want to parametrize this
 static t_tile_trans ref_outputs_Q [$];  
 static int cnt_in;
 static int cnt_out;
@@ -17,8 +20,9 @@ static bit [3:0] full;
 string test_name;
 // instantiation of DUT's - trk inside.
 `include "fifo_arb_dut.vh"
-`include "router_dut.vh"
 `include "fifo_arb_tasks.vh"
+
+`include "router_dut.vh"
 `include "router_tasks.vh"
 // =============================
 // CLK GEN
@@ -87,12 +91,15 @@ function void find_string( input string str,
                            output int found);
 automatic int len = str.len();
 automatic int len_substr = substr.len();
+found = 0;
 for( int i =0; i < len - len_substr; i++) begin
     if(str.substr(i,i+len_substr-1) == substr) begin
-       $display("found it");
        found = found | 1;
     end
 end
+
+    if(found == 1) $display("[INFO] find_string - found %s in %s",substr,str);
+    if(found == 0) $display("[INFO] find_string - did not find %s in %s",substr,str);
 endfunction
 
 initial begin : timeout_monitor
@@ -113,16 +120,19 @@ initial begin
   $display("================\n     START\n================\n");
   if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
-  else $fatal("CANNOT FINT TEST %s at time %t",test_name , $time());
+  else $fatal("CANNOT FIND TEST %s at time %t",test_name , $time());
   // check what is the test prefix fifo_arb or router
   find_string(.str(test_name), .substr("router")  , .found(router_test_true));
+
   find_string(.str(test_name), .substr("fifo_arb"), .found(fifo_arb_test_true));
 
 //=======================
 // The FIFO_ARB sequence
 //=======================
   if(fifo_arb_test_true == 1) begin
-    $display("this is fifo_arb test");
+    $display("==============================");
+    $display("[INFO] this is FIFO_ARB test");
+    $display("==============================");
   fork 
       run_fifo_arb_test(test_name);
       fifo_arb_get_inputs();
@@ -148,7 +158,9 @@ initial begin
 // The ROUTER sequence
 //======================
   end else if(router_test_true == 1) begin
-    $display("[INFO] : this is router test");
+    $display("==============================");
+    $display("[INFO] : this is ROUTER test");
+    $display("==============================");
     fork
     run_router_test(test_name);
     join 
