@@ -314,7 +314,10 @@ def main():
     # if args.clean  clean target/dut/tests/ directory before starting running the build script
     if args.clean:
         print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
-        shutil.rmtree('target/'+args.dut+'/tests/')
+        if os.path.exists('target/'+args.dut+'/tests/'):
+            shutil.rmtree('target/'+args.dut+'/tests/')
+        else:
+            print_message('[INFO] nothing to clean - target/'+args.dut+'/tests/ directory does not exist')
     
     # create target/dut/tests/ directory if not exists
     if not os.path.exists('target/'+args.dut+'/tests/'):
