@@ -35,7 +35,9 @@ parser.add_argument('-pp',        action='store_true',    help='run post-process
 parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
-parser.add_argument('-params',    default=' ',             help='used for overriding parameter values in simulation')
+parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
+parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
+parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -308,6 +310,13 @@ def main():
     if not os.path.exists(SOURCE):
         print_message(f'[ERROR] There is no dut \'{args.dut}\'')
         exit(1)
+
+    # if args.clean  clean target/dut/tests/ directory before starting running the build script
+    if args.clean:
+        print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
+        shutil.rmtree('target/'+args.dut+'/tests/')
+    
+    # create target/dut/tests/ directory if not exists
     if not os.path.exists('target/'+args.dut+'/tests/'):
         os.makedirs('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
@@ -382,13 +391,23 @@ def main():
 
     for test in tests:
         start_test_time = time.time()
+
+        # check out the output has an directory with the test name and the *_transcript file, if so, copy the dir with a suffix _1, _2, etc.
+        if os.path.exists('target/'+args.dut+'/tests/'+test.name+'/'+test.name+'_transcript'):
+            i=1
+            while os.path.exists('target/'+args.dut+'/tests/'+test.name+'_'+str(i)):
+                i += 1
+            shutil.copytree('target/'+args.dut+'/tests/'+test.name, 'target/'+args.dut+'/tests/'+test.name+'_'+str(i))
+        
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
         print_message('******************************************************************************')
-        if(run_status == "FAILED"):
+        if(run_status == "FAILED" and not args.keep_going):
             print_message('[ERROR] previous test failed, skipping test - '+test.name+'\n')
             test.fail_flag = True
         else:
+            if (test.fail_flag and args.keep_going):
+                print_message('[INFO] previous test failed, using -keep_going -> continuing test - '+test.name+'\n')
             if (args.app or args.full_run) and not test.fail_flag:
                 test._compile_sw()
             if (args.hw or args.full_run) and not test.fail_flag:
@@ -417,8 +436,13 @@ def main():
     # sys.stdout.flush()
     # sys.stderr.flush()
 
-    if(run_status == "FAILED"):
-        print_message('The failed tests are:')
+
+#===================================================================================================
+#       EOT - End Of Test section
+#===================================================================================================
+    print_message('=============================')
+    print_message('[INFO] Tests Final Status:')
+    print_message('=============================')
     for test in tests:
         if(test.fail_flag==True):
             print_message(f'[ERROR] test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
