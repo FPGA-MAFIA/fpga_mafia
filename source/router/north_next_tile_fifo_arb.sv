@@ -103,7 +103,7 @@ always_comb begin : set_nxt_tile_fifo_arb_id_north
         4'b0110 : in_south_to_north_next_tile_fifo_arb_id    = WEST;  // Next tile is final row, need to move west due to (north_tile_id[7:4] > in_south_req.address[31:28]);
         4'b0101 : in_south_to_north_next_tile_fifo_arb_id    = EAST;  // Next tile is final row, need to move east due to (north_tile_id[7:4] < in_south_req.address[31:28]);
         4'b00?? : in_south_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
-        default : in_south_to_north_assert_illegal = 1'b1;
+        default : in_south_to_north_assert_illegal = in_south_req_valid_match_north;
     endcase
 
 // ==============================
@@ -122,10 +122,13 @@ always_comb begin : set_nxt_tile_fifo_arb_id_north
     in_east_to_north_next_tile_fifo_arb_id    = NULL_CARDINAL;
     unique case({in_east_req_next_tile_is_target, in_east_req_next_tile_final_row, in_east_req_next_tile_col_west, in_east_req_next_tile_col_east})
         4'b1??? : in_east_to_north_next_tile_fifo_arb_id    = LOCAL; // Next tile is final, in_east_req_next_tile_is_target is set is all we care about
+        4'b0000 : in_east_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
+        4'b0001 : in_east_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
+        4'b0010 : in_east_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
+        4'b0011 : in_east_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
         4'b0110 : in_east_to_north_next_tile_fifo_arb_id    = WEST;  // Next tile is final row, need to move west due to (north_tile_id[7:4] > in_east_req.address[31:28]);
         4'b0101 : in_east_to_north_next_tile_fifo_arb_id    = EAST;  // Next tile is final row, need to move east due to (north_tile_id[7:4] < in_east_req.address[31:28]);
-        4'b00?? : in_east_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
-        default : in_east_to_north_assert_illegal         = 1'b1;
+        default : in_east_to_north_assert_illegal         = in_east_req_valid_match_north;
     endcase
 
 // ==============================
@@ -147,7 +150,7 @@ always_comb begin : set_nxt_tile_fifo_arb_id_north
         4'b0110 : in_west_to_north_next_tile_fifo_arb_id    = WEST;  // Next tile is final row, need to move west due to (north_tile_id[7:4] > in_west_req.address[31:28]);
         4'b0101 : in_west_to_north_next_tile_fifo_arb_id    = EAST;  // Next tile is final row, need to move east due to (north_tile_id[7:4] < in_west_req.address[31:28]);
         4'b00?? : in_west_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
-        default : in_west_to_north_assert_illegal         = 1'b1;
+        default : in_west_to_north_assert_illegal         =in_west_req_valid_match_north;
     endcase
 
 // ==============================
@@ -156,7 +159,7 @@ always_comb begin : set_nxt_tile_fifo_arb_id_north
     in_local_req_next_tile_is_target = in_local_req_valid_match_north && (north_tile_id[7:0] == in_local_req_address[31:24]);
     in_local_req_next_tile_final_row = in_local_req_valid_match_north && (north_tile_id[3:0] == in_local_req_address[27:24]);
     in_local_req_next_tile_final_col = in_local_req_valid_match_north && (north_tile_id[7:4] == in_local_req_address[31:28]);
-    in_local_req_next_tile_col_west = in_local_req_valid_match_north && (north_tile_id[7:4]  > in_local_req_address[31:28]);
+    in_local_req_next_tile_col_west  = in_local_req_valid_match_north && (north_tile_id[7:4]  > in_local_req_address[31:28]);
     in_local_req_next_tile_col_east  = in_local_req_valid_match_north && (north_tile_id[7:4]  < in_local_req_address[31:28]);
 
     //default values for unique case
@@ -167,7 +170,7 @@ always_comb begin : set_nxt_tile_fifo_arb_id_north
         4'b0110 : in_local_to_north_next_tile_fifo_arb_id    = WEST;  // Next tile is final row, need to move west due to (north_tile_id[7:4] > in_local_req.address[31:28]);
         4'b0101 : in_local_to_north_next_tile_fifo_arb_id    = EAST;  // Next tile is final row, need to move east due to (north_tile_id[7:4] < in_local_req.address[31:28]);
         4'b00?? : in_local_to_north_next_tile_fifo_arb_id    = NORTH; // Next tile is not final row, need to move north (this is the naive algorithm) - assumption moving north using the North fifo arbiter was correct.
-        default : in_local_to_north_assert_illegal         = 1'b1;
+        default : in_local_to_north_assert_illegal         = in_local_req_valid_match_north;
     endcase
 
 end // always_comb
