@@ -297,6 +297,16 @@ always_comb begin
                     //set the corresponding bit in the e_modified vector
                     next_tq_merge_buffer_e_modified[i]                        = tq_merge_buffer_e_modified[i];
                     next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
+
+
+                    // This is to fix a corner case where we have a fill & a write in the same cycle!!
+                    // This will make sure that the fm2cache response will not be ignored
+                    if( (tq_state[i] == S_MB_WAIT_FILL) && fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i) )begin
+                        next_tq_merge_buffer_data[i][31:0]   = next_tq_merge_buffer_e_modified[i][0] ? next_tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
+                        next_tq_merge_buffer_data[i][63:32]  = next_tq_merge_buffer_e_modified[i][1] ? next_tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
+                        next_tq_merge_buffer_data[i][95:64]  = next_tq_merge_buffer_e_modified[i][2] ? next_tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
+                        next_tq_merge_buffer_data[i][127:96] = next_tq_merge_buffer_e_modified[i][3] ? next_tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
+                    end
                 end //if
 
     end //for loop   
