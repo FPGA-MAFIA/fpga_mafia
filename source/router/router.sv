@@ -143,7 +143,83 @@ fifo_arb fifo_arb_north (
 .in_ready_arb_fifo2(in_north_ready.west_arb), //input
 .in_ready_arb_fifo3(in_north_ready.local_arb)  //input placeholder for local mini_core
 );
-
+//==============================
+//  overiding next t_tile_ID
+//==============================
+always_comb begin
+   if (in_south_req_valid_match_north) begin //from South
+      if(((in_south_req.address[31:28]==local_tile_id[7:4])&&(in_south_req.address[27:24]-local_tile_id[3:0]==4'h1))||
+         ((in_south_req.address[31:28]-local_tile_id[7:4]==4'h1)&&(in_south_req.address[27:24]==local_tile_id[3:0])))begin
+              in_south_req.next_tile_fifo_arb_id=LOCAL;
+      end
+ //     else if((in_south_req.address[27:24]>local_tile_id[3:0])) begin
+ //          in_south_req.next_tile_fifo_arb_id=SOUTH;
+ //     end
+      else if((in_south_req.address[27:24]<local_tile_id[3:0])) begin
+               in_south_req.next_tile_fifo_arb_id=NORTH;
+      end
+      else if((in_south_req.address[31:28]>local_tile_id[7:4])) begin
+               in_south_req.next_tile_fifo_arb_id=WEST;
+      end
+      else if((in_south_req.address[31:28]<local_tile_id[7:4])) begin
+               in_south_req.next_tile_fifo_arb_id=EAST;
+      end
+   end
+   else if (in_east_req_valid_match_north) begin //from East
+           if(((in_east_req.address[31:28]==local_tile_id[7:4])&&(in_east_req.address[27:24]-local_tile_id[3:0]==4'h1))||
+              ((in_east_req.address[31:28]-local_tile_id[7:4]==4'h1)&&(in_east_req.address[27:24]==local_tile_id[3:0])))begin
+                in_east_req.next_tile_fifo_arb_id=LOCAL;
+           end
+           else if((in_east_req.address[27:24]>local_tile_id[3:0])) begin
+                in_east_req.next_tile_fifo_arb_id=SOUTH;
+           end
+           else if((in_east_req.address[27:24]<local_tile_id[3:0])) begin
+                in_east_req.next_tile_fifo_arb_id=NORTH;
+           end
+           else if((in_east_req.address[31:28]>local_tile_id[7:4])) begin
+                in_east_req.next_tile_fifo_arb_id=WEST;
+           end
+//           else if((in_east_req.address[31:28]<local_tile_id[7:4])) begin
+//                in_east_req.next_tile_fifo_arb_id=EAST;
+//           end
+   end
+   else if (in_west_req_valid_match_north) begin //from West
+           if(((in_west_req.address[31:28]==local_tile_id[7:4])&&(in_west_req.address[27:24]-local_tile_id[3:0]==4'h1))||
+              ((in_west_req.address[31:28]-local_tile_id[7:4]==4'h1)&&(in_west_req.address[27:24]==local_tile_id[3:0])))begin
+                in_west_req.next_tile_fifo_arb_id=LOCAL;
+           end
+           else if((in_west_req.address[27:24]>local_tile_id[3:0])) begin
+                in_west_req.next_tile_fifo_arb_id=SOUTH;
+           end
+           else if((in_west_req.address[27:24]<local_tile_id[3:0])) begin
+                in_west_req.next_tile_fifo_arb_id=NORTH;
+           end
+ //          else if((in_west_req.address[31:28]>local_tile_id[7:4])) begin
+ //               in_west_req.next_tile_fifo_arb_id=WEST;
+ //          end
+           else if((in_west_req.address[31:28]<local_tile_id[7:4])) begin
+                in_west_req.next_tile_fifo_arb_id=EAST;
+           end
+   end
+   else if (in_local_req_valid_match_north) begin //from Local
+ //        if(((in_local_req.address[31:28]==local_tile_id[7:4])&&(in_local_req.address[27:24]-local_tile_id[3:0]==4'h1))||
+ //             ((in_local_req.address[31:28]-local_tile_id[7:4]==4'h1)&&(in_local_req.address[27:24]==local_tile_id[3:0])))begin
+ //               in_local_req.next_tile_fifo_arb_id=LOCAL;
+ //          end
+ /* else*/ if((in_local_req.address[27:24]>local_tile_id[3:0])) begin
+                in_local_req.next_tile_fifo_arb_id=SOUTH;
+           end
+           else if((in_local_req.address[27:24]<local_tile_id[3:0])) begin
+                in_local_req.next_tile_fifo_arb_id=NORTH;
+           end
+           else if((in_local_req.address[31:28]>local_tile_id[7:4])) begin
+                in_local_req.next_tile_fifo_arb_id=WEST;
+           end
+           else if((in_local_req.address[31:28]<local_tile_id[7:4])) begin
+                in_local_req.next_tile_fifo_arb_id=EAST;
+           end
+   end
+end
 //==============================
 // The East FIFO Arbiter
 //==============================
@@ -305,5 +381,6 @@ fifo_arb fifo_arb_local (
 .in_ready_arb_fifo2(in_local_ready.south_arb),//input
 .in_ready_arb_fifo3(in_local_ready.west_arb)  //input
 );
+
 
 endmodule 
