@@ -1,15 +1,4 @@
-cache_alive
-cache_alive_2
-fill_8_tq_entries
-rd_modify_rd
-single_fm_req
-wr_after_wr_cl
-wr_b2b_same_cl
-wr_miss_rd_hit_mb
-wr_miss_rd_hit
-wr_miss_wr_hit
-rand_simple
-many_tag_one_set
-rand_set_stress
-read_miss_stall_handle
-b2b_rd_miss_reissue
+rand -gV_NUM_REQ=500 -gV_RD_RATIO=25 -gV_MAX_REQ_DELAY=20 -gV_MIN_REQ_DELAY=0 -gV_NUM_SET_PULL=20 -gV_NUM_TAG_PULL=20
+rand -gV_NUM_REQ=500 -gV_RD_RATIO=25 -gV_MAX_REQ_DELAY=2  -gV_MIN_REQ_DELAY=0 -gV_NUM_SET_PULL=1  -gV_NUM_TAG_PULL=20
+rand -gV_NUM_REQ=500 -gV_RD_RATIO=25 -gV_MAX_REQ_DELAY=0  -gV_MIN_REQ_DELAY=0 -gV_NUM_SET_PULL=2  -gV_NUM_TAG_PULL=9
+rand -gV_NUM_REQ=500 -gV_RD_RATIO=25 -gV_MAX_REQ_DELAY=0  -gV_MIN_REQ_DELAY=0 -gV_NUM_SET_PULL=1  -gV_NUM_TAG_PULL=20
