@@ -21,5 +21,5 @@
 //../../../source/router/north_next_tile_fifo_arb.sv
 //../../../source/router/east_next_tile_fifo_arb.sv
 //../../../source/router/west_next_tile_fifo_arb.sv
-//../../../source/router/south_next_tile_fifo_arb.sv
+../../../source/router/south_next_tile_fifo_arb.sv
 //../../../source/router/local_next_tile_fifo_arb.sv

@@ -302,12 +302,41 @@ assign in_east_req_valid_match_south  = in_east_req_valid  && (in_east_req.next_
 assign in_west_req_valid_match_south  = in_west_req_valid  && (in_west_req.next_tile_fifo_arb_id  == SOUTH);
 assign in_local_req_valid_match_south = in_local_req_valid && (in_local_req.next_tile_fifo_arb_id == SOUTH);
 
+t_cardinal in_north_to_south_next_tile_fifo_arb_id;
+t_cardinal in_east_to_south_next_tile_fifo_arb_id;
+t_cardinal in_west_to_south_next_tile_fifo_arb_id;
+t_cardinal in_local_to_south_next_tile_fifo_arb_id;
+
+south_next_tile_fifo_arb south_next_tile_fifo_arb(
+    .local_tile_id                           (local_tile_id                  ) , //    input t_tile_id     local_tile_id,
+    .in_north_req_valid_match_south          (in_north_req_valid_match_south ) , //    input logic         in_nortth_req_valid_match_south,
+    .in_east_req_valid_match_south           (in_east_req_valid_match_south  ) , //    input logic         in_east_req_valid_match_south,
+    .in_west_req_valid_match_south           (in_west_req_valid_match_south  ) , //    input logic         in_west_req_valid_match_south,
+    .in_local_req_valid_match_south          (in_local_req_valid_match_south ) , //    input logic         in_local_req_valid_match_south,
+    .in_north_req_address                    (in_north_req.address[31:24]    ) , //    input logic [31:24] in_north_req_address,
+    .in_east_req_address                     (in_east_req.address[31:24]     ) , //    input logic [31:24] in_east_req_address,
+    .in_west_req_address                     (in_west_req.address[31:24]     ) , //    input logic [31:24] in_west_req_address,
+    .in_local_req_address                    (in_local_req.address[31:24]    ) , //    input logic [31:24] in_local_req_address,
+    //output
+    .in_north_to_south_next_tile_fifo_arb_id (in_north_to_south_next_tile_fifo_arb_id  ) , //    output t_cardinal   in_north_to_south_next_tile_fifo_arb_id,
+    .in_east_to_south_next_tile_fifo_arb_id  (in_east_to_south_next_tile_fifo_arb_id   ) , //    output t_cardinal   in_east_to_south_next_tile_fifo_arb_id,
+    .in_west_to_south_next_tile_fifo_arb_id  (in_west_to_south_next_tile_fifo_arb_id   ) , //    output t_cardinal   in_west_to_south_next_tile_fifo_arb_id,
+    .in_local_to_south_next_tile_fifo_arb_id (in_local_to_south_next_tile_fifo_arb_id  )   //    output t_cardinal   in_local_to_south_next_tile_fifo_arb_id
+);
+
 always_comb begin : override_the_south_next_tile_fifo_arb
-    // FIXME - override correctly the next_tile_fifo_arb_id
+    //north
     in_north_new_req_south  = in_north_req;
+    in_north_new_req_south.next_tile_fifo_arb_id = in_north_to_south_next_tile_fifo_arb_id;
+    //east
     in_east_new_req_south   = in_east_req;
+    in_east_new_req_south.next_tile_fifo_arb_id  = in_east_to_south_next_tile_fifo_arb_id;
+    //west
     in_west_new_req_south   = in_west_req;
+    in_west_new_req_south.next_tile_fifo_arb_id  = in_west_to_south_next_tile_fifo_arb_id;
+    //local
     in_local_new_req_south  = in_local_req;
+    in_local_new_req_south.next_tile_fifo_arb_id = in_local_to_south_next_tile_fifo_arb_id;
 end
 
 fifo_arb fifo_arb_south (

@@ -8,6 +8,8 @@ task run_router_test(input string test);
     `include "router_alive.sv"
   end else if(test == "router_send_to_north")begin
     `include "router_send_to_north.sv"
+    end else if(test == "router_send_to_south")begin
+    `include "router_send_to_south.sv"
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end
