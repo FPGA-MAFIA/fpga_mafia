@@ -67,6 +67,13 @@
         if(valid) decoded[encoded] = 1'b1 ;  \
 	end 
 
+`define ASSERT(name, expr, en, msg) \
+   always @(posedge clk) begin \
+      if (en && expr) begin \
+         $error($sformatf("%s: %s", name, msg)); \
+      end \
+   end
+
 
 
 
