@@ -265,7 +265,7 @@ class Test:
             self.fail_flag = True
         else:
             try:
-                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/d_mem.mif 0'
+                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
                 results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
             except:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
@@ -280,7 +280,7 @@ class Test:
         chdir(MODEL_ROOT)       
         find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.dut+'/output_files/*'
         results = run_cmd_with_capture(find_war_err_cmd)
-        print_message(results.stdout)
+        print_message(f'[INFO]'+results.stdout)
         print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
 
 def print_message(msg):

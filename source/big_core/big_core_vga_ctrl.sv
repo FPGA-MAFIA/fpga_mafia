@@ -28,6 +28,7 @@ import big_core_pkg::*;
     input  logic        CtrlVgaMemRdEnQ503,
     output logic [31:0] VgaRspDataQ504H,
     // VGA output
+    output logic        inDisplayArea,
     output logic [3:0]  RED,
     output logic [3:0]  GREEN,
     output logic [3:0]  BLUE,
@@ -42,7 +43,7 @@ import big_core_pkg::*;
 
 logic [9:0]  pixel_y;
 logic        CLK_25;
-logic        inDisplayArea;
+//logic        inDisplayArea;
 logic        next_h_sync;
 logic        next_v_sync;
 logic [3:0]  NextRED;

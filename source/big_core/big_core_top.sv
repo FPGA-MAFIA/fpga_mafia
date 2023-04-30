@@ -25,7 +25,8 @@ import big_core_pkg::*;
     // FPGA interface outputs
     output t_fpga_out fpga_out,      // CR_MEM
     // VGA output
-    output t_vga_out       vga_out  // VGA_OUTPUT          
+    output logic        inDisplayArea,
+    output t_vga_out    vga_out  // VGA_OUTPUT          
 );
 
 //=========================================
@@ -74,6 +75,7 @@ big_core_mem_wrap big_core_mem_wrap (
     .Button_1         (Button_1),            // CR_MEM
     .Switch           (Switch),              // CR_MEM
     .fpga_out         (fpga_out),            // CR_MEM
+    .inDisplayArea    (inDisplayArea),       // VGA_OUTPUT
     .vga_out          (vga_out)              // VGA_OUTPUT
 );
 
