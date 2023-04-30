@@ -63,3 +63,39 @@
 #define CR_Button_0 ((volatile int *) (CR_MEM_BASE + 0x1c))
 #define CR_Button_1 ((volatile int *) (CR_MEM_BASE + 0x20))
 #define CR_Switch   ((volatile int *) (CR_MEM_BASE + 0x24))
+
+
+
+
+
+int hex7seg(int number){
+    int hex7seg;
+    switch (number){
+        case 0: hex7seg = 0b11000000; break;
+        case 1: hex7seg = 0b11111001; break;
+        case 2: hex7seg = 0b10100100; break;
+        case 3: hex7seg = 0b10110000; break;
+        case 4: hex7seg = 0b10011001; break;
+        case 5: hex7seg = 0b10010010; break;
+        case 6: hex7seg = 0b10000010; break;
+        case 7: hex7seg = 0b11111000; break;
+        case 8: hex7seg = 0b10000000; break;
+        case 9: hex7seg = 0b10010000; break;
+        case 10: hex7seg = 0b10001000; break;
+        case 11: hex7seg = 0b10000011; break;
+        case 12: hex7seg = 0b11000110; break;
+        case 13: hex7seg = 0b10100001; break;
+        case 14: hex7seg = 0b10000110; break;
+        default: hex7seg = 0b10000000; break;
+    }
+    return hex7seg;
+}
+
+void fpga_7seg_print(int number){
+    WRITE_REG(CR_SEG7_0, hex7seg(number%10));
+    WRITE_REG(CR_SEG7_1, hex7seg((number/10)%10));
+    WRITE_REG(CR_SEG7_2, hex7seg((number/100)%10));
+    WRITE_REG(CR_SEG7_3, hex7seg((number/1000)%10));
+    WRITE_REG(CR_SEG7_4, hex7seg((number/10000)%10));
+    WRITE_REG(CR_SEG7_5, hex7seg((number/100000)%10));
+}
