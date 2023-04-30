@@ -59,17 +59,9 @@ end
 // Assertion for pop when empty
 //assert property (@(posedge clk) disable iff (rst) (empty |-> !pop)) else $error("Pop when empty");
 // Assertion for push when full
-always @(posedge clk) begin
-  if (full && push) begin
-    $error("Assertion: Push when full");//the syntax above not working - this is the same logic
-  end
-end
 
-// Assertion for pop when empty
-always @(posedge clk) begin
-  if (empty && pop) begin
-    $error("Assertion: Pop when empty");
-  end
-end
+`ASSERT("Push when full", full && push, !rst, "Push when full");
+`ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
+
 endmodule : fifo
 

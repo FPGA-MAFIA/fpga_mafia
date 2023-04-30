@@ -141,13 +141,9 @@ initial begin
   
    join
    fork
-    #1000;
-    wait((cnt_in == cnt_out)&& cnt_out > 0); 
+      #1us; // just for protection so the test wont stuck.
+      wait((cnt_in == cnt_out)&& cnt_out > 0); 
    join_any
-   //#1000;
-   //$display("ref_outputs is %p",ref_fifo_Q);
-   //for(int i = 0 ; i<4;i++)
-   //   $display("[INFO] : this is ref_input for fifo %0d: %p",i,ref_fifo_Q[i]);
 
   if(test_name !== "fifo_arb_Assertion_test")begin
    fifo_arb_DI_checker();
