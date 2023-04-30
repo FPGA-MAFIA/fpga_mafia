@@ -71,3 +71,22 @@ always @(posedge Clk) begin : memory_access_print
     $fwrite(trk_memory_access,"%t | %8h | read   | %8h | %8h \n", $realtime, Pc, DMemAddress, sc_core.DMemRspData);
     end
 end
+
+
+integer trk_rf;
+initial begin: trk_rf_gen
+    trk_rf = $fopen({"../../../target/sc_core/tests/",test_name,"/trk_rf.log"},"w");
+    $fwrite(trk_rf,"--------------------------------------------------------------------\n");
+    $fwrite(trk_rf,"   Time   | PC       |   reg_dst   | wr_data                               \n");
+    $fwrite(trk_rf,"--------------------------------------------------------------------\n");  
+end
+always @(posedge Clk) begin : rf_print
+    if(sc_core.CtrlRegWrEn) begin
+        $fwrite(trk_rf,"%8t | %8h |   %8h  | %8h          \n", 
+        $realtime,
+        Pc,                                   // PC
+        sc_core.RegDst,         // reg_dst
+        sc_core.RegWrData);      // wr_data
+        //TODO - see how we can maybe detect what was the instruction that resulted in this write
+    end
+end
