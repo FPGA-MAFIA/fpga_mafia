@@ -93,7 +93,8 @@ class Test:
         if not os.path.exists(TARGET+'tests/'+self.name):
             mkdir(TARGET+'tests/'+self.name)
         if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
-            mkdir(TARGET+'tests/'+self.name+'/gcc_files')
+            if(args.app):
+                mkdir(TARGET+'tests/'+self.name+'/gcc_files')
         if not os.path.exists(MODELSIM):
             mkdir(MODELSIM)
         if not os.path.exists(MODELSIM+'work'):
