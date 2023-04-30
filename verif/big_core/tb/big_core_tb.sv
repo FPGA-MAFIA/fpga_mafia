@@ -106,6 +106,8 @@ initial begin: test_seq
     $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
+    //reference model sc core:
+    force ref_core.IMem = IMem;
 
     file = $fopen({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
@@ -113,8 +115,10 @@ initial begin: test_seq
         $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
         $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
         force big_core_top.big_core_mem_wrap.d_mem.DMem = DMem;
+        force ref_core.DMem = DMem;
         #10
         release big_core_top.big_core_mem_wrap.d_mem.DMem;
+        release ref_core.DMem;
     end
 
 
@@ -164,5 +168,14 @@ task print_vga_screen ;
         end
     end
 endtask
+
+
+
+
+ref_core ref_core(
+    .Clk (Clk),
+    .Rst (Rst)
+);
+
 endmodule //big_core_tb
 

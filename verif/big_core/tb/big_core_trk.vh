@@ -89,7 +89,7 @@ integer trk_rf;
 initial begin: trk_rf_gen
     trk_rf = $fopen({"../../../target/big_core/tests/",test_name,"/trk_rf.log"},"w");
     $fwrite(trk_rf,"--------------------------------------------------------------------\n");
-    $fwrite(trk_rf,"   Time  | PC       | reg_dst | wr_data                               \n");
+    $fwrite(trk_rf,"   Time   | PC       |   reg_dst   | wr_data                               \n");
     $fwrite(trk_rf,"--------------------------------------------------------------------\n");  
 end
 always @(posedge Clk) begin : rf_print
