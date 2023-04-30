@@ -38,6 +38,7 @@ parser.add_argument('-cmd',       action='store_true',    help='dont run the scr
 parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
+parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -254,6 +255,24 @@ class Test:
         # Return the return code of the post process command
         return return_val.returncode
 
+    def _start_mif(self):
+        chdir(FPGA_ROOT)
+        # generate mif files
+        try:
+            i_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/i_mem.mif 0'
+            results = run_cmd_with_capture(i_mem_mif_cmd)
+        except:
+            print_message('[ERROR] Failed to generate i_mem.mif file for test '+self.name)
+            self.fail_flag = True
+        else:
+            try:
+                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
+                results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
+            except:
+                print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
+                self.fail_flag = True
+        chdir(MODEL_ROOT)       
+
     def _start_fpga(self):
         chdir(FPGA_ROOT)
         # generate mif files
@@ -435,6 +454,8 @@ def main():
                 test._start_simulation()
             if (args.fpga) and not test.fail_flag:
                 test._start_fpga()
+            if (args.mif):
+                test._start_mif()
             if (args.gui):
                 test._gui()
             if (args.pp) and not test.fail_flag:
