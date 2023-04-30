@@ -118,7 +118,6 @@ end
 //  This is the main test sequence
 // =============================
 initial begin
-  rst_ins();
   $display("================\n     START\n================\n");
   if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
@@ -127,6 +126,7 @@ initial begin
   find_string(.str(test_name), .substr("router")  , .found(router_test_true));
   find_string(.str(test_name), .substr("fifo_arb"), .found(fifo_arb_test_true));
 
+  rst_ins();
 //=======================
 // The FIFO_ARB sequence
 //=======================
