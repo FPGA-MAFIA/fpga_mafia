@@ -31,6 +31,7 @@ module big_core_mem_wrap
     input  logic [9:0] Switch,            // CR_MEM
     // FPGA interface outputs
     output t_fpga_out  fpga_out,          // CR_MEM output to FPGA
+    output logic        inDisplayArea,
     output t_vga_out   vga_out            // VGA output to FPGA
 );
 
@@ -158,6 +159,7 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .CtrlVgaMemRdEnQ503 (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
    .VgaRspDataQ504H    (PreVGAMemRdDataQ104H),
    // VGA output
+   .inDisplayArea     (inDisplayArea),
    .RED               (vga_out.VGA_R),
    .GREEN             (vga_out.VGA_G),
    .BLUE              (vga_out.VGA_B),

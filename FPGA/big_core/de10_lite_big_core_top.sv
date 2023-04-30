@@ -75,7 +75,7 @@ import big_core_pkg::*;
 //=======================================================
 t_fpga_out fpga_out;
 t_vga_out vga_out;
-
+logic inDisplayArea;
 //big_core_top big_core_top (
 //.Clk      (MAX10_CLK1_50),    //input  logic        Clk,
 //.Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
@@ -99,6 +99,7 @@ big_core_top big_core_top (
 // FPGA interface outputs
 .fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
 // VGA output
+.inDisplayArea    (inDisplayArea),       // VGA_OUTPUT
 .vga_out   (vga_out)    //output logic       v_sync,
 );
 
@@ -109,10 +110,10 @@ assign HEX2 	= fpga_out.SEG7_2;
 assign HEX3 	= fpga_out.SEG7_3;
 assign HEX4 	= fpga_out.SEG7_4;
 assign HEX5 	= fpga_out.SEG7_5;
-assign LEDR 	= fpga_out.LED;
-assign VGA_R 	= vga_out.VGA_R;
-assign VGA_G 	= vga_out.VGA_G;
-assign VGA_B 	= vga_out.VGA_B;
+assign LEDR 	= fpga_out.LED; //SW;//
+assign VGA_R 	= vga_out.VGA_R; //inDisplayArea ? 4'b1111 : '0;//
+assign VGA_G 	= vga_out.VGA_G; //inDisplayArea ? 4'b0011 : '0;//
+assign VGA_B 	= vga_out.VGA_B; //inDisplayArea ? SW[3:0] : '0;//
 assign VGA_HS 	= vga_out.VGA_HS;
 assign VGA_VS 	= vga_out.VGA_VS;
 
