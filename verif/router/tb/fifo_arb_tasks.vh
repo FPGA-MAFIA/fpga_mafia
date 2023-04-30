@@ -24,11 +24,11 @@ task automatic push_fifo(input int num_fifo);
     delay(1);
     valid_alloc_req[num_fifo] = '0;
   end else begin
-    if(full[num_fifo] !== 1'b1)begin
+    wait(full[num_fifo] !== 1'b1);//begin
       valid_alloc_req[num_fifo] = 1'b1;
       delay(1);
       valid_alloc_req[num_fifo] = '0;
-    end
+    //end
   end
 endtask
 
@@ -39,8 +39,9 @@ for(int i = 0; i<4; i++) begin
   automatic int index = i;
   fork begin
     forever begin
-      $display("this is thred %0d at time %t",index,$time);
+      //$display("this is thred %0d at time %t",index,$time);
       wait(valid_alloc_req[index] == 1'b1);
+      #0;
       cnt_in = cnt_in + 1;
       $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$ input of fifo number %0d and CNT_IN = %0d",index,cnt_in);
        ref_fifo_Q[index].push_back(alloc_req[index]);
@@ -48,29 +49,44 @@ for(int i = 0; i<4; i++) begin
        //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
       wait(valid_alloc_req[index] == 1'b0);  
     end
-  end join_none
+  end 
+  forever begin
+    wait(fifo_arb_ins.arb.winner_dec_id[index] == 1'b1);
+    if(winner_req_valid == 1'b0) $display("problem in fifo %0d at time %0t",index,$time);
+    cnt_fifo_pop = cnt_fifo_pop + 1;
+    $display("cnt_fifo_pop = %0d in fifo %0d at time %0t winner_valid is %0b and fifo_pop is %4b",cnt_fifo_pop,index,$time,winner_req_valid,fifo_arb_ins.arb.winner_dec_id);
+    wait(fifo_arb_ins.arb.winner_dec_id[index] == 1'b0);
+  end
+  join_none
 end
 //end
 endtask
 
 task automatic fifo_arb_get_outputs();
+int fifo_pop_cnt = 0;
 fork
 forever begin
 
   @(winner_req);
-  #1;
+  #0;
   if(winner_req_valid == 1'b1)begin
-    cnt_out = cnt_out + 1;
+  cnt_out = cnt_out + 1;
   ref_outputs_Q.push_back(winner_req);
   $display("CNT OUT = %0d",cnt_out);
   //$display("this is the outputs array %p @ with size %d time %t",ref_outputs_Q,ref_outputs_Q.size(),$time);
   end
+  //else $error("winner_req changed but not valid at time %0t with data %p",$time,winner_req);
 end
+//forever begin
+//  @(fifo_arb_ins.arb.winner_dec_id);
+//  fifo_pop_cnt = fifo_pop_cnt + 1;
+//  $display("fifo_pop_cnt is: %0d and fifo_pop is %4b",fifo_pop_cnt,fifo_arb_ins.arb.winner_dec_id);
+//end
 join_none
 endtask
 
 task automatic fifo_arb_check_empty_full();
-$display("@@@@@@@@@@@this is full signal %b",full);
+//$display("@@@@@@@@@@@this is full signal %b",full);
 fork
     forever begin 
         @(full);
@@ -86,7 +102,7 @@ endtask
 
 task fifo_arb_DI_checker(); // pseudo ref_model
 automatic bit check = 0;
-repeat(5)begin// TODO - check why we nust have this repeat, and if we must then how many loops?
+repeat(5000)begin// TODO - check why we nust have this repeat, and if we must then how many loops?
   foreach(ref_fifo_Q[i,j])begin
     foreach(ref_outputs_Q[k])begin
       if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
@@ -103,13 +119,13 @@ repeat(5)begin// TODO - check why we nust have this repeat, and if we must then 
     end
   end
   if(ref_outputs_Q.size()!= 0)begin
-    $error("output list not empty ,data is %p",ref_outputs_Q);
+    $error("output list not empty ,data is and size %0d",ref_outputs_Q.size());
     check = 1'b1;
   end
   for(int i=0;i<4;i++)begin
     if(ref_fifo_Q[i].size() != 0)begin
       check = 1'b1;
-       $error("input list not empty for fifo %0d ,data is %p",i,ref_fifo_Q[i]);
+       $error("input list not empty for fifo %0d , and size %0d",i,ref_fifo_Q[i].size());
     end   
   end
   if(check == 1'b0)

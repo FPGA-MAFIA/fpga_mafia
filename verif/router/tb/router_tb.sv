@@ -13,6 +13,7 @@ static t_tile_trans ref_fifo_Q [3:0][$]; // see if we want to parametrize this
 static t_tile_trans ref_outputs_Q [$];  
 static int cnt_in;
 static int cnt_out;
+static int cnt_fifo_pop;
 static bit [3:0] empty;
 static bit [3:0] full;
 int router_test_true;
@@ -107,7 +108,7 @@ end
 endfunction
 
 initial begin : timeout_monitor
-  #2us;
+  #20us;
   //$fatal(1, "Timeout");
   $error("timeout test");
   $finish();
@@ -142,11 +143,15 @@ initial begin
   
    join
    fork
-      #1us; // just for protection so the test wont stuck.
+      #10us; // just for protection so the test wont stuck.
       wait((cnt_in == cnt_out)&& cnt_out > 0); 
    join_any
 
   if(test_name !== "fifo_arb_Assertion_test")begin
+   $display("output size is: %0d",ref_outputs_Q.size());
+   for(int i = 0; i<4 ; i++)begin
+    $display("ref_fifo[%0d] size: %0d",i,ref_fifo_Q[i].size());
+   end
    fifo_arb_DI_checker();
   end
    delay(30);
