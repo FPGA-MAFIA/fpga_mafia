@@ -49,12 +49,21 @@ for(int i = 0; i<4; i++) begin
        //$display("this is the data of fifo %0d  %0b", index,$bits(alloc_req[index]));
       wait(valid_alloc_req[index] == 1'b0);  
     end
-  end join_none
+  end 
+  forever begin
+    wait(fifo_arb_ins.arb.winner_dec_id[index] == 1'b1);
+    if(winner_req_valid == 1'b0) $display("problem in fifo %0d at time %0t",index,$time);
+    cnt_fifo_pop = cnt_fifo_pop + 1;
+    $display("cnt_fifo_pop = %0d in fifo %0d at time %0t winner_valid is %0b and fifo_pop is %4b",cnt_fifo_pop,index,$time,winner_req_valid,fifo_arb_ins.arb.winner_dec_id);
+    wait(fifo_arb_ins.arb.winner_dec_id[index] == 1'b0);
+  end
+  join_none
 end
 //end
 endtask
 
 task automatic fifo_arb_get_outputs();
+int fifo_pop_cnt = 0;
 fork
 forever begin
 
@@ -66,7 +75,13 @@ forever begin
   $display("CNT OUT = %0d",cnt_out);
   //$display("this is the outputs array %p @ with size %d time %t",ref_outputs_Q,ref_outputs_Q.size(),$time);
   end
+  //else $error("winner_req changed but not valid at time %0t with data %p",$time,winner_req);
 end
+//forever begin
+//  @(fifo_arb_ins.arb.winner_dec_id);
+//  fifo_pop_cnt = fifo_pop_cnt + 1;
+//  $display("fifo_pop_cnt is: %0d and fifo_pop is %4b",fifo_pop_cnt,fifo_arb_ins.arb.winner_dec_id);
+//end
 join_none
 endtask
 

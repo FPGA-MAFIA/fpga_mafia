@@ -13,6 +13,7 @@ static t_tile_trans ref_fifo_Q [3:0][$]; // see if we want to parametrize this
 static t_tile_trans ref_outputs_Q [$];  
 static int cnt_in;
 static int cnt_out;
+static int cnt_fifo_pop;
 static bit [3:0] empty;
 static bit [3:0] full;
 int router_test_true;
