@@ -61,7 +61,7 @@ t_cardinal [4:0]      next_tile_fifo_arb_card;
 // Calculate the next tile id based on the current tile id and the cardinal direction
 //======================================
 t_tile_id next_tile_id;
-generate if (NEXT_TILE_CARDINAL == NORTH) begin
+generate if (NEXT_TILE_CARDINAL == NORTH) begin : assign_next_tile_id
     assign next_tile_id[7:4] =  local_tile_id[7:4];
     assign next_tile_id[3:0] =  local_tile_id[3:0]-1;
 end else if (NEXT_TILE_CARDINAL == SOUTH) begin

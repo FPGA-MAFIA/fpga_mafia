@@ -25,7 +25,7 @@ initial begin
     
     router_top_trk    = $fopen({"../../../target/router/tests/",test_name,"/router_top_trk.log"},"w");
     $fwrite(router_top_trk, "==================================================================================\n");
-    $fwrite(router_top_trk, "                      ROUTER TOP TRACKER  -  Test: ",test_name,"\n");
+    $fwrite(router_top_trk, "                      ROUTER [%h,%h] TOP TRACKER  -  Test: ", local_tile_id[7:4] , local_tile_id[3:0] , test_name,"\n");
     $fwrite(router_top_trk, "==================================================================================\n");
     $fwrite(router_top_trk,"--------------------------------------------------------------------------------------------------\n");
     $fwrite(router_top_trk," Time  || in/out || from/to: ||  ADDRESS   || opcode ||   DATA  ||   requestor_id  ||  next_tile \n");

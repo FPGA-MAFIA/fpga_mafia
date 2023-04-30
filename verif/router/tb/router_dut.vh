@@ -24,12 +24,14 @@ initial begin : default_values
     end
 end
 
+logic [7:0] local_tile_id;
+assign local_tile_id = 8'h33;
 
 router router_inst // TODO - a4d logic to outputs. 
 (
  .clk                  (clk),     //   input   logic      clk,
  .rst                  (rst),     //   input   logic      rst,
- .local_tile_id        (8'h33),   //   input   t_tile_id  local_tile_id,
+ .local_tile_id        (local_tile_id),   //   input   t_tile_id  local_tile_id,
  //========================================
  // North Interface
  //========================================

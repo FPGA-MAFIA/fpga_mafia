@@ -15,7 +15,6 @@ static int cnt_in;
 static int cnt_out;
 static bit [3:0] empty;
 static bit [3:0] full;
-
 int router_test_true;
 int fifo_arb_test_true;
 //static t_tile_trans ref_fifo_Q [$];
