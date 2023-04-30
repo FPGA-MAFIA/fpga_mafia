@@ -107,7 +107,7 @@ end
 endfunction
 
 initial begin : timeout_monitor
-  #2us;
+  #5us;
   //$fatal(1, "Timeout");
   $error("timeout test");
   $finish();
@@ -147,6 +147,10 @@ initial begin
    join_any
 
   if(test_name !== "fifo_arb_Assertion_test")begin
+   $display("output size is: %0d",ref_outputs_Q.size());
+   for(int i = 0; i<4 ; i++)begin
+    $display("ref_fifo[%0d] size: %0d",i,ref_fifo_Q[i].size());
+   end
    fifo_arb_DI_checker();
   end
    delay(30);
