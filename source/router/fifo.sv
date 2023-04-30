@@ -38,7 +38,7 @@ logic [MSB_PTR:0] next_wr_ptr;
 
 //Empty and full signals
 assign empty = (wr_ptr == rd_ptr);
-assign full  = (wr_ptr == (rd_ptr + FIFO_DEPTH - 1));
+assign full  = ((wr_ptr > rd_ptr) ? (wr_ptr == (rd_ptr + FIFO_DEPTH - 1)): (wr_ptr == (rd_ptr - (FIFO_DEPTH - 1))));
 always_comb begin : fifo_array_assign
     //default values:
     next_fifo_array = fifo_array;

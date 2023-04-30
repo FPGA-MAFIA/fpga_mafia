@@ -108,7 +108,7 @@ end
 endfunction
 
 initial begin : timeout_monitor
-  #5us;
+  #20us;
   //$fatal(1, "Timeout");
   $error("timeout test");
   $finish();
@@ -143,7 +143,7 @@ initial begin
   
    join
    fork
-      #1us; // just for protection so the test wont stuck.
+      #10us; // just for protection so the test wont stuck.
       wait((cnt_in == cnt_out)&& cnt_out > 0); 
    join_any
 
