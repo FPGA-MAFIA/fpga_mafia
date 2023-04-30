@@ -258,15 +258,15 @@ class Test:
         chdir(FPGA_ROOT)
         # generate mif files
         try:
-            i_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/i_mem_2.mif 0'
+            i_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/i_mem.mif 0'
             results = run_cmd_with_capture(i_mem_mif_cmd)
         except:
             print_message('[ERROR] Failed to generate i_mem.mif file for test '+self.name)
             self.fail_flag = True
         else:
             try:
-                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/d_mem_2.mif 0'
-                results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/d_mem.sv') else True
+                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/d_mem.mif 0'
+                results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
             except:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
                 self.fail_flag = True
