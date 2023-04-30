@@ -93,7 +93,7 @@ arb
 );
 
 
-
+//`ASSERT("Pop when not valid winner",fifo_pop & !winner_req_valid,!rst,"Pop fifo when not valid_req")
 // =================================
 // Assertion for illegal input
 // =================================

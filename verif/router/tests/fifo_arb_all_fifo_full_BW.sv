@@ -7,9 +7,10 @@ for(int i = 0; i<V_NUM_FIFO; i++) begin
   fork begin 
     $display("this is fifo %d at time %t",fifo,$time);
     for(int j = 0; j < V_REQUESTS; j++)begin
+        wait(fifo_arb_ins.full[fifo] == '0);
         cycle_delay = $urandom_range(0, V_MAX_DELAY);
         delay(cycle_delay);  
-        $display("fifo %d and request %0d at time: %0t",fifo,j,$time);
+        $display("fifo %d and request %0d at time: %0t and full[%0d] is %0b and full is %4b",fifo,j,$time,fifo,fifo_arb_ins.full[fifo],fifo_arb_ins.full );
         fifo_arb_gen_trans(fifo);
     end
  // end join_none

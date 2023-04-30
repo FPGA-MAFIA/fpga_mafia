@@ -102,7 +102,7 @@ endtask
 
 task fifo_arb_DI_checker(); // pseudo ref_model
 automatic bit check = 0;
-repeat(50)begin// TODO - check why we nust have this repeat, and if we must then how many loops?
+repeat(5000)begin// TODO - check why we nust have this repeat, and if we must then how many loops?
   foreach(ref_fifo_Q[i,j])begin
     foreach(ref_outputs_Q[k])begin
       if(ref_fifo_Q[i][j] == ref_outputs_Q[k])begin
