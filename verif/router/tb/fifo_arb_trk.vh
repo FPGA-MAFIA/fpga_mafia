@@ -8,7 +8,7 @@
 // Created          : 3/2023
 //-----------------------------------------------------------------------------
 // Description :
-// Create the differents Trackers for our fifo_arb   
+// Create the different Trackers for our fifo_arb   
 //-----------------------------------------------------------------------------
 
 
