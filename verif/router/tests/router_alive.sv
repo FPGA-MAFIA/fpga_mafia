@@ -1,10 +1,13 @@
+//First request
 delay(10);
-in_north_req_valid                 = 1'b1;
-in_north_req.data                  = 32'hDEAD_BEEF;
-in_north_req.address               = 32'h1100_0000;
-in_north_req.opcode                = WR;
-in_north_req.requestor_id          = 8'h01;
-in_north_req.next_tile_fifo_arb_id = EAST;
+input_gen_valid[NORTH] = 1'b1;
+random_gen_req(.card(NORTH), .trans(input_gen[NORTH]));
 delay(1);
-in_north_req_valid                 = '0;
-in_north_req                       = '0;
+input_gen_valid[NORTH] = 1'b0;
+
+//Second request
+delay(10);
+input_gen_valid[NORTH] = 1'b1;
+random_gen_req(.card(NORTH), .trans(input_gen[NORTH]));
+delay(1);
+input_gen_valid[NORTH] = 1'b0;

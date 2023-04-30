@@ -7,7 +7,6 @@ logic              winner_req_valid;
 logic        [1:0] src_num; // the decimal number of fifo
 
 
-`include "fifo_arb_trk.vh"
 
 fifo_arb #(.FIFO_ARB_FIFO_DEPTH(V_FIFO_DEPTH)) fifo_arb_ins(
 .clk                (clk),
