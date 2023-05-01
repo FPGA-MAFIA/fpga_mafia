@@ -50,7 +50,7 @@ int calculate_pi(int iterations) {
 }
 
 int start_pi_calc() {
-  int iterations = 2000000; // Increase for a more accurate result
+  int iterations = 50000; // Increase for a more accurate result
     set_cursor(6, 6);
   rvc_printf("\n\n CALCULATE PIE \n");
   calculate_pi(iterations);
@@ -59,8 +59,48 @@ int start_pi_calc() {
 
 
 
-int main()  {  
+void matrix_calc(){
+    set_cursor(70, 0);
+    int matrix_1 [3][3] = {{1,2,3},{4,5,6},{7,8,9}};
+    int matrix_2 [3][3] = {{1,2,3},{4,5,6},{7,8,9}};
+    int matrix_3 [3][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
+    rvc_printf("MATRIX 1\n");
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            rvc_print_int(matrix_1[i][j]);
+            rvc_printf(" ");
+        }
+        rvc_printf("\n");
+    }
+    rvc_printf("\nMATRIX 2\n");
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            rvc_print_int(matrix_2[i][j]);
+            rvc_printf(" ");
+        }
+        rvc_printf("\n");
+    }
+    //calculate matrix_3 = matrix_1 * matrix_2
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            for (int k=0; k<3; k++){
+                matrix_3[i][j] += matrix_1[i][k] * matrix_2[k][j];
+            }
+        }
+    }
+    rvc_printf("\nMATRIX 3\n");
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            rvc_print_int(matrix_3[i][j]);
+            rvc_printf(" ");
+        }
+        rvc_printf("\n");
+    }
+}
+
+int main()  {  
+    clear_screen();
     set_cursor(0, 0);
     //writing a string VGA
     rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
@@ -78,6 +118,7 @@ int main()  {
             wait(1000000);
         }
         start_pi_calc();
+        matrix_calc();
     }
 
     return 0;
