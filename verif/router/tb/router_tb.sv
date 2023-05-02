@@ -108,7 +108,7 @@ end
 endfunction
 
 initial begin : timeout_monitor
-  #20us;
+  #10us;
   //$fatal(1, "Timeout");
   $error("timeout test");
   $finish();
@@ -139,11 +139,12 @@ initial begin
       run_fifo_arb_test(test_name);
       fifo_arb_get_inputs();
       fifo_arb_get_outputs();
+      //arb_check();
       //fifo_arb_check_empty_full();
   
    join
    fork
-      #10us; // just for protection so the test wont stuck.
+      #5us; // just for protection so the test wont stuck.
       wait((cnt_in == cnt_out)&& cnt_out > 0); 
    join_any
 

@@ -99,7 +99,6 @@ fork
 
 join_none
 endtask
-
 task fifo_arb_DI_checker(); // pseudo ref_model
 automatic bit check = 0;
 repeat(5000)begin// TODO - check why we nust have this repeat, and if we must then how many loops?

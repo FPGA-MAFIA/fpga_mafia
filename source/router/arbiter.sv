@@ -36,14 +36,27 @@ logic [NUM_CLIENTS-1:0] mask_candidate;
 logic [NUM_CLIENTS-1:0] first_top;
 logic [NUM_CLIENTS-1:0] first_bottom;
 logic hit_top;
+logic [3:0] enc_last_winner;
+logic [3:0] next_enc_last_winner;
+
 
 `MAFIA_EN_RST_DFF(last_winner , winner_dec_id , clk, valid_winner, rst)
+`MAFIA_EN_RST_DFF(enc_last_winner , next_enc_last_winner , clk, 1'b1, rst)
 always_comb begin
         mask_out = '0;
     for(int i =0; i < NUM_CLIENTS; i++ )begin
-        mask_out[i] = (last_winner > i);
+		if(enc_last_winner >= i)begin
+        mask_out[i] = 1'b1;
+		end
+ // $display("##################################### mask_out[%0d] = %b last_winner = %0d %b enc_last_winner = %0d at time %0t",i, mask_out[i],last_winner,last_winner,enc_last_winner,$time);
     end
 end
+//always @(*) begin
+//  $display("############################################################# winner_dec_id = %b", winner_dec_id);
+//  $display("############################################################# data_winner = %b", data_winner);
+//  $display("############################################################# mask_out = %b", mask_out);
+//end
+
 assign mask_candidate = (valid_candidate & (~mask_out));
 `FIND_FIRST(first_top    , mask_candidate)
 `FIND_FIRST(first_bottom , valid_candidate)
@@ -60,6 +73,15 @@ always_comb begin
 	for(int i =0; i < NUM_CLIENTS; i++ )begin
 		data_winner = winner_dec_id[i] ? candidate[i] : data_winner;
 	end
+end
+//`ENCODER(winner_dec_id,next_enc_last_winner)
+always@(*)begin
+case (winner_dec_id)
+4'b0001 : next_enc_last_winner = 4'd0;
+4'b0010 : next_enc_last_winner = 4'd1;
+4'b0100 : next_enc_last_winner = 4'd2;
+4'b1000 : next_enc_last_winner = 4'd3;
+endcase
 end
 
 //====================
