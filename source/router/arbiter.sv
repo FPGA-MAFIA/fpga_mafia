@@ -23,6 +23,7 @@ module arbiter #(parameter int NUM_CLIENTS=4,
 	 input  logic                         			  rst,
 	 // ctrl path
 	 input  var   [NUM_CLIENTS-1:0]  				  valid_candidate ,
+	 input  logic                                     valid_arb,
 	 output logic [NUM_CLIENTS-1:0] 				  winner_dec_id,           
 	 // data path
 	 input  var   [NUM_CLIENTS-1:0]  [DATA_WIDTH-1:0] candidate ,
@@ -51,11 +52,7 @@ always_comb begin
  // $display("##################################### mask_out[%0d] = %b last_winner = %0d %b enc_last_winner = %0d at time %0t",i, mask_out[i],last_winner,last_winner,enc_last_winner,$time);
     end
 end
-//always @(*) begin
-//  $display("############################################################# winner_dec_id = %b", winner_dec_id);
-//  $display("############################################################# data_winner = %b", data_winner);
-//  $display("############################################################# mask_out = %b", mask_out);
-//end
+
 
 assign mask_candidate = (valid_candidate & (~mask_out));
 `FIND_FIRST(first_top    , mask_candidate)
@@ -63,7 +60,7 @@ assign mask_candidate = (valid_candidate & (~mask_out));
 
 assign hit_top = (|first_top);
 assign winner_dec_id = hit_top ? first_top : first_bottom;
-assign valid_winner = (|winner_dec_id);
+assign valid_winner = (|winner_dec_id) && valid_arb;
 
 //====================
 // Mux out the data_winner
