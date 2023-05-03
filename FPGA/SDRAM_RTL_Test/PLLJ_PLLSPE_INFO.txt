@@ -1,0 +1,10 @@
+PLL_Name	pll_test:u2|altpll:altpll_component|pll_test_altpll:auto_generated|pll1
+PLLJITTER	30
+PLLSPEmax	84
+PLLSPEmin	-53
+
+PLL_Name	Sdram_Control:u1|sdram_pll0:sdram_pll0_inst|altpll:altpll_component|sdram_pll0_altpll:auto_generated|pll1
+PLLJITTER	30
+PLLSPEmax	84
+PLLSPEmin	-53
+
