@@ -168,7 +168,6 @@ always @(posedge clk) begin
 // //==================================================
 // // tracker on Pipe Stages
 // //==================================================
-//Time || OPCODE || TQ ID || s_w_mru||                              hit|miss || mb_cancel || tag ||set || offset ||     Data || s_w_valid  || s_w_modified ||  s_w_tags ||  s_w_victim || s_w_hit || cl_data || fill_modif || fill_rd || dirty_evict || data_arr_addr           \n");
 if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
       $fwrite(cache_pipe_stages_trk,"%t   %-7s  %h    {%h,%h,%h,%h}   %h     %h       %h       %h     %h      %h      %h   {%h,%h,%h,%h}     {%h,%h,%h,%h}      {%h,%h,%h,%h}    {%h,%h,%h,%h}     {%h,%h,%h,%h}       %h       %h        %h         %h      %h\n",
       $realtime,
@@ -212,9 +211,6 @@ if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.cl_data
       );     
   end
-
- $fwrite(cache_pipe_io_trk,"  Time  || OPCODE  || set_way_mru||  mb_hit_cancel  || tag ||set || Data                  \n");
-
 // //==================================================
 // // tracker on TQ
 // //==================================================
