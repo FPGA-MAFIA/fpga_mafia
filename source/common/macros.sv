@@ -51,10 +51,10 @@
     end                                        
 
 
-`define  ENCODER(encoded , decoded )             \
+`define  ENCODER(encoded ,valid, decoded )             \
 	always_comb begin                                   \
         encoded = '0 ;                                 	\
-        //valid   = |decoded;                             \
+        valid   = |decoded;                             \
         for (int i = 0 ; i <$bits(decoded) ;i++) begin  \
 	        if (decoded[i])                             \
     	        encoded = i ;                           \
