@@ -51,7 +51,7 @@
     end                                        
 
 
-`define  ENCODER(encoded , valid, decoded )             \
+`define  ENCODER(encoded ,valid, decoded )             \
 	always_comb begin                                   \
         encoded = '0 ;                                 	\
         valid   = |decoded;                             \

@@ -11,6 +11,8 @@ task run_fifo_arb_test(input string test);
     `include "fifo_arb_all_fifo_full_BW.sv"
   end else if(test == "fifo_arb_Assertion_test")begin
     `include "fifo_arb_Assertion_test.sv"
+  end else if(test == "fifo_arb_back_pressure")begin
+    `include "fifo_arb_back_pressure.sv"
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end
@@ -99,7 +101,6 @@ fork
 
 join_none
 endtask
-
 task fifo_arb_DI_checker(); // pseudo ref_model
 automatic bit check = 0;
 repeat(5000)begin// TODO - check why we nust have this repeat, and if we must then how many loops?

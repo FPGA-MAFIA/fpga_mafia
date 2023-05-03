@@ -7,6 +7,7 @@ parameter V_FIFO_DEPTH = 4; // currently this value causes failure in the test d
 parameter V_NUM_FIFO   = 4;  // number of fifos to exercise in the test (HW is always 4, simulation may stimuli only some of them)
 parameter V_NO_BACK_PRESSURE = 0; // used to disable back pressure in the test which will cause a failure in the test
 parameter V_MAX_DELAY  = 5; // max delay in the test
+parameter V_BACK_PRESURE = 10;
 logic              clk;
 logic              rst;
 static t_tile_trans ref_fifo_Q [3:0][$]; // see if we want to parametrize this
@@ -18,6 +19,7 @@ static bit [3:0] empty;
 static bit [3:0] full;
 int router_test_true;
 int fifo_arb_test_true;
+int rand_in_ready;
 //static t_tile_trans ref_fifo_Q [$];
 //static int try_q [$];
 string test_name;
@@ -39,6 +41,10 @@ end
 
 assign full = fifo_arb_ins.full;
 assign empty = fifo_arb_ins.empty;
+//assign in_ready_arb_fifo = (logic [3:0])rand_in_ready;
+//assign in_ready_arb_fifo = {4{1'b0}}; // initialize all bits to 0
+//assign in_ready_arb_fifo = {4{rand_in_ready}}; // type cast the integer to a 4-bit logic vector
+
 
 // =============================
 // RST gen
@@ -51,6 +57,7 @@ task rst_ins();
     in_south_req_valid = '0;
     in_east_req_valid  = '0;
     in_west_req_valid  = '0;
+    in_ready_arb_fifo  = 4'b1111; // change only in relevant tests.
     //make sure fifo_arb valid input is 0 as default
     for(int i =0; i<4 ; i++) begin
       valid_alloc_req[i] = '0;
@@ -108,7 +115,7 @@ end
 endfunction
 
 initial begin : timeout_monitor
-  #20us;
+  #10us;
   //$fatal(1, "Timeout");
   $error("timeout test");
   $finish();
@@ -139,11 +146,12 @@ initial begin
       run_fifo_arb_test(test_name);
       fifo_arb_get_inputs();
       fifo_arb_get_outputs();
+      //arb_check();
       //fifo_arb_check_empty_full();
   
    join
    fork
-      #10us; // just for protection so the test wont stuck.
+      #5us; // just for protection so the test wont stuck.
       wait((cnt_in == cnt_out)&& cnt_out > 0); 
    join_any
 
