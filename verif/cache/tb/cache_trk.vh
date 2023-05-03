@@ -48,8 +48,8 @@ initial begin
     $fwrite(cache_pipe_stages_trk,"                                                               CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
     $fwrite(cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
     $fwrite(cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(cache_pipe_stages_trk,"Time || OPCODE || TQ || s_w_mru || hit|miss || mb_hit || tag ||set || offset ||   Data  || s_w_valid || s_w_modified ||   s_w_tags  ||  s_w_victim ||  s_w_hit  ||  fill  || fill || dirty || data array|| cl_data          \n");
-    $fwrite(cache_pipe_stages_trk,"                  ID                           cancel                                                                                                             modified    rd     evict     address                                                                \n");
+    $fwrite(cache_pipe_stages_trk,"Time || OPCODE || TQ || s_w_mru || hit|miss || mb_hit || tag ||set || offset ||   Data  || s_w_valid || s_w_modified ||   s_w_tags  ||  s_w_victim ||  s_w_hit  ||  fill  || fill || dirty ||           cl_data_q3               ||  data array|| cl_data          \n");
+    $fwrite(cache_pipe_stages_trk,"                  ID                           cancel                                                                                                             modified    rd     evict                                            address                                                                \n");
     $fwrite(cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");  
 
     cache_tq_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_tq_trk.log"},"w");
@@ -169,7 +169,7 @@ always @(posedge clk) begin
 // // tracker on Pipe Stages
 // //==================================================
 if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
-      $fwrite(cache_pipe_stages_trk,"%t   %-7s  %h    {%h,%h,%h,%h}   %h     %h       %h       %h     %h      %h      %h   {%h,%h,%h,%h}     {%h,%h,%h,%h}      {%h,%h,%h,%h}    {%h,%h,%h,%h}     {%h,%h,%h,%h}       %h       %h        %h         %h      %h\n",
+      $fwrite(cache_pipe_stages_trk,"%t   %-7s  %h    {%h,%h,%h,%h}   %h     %h       %h       %h     %h      %h      %h   {%h,%h,%h,%h}     {%h,%h,%h,%h}      {%h,%h,%h,%h}    {%h,%h,%h,%h}     {%h,%h,%h,%h}       %h       %h        %h     %h    %h      %h\n",
       $realtime,
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_op.name(),
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_tq_id,
@@ -207,6 +207,7 @@ if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.fill_modified,
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.fill_rd,
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.dirty_evict,
+      cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data,
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.data_array_address,
       cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.cl_data
       );     
@@ -218,7 +219,6 @@ if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
         if ((cache.cache_tq.tq_state[i] != cache.cache_tq.next_tq_state[i]) ||
              ((cache.cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (cache.cache_tq.rd_req_hit_mb[i] || cache.cache_tq.wr_req_hit_mb[i]) )
              ) begin
-        //$fwrite(cache_tq_trk,"%t    %-15s     %h       %h       %h              %h           %h       %h\n",
         $fwrite(cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
         $realtime,
         i,
@@ -228,9 +228,7 @@ if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
         cache.cache_tq.next_tq_cl_address         [i],
         cache.cache_tq.next_tq_merge_buffer_data  [i],      
         cache.cache_tq.next_tq_cl_word_offset     [i],     
-        cache.cache_tq.next_tq_reg_id             [i],
-        //cache.cache_tq.any_rd_hit_mb,
-        //cache.cache_tq.any_wr_hit_mb
+        cache.cache_tq.next_tq_reg_id             [i]
         );
 
 
