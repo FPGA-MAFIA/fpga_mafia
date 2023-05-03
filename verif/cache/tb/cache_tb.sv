@@ -98,6 +98,10 @@ end else  if(test_name == "rand") begin
 `include "rand.sv"
 end else  if(test_name == "many_tag_one_set") begin
 `include "many_tag_one_set.sv"
+end else  if(test_name == "read_miss_stall_handle") begin
+`include "read_miss_stall_handle.sv"
+end else  if(test_name == "b2b_rd_miss_reissue") begin
+`include "b2b_rd_miss_reissue.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);

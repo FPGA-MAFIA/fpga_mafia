@@ -109,13 +109,17 @@ always @(posedge clk) begin
         cache2core_rsp.data);
     end
     if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
-        $fwrite(cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h \n",
+        $fwrite(cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h_%h_%h_%h  \n",
         $realtime, 
         cache2fm_req_q3.address, 
         cache2fm_req_q3.tq_id, 
         cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
         cache2fm_req_q3.address[MSB_SET:LSB_SET], 
-        cache2fm_req_q3.data);
+        cache2fm_req_q3.data[127:96],
+        cache2fm_req_q3.data[95:64],
+        cache2fm_req_q3.data[63:32],
+        cache2fm_req_q3.data[31:0]
+        );
     end
     if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == FILL_REQ_OP)) begin
         $fwrite(cache_top_trk,"%t     CACHE_FILL_REQ    %h       %h         %h     %h      ( -- read request -- ) \n",

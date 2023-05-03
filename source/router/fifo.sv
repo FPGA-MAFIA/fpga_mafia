@@ -38,7 +38,7 @@ logic [MSB_PTR:0] next_wr_ptr;
 
 //Empty and full signals
 assign empty = (wr_ptr == rd_ptr);
-assign full  = (wr_ptr == (rd_ptr + FIFO_DEPTH - 1));
+assign full  = ((wr_ptr > rd_ptr) ? (wr_ptr == (rd_ptr + FIFO_DEPTH - 1)): (wr_ptr == (rd_ptr - 1'b1)));
 always_comb begin : fifo_array_assign
     //default values:
     next_fifo_array = fifo_array;
@@ -53,6 +53,15 @@ always_comb begin : fifo_array_assign
         next_rd_ptr = (rd_ptr != (FIFO_DEPTH - 1)) ? (rd_ptr + 1) : '0;
     end
 end
+// Assertion for push when full
+//assert property (@(posedge clk) disable iff (rst) (full |-> !push)) else $error("Push when full"); // iff -> if and only if.
+
+// Assertion for pop when empty
+//assert property (@(posedge clk) disable iff (rst) (empty |-> !pop)) else $error("Pop when empty");
+// Assertion for push when full
+
+`ASSERT("Push when full", full && push, !rst, "Push when full");
+`ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
 
 endmodule : fifo
 

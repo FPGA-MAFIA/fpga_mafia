@@ -6,7 +6,8 @@
 module fifo_arb
  import router_pkg::*;
  #(parameter DATA_WIDTH = 32,
-                parameter NUM_CLIENTS = 4)
+                parameter NUM_CLIENTS = 4,
+                parameter FIFO_ARB_FIFO_DEPTH = 4)
 (
 input  logic clk,
 input  logic rst,
@@ -47,6 +48,8 @@ logic [3:0] fifo_pop;
 logic [3:0] full;
 logic [3:0] empty;
 logic [1:0] src_num;;
+logic valid_arb;
+assign valid_arb = (in_ready_arb_fifo0 | in_ready_arb_fifo1| in_ready_arb_fifo2| in_ready_arb_fifo3);
 always_comb begin
 din[0] = alloc_req0;
 din[1] = alloc_req1;
@@ -64,7 +67,7 @@ end
 
     genvar i;
     generate for (i=0; i<NUM_CLIENTS; i=i+1) begin : gen_fifo
-            fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(4))
+            fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(FIFO_ARB_FIFO_DEPTH))
                 inside_fifo  (.clk       (clk),
                               .rst       (rst),
                               .push      (push[i]), // valid_alloc_req#
@@ -88,11 +91,12 @@ arb
     .candidate      (dout_fifo[3:0]), // input from each fifo, pop_data_arb candidate.
     .winner_dec_id  (fifo_pop[3:0]),  // the arbiter winner use to fifo pop.        
     .valid_winner   (winner_req_valid),
-    .data_winner    (winner_req)
+    .data_winner    (winner_req),
+    .valid_arb      (valid_arb) // the indication for arb not to pop if no one will accept to take the transaction.
 );
 
 
-
+//`ASSERT("Pop when not valid winner",fifo_pop & !winner_req_valid,!rst,"Pop fifo when not valid_req")
 // =================================
 // Assertion for illegal input
 // =================================

@@ -8,7 +8,7 @@
 // Created          : 3/2023
 //-----------------------------------------------------------------------------
 // Description :
-// Create the differents Trackers for our fifo_arb   
+// Create the different Trackers for our fifo_arb   
 //-----------------------------------------------------------------------------
 
 
@@ -21,22 +21,24 @@ integer full_empty_trk;
 logic [3:0] sample_empty;
 logic [3:0] empty_changed;
 
+
 initial begin
+    delay(1); // wait for the test to start
+    if(fifo_arb_test_true) begin
+        if ($value$plusargs ("STRING=%s", test_name))
+            $display("creating tracker in test directory: target/router/tests/%s", test_name);
+        $timeformat(-12, 0, "", 6);
 
-    if ($value$plusargs ("STRING=%s", test_name))
-        $display("creating tracker in test directory: target/router/tests/%s", test_name);
-    $timeformat(-12, 0, "", 6);
-    
-    fifo_arb_top_trk    = $fopen({"../../../target/router/tests/",test_name,"/fifo_arb_top_trk.log"},"w");
-    full_empty_trk      = $fopen({"../../../target/router/tests/",test_name,"/full_empty_trk.log"},"w");
-    $fwrite(fifo_arb_top_trk, "==================================================================================\n");
-    $fwrite(fifo_arb_top_trk, "                      FIFO_ARB TOP TRACKER  -  Test: ",test_name,"\n");
-    $fwrite(fifo_arb_top_trk, "==================================================================================\n");
-    $fwrite(fifo_arb_top_trk,"-----------------------------------------------------------------------------------\n");
-    $fwrite(fifo_arb_top_trk," Time  || input from fifo: ||  ADDRESS        || opcode ||DATA|| requestor_id  || next_tile \n");
-    $fwrite(fifo_arb_top_trk,"-----------------------------------------------------------------------------------\n");
-
-end
+        fifo_arb_top_trk    = $fopen({"../../../target/router/tests/",test_name,"/fifo_arb_top_trk.log"},"w");
+        full_empty_trk      = $fopen({"../../../target/router/tests/",test_name,"/full_empty_trk.log"},"w");
+        $fwrite(fifo_arb_top_trk, "==================================================================================\n");
+        $fwrite(fifo_arb_top_trk, "                      FIFO_ARB TOP TRACKER  -  Test: ",test_name,"\n");
+        $fwrite(fifo_arb_top_trk, "==================================================================================\n");
+        $fwrite(fifo_arb_top_trk,"-----------------------------------------------------------------------------------\n");
+        $fwrite(fifo_arb_top_trk," Time  || input from fifo: ||  ADDRESS        || opcode ||DATA|| requestor_id  || next_tile \n");
+        $fwrite(fifo_arb_top_trk,"-----------------------------------------------------------------------------------\n");
+    end// if fifo_arb_test_true
+end //initial begin
 
 always @(posedge clk) begin
 //==================================================

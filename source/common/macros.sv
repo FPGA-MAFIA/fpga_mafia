@@ -51,7 +51,7 @@
     end                                        
 
 
-`define  ENCODER(encoded , valid, decoded )             \
+`define  ENCODER(encoded ,valid, decoded )             \
 	always_comb begin                                   \
         encoded = '0 ;                                 	\
         valid   = |decoded;                             \
@@ -66,6 +66,13 @@
 	    decoded = '0 ;                       \
         if(valid) decoded[encoded] = 1'b1 ;  \
 	end 
+
+`define ASSERT(name, expr, en, msg) \
+   always @(posedge clk) begin \
+      if (en && expr) begin \
+         $error($sformatf("%s: %s", name, msg)); \
+      end \
+   end
 
 
 

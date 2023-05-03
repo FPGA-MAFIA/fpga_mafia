@@ -1,4 +1,10 @@
-fill_8_tq_entries
+rd_modify_rd
+wr_after_wr_cl
+wr_b2b_same_cl
+wr_miss_rd_hit_mb
 rand_simple
 many_tag_one_set
 rand_set_stress
+read_miss_stall_handle
+b2b_rd_miss_reissue
+fill_8_tq_entries

@@ -20,6 +20,7 @@ module cache_pipe
     input   logic               rst,
     //tq interface 
     input   var t_lu_req        pipe_lu_req_q1,
+    output  var t_early_lu_rsp  pipe_early_lu_rsp_q2,
     output  t_lu_rsp            pipe_lu_rsp_q3,
     // FM interface Requests 
     output  t_fm_req            cache2fm_req_q3,
@@ -93,6 +94,7 @@ logic hazard_detected_q3;
 always_comb begin
   cache_pipe_lu_q1 ='0; //this is the default value
   cache_pipe_lu_q1.lu_valid         = pipe_lu_req_q1.valid ;
+  cache_pipe_lu_q1.reg_id           = pipe_lu_req_q1.reg_id ;
   cache_pipe_lu_q1.lu_offset        = pipe_lu_req_q1.address[MSB_OFFSET:LSB_OFFSET];
   cache_pipe_lu_q1.lu_set           = pipe_lu_req_q1.address[MSB_SET:LSB_SET];
   cache_pipe_lu_q1.lu_tag           = pipe_lu_req_q1.address[MSB_TAG:LSB_TAG]; 
@@ -103,6 +105,8 @@ always_comb begin
   cache_pipe_lu_q1.lu_tq_id         = pipe_lu_req_q1.tq_id; 
   cache_pipe_lu_q1.fill_modified    = pipe_lu_req_q1.wr_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.fill_rd          = pipe_lu_req_q1.rd_indication && pipe_lu_req_q1.lu_op == FILL_LU;
+  cache_pipe_lu_q1.rd_indication    = pipe_lu_req_q1.rd_indication;
+
 end //always_comb
 
 //==================================================================
@@ -285,8 +289,13 @@ always_comb begin
 end //always_comb
 
 //data array read
-assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
+assign rd_cl_req_q2.data_array_address = cache_pipe_lu_q2.data_array_address;
 
+
+assign pipe_early_lu_rsp_q2.rd_miss       = cache_pipe_lu_q2.miss && (cache_pipe_lu_q2.lu_op == RD_LU) && cache_pipe_lu_q2.lu_valid;
+assign pipe_early_lu_rsp_q2.alloc_rd_fill = cache_pipe_lu_q2.fill_rd && cache_pipe_lu_q2.lu_valid;
+assign pipe_early_lu_rsp_q2.lu_tq_id      = cache_pipe_lu_q2.lu_tq_id;
+assign pipe_early_lu_rsp_q2.cl_address    = {cache_pipe_lu_q2.lu_tag, cache_pipe_lu_q2.lu_set};
 
 //==================================================================
 `MAFIA_DFF(pre_cache_pipe_lu_q3, cache_pipe_lu_q2, clk)
@@ -302,7 +311,12 @@ assign rd_cl_req_q2.cl_address = cache_pipe_lu_q2.data_array_address;
 //
 //==================================================================
 
-
+//======================
+//    assign PIPE BUS
+//======================
+always_comb begin
+  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q3; //this is the default value
+end
 //======================
 //    TQ_UPDATE -> PIPE_LU_RSP_q3
 //======================
@@ -317,14 +331,19 @@ assign pipe_lu_rsp_q3.cl_data       =   (cache_pipe_lu_q3.lu_op == FILL_LU)     
                                         (cache_pipe_lu_q3.lu_op == RD_LU) && (cache_pipe_lu_q3.hit)     ? rd_data_cl_rsp_q3         :
                                                                                                         '0;    
 assign pipe_lu_rsp_q3.address       =    {cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set,cache_pipe_lu_q3.lu_offset};
+assign pipe_lu_rsp_q3.reg_id        =    cache_pipe_lu_q3.reg_id;
+assign pipe_lu_rsp_q3.rd_indication =    cache_pipe_lu_q3.rd_indication;
 
-//======================
-//    assign PIPE BUS
-//======================
-always_comb begin
-  cache_pipe_lu_q3  =   pre_cache_pipe_lu_q3; //this is the default value
-end
+logic wr_match_in_pipe_q1_q3;
+logic wr_match_in_pipe_q2_q3;
+assign wr_match_in_pipe_q2_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set} == {cache_pipe_lu_q2.lu_tag,cache_pipe_lu_q2.lu_set}) && //Match address q3 and q2
+                                ( cache_pipe_lu_q3.lu_valid        && cache_pipe_lu_q2.lu_valid)             && //Both valid q3 and q2
+                                ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q2.lu_op == WR_LU);        //Both write q3 and q2
 
+assign wr_match_in_pipe_q1_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_set} == {cache_pipe_lu_q1.lu_tag,cache_pipe_lu_q1.lu_set}) && //Match address q3 and q1
+                                ( cache_pipe_lu_q3.lu_valid        && cache_pipe_lu_q1.lu_valid)             && //Both valid q3 and q1
+                                ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q1.lu_op == WR_LU);        //Both write q3 and q1
+assign pipe_lu_rsp_q3.wr_match_in_pipe = wr_match_in_pipe_q1_q3 || wr_match_in_pipe_q2_q3;
 
 `MAFIA_DFF(og_set_ways_tags_q3,    og_set_ways_tags_q2, clk)
 `MAFIA_DFF(set_ways_enc_victim_q3, set_ways_enc_victim_q2, clk)
@@ -360,7 +379,7 @@ end
 //======================
 //     Data_Hazard - accessing same set B2B 
 //====================== 
-assign hazard_detected_q3 = (wr_data_cl_q4.cl_address == wr_data_cl_q3.cl_address) && wr_data_cl_q4.valid;
+assign hazard_detected_q3 = (wr_data_cl_q4.data_array_address == wr_data_cl_q3.data_array_address) && wr_data_cl_q4.valid;
 assign hazard_rd_data_cl_rsp_q4 = wr_data_cl_q4.data;
 assign rd_data_cl_rsp_q3  = hazard_detected_q3 ? hazard_rd_data_cl_rsp_q4  : pre_rd_data_cl_rsp_q3;
 //======================
@@ -375,7 +394,7 @@ always_comb begin
     wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                              (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
                                                                                                             '0; 
-    wr_data_cl_q3.cl_address             =  cache_pipe_lu_q3.data_array_address;
+    wr_data_cl_q3.data_array_address     =  cache_pipe_lu_q3.data_array_address;
     wr_data_cl_q3.valid                  =  (cache_pipe_lu_q3.lu_valid && ((cache_pipe_lu_q3.lu_op == WR_LU) && cache_pipe_lu_q3.hit)) ||
                                             (cache_pipe_lu_q3.lu_valid && (cache_pipe_lu_q3.lu_op == FILL_LU));
 end

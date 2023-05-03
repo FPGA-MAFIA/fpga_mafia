@@ -98,6 +98,27 @@ task create_addrs_pull(input int local_num_tag_pull = V_MAX_NUM_TAG_PULL, // def
 endtask
 
 
+task read_all_tag_set_pull(input int local_num_tag_pull = V_NUM_TAG_PULL, // default values
+                           input int local_num_set_pull = V_NUM_SET_PULL, // default values
+                           input logic [7:0] tag_pull [V_MAX_NUM_TAG_PULL:0],
+                           input logic [7:0] set_pull [V_MAX_NUM_SET_PULL:0]
+                           );
+  // got over the tag_pull & the set_pull and read all the tags and sets up to the local_num_tag_pull & local_num_set_pull
+  // this is used to makes sure in EOT (end of test) that all the data was correct
+  for(int i = 0; i < local_num_tag_pull; i = i + 1) begin
+    for(int j = 0; j < local_num_set_pull; j = j + 1) begin
+      //go over the 4 cl offset:
+      $display("===EOT==== rd -> tag=%0h, set=%0h", tag_pull[i], set_pull[j]);
+      for(logic [2:0] k = 0; k < 4; k++)begin 
+        rd_req( {tag_pull[i], set_pull[j], k[1:0], 2'b00}, 1);
+      end//k offset
+    end//j set
+  end//i tag
+
+endtask
+
+
+
 
 //=======================================================
 //=======================================================

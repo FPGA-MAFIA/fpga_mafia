@@ -14,15 +14,14 @@ jobs:
     runs-on: [self-hosted , windows, x64]
     steps:
       - uses: actions/checkout@v2
-      - name: Run build BIG_CORE -all -app -hw -sim
-        run:  python build.py -dut 'big_core' -debug -regress level0 -app -hw -sim
-      - name: Run build MINI_CORE -all -app -hw -sim
-        run:  python build.py -dut 'mini_core' -debug -all -app -hw -sim
-      - name: Run build SC_CORE -all -app -hw -sim 
-        run:  python build.py -dut 'sc_core' -debug -all -app -hw -sim
-      - name: Run build CACHE -all -hw -sim -pp
-        run:  python build.py -dut 'cache' -debug -regress level0 -hw -sim -pp
-      # disabling the router DUT for now - FIXME abd 17/4/2023
-      #- name: Run build ROUTER -regress level0 -hw -sim
-      #  run:  python build.py -dut 'router' -debug -regress level0 -hw -sim
+      - name: Run build BIG_CORE -all -app -hw -sim -keep_going
+        run:  python build.py -dut 'big_core' -debug -regress level0 -app -hw -sim -keep_going
+      - name: Run build MINI_CORE -all -app -hw -sim -keep_going
+        run:  python build.py -dut 'mini_core' -debug -all -app -hw -sim -keep_going
+      - name: Run build SC_CORE -all -app -hw -sim  -keep_going
+        run:  python build.py -dut 'sc_core' -debug -all -app -hw -sim -keep_going
+      - name: Run build CACHE -regress level0 -hw -sim -pp -keep_going
+        run:  python build.py -dut 'cache' -debug -regress level0 -hw -sim -pp -keep_going
+      - name: Run build ROUTER -regress level0 -hw -sim -keep_going
+        run:  python build.py -dut 'router' -debug -regress level0 -hw -sim -keep_going
 

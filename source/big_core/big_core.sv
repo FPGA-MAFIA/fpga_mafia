@@ -9,15 +9,15 @@
 // Created          : 10/2021
 //-----------------------------------------------------------------------------
 // Description :
-// This module will comtain a complite RISCV Core supportint the RV32I
-// Will be implemented in a single cycle microarchitecture.
+// This module will contain a complete RISCV Core supporting the RV32I
+// Will be implemented in a single cycle micro architecture.
 // The I_MEM & D_MEM will support async memory read. (This will allow the single-cycle arch)
 // ---- 5 Pipeline Stages -----
 // 1) Q100H Instruction Fetch
 // 2) Q101H Instruction Decode 
 // 3) Q102H Execute 
 // 4) Q103H Memory Access
-// 5) Q104H Write back data from Memory/ALU to Registerfile
+// 5) Q104H Write back data from Memory/ALU to Register file
 
 `include "macros.sv"
 
@@ -132,7 +132,7 @@ assign NextPcQ10XH   = SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
 // Decode
 // -----------------
 // 1. Load hazard detection.
-// 2. Get the instruciton from I_MEM and use the decoder to set the Ctrl Bits.
+// 2. Get the instruction from I_MEM and use the decoder to set the Ctrl Bits.
 // 3. Use the rs1 & rs2 (RegSrc) to read the Register file data.
 // 4. construct the Immediate types.
 // ----------------- 
@@ -230,12 +230,12 @@ assign RegSrc2Q101H = InstructionQ101H[24:20];
 // ---- Read Register File ----
 assign MatchRd1AftrWrQ101H = (RegSrc1Q101H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q101H != 5'b0);
 
-assign RegRdData1Q101H = MatchRd1AftrWrQ101H    ? RegWrDataQ104H        : // forword WrDataQ104H -> RdDataQ101H
+assign RegRdData1Q101H = MatchRd1AftrWrQ101H    ? RegWrDataQ104H        : // forward WrDataQ104H -> RdDataQ101H
                          (RegSrc1Q101H == 5'b0) ? 32'b0                 : // Reading from Register[0] should result in '0
                                                   Register[RegSrc1Q101H]; // Common Case - reading from Register file
 
 assign MatchRd2AftrWrQ101H = (RegSrc2Q101H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc2Q101H != 5'b0);
-assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // forword WrDataQ104H -> RdDataQ101H
+assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // forward WrDataQ104H -> RdDataQ101H
                          (RegSrc2Q101H == 5'b0) ? 32'b0                 : // Reading from Register[0] should result in '0 
                                                   Register[RegSrc2Q101H]; // Common Case - reading from Register file
 
@@ -290,7 +290,7 @@ assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) &
 assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);
 assign Hazard1Data2Q102H = (RegSrc2Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc2Q102H != 5'b0);
 assign Hazard2Data2Q102H = (RegSrc2Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc2Q102H != 5'b0);
-// Forwording unite
+// Forwarding unite
 assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
                          Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
                                              PreRegRdData1Q102H; // Common Case - No Hazard

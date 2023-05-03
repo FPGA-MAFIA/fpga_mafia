@@ -19,18 +19,20 @@ module  cache_tq
     input   logic           clk,        
     input   logic           rst,        
     //core Interface
-    input   var t_req       core2cache_req,
+    input   var t_req       pre_core2cache_req,
     output  logic           stall,
     output  t_rd_rsp        cache2core_rsp,
     //FM Interface
     input   var t_fm_rd_rsp fm2cache_rd_rsp,
     //Pipe Interface
-    output  t_lu_req        pipe_lu_req_q1,
-    input   var t_lu_rsp    pipe_lu_rsp_q3
+    output  t_lu_req           pipe_lu_req_q1,
+    input   var t_early_lu_rsp pipe_early_lu_rsp_q2,
+    input   var t_lu_rsp       pipe_lu_rsp_q3
 );
+t_req                         core2cache_req;
+t_req                         reissue_req;
 t_tq_state [NUM_TQ_ENTRY-1:0] tq_state;
 t_tq_state [NUM_TQ_ENTRY-1:0] next_tq_state;
-
 
 logic [NUM_TQ_ENTRY-1:0] rd_req_hit_mb;
 logic [NUM_TQ_ENTRY-1:0] wr_req_hit_mb;
@@ -66,26 +68,97 @@ logic        [NUM_TQ_ENTRY-1:0] next_tq_rd_indication;
 logic        [NUM_TQ_ENTRY-1:0] next_tq_wr_indication; 
 t_reg_id     [NUM_TQ_ENTRY-1:0] next_tq_reg_id; 
 
+//==============
+// logic to handle b2b write requests to the same cache line - review, maybe can be simplified to compare the other pipe LU
+//==============
+//logic     [NUM_TQ_ENTRY-1:0]       en_tq_wr_count; 
+//logic     [NUM_TQ_ENTRY-1:0] [2:0] tq_wr_count; 
+//logic     [NUM_TQ_ENTRY-1:0] [2:0] next_tq_wr_count; 
+//logic     [NUM_TQ_ENTRY-1:0]       tq_wr_count_inc;
+//logic     [NUM_TQ_ENTRY-1:0]       tq_wr_count_dec;
+//
+//always_comb begin
+//    for(int i =0; i < NUM_TQ_ENTRY; i++) begin
+//        casez ({tq_wr_count_inc[i], tq_wr_count_dec[i]})
+//            3'b00:   next_tq_wr_count[i] = tq_wr_count[i];
+//            3'b01:   next_tq_wr_count[i] = tq_wr_count[i] + 1;
+//            3'b10:   next_tq_wr_count[i] = tq_wr_count[i] - 1;
+//            3'b11:   next_tq_wr_count[i] = tq_wr_count[i];
+//            default: next_tq_wr_count[i] = tq_wr_count[i];
+//        endcase
+//    end //for
+//end //always_comb
+//
+//generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_wr_count
+//`MAFIA_EN_RST_DFF(tq_wr_count[TQ_GEN], next_tq_wr_count[TQ_GEN], clk, en_tq_wr_count[TQ_GEN], (tq_state == S_IDLE))
+//end endgenerate
+
+logic sel_reissue;
+logic en_reissue_req;
+
+logic set_rd_miss_stall;
+logic rst_rd_miss_stall;
+logic stall_rd_miss_q;
+logic tq_full;
 
 logic rd_hit_pipe_rsp_q3;
-logic fill_with_rd_indication;
+logic fill_with_rd_indication_q3;
+
+t_tq_id      rd_miss_tq_id;
+t_cl_address rd_miss_cl_address;
+
+logic free_exists;
+logic wr_hit_exists;
+logic rd_hit_exists;
+logic fill_exists;
+t_tq_id enc_first_free;
+t_tq_id enc_first_fill;
+t_tq_id enc_wr_req_hit_mb;
+t_tq_id enc_rd_req_hit_mb;
+
+logic set_rd_miss_was_filled;
+logic rd_miss_was_filled;
+logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
+logic [4:0] tq_idle_counter;
+
+// Remember the last request that was cancelled due to a miss - will be reissued when the miss is served
+assign en_reissue_req   = pipe_early_lu_rsp_q2.rd_miss;
+`MAFIA_EN_DFF(reissue_req, pre_core2cache_req, clk, en_reissue_req)
+
+
+//remember the what request read missed - used to determine if the read miss was served by the fill
+`MAFIA_EN_DFF(rd_miss_tq_id,      pipe_early_lu_rsp_q2.lu_tq_id,   clk, en_reissue_req)
+`MAFIA_EN_DFF(rd_miss_cl_address, pipe_early_lu_rsp_q2.cl_address, clk, en_reissue_req)
+
+
+assign set_rd_miss_was_filled = stall_rd_miss_q                                         && 
+                                pipe_early_lu_rsp_q2.alloc_rd_fill                      && 
+                                (pipe_early_lu_rsp_q2.lu_tq_id   == rd_miss_tq_id)      && 
+                                (pipe_early_lu_rsp_q2.cl_address == rd_miss_cl_address) ; 
+
+`MAFIA_EN_RST_DFF(rd_miss_was_filled,  1'b1,   clk, set_rd_miss_was_filled, (rst || sel_reissue) )
+assign sel_reissue = rd_miss_was_filled  && (!fill_exists);
+assign core2cache_req = sel_reissue  ? reissue_req       : // While stall & alloc_rd_fill , reissue the request. (the rd miss was served by the fill)
+                                       pre_core2cache_req; // else, send the request from core
+
+// FIXME - add assertion that a there is no pre_core2cache_req.valid when stall is asserted
 
 assign rd_hit_pipe_rsp_q3     = pipe_lu_rsp_q3.valid               && 
                                (pipe_lu_rsp_q3.lu_op == RD_LU) &&
                                (pipe_lu_rsp_q3.lu_result == HIT);
 
-assign fill_with_rd_indication = pipe_lu_rsp_q3.valid  && 
-                                (pipe_lu_rsp_q3.lu_op == FILL_LU) &&
-                                tq_rd_indication[pipe_lu_rsp_q3.tq_id];
+assign fill_with_rd_indication_q3 = pipe_lu_rsp_q3.valid  && 
+                                    (pipe_lu_rsp_q3.lu_op == FILL_LU) &&
+                                     pipe_lu_rsp_q3.rd_indication;
 
-assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication;
+assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication_q3;
 //take the relevant word from cache line
 assign cache2core_rsp.data    = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
                                 pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
                                 pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.cl_data[95:64] :
                                                                                                     pipe_lu_rsp_q3.cl_data[127:96];
-assign cache2core_rsp.address = pipe_lu_rsp_q3.address; //FIXME: address should come from tq_entry
-assign cache2core_rsp.reg_id  = tq_reg_id[pipe_lu_rsp_q3.tq_id]; //FIXME
+assign cache2core_rsp.address = pipe_lu_rsp_q3.address;
+assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id; //FIXME
 
 
 
@@ -101,10 +174,13 @@ generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate
     `MAFIA_EN_DFF     (tq_reg_id                 [TQ_GEN], next_tq_reg_id                 [TQ_GEN], clk, en_tq_reg_id                 [TQ_GEN])
 end endgenerate
 
-logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
-        allocate_entry[i] = first_free[i] && core2cache_req.valid && (!any_rd_hit_mb) && (!any_wr_hit_mb);
+        allocate_entry[i] = first_free[i]               &&  // first free entry to allocate exists
+                            core2cache_req.valid        &&  // core request is valid
+                            (!any_rd_hit_mb)            &&  // no read hit in merge buffer
+                            (!any_wr_hit_mb)            &&  // no write hit in merge buffer
+                            (!pipe_early_lu_rsp_q2.rd_miss) ;  // no read miss in pipe -> must cancel request, wil be re-issue from the reissue buffer   
     end
     new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
@@ -162,7 +238,15 @@ always_comb begin
                                         (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
                                         (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_LU_CORE         : // this FILL is from an older request, don't want it to affect the entry
                                         /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR           ;
-                end                    
+
+                // Handle the case where there are 2 writes B2B to same cache line
+                // The data is merged in MB, but was already sent to pipe separately, 
+                // only when the last write is done we can go to idle - if other write match in pipe we need to wait for it in the S_LU_CORE state
+                // Note: this is still within the if((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)
+                    if( pipe_lu_rsp_q3.wr_match_in_pipe && (pipe_lu_rsp_q3.lu_result == HIT)) begin
+                         next_tq_state[i] = S_LU_CORE ;
+                    end
+                end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
             end
             S_MB_WAIT_FILL                : begin
                 if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i)) begin
@@ -217,6 +301,16 @@ always_comb begin
                     //set the corresponding bit in the e_modified vector
                     next_tq_merge_buffer_e_modified[i]                        = tq_merge_buffer_e_modified[i];
                     next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
+
+
+                    // This is to fix a corner case where we have a fill & a write in the same cycle!!
+                    // This will make sure that the fm2cache response will not be ignored
+                    if( (tq_state[i] == S_MB_WAIT_FILL) && fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i) )begin
+                        next_tq_merge_buffer_data[i][31:0]   = next_tq_merge_buffer_e_modified[i][0] ? next_tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
+                        next_tq_merge_buffer_data[i][63:32]  = next_tq_merge_buffer_e_modified[i][1] ? next_tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
+                        next_tq_merge_buffer_data[i][95:64]  = next_tq_merge_buffer_e_modified[i][2] ? next_tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
+                        next_tq_merge_buffer_data[i][127:96] = next_tq_merge_buffer_e_modified[i][3] ? next_tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
+                    end
                 end //if
 
     end //for loop   
@@ -227,25 +321,43 @@ always_comb begin
         rd_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == RD_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
-                           (!tq_rd_indication[i])           && 
-                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY));
+                           (!tq_rd_indication[i])           && // if the entry is already set as read indication, then we don't merge to the same entry
+                           (!(pipe_early_lu_rsp_q2.rd_miss))&& // the request will be reissued later. we don't want to merge it to the same entry
+                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
     
         wr_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == WR_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
+                           (!tq_rd_indication[i])           && //if the entry is already set as read indication, then we don't merge to the same entry
+                           (!(pipe_early_lu_rsp_q2.rd_miss))&& // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
     
     end
 end
 
-always_comb begin
-    stall            = 1'b1;                //default to stall
+always_comb begin : tq_full_logic
+    tq_idle_counter = '0;
     for(int i =0; i<NUM_TQ_ENTRY; ++i) begin
         if(tq_state[i] == S_IDLE) begin     //if there is an idle entry, then no stall
-            stall = 1'b0;
+            tq_idle_counter = tq_idle_counter +1;
         end
     end
+    tq_full = (tq_idle_counter == 1 ) || (tq_idle_counter == 0 ) ;
 end
+
+//sticky stall indication - used for read miss stall logic
+assign set_rd_miss_stall = pipe_early_lu_rsp_q2.rd_miss;
+assign rst_rd_miss_stall = sel_reissue;
+// This is an implementation of a set_rst flop using a en_rst flop
+`MAFIA_EN_RST_DFF(stall_rd_miss_q,            // output
+                  1'b1 ,  
+                  clk, 
+                  set_rd_miss_stall,           // set condition
+                  (rst_rd_miss_stall || rst) ) // reset condition
+
+//Stall if there is a read miss in pipe q2 or tq full.
+assign stall = tq_full || stall_rd_miss_q || set_rd_miss_stall;
+
 
 assign any_rd_hit_mb = |rd_req_hit_mb;
 assign any_wr_hit_mb = |wr_req_hit_mb;
@@ -262,15 +374,10 @@ end
 //FIXME - need to replace with round robin
 `FIND_FIRST(first_fill, fill_entries)
 
-logic free_exists;
-logic wr_hit_exists;
-logic fill_exists;
-t_tq_id enc_first_free;
-t_tq_id enc_first_fill;
-t_tq_id enc_wr_req_hit_mb;
 `ENCODER(enc_first_free, free_exists, first_free)
 `ENCODER(enc_first_fill, fill_exists, first_fill)
 `ENCODER(enc_wr_req_hit_mb, wr_hit_exists, wr_req_hit_mb)
+`ENCODER(enc_rd_req_hit_mb, rd_hit_exists, rd_req_hit_mb)
 
 //=================
 // Pipe lookup mux - core request vs fill request
@@ -278,16 +385,21 @@ t_tq_id enc_wr_req_hit_mb;
 always_comb begin
     pipe_lu_req_q1 = '0;
     if(core2cache_req.valid) begin
-        pipe_lu_req_q1.valid   = core2cache_req.valid;
-        pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
-                                 (core2cache_req.opcode == RD_OP) ? RD_LU :
-                                                                    NO_LU ;
-        pipe_lu_req_q1.address       = core2cache_req.address;
-        pipe_lu_req_q1.data          = core2cache_req.data;
-        pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb : enc_first_free;
-        pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
-        pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
-        pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
+        if(!pipe_early_lu_rsp_q2.rd_miss) begin // incase of rd miss in q2, then we need to cancel the core request and reissue it later
+            pipe_lu_req_q1.valid   = core2cache_req.valid;
+            pipe_lu_req_q1.reg_id  = core2cache_req.reg_id;
+            pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
+                                     (core2cache_req.opcode == RD_OP) ? RD_LU :
+                                                                        NO_LU ;
+            pipe_lu_req_q1.address       = core2cache_req.address;
+            pipe_lu_req_q1.data          = core2cache_req.data;
+            pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb :
+                                           any_rd_hit_mb ? enc_rd_req_hit_mb :
+                                                           enc_first_free    ;
+            pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
+            pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
+            pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
+        end // pipe_early_lu_rsp_q2.rd_miss
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
         pipe_lu_req_q1.lu_op         = FILL_LU;
@@ -296,7 +408,12 @@ always_comb begin
         pipe_lu_req_q1.tq_id         = enc_first_fill;
         pipe_lu_req_q1.rd_indication = tq_rd_indication    [enc_first_fill];
         pipe_lu_req_q1.wr_indication = tq_wr_indication    [enc_first_fill];
+        pipe_lu_req_q1.reg_id        = tq_reg_id           [enc_first_fill];
     end //else if
+
+    //incase of a read miss, we need to cancel the request and re-issue it later from the re-issue buffer
+
+
 
 end
 

@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import time
 import os
 import shutil
 import subprocess
@@ -34,7 +35,10 @@ parser.add_argument('-pp',        action='store_true',    help='run post-process
 parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
-parser.add_argument('-params',    default=' ',             help='used for overriding parameter values in simulation')
+parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
+parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
+parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
+parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
 args = parser.parse_args()
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -79,6 +83,7 @@ class Test:
         self.target , self.gcc_dir = self._create_test_dir()
         self.path = TESTS+self.file_name
         self.fail_flag = False
+        self.duration = 0
         # the tests parameters
         self.params = params # FIXME ABD
     def _create_test_dir(self):
@@ -89,7 +94,8 @@ class Test:
         if not os.path.exists(TARGET+'tests/'+self.name):
             mkdir(TARGET+'tests/'+self.name)
         if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
-            mkdir(TARGET+'tests/'+self.name+'/gcc_files')
+            if(args.app):
+                mkdir(TARGET+'tests/'+self.name+'/gcc_files')
         if not os.path.exists(MODELSIM):
             mkdir(MODELSIM)
         if not os.path.exists(MODELSIM+'work'):
@@ -249,18 +255,51 @@ class Test:
         # Return the return code of the post process command
         return return_val.returncode
 
+    def _start_mif(self):
+        chdir(FPGA_ROOT)
+        # generate mif files
+        try:
+            i_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/i_mem.mif 0'
+            results = run_cmd_with_capture(i_mem_mif_cmd)
+        except:
+            print_message('[ERROR] Failed to generate i_mem.mif file for test '+self.name)
+            self.fail_flag = True
+        else:
+            try:
+                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
+                results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
+            except:
+                print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
+                self.fail_flag = True
+        chdir(MODEL_ROOT)       
+
     def _start_fpga(self):
         chdir(FPGA_ROOT)
+        # generate mif files
         try:
-            fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.dut+' -c de10_lite_'+self.dut+' '
-            results = run_cmd_with_capture(fpga_cmd)
+            i_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/i_mem.mif 0'
+            results = run_cmd_with_capture(i_mem_mif_cmd)
         except:
-            print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
+            print_message('[ERROR] Failed to generate i_mem.mif file for test '+self.name)
             self.fail_flag = True
+        else:
+            try:
+                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
+                results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
+            except:
+                print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
+                self.fail_flag = True
+            else:
+                try:
+                    fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.dut+' -c de10_lite_'+self.dut+' '
+                    results = run_cmd_with_capture(fpga_cmd)
+                except:
+                    print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
+                    self.fail_flag = True
         chdir(MODEL_ROOT)       
         find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.dut+'/output_files/*'
         results = run_cmd_with_capture(find_war_err_cmd)
-        print_message(results.stdout)
+        print_message(f'[INFO]'+results.stdout)
         print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
 
 def print_message(msg):
@@ -306,6 +345,16 @@ def main():
     if not os.path.exists(SOURCE):
         print_message(f'[ERROR] There is no dut \'{args.dut}\'')
         exit(1)
+
+    # if args.clean  clean target/dut/tests/ directory before starting running the build script
+    if args.clean:
+        print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
+        if os.path.exists('target/'+args.dut+'/tests/'):
+            shutil.rmtree('target/'+args.dut+'/tests/')
+        else:
+            print_message('[INFO] nothing to clean - target/'+args.dut+'/tests/ directory does not exist')
+    
+    # create target/dut/tests/ directory if not exists
     if not os.path.exists('target/'+args.dut+'/tests/'):
         os.makedirs('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
@@ -379,38 +428,67 @@ def main():
     # sys.stderr = open(log_file, "w", buffering=1)   
 
     for test in tests:
+        start_test_time = time.time()
+
+        # check out the output has an directory with the test name and the *_transcript file, if so, copy the dir with a suffix _1, _2, etc.
+        if os.path.exists('target/'+args.dut+'/tests/'+test.name+'/'+test.name+'_transcript'):
+            i=1
+            while os.path.exists('target/'+args.dut+'/tests/'+test.name+'_'+str(i)):
+                i += 1
+            shutil.copytree('target/'+args.dut+'/tests/'+test.name, 'target/'+args.dut+'/tests/'+test.name+'_'+str(i))
+        
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
         print_message('******************************************************************************')
-        if (args.app or args.full_run) and not test.fail_flag:
-            test._compile_sw()
-        if (args.hw or args.full_run) and not test.fail_flag:
-            test._compile_hw()
-        if (args.sim or args.full_run) and not test.fail_flag:
-            test._start_simulation()
-        if (args.fpga) and not test.fail_flag:
-            test._start_fpga()
-        if (args.gui):
-            test._gui()
-        if (args.pp) and not test.fail_flag:
-            if (test._post_process()):# if return value is 0, then the post process is done successfully
-                test.fail_flag = True
-        if not args.debug:
-            test._no_debug()
-        print_message(f'************************** End {test.name} **********************************')
-        print()
-        if(test.fail_flag):
-            run_status = "FAILED"
+        if(run_status == "FAILED" and not args.keep_going):
+            print_message('[ERROR] previous test failed, skipping test - '+test.name+'\n')
+            test.fail_flag = True
+        else:
+            if (test.fail_flag and args.keep_going):
+                print_message('[INFO] previous test failed, using -keep_going -> continuing test - '+test.name+'\n')
+            if (args.app or args.full_run) and not test.fail_flag:
+                test._compile_sw()
+            if (args.hw or args.full_run) and not test.fail_flag:
+                test._compile_hw()
+            if (args.sim or args.full_run) and not test.fail_flag:
+                test._start_simulation()
+            if (args.fpga) and not test.fail_flag:
+                test._start_fpga()
+            if (args.mif):
+                test._start_mif()
+            if (args.gui):
+                test._gui()
+            if (args.pp) and not test.fail_flag:
+                if (test._post_process()):# if return value is 0, then the post process is done successfully
+                    test.fail_flag = True
+            if not args.debug:
+                test._no_debug()
+
+            # print the test execution time
+            end_test_time = time.time()
+            test.duration = end_test_time - start_test_time
+            print_message(f"[INFO] test execution took {test.duration:.2f} seconds.")
+
+            print_message(f'************************** End {test.name} **********************************')
+            print()
+            if(test.fail_flag):
+                run_status = "FAILED"
     # sys.stdout.flush()
     # sys.stderr.flush()
 
-    if(run_status == "FAILED"):
-        print_message('The failed tests are:')
+
+#===================================================================================================
+#       EOT - End Of Test section
+#===================================================================================================
+    print_message('=============================')
+    print_message('[INFO] Tests Final Status:')
+    print_message('=============================')
     for test in tests:
         if(test.fail_flag==True):
-            print_message(f'[ERROR] test failed - {test.name}  - target/'+args.dut+'/tests/'+test.name+'/')
+            print_message(f'[ERROR] test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
         if(test.fail_flag==False):
-            print_message(f'[INFO] test Passed- {test.name}  - target/'+args.dut+'/tests/'+test.name+'/')
+            print_message(f'[INFO] test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
+
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')
     print_message('=================================================================================')
@@ -424,4 +502,10 @@ def main():
         return 0
 
 if __name__ == "__main__" :
-    sys.exit(main())
+    start_time = time.time()
+    exit_status = main()
+    end_time = time.time()
+    duration = end_time - start_time
+    print_message(f"[INFO] Script execution took {duration:.2f} seconds.")
+
+    sys.exit(exit_status)
