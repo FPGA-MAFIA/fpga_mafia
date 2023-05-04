@@ -23,13 +23,26 @@ task backdoor_cache_load();
   for(int D_WAY = 0; D_WAY< (SET_ADRS_WIDTH + WAY_WIDTH) ; D_WAY++) begin
     data_mem[D_WAY]  = 'h5000+D_WAY;
   end
+  if(V_D_CACHE_TEST == 1) force_backdoor_d_tag_data();
+  if(V_I_CACHE_TEST == 1) force_backdoor_i_tag_data();
+endtask
+
+task force_backdoor_d_tag_data();
     force cache.cache_pipe_wrap.tag_array.mem  = tag_mem;
     force cache.cache_pipe_wrap.data_array.mem = data_mem;
     delay(5);
-
     release cache.cache_pipe_wrap.data_array.mem;
     release cache.cache_pipe_wrap.tag_array.mem;
 endtask
+
+task force_backdoor_i_tag_data();
+    force i_cache.cache_pipe_wrap.tag_array.mem  = tag_mem;
+    force i_cache.cache_pipe_wrap.data_array.mem = data_mem;
+    delay(5);
+    release i_cache.cache_pipe_wrap.data_array.mem;
+    release i_cache.cache_pipe_wrap.tag_array.mem;
+endtask
+
 
 //=======================================================
 //=======================================================
