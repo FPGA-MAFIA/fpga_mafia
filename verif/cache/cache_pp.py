@@ -39,6 +39,17 @@ file_transcript = os.path.join(base_path, args.test_name, transcript).replace("\
 # Construct the paths to the two files to compare
 file1_path = os.path.join(base_path, args.test_name, "cache_ref_trk.log").replace("\\", "/")
 file2_path = os.path.join(base_path, args.test_name, "cache_ref_gold_trk.log").replace("\\", "/")
+# add error handling for missing files
+if not os.path.exists(file1_path):
+    print_message("[PP_ERROR] File not found: "+file1_path)
+    sys.exit(1)
+if not os.path.exists(file2_path):
+    print_message("[PP_ERROR] File not found: "+file2_path)
+    sys.exit(1)
+if not os.path.exists(file_transcript):
+    print_message("[PP_ERROR] File not found: "+file_transcript)
+    sys.exit(1)
+
 #Reorder the ref_trk files by pairs of Req/rsp
 ref_orderer.orderer_func(file1_path)
 ref_orderer.orderer_func(file2_path)

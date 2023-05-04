@@ -131,11 +131,13 @@ end endgenerate
 logic      dmem_stall;
 t_rd_rsp   dmem_cache2core_rsp;
 t_fm_req   dmem_cache2fm_req_q3;
+t_req      dmem_core2cache_req;
+
 cache cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
     //Agent Interface                      
-   .core2cache_req     (core2cache_req), //input   
+   .core2cache_req     (dmem_core2cache_req), //input   
    .stall              (dmem_stall),          //output  logic
    .cache2core_rsp     (dmem_cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
@@ -149,11 +151,12 @@ cache cache ( //DUT
 logic      imem_stall;
 t_rd_rsp   imem_cache2core_rsp;
 t_fm_req   imem_cache2fm_req_q3;
+t_req      imem_core2cache_req;
 i_cache i_cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
     //Agent Interface                      
-   .core2cache_req     (core2cache_req), //input   
+   .core2cache_req     (imem_core2cache_req), //input   
    .stall              (imem_stall),          //output  logic
    .cache2core_rsp     (imem_cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
@@ -168,6 +171,8 @@ assign cache2core_rsp  = V_D_CACHE_TEST ? dmem_cache2core_rsp :
 assign cache2fm_req_q3 = V_D_CACHE_TEST ? dmem_cache2fm_req_q3 : 
                          V_I_CACHE_TEST ? imem_cache2fm_req_q3 : '0;
 
+assign dmem_core2cache_req = V_D_CACHE_TEST ? core2cache_req :  t_req'('0);
+assign imem_core2cache_req = V_I_CACHE_TEST ? core2cache_req :  t_req'('0);
 
 `ASSERT("single_test_enabled",                             //name
         ( (V_D_CACHE_TEST == 1) && (V_I_CACHE_TEST == 1) ),//expression
