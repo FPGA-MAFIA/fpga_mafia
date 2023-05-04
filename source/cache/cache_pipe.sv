@@ -158,7 +158,7 @@ assign set_ways_free_q2 = ~rd_data_set_rsp_q2.valid;
 `FIND_FIRST(first_free_way_q2, set_ways_free_q2)
 `FIND_FIRST(first_lru_way_q2 , set_ways_lru_q2)
 
-always_comb begin : fill_victem_way
+always_comb begin : fill_victim_way
     set_ways_victim_q2 = '0; //TODO
     dirty_evict_q2     = 1'b0;
     any_free_way_q2    = |set_ways_free_q2;
