@@ -121,6 +121,9 @@ end// initial
 generate if(V_D_CACHE_TEST == 1) begin
 `include "d_cache_trk.vh"
 end endgenerate
+generate if(V_I_CACHE_TEST == 1) begin
+`include "i_cache_trk.vh"
+end endgenerate
 
 //==================
 // D_CACHE DUT
