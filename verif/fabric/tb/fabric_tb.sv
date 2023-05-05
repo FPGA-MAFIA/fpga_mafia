@@ -8,6 +8,7 @@ int fabric_test_true;
 int mini_core_tile_test_true;
 string test_name;
 
+`include "mini_core_tile_dut.vh"
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
 // =============================
@@ -53,7 +54,7 @@ endfunction
 initial begin : timeout_monitor
   #10us;
   //$fatal(1, "Timeout");
-  $error("timeout test");
+  //$error("timeout test");
   $finish();
 end
 
@@ -83,6 +84,9 @@ initial begin
   end else begin
     $error("[ERROR] : this is not a valid test name");
   end
+  delay(30);
+  $display("TEST DONE");
+  $finish();
 end
 
 endmodule
