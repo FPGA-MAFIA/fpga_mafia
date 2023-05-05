@@ -118,12 +118,6 @@ delay(80); $finish;
 end// initial
 
 `include "cache_tasks.vh"
-generate if(V_D_CACHE_TEST == 1) begin
-`include "d_cache_trk.vh"
-end endgenerate
-generate if(V_I_CACHE_TEST == 1) begin
-`include "i_cache_trk.vh"
-end endgenerate
 
 //==================
 // D_CACHE DUT
@@ -133,6 +127,9 @@ t_rd_rsp   dmem_cache2core_rsp;
 t_fm_req   dmem_cache2fm_req_q3;
 t_req      dmem_core2cache_req;
 
+generate if(V_D_CACHE_TEST == 1) begin
+`include "d_cache_trk.vh"
+end endgenerate
 cache cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
@@ -152,6 +149,9 @@ logic      imem_stall;
 t_rd_rsp   imem_cache2core_rsp;
 t_fm_req   imem_cache2fm_req_q3;
 t_req      imem_core2cache_req;
+generate if(V_I_CACHE_TEST == 1) begin
+`include "i_cache_trk.vh"
+end endgenerate
 i_cache i_cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
