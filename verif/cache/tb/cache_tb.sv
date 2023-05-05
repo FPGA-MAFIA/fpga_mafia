@@ -13,6 +13,8 @@ t_fm_rd_rsp [9:0] samp_fm2cache_rd_rsp;
 t_fm_rd_rsp       fm2cache_rd_rsp;
 
 
+parameter V_D_CACHE_TEST=1; // default is D cache test
+parameter V_I_CACHE_TEST=0; // Can be overridden by test
 
 int LOCAL_NUM_TAG_PULL; // used for setting the number of tag pulls from test itself
 int LOCAL_NUM_SET_PULL; // used for setting the number of tag pulls from test itself
@@ -115,22 +117,67 @@ $display("\n\n================\n     Done\n================\n");
 delay(80); $finish;
 end// initial
 
-`include "cache_trk.vh"
 `include "cache_tasks.vh"
+generate if(V_D_CACHE_TEST == 1) begin
+`include "d_cache_trk.vh"
+end endgenerate
+generate if(V_I_CACHE_TEST == 1) begin
+`include "i_cache_trk.vh"
+end endgenerate
+
+//==================
+// D_CACHE DUT
+//==================
+logic      dmem_stall;
+t_rd_rsp   dmem_cache2core_rsp;
+t_fm_req   dmem_cache2fm_req_q3;
+t_req      dmem_core2cache_req;
 
 cache cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
     //Agent Interface                      
-   .core2cache_req     (core2cache_req), //input   
-   .stall              (stall),          //output  logic
-   .cache2core_rsp     (cache2core_rsp), //output  t_rd_rsp
+   .core2cache_req     (dmem_core2cache_req), //input   
+   .stall              (dmem_stall),          //output  logic
+   .cache2core_rsp     (dmem_cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
-   .cache2fm_req_q3    (cache2fm_req_q3),//output  t_fm_req
+   .cache2fm_req_q3    (dmem_cache2fm_req_q3),//output  t_fm_req
    .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
 );
 
+//==================
+// I_CACHE DUT
+//==================
+logic      imem_stall;
+t_rd_rsp   imem_cache2core_rsp;
+t_fm_req   imem_cache2fm_req_q3;
+t_req      imem_core2cache_req;
+i_cache i_cache ( //DUT
+   .clk                (clk),            //input   logic
+   .rst                (rst),            //input   logic
+    //Agent Interface                      
+   .core2cache_req     (imem_core2cache_req), //input   
+   .stall              (imem_stall),          //output  logic
+   .cache2core_rsp     (imem_cache2core_rsp), //output  t_rd_rsp
+    // FM Interface                   
+   .cache2fm_req_q3    (imem_cache2fm_req_q3),//output  t_fm_req
+   .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
+);
+    
+assign stall           = V_D_CACHE_TEST ? dmem_stall : 
+                         V_I_CACHE_TEST ? imem_stall : 1'b0;
+assign cache2core_rsp  = V_D_CACHE_TEST ? dmem_cache2core_rsp : 
+                         V_I_CACHE_TEST ? imem_cache2core_rsp : '0;
+assign cache2fm_req_q3 = V_D_CACHE_TEST ? dmem_cache2fm_req_q3 : 
+                         V_I_CACHE_TEST ? imem_cache2fm_req_q3 : '0;
 
+assign dmem_core2cache_req = V_D_CACHE_TEST ? core2cache_req :  t_req'('0);
+assign imem_core2cache_req = V_I_CACHE_TEST ? core2cache_req :  t_req'('0);
+
+`ASSERT("single_test_enabled",                             //name
+        ( (V_D_CACHE_TEST == 1) && (V_I_CACHE_TEST == 1) ),//expression
+        1'b1,                                              //enabled
+        "Only one cache test can be enabled at a time - please review the TB parameters overrides");//message
 //============================
 //          Far Memory ARRAY
 //============================

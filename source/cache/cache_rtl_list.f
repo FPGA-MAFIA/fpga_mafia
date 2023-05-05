@@ -17,6 +17,7 @@
 ../../../source/cache/cache_param_pkg.sv
 
 // === DUT === 
+// Data cache
 ../../../source/cache/cache.sv
 ../../../source/cache/cache_tq.sv
 ../../../source/cache/cache_pipe_wrap.sv
@@ -24,6 +25,8 @@
 ../../../source/common/array.sv
 
 
+// instruction cache
+../../../source/cache/i_cache.sv
 
 
 

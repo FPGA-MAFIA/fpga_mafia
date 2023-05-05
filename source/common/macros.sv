@@ -70,7 +70,7 @@
 `define ASSERT(name, expr, en, msg) \
    always @(posedge clk) begin \
       if (en && expr) begin \
-         $error($sformatf("%s: %s", name, msg)); \
+         $error($sformatf("[ERROR] %s: %s", name, msg)); \
       end \
    end
 

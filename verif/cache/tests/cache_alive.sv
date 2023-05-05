@@ -1,5 +1,4 @@
 //preload Cache
-delay(1); backdoor_cache_load();
 delay(5);   wr_req(20'hE8_01_0, 32'hDEAD_BEAF , 5'b0);
 delay(5);   wr_req(20'hE9_01_0, 32'hFAFA_FAFA , 5'b1);
 delay(5);   wr_req(20'hEA_01_0, 32'hBABA_BABA , 5'b1);

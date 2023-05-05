@@ -13,7 +13,7 @@
 //-----------------------------------------------------------------------------
 `include "macros.sv"
 
-module cache 
+module i_cache 
     import cache_param_pkg::*;  
 (
     input   logic           clk,
@@ -56,6 +56,19 @@ cache_pipe_wrap cache_pipe_wrap (
     //FM Interface
     .cache2fm_req_q3 (cache2fm_req_q3)//output
 );
+
+
+//======================================
+// Assertions
+//======================================
+
+// the assertion will make sure the simulation sends only rd request to the i_cache
+`ASSERT("core2cache_wr_req",                                          //name
+        ( (core2cache_req.valid && (core2cache_req.opcode == WR_OP) )),//expression
+        (!rst),                                                       //enabled
+        "in the i cache, we can only accept rd requests");            //message
+
+
 
 
 endmodule

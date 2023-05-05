@@ -8,31 +8,6 @@ task delay(input int cycles);
 endtask
 
 //=======================================================
-//=======================================================
-task backdoor_cache_load();
-  for(int SET =0; SET< NUM_SET ; SET++) begin
-    for(int WAY =0; WAY< NUM_WAYS; WAY++) begin
-        back_door_entry.tags    [WAY] = WAY + 1000;
-        back_door_entry.valid   [WAY] = 1'b1;
-        back_door_entry.modified[WAY] = 1'b0;
-        back_door_entry.mru     [WAY] = 1'b0;
-    end
-    tag_mem[SET]  = back_door_entry;
-  end
-
-  for(int D_WAY = 0; D_WAY< (SET_ADRS_WIDTH + WAY_WIDTH) ; D_WAY++) begin
-    data_mem[D_WAY]  = 'h5000+D_WAY;
-  end
-    force cache.cache_pipe_wrap.tag_array.mem  = tag_mem;
-    force cache.cache_pipe_wrap.data_array.mem = data_mem;
-    delay(5);
-
-    release cache.cache_pipe_wrap.data_array.mem;
-    release cache.cache_pipe_wrap.tag_array.mem;
-endtask
-
-//=======================================================
-//=======================================================
 task backdoor_fm_load();
   $display("= backdoor_fm_load start =\n");
   for(int FM_ADDRESS =0; FM_ADDRESS < NUM_FM_CL ; FM_ADDRESS++) begin
