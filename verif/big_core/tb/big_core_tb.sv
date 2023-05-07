@@ -42,8 +42,11 @@ logic [9:0]  Switch;
 t_fpga_out  fpga_out;
 t_fpga_out  next_fpga_out;
 t_vga_out   vga_out;
+logic inDisplayArea; 
 
+logic EndOfTest;
 `MAFIA_DFF(fpga_out, next_fpga_out, Clk)
+`include "big_core_tasks.vh"
 
 //=========================================
 // Instantiating the big_core core
@@ -70,6 +73,7 @@ big_core_top big_core_top(
     .Button_1       (Button_1),
     .Switch         (Switch  ),
     .fpga_out       (next_fpga_out),
+    .inDisplayArea  (inDisplayArea),
     .vga_out        (vga_out  ) 
 );
 
@@ -87,6 +91,10 @@ end//initial clock_gen
 // reset generation
 // ========================
 initial begin: reset_gen
+    Button_0 = 1'b0;
+    Button_1 = 1'b0;
+    Switch   = 10'b0;
+    EndOfTest = 1'b0;
     Rst = 1'b1;
 #40 Rst = 1'b0;
 end: reset_gen
@@ -120,9 +128,13 @@ initial begin: test_seq
         release big_core_top.big_core_mem_wrap.d_mem.DMem;
         release ref_core.DMem;
     end
+    if(test_name == "alive_sim_FPGA") begin
+        `include "alive_sim_FPGA.vh"
+    end
 
 
-    #1000000
+    #100000
+    EndOfTest = 1'b1;
     print_vga_screen();
     $error(" Timeout \n===================\n test %s ended timeout \n=====================", test_name);
     $finish;

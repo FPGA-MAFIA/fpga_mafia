@@ -1,4 +1,6 @@
 +incdir+../../../source/common/
++incdir+../../../verif/big_core/tb/
++incdir+../../../verif/big_core/tests/
 ../../../verif/big_core/tb/big_core_tb.sv
 
 //This is used for the reference core model

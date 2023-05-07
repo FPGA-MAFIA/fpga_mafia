@@ -125,7 +125,7 @@ parameter CR_SEG7_5    = CR_MEM_OFFSET + 'h14 ; // RW 8 bit
 parameter CR_LED       = CR_MEM_OFFSET + 'h18 ; // RW 10 bit
 parameter CR_Button_0  = CR_MEM_OFFSET + 'h1C ; // RO 1 bit
 parameter CR_Button_1  = CR_MEM_OFFSET + 'h20 ; // RO 1 bit
-parameter CR_Switch    = CR_MEM_OFFSET + 'h24 ; // RO 10 bit
+parameter CR_SWITCH    = CR_MEM_OFFSET + 'h24 ; // RO 10 bit
 
 
 typedef struct packed { // RO

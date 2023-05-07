@@ -95,7 +95,7 @@ always_comb begin
             // ---- RO memory ----
             CR_Button_0 : pre_q = {31'b0 , cr_ro_next.Button_0} ;
             CR_Button_1 : pre_q = {31'b0 , cr_ro_next.Button_1} ;
-            CR_Switch   : pre_q = {22'b0 , cr_ro_next.Switch}   ;
+            CR_SWITCH   : pre_q = {22'b0 , cr_ro_next.Switch}   ;
             default     : pre_q = 32'b0                         ;
         endcase
     end

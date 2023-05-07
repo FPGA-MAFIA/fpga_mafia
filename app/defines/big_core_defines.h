@@ -62,7 +62,7 @@
 #define CR_LED      ((volatile int *) (CR_MEM_BASE + 0x18))
 #define CR_Button_0 ((volatile int *) (CR_MEM_BASE + 0x1c))
 #define CR_Button_1 ((volatile int *) (CR_MEM_BASE + 0x20))
-#define CR_Switch   ((volatile int *) (CR_MEM_BASE + 0x24))
+#define CR_SWITCH   ((volatile int *) (CR_MEM_BASE + 0x24))
 
 
 

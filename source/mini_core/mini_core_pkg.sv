@@ -111,8 +111,8 @@ parameter CR_SEG7_5    = CR_SEG7_4   + 4 ; // RW 7 bit
 parameter CR_LED       = CR_SEG7_5   + 4 ; // RW 10 bit
 parameter CR_Button_0  = CR_LED      + 4 ; // RO 1 bit
 parameter CR_Button_1  = CR_Button_0 + 4 ; // RO 1 bit
-parameter CR_Switch    = CR_Button_1 + 4 ; // RO 10 bit
-parameter CR_CURSOR_H  = CR_Switch   + 4 ; // RW 32 bit
+parameter CR_SWITCH    = CR_Button_1 + 4 ; // RO 10 bit
+parameter CR_CURSOR_H  = CR_SWITCH   + 4 ; // RW 32 bit
 parameter CR_CURSOR_V  = CR_CURSOR_H + 4 ; // RW 32 bit
 
 typedef struct packed { // RO
