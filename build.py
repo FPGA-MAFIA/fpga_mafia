@@ -266,7 +266,10 @@ class Test:
             self.fail_flag = True
         else:
             try:
-                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
+                if os.path.exists(TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
+                    d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
+                else:
+                    d_mem_mif_cmd = 'cp mif/defult_d_mem.mif mif/d_mem.mif'
                 results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
             except:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
@@ -275,27 +278,13 @@ class Test:
 
     def _start_fpga(self):
         chdir(FPGA_ROOT)
-        # generate mif files
-        try:
-            i_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/inst_mem.sv mif/i_mem.mif 0'
-            results = run_cmd_with_capture(i_mem_mif_cmd)
-        except:
-            print_message('[ERROR] Failed to generate i_mem.mif file for test '+self.name)
-            self.fail_flag = True
-        else:
+        if not self.fail_flag:
             try:
-                d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
-                results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
+                fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.dut+' -c de10_lite_'+self.dut+' '
+                results = run_cmd_with_capture(fpga_cmd)
             except:
-                print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
+                print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
                 self.fail_flag = True
-            else:
-                try:
-                    fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.dut+' -c de10_lite_'+self.dut+' '
-                    results = run_cmd_with_capture(fpga_cmd)
-                except:
-                    print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
-                    self.fail_flag = True
         chdir(MODEL_ROOT)       
         find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.dut+'/output_files/*'
         results = run_cmd_with_capture(find_war_err_cmd)
@@ -453,8 +442,11 @@ def main():
             if (args.sim or args.full_run) and not test.fail_flag:
                 test._start_simulation()
             if (args.fpga) and not test.fail_flag:
+                test._start_mif()
                 test._start_fpga()
             if (args.mif):
+                if not args.app:
+                    test._compile_sw()
                 test._start_mif()
             if (args.gui):
                 test._gui()
