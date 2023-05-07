@@ -50,7 +50,9 @@ import router_pkg::*;
     output  t_tile_trans        out_south_req,
     input   var t_fab_ready     in_south_ready
 );
-
+logic in_local_req_valid  ; 
+t_tile_trans in_local_req ; 
+t_fab_ready in_local_ready; 
 
 
 router router_inst // TODO - a4d logic to outputs. 
@@ -110,6 +112,7 @@ router router_inst // TODO - a4d logic to outputs.
  .out_local_req         (),// output t_tile_trans  out_local_req,
  .in_local_ready        (in_local_ready)// input   t_fab_ready   in_local_ready, 
 );
+
 
 // Temp TODO FIXME - override with xmt for TB
 assign in_local_req_valid = '0;
