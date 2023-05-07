@@ -63,5 +63,6 @@ end
 `ASSERT("Push when full", full && push, !rst, "Push when full");
 `ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
 
+
 endmodule : fifo
 

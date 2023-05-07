@@ -26,4 +26,6 @@ jobs:
         run:  python build.py -dut 'cache' -debug -regress level0_i_cache -hw -sim -pp -keep_going
       - name: Run build ROUTER -regress level0 -hw -sim -keep_going
         run:  python build.py -dut 'router' -debug -regress level0 -hw -sim -keep_going
+      - name: Run build FABRIC -regress level0 -hw -sim -keep_going
+        run:  python build.py -dut 'fabric' -debug -regress level0 -hw -sim -keep_going
 

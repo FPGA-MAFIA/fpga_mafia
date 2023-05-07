@@ -9,6 +9,7 @@ int mini_core_tile_test_true;
 string test_name;
 
 `include "mini_core_tile_dut.vh"
+`include "fabric_dut.vh"
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
 // =============================
@@ -23,9 +24,12 @@ end
 // RST gen
 // =============================
 task rst_ins();
-#1;
+    //start with reset
+    rst = 1'b1;
+    delay(10);
+    //release reset
+    rst = '0;
 endtask
-
 // =============================
 //  general tasks
 // =============================
@@ -80,6 +84,13 @@ initial begin
     $display("==============================");
   fork 
       run_mini_core_tile_test(test_name);  
+  join
+  end else if(fabric_test_true) begin
+    $display("==============================");
+    $display("[INFO] this is MINI_CORE_TILE test");
+    $display("==============================");
+  fork 
+      run_fabric_test(test_name);  
   join
   end else begin
     $error("[ERROR] : this is not a valid test name");

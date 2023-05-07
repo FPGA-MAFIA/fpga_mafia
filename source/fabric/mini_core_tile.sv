@@ -50,10 +50,16 @@ import router_pkg::*;
     output  t_tile_trans        out_south_req,
     input   var t_fab_ready     in_south_ready
 );
+
+
+// Will be connected to the local mini core
 logic in_local_req_valid  ; 
 t_tile_trans in_local_req ; 
 t_fab_ready in_local_ready; 
 
+logic out_local_req_valid  ; 
+t_tile_trans out_local_req ; 
+t_fab_ready out_local_ready; 
 
 router router_inst // TODO - a4d logic to outputs. 
 (
@@ -106,18 +112,30 @@ router router_inst // TODO - a4d logic to outputs.
  //========================================
  .in_local_req_valid   (in_local_req_valid),// input logic in_local_req_valid,
  .in_local_req         (in_local_req),// input logic in_local_req_valid,
- .out_local_ready      (),// output
+ .out_local_ready      (out_local_ready),// output
  // output request & input ready
- .out_local_req_valid   (),// output logic out_local_req_valid,
- .out_local_req         (),// output t_tile_trans  out_local_req,
+ .out_local_req_valid   (out_local_req_valid),// output logic out_local_req_valid,
+ .out_local_req         (out_local_req),// output t_tile_trans  out_local_req,
  .in_local_ready        (in_local_ready)// input   t_fab_ready   in_local_ready, 
 );
 
 
 // Temp TODO FIXME - override with xmt for TB
+//This is the local mini_core output placeholder (inputs into the router)
 assign in_local_req_valid = '0;
 assign in_local_req       = '0;
-assign in_local_ready     = '0;
+assign in_local_ready     = 4'b1111;
+
+
+//========================================
+// mini core - Local
+//========================================
+//mini_top mini_top (
+//.Clock               (Clk),
+//.Rst                 (Rst),
+//// //============================================
+//// //      fabric interface
+//// //============================================
 
 
 endmodule 
