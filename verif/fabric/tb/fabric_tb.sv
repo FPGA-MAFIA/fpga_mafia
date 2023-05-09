@@ -1,4 +1,6 @@
 `include "macros.sv"
+`define MINI_CORE_TILE(col,row) fabric.instance_tile_col_loop[col].instance_tile_row_loop[row].mini_core_tile_ins
+`define IN_LOCAL_REQ(col,row)   `MINI_CORE_TILE(col,row).in_local_req
 module fabric_tb;
 import router_pkg::*;
 import mini_core_pkg::*;
@@ -12,6 +14,7 @@ string test_name;
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
+//`include "fabric_inputs_trk.vh"
 // =============================
 // CLK GEN
 // =============================
@@ -87,7 +90,7 @@ initial begin
   join
   end else if(fabric_test_true) begin
     $display("==============================");
-    $display("[INFO] this is MINI_CORE_TILE test");
+    $display("[INFO] this is FABRIC test");
     $display("==============================");
   fork 
       run_fabric_test(test_name);  
