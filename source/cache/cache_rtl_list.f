@@ -26,7 +26,7 @@
 
 
 // instruction cache
-../../../source/cache/i_cache.sv
+../../../source/i_cache/i_cache.sv
 
 
 
