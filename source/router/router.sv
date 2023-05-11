@@ -133,6 +133,7 @@ assign in_local_req_valid_match_north  =  in_local_req_valid && (in_local_req.ne
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(NORTH))
 north_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id    
     .in_north_req_valid     ('0                             ) , //    input logic        
     .in_east_req_valid      (in_east_req_valid_match_north  ) , //    input logic        
@@ -214,6 +215,7 @@ assign in_local_req_valid_match_east  = in_local_req_valid && (in_local_req.next
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(EAST))
 east_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id
     .in_north_req_valid     (in_north_req_valid_match_east  ) , //    input logic
     .in_east_req_valid      ('0                             ) , //    input logic
@@ -295,6 +297,7 @@ assign in_local_req_valid_match_south = in_local_req_valid && (in_local_req.next
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(SOUTH))
 south_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id    
     .in_north_req_valid     (in_north_req_valid_match_south ) , //    input logic        
     .in_east_req_valid      (in_east_req_valid_match_south  ) , //    input logic        
@@ -373,6 +376,7 @@ assign in_local_req_valid_match_west  = in_local_req_valid && (in_local_req.next
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(WEST))
 west_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id
     .in_north_req_valid     (in_north_req_valid_match_west  ) , //    input logic
     .in_east_req_valid      (in_east_req_valid_match_west   ) , //    input logic

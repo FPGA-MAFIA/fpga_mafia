@@ -15,6 +15,7 @@ module next_tile_fifo_arb
 import router_pkg::*;
 #(parameter NEXT_TILE_CARDINAL=NULL_CARDINAL)
 (
+    input logic         clk,
     input t_tile_id     local_tile_id,
     input logic         in_north_req_valid,
     input logic         in_east_req_valid,
@@ -144,5 +145,21 @@ for(int i=0; i<5; i++)begin
     end
 end
 end
+
+// Concurrent assertion to check if next_tile is going back
+//  property going_back;
+   // @(posedge clk) 
+   // (next_tile_fifo_arb_card == WEST && req_valid[3] && req_address[3][7:4] >= next_tile_id[7:4]) ||
+   // (next_tile_fifo_arb_card == EAST && req_valid[1] && req_address[1][7:4] <= next_tile_id[7:4]) ||
+   // (next_tile_fifo_arb_card == NORTH && req_valid[0] && req_address[0][3:0] >= next_tile_id[3:0]) ||
+  //  (next_tile_fifo_arb_card == SOUTH && req_valid[2] && req_address[2][3:0] <= next_tile_id[3:0]);
+  //endproperty
+logic going_back;
+`ASSERT (local_tile_id,((next_tile_fifo_arb_card == EAST && req_valid[3] && req_address[3][7:4] >= next_tile_id[7:4]) ||
+    (next_tile_fifo_arb_card == WEST && req_valid[1] && req_address[1][7:4] <= next_tile_id[7:4]) ||
+    (next_tile_fifo_arb_card == SOUTH && req_valid[0] && req_address[0][3:0] >= next_tile_id[3:0]) ||
+    (next_tile_fifo_arb_card == NORTH && req_valid[2] && req_address[2][3:0] <= next_tile_id[3:0])),1'b1,"next_tile is going back");
+  // Assert the going_back property
+  //assert property (going_back);
 
 endmodule 
