@@ -126,7 +126,9 @@ assign in_south_req_valid_match_north  =  in_south_req_valid && (in_south_req.ne
 assign in_east_req_valid_match_north   =  in_east_req_valid  && (in_east_req.next_tile_fifo_arb_id  == NORTH);
 assign in_west_req_valid_match_north   =  in_west_req_valid  && (in_west_req.next_tile_fifo_arb_id  == NORTH);
 assign in_local_req_valid_match_north  =  in_local_req_valid && (in_local_req.next_tile_fifo_arb_id == NORTH);
-
+// TODO we can probably remove this, testing the assertion
+logic in_north_req_valid_match_north;
+assign in_north_req_valid_match_north  =  in_north_req_valid && (in_north_req.next_tile_fifo_arb_id == NORTH);
 //==============================
 // override the next_tile_fifo_arb_id
 //==============================
@@ -135,7 +137,7 @@ next_tile_fifo_arb
 north_next_tile_fifo_arb (
     .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id    
-    .in_north_req_valid     ('0                             ) , //    input logic        
+    .in_north_req_valid     (in_north_req_valid_match_north ) , //    input logic        
     .in_east_req_valid      (in_east_req_valid_match_north  ) , //    input logic        
     .in_south_req_valid     (in_south_req_valid_match_north ) , //    input logic        
     .in_west_req_valid      (in_west_req_valid_match_north  ) , //    input logic        
