@@ -49,7 +49,6 @@ logic [NUM_WORDS_IN_CL-1:0][WORD_WIDTH-1:0] data_array_data_q3;
 
 logic [NUM_WAYS-1:0]                set_ways_mru_q2;
 logic [NUM_WAYS-1:0]                set_ways_victim_q2;
-logic [NUM_WAYS-1:0]                set_ways_modified_q2;
 logic [NUM_WAYS-1:0]                set_ways_valid_q2;
 logic [NUM_WAYS-1:0][TAG_WIDTH-1:0] set_ways_tags_q2; 
 logic [NUM_WAYS-1:0][TAG_WIDTH-1:0] og_set_ways_tags_q2; 
@@ -62,8 +61,6 @@ logic [NUM_WAYS-1:0]                set_ways_lru_q2;
 logic [NUM_WAYS-1:0]                set_ways_free_q2;
 logic [NUM_WAYS-1:0]                first_free_way_q2;
 logic [NUM_WAYS-1:0]                first_lru_way_q2;
-logic [NUM_WAYS-1:0]                victim_and_modified_q2;
-logic                               dirty_evict_q2;
 logic                               any_free_way_q2;
 logic                               any_lru_way_q2;
 logic hazard_detected_q2;
@@ -100,10 +97,8 @@ always_comb begin
   cache_pipe_lu_q1.lu_tag           = pipe_lu_req_q1.address[MSB_TAG:LSB_TAG]; 
   cache_pipe_lu_q1.lu_op            = pipe_lu_req_q1.lu_op ;
   cache_pipe_lu_q1.cl_data          = pipe_lu_req_q1.cl_data;
-  cache_pipe_lu_q1.data             = pipe_lu_req_q1.data;
   cache_pipe_lu_q1.mb_hit_cancel    = pipe_lu_req_q1.mb_hit_cancel ;
   cache_pipe_lu_q1.lu_tq_id         = pipe_lu_req_q1.tq_id; 
-  cache_pipe_lu_q1.fill_modified    = pipe_lu_req_q1.wr_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.fill_rd          = pipe_lu_req_q1.rd_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.rd_indication    = pipe_lu_req_q1.rd_indication;
 
@@ -133,7 +128,6 @@ end //always_comb
 assign hazard_detected_q2 = (cache_pipe_lu_q2.lu_set == cache_pipe_lu_q3.lu_set) && cache_pipe_lu_q3.lu_valid && cache_pipe_lu_q2.lu_valid;
 assign hazard_rd_data_set_rsp_q3.valid    = wr_data_set_q3.valid;
 assign hazard_rd_data_set_rsp_q3.tags     = wr_data_set_q3.tags;
-assign hazard_rd_data_set_rsp_q3.modified = wr_data_set_q3.modified;
 assign hazard_rd_data_set_rsp_q3.mru      = wr_data_set_q3.mru;
 assign rd_data_set_rsp_q2 = hazard_detected_q2 ? hazard_rd_data_set_rsp_q3 : pre_rd_data_set_rsp_q2;
 //======================
@@ -150,8 +144,6 @@ end
 //======================
 //    ALOC_VICTIM (incase of fill)
 //====================== 
-//TODO: if Opcode is fill, find first invalid entry if all valids use MRU to choose victim
-// set the cache_pipe_lu_q2.dirty_evict incase of modified data is the victim
 
 assign set_ways_lru_q2  = ~rd_data_set_rsp_q2.mru;
 assign set_ways_free_q2 = ~rd_data_set_rsp_q2.valid;
@@ -160,7 +152,6 @@ assign set_ways_free_q2 = ~rd_data_set_rsp_q2.valid;
 
 always_comb begin : fill_victim_way
     set_ways_victim_q2 = '0; //TODO
-    dirty_evict_q2     = 1'b0;
     any_free_way_q2    = |set_ways_free_q2;
     any_lru_way_q2     = |first_lru_way_q2;
     if( cache_pipe_lu_q2.lu_op == FILL_LU ) begin
@@ -168,23 +159,14 @@ always_comb begin : fill_victim_way
                              any_lru_way_q2  ? first_lru_way_q2  : // expecting always to have at lease 1 LRU (due to the bit flip)
                                                4'b0000 ;           // not expecting to occure - this will couse a bug if it doues 
     end
-    // if entry is valid, modified and chosen as victim
-    victim_and_modified_q2 = (rd_data_set_rsp_q2.valid & rd_data_set_rsp_q2.modified & set_ways_victim_q2); //the "and" will help us indicate if we choose a modified entry to evict
-    // set the dirty evict bit
-    dirty_evict_q2     = |victim_and_modified_q2;
-
 end
 
 //======================
 //    WRITE_SET_UPDATE
 //======================
-//TODO: in case Rd hit update MRU 
-//      in case of Wr hit update MRU , modified
-//      in case of fill, update tag,valid,mru, modified?
 always_comb begin
     set_ways_valid_q2    = rd_data_set_rsp_q2.valid;    //default value - keep data the same.
     set_ways_mru_q2      = rd_data_set_rsp_q2.mru;      //default value - keep data the same.  
-    set_ways_modified_q2 = rd_data_set_rsp_q2.modified; //default value - keep data the same.  
     set_ways_tags_q2     = rd_data_set_rsp_q2.tags;     //default value - keep data the same.
     og_set_ways_tags_q2  = rd_data_set_rsp_q2.tags;     //default value - keep data the same.
     //-----------------------------
@@ -195,26 +177,12 @@ always_comb begin
     end
 
     //-----------------------------
-    // in case of Wr hit update MRU , modified  
-    //-----------------------------
-    if ((cache_pipe_lu_q2.lu_op == WR_LU) && (cache_pipe_lu_q2.hit)) begin
-        set_ways_mru_q2      = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.mru;     // adding the way hit location to the current MRU vec
-        set_ways_modified_q2 = cache_pipe_lu_q2.set_ways_hit | rd_data_set_rsp_q2.modified;// adding the way hit location to the current modified vec
-    end
-    
-    //-----------------------------
-    // in case of fill, update tag,valid,mru, modified?
+    // in case of fill, update tag,valid,mru
     //-----------------------------
     if ((cache_pipe_lu_q2.lu_op == FILL_LU)) begin
         set_ways_mru_q2                           = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.mru;
         set_ways_valid_q2                         = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.valid;
         set_ways_tags_q2[set_ways_enc_victim_q2]  = cache_pipe_lu_q2.lu_tag;  // updating the way victim entry only - the rest of the ways are updated in the defuat value
-        if(cache_pipe_lu_q2.fill_modified) begin //the fill has modified data from the merge buffer
-            set_ways_modified_q2 = cache_pipe_lu_q2.set_ways_victim | rd_data_set_rsp_q2.modified;// adding the way victim to location to the current modified vec
-        end
-        else begin //clear the modified bit in the victim way
-            set_ways_modified_q2 = ~cache_pipe_lu_q2.set_ways_victim & rd_data_set_rsp_q2.modified;// adding the way victim to location to the current modified vec
-        end
     end
 
     //-----------------------------
@@ -235,7 +203,7 @@ always_comb begin : tag_array_update_assignment
     wr_data_set_q2.set      =  cache_pipe_lu_q2.lu_set; 
     wr_data_set_q2.tags     =  cache_pipe_lu_q2.set_ways_tags ;
     wr_data_set_q2.valid    =  cache_pipe_lu_q2.set_ways_valid ;
-    wr_data_set_q2.modified =  cache_pipe_lu_q2.set_ways_modified ;
+    wr_data_set_q2.modified =  '0;
     wr_data_set_q2.mru      =  cache_pipe_lu_q2.set_ways_mru ;
 end
 
@@ -279,12 +247,10 @@ always_comb begin
   cache_pipe_lu_q2.set_ways_hit         =   way_tag_match_q2;
   cache_pipe_lu_q2.set_ways_enc_hit     =   way_tag_enc_match_q2;
   cache_pipe_lu_q2.set_ways_victim      =   set_ways_victim_q2;
-  cache_pipe_lu_q2.set_ways_modified    =   set_ways_modified_q2;
   cache_pipe_lu_q2.hit                  =   |way_tag_match_q2;
   cache_pipe_lu_q2.miss                 =   !(|way_tag_match_q2) && (cache_pipe_lu_q2.lu_valid);
   cache_pipe_lu_q2.data_array_address   =   (cache_pipe_lu_q2.lu_op == FILL_LU) ? {cache_pipe_lu_q2.lu_set , set_ways_enc_victim_q2} :
                                                                                   {cache_pipe_lu_q2.lu_set , way_tag_enc_match_q2}   ;
-  cache_pipe_lu_q2.dirty_evict          =  dirty_evict_q2;
 
 end //always_comb
 
@@ -350,19 +316,6 @@ assign pipe_lu_rsp_q3.wr_match_in_pipe = wr_match_in_pipe_q1_q3 || wr_match_in_p
 always_comb begin
     cache2fm_req_q3 = '0;   
 //======================
-//    DIRTY_EVICT 
-//======================
-//We should dirty evict to far memory only in case of fill that allocated a modified entry
-if (cache_pipe_lu_q3.dirty_evict &&
-    (cache_pipe_lu_q3.lu_op == FILL_LU)) begin
-    cache2fm_req_q3.valid    =  cache_pipe_lu_q3.lu_valid; 
-    cache2fm_req_q3.address  = {og_set_ways_tags_q3[set_ways_enc_victim_q3], cache_pipe_lu_q3.lu_set, 4'b0000};
-    cache2fm_req_q3.tq_id    =  cache_pipe_lu_q3.lu_tq_id;
-    cache2fm_req_q3.data     =  rd_data_cl_rsp_q3;
-    cache2fm_req_q3.opcode   =  DIRTY_EVICT_OP;
-end
-
-//======================
 //    CACHE_MISS, send FM_FILL_REQUEST
 //======================
 //in case of Rd/Wr cache_miss send a FM fill request
@@ -391,9 +344,8 @@ always_comb begin
     data_array_data_q3                   =   rd_data_cl_rsp_q3; //the current CL in data array
     data_array_data_q3[lu_word_offset_q3]=   cache_pipe_lu_q3.data; //override the specific word
     wr_data_cl_q3                        =   '0;
-    wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
-                                             (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
-                                                                                                            '0; 
+    wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU) ? cache_pipe_lu_q3.cl_data  :
+                                                                                   '0; 
     wr_data_cl_q3.data_array_address     =  cache_pipe_lu_q3.data_array_address;
     wr_data_cl_q3.valid                  =  (cache_pipe_lu_q3.lu_valid && ((cache_pipe_lu_q3.lu_op == WR_LU) && cache_pipe_lu_q3.hit)) ||
                                             (cache_pipe_lu_q3.lu_valid && (cache_pipe_lu_q3.lu_op == FILL_LU));

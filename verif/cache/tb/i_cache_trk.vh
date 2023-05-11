@@ -223,12 +223,11 @@ if(i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
         if ((i_cache.i_cache_tq.tq_state[i] != i_cache.i_cache_tq.next_tq_state[i]) ||
              ((i_cache.i_cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (i_cache.i_cache_tq.rd_req_hit_mb[i] || i_cache.i_cache_tq.wr_req_hit_mb[i]) )
              ) begin
-        $fwrite(i_cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
+        $fwrite(i_cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h       %h            %h              \n",
         $realtime,
         i,
         i_cache.i_cache_tq.next_tq_state              [i].name,     
         i_cache.i_cache_tq.next_tq_rd_indication      [i],     
-        i_cache.i_cache_tq.next_tq_wr_indication      [i],         
         i_cache.i_cache_tq.next_tq_cl_address         [i],
         i_cache.i_cache_tq.next_tq_merge_buffer_data  [i],      
         i_cache.i_cache_tq.next_tq_cl_word_offset     [i],     
