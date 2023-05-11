@@ -29,12 +29,16 @@ end
 
 
 
+// wait for all the requests to be completed
+delay(20);
 $display("======================================\n     EOT : End-Of-Test \n======================================\n");
 //EOT: end of test
 // Go over all the potential address in the test, read it all out
 // The Reference model will compare it to all the data that was written
-read_all_tag_set_pull(.local_num_tag_pull(V_NUM_TAG_PULL), // default values
-                      .local_num_set_pull(V_NUM_SET_PULL), // default values
-                      .tag_pull(tag_pull),  // input
-                      .set_pull(set_pull)  // input
-                     );
+if(V_D_CACHE_TEST == 1) begin
+    read_all_tag_set_pull(.local_num_tag_pull(V_NUM_TAG_PULL), // default values
+                          .local_num_set_pull(V_NUM_SET_PULL), // default values
+                          .tag_pull(tag_pull),  // input
+                          .set_pull(set_pull)  // input
+                         );
+end

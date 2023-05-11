@@ -1,64 +1,64 @@
 //-----------------------------------------------------------------------------
-// Title            : cache_trk
+// Title            : i_cache_trk
 // Project          : fpga_mafia
 //-----------------------------------------------------------------------------
-// File             : cache_trk.vh
+// File             : i_cache_trk.vh
 // Original Author  : Noam Sabban
 // Code Owner       : 
 // Created          : 12/2022
 //-----------------------------------------------------------------------------
 // Description :
-// Create the differents Trackers for our Cache   
+// Create the differents Trackers for our i_Cache   
 //-----------------------------------------------------------------------------
 
 
 
 
 
-integer cache_top_trk;
-integer cache_pipe_io_trk;
-integer cache_tq_trk;
+integer i_cache_top_trk;
+integer i_cache_pipe_io_trk;
+integer i_cache_tq_trk;
 integer cache_ref_gold_trk;
 integer cache_ref_trk;
-integer cache_pipe_stages_trk;
+integer i_cache_pipe_stages_trk;
 
 initial begin
     if ($value$plusargs ("STRING=%s", test_name))
         $display("creating tracker in test directory: target/cache/tests/%s", test_name);
     $timeformat(-12, 0, "", 6);
     
-    cache_top_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_top_trk.log"},"w");
-    $fwrite(cache_top_trk, "==================================================================================\n");
-    $fwrite(cache_top_trk, "                      CACHE TOP TRACKER  -  Test: ",test_name,"\n");
-    $fwrite(cache_top_trk, "==================================================================================\n");
-    $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
-    $fwrite(cache_top_trk," Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data \n");
-    $fwrite(cache_top_trk,"-----------------------------------------------------------------------------------\n");
+    i_cache_top_trk      = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_top_trk.log"},"w");
+    $fwrite(i_cache_top_trk, "==================================================================================\n");
+    $fwrite(i_cache_top_trk, "                      CACHE TOP TRACKER  -  Test: ",test_name,"\n");
+    $fwrite(i_cache_top_trk, "==================================================================================\n");
+    $fwrite(i_cache_top_trk,"-----------------------------------------------------------------------------------\n");
+    $fwrite(i_cache_top_trk," Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data \n");
+    $fwrite(i_cache_top_trk,"-----------------------------------------------------------------------------------\n");
 
-    cache_pipe_io_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_io_trk.log"},"w");
-    $fwrite(cache_pipe_io_trk,"==========================================================================================\n");
-    $fwrite(cache_pipe_io_trk,"                      CACHE PIPE I/O TRACKER  -  Test: ",test_name,"\n"); 
-    $fwrite(cache_pipe_io_trk,"==========================================================================================\n");
-    $fwrite(cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
-    $fwrite(cache_pipe_io_trk,"  Time  ||REQ/RSP||  OPCODE  || TQ ID ||  address  || rd ind || wr ind || Data/Result ||   CL־Data \n");
-    $fwrite(cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
+    i_cache_pipe_io_trk = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_pipe_io_trk.log"},"w");
+    $fwrite(i_cache_pipe_io_trk,"==========================================================================================\n");
+    $fwrite(i_cache_pipe_io_trk,"                      CACHE PIPE I/O TRACKER  -  Test: ",test_name,"\n"); 
+    $fwrite(i_cache_pipe_io_trk,"==========================================================================================\n");
+    $fwrite(i_cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
+    $fwrite(i_cache_pipe_io_trk,"  Time  ||REQ/RSP||  OPCODE  || TQ ID ||  address  || rd ind || wr ind || Data/Result ||   CL־Data \n");
+    $fwrite(i_cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
 
-    cache_pipe_stages_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_pipe_stages_trk.log"},"w");
-    $fwrite(cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
-    $fwrite(cache_pipe_stages_trk,"                                                               CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
-    $fwrite(cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
-    $fwrite(cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(cache_pipe_stages_trk,"Time || OPCODE || TQ || s_w_mru || hit|miss || mb_hit || tag ||set || offset ||   Data  || s_w_valid || s_w_modified ||   s_w_tags  ||  s_w_victim ||  s_w_hit  ||  fill  || fill || dirty ||           cl_data_q3               ||  data array|| cl_data          \n");
-    $fwrite(cache_pipe_stages_trk,"                  ID                           cancel                                                                                                             modified    rd     evict                                            address                                                                \n");
-    $fwrite(cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");  
+    i_cache_pipe_stages_trk = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_pipe_stages_trk.log"},"w");
+    $fwrite(i_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
+    $fwrite(i_cache_pipe_stages_trk,"                                                               CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
+    $fwrite(i_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
+    $fwrite(i_cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+    $fwrite(i_cache_pipe_stages_trk,"Time || OPCODE || TQ || s_w_mru || hit|miss || mb_hit || tag ||set || offset ||   Data  || s_w_valid || s_w_modified ||   s_w_tags  ||  s_w_victim ||  s_w_hit  ||  fill  || fill || dirty ||           cl_data_q3               ||  data array|| cl_data          \n");
+    $fwrite(i_cache_pipe_stages_trk,"                  ID                           cancel                                                                                                             modified    rd     evict                                            address                                                                \n");
+    $fwrite(i_cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");  
 
-    cache_tq_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_tq_trk.log"},"w");
-    $fwrite(cache_tq_trk,"====================================================================================================================\n");
-    $fwrite(cache_tq_trk,"                      CACHE TQ TRACKER  -  Test: ",test_name,"\n");
-    $fwrite(cache_tq_trk,"====================================================================================================================\n");
-    $fwrite(cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
-    $fwrite(cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
+    i_cache_tq_trk      = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_tq_trk.log"},"w");
+    $fwrite(i_cache_tq_trk,"====================================================================================================================\n");
+    $fwrite(i_cache_tq_trk,"                      CACHE TQ TRACKER  -  Test: ",test_name,"\n");
+    $fwrite(i_cache_tq_trk,"====================================================================================================================\n");
+    $fwrite(i_cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
+    $fwrite(i_cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
+    $fwrite(i_cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
     cache_ref_gold_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
     cache_ref_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_trk.log"},"w");
@@ -83,7 +83,7 @@ always @(posedge clk) begin
 // tracker of the Cache Top Level Interface
 //==================================================
     if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
-        $fwrite(cache_top_trk,"%t     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
+        $fwrite(i_cache_top_trk,"%t     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
         $realtime, 
         core2cache_req.address, 
         core2cache_req.reg_id, 
@@ -91,7 +91,7 @@ always @(posedge clk) begin
         core2cache_req.address[MSB_SET:LSB_SET]);      
     end
     if(core2cache_req.valid && (core2cache_req.opcode == WR_OP )) begin
-        $fwrite(cache_top_trk,"%t     CORE_WR_REQ       %h       %h        %h     %h      %h \n",
+        $fwrite(i_cache_top_trk,"%t     CORE_WR_REQ       %h       %h        %h     %h      %h \n",
         $realtime, 
         core2cache_req.address, 
         core2cache_req.reg_id, 
@@ -100,7 +100,7 @@ always @(posedge clk) begin
         core2cache_req.data);      
     end
     if(cache2core_rsp.valid) begin
-        $fwrite(cache_top_trk,"%t     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
+        $fwrite(i_cache_top_trk,"%t     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
         $realtime, 
         cache2core_rsp.address, 
         cache2core_rsp.reg_id, 
@@ -109,7 +109,7 @@ always @(posedge clk) begin
         cache2core_rsp.data);
     end
     if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
-        $fwrite(cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h_%h_%h_%h  \n",
+        $fwrite(i_cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h_%h_%h_%h  \n",
         $realtime, 
         cache2fm_req_q3.address, 
         cache2fm_req_q3.tq_id, 
@@ -122,7 +122,7 @@ always @(posedge clk) begin
         );
     end
     if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == FILL_REQ_OP)) begin
-        $fwrite(cache_top_trk,"%t     CACHE_FILL_REQ    %h       %h         %h     %h      ( -- read request -- ) \n",
+        $fwrite(i_cache_top_trk,"%t     CACHE_FILL_REQ    %h       %h         %h     %h      ( -- read request -- ) \n",
         $realtime, 
         cache2fm_req_q3.address, 
         cache2fm_req_q3.tq_id, 
@@ -130,7 +130,7 @@ always @(posedge clk) begin
         cache2fm_req_q3.address[MSB_SET:LSB_SET]);
     end
     if(fm2cache_rd_rsp.valid) begin
-        $fwrite(cache_top_trk,"%t     FM_FILL_RSP     (see tq_id)   %h        ----   ----     %h_%h_%h_%h \n",
+        $fwrite(i_cache_top_trk,"%t     FM_FILL_RSP     (see tq_id)   %h        ----   ----     %h_%h_%h_%h \n",
         $realtime, 
         fm2cache_rd_rsp.tq_id, 
         fm2cache_rd_rsp.data[127:96], 
@@ -140,99 +140,98 @@ always @(posedge clk) begin
     end
 
 //==================================================
-// tracker on cache Pipe IO
+// tracker on i_cache Pipe IO
 //==================================================
 
  //===== Request Tracker =====   
-    if(i_cache.cache_pipe_wrap.pipe_lu_req_q1.valid) begin
-        $fwrite(cache_pipe_io_trk,"%t      Request   %-7s    %h        %h        %h         %h        %h      %h\n",
+    if(i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.valid) begin
+        $fwrite(i_cache_pipe_io_trk,"%t      Request   %-7s    %h        %h        %h         %h        %h      %h\n",
         $realtime,
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.lu_op.name(), 
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.tq_id, 
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.address, 
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.rd_indication,
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.wr_indication,
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.data,
-        i_cache.cache_pipe_wrap.pipe_lu_req_q1.cl_data);  
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.lu_op.name(), 
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.tq_id, 
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.address, 
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.rd_indication,
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.wr_indication,
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.data,
+        i_cache.i_cache_pipe_wrap.pipe_lu_req_q1.cl_data);  
 
     end
 
  //===== Response Tracker =====   
-    if(i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
-        $fwrite(cache_pipe_io_trk,"%t      Response  %-7s    %h        %h      (---lu resp---)         %-4h       %h\n",
+    if(i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
+        $fwrite(i_cache_pipe_io_trk,"%t      Response  %-7s    %h        %h      (---lu resp---)         %-4h       %h\n",
         $realtime,
-        i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(),
-        i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.tq_id,
-        i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.address,
-        i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_result.name(), 
-        i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
+        i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(),
+        i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.tq_id,
+        i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.address,
+        i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.lu_result.name(), 
+        i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
     end
 
 
 // //==================================================
 // // tracker on Pipe Stages
 // //==================================================
-if(i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
-      $fwrite(cache_pipe_stages_trk,"%t   %-7s  %h    {%h,%h,%h,%h}   %h     %h       %h       %h     %h      %h      %h   {%h,%h,%h,%h}     {%h,%h,%h,%h}      {%h,%h,%h,%h}    {%h,%h,%h,%h}     {%h,%h,%h,%h}       %h       %h        %h     %h    %h      %h\n",
+if(i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
+      $fwrite(i_cache_pipe_stages_trk,"%t   %-7s  %h    {%h,%h,%h,%h}   %h     %h       %h       %h     %h      %h      %h   {%h,%h,%h,%h}     {%h,%h,%h,%h}      {%h,%h,%h,%h}    {%h,%h,%h,%h}     {%h,%h,%h,%h}       %h       %h        %h     %h    %h      %h\n",
       $realtime,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_op.name(),
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_tq_id,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[0],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[1],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[2],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[3],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.hit,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.miss,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.mb_hit_cancel, 
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_tag,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_set,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_offset,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.data,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[0],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[1],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[2],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[3],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[0],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[1],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[2],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[3],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[0],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[1],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[2],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[3],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[0],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[1],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[2],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[3],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[0],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[1],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[2],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[3],
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.fill_modified,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.fill_rd,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.dirty_evict,
-      i_cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.data_array_address,
-      i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.cl_data
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_op.name(),
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_tq_id,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_mru[0],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_mru[1],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_mru[2],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_mru[3],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.hit,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.miss,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.mb_hit_cancel, 
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_tag,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_set,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_offset,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.data,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_valid[0],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_valid[1],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_valid[2],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_valid[3],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_modified[0],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_modified[1],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_modified[2],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_modified[3],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_tags[0],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_tags[1],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_tags[2],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_tags[3],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_victim[0],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_victim[1],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_victim[2],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_victim[3],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_hit[0],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_hit[1],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_hit[2],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.set_ways_hit[3],
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.fill_modified,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.fill_rd,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.dirty_evict,
+      i_cache.i_cache_pipe_wrap.pipe_lu_rsp_q3.cl_data,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.data_array_address,
+      i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.cl_data
       );     
   end
 // //==================================================
 // // tracker on TQ
 // //==================================================
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
-        if ((i_cache.cache_tq.tq_state[i] != i_cache.cache_tq.next_tq_state[i]) ||
-             ((i_cache.cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (i_cache.cache_tq.rd_req_hit_mb[i] || i_cache.cache_tq.wr_req_hit_mb[i]) )
+        if ((i_cache.i_cache_tq.tq_state[i] != i_cache.i_cache_tq.next_tq_state[i]) ||
+             ((i_cache.i_cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (i_cache.i_cache_tq.rd_req_hit_mb[i] || i_cache.i_cache_tq.wr_req_hit_mb[i]) )
              ) begin
-        $fwrite(cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
+        $fwrite(i_cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h       %h            %h              \n",
         $realtime,
         i,
-        i_cache.cache_tq.next_tq_state              [i].name,     
-        i_cache.cache_tq.next_tq_rd_indication      [i],     
-        i_cache.cache_tq.next_tq_wr_indication      [i],         
-        i_cache.cache_tq.next_tq_cl_address         [i],
-        i_cache.cache_tq.next_tq_merge_buffer_data  [i],      
-        i_cache.cache_tq.next_tq_cl_word_offset     [i],     
-        i_cache.cache_tq.next_tq_reg_id             [i]
+        i_cache.i_cache_tq.next_tq_state              [i].name,     
+        i_cache.i_cache_tq.next_tq_rd_indication      [i],     
+        i_cache.i_cache_tq.next_tq_cl_address         [i],
+        i_cache.i_cache_tq.next_tq_merge_buffer_data  [i],      
+        i_cache.i_cache_tq.next_tq_cl_word_offset     [i],     
+        i_cache.i_cache_tq.next_tq_reg_id             [i]
         );
 
 
@@ -241,7 +240,7 @@ if(i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
 
 
 //==================================================
-// tracker of reference model - core<->cache
+// tracker of reference model - core<->i_cache
 //==================================================
     if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
         $fwrite(cache_ref_gold_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
@@ -260,7 +259,7 @@ if(i_cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
     end
 
 //==================================================
-// tracker of reference model - core<->cache
+// tracker of reference model - core<->i_cache
 //==================================================
     if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
         $fwrite(cache_ref_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
