@@ -49,7 +49,8 @@ logic [3:0] full;
 logic [3:0] empty;
 logic [1:0] src_num;;
 logic valid_arb;
-assign valid_arb = (in_ready_arb_fifo0 | in_ready_arb_fifo1| in_ready_arb_fifo2| in_ready_arb_fifo3);
+// FIXME - this is totally wrong - its should help the RR to choose the next winner to pop. not a general valid_arb.
+assign valid_arb = (in_ready_arb_fifo0 | in_ready_arb_fifo1 | in_ready_arb_fifo2 | in_ready_arb_fifo3);
 always_comb begin
 din[0] = alloc_req0;
 din[1] = alloc_req1;
