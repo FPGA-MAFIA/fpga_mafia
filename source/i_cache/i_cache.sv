@@ -14,7 +14,7 @@
 `include "macros.sv"
 
 module i_cache 
-    import cache_param_pkg::*;  
+    import i_cache_param_pkg::*;  
 (
     input   logic           clk,
     input   logic           rst,
@@ -31,7 +31,7 @@ t_lu_req        pipe_lu_req_q1;
 t_early_lu_rsp  pipe_early_lu_rsp_q2;
 t_lu_rsp        pipe_lu_rsp_q3;
 
-cache_tq cache_tq (
+i_cache_tq i_cache_tq (
     .clk             (clk),            //input
     .rst             (rst),            //input
     //Agent Interface
@@ -46,7 +46,7 @@ cache_tq cache_tq (
     .pipe_lu_rsp_q3       (pipe_lu_rsp_q3)  //input
 );
 
-cache_pipe_wrap cache_pipe_wrap (
+i_cache_pipe_wrap i_cache_pipe_wrap (
     .clk                (clk),               //input
     .rst                (rst),               //input
     //Pipe Interface
@@ -57,7 +57,6 @@ cache_pipe_wrap cache_pipe_wrap (
     .cache2fm_req_q3 (cache2fm_req_q3)//output
 );
 
-
 //======================================
 // Assertions
 //======================================
@@ -67,7 +66,6 @@ cache_pipe_wrap cache_pipe_wrap (
         ( (core2cache_req.valid && (core2cache_req.opcode == WR_OP) )),//expression
         (!rst),                                                       //enabled
         "in the i cache, we can only accept rd requests");            //message
-
 
 
 

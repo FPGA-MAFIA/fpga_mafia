@@ -14,7 +14,7 @@
 
 
 
-package cache_param_pkg;
+package i_cache_param_pkg;
 
 //TQ parameters
 parameter TQ_ID_WIDTH     = 3;                       
@@ -45,8 +45,8 @@ parameter MSB_TAG               = 19;                        //
 parameter CL_ADRS_WIDTH         = TAG_WIDTH + SET_ADRS_WIDTH;//16 -> Address[TAG_MSB:SET_LSB] = Address[19:4]
 parameter WAY_WIDTH             = 2;
 parameter NUM_WAYS              = 2**WAY_WIDTH;              //4 -> (2)^2. -> 2 bits represent 4 ways.
-parameter WAY_ENTRY_SIZE        = (TAG_WIDTH+2); //{tag,valid,mru}
-parameter SET_WIDTH             = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,mru} * NUM_WAYS
+parameter WAY_ENTRY_SIZE        = (TAG_WIDTH+3); //{tag,valid,modified,mru} * NUM_WAYS
+parameter SET_WIDTH             = WAY_ENTRY_SIZE*NUM_WAYS ; //{tag,valid,modified,mru} * NUM_WAYS
 parameter NUM_SET               = 2**SET_ADRS_WIDTH;
 
 
@@ -82,6 +82,7 @@ typedef enum logic [1:0] {
 
 typedef enum logic {
     RD_OP     = 1'b0 ,
+    WR_OP     = 1'b1
 } t_opcode ;
 
 typedef enum logic [1:0] {
@@ -94,14 +95,25 @@ typedef enum logic [1:0] {
 typedef enum logic [1:0] {
    NO_LU   = 2'b00 ,
    RD_LU   = 2'b01 ,
+   WR_LU   = 2'b10 ,
    FILL_LU = 2'b11
 } t_lu_opcode ;
 
 typedef enum logic [1:0] {
     NO_FM_REQ      = 2'b00,
+    DIRTY_EVICT_OP = 2'b01,
     FILL_REQ_OP    = 2'b11
 } t_fm_req_op ;
 
+
+
+typedef struct packed {
+    logic         valid;
+    logic         reject;
+    logic         accept;
+    t_address     address;
+    t_reg_id      reg_id;
+} t_ack ;
 
 typedef struct packed {
     logic       valid;
@@ -144,6 +156,7 @@ typedef struct packed {
     t_word       data; //CoreWrites req
     logic        mb_hit_cancel;
     logic        rd_indication;
+    logic        wr_indication;
     t_reg_id      reg_id;
 } t_lu_req ;
 
@@ -154,8 +167,10 @@ typedef struct packed {
     t_tq_id      tq_id;
     t_cl         cl_data;
     t_reg_id      reg_id;
+    // t_offset     offset;
     t_address    address;
     logic        rd_indication;
+    logic        wr_match_in_pipe;
 } t_lu_rsp ;
 
 
@@ -166,8 +181,19 @@ typedef struct packed {
 typedef struct packed {
     logic [NUM_WAYS-1:0][TAG_WIDTH-1:0] tags;
     logic [NUM_WAYS-1:0]                valid;
+    logic [NUM_WAYS-1:0]                modified;
     logic [NUM_WAYS-1:0]                mru;
 } t_set_rd_rsp ;
+
+typedef struct packed {
+    logic                                en;
+    logic [SET_ADRS_WIDTH-1:0]           set;
+    logic [NUM_WAYS-1:0][TAG_WIDTH-1:0]  tags;
+    logic [NUM_WAYS-1:0]                 valid;
+    logic [NUM_WAYS-1:0]                 modified;
+    logic [NUM_WAYS-1:0]                 mru;
+} t_set_wr_req ;
+
 
 typedef struct packed {
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0] data_array_address;
@@ -176,6 +202,12 @@ typedef struct packed {
 typedef struct packed {
     logic [CL_WIDTH-1:0] cl_data;
 } t_cl_rd_rsp ;
+
+typedef struct packed {
+    logic                                  valid;
+    logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0] data_array_address;
+    logic [CL_WIDTH-1:0]                   data;
+} t_cl_wr_req ;
 
 
 typedef struct packed {
@@ -187,7 +219,9 @@ typedef struct packed {
     t_tq_id                                 lu_tq_id;
     logic                                   hit;
     logic                                   miss;
+    logic                                   mb_hit_cancel;
     logic [NUM_WAYS-1:0]                    set_ways_valid;
+    logic [NUM_WAYS-1:0]                    set_ways_modified;
     logic [NUM_WAYS-1:0]                    set_ways_mru;
     logic [NUM_WAYS-1:0][TAG_WIDTH-1:0]     set_ways_tags;
     logic [NUM_WAYS-1:0]                    set_ways_victim;
@@ -195,8 +229,10 @@ typedef struct packed {
     logic [WAY_WIDTH-1:0]                   set_ways_enc_hit;
     t_cl                                    cl_data;
     t_word                                  data;
+    logic                                   fill_modified;
     logic                                   fill_rd;
     t_reg_id                                reg_id;
+    logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
     logic                                   rd_indication;
 } t_pipe_bus; 

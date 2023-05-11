@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 `include "macros.sv"
 
-module cache_pipe_wrap 
-    import cache_param_pkg::*;  
+module i_cache_pipe_wrap 
+    import i_cache_param_pkg::*;  
 (
     input   logic        clk,
     input   logic        rst,
@@ -31,8 +31,9 @@ t_set_rd_rsp rd_data_set_rsp_q2;
 t_set_wr_req wr_data_set_q2;
 t_cl_rd_req  rd_cl_req_q2; 
 t_cl_rd_rsp  rd_data_cl_rsp_q3; 
+t_cl_wr_req  wr_data_cl_q3; 
 
-cache_pipe cache_pipe(
+i_cache_pipe i_cache_pipe(
     .clk                    (clk),               //input
     .rst                    (rst),               //input
     //tq interface
@@ -44,9 +45,11 @@ cache_pipe cache_pipe(
     //tag_array interface
     .rd_set_req_q1          (rd_set_req_q1),     //output
     .pre_rd_data_set_rsp_q2 (rd_data_set_rsp_q2),//input
+    .wr_data_set_q2         (wr_data_set_q2),    //output
     //data_array interface
     .rd_cl_req_q2           (rd_cl_req_q2),      //output
     .pre_rd_data_cl_rsp_q3  (rd_data_cl_rsp_q3), //input
+    .wr_data_cl_q3          (wr_data_cl_q3)      //output
 );
 
 //============================
@@ -54,11 +57,18 @@ cache_pipe cache_pipe(
 //============================
 //============================
 array #(
-    .WORD_WIDTH     (SET_WIDTH),        // {tag,valid,lru,fill} * NUM_WAYS
+    .WORD_WIDTH     (SET_WIDTH),        // {tag,valid,modified,lru,fill} * NUM_WAYS
     .ADRS_WIDTH     (SET_ADRS_WIDTH)    // 2^SET_ADRS_WIDTH -> array size
-) tag_array (
+) i_tag_array (
     .clk            (clk),                     //input
     .rst            (rst),                     //input
+    //write interface
+    .wr_en          (wr_data_set_q2.en),       //input
+    .wr_address     (wr_data_set_q2.set),      //input
+    .wr_data        ({wr_data_set_q2.tags,     // #way x tag_width
+                      wr_data_set_q2.valid,    // #way 
+                      wr_data_set_q2.modified, // #way 
+                      wr_data_set_q2.mru}),   // #way
     //read interface
     .rd_address     (rd_set_req_q1.set),       //input
     .q              (rd_data_set_rsp_q2)       //output
@@ -71,9 +81,13 @@ array #(
 array  #(
     .WORD_WIDTH     (CL_WIDTH),
     .ADRS_WIDTH     (SET_ADRS_WIDTH + WAY_WIDTH)
-) data_array (
+) i_data_array (
     .clk            (clk),                     //input
     .rst            (rst),                     //input
+    //write interface
+    .wr_en          (wr_data_cl_q3.valid),     //input
+    .wr_address     (wr_data_cl_q3.data_array_address),//input
+    .wr_data        (wr_data_cl_q3.data),      //input
     //read interface
     .rd_address     (rd_cl_req_q2),            //input
     .q              (rd_data_cl_rsp_q3)        //output
