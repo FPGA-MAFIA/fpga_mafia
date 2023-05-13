@@ -42,6 +42,14 @@
             else if(en) q <= i;
 
 
+`define MAFIA_MUXOR(winner, candidates, select)     \
+always_comb begin                                   \
+    winner = '0;                                    \
+    for(int i =0; i < $bits(select); i++) begin     \
+        winner = select[i] ? candidates[i] : winner;\
+    end                                             \
+end
+
 `define  FIND_FIRST(first , candidates )                    \
     always_comb begin                                       \
         first = '0;                                         \
@@ -50,28 +58,27 @@
         end                                                 \
     end                                        
 
-
-`define  ENCODER(encoded ,valid, decoded )             \
-	always_comb begin                                   \
-        encoded = '0 ;                                 	\
-        valid   = |decoded;                             \
-        for (int i = 0 ; i <$bits(decoded) ;i++) begin  \
-	        if (decoded[i])                             \
-    	        encoded = i ;                           \
-    	end                                             \
+`define  ENCODER(encoded ,valid, decoded )            \
+   always_comb begin                                  \
+        encoded = '0 ;                                \
+        valid   = |decoded;                           \
+        for (int i = 0 ; i <$bits(decoded) ;i++) begin\
+        if (decoded[i])                               \
+            encoded = i ;                             \
+    end                                               \
     end 
 
-`define  DECODER(decoded , encoded, valid )  \
-    always_comb begin                        \
-	    decoded = '0 ;                       \
-        if(valid) decoded[encoded] = 1'b1 ;  \
-	end 
+`define  DECODER(decoded , encoded, valid )\
+    always_comb begin                      \
+      decoded = '0 ;                       \
+      if(valid) decoded[encoded] = 1'b1 ;  \
+   end 
 
-`define ASSERT(name, expr, en, msg) \
-   always @(posedge clk) begin \
-      if (en && expr) begin \
+`define ASSERT(name, expr, en, msg)                      \
+   always @(posedge clk) begin                           \
+      if (en && expr) begin                              \
          $error($sformatf("[ERROR] %s: %s", name, msg)); \
-      end \
+      end                                                \
    end
 
 

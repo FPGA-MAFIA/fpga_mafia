@@ -2,7 +2,7 @@ logic        [3:0] valid_alloc_req;
 t_tile_trans [3:0] alloc_req;
 logic        [3:0] out_ready_fifo;
 t_tile_trans       winner_req;
-logic        [3:0] in_ready_arb_fifo;
+logic        [4:0] in_ready_arb_fifo;
 logic              winner_req_valid;
 logic        [1:0] src_num; // the decimal number of fifo
 
@@ -24,9 +24,11 @@ fifo_arb #(.FIFO_ARB_FIFO_DEPTH(V_FIFO_DEPTH)) fifo_arb_ins(
 .out_ready_fifo2    (out_ready_fifo[2]),
 .out_ready_fifo3    (out_ready_fifo[3]),
 .winner_req         (winner_req),
-.winner_req_valid       (winner_req_valid),
-.in_ready_arb_fifo0 (in_ready_arb_fifo[0]),
-.in_ready_arb_fifo1 (in_ready_arb_fifo[1]),
-.in_ready_arb_fifo2 (in_ready_arb_fifo[2]),
-.in_ready_arb_fifo3 (in_ready_arb_fifo[3])
+.winner_req_valid   (winner_req_valid),
+.in_ready_north_arb_fifo(in_ready_arb_fifo[0]),
+.in_ready_east_arb_fifo (in_ready_arb_fifo[1]),
+.in_ready_south_arb_fifo(in_ready_arb_fifo[2]),
+.in_ready_west_arb_fifo (in_ready_arb_fifo[3]),
+.in_ready_local_arb_fifo(in_ready_arb_fifo[4])
+
 );

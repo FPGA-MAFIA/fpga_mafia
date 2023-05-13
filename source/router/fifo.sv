@@ -48,8 +48,8 @@ always_comb begin : fifo_array_assign
         next_fifo_array[wr_ptr] = push_data;
         next_wr_ptr = (wr_ptr != (FIFO_DEPTH - 1)) ? (wr_ptr + 1) : '0;
     end
+    pop_data = fifo_array[rd_ptr];
     if (pop) begin
-        pop_data = fifo_array[rd_ptr];
         next_rd_ptr = (rd_ptr != (FIFO_DEPTH - 1)) ? (rd_ptr + 1) : '0;
     end
 end
