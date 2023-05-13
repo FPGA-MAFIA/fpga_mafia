@@ -48,7 +48,6 @@ logic [3:0] fifo_pop;
 logic [3:0] winner_dec_id;
 logic [3:0] full;
 logic [3:0] empty;
-logic [1:0] src_num;;
 
 always_comb begin
     din[0] = alloc_req0;

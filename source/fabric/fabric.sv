@@ -68,39 +68,42 @@ end
 // assign the un-used edges to 0
 always_comb begin 
     for(int row =0; row< 5; row++) begin
+        //The first column strap the valid to 0
         out_north_req_valid[0][row] = '0;
         out_south_req_valid[0][row] = '0;
         out_east_req_valid[0][row] = '0;
         out_west_req_valid[0][row] = '0;
+        //The last column strap the valid to 0
         out_north_req_valid[4][row] = '0;
         out_south_req_valid[4][row] = '0;
         out_east_req_valid[4][row] = '0;
         out_west_req_valid[4][row] = '0;
     end
     for(int col =0; col< 5; col++) begin
+        //The first row strap the valid to 0
         out_north_req_valid[col][0] = '0;
         out_south_req_valid[col][0] = '0;
         out_east_req_valid[col][0] = '0;
         out_west_req_valid[col][0] = '0;
+        //The last row strap the valid to 0
         out_north_req_valid[col][4] = '0;
         out_south_req_valid[col][4] = '0;
         out_east_req_valid[col][4] = '0;
         out_west_req_valid[col][4] = '0;
     end
 
-
 //TODO FIXME - connect the READY signal correctly
     for(int col =0; col< 5; col++) begin
-    for(int row =0; row< 5; row++) begin
-        in_north_ready[col][row] = 1'b1;
-        in_east_ready [col][row] = 1'b1;
-        in_west_ready [col][row] = 1'b1;
-        in_south_ready[col][row] = 1'b1;
-        out_north_ready[col][row] = 1'b1;
-        out_east_ready [col][row] = 1'b1;
-        out_west_ready [col][row] = 1'b1;
-        out_south_ready[col][row] = 1'b1;
-    end // row
+        for(int row =0; row< 5; row++) begin
+            in_north_ready[col][row] = 5'b11111;
+            in_east_ready [col][row] = 5'b11111;
+            in_west_ready [col][row] = 5'b11111;
+            in_south_ready[col][row] = 5'b11111;
+            out_north_ready[col][row] = 5'b11111;
+            out_east_ready [col][row] = 5'b11111;
+            out_west_ready [col][row] = 5'b11111;
+            out_south_ready[col][row] = 5'b11111;
+        end // row
     end // col
 end
 
