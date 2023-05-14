@@ -14,7 +14,7 @@ string test_name;
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
-//`include "fabric_inputs_trk.vh"
+`include "fabric_inputs_trk.vh"
 // =============================
 // CLK GEN
 // =============================

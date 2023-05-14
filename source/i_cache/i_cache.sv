@@ -57,6 +57,7 @@ i_cache_pipe_wrap i_cache_pipe_wrap (
     .cache2fm_req_q3 (cache2fm_req_q3)//output
 );
 
+`ifdef SIM_ONLY
 //======================================
 // Assertions
 //======================================
@@ -66,7 +67,7 @@ i_cache_pipe_wrap i_cache_pipe_wrap (
         ( (core2cache_req.valid && (core2cache_req.opcode == WR_OP) )),//expression
         (!rst),                                                       //enabled
         "in the i cache, we can only accept rd requests");            //message
-
+`endif
 
 
 endmodule

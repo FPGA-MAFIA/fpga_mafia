@@ -41,7 +41,7 @@ always @(posedge clk) begin
 for(int i =1 ; i < 6; i++) begin
     for(int j =1 ; j < 6; j++) begin
         if(v_in_north_valid[i][j] || v_in_south_valid[i][j] || v_in_east_valid[i][j] || v_in_west_valid[i][j])begin// || fabric.in_south_req_valid(i,j) || fabric.in_east_req_valid(i,j) || fabric.in_west_req_valid(i,j)) begin // if there is any valid req
-            $fwrite(fabric_top_trk,"%t  [%d,%d] input       %h       %-7s %h     %h      %-7s \n",
+            $fwrite(fabric_top_trk,"%t   [%0d,%0d]   input     %h       %-7s %h     %h      %-7s \n",
             $realtime,
             i,
             j, // tile id 
