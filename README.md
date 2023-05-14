@@ -3,7 +3,7 @@
 *** WIP - A working fabric is expected by Aug 1, 2023  
 Currently, individual IPs are being enabled  
 
-# FPGA Multi-Agent Fabric Integration Architecture
+# FPGA Multi-Agent FabrIc Architecture
 ## The MAFIA Project
 
 
