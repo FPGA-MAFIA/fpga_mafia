@@ -41,9 +41,6 @@ end
 
 assign full = fifo_arb_ins.full;
 assign empty = fifo_arb_ins.empty;
-//assign in_ready_arb_fifo = (logic [3:0])rand_in_ready;
-//assign in_ready_arb_fifo = {4{1'b0}}; // initialize all bits to 0
-//assign in_ready_arb_fifo = {4{rand_in_ready}}; // type cast the integer to a 4-bit logic vector
 
 
 // =============================
@@ -57,7 +54,7 @@ task rst_ins();
     in_south_req_valid = '0;
     in_east_req_valid  = '0;
     in_west_req_valid  = '0;
-    in_ready_arb_fifo  = 4'b1111; // change only in relevant tests.
+    in_ready_arb_fifo  = 5'b11111; // change only in relevant tests.
     //make sure fifo_arb valid input is 0 as default
     for(int i =0; i<4 ; i++) begin
       valid_alloc_req[i] = '0;
