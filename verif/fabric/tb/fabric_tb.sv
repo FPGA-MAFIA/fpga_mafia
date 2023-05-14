@@ -1,5 +1,5 @@
 `include "macros.sv"
-`define MINI_CORE_TILE(col,row) fabric.instance_tile_col_loop[col].instance_tile_row_loop[row].mini_core_tile_ins
+`define MINI_CORE_TILE(col,row) fabric.col[col].row[row].mini_core_tile_ins
 `define IN_LOCAL_REQ(col,row)   `MINI_CORE_TILE(col,row).in_local_req
 module fabric_tb;
 import router_pkg::*;

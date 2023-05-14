@@ -84,6 +84,4 @@ end
 
 
 
-
-
 `endif //MACROS_VS

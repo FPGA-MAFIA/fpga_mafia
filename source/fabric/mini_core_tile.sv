@@ -134,7 +134,7 @@ t_cardinal next_tile_fifo_arb_id;
 //==============================
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(LOCAL))
-east_next_tile_fifo_arb (
+local_next_tile_fifo_arb (
     .local_tile_id          (local_tile_id) , //    input t_tile_id
     .in_north_req_valid     ('0) , //    input logic
     .in_east_req_valid      ('0) , //    input logic

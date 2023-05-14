@@ -28,7 +28,7 @@ initial begin
         $fwrite(fabric_top_trk, "                      FABRIC TOP TRACKER  -  Test: ", test_name,"\n");
         $fwrite(fabric_top_trk, "==================================================================================\n");
         $fwrite(fabric_top_trk,"--------------------------------------------------------------------------------------------------\n");
-        $fwrite(fabric_top_trk," Time  || Tile || in/out || from/to: ||  ADDRESS   || opcode ||   DATA  ||   requestor_id  ||  next_tile \n");
+        $fwrite(fabric_top_trk," Time  || Cardinal || from ||  to: ||  ADDRESS   || opcode ||   DATA  ||   requestor_id  ||  next_tile \n");
         $fwrite(fabric_top_trk,"--------------------------------------------------------------------------------------------------\n");
     end //if
 end // initial
@@ -38,20 +38,65 @@ always @(posedge clk) begin
 //==================================================
 // tracker of the fabric Top Level Interface
 //==================================================
-for(int i =1 ; i < 6; i++) begin
-    for(int j =1 ; j < 6; j++) begin
-        if(v_in_north_valid[i][j] || v_in_south_valid[i][j] || v_in_east_valid[i][j] || v_in_west_valid[i][j])begin// || fabric.in_south_req_valid(i,j) || fabric.in_east_req_valid(i,j) || fabric.in_west_req_valid(i,j)) begin // if there is any valid req
-            $fwrite(fabric_top_trk,"%t   [%0d,%0d]   input     %h       %-7s %h     %h      %-7s \n",
+for(int col =1 ; col < 4; col++) begin
+    for(int row =1 ; row < 4; row++) begin
+        if(v_in_north_valid[col][row])begin
+            $fwrite(fabric_top_trk,"%t  Going South  [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
             $realtime,
-            i,
-            j, // tile id 
-            v_in_north_req[i][j].address[23:0],  
-            v_in_north_req[i][j].opcode.name(), 
-            v_in_north_req[i][j].data , 
-            v_in_north_req[i][j].requestor_id,
-            v_in_north_req[i][j].next_tile_fifo_arb_id.name()
+            col,
+            row-1, // tile id 
+            col,
+            row, // tile id 
+            v_in_north_req[col][row].address[31:0],  
+            v_in_north_req[col][row].opcode.name(), 
+            v_in_north_req[col][row].data , 
+            v_in_north_req[col][row].requestor_id,
+            v_in_north_req[col][row].next_tile_fifo_arb_id.name()
             );      
         end
+        if(v_in_south_valid[col][row])begin
+            $fwrite(fabric_top_trk,"%t  Going North  [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $realtime,
+            col,
+            row+1, // tile id 
+            col,
+            row, // tile id 
+            v_in_south_req[col][row].address[31:0],  
+            v_in_south_req[col][row].opcode.name(), 
+            v_in_south_req[col][row].data , 
+            v_in_south_req[col][row].requestor_id,
+            v_in_south_req[col][row].next_tile_fifo_arb_id.name()
+            );      
+        end
+        if(v_in_west_valid[col][row])begin
+            $fwrite(fabric_top_trk,"%t  Going East   [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $realtime,
+            col-1,
+            row, // tile id 
+            col,
+            row, // tile id 
+            v_in_west_req[col][row].address[31:0],  
+            v_in_west_req[col][row].opcode.name(), 
+            v_in_west_req[col][row].data , 
+            v_in_west_req[col][row].requestor_id,
+            v_in_west_req[col][row].next_tile_fifo_arb_id.name()
+            );      
+        end
+        if(v_in_east_valid[col][row])begin
+            $fwrite(fabric_top_trk,"%t  Going West   [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $realtime,
+            col+1,
+            row, // tile id 
+            col,
+            row, // tile id 
+            v_in_east_req[col][row].address[31:0],  
+            v_in_east_req[col][row].opcode.name(), 
+            v_in_east_req[col][row].data , 
+            v_in_east_req[col][row].requestor_id,
+            v_in_east_req[col][row].next_tile_fifo_arb_id.name()
+            );      
+        end
+
       end // for loop
     end //for loop
 end
