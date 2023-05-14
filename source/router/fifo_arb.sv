@@ -114,20 +114,15 @@ assign fifo_pop[3:0] = winner_dec_id[3:0];
 `MAFIA_MUXOR(winner_req, dout_fifo, winner_dec_id)
 
 
-//`ASSERT("Pop when not valid winner",fifo_pop & !winner_req_valid,!rst,"Pop fifo when not valid_req")
-// =================================
-// Assertion for illegal input
-// =================================
-// FIFO 0:
-// assert if fifo is full -> no new data can be pushed. (valid_alloc_req# = 1'b1)
 
-//// Define the property
-//property push_data_when_full_prop;
-//  @(posedge clk) disable iff(!rst) (full[0] == 1'b1) |-> (push[0] == 1'b0);
-//endproperty
-//
-//// Use the property in an assertion
-//assert push_data_when_full_assert: push_data_when_full_prop else $error("New data was pushed when fifo is full");
-//
-// If the arbiter chose a fifo to pop, the fifo must not be empty.
+//=================================================
+//  Assertion for fifo_arbiter - not synthesizable
+//=================================================
+`ifdef SIM_ONLY
+logic assert_pop_without_valid_winner;
+assign assert_pop_without_valid_winner = (|fifo_pop[3:0] & !winner_req_valid);
+
+`ASSERT("assert_pop_without_valid_winner", assert_pop_without_valid_winner, 1'b1, "Pop fifo when not valid_req")
+`endif
+
 endmodule

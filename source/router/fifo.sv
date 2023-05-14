@@ -60,8 +60,10 @@ end
 //assert property (@(posedge clk) disable iff (rst) (empty |-> !pop)) else $error("Pop when empty");
 // Assertion for push when full
 
+`ifdef SIM_ONLY
 `ASSERT("Push when full", full && push, !rst, "Push when full");
 `ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
+`endif
 
 
 endmodule : fifo
