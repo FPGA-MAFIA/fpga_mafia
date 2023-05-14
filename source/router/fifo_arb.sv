@@ -95,8 +95,7 @@ arb
     .valid_arb      (valid_arb) // the indication for arb not to pop if no one will accept to take the transaction.
 );
 
-
-//`ASSERT("Pop when not valid winner",fifo_pop & !winner_req_valid,!rst,"Pop fifo when not valid_req")
+`ASSERT_COMB("Pop when not valid winner",fifo_pop, !winner_req_valid,!rst,"Pop fifo when not valid_req")
 // =================================
 // Assertion for illegal input
 // =================================
