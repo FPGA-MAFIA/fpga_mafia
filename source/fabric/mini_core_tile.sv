@@ -55,6 +55,7 @@ import router_pkg::*;
 // Will be connected to the local mini core
 logic in_local_req_valid  ; 
 t_tile_trans in_local_req ; 
+t_tile_trans pre_in_local_req ; 
 t_fab_ready in_local_ready; 
 
 logic out_local_req_valid  ; 
@@ -123,8 +124,42 @@ router router_inst // TODO - a4d logic to outputs.
 // Temp TODO FIXME - override with xmt for TB
 //This is the local mini_core output placeholder (inputs into the router)
 assign in_local_req_valid = '0;
-assign in_local_req       = '0;
+assign pre_in_local_req   = '0;
 assign in_local_ready     = 5'b11111;
+
+
+t_cardinal next_tile_fifo_arb_id;
+//==============================
+// override the next_tile_fifo_arb_id
+//==============================
+next_tile_fifo_arb
+#(.NEXT_TILE_CARDINAL(LOCAL))
+east_next_tile_fifo_arb (
+    .local_tile_id          (local_tile_id) , //    input t_tile_id
+    .in_north_req_valid     ('0) , //    input logic
+    .in_east_req_valid      ('0) , //    input logic
+    .in_south_req_valid     ('0) , //    input logic
+    .in_west_req_valid      ('0) , //    input logic
+    .in_local_req_valid     (in_local_req_valid) , //    input logic
+    .in_north_req_address   ('0) , //    input logic [31:24]
+    .in_east_req_address    ('0) , //    input logic [31:24]
+    .in_south_req_address   ('0) , //    input logic [31:24]
+    .in_west_req_address    ('0) , //    input logic [31:24]
+    .in_local_req_address   (pre_in_local_req.address[31:24]    ) , //    input logic [31:24]
+    //output
+    .in_north_next_tile_fifo_arb_card ( ) , //    output t_cardinal
+    .in_east_next_tile_fifo_arb_card  ( ) , //    output t_cardinal
+    .in_south_next_tile_fifo_arb_card ( ) , //    output t_cardinal
+    .in_west_next_tile_fifo_arb_card  ( ) , //    output t_cardinal
+    .in_local_next_tile_fifo_arb_card (next_tile_fifo_arb_id)   //    output t_cardinal
+);
+
+always_comb begin : override_the_local_next_tile_fifo_arb
+    // default values
+    in_local_req  = pre_in_local_req;
+    // override the next_tile_fifo_arb_id
+    in_local_req.next_tile_fifo_arb_id = next_tile_fifo_arb_id;
+end
 
 
 //========================================
