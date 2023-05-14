@@ -124,7 +124,7 @@ router router_inst // TODO - a4d logic to outputs.
 //This is the local mini_core output placeholder (inputs into the router)
 assign in_local_req_valid = '0;
 assign in_local_req       = '0;
-assign in_local_ready     = 4'b1111;
+assign in_local_ready     = 5'b11111;
 
 
 //========================================
