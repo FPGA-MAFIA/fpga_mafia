@@ -80,6 +80,7 @@ end
       if (en && expr) begin                              \
          $error($sformatf("[ERROR] %s: %s", name, msg)); \
       end                                                \
+   `endif                                                \
    end
 
 
