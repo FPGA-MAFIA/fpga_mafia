@@ -68,19 +68,13 @@
 	end 
 
 `define ASSERT(name, expr, en, msg) \
+   `ifdef SIM_ONLY\
    always @(posedge clk) begin \
       if (en && expr) begin \
          $error($sformatf("[ERROR] %s: %s", name, msg)); \
       end \
-   end
-   
-   `define ASSERT_COMB(name,my_event, expr, en, msg) \
-   always @(my_event) begin \
-      if (en && expr) begin \
-         $error($sformatf("[ERROR] %s: %s", name, msg)); \
-      end \
-   end
-
+   end   \
+   `endif //SIM_ONLY
 
 
 
