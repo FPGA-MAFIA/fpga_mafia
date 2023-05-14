@@ -87,9 +87,9 @@ logic [3:0] valid_candidate;
 always_comb begin 
     for(int i=0; i<NUM_CLIENTS; i++ )
     valid_candidate[i] = ~empty[i] && ( (in_ready_north_arb_fifo && (dout_fifo[i].next_tile_fifo_arb_id == NORTH)) ||
-                                        (in_ready_east_arb_fifo  && (dout_fifo[i].next_tile_fifo_arb_id == EAST))  ||
+                                        (in_ready_east_arb_fifo  && (dout_fifo[i].next_tile_fifo_arb_id == EAST )) ||
                                         (in_ready_south_arb_fifo && (dout_fifo[i].next_tile_fifo_arb_id == SOUTH)) ||
-                                        (in_ready_west_arb_fifo  && (dout_fifo[i].next_tile_fifo_arb_id == WEST))  ||
+                                        (in_ready_west_arb_fifo  && (dout_fifo[i].next_tile_fifo_arb_id == WEST )) ||
                                         (in_ready_local_arb_fifo && (dout_fifo[i].next_tile_fifo_arb_id == LOCAL)));
 end
 
@@ -109,6 +109,8 @@ assign winner_req_valid = |winner_dec_id[3:0];
 assign fifo_pop[3:0] = winner_dec_id[3:0];
 
 
+// This is the main data path muxor
+// choose the winning fifo that popped and select the data to be sent to the next tile
 `MAFIA_MUXOR(winner_req, dout_fifo, winner_dec_id)
 
 
