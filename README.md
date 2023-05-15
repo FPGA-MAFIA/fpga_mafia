@@ -6,17 +6,22 @@ Our team is working diligently to deliver a fully functional fabric by August 1,
 Stay tuned for updates!  
 
 # FPGA Multi-Agent FabrIc Architecture (MAFIA)
-Welcome to the MAFIA Project, a revolutionary initiative aimed at designing a System-on-a-Chip (SoC) Tile-based mesh fabric.  
+Welcome to the MAFIA Project, a initiative aimed at designing a System-on-a-Chip (SoC) Tile-based mesh fabric.  
 Our architecture is designed to be highly versatile, capable of incorporating a variety of functionalities.  
-
 This includes, but is not limited to:  
 - RISCV mini-cores and big-cores
 - Hardware accelerators
 - IO devices such as UART, keyboard, VGA, and DE10-Lite FPGA IO
 
 # Project Overview
-The MAFIA Project development is done by the final year Electrical Engineering and Computer Engineering students at Bar-Ilan University and the Technion in Israel.  
-Our overarching goal is to design a System-on-a-Chip (SoC) tile-based mesh fabric capable of integrating a diverse range of IPs and functionalities.
+The MAFIA Project is developed by final year Electrical and Computer Engineering students at Bar-Ilan University and the Technion in Israel.
+We aim to design a System-on-a-Chip (SoC) tile-based mesh fabric for integrating diverse range of IPs and functionalities.
+Key features and capabilities include:
+- Acceleration of distributed workloads, particularly beneficial for AI inference and learning.
+- Traditional program acceleration by utilizing a pipelining approach.
+  - Example flow: Decoding -> Decrypting -> Analyzing -> Writing new data -> Encrypting -> Encoding
+    In our design, each core or cluster of cores handling a different stage, creating a pipe-line
+- This SoC design provides a robust platform for versatile tasks, offering improved speed and efficiency
 
 ## Technology Stack
 - The project's RTL is written in SystemVerilog.
