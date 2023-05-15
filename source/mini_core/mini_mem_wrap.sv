@@ -17,9 +17,12 @@
 //---------------------------------------------------
 module mini_mem_wrap
 import mini_core_pkg::*;
+import router_pkg::*;
+import common_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
+                input  t_tile_id    local_tile_id,
                 //============================================
                 //      core interface
                 //============================================
@@ -38,6 +41,10 @@ import mini_core_pkg::*;
                 //============================================
                 //      fabric interface
                 //============================================
+                input  logic        InFabricValidQ503H    ,
+                input  t_tile_trans InFabricQ503H    ,
+                output t_tile_trans OutFabricQ505H   ,
+                output t_tile_trans OutFabricValidQ505H   ,
                 input  logic        F2C_ReqValidQ503H     ,
                 input  t_fab_op     F2C_ReqOpcodeQ503H    ,
                 input  logic [31:0] F2C_ReqAddressQ503H   ,
@@ -64,12 +71,10 @@ assign F2C_DMemHitQ503H  =(F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] > D_MEM_RE
                           (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
 assign F2C_DMemWrEnQ503H = F2C_ReqValidQ503H && (F2C_ReqOpcodeQ503H == WR_REQ) && F2C_DMemHitQ503H;
 
-assign F2C_RspDataQ504H   = F2C_IMemHitQ503H ? F2C_IMemRspDataQ504H :
-                            F2C_DMemHitQ503H ? F2C_DMemRspDataQ504H :
-                                                '0                  ;
-
-`MAFIA_DFF(F2C_RspValidQ504H, F2C_ReqValidQ503H, Clock)
-
+//==================================
+// Instruction Memory
+//==================================
+//This is the instruction memory
 mem  #(
   .WORD_WIDTH(32),  //FIXME - Parametrize!!
   .ADRS_WIDTH(13)   //FIXME - Parametrize!!
@@ -89,6 +94,9 @@ mem  #(
     .q_b        (F2C_IMemRspDataQ504H)              
     );
 
+//==================================
+// DATA Memory
+//==================================
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
   .ADRS_WIDTH(14)//FIXME - Parametrize!!
@@ -108,4 +116,66 @@ d_mem  (
     .byteena_b  (4'b1111),
     .q_b        (F2C_DMemRspDataQ504H)              
     );
+
+//==================================
+// F2C response 504 ( D_MEM/I_MEM )
+//==================================
+assign F2C_RspDataQ504H   = F2C_IMemHitQ503H ? F2C_IMemRspDataQ504H :
+                            F2C_DMemHitQ503H ? F2C_DMemRspDataQ504H :
+                                                '0                  ;
+`MAFIA_DFF(F2C_RspValidQ504H, F2C_ReqValidQ503H, Clock)
+
+t_tile_trans OutFabricQ504H;
+assign F2C_InFabricQ503H = InFabricValidQ503H && (InFabricQ503H.opcode == RD) ? InFabricQ503H : '0;
+logic [31:0] F2C_RdRspAddressQ503H;
+// Set the target address to the requestor id (This is the Read response address)
+assign F2C_RdRspAddressQ503H = {F2C_InFabricQ503H.requestor_id[7:0],F2C_InFabricQ503H.address[23:0]};
+`MAFIA_DFF(F2C_OutFabricValidQ504H                 , F2C_InFabricValidQ503H  , Clock)
+`MAFIA_DFF(F2C_OutFabricQ504H.address              , F2C_RdRspAddressQ503H   , Clock) 
+`MAFIA_DFF(F2C_OutFabricQ504H.opcode               , RD_RSP                  , Clock)
+`MAFIA_DFF(F2C_OutFabricQ504H.data                 , F2C_RspDataQ504H        , Clock)
+`MAFIA_DFF(F2C_OutFabricQ504H.requestor_id         , local_tile_id           , Clock)// The requestor id is the local tile id
+`MAFIA_DFF(F2C_OutFabricQ504H.next_tile_fifo_arb_id, '0                      , Clock)
+
+
+//==================================
+// Mux out Fabric Access Response/Request
+//==================================
+// We may have multiple transaction trying to access the fabric
+// 1. A read response to fabric 
+// 2. read/write request from the core the needs to access the fabric (a non local read/write)
+// we solve this by using a fifo to accumulate the different transactions and use an arbiter to choose between them.
+// and we can start back pressure the core/fabric if the corresponding fifo is full.
+//==================================
+// F2C FIFO - accumulate read responses to the fabric (A response to a Fabric 2 Core read request)
+//==================================
+// a FIFO to accumulate the read responses to the fabric
+fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
+f2c_rsp_fifo  (.clk       (Clock),
+               .rst       (Rst),
+               .push      (OutFabricValidQ504H), // valid_alloc_req#
+               .push_data (OutFabricQ504H),// alloc_req#
+               .pop       (OutFabricValidQ505H),//arbiter chose this fifo to pop.
+               .pop_data  (OutFabricQ505H), // arbiter input
+               .full      (F2C_RspFull),//out_ready_fifo#
+               .empty     (F2C_RspEmpty)
+               );// indication to arbiter that the fifo is empty
+
+//==================================
+// C2F FIFO - accumulate core 2 Fabric requests
+//==================================
+// a FIFO to accumulate the requests from the core to the fabric
+fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
+c2f_req_fifo  (.clk       (Clock),
+               .rst       (Rst),
+               .push      (), // valid_alloc_req#
+               .push_data (),// alloc_req#
+               .pop       (),//arbiter chose this fifo to pop.
+               .pop_data  (), // arbiter input
+               .full      (),//out_ready_fifo#
+               .empty     ()
+               );// indication to arbiter that the fifo is empty
+
+
+
 endmodule
