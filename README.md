@@ -1,24 +1,22 @@
 [![mafia_sanity](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml/badge.svg)](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml)
 
 ## Current Development Status:
-This project is currently a work in progress (WIP). We are in the process of enabling and integrating individual Intellectual Properties (IPs).  
+This project is currently a work in progress (WIP). We are in the process of enabling and integrating individual IPs.  
 Our team is working diligently to deliver a fully functional fabric by August 1, 2023.  
-Stay tuned for updates and feel free to contribute!  
+Stay tuned for updates!  
 
 # FPGA Multi-Agent FabrIc Architecture (MAFIA)
 Welcome to the MAFIA Project, a revolutionary initiative aimed at designing a System-on-a-Chip (SoC) Tile-based mesh fabric.  
-Our architecture is designed to be highly adaptable and versatile, capable of incorporating a variety of functionalities.  
+Our architecture is designed to be highly versatile, capable of incorporating a variety of functionalities.  
 
 This includes, but is not limited to:  
 - RISCV mini-cores and big-cores
 - Hardware accelerators
 - IO devices such as UART, keyboard, VGA, and DE10-Lite FPGA IO
 
-By integrating these functionalities, we aim to create a robust, efficient, and flexible computing platform.   
-We invite you to join us in this exciting venture!  
-
 # Project Overview
-The MAFIA Project is the culmination of rigorous study and development by final year Electrical Engineering and Computer Engineering students at Bar-Ilan University and the Technion in Israel. Our overarching goal is to design a System-on-a-Chip (SoC) tile-based mesh fabric capable of integrating a diverse range of IPs and functionalities.
+The MAFIA Project development is done by the final year Electrical Engineering and Computer Engineering students at Bar-Ilan University and the Technion in Israel.  
+Our overarching goal is to design a System-on-a-Chip (SoC) tile-based mesh fabric capable of integrating a diverse range of IPs and functionalities.
 
 ## Technology Stack
 - The project's RTL is written in SystemVerilog.
@@ -33,7 +31,7 @@ Our architecture consists of the following key elements:
 - A Memory Subsystem equipped with L1 Instruction and Data Cache, as well as a Memory Controller.
 
 ## Software Stack to run on SoC:
-Our system runs on a simple RISCV embedded OS and includes:
+Our system runs on a simple proprietary RISCV embedded OS like system and includes:
 - A software library for VGA graphical capabilities.
 - A software library for accessing the FPGA MMIO and special control registers.
 - Software examples demonstrating the utilization of many cores for distributed calculations and parallel computation.
@@ -47,7 +45,7 @@ For best exporence we recomended using a windows machin running vscode + gitbash
 To see the build and run options, use the following command:
 ```python build.py -h ```  
 For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
-Please add your question in the comment section of the discussion
+Please add your question discussion tab
 
 ## Prerequisite
 Before you start, make sure you have the following tools and software installed:
@@ -61,6 +59,7 @@ To make your experience smoother, we recommend installing the following tools:
 ## Inspiration Behind the Project:  
 This project draws inspiration from innovative players in the field of computing.  
 These include:  
+- [HammerBlade Manycore:Bespoke Silicon Group](https://www.bsg.ai/) | [Watch the video on Youtube](https://www.youtube.com/watch?v=gTM7Tc5DCA8)
 - [Tesla: DOJO](https://www.tesla.com/AI) | [Watch the video on Youtube](https://www.youtube.com/watch?v=DSw3IwsgNnc)  
 - [Tenstorrent: Wormhole & more](https://tenstorrent.com/) | [Watch the video on Youtube](https://www.youtube.com/watch?v=32CRYenTcdw)  
 - [Esperanto: ET-SoC-1](https://www.esperanto.ai/)  | [Watch the video on Youtube](https://www.youtube.com/watch?v=5foT3huJ_Gg)  
@@ -71,7 +70,6 @@ Similarly, this project offers a unique, highly-integratable mesh architecture t
 ### Issue: 'ModuleNotFoundError: No module named 'termcolor''
 **Solution**: Run the following command to resolve this issue:  
 > pip install termcolor
-
 
 ``` 'riscv-none-embed-gcc.exe' is not recognized as an internal or external command ```  
 Solution: Add the following line to your ~/.bashrc file:  
