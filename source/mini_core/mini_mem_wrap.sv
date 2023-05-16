@@ -57,7 +57,9 @@ logic        F2C_IMemHitQ503H;
 logic        F2C_IMemWrEnQ503H;
 logic [31:0] F2C_IMemRspDataQ504H;
 
+logic        F2C_IMemHitQ503H;
 logic        F2C_DMemHitQ503H;
+logic        F2C_CrMemHitQ503H;
 logic        F2C_DMemWrEnQ503H;
 logic [31:0] F2C_DMemRspDataQ504H;
 //===========================================
