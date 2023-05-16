@@ -14,13 +14,13 @@ t_fab_ready  [5:1]input_gen_ready ;// North[1], East[2], South[3], West[4], Loca
 t_fab_ready  [5:1]output_gen_ready;// North[1], East[2], South[3], West[4], Local[5]
 initial begin : default_values
     input_gen_valid = '0;
-    input_gen_ready = 5'b11111;
     for(int i = 1; i < 6; i = i + 1) begin
         input_gen[i].data                  = '0;
         input_gen[i].address               = '0;
         input_gen[i].opcode                = NULL;
         input_gen[i].requestor_id          = 8'h00;
         input_gen[i].next_tile_fifo_arb_id = NULL_CARDINAL;
+        input_gen_ready[i] = 5'b11111;
     end
 end
 
