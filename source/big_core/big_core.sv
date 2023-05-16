@@ -89,6 +89,7 @@ t_immediate         SelImmTypeQ101H;
 t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
 t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
 t_opcode            OpcodeQ101H, OpcodeQ102H;
+t_csr               CsrQ101H, CsrQ102H;
 
 logic Hazard1Data1Q102H;
 logic Hazard2Data1Q102H;
@@ -156,6 +157,7 @@ assign InstructionQ101H         = flushQ102H ? NOP :
 // End Load and Ctrl hazard detection
 
 assign OpcodeQ101H           = t_opcode'(InstructionQ101H[6:0]);
+assign CsrQ101H              = t_csr'({csr_rden csr_wren InstructionQ101H[13:12] InstructionQ101H{19:15} InstructionQ101H{31:20}});
 assign Funct3Q101H           = InstructionQ101H[14:12];
 assign Funct7Q101H           = InstructionQ101H[31:25];
 assign SelNextPcAluOutJQ101H = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
@@ -261,7 +263,8 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 `MAFIA_RST_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk, Rst)
 `MAFIA_RST_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk, Rst)
 `MAFIA_RST_DFF(RegDstQ102H              , RegDstQ101H           , Clk, Rst)
-`MAFIA_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0))
+`MAFIA_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0) )
+`MAFIA_RST_VAL_DFF(CsrQ102H             , CsrQ101H              , Clk, Rst, t_csr'('0)    )
 `MAFIA_RST_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk, Rst)
 `MAFIA_RST_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk, Rst)
 
@@ -285,6 +288,17 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 
 //---- The Register File ----
  `MAFIA_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clk , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
+// Csr instantiating
+big_core_csr big_core_csr(
+    logic Clk,
+    logic Rst,
+    logic         csr_wren,
+    logic         csr_rden,
+    logic [1:0]   csr_op,    // 2-bit CSR operation (00: Read, 01: Write, 10: Set, 11: Clear)
+    logic [11:0]  csr_addr, // 12-bit CSR address
+    logic [31:0]  csr_data, // 32-bit data to be written into the CSR
+puts to the core
+     logic [31:0] csr_read_data)
 // Hazard Detection
 assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc1Q102H != 5'b0);
 assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);

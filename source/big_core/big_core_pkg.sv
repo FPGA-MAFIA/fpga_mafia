@@ -82,6 +82,15 @@ typedef enum logic [2:0] {
    BGEU = 3'b111
 } t_branch_type ;
 
+typedef enum logic [2:0] {
+  CRSRW   = 3'b001 ,
+  CRSRS   = 3'b010 ,
+  CRSRC   = 3'b011 ,
+  CRSRWI  = 3'b101 ,
+  CRSRSI  = 3'b110 ,
+  CRSRCI  = 3'b111
+} t_funct3_csr ;
+
 typedef enum logic [6:0] {
    LUI    = 7'b0110111 ,
    AUIPC  = 7'b0010111 ,
@@ -95,6 +104,14 @@ typedef enum logic [6:0] {
    FENCE  = 7'b0001111 ,
    SYSCAL = 7'b1110011
 } t_opcode ;
+
+typedef struct packed {
+    logic        csr_wren;
+    logic        csr_rden;
+    logic [1:0]  csr_op;
+    logic [4:0]  csr_rs1;
+    logic [11:0] csr_adrr;
+} t_csr;
 
 typedef struct packed {
     logic [7:0] SEG7_0;
