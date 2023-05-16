@@ -68,26 +68,29 @@ end
 // assign the un-used edges to 0
 always_comb begin 
     for(int row =0; row< 5; row++) begin
+        //The first column strap the valid to 0
         out_north_req_valid[0][row] = '0;
         out_south_req_valid[0][row] = '0;
         out_east_req_valid[0][row] = '0;
         out_west_req_valid[0][row] = '0;
+        //The last column strap the valid to 0
         out_north_req_valid[4][row] = '0;
         out_south_req_valid[4][row] = '0;
         out_east_req_valid[4][row] = '0;
         out_west_req_valid[4][row] = '0;
     end
     for(int col =0; col< 5; col++) begin
+        //The first row strap the valid to 0
         out_north_req_valid[col][0] = '0;
         out_south_req_valid[col][0] = '0;
         out_east_req_valid[col][0] = '0;
         out_west_req_valid[col][0] = '0;
+        //The last row strap the valid to 0
         out_north_req_valid[col][4] = '0;
         out_south_req_valid[col][4] = '0;
         out_east_req_valid[col][4] = '0;
         out_west_req_valid[col][4] = '0;
     end
-
 
 //TODO FIXME - connect the READY signal correctly
     for(int col =0; col< 5; col++) begin
@@ -112,8 +115,8 @@ t_tile_id [3:1] [3:1] local_tile_id;
 logic [3:1] [3:1] [3:0] local_tile_id_row;
 logic [3:1] [3:1] [3:0] local_tile_id_col;
 generate
-for(COL = 1; COL<4; COL++) begin : instance_tile_col_loop
-for(ROW = 1; ROW<4; ROW++) begin : instance_tile_row_loop
+for(COL = 1; COL<4; COL++) begin : col
+for(ROW = 1; ROW<4; ROW++) begin : row
 // generate the local_tile_id
 assign local_tile_id_row[COL][ROW] = ROW;
 assign local_tile_id_col[COL][ROW] = COL;
@@ -151,9 +154,9 @@ mini_core_tile mini_core_tile_ins (
     .out_south_req       (out_south_req        [COL][ROW]),
     .in_south_ready      (in_south_ready       [COL][ROW])
   );
-end // instance_tile_row_loop
-end // instance_tile_col_loop
-endgenerate // instance_tile_row_loop
+end // row
+end // col
+endgenerate // row
 
 endmodule
 

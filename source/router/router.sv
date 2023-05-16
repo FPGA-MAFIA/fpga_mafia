@@ -196,12 +196,12 @@ fifo_arb fifo_arb_north (
 .winner_req_valid(out_north_req_valid),
 .winner_req      (out_north_req),
 // Input
-.in_ready_arb_fifo0(in_north_ready.north_arb),//input
-.in_ready_arb_fifo1(in_north_ready.east_arb), //input
-.in_ready_arb_fifo2(in_north_ready.west_arb), //input
-.in_ready_arb_fifo3(in_north_ready.local_arb)  //input placeholder for local mini_core
+.in_ready_north_arb_fifo(in_north_ready.north_arb),
+.in_ready_east_arb_fifo (in_north_ready.east_arb),
+.in_ready_south_arb_fifo(in_north_ready.south_arb),
+.in_ready_west_arb_fifo (in_north_ready.west_arb),
+.in_ready_local_arb_fifo(in_north_ready.local_arb)
 );
-
 
 //==============================
 // The East FIFO Arbiter
@@ -282,10 +282,11 @@ fifo_arb fifo_arb_east (
 .winner_req_valid(out_east_req_valid),
 .winner_req      (out_east_req),
 // Input
-.in_ready_arb_fifo0(in_east_ready.north_arb),//input
-.in_ready_arb_fifo1(in_east_ready.south_arb),//input
-.in_ready_arb_fifo2(in_east_ready.west_arb), //input
-.in_ready_arb_fifo3(in_east_ready.local_arb)  //input placeholder for local mini_core
+.in_ready_north_arb_fifo(in_east_ready.north_arb),
+.in_ready_east_arb_fifo (in_east_ready.east_arb),
+.in_ready_south_arb_fifo(in_east_ready.south_arb),
+.in_ready_west_arb_fifo (in_east_ready.west_arb),
+.in_ready_local_arb_fifo(in_east_ready.local_arb)
 );
 
 
@@ -363,10 +364,11 @@ fifo_arb fifo_arb_south (
 .winner_req_valid(out_south_req_valid),
 .winner_req      (out_south_req),
 // Input
-.in_ready_arb_fifo0(in_south_ready.north_arb),//input
-.in_ready_arb_fifo1(in_south_ready.east_arb), //input
-.in_ready_arb_fifo2(in_south_ready.west_arb), //input
-.in_ready_arb_fifo3(in_south_ready.local_arb)  //input placeholder for local mini_core
+.in_ready_north_arb_fifo(in_south_ready.north_arb),
+.in_ready_east_arb_fifo (in_south_ready.east_arb),
+.in_ready_south_arb_fifo(in_south_ready.south_arb),
+.in_ready_west_arb_fifo (in_south_ready.west_arb),
+.in_ready_local_arb_fifo(in_south_ready.local_arb)
 );
 
 //==============================
@@ -447,10 +449,11 @@ fifo_arb fifo_arb_west (
 .winner_req_valid    (out_west_req_valid),
 .winner_req      (out_west_req),
 // Input
-.in_ready_arb_fifo0(in_west_ready.north_arb),//input
-.in_ready_arb_fifo1(in_west_ready.east_arb), //input
-.in_ready_arb_fifo2(in_west_ready.south_arb),//input
-.in_ready_arb_fifo3(in_west_ready.local_arb)  //input placeholder for local mini_core
+.in_ready_north_arb_fifo(in_west_ready.north_arb),
+.in_ready_east_arb_fifo (in_west_ready.east_arb),
+.in_ready_south_arb_fifo(in_west_ready.south_arb),
+.in_ready_west_arb_fifo (in_west_ready.west_arb),
+.in_ready_local_arb_fifo(in_west_ready.local_arb)
 );
 
 //==============================
@@ -496,10 +499,11 @@ fifo_arb fifo_arb_local (
 .winner_req_valid  (out_local_req_valid),
 .winner_req        (out_local_req),
 // Input
-.in_ready_arb_fifo0(in_local_ready.north_arb),//input
-.in_ready_arb_fifo1(in_local_ready.east_arb), //input
-.in_ready_arb_fifo2(in_local_ready.south_arb),//input
-.in_ready_arb_fifo3(in_local_ready.west_arb)  //input
+.in_ready_north_arb_fifo(in_local_ready.north_arb),
+.in_ready_east_arb_fifo (in_local_ready.east_arb),
+.in_ready_south_arb_fifo(in_local_ready.south_arb),
+.in_ready_west_arb_fifo (in_local_ready.west_arb),
+.in_ready_local_arb_fifo(in_local_ready.local_arb)
 );
 
 

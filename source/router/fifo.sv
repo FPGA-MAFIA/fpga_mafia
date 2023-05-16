@@ -9,7 +9,7 @@
 
 `include "macros.sv"
 module fifo #(parameter int DATA_WIDTH = 8, 
-           	  parameter int FIFO_DEPTH = 3)
+           	  parameter int FIFO_DEPTH = 4)
     (
     input  logic                   clk,
     input  logic                   rst,
@@ -36,9 +36,6 @@ logic [MSB_PTR:0] next_wr_ptr;
 `MAFIA_RST_DFF(rd_ptr, next_rd_ptr, clk, rst)
 `MAFIA_RST_DFF(wr_ptr, next_wr_ptr, clk, rst)
 
-//Empty and full signals
-assign empty = (wr_ptr == rd_ptr);
-assign full  = ((wr_ptr > rd_ptr) ? (wr_ptr == (rd_ptr + FIFO_DEPTH - 1)): (wr_ptr == (rd_ptr - 1'b1)));
 always_comb begin : fifo_array_assign
     //default values:
     next_fifo_array = fifo_array;
@@ -48,20 +45,50 @@ always_comb begin : fifo_array_assign
         next_fifo_array[wr_ptr] = push_data;
         next_wr_ptr = (wr_ptr != (FIFO_DEPTH - 1)) ? (wr_ptr + 1) : '0;
     end
+    pop_data = fifo_array[rd_ptr];
     if (pop) begin
-        pop_data = fifo_array[rd_ptr];
         next_rd_ptr = (rd_ptr != (FIFO_DEPTH - 1)) ? (rd_ptr + 1) : '0;
     end
 end
+
+//=============================================================================
+// Empty and full signals
+//=============================================================================
+// In this implementation - if the fifo of size 2 we have a problem due to the bit overflow when comparing rd_ptr-1 and wr_ptr
+// This is why we added the "FIFO_DEPTH - 1" in the comparison - but this is not a good solution
+// assign empty = (wr_ptr == rd_ptr);
+// assign full  = ((wr_ptr > rd_ptr) ? (wr_ptr == (rd_ptr + FIFO_DEPTH - 1)): (wr_ptr == (rd_ptr - 1'b1)));
+
+//=============================================================================
+// An alternative solution is to use a counter:
+//=============================================================================
+logic [MSB_PTR:0] count;
+logic [MSB_PTR:0] next_count;
+`MAFIA_RST_DFF(count, next_count, clk, rst)
+always_comb begin
+    next_count = count;
+    unique casez ({push, pop})
+        2'b00: next_count = count;
+        2'b01: next_count = count - 1'b1; // protected with the assertion below
+        2'b10: next_count = count + 1'b1; // protected with the assertion below
+        2'b11: next_count = count;
+    endcase
+end // always_comb
+assign empty = (count == 0); 
+assign full  = (count == FIFO_DEPTH-1);
+
+//=============================================================================
+//=============================================================================
+//=============================================================================
+`ifdef SIM_ONLY
+`ASSERT("Push when full", full && push, !rst, "Push when full");
+`ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
 // Assertion for push when full
 //assert property (@(posedge clk) disable iff (rst) (full |-> !push)) else $error("Push when full"); // iff -> if and only if.
-
 // Assertion for pop when empty
 //assert property (@(posedge clk) disable iff (rst) (empty |-> !pop)) else $error("Pop when empty");
 // Assertion for push when full
-
-`ASSERT("Push when full", full && push, !rst, "Push when full");
-`ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
+`endif
 
 
 endmodule : fifo

@@ -1,4 +1,9 @@
 `include "macros.sv"
+`define MINI_CORE_TILE(col,row) fabric.col[col].row[row].mini_core_tile_ins
+`define IN_LOCAL_REQ(col,row)   `MINI_CORE_TILE(col,row).in_local_req
+
+`define RAND_EP(rand_ep)  rand_ep = {4'($urandom_range(4'd1, 4'd3)), 4'($urandom_range(4'd1, 4'd3))};
+
 module fabric_tb;
 import router_pkg::*;
 import mini_core_pkg::*;
@@ -7,11 +12,13 @@ logic              rst;
 int fabric_test_true;
 int mini_core_tile_test_true;
 string test_name;
-
+t_tile_id rand_source;
+t_tile_id rand_target;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
+`include "fabric_inputs_trk.vh"
 // =============================
 // CLK GEN
 // =============================
@@ -87,7 +94,7 @@ initial begin
   join
   end else if(fabric_test_true) begin
     $display("==============================");
-    $display("[INFO] this is MINI_CORE_TILE test");
+    $display("[INFO] this is FABRIC test");
     $display("==============================");
   fork 
       run_fabric_test(test_name);  
