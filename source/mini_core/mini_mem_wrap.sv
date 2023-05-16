@@ -63,13 +63,17 @@ logic [31:0] F2C_DMemRspDataQ504H;
 //===========================================
 //    set F2C request 503 ( D_MEM )
 //===========================================
+// Set the F2C IMEM hit indications
 assign F2C_IMemHitQ503H  = (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] > I_MEM_REGION_FLOOR) && 
                            (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] < I_MEM_REGION_ROOF) ;
-assign F2C_IMemWrEnQ503H = F2C_ReqValidQ503H && (F2C_ReqOpcodeQ503H == WR_REQ) && F2C_IMemHitQ503H;
-
-assign F2C_DMemHitQ503H  =(F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] > D_MEM_REGION_FLOOR) && 
-                          (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
-assign F2C_DMemWrEnQ503H = F2C_ReqValidQ503H && (F2C_ReqOpcodeQ503H == WR_REQ) && F2C_DMemHitQ503H;
+assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && F2C_ReqValidQ503H && (F2C_ReqOpcodeQ503H == WR_REQ);
+// Set the F2C DMEM hit indications
+assign F2C_DMemHitQ503H  = (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] > D_MEM_REGION_FLOOR) && 
+                           (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
+assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && F2C_ReqValidQ503H && (F2C_ReqOpcodeQ503H == WR_REQ);
+// Set the F2C CrMEM hit indications
+assign F2C_CrMemHitQ503H  = 1'b0; //FIXME - Add CR_MEM offset hit indication
+assign F2C_CrMemWrEnQ503H =  1'b0; //FIXME - Add CR_MEM offset hit indication
 
 //==================================
 // Instruction Memory
@@ -99,9 +103,8 @@ mem  #(
 //==================================
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
-  .ADRS_WIDTH(14)//FIXME - Parametrize!!
-)
-d_mem  (
+  .ADRS_WIDTH(14) //FIXME - Parametrize!!
+) d_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
     .address_a  (DMemAddressQ103H[15:2]),//FIXME - Parametrize!!
@@ -120,14 +123,16 @@ d_mem  (
 //==================================
 // F2C response 504 ( D_MEM/I_MEM )
 //==================================
-assign F2C_RspDataQ504H   = F2C_IMemHitQ503H ? F2C_IMemRspDataQ504H :
-                            F2C_DMemHitQ503H ? F2C_DMemRspDataQ504H :
-                                                '0                  ;
+assign F2C_RspDataQ504H   = F2C_CrMemHitQ503H ? F2C_CrMemRspDataQ504H : //CR hit is the highest priority
+                            F2C_IMemHitQ503H  ? F2C_IMemRspDataQ504H  :
+                            F2C_DMemHitQ503H  ? F2C_DMemRspDataQ504H  :
+                                               '0                     ;
 `MAFIA_DFF(F2C_RspValidQ504H, F2C_ReqValidQ503H, Clock)
 
 t_tile_trans OutFabricQ504H;
-assign F2C_InFabricQ503H = InFabricValidQ503H && (InFabricQ503H.opcode == RD) ? InFabricQ503H : '0;
 logic [31:0] F2C_RdRspAddressQ503H;
+assign F2C_InFabricValidQ503H = InFabricValidQ503H && (InFabricQ503H.opcode == RD);
+assign F2C_InFabricQ503H      = F2C_InFabricValidQ503H   ?  InFabricQ503H  :  '0;
 // Set the target address to the requestor id (This is the Read response address)
 assign F2C_RdRspAddressQ503H = {F2C_InFabricQ503H.requestor_id[7:0],F2C_InFabricQ503H.address[23:0]};
 `MAFIA_DFF(F2C_OutFabricValidQ504H                 , F2C_InFabricValidQ503H  , Clock)
@@ -153,12 +158,12 @@ assign F2C_RdRspAddressQ503H = {F2C_InFabricQ503H.requestor_id[7:0],F2C_InFabric
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 f2c_rsp_fifo  (.clk       (Clock),
                .rst       (Rst),
-               .push      (OutFabricValidQ504H), // valid_alloc_req#
-               .push_data (OutFabricQ504H),// alloc_req#
-               .pop       (OutFabricValidQ505H),//arbiter chose this fifo to pop.
-               .pop_data  (OutFabricQ505H), // arbiter input
-               .full      (F2C_RspFull),//out_ready_fifo#
-               .empty     (F2C_RspEmpty)
+               .push      (F2C_OutFabricValidQ504H),  // input
+               .push_data (F2C_OutFabricQ504H),       // input
+               .pop       (F2C_OutFabricValidQ505H),  // input
+               .pop_data  (F2C_OutFabricQ505H),       // output
+               .full      (F2C_RspFull),              // output
+               .empty     (F2C_RspEmpty)              // output
                );// indication to arbiter that the fifo is empty
 
 //==================================
