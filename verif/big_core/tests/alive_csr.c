@@ -30,12 +30,12 @@ int main()  {
     int cycle_counter2;
     asm volatile ("csrr %0, 0xC00" : "=r" (cycle_counter1));
     asm volatile ("csrr %0, 0xC00" : "=r" (cycle_counter2));
-    rvc_printf("\n VAL ");
+    rvc_printf("\n COUNT1 ");
     rvc_print_int(cycle_counter1);
-    rvc_printf("\n VAL ");
+    rvc_printf("\n COUNT2 ");
     rvc_print_int(cycle_counter2);
     int counter = cycle_counter2 - cycle_counter1;
-    rvc_printf("\n VAL ");
+    rvc_printf("\n DIFF   ");
     rvc_print_int(counter);
 
     return 0;
