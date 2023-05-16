@@ -110,7 +110,31 @@ typedef struct packed {
     logic        csr_rden;
     logic [1:0]  csr_op;
     logic [4:0]  csr_rs1;
-    logic [11:0] csr_adrr;
+    logic [11:0] csr_addr;
+    logic [31:0] csr_data;
+} t_csr_inst;
+
+typedef enum logic [11:0] {
+ CSR_SCRATCH   = 12'h009 ,
+ CSR_CYCLE_LOW = 12'hC00 ,
+ CSR_CYCLE_HIGH= 12'hC80 ,
+ CSR_MCAUSE    = 12'h342
+} t_csr_addr ;
+
+typedef struct packed {
+    logic illegal_instruction;
+    logic misaligned_access;
+    logic illegal_csr_access;
+    logic breakpoint;
+    logic timer_interrupt;  
+    logic external_interrupt;
+} t_csr_hw_updt;
+
+typedef struct packed {
+    logic [31:0] csr_scratch;
+    logic [31:0] csr_cycle_low;
+    logic [31:0] csr_cycle_high;
+    logic [31:0] csr_mcause;
 } t_csr;
 
 typedef struct packed {

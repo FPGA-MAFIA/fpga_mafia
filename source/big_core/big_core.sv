@@ -21,7 +21,9 @@
 
 `include "macros.sv"
 
-module big_core (
+module big_core 
+import big_core_pkg::*;
+(
     input  logic        Clk,
     input  logic        Rst,
     // Instruction Memory
@@ -35,7 +37,6 @@ module big_core (
     output logic        DMemRdEnQ103H,       // To D_MEM
     input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
-import big_core_pkg::*;
 // ---- Data-Path signals ----
 // Program counter
 logic [31:0]        PcQ101H, PcQ102H;
@@ -62,6 +63,7 @@ logic               SelNextPcAluOutQ102H;
 logic               SelRegWrPcQ101H, SelRegWrPcQ102H, SelRegWrPcQ103H, SelRegWrPcQ104H;
 logic               BranchCondMetQ102H;
 logic               SelDMemWbQ101H, SelDMemWbQ102H, SelDMemWbQ103H, SelDMemWbQ104H;
+logic               SelCsrWbQ101H,  SelCsrWbQ102H;
 logic [2:0]         Funct3Q101H;
 logic [6:0]         Funct7Q101H;
 logic [4:0]         PreRegSrc1Q101H, RegSrc1Q101H, RegSrc1Q102H; 
@@ -89,7 +91,7 @@ t_immediate         SelImmTypeQ101H;
 t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
 t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
 t_opcode            OpcodeQ101H, OpcodeQ102H;
-t_csr               CsrQ101H, CsrQ102H;
+t_csr_inst          CsrInstQ101H, CsrInstQ102H;
 
 logic Hazard1Data1Q102H;
 logic Hazard2Data1Q102H;
@@ -156,8 +158,18 @@ assign InstructionQ101H         = flushQ102H ? NOP :
 
 // End Load and Ctrl hazard detection
 
+
 assign OpcodeQ101H           = t_opcode'(InstructionQ101H[6:0]);
-assign CsrQ101H              = t_csr'({csr_rden csr_wren InstructionQ101H[13:12] InstructionQ101H{19:15} InstructionQ101H{31:20}});
+assign RegDstQ101H           = InstructionQ101H[11:7];
+assign RegSrc1Q101H          = InstructionQ101H[19:15];
+assign RegSrc2Q101H          = InstructionQ101H[24:20];
+assign CsrInstQ101H.csr_wren = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b01)) && (RegSrc1Q101H=='0 ));
+assign CsrInstQ101H.csr_rden = (OpcodeQ101H == SYSCAL) && !((Funct3Q101H[1:0]==2'b01 ) && (RegDstQ101H=='0 ));
+assign CsrInstQ101H.csr_op   = InstructionQ101H[13:12];
+assign CsrInstQ101H.csr_rs1  = InstructionQ101H[19:15];
+assign CsrInstQ101H.csr_addr = InstructionQ101H[31:20];
+assign CsrInstQ101H.csr_data = InstructionQ101H[14] ? {27'h0, InstructionQ101H[19:15]} : RegRdData1Q101H;
+assign SelCsrWbQ101H         = CsrInstQ101H.csr_rden;
 assign Funct3Q101H           = InstructionQ101H[14:12];
 assign Funct7Q101H           = InstructionQ101H[31:25];
 assign SelNextPcAluOutJQ101H = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
@@ -167,8 +179,9 @@ assign SelAluPcQ101H         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) |
 assign SelAluImmQ101H        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
 assign SelDMemWbQ101H        = (OpcodeQ101H == LOAD);
 assign CtrlLuiQ101H          = (OpcodeQ101H == LUI);
-assign CtrlRegWrEnQ101H      = (OpcodeQ101H == LUI ) || (OpcodeQ101H == AUIPC) || (OpcodeQ101H == JAL)  || (OpcodeQ101H == JALR) ||
-                               (OpcodeQ101H == LOAD) || (OpcodeQ101H == I_OP)  || (OpcodeQ101H == R_OP) || (OpcodeQ101H == FENCE);
+assign CtrlRegWrEnQ101H      = (OpcodeQ101H == LUI ) || (OpcodeQ101H == AUIPC) || (OpcodeQ101H == JAL)  || (OpcodeQ101H == JALR)  ||
+                               (OpcodeQ101H == LOAD) || (OpcodeQ101H == I_OP)  || (OpcodeQ101H == R_OP) || (OpcodeQ101H == FENCE) ||
+                               CsrInstQ101H.csr_wren;
 assign CtrlDMemWrEnQ101H     = (OpcodeQ101H == STORE);
 assign CtrlSignExtQ101H      = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); // Sign extend the LOAD from memory read.
 assign CtrlDMemByteEnQ101H   = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
@@ -226,9 +239,6 @@ end
 //===================
 //  Register File
 //===================
-assign RegDstQ101H  = InstructionQ101H[11:7];
-assign RegSrc1Q101H = InstructionQ101H[19:15];
-assign RegSrc2Q101H = InstructionQ101H[24:20];
 // ---- Read Register File ----
 assign MatchRd1AftrWrQ101H = (RegSrc1Q101H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q101H != 5'b0);
 
@@ -250,6 +260,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 `MAFIA_RST_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk, Rst)
 `MAFIA_RST_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk, Rst)
 `MAFIA_RST_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk, Rst)
+`MAFIA_RST_DFF(SelCsrWbQ102H           , SelCsrWbQ101H        , Clk, Rst)
 `MAFIA_RST_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk, Rst)
 `MAFIA_RST_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk, Rst)
 `MAFIA_RST_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk, Rst)
@@ -264,7 +275,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 `MAFIA_RST_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk, Rst)
 `MAFIA_RST_DFF(RegDstQ102H              , RegDstQ101H           , Clk, Rst)
 `MAFIA_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0) )
-`MAFIA_RST_VAL_DFF(CsrQ102H             , CsrQ101H              , Clk, Rst, t_csr'('0)    )
+`MAFIA_RST_VAL_DFF(CsrInstQ102H         , CsrInstQ101H          , Clk, Rst, t_csr_inst'('0)    )
 `MAFIA_RST_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk, Rst)
 `MAFIA_RST_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk, Rst)
 
@@ -288,17 +299,21 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 
 //---- The Register File ----
  `MAFIA_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clk , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
-// Csr instantiating
-big_core_csr big_core_csr(
-    logic Clk,
-    logic Rst,
-    logic         csr_wren,
-    logic         csr_rden,
-    logic [1:0]   csr_op,    // 2-bit CSR operation (00: Read, 01: Write, 10: Set, 11: Clear)
-    logic [11:0]  csr_addr, // 12-bit CSR address
-    logic [31:0]  csr_data, // 32-bit data to be written into the CSR
-puts to the core
-     logic [31:0] csr_read_data)
+//===============================================================================================
+// CSR instantiating
+//===============================================================================================
+logic [31:0] CsrReadDataQ102H;
+big_core_csr big_core_csr (
+ .Clk             (Clk),  
+ .Rst             (Rst),  
+ // Inputs from the core
+ .CsrInstQ102H    (CsrInstQ102H), 
+ .CsrHwUpdt       ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ // Outputs to the core
+ .CsrReadDataQ102H(CsrReadDataQ102H)
+);
+
+
 // Hazard Detection
 assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc1Q102H != 5'b0);
 assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);
@@ -336,6 +351,7 @@ always_comb begin : alu_logic
     default : AluOutQ102H = AluIn1Q102H + AluIn2Q102H;
   endcase
   if (CtrlLuiQ102H) AluOutQ102H = AluIn2Q102H;                                      // LUI
+  if (SelCsrWbQ102H) AluOutQ102H = CsrReadDataQ102H;                                // CSR
 end
 
 always_comb begin : branch_comp
@@ -420,6 +436,9 @@ assign PostSxDMemRdDataQ104H[31:24] =  ByteEnQ104H[3]    ? DMemRdRspQ104H[31:24]
                                        CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[23]}} : 8'b0;
 
 // ---- Select what write to the register file ----
-assign WrBackDataQ104H = SelDMemWbQ104H  ? PostSxDMemRdDataQ104H : AluOutQ104H;
-assign RegWrDataQ104H  = SelRegWrPcQ104H ? PcPlus4Q104H          : WrBackDataQ104H;
+assign WrBackDataQ104H = SelDMemWbQ104H  ? PostSxDMemRdDataQ104H : 
+                                           AluOutQ104H           ; //include the CSR write back
+
+assign RegWrDataQ104H  = SelRegWrPcQ104H ? PcPlus4Q104H : 
+                                          WrBackDataQ104H;
 endmodule // Module big_core 

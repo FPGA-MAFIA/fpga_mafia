@@ -1,29 +1,101 @@
-module big_core_csr #(parameter CSR_SIZE = 4096) (
+`include "macros.sv"
+module big_core_csr
+import big_core_pkg::*;
+(
     input logic Clk,
     input logic Rst,
-
     // Inputs from the core
-    input logic         csr_wren,
-    input logic         csr_rden,
-    input logic [1:0]   csr_op,    // 2-bit CSR operation (00: Read, 01: Write, 10: Set, 11: Clear)
-    input logic [11:0]  csr_addr, // 12-bit CSR address
-    input logic [31:0]  csr_data, // 32-bit data to be written into the CSR
-
+    input var t_csr_inst CsrInstQ102H,
+    input var t_csr_hw_updt CsrHwUpdt, // 32-bit data to be written into the CSR
     // Outputs to the core
-    output logic [31:0] csr_read_data // 32-bit data read from the CSR
+    output logic [31:0] CsrReadDataQ102H // 32-bit data read from the CSR
 );
 
     // Define the CSR registers
-    logic csrs [CSR_SIZE-1:0][31:0]; // 4,096 CSRs, each 32 bits wide
+    t_csr csr; 
+    t_csr next_csr;
+//==============================
+// CSR Access
+//------------------------------
+logic        csr_wren;
+logic        csr_rden;
+logic [1:0]  csr_op;
+logic [11:0] csr_addr;
+logic [31:0] csr_data;
+assign csr_wren = CsrInstQ102H.csr_wren;
+assign csr_rden = CsrInstQ102H.csr_rden;
+assign csr_addr = CsrInstQ102H.csr_addr;
+assign csr_data = CsrInstQ102H.csr_data;
+assign csr_op   = CsrInstQ102H.csr_op;
 
-    // Internal signals
-    logic [31:0] csr_write_data;
+logic csr_cycle_low_overflow;
+always_comb begin
+    next_csr = csr;
+    if(csr_wren) begin
+        unique casez ({csr_op,csr_addr}) // address holds the offset
+            // ---- RW CSR ----
+            {2'b01,CSR_SCRATCH}   : next_csr.csr_scratch = csr_data;
+            {2'b10,CSR_SCRATCH}   : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
+            {2'b11,CSR_SCRATCH}   : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
 
-    if      (csr_op == 2'b00) assign csr_write_data = {$size(csr_data){1'b0}};
-    else if (csr_op == 2'b01) assign csr_write_data = csr_data;
-    else if (csr_op == 2'b10) assign csr_write_data = csrs[csr_addr] |  csr_data;
-    else if (csr_op == 2'b11) assign csr_write_data = csrs[csr_addr] & ~csr_data;
-    
-    `MAFIA_EN_RST_DFF(csr_read_data , csrs[csr_addr]  , Clk, csr_rden, Rst)
-    `MAFIA_EN_RST_DFF(csrs[csr_addr], csr_write_data  , Clk, csr_wren, Rst)
+            {2'b01,CSR_MCAUSE}    : next_csr.csr_mcause = csr_data;                    
+            {2'b10,CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause |  csr_data;
+            {2'b11,CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause & ~csr_data;
+            // ---- Other ----
+            default   : /* Do nothing */;
+        endcase
+    end
+    //==========================================================================
+    // ---- RO CSR - writes from RTL ----
+    //==========================================================================
+    // the cycle counter is incremented on every clock cycle
+        {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
+        next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
+    //==========================================================================
+
+    //==========================================================================
+    // handle HW exceptions:
+    //==========================================================================
+    // 1. illegal instruction
+    // 2. misaligned access
+    // 3. illegal CSR access
+    // 4. breakpoint
+    if(CsrHwUpdt.illegal_instruction) next_csr.csr_mcause = 32'h00000002;
+    if(CsrHwUpdt.misaligned_access)   next_csr.csr_mcause = 32'h00000004;
+    if(CsrHwUpdt.illegal_csr_access)  next_csr.csr_mcause = 32'h0000000B;
+    if(CsrHwUpdt.breakpoint)          next_csr.csr_mcause = 32'h00000003;
+    // handle HW interrupts:
+    // 1. timer interrupt
+    // 2. external interrupt
+    if(CsrHwUpdt.timer_interrupt)     next_csr.csr_mcause = 32'h00000007;
+    if(CsrHwUpdt.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
+
+    //==========================================================================
+    // Reset values for CSR
+    //==========================================================================
+    if(Rst) begin
+        next_csr = '0;
+        //May override the reset values
+        next_csr.csr_scratch   = 32'h05;
+    end // if(Rst)
+end//always_comb
+
+`MAFIA_DFF(csr, next_csr, Clk)
+
+// This is the load
+always_comb begin
+    CsrReadDataQ102H = 32'b0;
+    if(csr_rden) begin
+        unique casez (csr_addr) // address holds the offset
+            // ---- RW CSR ----
+            CSR_SCRATCH    : CsrReadDataQ102H = csr.csr_scratch;
+            // ---- RO CSR ----
+            CSR_CYCLE_LOW  : CsrReadDataQ102H = csr.csr_cycle_low;
+            CSR_CYCLE_HIGH : CsrReadDataQ102H = csr.csr_cycle_high;
+            CSR_MCAUSE     : CsrReadDataQ102H = csr.csr_mcause;
+            default        : CsrReadDataQ102H = 32'b0 ;
+        endcase
+    end
+end
+
 endmodule
