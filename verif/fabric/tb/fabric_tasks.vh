@@ -25,6 +25,7 @@ task send_rand_req(input t_tile_id source_id, input t_tile_id target_id);
 int source_row, source_col;
 assign source_row = source_id[3:0];
 assign source_col = source_id[7:4];
+$display(" [INFO] : new request source_id = %h, target_id = %h",source_id,target_id);
 
 //first row
 if ( (source_row == 4'd1) && (source_col == 4'd1) ) `ASSIGN_IN_LOCAL_REQ(4'd1,4'd1,target_id)
