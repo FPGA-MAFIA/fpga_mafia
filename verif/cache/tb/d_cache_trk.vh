@@ -144,95 +144,95 @@ always @(posedge clk) begin
 //==================================================
 
  //===== Request Tracker =====   
-    if(cache.cache_pipe_wrap.pipe_lu_req_q1.valid) begin
+    if(d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.valid) begin
         $fwrite(cache_pipe_io_trk,"%t      Request   %-7s    %h        %h        %h         %h        %h      %h\n",
         $realtime,
-        cache.cache_pipe_wrap.pipe_lu_req_q1.lu_op.name(), 
-        cache.cache_pipe_wrap.pipe_lu_req_q1.tq_id, 
-        cache.cache_pipe_wrap.pipe_lu_req_q1.address, 
-        cache.cache_pipe_wrap.pipe_lu_req_q1.rd_indication,
-        cache.cache_pipe_wrap.pipe_lu_req_q1.wr_indication,
-        cache.cache_pipe_wrap.pipe_lu_req_q1.data,
-        cache.cache_pipe_wrap.pipe_lu_req_q1.cl_data);  
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.lu_op.name(), 
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.tq_id, 
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.address, 
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.rd_indication,
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.wr_indication,
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.data,
+        d_cache.d_cache_pipe_wrap.pipe_lu_req_q1.cl_data);  
 
     end
 
  //===== Response Tracker =====   
-    if(cache.cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
+    if(d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.valid) begin
         $fwrite(cache_pipe_io_trk,"%t      Response  %-7s    %h        %h      (---lu resp---)         %-4h       %h\n",
         $realtime,
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(),
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.tq_id,
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.address,
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.lu_result.name(), 
-        cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
+        d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.lu_op.name(),
+        d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.tq_id,
+        d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.address,
+        d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.lu_result.name(), 
+        d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.cl_data);     
     end
 
 
 // //==================================================
 // // tracker on Pipe Stages
 // //==================================================
-if(cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_valid) begin
+if(d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
       $fwrite(cache_pipe_stages_trk,"%t   %-7s  %h    {%h,%h,%h,%h}   %h     %h       %h       %h     %h      %h      %h   {%h,%h,%h,%h}     {%h,%h,%h,%h}      {%h,%h,%h,%h}    {%h,%h,%h,%h}     {%h,%h,%h,%h}       %h       %h        %h     %h    %h      %h\n",
       $realtime,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_op.name(),
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_tq_id,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[0],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[1],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[2],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_mru[3],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.hit,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.miss,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.mb_hit_cancel, 
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_tag,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_set,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.lu_offset,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.data,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[0],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[1],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[2],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_valid[3],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[0],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[1],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[2],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_modified[3],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[0],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[1],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[2],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_tags[3],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[0],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[1],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[2],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_victim[3],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[0],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[1],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[2],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.set_ways_hit[3],
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.fill_modified,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.fill_rd,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.dirty_evict,
-      cache.cache_pipe_wrap.pipe_lu_rsp_q3.cl_data,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.data_array_address,
-      cache.cache_pipe_wrap.cache_pipe.cache_pipe_lu_q2.cl_data
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_op.name(),
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_tq_id,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_mru[0],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_mru[1],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_mru[2],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_mru[3],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.hit,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.miss,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.mb_hit_cancel, 
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_tag,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_set,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_offset,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.data,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_valid[0],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_valid[1],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_valid[2],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_valid[3],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_modified[0],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_modified[1],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_modified[2],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_modified[3],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_tags[0],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_tags[1],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_tags[2],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_tags[3],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_victim[0],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_victim[1],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_victim[2],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_victim[3],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_hit[0],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_hit[1],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_hit[2],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.set_ways_hit[3],
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.fill_modified,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.fill_rd,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.dirty_evict,
+      d_cache.d_cache_pipe_wrap.pipe_lu_rsp_q3.cl_data,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.data_array_address,
+      d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.cl_data
       );     
   end
 // //==================================================
 // // tracker on TQ
 // //==================================================
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
-        if ((cache.cache_tq.tq_state[i] != cache.cache_tq.next_tq_state[i]) ||
-             ((cache.cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (cache.cache_tq.rd_req_hit_mb[i] || cache.cache_tq.wr_req_hit_mb[i]) )
+        if ((d_cache.d_cache_tq.tq_state[i] != d_cache.d_cache_tq.next_tq_state[i]) ||
+             ((d_cache.d_cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && (d_cache.d_cache_tq.rd_req_hit_mb[i] || d_cache.d_cache_tq.wr_req_hit_mb[i]) )
              ) begin
         $fwrite(cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
         $realtime,
         i,
-        cache.cache_tq.next_tq_state              [i].name,     
-        cache.cache_tq.next_tq_rd_indication      [i],     
-        cache.cache_tq.next_tq_wr_indication      [i],         
-        cache.cache_tq.next_tq_cl_address         [i],
-        cache.cache_tq.next_tq_merge_buffer_data  [i],      
-        cache.cache_tq.next_tq_cl_word_offset     [i],     
-        cache.cache_tq.next_tq_reg_id             [i]
+        d_cache.d_cache_tq.next_tq_state              [i].name,     
+        d_cache.d_cache_tq.next_tq_rd_indication      [i],     
+        d_cache.d_cache_tq.next_tq_wr_indication      [i],         
+        d_cache.d_cache_tq.next_tq_cl_address         [i],
+        d_cache.d_cache_tq.next_tq_merge_buffer_data  [i],      
+        d_cache.d_cache_tq.next_tq_cl_word_offset     [i],     
+        d_cache.d_cache_tq.next_tq_reg_id             [i]
         );
 
 
