@@ -3,6 +3,7 @@
 module cache_tb ;
 
 import d_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
+//import i_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
 logic             clk;
 logic             rst;
 t_req             core2cache_req;
