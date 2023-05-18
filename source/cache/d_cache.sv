@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 `include "macros.sv"
 
-module cache 
-    import cache_param_pkg::*;  
+module d_cache 
+    import d_cache_param_pkg::*;  
 (
     input   logic           clk,
     input   logic           rst,
@@ -31,7 +31,7 @@ t_lu_req        pipe_lu_req_q1;
 t_early_lu_rsp  pipe_early_lu_rsp_q2;
 t_lu_rsp        pipe_lu_rsp_q3;
 
-cache_tq cache_tq (
+d_cache_tq d_cache_tq (
     .clk             (clk),            //input
     .rst             (rst),            //input
     //Agent Interface
@@ -46,7 +46,7 @@ cache_tq cache_tq (
     .pipe_lu_rsp_q3       (pipe_lu_rsp_q3)  //input
 );
 
-cache_pipe_wrap cache_pipe_wrap (
+d_cache_pipe_wrap d_cache_pipe_wrap (
     .clk                (clk),               //input
     .rst                (rst),               //input
     //Pipe Interface

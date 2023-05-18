@@ -2,7 +2,7 @@
 
 module cache_tb ;
 
-import cache_param_pkg::*;  
+import d_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
 logic             clk;
 logic             rst;
 t_req             core2cache_req;
@@ -130,7 +130,7 @@ t_req      dmem_core2cache_req;
 generate if(V_D_CACHE_TEST == 1) begin
 `include "d_cache_trk.vh"
 end endgenerate
-cache cache ( //DUT
+d_cache d_cache ( //DUT
    .clk                (clk),            //input   logic
    .rst                (rst),            //input   logic
     //Agent Interface                      

@@ -106,15 +106,6 @@ typedef enum logic [1:0] {
 } t_fm_req_op ;
 
 
-
-typedef struct packed {
-    logic         valid;
-    logic         reject;
-    logic         accept;
-    t_address     address;
-    t_reg_id      reg_id;
-} t_ack ;
-
 typedef struct packed {
     logic       valid;
     t_tq_id     tq_id;
@@ -221,7 +212,6 @@ typedef struct packed {
     logic                                   miss;
     logic                                   mb_hit_cancel;
     logic [NUM_WAYS-1:0]                    set_ways_valid;
-    logic [NUM_WAYS-1:0]                    set_ways_modified;
     logic [NUM_WAYS-1:0]                    set_ways_mru;
     logic [NUM_WAYS-1:0][TAG_WIDTH-1:0]     set_ways_tags;
     logic [NUM_WAYS-1:0]                    set_ways_victim;
@@ -229,10 +219,8 @@ typedef struct packed {
     logic [WAY_WIDTH-1:0]                   set_ways_enc_hit;
     t_cl                                    cl_data;
     t_word                                  data;
-    logic                                   fill_modified;
     logic                                   fill_rd;
     t_reg_id                                reg_id;
-    logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
     logic                                   rd_indication;
 } t_pipe_bus; 

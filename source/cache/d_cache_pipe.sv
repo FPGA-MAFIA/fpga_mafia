@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 `include "macros.sv"
 
-module cache_pipe
-    import cache_param_pkg::*;  
+module d_cache_pipe
+    import d_cache_param_pkg::*;  
 (
     input   logic               clk,
     input   logic               rst,
