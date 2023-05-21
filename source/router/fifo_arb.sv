@@ -93,12 +93,8 @@ always_comb begin
                                         (in_ready_local_arb_fifo && (dout_fifo[i].next_tile_fifo_arb_id == LOCAL)));
 end
 
-arbiter #(
-.NUM_CLIENTS(4),
-.DATA_WIDTH($bits(t_tile_trans))
-)
-arb 
-    (
+arbiter #(.NUM_CLIENTS(4))
+arb(
     .clk(clk),
     .rst(rst),
     .valid_candidate(valid_candidate[3:0]),    // input from each fifo - not empty indication, valid candidate.
