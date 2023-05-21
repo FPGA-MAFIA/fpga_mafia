@@ -61,6 +61,12 @@ To make your experience smoother, we recommend installing the following tools:
 - [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a "Unix-like" shell.  
 - [Visual Studio Code](https://code.visualstudio.com/download), a code editor that supports many programming languages.  
 
+recommend testing this tutorial:
+https://github.com/amichai-bd/fpga_mafia/wiki/Getting-started---tool-chain-tutorial. 
+
+
+
+
 ## Inspiration Behind the Project:  
 This project draws inspiration from innovative players in the field of computing.  
 These include:  

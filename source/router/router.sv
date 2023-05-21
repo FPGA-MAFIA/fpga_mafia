@@ -126,15 +126,18 @@ assign in_south_req_valid_match_north  =  in_south_req_valid && (in_south_req.ne
 assign in_east_req_valid_match_north   =  in_east_req_valid  && (in_east_req.next_tile_fifo_arb_id  == NORTH);
 assign in_west_req_valid_match_north   =  in_west_req_valid  && (in_west_req.next_tile_fifo_arb_id  == NORTH);
 assign in_local_req_valid_match_north  =  in_local_req_valid && (in_local_req.next_tile_fifo_arb_id == NORTH);
-
+// TODO we can probably remove this, testing the assertion
+logic in_north_req_valid_match_north;
+assign in_north_req_valid_match_north  =  in_north_req_valid && (in_north_req.next_tile_fifo_arb_id == NORTH);
 //==============================
 // override the next_tile_fifo_arb_id
 //==============================
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(NORTH))
 north_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id    
-    .in_north_req_valid     ('0                             ) , //    input logic        
+    .in_north_req_valid     (in_north_req_valid_match_north ) , //    input logic        
     .in_east_req_valid      (in_east_req_valid_match_north  ) , //    input logic        
     .in_south_req_valid     (in_south_req_valid_match_north ) , //    input logic        
     .in_west_req_valid      (in_west_req_valid_match_north  ) , //    input logic        
@@ -208,15 +211,19 @@ assign in_north_req_valid_match_east  = in_north_req_valid && (in_north_req.next
 assign in_south_req_valid_match_east  = in_south_req_valid && (in_south_req.next_tile_fifo_arb_id == EAST);
 assign in_west_req_valid_match_east   = in_west_req_valid  && (in_west_req.next_tile_fifo_arb_id  == EAST);
 assign in_local_req_valid_match_east  = in_local_req_valid && (in_local_req.next_tile_fifo_arb_id == EAST);
+// TODO we can probably remove this, testing the assertion
+logic in_east_req_valid_match_east;
+assign in_east_req_valid_match_east  =  in_east_req_valid && (in_east_req.next_tile_fifo_arb_id == EAST);
 //==============================
 // override the next_tile_fifo_arb_id
 //==============================
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(EAST))
 east_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id
     .in_north_req_valid     (in_north_req_valid_match_east  ) , //    input logic
-    .in_east_req_valid      ('0                             ) , //    input logic
+    .in_east_req_valid      (in_east_req_valid_match_east   ) , //    input logic
     .in_south_req_valid     (in_south_req_valid_match_east  ) , //    input logic
     .in_west_req_valid      (in_west_req_valid_match_east   ) , //    input logic
     .in_local_req_valid     (in_local_req_valid_match_east  ) , //    input logic
@@ -291,15 +298,19 @@ assign in_north_req_valid_match_south = in_north_req_valid && (in_north_req.next
 assign in_east_req_valid_match_south  = in_east_req_valid  && (in_east_req.next_tile_fifo_arb_id  == SOUTH);
 assign in_west_req_valid_match_south  = in_west_req_valid  && (in_west_req.next_tile_fifo_arb_id  == SOUTH);
 assign in_local_req_valid_match_south = in_local_req_valid && (in_local_req.next_tile_fifo_arb_id == SOUTH);
+// TODO we can probably remove this, testing the assertion
+logic in_south_req_valid_match_south;
+assign in_south_req_valid_match_south  =  in_south_req_valid && (in_south_req.next_tile_fifo_arb_id == SOUTH);
 
 // override the next_tile_fifo_arb_id
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(SOUTH))
 south_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id    
     .in_north_req_valid     (in_north_req_valid_match_south ) , //    input logic        
     .in_east_req_valid      (in_east_req_valid_match_south  ) , //    input logic        
-    .in_south_req_valid     ('0                             ) , //    input logic        
+    .in_south_req_valid     (in_south_req_valid_match_south ) , //    input logic        
     .in_west_req_valid      (in_west_req_valid_match_south  ) , //    input logic        
     .in_local_req_valid     (in_local_req_valid_match_south ) , //    input logic        
     .in_north_req_address   (in_north_req.address[31:24]    ) , //    input logic [31:24]
@@ -368,6 +379,9 @@ assign in_north_req_valid_match_west  = in_north_req_valid && (in_north_req.next
 assign in_east_req_valid_match_west   = in_east_req_valid  && (in_east_req.next_tile_fifo_arb_id  == WEST);
 assign in_south_req_valid_match_west  = in_south_req_valid && (in_south_req.next_tile_fifo_arb_id == WEST);
 assign in_local_req_valid_match_west  = in_local_req_valid && (in_local_req.next_tile_fifo_arb_id == WEST);
+// TODO we can probably remove this, testing the assertion
+logic in_west_req_valid_match_west;
+assign in_west_req_valid_match_west  =  in_west_req_valid && (in_west_req.next_tile_fifo_arb_id == WEST);
 
 //==============================
 // override the next_tile_fifo_arb_id
@@ -375,11 +389,12 @@ assign in_local_req_valid_match_west  = in_local_req_valid && (in_local_req.next
 next_tile_fifo_arb
 #(.NEXT_TILE_CARDINAL(WEST))
 west_next_tile_fifo_arb (
+    .clk                    (clk                            ) ,
     .local_tile_id          (local_tile_id                  ) , //    input t_tile_id
     .in_north_req_valid     (in_north_req_valid_match_west  ) , //    input logic
     .in_east_req_valid      (in_east_req_valid_match_west   ) , //    input logic
     .in_south_req_valid     (in_south_req_valid_match_west  ) , //    input logic
-    .in_west_req_valid      ('0                             ) , //    input logic
+    .in_west_req_valid      (in_west_req_valid_match_west   ) , //    input logic
     .in_local_req_valid     (in_local_req_valid_match_west  ) , //    input logic
     .in_north_req_address   (in_north_req.address[31:24]    ) , //    input logic [31:24]
     .in_east_req_address    (in_east_req.address [31:24]    ) , //    input logic [31:24]

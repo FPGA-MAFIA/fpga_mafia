@@ -22,3 +22,4 @@
 ../../../source/big_core/vga_mem.sv
 ../../../source/big_core/d_mem.sv
 ../../../source/big_core/i_mem.sv
+../../../source/big_core/big_core_csr.sv

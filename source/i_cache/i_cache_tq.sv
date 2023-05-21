@@ -35,9 +35,7 @@ t_tq_state [NUM_TQ_ENTRY-1:0] tq_state;
 t_tq_state [NUM_TQ_ENTRY-1:0] next_tq_state;
 
 logic [NUM_TQ_ENTRY-1:0] rd_req_hit_mb;
-logic [NUM_TQ_ENTRY-1:0] wr_req_hit_mb;
 logic any_rd_hit_mb;
-logic any_wr_hit_mb;
 
 logic [NUM_TQ_ENTRY-1:0] free_entries;
 logic [NUM_TQ_ENTRY-1:0] allocate_entry;
@@ -56,38 +54,12 @@ t_cl         [NUM_TQ_ENTRY-1:0] tq_merge_buffer_data;
 t_cl_address [NUM_TQ_ENTRY-1:0] tq_cl_address;
 t_word_offset[NUM_TQ_ENTRY-1:0] tq_cl_word_offset; 
 logic        [NUM_TQ_ENTRY-1:0] tq_rd_indication; 
-logic        [NUM_TQ_ENTRY-1:0] tq_wr_indication; 
 t_reg_id     [NUM_TQ_ENTRY-1:0] tq_reg_id; 
 t_cl         [NUM_TQ_ENTRY-1:0] next_tq_merge_buffer_data; 
 t_cl_address [NUM_TQ_ENTRY-1:0] next_tq_cl_address; 
 t_word_offset[NUM_TQ_ENTRY-1:0] next_tq_cl_word_offset; 
 logic        [NUM_TQ_ENTRY-1:0] next_tq_rd_indication; 
 t_reg_id     [NUM_TQ_ENTRY-1:0] next_tq_reg_id; 
-
-//==============
-// logic to handle b2b write requests to the same cache line - review, maybe can be simplified to compare the other pipe LU
-//==============
-//logic     [NUM_TQ_ENTRY-1:0]       en_tq_wr_count; 
-//logic     [NUM_TQ_ENTRY-1:0] [2:0] tq_wr_count; 
-//logic     [NUM_TQ_ENTRY-1:0] [2:0] next_tq_wr_count; 
-//logic     [NUM_TQ_ENTRY-1:0]       tq_wr_count_inc;
-//logic     [NUM_TQ_ENTRY-1:0]       tq_wr_count_dec;
-//
-//always_comb begin
-//    for(int i =0; i < NUM_TQ_ENTRY; i++) begin
-//        casez ({tq_wr_count_inc[i], tq_wr_count_dec[i]})
-//            3'b00:   next_tq_wr_count[i] = tq_wr_count[i];
-//            3'b01:   next_tq_wr_count[i] = tq_wr_count[i] + 1;
-//            3'b10:   next_tq_wr_count[i] = tq_wr_count[i] - 1;
-//            3'b11:   next_tq_wr_count[i] = tq_wr_count[i];
-//            default: next_tq_wr_count[i] = tq_wr_count[i];
-//        endcase
-//    end //for
-//end //always_comb
-//
-//generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_wr_count
-//`MAFIA_EN_RST_DFF(tq_wr_count[TQ_GEN], next_tq_wr_count[TQ_GEN], clk, en_tq_wr_count[TQ_GEN], (tq_state == S_IDLE))
-//end endgenerate
 
 logic sel_reissue;
 logic en_reissue_req;
@@ -104,7 +76,6 @@ t_tq_id      rd_miss_tq_id;
 t_cl_address rd_miss_cl_address;
 
 logic free_exists;
-logic wr_hit_exists;
 logic rd_hit_exists;
 logic fill_exists;
 t_tq_id enc_first_free;
@@ -173,7 +144,6 @@ always_comb begin
         allocate_entry[i] = first_free[i]               &&  // first free entry to allocate exists
                             core2cache_req.valid        &&  // core request is valid
                             (!any_rd_hit_mb)            &&  // no read hit in merge buffer
-                            (!any_wr_hit_mb)            &&  // no write hit in merge buffer
                             (!pipe_early_lu_rsp_q2.rd_miss) ;  // no read miss in pipe -> must cancel request, wil be re-issue from the reissue buffer   
     end
     new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
@@ -207,7 +177,6 @@ always_comb begin
                     next_tq_cl_word_offset          [i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                 end
             end    
-            //FIXME: in case of write after write to same cache line we still need to write the data to mb ?
             S_LU_CORE: begin
                 //if Cache_hit : nex_state == IDLE
                 //if Cache_miss : next_state == MB_WAIT_FILL
@@ -268,15 +237,7 @@ always_comb begin
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
                            (!tq_rd_indication[i])           && // if the entry is already set as read indication, then we don't merge to the same entry
                            (!(pipe_early_lu_rsp_q2.rd_miss))&& // the request will be reissued later. we don't want to merge it to the same entry
-                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
-    
-        wr_req_hit_mb[i] = core2cache_req.valid             && 
-                           (core2cache_req.opcode == WR_OP) &&
-                           (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
-                           (!tq_rd_indication[i])           && //if the entry is already set as read indication, then we don't merge to the same entry
-                           (!(pipe_early_lu_rsp_q2.rd_miss))&& // the request will be reissued later. we don't want to merge it to the same entry
-                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
-    
+                           ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));    
     end
 end
 
@@ -305,7 +266,6 @@ assign stall = tq_full || stall_rd_miss_q || set_rd_miss_stall;
 
 
 assign any_rd_hit_mb = |rd_req_hit_mb;
-assign any_wr_hit_mb = |wr_req_hit_mb;
 
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
@@ -321,7 +281,6 @@ end
 
 `ENCODER(enc_first_free, free_exists, first_free)
 `ENCODER(enc_first_fill, fill_exists, first_fill)
-`ENCODER(enc_wr_req_hit_mb, wr_hit_exists, wr_req_hit_mb)
 `ENCODER(enc_rd_req_hit_mb, rd_hit_exists, rd_req_hit_mb)
 
 //=================
@@ -333,17 +292,14 @@ always_comb begin
         if(!pipe_early_lu_rsp_q2.rd_miss) begin // incase of rd miss in q2, then we need to cancel the core request and reissue it later
             pipe_lu_req_q1.valid   = core2cache_req.valid;
             pipe_lu_req_q1.reg_id  = core2cache_req.reg_id;
-            pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
-                                     (core2cache_req.opcode == RD_OP) ? RD_LU :
+            pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == RD_OP) ? RD_LU :
                                                                         NO_LU ;
             pipe_lu_req_q1.address       = core2cache_req.address;
             pipe_lu_req_q1.data          = core2cache_req.data;
-            pipe_lu_req_q1.tq_id         = any_wr_hit_mb ? enc_wr_req_hit_mb :
-                                           any_rd_hit_mb ? enc_rd_req_hit_mb :
-                                                           enc_first_free    ;
-            pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
+            pipe_lu_req_q1.tq_id         = any_rd_hit_mb ? enc_rd_req_hit_mb :
+                                                            enc_first_free    ;
+            pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb;
             pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
-            pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
         end // pipe_early_lu_rsp_q2.rd_miss
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
@@ -352,7 +308,6 @@ always_comb begin
         pipe_lu_req_q1.cl_data       = tq_merge_buffer_data[enc_first_fill];
         pipe_lu_req_q1.tq_id         = enc_first_fill;
         pipe_lu_req_q1.rd_indication = tq_rd_indication    [enc_first_fill];
-        pipe_lu_req_q1.wr_indication = tq_wr_indication    [enc_first_fill];
         pipe_lu_req_q1.reg_id        = tq_reg_id           [enc_first_fill];
     end //else if
 

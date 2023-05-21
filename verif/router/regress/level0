@@ -16,4 +16,5 @@ fifo_arb_back_pressure   -gV_REQUESTS=7 -gV_FIFO_DEPTH=3 -gV_NUM_FIFO=4 -gV_MAX_
 fifo_arb_back_pressure   -gV_REQUESTS=10 -gV_FIFO_DEPTH=4 -gV_NUM_FIFO=4 -gV_MAX_DELAY=5 -gV_BACK_PRESSURE=1
 fifo_arb_simple
 fifo_arb_single_fifo_full_BW
-router_alive   -gV_REQUESTS=3
+router_alive   -gV_REQUESTS=30 -gV_MAX_DELAY=10
+router_alive   -gV_REQUESTS=300 -gV_MAX_DELAY=1
