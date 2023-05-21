@@ -1,8 +1,8 @@
 //------------------------------------------------------------
-// Title : alive fpga
+// Title : alive fpga io
 // Project : big_core
 //------------------------------------------------------------
-// File : alive_fpga.c
+// File : alive_fpga_io.c
 // Author : Daniel Kaufman
 // Adviser : Amichai Ben-David
 // Created : 03/2023
@@ -17,8 +17,6 @@ void wait(int cycles) {
         asm("nop");
     }
 }
-
-
 
 int main()  {  
     int count = 0;
