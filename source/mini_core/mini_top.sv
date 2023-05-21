@@ -3,18 +3,17 @@
 
 module mini_top
 import mini_core_pkg::*;
+import router_pkg::*;
 (
-                input  logic        Clock  ,
-                input  logic        Rst    ,
-                //============================================
-                //      fabric interface
-                //============================================
-                input  logic        F2C_ReqValidQ503H     ,
-                input  t_fab_op     F2C_ReqOpcodeQ503H    ,
-                input  logic [31:0] F2C_ReqAddressQ503H   ,
-                input  logic [31:0] F2C_ReqDataQ503H      ,
-                output logic        F2C_RspValidQ504H     , 
-                output logic [31:0] F2C_RspDataQ504H 
+input  logic        Clock  ,
+input  logic        Rst    ,
+//============================================
+//      fabric interface
+//============================================
+input  logic            InFabricValidQ503H  ,
+input  var t_tile_trans InFabricQ503H       ,
+output logic            OutFabricValidQ505H ,
+output var t_tile_trans OutFabricQ505H 
 );
 
 logic [31:0] PcQ100H;             // To I_MEM
@@ -56,15 +55,13 @@ mini_mem_wrap mini_mem_wrap(
  .DMemByteEnQ103H       (DMemByteEnQ103H),     // input  logic [3:0]  DMemByteEnQ103H,     // To D_MEM
  .DMemWrEnQ103H         (DMemWrEnQ103H),       // input  logic        DMemWrEnQ103H,       // To D_MEM
  .DMemRdRspQ104H        (DMemRdRspQ104H),      // output logic [31:0] DMemRdRspQ104H       // From D_MEM
-// //============================================
-// //      fabric interface
-// //============================================
- .F2C_ReqValidQ503H     (F2C_ReqValidQ503H),   // input  logic        F2C_ReqValidQ503H     ,
- .F2C_ReqOpcodeQ503H    (F2C_ReqOpcodeQ503H),  // input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .F2C_ReqAddressQ503H   (F2C_ReqAddressQ503H), // input  logic [31:0] F2C_ReqAddressQ503H   ,
- .F2C_ReqDataQ503H      (F2C_ReqDataQ503H),    // input  logic [31:0] F2C_ReqDataQ503H      ,
- .F2C_RspValidQ504H     (F2C_RspValidQ504H),   // output logic        F2C_RspValidQ504H     , 
- .F2C_RspDataQ504H      (F2C_RspDataQ504H)     // output logic [31:0] F2C_RspDataQ504H 
+//============================================
+//      fabric interface
+//============================================
+ .InFabricValidQ503H    (InFabricValidQ503H),   // input  logic        F2C_ReqValidQ503H     ,
+ .InFabricQ503H         (InFabricQ503H),        // input  t_opcode     F2C_ReqOpcodeQ503H    ,
+ .OutFabricQ505H        (OutFabricQ505H),       // output t_rdata      F2C_RspDataQ504H      ,
+ .OutFabricValidQ505H   (OutFabricValidQ505H)   // output logic        F2C_RspValidQ504H
 );
 
 

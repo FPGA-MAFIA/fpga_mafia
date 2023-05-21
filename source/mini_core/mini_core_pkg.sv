@@ -179,12 +179,6 @@ typedef struct packed { // RW
 //   FENCE  = 7'b0001111 ,
 //   SYSCAL = 7'b1110011
 //} t_opcode ;
-typedef enum logic [1:0] {
-    RD_REQ = 2'b00 , 
-    WR_REQ = 2'b01 , 
-    RD_RSP = 2'b10 
-} t_fab_op ;
-
 
 
 endpackage

@@ -80,15 +80,13 @@ end // test_seq
 mini_top mini_top (
 .Clock               (Clk),
 .Rst                 (Rst),
-// //============================================
-// //      fabric interface
-// //============================================
-.F2C_ReqValidQ503H     ('0),// input  logic        F2C_ReqValidQ503H     ,
-.F2C_ReqOpcodeQ503H    ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
-.F2C_ReqAddressQ503H   ('0),// input  logic [31:0] F2C_ReqAddressQ503H   ,
-.F2C_ReqDataQ503H      ('0),// input  logic [31:0] F2C_ReqDataQ503H      ,
-.F2C_RspValidQ504H     (),  // output logic        F2C_RspValidQ504H     , 
-.F2C_RspDataQ504H      ()   // output logic [31:0] F2C_RspDataQ504H 
+//============================================
+//      fabric interface
+//============================================
+ .InFabricValidQ503H    ('0),// input  logic        F2C_ReqValidQ503H     ,
+ .InFabricQ503H         ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
+ .OutFabricQ505H        (),  // output t_rdata      F2C_RspDataQ504H      ,
+ .OutFabricValidQ505H   ()   // output logic        F2C_RspValidQ504H
 );      
 
 `include "mini_core_trk.sv"
