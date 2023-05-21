@@ -266,7 +266,7 @@ class Test:
             self.fail_flag = True
         else:
             try:
-                if os.path.exists(TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
+                if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
                     d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
                 else:
                     d_mem_mif_cmd = 'cp mif/defult_d_mem.mif mif/d_mem.mif'
