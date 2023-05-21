@@ -7,6 +7,11 @@
 module fabric_tb;
 import router_pkg::*;
 import mini_core_pkg::*;
+typedef struct packed {
+    t_tile_trans trans;
+    t_tile_id source;
+    t_tile_id target;
+} t_tile_trans_v;
 parameter V_ROW = 3;
 parameter V_COL = 3;
 logic              clk;
@@ -14,11 +19,10 @@ logic              rst;
 int fabric_test_true;
 int mini_core_tile_test_true;
 string test_name;
-t_tile_id rand_source;
-t_tile_id rand_target;
 static int cnt_trans;
 //static t_tile_trans origin_trans;
-static t_tile_trans [V_ROW:1] [V_COL:1] origin_trans;
+t_tile_trans_v [V_ROW:1] [V_COL:1] origin_trans;
+bit [V_ROW:1] [V_COL:1] valid_tile;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
@@ -42,13 +46,19 @@ task rst_ins();
     //release reset
     rst = '0;
 endtask
-always_comb begin : io_if
-for(int row = 1; row <=V_ROW ; row++)begin
-  for(int col = 1; col <=V_COL ; col++)begin
-    fabric.col[1].row[1].mini_core_tile_ins.pre_in_local_req.data = '0;
+genvar row, col;
+generate
+  for (col = 1; col <= V_COL; col = col + 1) begin : gen_col
+    for (row = 1; row <= V_ROW; row = row + 1) begin : gen_row
+      assign fabric.col[col].row[row].mini_core_tile_ins.in_local_req_valid            = valid_tile  [col][row];           
+      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.data         = origin_trans[col][row].trans.data;    
+      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.address      = origin_trans[col][row].trans.address;
+      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.opcode       = origin_trans[col][row].trans.opcode;  
+      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id = origin_trans[col][row].trans.requestor_id;                 
+    end
   end
-end  
-end
+endgenerate
+
 // =============================
 //  general tasks
 // =============================

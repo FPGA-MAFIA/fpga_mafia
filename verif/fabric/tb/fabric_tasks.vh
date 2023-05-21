@@ -22,27 +22,32 @@ endtask
 // XMR to drive a request from one local core in the fabric to another
 task send_req(input t_tile_id source_id, input t_tile_id target_id, input t_tile_opcode opcode);
 int source_row, source_col;
+int target_row, target_col;
 assign source_row = source_id[3:0];
 assign source_col = source_id[7:4];
+assign target_row = target_id[3:0];
+assign target_col = target_id[7:4];
 $display(" [INFO] : new request source_id = %h, target_id = %h",source_id,target_id);
+  for (int row = 1; row <= V_ROW; row = row + 1) begin
+    for (int col = 1; col <= V_COL; col = col + 1) begin 
+      if ( (source_row == row) && (source_col == col) )begin
+         valid_tile[col][row] = 1'b1;          
+         origin_trans[col][row].trans.data = $urandom_range(0,1024);
+         origin_trans[col][row].trans.address = {target_id, 24'h0};
+         origin_trans[col][row].trans.opcode = opcode;
+         origin_trans[col][row].trans.requestor_id = {col,row};                     
+         origin_trans[col][row].source = {source_col,source_row};                     
+         origin_trans[col][row].target = {target_col,target_row};                     
+         delay(1);                                                                                                     
+         valid_tile[col][row] = 1'b0;          
+         $display("origin_trans = %p at time %t from tile [%0d,%0d] to tile: [%0d,%0d]",origin_trans[col][row],$time,col,row,target_col,target_row);
+      end
+    end
+  end 
 
-//first row
-if ( (source_row == 4'd1) && (source_col == 4'd1) ) `ASSIGN_IN_LOCAL_REQ(4'd1,4'd1,target_id)
-if ( (source_row == 4'd1) && (source_col == 4'd2) ) `ASSIGN_IN_LOCAL_REQ(4'd2,4'd1,target_id)
-if ( (source_row == 4'd1) && (source_col == 4'd3) ) `ASSIGN_IN_LOCAL_REQ(4'd3,4'd1,target_id)
-//second row
-if ( (source_row == 4'd2) && (source_col == 4'd1) ) `ASSIGN_IN_LOCAL_REQ(4'd1,4'd2,target_id)
-if ( (source_row == 4'd2) && (source_col == 4'd2) ) `ASSIGN_IN_LOCAL_REQ(4'd2,4'd2,target_id)
-if ( (source_row == 4'd2) && (source_col == 4'd3) ) `ASSIGN_IN_LOCAL_REQ(4'd3,4'd2,target_id)
-//third row
-if ( (source_row == 4'd3) && (source_col == 4'd1) ) `ASSIGN_IN_LOCAL_REQ(4'd1,4'd3,target_id)
-if ( (source_row == 4'd3) && (source_col == 4'd2) ) `ASSIGN_IN_LOCAL_REQ(4'd2,4'd3,target_id)
-if ( (source_row == 4'd3) && (source_col == 4'd3) ) `ASSIGN_IN_LOCAL_REQ(4'd3,4'd3,target_id)
-
- // add the macros
 endtask
 
-//task fabric_DI_checker(input t_tile_id source, input t_tile_id target);// assumption - only one transaction can be alive in the whole fabric.
+//task fabric_DI_checker(input t_tile_id source, input t_tile_id target);
 //forever begin
 //  wait(source == target);
 //  cnt_trans = cnt_trans + 1;
