@@ -7,6 +7,8 @@
 module fabric_tb;
 import router_pkg::*;
 import mini_core_pkg::*;
+parameter V_ROW = 3;
+parameter V_COL = 3;
 logic              clk;
 logic              rst;
 int fabric_test_true;
@@ -15,7 +17,8 @@ string test_name;
 t_tile_id rand_source;
 t_tile_id rand_target;
 static int cnt_trans;
-static t_tile_trans origin_trans;
+//static t_tile_trans origin_trans;
+static t_tile_trans [V_ROW:1] [V_COL:1] origin_trans;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
@@ -39,6 +42,13 @@ task rst_ins();
     //release reset
     rst = '0;
 endtask
+always_comb begin : io_if
+for(int row = 1; row <=V_ROW ; row++)begin
+  for(int col = 1; col <=V_COL ; col++)begin
+    fabric.col[1].row[1].mini_core_tile_ins.pre_in_local_req.data = '0;
+  end
+end  
+end
 // =============================
 //  general tasks
 // =============================
