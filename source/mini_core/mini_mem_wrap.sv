@@ -41,16 +41,10 @@ import common_pkg::*;
                 //============================================
                 //      fabric interface
                 //============================================
-                input  logic        InFabricValidQ503H    ,
-                input  t_tile_trans InFabricQ503H    ,
-                output t_tile_trans OutFabricQ505H   ,
-                output t_tile_trans OutFabricValidQ505H   ,
-                input  logic        F2C_ReqValidQ503H     ,
-                input  t_fab_op     F2C_ReqOpcodeQ503H    ,
-                input  logic [31:0] F2C_ReqAddressQ503H   ,
-                input  logic [31:0] F2C_ReqDataQ503H      ,
-                output logic        F2C_RspValidQ504H     , 
-                output logic [31:0] F2C_RspDataQ504H 
+                input  logic        InFabricValidQ503H  ,
+                input  t_tile_trans InFabricQ503H       ,
+                output t_tile_trans OutFabricValidQ505H ,
+                output t_tile_trans OutFabricQ505H 
 );
 
 logic        F2C_IMemHitQ503H;
@@ -66,9 +60,9 @@ logic [31:0] F2C_DMemRspDataQ504H;
 //    set F2C request 503 ( D_MEM )
 //===========================================
 // Set the F2C IMEM hit indications
-assign F2C_IMemHitQ503H  = (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] > I_MEM_REGION_FLOOR) && 
-                           (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] < I_MEM_REGION_ROOF) ;
-assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && F2C_ReqValidQ503H && (F2C_ReqOpcodeQ503H == WR_REQ);
+assign F2C_IMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > I_MEM_REGION_FLOOR) && 
+                           (InFabricQ503H.address[MSB_REGION:LSB_REGION] < I_MEM_REGION_ROOF) ;
+assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 // Set the F2C DMEM hit indications
 assign F2C_DMemHitQ503H  = (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] > D_MEM_REGION_FLOOR) && 
                            (F2C_ReqAddressQ503H[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
