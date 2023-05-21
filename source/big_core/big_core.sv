@@ -114,9 +114,18 @@ logic MatchRd2AftrWrQ101H;
 // 2. Calc/Set the NextPc
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+logic [31:0] interruptJumpAddrQ101H;
+logic [31:0] MePcQ101H;
+logic        InterruptJumpQ101H;
+logic        MretQ101H;
 assign PcPlus4Q100H  = PcQ100H + 3'h4;
-assign NextPcQ10XH   = SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
+logic interrupt_counter_expired;
+assign InterruptJumpQ101H = interrupt_counter_expired;
+assign interruptJumpAddrQ101H = 32'h100; //FIXME - come from CSR?
+assign NextPcQ10XH   = InterruptJumpQ101H   ? interruptJumpAddrQ101H :
+                       MretQ101H            ? MePcQ101H   :
+                       SelNextPcAluOutQ102H ? AluOutQ102H :
+                                              PcPlus4Q100H;
 `MAFIA_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst)
 
 // Q100H to Q101H Flip Flops. 
@@ -155,10 +164,10 @@ assign InstructionQ101H         = flushQ102H ? NOP :
                                   LoadHzrdDetectQ102H ? PreviousInstructionQ101H :
                                                         PreInstructionQ101H;
 
-
+assign MretQ101H     = (Funct7Q101H == 7'b0011000) && (RegSrc2Q101H==5'b00010) && 
+                       (RegSrc1Q101H ==5'b00000)   && (Funct3Q101H == 3'b000)  && 
+                       (RegDstQ101H == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
 // End Load and Ctrl hazard detection
-
-
 assign OpcodeQ101H           = t_opcode'(InstructionQ101H[6:0]);
 assign RegDstQ101H           = InstructionQ101H[11:7];
 assign RegSrc1Q101H          = InstructionQ101H[19:15];
@@ -306,9 +315,12 @@ logic [31:0] CsrReadDataQ102H;
 big_core_csr big_core_csr (
  .Clk             (Clk),  
  .Rst             (Rst),  
+ .PcQ102H         (PcQ102H),
  // Inputs from the core
  .CsrInstQ102H    (CsrInstQ102H), 
  .CsrHwUpdt       ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .MePc            (MePcQ101H),
+ .interrupt_counter_expired (interrupt_counter_expired),
  // Outputs to the core
  .CsrReadDataQ102H(CsrReadDataQ102H)
 );

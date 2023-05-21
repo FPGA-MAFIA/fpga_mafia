@@ -115,10 +115,11 @@ typedef struct packed {
 } t_csr_inst;
 
 typedef enum logic [11:0] {
- CSR_SCRATCH   = 12'h009 ,
- CSR_CYCLE_LOW = 12'hC00 ,
- CSR_CYCLE_HIGH= 12'hC80 ,
- CSR_MCAUSE    = 12'h342
+ CSR_SCRATCH    = 12'h009 ,
+ CSR_CYCLE_LOW  = 12'hC00 ,
+ CSR_CYCLE_HIGH = 12'hC80 ,
+ CSR_MCAUSE     = 12'h342 ,
+ CSR_MEPC       = 12'h341
 } t_csr_addr ;
 
 typedef struct packed {
@@ -135,6 +136,7 @@ typedef struct packed {
     logic [31:0] csr_cycle_low;
     logic [31:0] csr_cycle_high;
     logic [31:0] csr_mcause;
+    logic [31:0] csr_mepc;
 } t_csr;
 
 typedef struct packed {

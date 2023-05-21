@@ -108,12 +108,13 @@ i_mem	i_mem (
 
 
 // Instantiating the mafia_asap_5pl_d_mem data memory
-
+// Please note: from HW perspective, the offset is '0' (and not 64KB) so the data is aligned to the LSB
+// currently in simulation we are actually using the 64KB offset, but in the FPGA we are using the '0' offset - which happens automatically due to the MSB cutoff
  d_mem d_mem (
     .clock            (Clk),
     //Core interface
     .data_a           (ShiftDMemWrDataQ103H),
-    .address_a        (DMemAddressQ103H[31:2]),
+    .address_a        (DMemAddressQ103H[31:2]), //The address cuts off the MSB in bit [15] when working in 64k - need to make sure we understand this correctly
     .byteena_a        (ShiftDMemByteEnQ103H),
     .wren_a           (DMemWrEnQ103H && MatchDMemRegionQ103H),
     .q_a              (PreShiftDMemRdDataQ104H),
