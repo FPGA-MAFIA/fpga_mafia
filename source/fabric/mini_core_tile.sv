@@ -121,13 +121,6 @@ router router_inst // TODO - a4d logic to outputs.
 );
 
 
-// Temp TODO FIXME - override with xmt for TB
-//This is the local mini_core output placeholder (inputs into the router)
-assign in_local_req_valid = '0;
-assign pre_in_local_req   = '0;
-assign in_local_ready     = 5'b11111;
-
-
 t_cardinal next_tile_fifo_arb_id;
 //==============================
 // override the next_tile_fifo_arb_id
@@ -163,15 +156,29 @@ always_comb begin : override_the_local_next_tile_fifo_arb
 end
 
 
+// Temp TODO FIXME - override with xmr for TB
+//This is the local mini_core output placeholder (inputs into the router)
+assign in_local_req_valid = '0;
+assign pre_in_local_req   = '0;
+assign in_local_ready     = 5'b11111;
+
 //========================================
 // mini core - Local
 //========================================
-//mini_top mini_top (
-//.Clock               (Clk),
-//.Rst                 (Rst),
-//// //============================================
-//// //      fabric interface
-//// //============================================
+mini_top mini_top (
+ .Clock              (Clock)              , //input  logic        Clock  ,
+ .Rst                (Rst)                , //input  logic        Rst    ,
+ //============================================
+ //      fabric interface
+ //============================================
+ .F2C_ReqValidQ503H  (F2C_ReqValidQ503H)  , //input  logic        F2C_ReqValidQ503H     ,
+ .F2C_ReqOpcodeQ503H (F2C_ReqOpcodeQ503H) , //input  t_fab_op     F2C_ReqOpcodeQ503H    ,
+ .F2C_ReqAddressQ503H(F2C_ReqAddressQ503H), //input  logic [31:0] F2C_ReqAddressQ503H   ,
+ .F2C_ReqDataQ503H   (F2C_ReqDataQ503H)   , //input  logic [31:0] F2C_ReqDataQ503H      ,
+ .F2C_RspValidQ504H  (F2C_RspValidQ504H)  , //output logic        F2C_RspValidQ504H     , 
+ .F2C_RspDataQ504H   (F2C_RspDataQ504H)   , //output logic [31:0] F2C_RspDataQ504H ,
+);
+
 
 
 endmodule 
