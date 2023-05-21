@@ -72,6 +72,7 @@ always_comb begin
         2'b01: next_count = count - 1'b1; // protected with the assertion below
         2'b10: next_count = count + 1'b1; // protected with the assertion below
         2'b11: next_count = count;
+        default: next_count = count;
     endcase
 end // always_comb
 assign empty = (count == 0); 
