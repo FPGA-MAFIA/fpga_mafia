@@ -14,7 +14,7 @@
 `include "macros.sv"
 
 module cache_ref_model 
-    import cache_param_pkg::*;  
+    import d_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
 (
     input   logic           clk,
     input   logic           rst,

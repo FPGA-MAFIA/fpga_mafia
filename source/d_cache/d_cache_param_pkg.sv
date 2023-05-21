@@ -14,7 +14,7 @@
 
 
 
-package cache_param_pkg;
+package d_cache_param_pkg;
 
 //TQ parameters
 parameter TQ_ID_WIDTH     = 3;                       

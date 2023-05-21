@@ -2,3 +2,6 @@ python build.py -dut 'cache' -debug -tests 'cache_alive' -hw  -sim              
 python build.py -dut 'cache' -debug -tests 'cache_alive' -sim -gui 
 
 python build.py -dut 'cache' -debug  -all -sim
+
+
+python build.py -dut 'd_cache' -debug -regress alive -hw  -sim 
