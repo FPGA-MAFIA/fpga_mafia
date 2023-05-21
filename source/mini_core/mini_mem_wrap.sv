@@ -81,7 +81,7 @@ assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > D_MEM
 assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 // Set the F2C CrMEM hit indications
 assign F2C_CrMemHitQ503H  = 1'b0; //FIXME - Add CR_MEM offset hit indication
-assign F2C_CrMemWrEnQ503H =  1'b0; //FIXME - Add CR_MEM offset hit indication
+assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
 
 //==================================
 // Instruction Memory
@@ -185,10 +185,10 @@ f2c_rsp_fifo  (.clk       (Clock),
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 c2f_req_fifo  (.clk       (Clock),
                .rst       (Rst),
-               .push      (), // valid_alloc_req#
-               .push_data (),// alloc_req#
-               .pop       (),//arbiter chose this fifo to pop.
-               .pop_data  (), // arbiter input
+               .push      ('0),//valid_alloc_req#
+               .push_data ('0),//alloc_req#
+               .pop       ('0),//arbiter chose this fifo to pop.
+               .pop_data  (),//arbiter input
                .full      (),//out_ready_fifo#
                .empty     ()
                );// indication to arbiter that the fifo is empty

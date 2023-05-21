@@ -7,6 +7,7 @@ import router_pkg::*;
 (
 input  logic        Clock  ,
 input  logic        Rst    ,
+input  t_tile_id    local_tile_id,
 //============================================
 //      fabric interface
 //============================================
@@ -41,8 +42,9 @@ mini_core mini_core (
 
 //---------------------------------------------------
 mini_mem_wrap mini_mem_wrap(
- .Clock                 (Clock)  ,               // input  logic        Clock  ,
- .Rst                   (Rst)    ,               // input  logic        Rst    ,
+ .Clock                 (Clock)  ,              // input  logic        Clock  ,
+ .Rst                   (Rst)    ,              // input  logic        Rst    ,
+ .local_tile_id         (local_tile_id)       , //input  t_tile_id    local_tile_id,
 // //============================================
 // //      core interface
 // //============================================

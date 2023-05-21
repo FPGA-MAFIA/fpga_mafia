@@ -21,6 +21,7 @@
 module mini_core_tb  ;
 //import core_pkg::*;
 import mini_core_pkg::*;
+import router_pkg::*;
 
 
 logic        Clk;
@@ -76,10 +77,12 @@ end // test_seq
 
 
 // DUT instance mini_core 
-
+t_tile_id local_tile_id;
+assign  local_tile_id = 8'h2_2;
 mini_top mini_top (
 .Clock               (Clk),
 .Rst                 (Rst),
+.local_tile_id       (local_tile_id),
 //============================================
 //      fabric interface
 //============================================
