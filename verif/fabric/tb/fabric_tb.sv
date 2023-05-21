@@ -14,6 +14,8 @@ int mini_core_tile_test_true;
 string test_name;
 t_tile_id rand_source;
 t_tile_id rand_target;
+static int cnt_trans;
+static t_tile_trans origin_trans;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
@@ -96,9 +98,18 @@ initial begin
     $display("==============================");
     $display("[INFO] this is FABRIC test");
     $display("==============================");
+    cnt_trans = 0;
   fork 
-      run_fabric_test(test_name);  
-  join
+      run_fabric_test(test_name);
+      fork  
+      //fabric_get_in_trans();
+      //fabric_get_source_tile_id();
+      //fabric_get_current_tile_id();
+      //fabric_get_trans_from_tile();
+      //fabric_DI_checker();
+      #5us;
+      join
+  join_any
   end else begin
     $error("[ERROR] : this is not a valid test name");
   end
