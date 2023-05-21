@@ -161,6 +161,6 @@ logic going_back;
          ((NEXT_TILE_CARDINAL == NORTH) && in_north_req_valid ) ||
          ((NEXT_TILE_CARDINAL == SOUTH) && in_south_req_valid ) ||
          ((NEXT_TILE_CARDINAL == LOCAL) && in_local_req_valid )),
-        1'b1,   // always enable the assertion
+        (NEXT_TILE_CARDINAL!=LOCAL),   // always enable the assertion
         "a request is targeting the same tile it came from"); // message to display if assertion fails
 endmodule 
