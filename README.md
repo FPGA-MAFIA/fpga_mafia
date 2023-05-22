@@ -51,6 +51,8 @@ To see the build and run options, use the following command:
 ```python build.py -h ```  
 For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
 Please add your question discussion tab
+### A tutorial for getting started with the tool chain:  
+https://github.com/amichai-bd/fpga_mafia/wiki/Getting-started---tool-chain-tutorial. 
 
 ## Prerequisite
 Before you start, make sure you have the following tools and software installed:
@@ -60,11 +62,6 @@ Before you start, make sure you have the following tools and software installed:
 To make your experience smoother, we recommend installing the following tools:
 - [GitBash](https://gitforwindows.org/), a Windows version of Git that includes a "Unix-like" shell.  
 - [Visual Studio Code](https://code.visualstudio.com/download), a code editor that supports many programming languages.  
-
-recommend testing this tutorial:
-https://github.com/amichai-bd/fpga_mafia/wiki/Getting-started---tool-chain-tutorial. 
-
-
 
 
 ## Inspiration Behind the Project:  
@@ -77,7 +74,6 @@ These include:
 Similarly, this project offers a unique, highly-integratable mesh architecture that can support a wide range of agents, and execute parallel computing for distributed workflow.
 
 ## Troubleshooting Common Issues
-
 ### Issue: 'ModuleNotFoundError: No module named 'termcolor''
 **Solution**: Run the following command to resolve this issue:  
 > pip install termcolor
@@ -97,5 +93,6 @@ Then, reload the bashrc file with this command:
 ### Quick Access Commands
 For easy access, you can run the following commands in the GitBash shell for Windows:
 ./build.py -h  
-./build.py -dut 'big_core' -debug -tests alive -app 
-./build.py -dut 'sc_core' -debug -tests alive -full_run
+./build.py -dut big_core -debug -tests alive -app -hw -sim
+./build.py -dut cache -debug -tests cache_alive -hw -sim -pp
+./build.py -dut sc_core -debug -tests alive -full_run
