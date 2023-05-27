@@ -1,0 +1,49 @@
+Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+Start time: 22:32:24 on May 27,2023
+vlog -lint -f ../../.././verif/lotr/tb//lotr_list.f 
+-- Compiling package lotr_pkg
+-- Compiling interface wishbone
+-- Compiling module wishbone_mux3to1
+-- Compiling module raminfr
+-- Compiling module uart_sync_flops
+-- Compiling module uart_rfifo
+-- Compiling module uart_tfifo
+-- Compiling module uart_receiver
+-- Compiling module uart_transmitter
+-- Compiling module uart_regs
+-- Compiling module uart_wb
+-- Compiling module uart_top
+-- Compiling module uart_wrapper
+-- Compiling package uart_config_sv_unit
+-- Compiling module uart_config
+-- Compiling module Counter
+-- Compiling module wishbone_transfer_fsm
+-- Compiling module transfer_handler_engine
+-- Compiling module gateway
+-- Compiling module uart_io
+-- Importing package lotr_pkg
+-- Compiling module gpc_4t
+-- Compiling module core_4t
+-- Compiling module d_mem
+-- Compiling module cr_mem
+-- Compiling module d_mem_wrap
+-- Compiling module i_mem
+-- Compiling module i_mem_wrap
+-- Compiling module f2c
+-- Compiling module c2f
+-- Compiling module rc
+-- Compiling module mro
+-- Compiling module uart_tile
+-- Compiling module gpc_4t_tile
+-- Compiling module lotr
+-- Compiling module fpga_tile
+-- Compiling module DE10Lite_MMIO
+-- Compiling module vga_ctrl
+-- Compiling module vga_mem
+-- Compiling module vga_sync_gen
+-- Compiling module lotr_tb
+
+Top level modules:
+	lotr_tb
+End time: 22:32:24 on May 27,2023, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0

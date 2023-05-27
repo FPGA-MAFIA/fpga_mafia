@@ -1,0 +1,1056 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/Users/abendavid/OneDrive - NVIDIA Corporation/Desktop/github/BIU_project/fpga_mafia/lotr/target/lotr/modelsim
+vc2f
+Z0 DXx6 sv_std 3 std 0 22 VYECXdT12H8WgbUP_5Y6:3
+Z1 DXx4 work 8 lotr_pkg 0 22 ?hlB[]Ud5PHcEgJ14P8kN3
+Z2 !s110 1685215944
+!i10b 1
+!s100 zE^[iFU6P:4DX9VVKCGbA3
+Z3 !s11b Dg1SIo80bB@j0V0VzS_@n1
+IQPES6SRNBQGFF:K;[Nfz03
+Z4 VDg1SIo80bB@j0V0VzS_@n1
+S1
+Z5 dC:/Users/abendavid/OneDrive - NVIDIA Corporation/Desktop/github/BIU_project/fpga_mafia/lotr_orig/target/lotr/modelsim
+Z6 w1672900594
+8../../../source/rc/rtl/c2f.sv
+F../../../source/rc/rtl/c2f.sv
+!i122 10
+L0 17 248
+Z7 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z8 !s108 1685215944.000000
+!s107 ../../../verif/lotr/tb//lotr_log_gen.sv|../../../source/common//lotr_defines.sv|..\..\..\source\uart_io\rtl\..\..\common\lotr_defines.sv|..\..\..\source\uart_io\rtl\.\uart\uart_defines.v|..\..\..\source\uart_io\rtl\gateway\..\uart\uart_defines.v|../../../source/common//../../source/uart_io/rtl/uart/uart_defines.v|..\..\..\source\uart_io\rtl\uart\uart_defines.v|../../../verif/lotr/tb/lotr_tb.sv|../../../source/lotr/rtl/vga_sync_gen.sv|../../../source/lotr/rtl/vga_mem.sv|../../../source/lotr/rtl/vga_ctrl.sv|../../../source/lotr/rtl/DE10Lite_MMIO.sv|../../../source/lotr/rtl/fpga_tile.sv|../../../source/lotr/rtl/lotr.sv|../../../source/lotr/rtl/gpc_4t_tile.sv|../../../source/lotr/rtl/uart_tile.sv|../../../source/rc/rtl/mro.sv|../../../source/rc/rtl/rc.sv|../../../source/rc/rtl/c2f.sv|../../../source/rc/rtl/f2c.sv|../../../source/gpc_4t/rtl/i_mem_wrap.sv|../../../source/gpc_4t/rtl/i_mem.sv|../../../source/gpc_4t/rtl/d_mem_wrap.sv|../../../source/gpc_4t/rtl/cr_mem.sv|../../../source/gpc_4t/rtl/d_mem.sv|../../../source/gpc_4t/rtl/core_4t.sv|../../../source/gpc_4t/rtl/gpc_4t.sv|../../../source/uart_io/rtl/uart_io.sv|../../../source/uart_io/rtl/gateway/gateway.sv|../../../source/uart_io/rtl/gateway/transfer_handler_engine/transfer_handler_engine.sv|../../../source/uart_io/rtl/gateway/transfer_handler_engine/wishbone_transfer_fsm.sv|../../../source/uart_io/rtl/gateway/transfer_handler_engine/Counter.sv|../../../source/uart_io/rtl/gateway/uart_config/uart_config.sv|../../../source/uart_io/rtl/uart/uart_wrapper.sv|../../../source/uart_io/rtl/uart/uart_top.v|../../../source/uart_io/rtl/uart/uart_wb.v|../../../source/uart_io/rtl/uart/uart_regs.v|../../../source/uart_io/rtl/uart/uart_transmitter.v|../../../source/uart_io/rtl/uart/uart_receiver.v|../../../source/uart_io/rtl/uart/uart_tfifo.v|../../../source/uart_io/rtl/uart/uart_rfifo.v|../../../source/uart_io/rtl/uart/uart_sync_flops.v|../../../source/uart_io/rtl/uart/raminfr.v|../../../source/uart_io/rtl/uart/timescale.v|../../../source/uart_io/rtl/uart/uart_defines.v|../../../source/uart_io/rtl/wishbone/wishbone_mux3to1.sv|../../../source/uart_io/rtl/wishbone/wishbone.sv|../../../source/common/lotr_pkg.sv|
+Z9 !s90 -lint|-f|../../.././verif/lotr/tb//lotr_list.f|
+!i113 1
+Z10 o-lint
+Z11 !s92 -lint +define+SIMULATION_ON +incdir+../../../source/common/ +incdir+../../../source/common/ +incdir+../../../verif/lotr/tb/ +incdir+../../../verif/lotr/tests/
+Z12 tCvgOpt 0
+vcore_4t
+R0
+R1
+R2
+!i10b 1
+!s100 1mIIZVlD2ANC]^beCZ;[R3
+R3
+IG0[^LJ?d]fA4k;BkCh5Ce0
+R4
+S1
+R5
+w1659962495
+8../../../source/gpc_4t/rtl/core_4t.sv
+F../../../source/gpc_4t/rtl/core_4t.sv
+!i122 10
+L0 27 615
+R7
+r1
+!s85 0
+31
+R8
+Z13 !s107 ../../../verif/lotr/tb//lotr_log_gen.sv|../../../source/common//lotr_defines.sv|..\..\..\source\uart_io\rtl\..\..\common\lotr_defines.sv|..\..\..\source\uart_io\rtl\.\uart\uart_defines.v|..\..\..\source\uart_io\rtl\gateway\..\uart\uart_defines.v|../../../source/common//../../source/uart_io/rtl/uart/uart_defines.v|..\..\..\source\uart_io\rtl\uart\uart_defines.v|../../../verif/lotr/tb/lotr_tb.sv|../../../source/lotr/rtl/vga_sync_gen.sv|../../../source/lotr/rtl/vga_mem.sv|../../../source/lotr/rtl/vga_ctrl.sv|../../../source/lotr/rtl/DE10Lite_MMIO.sv|../../../source/lotr/rtl/fpga_tile.sv|../../../source/lotr/rtl/lotr.sv|../../../source/lotr/rtl/gpc_4t_tile.sv|../../../source/lotr/rtl/uart_tile.sv|../../../source/rc/rtl/mro.sv|../../../source/rc/rtl/rc.sv|../../../source/rc/rtl/c2f.sv|../../../source/rc/rtl/f2c.sv|../../../source/gpc_4t/rtl/i_mem_wrap.sv|../../../source/gpc_4t/rtl/i_mem.sv|../../../source/gpc_4t/rtl/d_mem_wrap.sv|../../../source/gpc_4t/rtl/cr_mem.sv|../../../source/gpc_4t/rtl/d_mem.sv|../../../source/gpc_4t/rtl/core_4t.sv|../../../source/gpc_4t/rtl/gpc_4t.sv|../../../source/uart_io/rtl/uart_io.sv|../../../source/uart_io/rtl/gateway/gateway.sv|../../../source/uart_io/rtl/gateway/transfer_handler_engine/transfer_handler_engine.sv|../../../source/uart_io/rtl/gateway/transfer_handler_engine/wishbone_transfer_fsm.sv|../../../source/uart_io/rtl/gateway/transfer_handler_engine/Counter.sv|../../../source/uart_io/rtl/gateway/uart_config/uart_config.sv|../../../source/uart_io/rtl/uart/uart_wrapper.sv|../../../source/uart_io/rtl/uart/uart_top.v|../../../source/uart_io/rtl/uart/uart_wb.v|../../../source/uart_io/rtl/uart/uart_regs.v|../../../source/uart_io/rtl/uart/uart_transmitter.v|../../../source/uart_io/rtl/uart/uart_receiver.v|../../../source/uart_io/rtl/uart/uart_tfifo.v|../../../source/uart_io/rtl/uart/uart_rfifo.v|../../../source/uart_io/rtl/uart/uart_sync_flops.v|../../../source/uart_io/rtl/uart/raminfr.v|../../../source/uart_io/rtl/uart/timescale.v|../../../source/uart_io/rtl/uart/uart_defines.v|../../../source/uart_io/rtl/wishbone/wishbone_mux3to1.sv|../../../source/uart_io/rtl/wishbone/wishbone.sv|../../../source/common/lotr_pkg.sv|
+R9
+!i113 1
+R10
+R11
+R12
+vCounter
+R0
+R2
+!i10b 1
+!s100 eFm>D:9SkeOMhGRVPI1=W0
+R3
+I544GlVUzE;hzkBjGWG^`Z0
+R4
+S1
+R5
+Z14 w1675796809
+8../../../source/uart_io/rtl/gateway/transfer_handler_engine/Counter.sv
+F../../../source/uart_io/rtl/gateway/transfer_handler_engine/Counter.sv
+!i122 10
+L0 4 42
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+n@counter
+vcr_mem
+R0
+R1
+R2
+!i10b 1
+!s100 U]89W=OJ]YkgCo>T^X<A70
+R3
+INz6dZkUP`M8hhHzeA;MjJ0
+R4
+S1
+R5
+R14
+8../../../source/gpc_4t/rtl/cr_mem.sv
+F../../../source/gpc_4t/rtl/cr_mem.sv
+!i122 10
+L0 17 313
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vd_mem
+R0
+R1
+R2
+!i10b 1
+!s100 ?fLbMk2KQN51?Wc@]^jjA1
+R3
+IJzOW_f3^EXOPhb==WY1723
+R4
+S1
+R5
+w1671114271
+8../../../source/gpc_4t/rtl/d_mem.sv
+F../../../source/gpc_4t/rtl/d_mem.sv
+!i122 10
+L0 18 61
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vd_mem_wrap
+R0
+R1
+R2
+!i10b 1
+!s100 ?neEjT?2HeGGmVDeNY[]J3
+R3
+IEzEd]Kmj^MGeIoBg2mFU;3
+R4
+S1
+R5
+R14
+8../../../source/gpc_4t/rtl/d_mem_wrap.sv
+F../../../source/gpc_4t/rtl/d_mem_wrap.sv
+!i122 10
+L0 17 300
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vDE10Lite_MMIO
+R0
+R1
+R2
+!i10b 1
+!s100 <Wa63G3ja=6F>kzlQ23_R1
+R3
+I3;c3>nS;VQ?k8_c56fekC3
+R4
+S1
+R5
+R14
+8../../../source/lotr/rtl/DE10Lite_MMIO.sv
+F../../../source/lotr/rtl/DE10Lite_MMIO.sv
+!i122 10
+L0 16 232
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+n@d@e10@lite_@m@m@i@o
+vf2c
+R0
+R1
+R2
+!i10b 1
+!s100 `DdR__C^67Rfdb>kBaQh^1
+R3
+I]:hSZ0mVVlB:Q:doTFB?23
+R4
+S1
+R5
+w1658337913
+8../../../source/rc/rtl/f2c.sv
+F../../../source/rc/rtl/f2c.sv
+!i122 10
+L0 17 223
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vfpga_tile
+R0
+R1
+R2
+!i10b 1
+!s100 IY@fYPS19BKGR5=MQzImN0
+R3
+IaRGh^1HBEc`cYnXll^Eok3
+R4
+S1
+R5
+R14
+8../../../source/lotr/rtl/fpga_tile.sv
+F../../../source/lotr/rtl/fpga_tile.sv
+!i122 10
+L0 19 185
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vgateway
+R0
+R2
+!i10b 1
+!s100 4lC_``8Uf14HAbLkzmZgH2
+R3
+I?0I5zz1fMETLkC:5oi=lE1
+R4
+S1
+R5
+R14
+8../../../source/uart_io/rtl/gateway/gateway.sv
+F../../../source/uart_io/rtl/gateway/gateway.sv
+!i122 10
+L0 11 64
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vgpc_4t
+R0
+R1
+R2
+!i10b 1
+!s100 e1Zfn7E1NT_H5U:M]i11Q2
+R3
+I4`FU38lMB`2^2LgG7AV[W2
+R4
+S1
+R5
+R14
+8../../../source/gpc_4t/rtl/gpc_4t.sv
+F../../../source/gpc_4t/rtl/gpc_4t.sv
+!i122 10
+L0 22 200
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vgpc_4t_tile
+R0
+R1
+R2
+!i10b 1
+!s100 dbEWCM6dFYmSz@TWV_GlR3
+R3
+ISJcRTA`WSJQ2FDkn17EJk2
+R4
+S1
+R5
+R14
+8../../../source/lotr/rtl/gpc_4t_tile.sv
+F../../../source/lotr/rtl/gpc_4t_tile.sv
+!i122 10
+L0 19 167
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vi_mem
+R0
+R1
+R2
+!i10b 1
+!s100 33aiQh1Y@H^1JCk_9iZ2B2
+R3
+IEk^5OgaQi`5oCzOR_7HLQ0
+R4
+S1
+R5
+w1654786095
+8../../../source/gpc_4t/rtl/i_mem.sv
+F../../../source/gpc_4t/rtl/i_mem.sv
+!i122 10
+L0 16 51
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vi_mem_wrap
+R0
+R1
+R2
+!i10b 1
+!s100 3G[^OgVBC2<Hb:RMOQB`^3
+R3
+IA^bg3>ok]zSnTYKUSA^ol1
+R4
+S1
+R5
+w1660167613
+8../../../source/gpc_4t/rtl/i_mem_wrap.sv
+F../../../source/gpc_4t/rtl/i_mem_wrap.sv
+!i122 10
+L0 16 60
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vlotr
+R0
+R1
+R2
+!i10b 1
+!s100 e:_LkKcU6BkZ1`3H=8QfT1
+R3
+IAWaF1^fLACY]7`@`Gaj3_2
+R4
+S1
+R5
+w1680436359
+8../../../source/lotr/rtl/lotr.sv
+F../../../source/lotr/rtl/lotr.sv
+!i122 10
+L0 19 315
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+Xlotr_pkg
+R0
+R2
+!i10b 1
+!s100 YWI56WkgRcBAME4iH[@dR2
+R3
+I?hlB[]Ud5PHcEgJ14P8kN3
+V?hlB[]Ud5PHcEgJ14P8kN3
+S1
+R5
+R14
+8../../../source/common/lotr_pkg.sv
+F../../../source/common/lotr_pkg.sv
+!i122 10
+L0 15 0
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vlotr_tb
+R0
+R1
+R2
+!i10b 1
+!s100 Ce8NWU:68DX?VZJoSgSLj1
+R3
+Im>IbgZY3^kTfzl@b7M4`i3
+R4
+S1
+R5
+w1678880269
+8../../../verif/lotr/tb/lotr_tb.sv
+F../../../verif/lotr/tb/lotr_tb.sv
+F../../../verif/lotr/tb//lotr_log_gen.sv
+F../../../source/common//lotr_defines.sv
+!i122 10
+L0 4 703
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vmro
+R0
+R2
+!i10b 1
+!s100 K177@S;;7m0RC3U=05GS=1
+R3
+I=dWiZmckY33g7Enbb;^bD0
+R4
+S1
+R5
+w1654780205
+8../../../source/rc/rtl/mro.sv
+F../../../source/rc/rtl/mro.sv
+!i122 10
+L0 3 102
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vraminfr
+R2
+!i10b 1
+!s100 C=RXgQZ^4cD2OZ5nc`8hd1
+R3
+IX>h?iGV9Ao]UWZ@J=S]eH2
+R4
+R5
+Z15 w1659962164
+8../../../source/uart_io/rtl/uart/raminfr.v
+F../../../source/uart_io/rtl/uart/raminfr.v
+!i122 10
+L0 83 28
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vrc
+R0
+R1
+R2
+!i10b 1
+!s100 _T4GDgR6^RiEGM=R?=CCR2
+R3
+IicBiJcZJ_M?O4Z;;N2mWR0
+R4
+S1
+R5
+w1654780798
+8../../../source/rc/rtl/rc.sv
+F../../../source/rc/rtl/rc.sv
+!i122 10
+L0 17 365
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vtransfer_handler_engine
+R0
+R2
+!i10b 1
+!s100 lYU@_4B75QjNA6jm1Vh<P0
+R3
+ITa<9U4@?SJ<`Dka@HWTDR1
+R4
+S1
+R5
+R14
+8../../../source/uart_io/rtl/gateway/transfer_handler_engine/transfer_handler_engine.sv
+F../../../source/uart_io/rtl/gateway/transfer_handler_engine/transfer_handler_engine.sv
+!i122 10
+L0 11 390
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_config
+R0
+DXx4 work 19 uart_config_sv_unit 0 22 ?lT<Re@9X<iGzMF`8M^B32
+R2
+R4
+r1
+!s85 0
+!i10b 1
+!s100 Pb04o?HFg5h^oN`>=YX_;2
+IC8:gNIgB:4lEbN_nLz:fV3
+!s105 uart_config_sv_unit
+S1
+R5
+R14
+Z16 8../../../source/uart_io/rtl/gateway/uart_config/uart_config.sv
+Z17 F../../../source/uart_io/rtl/gateway/uart_config/uart_config.sv
+!i122 10
+L0 42 255
+R7
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+Xuart_config_sv_unit
+R0
+R2
+V?lT<Re@9X<iGzMF`8M^B32
+r1
+!s85 0
+!i10b 1
+!s100 LT91BZj59jTBJ3:_63ClZ3
+I?lT<Re@9X<iGzMF`8M^B32
+!i103 1
+S1
+R5
+R14
+R16
+R17
+F../../../source/common//../../source/uart_io/rtl/uart/uart_defines.v
+!i122 10
+L0 11 0
+R7
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_io
+R0
+R1
+R2
+!i10b 1
+!s100 zI11Z`if1fL1G29=Md:QK3
+R3
+I?R>0lXJecKLOaGd8dDYal3
+R4
+S1
+R5
+R14
+8../../../source/uart_io/rtl/uart_io.sv
+F../../../source/uart_io/rtl/uart_io.sv
+!i122 10
+L0 11 76
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_receiver
+R2
+!i10b 1
+!s100 Y`j57>88njPSDAD7TVW4R0
+R3
+IVcNX4N=20:1Z<S^2UgEzb0
+R4
+R5
+R14
+8../../../source/uart_io/rtl/uart/uart_receiver.v
+F../../../source/uart_io/rtl/uart/uart_receiver.v
+!i122 10
+L0 198 285
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_regs
+R2
+!i10b 1
+!s100 z:>YLoLIM:6Z@KZC4EH:j0
+R3
+IO_Ke>Db5TWc];b7BI:loP0
+R4
+R5
+R14
+8../../../source/uart_io/rtl/uart/uart_regs.v
+F../../../source/uart_io/rtl/uart/uart_regs.v
+!i122 10
+L0 231 666
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_rfifo
+R2
+!i10b 1
+!s100 C0M`L=MVCOfazRKQl31a<2
+R3
+IfRl[g7UW2Ke[5?XS:ZRg23
+R4
+R5
+R15
+8../../../source/uart_io/rtl/uart/uart_rfifo.v
+F../../../source/uart_io/rtl/uart/uart_rfifo.v
+!i122 10
+L0 150 171
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_sync_flops
+R2
+!i10b 1
+!s100 3JMRXZ85B9NmNNRfz;G6m3
+R3
+IEIINFoPaJgoibfETLlLUz1
+R4
+R5
+R15
+8../../../source/uart_io/rtl/uart/uart_sync_flops.v
+F../../../source/uart_io/rtl/uart/uart_sync_flops.v
+!i122 10
+L0 71 52
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_tfifo
+R2
+!i10b 1
+!s100 @00IzQW[:ka<ahlL7h9l92
+R3
+IDN;MefZL20oAUe3Xkhj9B0
+R4
+R5
+R15
+8../../../source/uart_io/rtl/uart/uart_tfifo.v
+F../../../source/uart_io/rtl/uart/uart_tfifo.v
+!i122 10
+L0 144 100
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_tile
+R0
+R1
+R2
+!i10b 1
+!s100 aBBhF<@fKg6_AA9M;gFg11
+R3
+ILVb<S6=P]V27ENAHd;YdQ2
+R4
+S1
+R5
+R6
+8../../../source/lotr/rtl/uart_tile.sv
+F../../../source/lotr/rtl/uart_tile.sv
+!i122 10
+L0 19 168
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_top
+R2
+!i10b 1
+!s100 1LFhA0LIFfihI@X`]BBQm2
+R3
+ITRT>U]S=X]Uc;GV5=iR]S1
+R4
+R5
+R6
+8../../../source/uart_io/rtl/uart/uart_top.v
+F../../../source/uart_io/rtl/uart/uart_top.v
+!i122 10
+L0 140 200
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_transmitter
+R2
+!i10b 1
+!s100 NY5;USlAS_:m0NbgKGZW33
+R3
+IgInzfV5^dTAiD`0HB[PcS2
+R4
+R5
+R15
+8../../../source/uart_io/rtl/uart/uart_transmitter.v
+F../../../source/uart_io/rtl/uart/uart_transmitter.v
+!i122 10
+L0 154 198
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_wb
+R2
+!i10b 1
+!s100 3hDd[>B9hN:LNFF:Af1^f0
+R3
+IgY`fAdVIVChMiKMC<E:Eh0
+R4
+R5
+R15
+8../../../source/uart_io/rtl/uart/uart_wb.v
+F../../../source/uart_io/rtl/uart/uart_wb.v
+!i122 10
+L0 142 166
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vuart_wrapper
+R0
+R2
+!i10b 1
+!s100 UHLoXH`EFjb9FjnCzC4cn2
+R3
+IK8O=7H5mW]MaD^7bVJ@3m2
+R4
+S1
+R5
+R14
+8../../../source/uart_io/rtl/uart/uart_wrapper.sv
+F../../../source/uart_io/rtl/uart/uart_wrapper.sv
+!i122 10
+L0 9 48
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vvga_ctrl
+R0
+R2
+!i10b 1
+!s100 X8mO[MBBA^>aFKa@kRLXS1
+R3
+I:Cc>2EB1FC86J;z]BG8Xo0
+R4
+S1
+R5
+R15
+8../../../source/lotr/rtl/vga_ctrl.sv
+F../../../source/lotr/rtl/vga_ctrl.sv
+!i122 10
+L0 17 156
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vvga_mem
+R0
+R1
+R2
+!i10b 1
+!s100 i<CZLMzezW@8SGz=Ol`;Y2
+R3
+IcE?6JbJ1f1]UB]ETc_S:e3
+R4
+S1
+R5
+w1658134083
+8../../../source/lotr/rtl/vga_mem.sv
+F../../../source/lotr/rtl/vga_mem.sv
+!i122 10
+L0 16 59
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vvga_sync_gen
+R0
+R2
+!i10b 1
+!s100 JJIYUIf^m2R0705jb4a7E2
+R3
+IN5S7hnPKLcN3hA`9TLo1z1
+R4
+S1
+R5
+w1656512256
+8../../../source/lotr/rtl/vga_sync_gen.sv
+F../../../source/lotr/rtl/vga_sync_gen.sv
+!i122 10
+L0 16 38
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+Ywishbone
+R0
+R2
+!i10b 1
+!s100 0mg5;4fGIAMTU>S4n>^6E0
+R3
+IVmjdoHG4B_8fPgG0kW^>:3
+R4
+S1
+R5
+w1678871597
+8../../../source/uart_io/rtl/wishbone/wishbone.sv
+F../../../source/uart_io/rtl/wishbone/wishbone.sv
+!i122 10
+L0 2 0
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vwishbone_mux3to1
+R0
+R2
+!i10b 1
+!s100 2fcGSDB5W<1CdCQAbl=k[2
+R3
+INWj`>jRQJ>ogf4aSgcE550
+R4
+S1
+R5
+R14
+8../../../source/uart_io/rtl/wishbone/wishbone_mux3to1.sv
+F../../../source/uart_io/rtl/wishbone/wishbone_mux3to1.sv
+!i122 10
+L0 8 35
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
+vwishbone_transfer_fsm
+R0
+R2
+!i10b 1
+!s100 jVC5djIfn:FWUgi:C1aPC3
+R3
+IgG>z?^DHA2kUK4l9GZP5`2
+R4
+S1
+R5
+R14
+8../../../source/uart_io/rtl/gateway/transfer_handler_engine/wishbone_transfer_fsm.sv
+F../../../source/uart_io/rtl/gateway/transfer_handler_engine/wishbone_transfer_fsm.sv
+!i122 10
+L0 6 221
+R7
+r1
+!s85 0
+31
+R8
+R13
+R9
+!i113 1
+R10
+R11
+R12
