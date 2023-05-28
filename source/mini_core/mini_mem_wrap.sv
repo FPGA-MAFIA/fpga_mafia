@@ -88,7 +88,7 @@ assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
 //==================================
 //This is the instruction memory
 mem  #(
-  .WORD_WIDTH(32),  //FIXME - Parametrize!!
+  .WORD_WIDTH(32),                //FIXME - Parametrize!!
   .ADRS_WIDTH(I_MEM_ADRS_MSB+1)   //FIXME - Parametrize!!
 ) i_mem  (
     .clock    (Clock),
