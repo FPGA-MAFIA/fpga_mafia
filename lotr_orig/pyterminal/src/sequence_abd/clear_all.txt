@@ -1,4 +1,4 @@
-COM3
+COM4
 WB
 0x01000000
 sv/clear.sv

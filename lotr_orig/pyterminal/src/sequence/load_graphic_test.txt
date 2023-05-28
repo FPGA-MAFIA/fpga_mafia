@@ -1,4 +1,4 @@
-COM3
+COM4
 WB
 0x01000000
 ../../../../mem_sv_for_fpga_cache/Tests/graphic_test/inst_mem.sv
