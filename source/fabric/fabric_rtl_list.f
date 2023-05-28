@@ -9,6 +9,7 @@
 ../../../source/router/next_tile_fifo_arb.sv
 //  mini_core files
 ../../../source/common/mem.sv
+../../../source/common/common_pkg.sv
 ../../../source/mini_core/mini_core_pkg.sv
 ../../../source/mini_core/mini_core.sv
 ../../../source/mini_core/mini_top.sv

@@ -266,7 +266,7 @@ class Test:
             self.fail_flag = True
         else:
             try:
-                if os.path.exists(TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
+                if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
                     d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
                 else:
                     d_mem_mif_cmd = 'cp mif/defult_d_mem.mif mif/d_mem.mif'
@@ -331,7 +331,7 @@ def run_cmd_with_capture(cmd):
 #####################################################################################################       
 def main():
     os.chdir(MODEL_ROOT)
-    if not os.path.exists(SOURCE):
+    if not os.path.exists(VERIF):
         print_message(f'[ERROR] There is no dut \'{args.dut}\'')
         exit(1)
 
@@ -339,7 +339,9 @@ def main():
     if args.clean:
         print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
         if os.path.exists('target/'+args.dut+'/tests/'):
-            shutil.rmtree('target/'+args.dut+'/tests/')
+            rm_target_cmd  = 'rm -rf target/'+args.dut+'/tests/'
+            run_cmd(rm_target_cmd)
+            #shutil.rmtree('target/'+args.dut+'/tests/')
         else:
             print_message('[INFO] nothing to clean - target/'+args.dut+'/tests/ directory does not exist')
     
@@ -425,6 +427,10 @@ def main():
             while os.path.exists('target/'+args.dut+'/tests/'+test.name+'_'+str(i)):
                 i += 1
             shutil.copytree('target/'+args.dut+'/tests/'+test.name, 'target/'+args.dut+'/tests/'+test.name+'_'+str(i))
+            # remove the test directory
+            shutil.rmtree('target/'+args.dut+'/tests/'+test.name)
+            # create the test directory again
+            os.makedirs('target/'+args.dut+'/tests/'+test.name)
         
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)

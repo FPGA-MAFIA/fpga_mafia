@@ -10,10 +10,20 @@
 // Description :
 //-----------------------------------------------------------------------------
 
+
 +incdir+../../../source/common/
-//RTL FIles
-../../../source/common/mem.sv
+
+// param packages
 ../../../source/mini_core/mini_core_pkg.sv
+../../../source/router/router_pkg.sv
+../../../source/common/common_pkg.sv
+
+// Common
+../../../source/router/arbiter.sv
+../../../source/router/fifo.sv
+../../../source/common/mem.sv
+
+//RTL FIles
 ../../../source/mini_core/mini_core.sv
 ../../../source/mini_core/mini_top.sv
 ../../../source/mini_core/mini_mem_wrap.sv

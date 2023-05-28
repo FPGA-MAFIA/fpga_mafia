@@ -1,9 +1,12 @@
 $display("Finished elaborating the design...");
+
+//sending direct requests
+send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
+send_req(.source_id(8'h3_3), .target_id(8'h1_1), .opcode(WR));
+delay(20);
+
+//sending random requests
 for(int i=0; i< 10; i++) begin
-    do begin 
-        `RAND_EP(rand_source)
-        `RAND_EP(rand_target)
-    end while (rand_source == rand_target);
-    send_rand_req(.source_id(rand_source), .target_id(rand_target));
+    send_rand_req();
     delay(10);
 end

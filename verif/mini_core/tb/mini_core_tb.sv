@@ -19,8 +19,8 @@
 
 
 module mini_core_tb  ;
-//import core_pkg::*;
 import mini_core_pkg::*;
+import router_pkg::*;
 
 
 logic        Clk;
@@ -76,19 +76,19 @@ end // test_seq
 
 
 // DUT instance mini_core 
-
+t_tile_id local_tile_id;
+assign  local_tile_id = 8'h2_2;
 mini_top mini_top (
 .Clock               (Clk),
 .Rst                 (Rst),
-// //============================================
-// //      fabric interface
-// //============================================
-.F2C_ReqValidQ503H     ('0),// input  logic        F2C_ReqValidQ503H     ,
-.F2C_ReqOpcodeQ503H    ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
-.F2C_ReqAddressQ503H   ('0),// input  logic [31:0] F2C_ReqAddressQ503H   ,
-.F2C_ReqDataQ503H      ('0),// input  logic [31:0] F2C_ReqDataQ503H      ,
-.F2C_RspValidQ504H     (),  // output logic        F2C_RspValidQ504H     , 
-.F2C_RspDataQ504H      ()   // output logic [31:0] F2C_RspDataQ504H 
+.local_tile_id       (local_tile_id),
+//============================================
+//      fabric interface
+//============================================
+ .InFabricValidQ503H    ('0),// input  logic        F2C_ReqValidQ503H     ,
+ .InFabricQ503H         ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
+ .OutFabricQ505H        (),  // output t_rdata      F2C_RspDataQ504H      ,
+ .OutFabricValidQ505H   ()   // output logic        F2C_RspValidQ504H
 );      
 
 `include "mini_core_trk.sv"
