@@ -5,7 +5,7 @@ int main() {
     switch (UniqeId) //the CR Address
     {
         case 0x4 : //  
-        rvc_printf("HI\n");
+        rvc_printf("HELLO WORLD\n");
         break;
         default :
             while(1); 
