@@ -23,6 +23,7 @@ logic [31:0] DMemWrDataQ103H;     // To D_MEM
 logic [31:0] DMemAddressQ103H;    // To D_MEM
 logic [3:0]  DMemByteEnQ103H;     // To D_MEM
 logic        DMemWrEnQ103H;       // To D_MEM
+logic        DMemRdEnQ103H;       // To D_MEM
 logic [31:0] DMemRdRspQ104H;      // From D_MEM
 
 
@@ -37,6 +38,7 @@ mini_core mini_core (
    .DMemAddressQ103H    ( DMemAddressQ103H   ), // output logic [31:0] DMemAddressQ103H,    // To D_MEM
    .DMemByteEnQ103H     ( DMemByteEnQ103H    ), // output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
    .DMemWrEnQ103H       ( DMemWrEnQ103H      ), // output logic        DMemWrEnQ103H,       // To D_MEM
+   .DMemRdEnQ103H       ( DMemRdEnQ103H      ), // output logic        DMemRdEnQ103H,       // To D_MEM
    .DMemRdRspQ104H      ( DMemRdRspQ104H     )  // input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
 
@@ -56,6 +58,7 @@ mini_mem_wrap mini_mem_wrap(
  .DMemAddressQ103H      (DMemAddressQ103H),    // input  logic [31:0] DMemAddressQ103H,    // To D_MEM
  .DMemByteEnQ103H       (DMemByteEnQ103H),     // input  logic [3:0]  DMemByteEnQ103H,     // To D_MEM
  .DMemWrEnQ103H         (DMemWrEnQ103H),       // input  logic        DMemWrEnQ103H,       // To D_MEM
+ .DMemRdEnQ103H         (DMemRdEnQ103H),       // input  logic        DMemRdEnQ103H,       // To D_MEM
  .DMemRdRspQ104H        (DMemRdRspQ104H),      // output logic [31:0] DMemRdRspQ104H       // From D_MEM
 //============================================
 //      fabric interface

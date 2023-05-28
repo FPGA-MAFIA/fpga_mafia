@@ -33,11 +33,12 @@ import common_pkg::*;
                 //============================================
                 //     d_mem
                 //============================================
-                input  logic [31:0] DMemWrDataQ103H,     // To D_MEM
-                input  logic [31:0] DMemAddressQ103H,    // To D_MEM
-                input  logic [3:0]  DMemByteEnQ103H,     // To D_MEM
-                input  logic        DMemWrEnQ103H,       // To D_MEM
-                output logic [31:0] DMemRdRspQ104H,      // From D_MEM
+                input  logic [31:0] DMemWrDataQ103H , // To D_MEM
+                input  logic [31:0] DMemAddressQ103H, // To D_MEM
+                input  logic [3:0]  DMemByteEnQ103H , // To D_MEM
+                input  logic        DMemWrEnQ103H   , // To D_MEM
+                input  logic        DMemRdEnQ103H   , // To D_MEM
+                output logic [31:0] DMemRdRspQ104H  , // From D_MEM
                 //============================================
                 //      fabric interface
                 //============================================
@@ -66,7 +67,6 @@ logic   F2C_DMemHitQ504H ;
 t_tile_trans F2C_InFabricQ503H;
 
 logic F2C_OutFabricValidQ505H;
-logic C2F_OutFabricValidQ505H;
 t_tile_trans F2C_OutFabricQ505H;
 //===========================================
 //    set F2C request 503 ( D_MEM )
@@ -89,39 +89,45 @@ assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
 //This is the instruction memory
 mem  #(
   .WORD_WIDTH(32),  //FIXME - Parametrize!!
-  .ADRS_WIDTH(13)   //FIXME - Parametrize!!
+  .ADRS_WIDTH(I_MEM_ADRS_MSB+1)   //FIXME - Parametrize!!
 ) i_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
-    .address_a  (PcQ100H[14:2]),           //FIXME - Parametrize!!
+    .address_a  (PcQ100H[I_MEM_ADRS_MSB:2]),           //FIXME - Parametrize!!
     .data_a     ('0),
     .wren_a     (1'b0),
     .byteena_a  (4'b0),
     .q_a        (PreInstructionQ101H),
     //fabric interface
-    .address_b  (InFabricQ503H.address[14:2]),//FIXME - Parametrize!!
+    .address_b  (InFabricQ503H.address[I_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
     .data_b     (InFabricQ503H.data),              
     .wren_b     (F2C_IMemWrEnQ503H),                
-    .byteena_b  (4'b1111),
+    .byteena_b  (4'b1111), // NOTE no need to support byte enable for instruction memory
     .q_b        (F2C_IMemRspDataQ504H)              
     );
 
 //==================================
 // DATA Memory
 //==================================
+logic LocalDMemWrEnQ103H;
+logic NonLocalDMemReqQ103H;
+assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
+                              (DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0);
+assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
+                              (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
-  .ADRS_WIDTH(14) //FIXME - Parametrize!!
+  .ADRS_WIDTH(D_MEM_ADRS_MSB+1) //FIXME - Parametrize!!
 ) d_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
-    .address_a  (DMemAddressQ103H[15:2]),//FIXME - Parametrize!!
+    .address_a  (DMemAddressQ103H[D_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
     .data_a     (DMemWrDataQ103H),
-    .wren_a     (DMemWrEnQ103H),
+    .wren_a     (LocalDMemWrEnQ103H),
     .byteena_a  (DMemByteEnQ103H),
     .q_a        (DMemRdRspQ104H),
     //fabric interface
-    .address_b  (InFabricQ503H.address[15:2]),//FIXME - Parametrize!!
+    .address_b  (InFabricQ503H.address[D_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
     .data_b     (InFabricQ503H.data),              
     .wren_b     (F2C_DMemWrEnQ503H),                
     .byteena_b  (4'b1111),//FIXME - should accept the byte enable from the fabric
@@ -182,24 +188,35 @@ f2c_rsp_fifo  (.clk       (Clock),
 // C2F FIFO - accumulate core 2 Fabric requests
 //==================================
 // a FIFO to accumulate the requests from the core to the fabric
+t_tile_trans  C2F_OutFabricQ104H;
+t_tile_trans  C2F_ReqQ103H;
+logic         C2F_ReqValidQ103H;
+logic         C2F_OutFabricValidQ104H;
+logic         C2F_RspFull, C2F_RspEmpty;
+logic [1:0] winner_dec_id;
+logic [1:0] valid_candidate;
+logic C2F_ReqEmpty;
+assign C2F_ReqQ103H.address      = DMemAddressQ103H;
+assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
+assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
+assign C2F_ReqQ103H.requestor_id = local_tile_id;
+assign C2F_ReqValidQ103H         = NonLocalDMemReqQ103H;
+
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 c2f_req_fifo  (.clk       (Clock),
                .rst       (Rst),
-               .push      ('0),//valid_alloc_req#
-               .push_data ('0),//alloc_req#
-               .pop       ('0),//arbiter chose this fifo to pop.
-               .pop_data  (),//arbiter input
-               .full      (),//out_ready_fifo#
-               .empty     ()
+               .push      (C2F_ReqValidQ103H),      //valid_alloc_req#
+               .push_data (C2F_ReqQ103H),           //alloc_req#
+               .pop       (C2F_OutFabricValidQ104H),//arbiter chose this fifo to pop.
+               .pop_data  (C2F_OutFabricQ104H),     //arbiter input
+               .full      (C2F_RspFull),            //out_ready_fifo#
+               .empty     (C2F_RspEmpty)
                );// indication to arbiter that the fifo is empty
 
 
 //==================================
 // Arbiter - choose between the different transactions trying to access the fabric
 //==================================
-logic [1:0] winner_dec_id;
-logic [1:0] valid_candidate;
-logic C2F_ReqEmpty;
 // The arbiter is a Round Robin arbiter 
 assign valid_candidate[0] = !F2C_RspEmpty;  // add back pressure from the fabric
 assign valid_candidate[1] = !C2F_ReqEmpty;  // add back pressure from the fabric
@@ -213,6 +230,10 @@ arbiter #(
     .winner_dec_id      (winner_dec_id)
 );
 assign F2C_OutFabricValidQ505H = winner_dec_id[0];
-assign C2F_OutFabricValidQ505H = winner_dec_id[1];
+assign C2F_OutFabricValidQ104H = winner_dec_id[1];
 
+assign OutFabricValidQ505H =  F2C_OutFabricValidQ505H | C2F_OutFabricValidQ104H;
+assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
+                              C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
+                                                        '0;                 
 endmodule
