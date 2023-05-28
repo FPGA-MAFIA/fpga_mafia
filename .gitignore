@@ -12,3 +12,5 @@ FPGA/big_core/*
 !FPGA/big_core/de10_lite_big_core.qpf
 !FPGA/big_core/de10_lite_big_core.qsf
 verif/cache/__pycache__
+
+lotr_orig/target/*

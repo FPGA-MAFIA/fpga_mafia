@@ -5,10 +5,7 @@ int main() {
     switch (UniqeId) //the CR Address
     {
         case 0x4 : //  
-        rvc_printf("WE ARE THE PEOPLE THAT RULE THE WORLD.\n");
-        rvc_printf("A FORCE RUNNING IN EVERY BOY AND GIRL.\n");
-        rvc_printf("ALL REJOICING IN THE WORLD, TAKE ME NOW WE CAN TRY.\n");
-        rvc_printf("0123456789\n");
+        rvc_printf("HI\n");
         break;
         default :
             while(1); 
