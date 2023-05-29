@@ -1,4 +1,4 @@
-COM3
+COM4
 WB
 0x03400000
 sv/clear_VGA.sv

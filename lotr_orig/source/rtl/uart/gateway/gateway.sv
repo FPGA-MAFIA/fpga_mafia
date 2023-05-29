@@ -6,7 +6,7 @@
  */
 
 `timescale 1ns/1ns
-`include "../uart/uart_defines.v"
+`include "uart_defines.v"
 
 module gateway
   (
