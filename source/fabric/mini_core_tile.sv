@@ -62,6 +62,9 @@ logic out_local_req_valid  ;
 t_tile_trans out_local_req ; 
 t_fab_ready out_local_ready; 
 
+logic        OutFabricValidQ505H ;
+t_tile_trans OutFabricQ505H ;
+
 router router_inst // TODO - a4d logic to outputs. 
 (
  .clk                  (clk),     //   input   logic      clk,
@@ -121,13 +124,6 @@ router router_inst // TODO - a4d logic to outputs.
 );
 
 
-// Temp TODO FIXME - override with xmt for TB
-//This is the local mini_core output placeholder (inputs into the router)
-assign in_local_req_valid = '0;
-assign pre_in_local_req   = '0;
-assign in_local_ready     = 5'b11111;
-
-
 t_cardinal next_tile_fifo_arb_id;
 //==============================
 // override the next_tile_fifo_arb_id
@@ -163,15 +159,34 @@ always_comb begin : override_the_local_next_tile_fifo_arb
 end
 
 
+// Temp TODO FIXME - override with xmr for TB
+//This is the local mini_core output placeholder (inputs into the router)
+localparam TEMP_STRAP_TO_ZEROL = 1;
+assign in_local_req_valid = TEMP_STRAP_TO_ZEROL ? '0        : OutFabricValidQ505H ;
+assign pre_in_local_req   = TEMP_STRAP_TO_ZEROL ? '0        : OutFabricQ505H ;
+assign in_local_ready     =  5'b11111;
+
+// output from the router to the local mini_core
+logic        InFabricValidQ503H  ; 
+t_tile_trans InFabricQ503H ; 
+assign InFabricValidQ503H = out_local_req_valid;
+assign InFabricQ503H      = out_local_req;
 //========================================
 // mini core - Local
 //========================================
-//mini_top mini_top (
-//.Clock               (Clk),
-//.Rst                 (Rst),
-//// //============================================
-//// //      fabric interface
-//// //============================================
+mini_top mini_top (
+ .Clock              (clk)          , //input  logic        Clock  ,
+ .Rst                (rst)          , //input  logic        Rst    ,
+ .local_tile_id      (local_tile_id), //input  t_tile_id    local_tile_id,
+ //============================================
+ //      fabric interface
+ //============================================
+ .InFabricValidQ503H (InFabricValidQ503H), //input  logic            InFabricValidQ503H  ,
+ .InFabricQ503H      (InFabricQ503H),      //input  var t_tile_trans InFabricQ503H       ,
+ .OutFabricValidQ505H(OutFabricValidQ505H),//output logic            OutFabricValidQ505H ,
+ .OutFabricQ505H     (OutFabricQ505H)     //output var t_tile_trans OutFabricQ505H ,
+);
+
 
 
 endmodule 

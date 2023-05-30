@@ -12,22 +12,20 @@
 //-----------------------------------------------------------------------------
 
 package mini_core_pkg;
-parameter I_MEM_SIZE   = 'h2000;
+parameter I_MEM_SIZE   = 'h10000; //FIXME - currently using same as BIG_CORE
 parameter I_MEM_OFFSET = 'h0;
-parameter D_MEM_SIZE   = 'h3000;
-parameter D_MEM_OFFSET = 'h2000;
+parameter D_MEM_SIZE   = 'h10000;
+parameter D_MEM_OFFSET = 'h10000;
 
 parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
 parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
-parameter CR_MEM_MSB  = 'h8000-1;  // CR_MEM  0x7000 - 0x7FFF
-parameter VGA_MEM_MSB = 'h11600-1; // VGA_MEM 0x8000 - 0x115FF
+
+parameter I_MEM_ADRS_MSB = 15;
+parameter D_MEM_ADRS_MSB = 15;
 
 // Region bits
 parameter LSB_REGION = 0;
-parameter MSB_REGION = 15;
-
-// VGA Region bits
-parameter VGA_MSB_REGION = 19;
+parameter MSB_REGION = 17;
 
 // Encoded regions
 parameter I_MEM_REGION_FLOOR   = 'h0                    ;
@@ -35,24 +33,6 @@ parameter I_MEM_REGION_ROOF    = I_MEM_MSB              ;
 
 parameter D_MEM_REGION_FLOOR   = I_MEM_REGION_ROOF  + 1 ;
 parameter D_MEM_REGION_ROOF    = D_MEM_MSB              ;
-
-parameter CR_MEM_REGION_FLOOR  = D_MEM_REGION_ROOF  + 1 ;
-parameter CR_MEM_REGION_ROOF   = CR_MEM_MSB             ;
-
-parameter VGA_MEM_REGION_FLOOR = CR_MEM_REGION_ROOF + 1 ;
-parameter VGA_MEM_REGION_ROOF  = VGA_MEM_MSB            ;
-
-// define data memory sizes
-parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
-//parameter D_MEM_OFFSET     = 'h0040_0000;   // See D_MEM_REGION
-parameter LSB_D_MEM        = 0 ;
-parameter MSB_D_MEM        = 12;
-parameter SIZE_D_MEM_LOTR  = 2**(MSB_D_MEM + 1);
-parameter SIZE_SHRD_MEM    = 2**(MSB_D_MEM );
-parameter MEM_SHARD_OFFSET = 32'h0040_0f00;
-// define VGA memory sizes
-parameter SIZE_VGA_MEM       = 38400;
-
 
 
 typedef enum logic [2:0] {
@@ -102,6 +82,7 @@ typedef enum logic [6:0] {
 parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
 
 // CR Address Offsets
+parameter CR_MEM_REGION_FLOOR = 'h20000;//  FIXME
 parameter CR_SEG7_0    = CR_MEM_REGION_FLOOR ; // RW 7 bit
 parameter CR_SEG7_1    = CR_SEG7_0   + 4 ; // RW 7 bit
 parameter CR_SEG7_2    = CR_SEG7_1   + 4 ; // RW 7 bit
@@ -179,12 +160,6 @@ typedef struct packed { // RW
 //   FENCE  = 7'b0001111 ,
 //   SYSCAL = 7'b1110011
 //} t_opcode ;
-typedef enum logic [1:0] {
-    RD_REQ = 2'b00 , 
-    WR_REQ = 2'b01 , 
-    RD_RSP = 2'b10 
-} t_fab_op ;
-
 
 
 endpackage

@@ -21,13 +21,13 @@ module mem #(
 ) (
     input  logic                  clock      ,
     //interface a
-    input  logic [ADRS_WIDTH-1:0] address_a  ,
+    input  logic [ADRS_WIDTH-1:2] address_a  ,
     input  logic                  wren_a     ,
     input  logic [3:0]            byteena_a  ,
     input  logic [WORD_WIDTH-1:0] data_a     ,
     output logic [WORD_WIDTH-1:0] q_a        ,
     //interface b
-    input  logic [ADRS_WIDTH-1:0] address_b  ,
+    input  logic [ADRS_WIDTH-1:2] address_b  ,
     input  logic                  wren_b     ,
     input  logic [3:0]            byteena_b  ,
     input  logic [WORD_WIDTH-1:0] data_b     ,

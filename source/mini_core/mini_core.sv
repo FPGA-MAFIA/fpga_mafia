@@ -34,6 +34,7 @@ import mini_core_pkg::*;
     output logic [31:0] DMemAddressQ103H,    // To D_MEM
     output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
     output logic        DMemWrEnQ103H,       // To D_MEM
+    output logic        DMemRdEnQ103H,       // To D_MEM
     input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
 
@@ -70,6 +71,7 @@ logic [4:0]         PreRegSrc2Q101H, RegSrc2Q101H, RegSrc2Q102H;
 logic [4:0]         RegDstQ101H, RegDstQ102H, RegDstQ103H, RegDstQ104H;
 logic [3:0]         CtrlDMemByteEnQ101H, CtrlDMemByteEnQ102H, CtrlDMemByteEnQ103H;
 logic               CtrlDMemWrEnQ101H, CtrlDMemWrEnQ102H, CtrlDMemWrEnQ103H;
+logic               CtrlDMemRdEnQ101H, CtrlDMemRdEnQ102H, CtrlDMemRdEnQ103H;
 logic               CtrlSignExtQ101H, CtrlSignExtQ102H, CtrlSignExtQ103H, CtrlSignExtQ104H;
 logic               CtrlLuiQ101H, CtrlLuiQ102H;
 logic               CtrlRegWrEnQ101H, CtrlRegWrEnQ102H, CtrlRegWrEnQ103H, CtrlRegWrEnQ104H;
@@ -168,6 +170,7 @@ assign CtrlLuiQ101H          = (OpcodeQ101H == LUI);
 assign CtrlRegWrEnQ101H      = (OpcodeQ101H == LUI ) || (OpcodeQ101H == AUIPC) || (OpcodeQ101H == JAL)  || (OpcodeQ101H == JALR) ||
                                (OpcodeQ101H == LOAD) || (OpcodeQ101H == I_OP)  || (OpcodeQ101H == R_OP) || (OpcodeQ101H == FENCE);
 assign CtrlDMemWrEnQ101H     = (OpcodeQ101H == STORE);
+assign CtrlDMemRdEnQ101H     = (OpcodeQ101H == LOAD);
 assign CtrlSignExtQ101H      = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); // Sign extend the LOAD from memory read.
 assign CtrlDMemByteEnQ101H   = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
                                ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b01) ? 4'b0011 : // LH || SH
@@ -251,6 +254,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 `MAFIA_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clock)
 `MAFIA_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clock)
 `MAFIA_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clock)
+`MAFIA_DFF(CtrlDMemRdEnQ102H        , CtrlDMemRdEnQ101H     , Clock)
 `MAFIA_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clock)
 `MAFIA_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clock)
 `MAFIA_DFF(CtrlBranchOpQ102H        , CtrlBranchOpQ101H     , Clock)
@@ -346,6 +350,7 @@ assign flushQ102H = SelNextPcAluOutQ102H;
 `MAFIA_DFF(AluOutQ103H         , AluOutQ102H         , Clock)
 `MAFIA_DFF(CtrlDMemByteEnQ103H , CtrlDMemByteEnQ102H , Clock)
 `MAFIA_DFF(CtrlDMemWrEnQ103H   , CtrlDMemWrEnQ102H   , Clock)
+`MAFIA_DFF(CtrlDMemRdEnQ103H   , CtrlDMemRdEnQ102H   , Clock)
 `MAFIA_DFF(SelDMemWbQ103H      , SelDMemWbQ102H      , Clock)
 `MAFIA_DFF(CtrlSignExtQ103H    , CtrlSignExtQ102H    , Clock)
 `MAFIA_DFF(PcPlus4Q103H        , PcPlus4Q102H        , Clock)
@@ -381,6 +386,7 @@ DMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { CtrlDMemByteEnQ103H[2:0]
 end
 assign DMemAddressQ103H = AluOutQ103H;
 assign DMemWrEnQ103H    = CtrlDMemWrEnQ103H;
+assign DMemRdEnQ103H    = CtrlDMemRdEnQ103H;
 
 // Q103H to Q104H Flip Flops
 `MAFIA_DFF(AluOutQ104H         , AluOutQ103H         , Clock)

@@ -16,8 +16,7 @@
 // Description: The arbiter module.
 `include "macros.sv"
 
-module arbiter #(parameter int NUM_CLIENTS=4,
-                parameter int DATA_WIDTH=32)
+module arbiter #(parameter int NUM_CLIENTS=4)
     (
      input  logic                   clk,
      input  logic                   rst,
