@@ -41,7 +41,7 @@ always @(posedge clk) begin
 for(int col =1 ; col < 4; col++) begin
     for(int row =1 ; row < 4; row++) begin
         if(v_in_north_valid[col][row])begin
-            $fwrite(fabric_top_trk,"%t  Going South  [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $fwrite(fabric_top_trk,"%t  Going South  [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h           %-7s \n",
             $realtime,
             col,
             row-1, // tile id 
@@ -55,7 +55,7 @@ for(int col =1 ; col < 4; col++) begin
             );      
         end
         if(v_in_south_valid[col][row])begin
-            $fwrite(fabric_top_trk,"%t  Going North  [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $fwrite(fabric_top_trk,"%t  Going North  [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h           %-7s \n",
             $realtime,
             col,
             row+1, // tile id 
@@ -69,7 +69,7 @@ for(int col =1 ; col < 4; col++) begin
             );      
         end
         if(v_in_west_valid[col][row])begin
-            $fwrite(fabric_top_trk,"%t  Going East   [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $fwrite(fabric_top_trk,"%t  Going East   [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h           %-7s \n",
             $realtime,
             col-1,
             row, // tile id 
@@ -83,7 +83,7 @@ for(int col =1 ; col < 4; col++) begin
             );      
         end
         if(v_in_east_valid[col][row])begin
-            $fwrite(fabric_top_trk,"%t  Going West   [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h      %-7s \n",
+            $fwrite(fabric_top_trk,"%t  Going West   [%0d,%0d]->[%0d,%0d]     %h       %-7s    %h     %h           %-7s \n",
             $realtime,
             col+1,
             row, // tile id 

@@ -87,20 +87,7 @@ end
 join_none
 endtask
 
-task automatic fifo_arb_check_empty_full();
-//$display("@@@@@@@@@@@this is full signal %b",full);
-fork
-    forever begin 
-        @(full);
-        $display("@@@@@@@@@@@this is full signal %b",full);
-    end
-    forever begin 
-        @(empty);
-        $display("@@@@@@@@@@@this is empty signal %b",empty);
-    end
 
-join_none
-endtask
 task fifo_arb_DI_checker(); // pseudo ref_model
 automatic bit check = 0;
 repeat(5000)begin// TODO - check why we nust have this repeat, and if we must then how many loops?

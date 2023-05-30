@@ -33,7 +33,7 @@ logic [NUM_CLIENTS-1:0] first_top;
 logic [NUM_CLIENTS-1:0] first_bottom;
 logic hit_top;
 logic [3:0] enc_last_winner;
-logic [3:0] next_enc_last_winner;
+logic [1:0] next_enc_last_winner;
 
 
 `MAFIA_EN_RST_DFF(last_winner  , winner_dec_id        , clk, valid_winner, rst)
@@ -57,14 +57,14 @@ assign hit_top = (|first_top);
 assign winner_dec_id = hit_top ? first_top : first_bottom;
 assign valid_winner = (|winner_dec_id);
 
-//`ENCODER(winner_dec_id,next_enc_last_winner)
+//`ENCODER(next_enc_last_winner,1,winner_dec_id)
 always_comb begin
 case (winner_dec_id)
-4'b0001 : next_enc_last_winner = 4'd0;
-4'b0010 : next_enc_last_winner = 4'd1;
-4'b0100 : next_enc_last_winner = 4'd2;
-4'b1000 : next_enc_last_winner = 4'd3;
-default : next_enc_last_winner = 4'd0;
+4'b0001 : next_enc_last_winner = 2'd0;
+4'b0010 : next_enc_last_winner = 2'd1;
+4'b0100 : next_enc_last_winner = 2'd2;
+4'b1000 : next_enc_last_winner = 2'd3;
+default : next_enc_last_winner = 2'd0;
 endcase
 end
 
