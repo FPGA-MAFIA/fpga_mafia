@@ -20,8 +20,8 @@ void wait(int cycles) {
 
 int main()  {  
     int count = 0;
-    while (1) {
-        wait(100);
+    while (count <= 10000) {
+        wait(1000000);
         fpga_7seg_print(count++);
     }
     return 0;

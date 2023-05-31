@@ -126,9 +126,9 @@ unsigned int CR_CURSOR_H[1] = {0};
 unsigned int CR_CURSOR_V[1] = {0};
 
 /* This function print a char note on the screen in (raw,col) position */
-void draw_char(char note, int raw, int col)
+void draw_char(char note, int row, int col)
 {
-    unsigned int vertical   = raw * LINE;
+    unsigned int vertical   = row * LINE;
     unsigned int horizontal = col * BYTES;
     volatile int *ptr_top;
     volatile int *ptr_bottom;
@@ -138,6 +138,74 @@ void draw_char(char note, int raw, int col)
 
     WRITE_REG(ptr_top    , ASCII_TOP[note]);
     WRITE_REG(ptr_bottom , ASCII_BOTTOM[note]);
+}
+
+/* This function draws a rectangle on the screen at the specified location and size */
+void draw_rectangle(int row, int col, int width, int height, int value)
+{
+    int i, j;
+    unsigned int vertical = row * LINE;
+    unsigned int horizontal = col * BYTES;
+    volatile int *ptr_top;
+    volatile int *ptr_bottom;
+
+    for (i = 0; i < height; i++)
+    {
+        for (j = 0; j < width; j++)
+        {
+            VGA_PTR(ptr_top, horizontal + j * BYTES + vertical);
+            VGA_PTR(ptr_bottom, horizontal + j * BYTES + vertical + LINE);
+
+            if (value == 0)
+            {
+                WRITE_REG(ptr_top, 0x00000000);    // Turn off the pixel
+                WRITE_REG(ptr_bottom, 0x00000000); // Turn off the pixel
+            }
+            else
+            {
+                WRITE_REG(ptr_top, 0xFFFFFFFF);    // Draw the pixel
+                WRITE_REG(ptr_bottom, 0xFFFFFFFF); // Draw the pixel
+            }
+        }
+        vertical += LINE;
+    }
+}
+
+void move_rectangle(int row, int col, int width, int height, char direction)
+{
+    // Calculate the new position based on the direction
+    int newRow = row;
+    int newCol = col;
+
+    switch (direction)
+    {
+        case 'U':
+            newRow--;
+            break;
+        case 'D':
+            newRow++;
+            break;
+        case 'L':
+            newCol--;
+            break;
+        case 'R':
+            newCol++;
+            break;
+        default:
+            return; // Invalid direction, exit the function
+    }
+
+    // Check if the new position is within the screen boundaries
+    if (newRow < 0 || newRow + height > RAWS || newCol < 0 || newCol + width > COLUMN)
+    {
+        return; // New position is outside the screen boundaries, exit the function
+    }
+
+    // Turn off the original rectangle
+    draw_rectangle(row, col, width, height, 0);
+
+    // Draw the new rectangle in the new position
+    draw_rectangle(newRow, newCol, width, height, 1);
 }
 
 /* This function print a string on the screen in (CR_CURSOR_V,CR_CURSOR_H) position */
