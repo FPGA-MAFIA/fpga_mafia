@@ -46,6 +46,7 @@ initial begin
     d_cache_pipe_stages_trk = $fopen({"../../../target/cache/tests/",test_name,"/d_cache_pipe_stages_trk.log"},"w");
     $fwrite(d_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
     $fwrite(d_cache_pipe_stages_trk,"                                                               D_CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
+
     $fwrite(d_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
     $fwrite(d_cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
     $fwrite(d_cache_pipe_stages_trk,"Time || OPCODE || TQ || s_w_mru || hit|miss || mb_hit || tag ||set || offset ||   Data  || s_w_valid || s_w_modified ||   s_w_tags  ||  s_w_victim ||  s_w_hit  ||  fill  || fill || dirty ||           cl_data_q3               ||  data array|| cl_data          \n");
@@ -108,6 +109,7 @@ always @(posedge clk) begin
         dmem_cache2core_rsp.address[MSB_SET:LSB_SET], 
         dmem_cache2core_rsp.data);
     end
+
     if(dmem_cache2fm_req_q3.valid && (dmem_cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
         $fwrite(d_cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h_%h_%h_%h  \n",
         $realtime, 
@@ -121,6 +123,7 @@ always @(posedge clk) begin
         dmem_cache2fm_req_q3.data[31:0]
         );
     end
+
     if(dmem_cache2fm_req_q3.valid && (dmem_cache2fm_req_q3.opcode == FILL_REQ_OP)) begin
         $fwrite(d_cache_top_trk,"%t     CACHE_FILL_REQ    %h       %h         %h     %h      ( -- read request -- ) \n",
         $realtime, 

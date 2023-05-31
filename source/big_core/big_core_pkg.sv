@@ -82,6 +82,15 @@ typedef enum logic [2:0] {
    BGEU = 3'b111
 } t_branch_type ;
 
+typedef enum logic [2:0] {
+  CRSRW   = 3'b001 ,
+  CRSRS   = 3'b010 ,
+  CRSRC   = 3'b011 ,
+  CRSRWI  = 3'b101 ,
+  CRSRSI  = 3'b110 ,
+  CRSRCI  = 3'b111
+} t_funct3_csr ;
+
 typedef enum logic [6:0] {
    LUI    = 7'b0110111 ,
    AUIPC  = 7'b0010111 ,
@@ -95,6 +104,40 @@ typedef enum logic [6:0] {
    FENCE  = 7'b0001111 ,
    SYSCAL = 7'b1110011
 } t_opcode ;
+
+typedef struct packed {
+    logic        csr_wren;
+    logic        csr_rden;
+    logic [1:0]  csr_op;
+    logic [4:0]  csr_rs1;
+    logic [11:0] csr_addr;
+    logic [31:0] csr_data;
+} t_csr_inst;
+
+typedef enum logic [11:0] {
+ CSR_SCRATCH    = 12'h009 ,
+ CSR_CYCLE_LOW  = 12'hC00 ,
+ CSR_CYCLE_HIGH = 12'hC80 ,
+ CSR_MCAUSE     = 12'h342 ,
+ CSR_MEPC       = 12'h341
+} t_csr_addr ;
+
+typedef struct packed {
+    logic illegal_instruction;
+    logic misaligned_access;
+    logic illegal_csr_access;
+    logic breakpoint;
+    logic timer_interrupt;  
+    logic external_interrupt;
+} t_csr_hw_updt;
+
+typedef struct packed {
+    logic [31:0] csr_scratch;
+    logic [31:0] csr_cycle_low;
+    logic [31:0] csr_cycle_high;
+    logic [31:0] csr_mcause;
+    logic [31:0] csr_mepc;
+} t_csr;
 
 typedef struct packed {
     logic [7:0] SEG7_0;
