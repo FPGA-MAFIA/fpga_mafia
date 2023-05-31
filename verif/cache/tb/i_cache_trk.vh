@@ -29,7 +29,7 @@ initial begin
     
     i_cache_top_trk      = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_top_trk.log"},"w");
     $fwrite(i_cache_top_trk, "==================================================================================\n");
-    $fwrite(i_cache_top_trk, "                      CACHE TOP TRACKER  -  Test: ",test_name,"\n");
+    $fwrite(i_cache_top_trk, "                      I_CACHE TOP TRACKER  -  Test: ",test_name,"\n");
     $fwrite(i_cache_top_trk, "==================================================================================\n");
     $fwrite(i_cache_top_trk,"-----------------------------------------------------------------------------------\n");
     $fwrite(i_cache_top_trk," Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data \n");
@@ -37,7 +37,7 @@ initial begin
 
     i_cache_pipe_io_trk = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_pipe_io_trk.log"},"w");
     $fwrite(i_cache_pipe_io_trk,"==========================================================================================\n");
-    $fwrite(i_cache_pipe_io_trk,"                      CACHE PIPE I/O TRACKER  -  Test: ",test_name,"\n"); 
+    $fwrite(i_cache_pipe_io_trk,"                      I_CACHE PIPE I/O TRACKER  -  Test: ",test_name,"\n"); 
     $fwrite(i_cache_pipe_io_trk,"==========================================================================================\n");
     $fwrite(i_cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
     $fwrite(i_cache_pipe_io_trk,"  Time  ||REQ/RSP||  OPCODE  || TQ ID ||  address  || rd ind || Data/Result ||   CL־Data \n");
@@ -45,7 +45,7 @@ initial begin
 
     i_cache_pipe_stages_trk = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_pipe_stages_trk.log"},"w");
     $fwrite(i_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
-    $fwrite(i_cache_pipe_stages_trk,"                                                               CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
+    $fwrite(i_cache_pipe_stages_trk,"                                                               I_CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
     $fwrite(i_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
     $fwrite(i_cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
     $fwrite(i_cache_pipe_stages_trk,"Time || OPCODE || TQ || s_w_mru || hit|miss || mb_hit || tag ||set || offset ||   Data  || s_w_valid ||  s_w_tags  ||  s_w_victim ||  s_w_hit  || fill ||           cl_data_q3               ||  data array|| cl_data          \n");
@@ -54,7 +54,7 @@ initial begin
 
     i_cache_tq_trk      = $fopen({"../../../target/cache/tests/",test_name,"/i_cache_tq_trk.log"},"w");
     $fwrite(i_cache_tq_trk,"====================================================================================================================\n");
-    $fwrite(i_cache_tq_trk,"                      CACHE TQ TRACKER  -  Test: ",test_name,"\n");
+    $fwrite(i_cache_tq_trk,"                      I_CACHE TQ TRACKER  -  Test: ",test_name,"\n");
     $fwrite(i_cache_tq_trk,"====================================================================================================================\n");
     $fwrite(i_cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
     $fwrite(i_cache_tq_trk," Time ||ENTRY||    State      ||  RD  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd hit\n");
@@ -82,52 +82,52 @@ always @(posedge clk) begin
 //==================================================
 // tracker of the Cache Top Level Interface
 //==================================================
-    if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
+    if(imem_core2cache_req.valid && (imem_core2cache_req.opcode == RD_OP )) begin
         $fwrite(i_cache_top_trk,"%t     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
         $realtime, 
-        core2cache_req.address, 
-        core2cache_req.reg_id, 
-        core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        core2cache_req.address[MSB_SET:LSB_SET]);      
+        imem_core2cache_req.address, 
+        imem_core2cache_req.reg_id, 
+        imem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
+        imem_core2cache_req.address[MSB_SET:LSB_SET]);      
     end
-    if(core2cache_req.valid && (core2cache_req.opcode == WR_OP )) begin
+    if(imem_core2cache_req.valid && (imem_core2cache_req.opcode == WR_OP )) begin
         $fwrite(i_cache_top_trk,"%t     CORE_WR_REQ       %h       %h        %h     %h      %h \n",
         $realtime, 
-        core2cache_req.address, 
-        core2cache_req.reg_id, 
-        core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        core2cache_req.address[MSB_SET:LSB_SET],
-        core2cache_req.data);      
+        imem_core2cache_req.address, 
+        imem_core2cache_req.reg_id, 
+        imem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
+        imem_core2cache_req.address[MSB_SET:LSB_SET],
+        imem_core2cache_req.data);      
     end
-    if(cache2core_rsp.valid) begin
+    if(imem_cache2core_rsp.valid) begin
         $fwrite(i_cache_top_trk,"%t     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
         $realtime, 
-        cache2core_rsp.address, 
-        cache2core_rsp.reg_id, 
-        cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
-        cache2core_rsp.address[MSB_SET:LSB_SET], 
-        cache2core_rsp.data);
+        imem_cache2core_rsp.address, 
+        imem_cache2core_rsp.reg_id, 
+        imem_cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
+        imem_cache2core_rsp.address[MSB_SET:LSB_SET], 
+        imem_cache2core_rsp.data);
     end
-    if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
+    if(imem_cache2fm_req_q3.valid && (imem_cache2fm_req_q3.opcode == DIRTY_EVICT_OP)) begin
         $fwrite(i_cache_top_trk,"%t     CACHE_DIRTY_EVICT %h       %h         %h     %h      %h_%h_%h_%h  \n",
         $realtime, 
-        cache2fm_req_q3.address, 
-        cache2fm_req_q3.tq_id, 
-        cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
-        cache2fm_req_q3.address[MSB_SET:LSB_SET], 
-        cache2fm_req_q3.data[127:96],
-        cache2fm_req_q3.data[95:64],
-        cache2fm_req_q3.data[63:32],
-        cache2fm_req_q3.data[31:0]
+        imem_cache2fm_req_q3.address, 
+        imem_cache2fm_req_q3.tq_id, 
+        imem_cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
+        imem_cache2fm_req_q3.address[MSB_SET:LSB_SET], 
+        imem_cache2fm_req_q3.data[127:96],
+        imem_cache2fm_req_q3.data[95:64],
+        imem_cache2fm_req_q3.data[63:32],
+        imem_cache2fm_req_q3.data[31:0]
         );
     end
-    if(cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == FILL_REQ_OP)) begin
+    if(imem_cache2fm_req_q3.valid && (imem_cache2fm_req_q3.opcode == FILL_REQ_OP)) begin
         $fwrite(i_cache_top_trk,"%t     CACHE_FILL_REQ    %h       %h         %h     %h      ( -- read request -- ) \n",
         $realtime, 
-        cache2fm_req_q3.address, 
-        cache2fm_req_q3.tq_id, 
-        cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
-        cache2fm_req_q3.address[MSB_SET:LSB_SET]);
+        imem_cache2fm_req_q3.address, 
+        imem_cache2fm_req_q3.tq_id, 
+        imem_cache2fm_req_q3.address[MSB_TAG:LSB_TAG] , 
+        imem_cache2fm_req_q3.address[MSB_SET:LSB_SET]);
     end
     if(fm2cache_rd_rsp.valid) begin
         $fwrite(i_cache_top_trk,"%t     FM_FILL_RSP     (see tq_id)   %h        ----   ----     %h_%h_%h_%h \n",
@@ -214,7 +214,7 @@ if(i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
 // //==================================================
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
         if ((i_cache.i_cache_tq.tq_state[i] != i_cache.i_cache_tq.next_tq_state[i]) ||
-             ((i_cache.i_cache_tq.tq_state[i] != S_IDLE) &&  core2cache_req.valid && i_cache.i_cache_tq.rd_req_hit_mb[i] )
+             ((i_cache.i_cache_tq.tq_state[i] != S_IDLE) &&  imem_core2cache_req.valid && i_cache.i_cache_tq.rd_req_hit_mb[i] )
              ) begin
         $fwrite(i_cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h       %h            %h              \n",
         $realtime,
@@ -235,12 +235,12 @@ if(i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
 //==================================================
 // tracker of reference model - core<->i_cache
 //==================================================
-    if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
+    if(imem_core2cache_req.valid && (imem_core2cache_req.opcode == RD_OP )) begin
         $fwrite(cache_ref_gold_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
-        core2cache_req.address, 
-        core2cache_req.reg_id, 
-        core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        core2cache_req.address[MSB_SET:LSB_SET]);      
+        imem_core2cache_req.address, 
+        imem_core2cache_req.reg_id, 
+        imem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
+        imem_core2cache_req.address[MSB_SET:LSB_SET]);      
     end
     if(ref_cache2core_rsp.valid) begin
         $fwrite(cache_ref_gold_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
@@ -254,20 +254,20 @@ if(i_cache.i_cache_pipe_wrap.i_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
 //==================================================
 // tracker of reference model - core<->i_cache
 //==================================================
-    if(core2cache_req.valid && (core2cache_req.opcode == RD_OP )) begin
+    if(imem_core2cache_req.valid && (imem_core2cache_req.opcode == RD_OP )) begin
         $fwrite(cache_ref_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
-        core2cache_req.address, 
-        core2cache_req.reg_id, 
-        core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        core2cache_req.address[MSB_SET:LSB_SET]);      
+        imem_core2cache_req.address, 
+        imem_core2cache_req.reg_id, 
+        imem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
+        imem_core2cache_req.address[MSB_SET:LSB_SET]);      
     end
-    if(cache2core_rsp.valid) begin
+    if(imem_cache2core_rsp.valid) begin
         $fwrite(cache_ref_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
-        cache2core_rsp.address, 
-        cache2core_rsp.reg_id, 
-        cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
-        cache2core_rsp.address[MSB_SET:LSB_SET], 
-        cache2core_rsp.data);
+        imem_cache2core_rsp.address, 
+        imem_cache2core_rsp.reg_id, 
+        imem_cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
+        imem_cache2core_rsp.address[MSB_SET:LSB_SET], 
+        imem_cache2core_rsp.data);
     end
 
 
