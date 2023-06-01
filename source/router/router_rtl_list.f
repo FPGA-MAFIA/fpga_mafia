@@ -16,11 +16,5 @@
 ../../../source/router/router.sv
 ../../../source/router/fifo_arb.sv
 ../../../source/common/fifo.sv
-../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
 ../../../source/router/next_tile_fifo_arb.sv
-//../../../source/router/north_next_tile_fifo_arb.sv
-//../../../source/router/north_next_tile_fifo_arb.sv
-//../../../source/router/east_next_tile_fifo_arb.sv
-//../../../source/router/west_next_tile_fifo_arb.sv
-//../../../source/router/south_next_tile_fifo_arb.sv
-//../../../source/router/local_next_tile_fifo_arb.sv
