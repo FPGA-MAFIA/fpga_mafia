@@ -20,7 +20,7 @@
 
 // Common
 ../../../source/common/fifo.sv
-../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
 ../../../source/common/mem.sv
 
 //RTL FIles
