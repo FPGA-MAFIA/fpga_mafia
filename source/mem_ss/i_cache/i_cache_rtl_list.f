@@ -14,12 +14,16 @@
 +incdir+../../../source/common/
 
 // === packages === 
-../../../source/d_cache/d_cache_param_pkg.sv
+../../../source/mem_ss/i_cache/i_cache_param_pkg.sv
 
 // === DUT === 
-// Data cache
-../../../source/d_cache/d_cache.sv
-../../../source/d_cache/d_cache_tq.sv
-../../../source/d_cache/d_cache_pipe_wrap.sv
-../../../source/d_cache/d_cache_pipe.sv
-../../../source/common/array.sv
+// instruction cache
+../../../source/mem_ss/i_cache/i_cache.sv
+../../../source/mem_ss/i_cache/i_cache_tq.sv
+../../../source/mem_ss/i_cache/i_cache_pipe_wrap.sv
+../../../source/mem_ss/i_cache/i_cache_pipe.sv
+// ../../../source/common/array.sv -> this is compiled in the d_cache list
+
+
+
+

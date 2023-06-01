@@ -19,8 +19,8 @@
 ../../../source/common/common_pkg.sv
 
 // Common
-../../../source/router/arbiter.sv
-../../../source/router/fifo.sv
+../../../source/common/fifo.sv
+../../../source/common/fifo.sv
 ../../../source/common/mem.sv
 
 //RTL FIles
