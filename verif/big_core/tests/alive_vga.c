@@ -11,7 +11,7 @@
 // This program is a basic sanity test for the vga operators.
 //------------------------------------------------------------
 #include "big_core_defines.h"
-#include "../../../app/defines/graphic_vga.h"
+#include "graphic_vga.h"
 
 void wait(int cycles) {
     for (int i = 0; i < cycles; i++) {
