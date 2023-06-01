@@ -1,0 +1,15 @@
+
+The sv directory has some usfull memory you can load
+The sequence directory has sequence file you can run.
+Example:
+python uart_term.py < sequence/reset_all_pc.txt 
+python uart_term.py < sequence/load_fpga_main.txt
+python uart_term.py < sequence/restart_prgram.txt
+
+
+
+// Make sure you have installed for python to use the uart COM port
+pip install serial
+pip install pySerial
+
+
