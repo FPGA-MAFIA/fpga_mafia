@@ -76,19 +76,7 @@ import big_core_pkg::*;
 t_fpga_out fpga_out;
 t_vga_out vga_out;
 logic inDisplayArea;
-//big_core_top big_core_top (
-//.Clk      (MAX10_CLK1_50),    //input  logic        Clk,
-//.Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
-//// FPGA interface inputs              
-//.Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
-//.Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
-//.Switch   (SW),    	   //input  logic [9:0] Switch,   // CR_MEM
-//// FPGA interface outputs
-//.fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
-//// VGA output
-//.vga_out   (vga_out)    //output logic       v_sync,
-//);
-//
+
 big_core_top big_core_top (
 .Clk      (MAX10_CLK1_50),    //input  logic        Clk,
 .Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
