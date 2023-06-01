@@ -4,8 +4,8 @@
 ../../../source/router/router_pkg.sv
 ../../../source/router/router.sv
 ../../../source/router/fifo_arb.sv
-../../../source/router/arbiter.sv
-../../../source/router/fifo.sv
+../../../source/common/fifo.sv
+../../../source/common/fifo.sv
 ../../../source/router/next_tile_fifo_arb.sv
 //  mini_core files
 ../../../source/common/mem.sv
