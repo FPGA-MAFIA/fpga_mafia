@@ -3,5 +3,4 @@ fibonacci.c
 floating_point.c
 gcd.c
 primary_numbers.c
-alive_vga.c
 bss_test.c
