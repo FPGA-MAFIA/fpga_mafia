@@ -3,7 +3,7 @@
 
 module mini_top
 import mini_core_pkg::*;
-import router_pkg::*;
+import common_pkg::*;
 (
 input  logic        Clock  ,
 input  logic        Rst    ,

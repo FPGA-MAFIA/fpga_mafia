@@ -12,7 +12,7 @@
 
 `include "macros.sv"
 module router
-import router_pkg::*;
+import common_pkg::*;
 (
     input   logic               clk,
     input   logic               rst,

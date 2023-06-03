@@ -17,7 +17,6 @@
 //---------------------------------------------------
 module mini_mem_wrap
 import mini_core_pkg::*;
-import router_pkg::*;
 import common_pkg::*;
 (
                 input  logic        Clock  ,
