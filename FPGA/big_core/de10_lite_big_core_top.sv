@@ -6,61 +6,64 @@
 `include "macros.sv"
 module de10_lite_big_core_top(
 
-	//////////// CLOCK //////////
-	input 		          		ADC_CLK_10,
-	input 		          		MAX10_CLK1_50,
-	input 		          		MAX10_CLK2_50,
+    //////////// CLOCK //////////
+    input                           ADC_CLK_10,
+    input                           MAX10_CLK1_50,
+    input                           MAX10_CLK2_50,
 
-	//////////// SDRAM //////////
-	output		    [12:0]		DRAM_ADDR,
-	output		     [1:0]		DRAM_BA,
-	output		          		DRAM_CAS_N,
-	output		          		DRAM_CKE,
-	output		          		DRAM_CLK,
-	output		          		DRAM_CS_N,
-	inout 		    [15:0]		DRAM_DQ,
-	output		          		DRAM_LDQM,
-	output		          		DRAM_RAS_N,
-	output		          		DRAM_UDQM,
-	output		          		DRAM_WE_N,
+    //////////// SDRAM //////////
+    output            [12:0]        DRAM_ADDR,
+    output             [1:0]        DRAM_BA,
+    output                          DRAM_CAS_N,
+    output                          DRAM_CKE,
+    output                          DRAM_CLK,
+    output                          DRAM_CS_N,
+    inout             [15:0]        DRAM_DQ,
+    output                          DRAM_LDQM,
+    output                          DRAM_RAS_N,
+    output                          DRAM_UDQM,
+    output                          DRAM_WE_N,
 
-	//////////// SEG7 //////////
-	output		     [7:0]		HEX0,
-	output		     [7:0]		HEX1,
-	output		     [7:0]		HEX2,
-	output		     [7:0]		HEX3,
-	output		     [7:0]		HEX4,
-	output		     [7:0]		HEX5,
+    //////////// SEG7 //////////
+    output             [7:0]        HEX0,
+    output             [7:0]        HEX1,
+    output             [7:0]        HEX2,
+    output             [7:0]        HEX3,
+    output             [7:0]        HEX4,
+    output             [7:0]        HEX5,
 
-	//////////// KEY //////////
-	input 		     [1:0]		KEY,
+    //////////// KEY //////////
+    input              [1:0]        KEY,
 
-	//////////// LED //////////
-	output		     [9:0]		LEDR,
+    //////////// LED //////////
+    output             [9:0]        LEDR,
 
-	//////////// SW //////////
-	input logic      [9:0]		SW,
+    //////////// SW //////////
+    input logic      [9:0]        SW,
 
-	//////////// VGA //////////
-	output		     [3:0]		VGA_B,
-	output		     [3:0]		VGA_G,
-	output		          		VGA_HS,
-	output		     [3:0]		VGA_R,
-	output		          		VGA_VS,
+    //////////// VGA //////////
+    output             [3:0]        VGA_B,
+    output             [3:0]        VGA_G,
+    output                          VGA_HS,
+    output             [3:0]        VGA_R,
+    output                          VGA_VS,
 
-	//////////// Accelerometer //////////
-	output		          		GSENSOR_CS_N,
-	input 		     [2:1]		GSENSOR_INT,
-	output		          		GSENSOR_SCLK,
-	inout 		          		GSENSOR_SDI,
-	inout 		          		GSENSOR_SDO,
+    //////////// Accelerometer //////////
+    output                          GSENSOR_CS_N,
+    input              [2:1]        GSENSOR_INT,
+    output                          GSENSOR_SCLK,
+    inout                           GSENSOR_SDI,
+    inout                           GSENSOR_SDO,
 
-	//////////// Arduino //////////
-	inout 		    [15:0]		ARDUINO_IO,
-	inout 		          		ARDUINO_RESET_N,
+    //////////// Arduino //////////
+    inout             [15:0]        ARDUINO_IO,
+    inout                           ARDUINO_RESET_N,
 
-	//////////// GPIO, GPIO connect to GPIO Default //////////
-	inout 		    [35:0]		GPIO
+    //////////// GPIO, GPIO connect to GPIO Default //////////
+    input  logic        UART_TXD,
+    output logic        UART_RXD,
+    output logic        INTERRUPT,
+    inout             [35:0]        GPIO
 );
 
 
@@ -70,44 +73,107 @@ import big_core_pkg::*;
 //  REG/WIRE declarations
 //=======================================================
 
+
+logic Rst;
+assign Rst = (!KEY[0] && SW[9]);
+
 //=======================================================
 //  Structural coding
 //=======================================================
 t_fpga_out fpga_out;
 t_vga_out vga_out;
 logic inDisplayArea;
-
+logic InFabricValidQ503H, OutFabricValidQ505H, PreOutFabricValidQ505H;
+t_tile_trans InFabricQ503H;
+t_tile_trans OutFabricQ505H, PreOutFabricQ505H;
+logic RstPc;
+logic C2F_ReqOpcodeQ500H;
+// =======================================================
+// big_core_top
+// =======================================================
 big_core_top big_core_top (
-.Clk      (MAX10_CLK1_50),    //input  logic        Clk,
-.Rst      ((!KEY[0] && SW[9])),    //input  logic        Rst,
+.Clk      (MAX10_CLK1_50),     //input  logic        Clk,
+.Rst      (Rst),//input  logic        Rst,
+.RstPc     (RstPc),// input
+// Fabric interface
+.InFabricValidQ503H (InFabricValidQ503H), //input  logic        ,
+.InFabricQ503H      (InFabricQ503H),      //input  t_tile_trans ,
+.OutFabricValidQ505H(PreOutFabricValidQ505H),//output logic        ,
+.OutFabricQ505H     (PreOutFabricQ505H),     //output t_tile_trans ,
 // FPGA interface inputs              
 .Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
 .Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
-.Switch   (SW),    	   //input  logic [9:0] Switch,   // CR_MEM
+.Switch   (SW),           //input  logic [9:0] Switch,   // CR_MEM
 // FPGA interface outputs
-.fpga_out   (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
+.fpga_out     (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
 // VGA output
-.inDisplayArea    (inDisplayArea),       // VGA_OUTPUT
-.vga_out   (vga_out)    //output logic       v_sync,
+.inDisplayArea(inDisplayArea), // VGA_OUTPUT
+.vga_out        (vga_out)        //output logic       v_sync,
 );
 
+logic EnRstPc;
+assign EnRstPc = (InFabricQ503H.address == 32'hFFFF_FFFF) && (InFabricQ503H.opcode == WR) && InFabricValidQ503H;
+`MAFIA_EN_RST_DFF(RstPc,  InFabricQ503H.data[0] , MAX10_CLK1_50, EnRstPc, Rst)
 
-assign HEX0 	= fpga_out.SEG7_0;
-assign HEX1 	= fpga_out.SEG7_1;
-assign HEX2 	= fpga_out.SEG7_2;
-assign HEX3 	= fpga_out.SEG7_3;
-assign HEX4 	= fpga_out.SEG7_4;
-assign HEX5 	= fpga_out.SEG7_5;
-assign LEDR 	= fpga_out.LED; //SW;//
-assign VGA_R 	= vga_out.VGA_R; //inDisplayArea ? 4'b1111 : '0;//
-assign VGA_G 	= vga_out.VGA_G; //inDisplayArea ? 4'b0011 : '0;//
-assign VGA_B 	= vga_out.VGA_B; //inDisplayArea ? SW[3:0] : '0;//
-assign VGA_HS 	= vga_out.VGA_HS;
-assign VGA_VS 	= vga_out.VGA_VS;
+always_comb begin
+    OutFabricValidQ505H  = PreOutFabricValidQ505H;
+    OutFabricQ505H       = PreOutFabricQ505H;
+    OutFabricQ505H.data  = PreOutFabricQ505H.address == 32'hFFFF_FFFF ? {31'b0,RstPc} : PreOutFabricQ505H.data;
+end
 
-// =======================================================	
-//  This logic is just to clean all the warnings	
-// =======================================================	
+// =======================================================
+//  UART
+// =======================================================
+uart_io  uart_io_inst
+    (
+    .clk                    (MAX10_CLK1_50)        ,//input
+    .rstn                   (!Rst)            ,//input
+    .core_id                ('0)                   ,//input
+    //================================================
+    //        Core to Fabric
+    //================================================
+    // input - Rsp to Core
+    .C2F_RspValidQ502H      (OutFabricValidQ505H),//input
+    .C2F_RspThreadIDQ502H   ('0),                 //input
+    .C2F_RspDataQ502H       (OutFabricQ505H.data),//input
+    .C2F_RspStall           ('0),                 //input
+    // output - Req from Core
+    .C2F_ReqValidQ500H      (InFabricValidQ503H),//output
+    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H),//output
+    .C2F_ReqThreadIDQ500H   (                  ),//output
+    .C2F_ReqAddressQ500H    (InFabricQ503H.address),//output
+    .C2F_ReqDataQ500H       (InFabricQ503H.data)   ,//output
+    // UART RX/TX
+    .uart_master_tx         (UART_TXD),
+    .uart_master_rx         (UART_RXD),
+    .interrupt              (INTERRUPT)
+    );
+assign InFabricQ503H.opcode = (C2F_ReqOpcodeQ500H == 1'b0) ? RD :
+                              (C2F_ReqOpcodeQ500H == 1'b1) ? WR :
+                                                             RD ;
+
+assign InFabricQ503H.requestor_id = '0;
+assign InFabricQ503H.next_tile_fifo_arb_id = t_cardinal'('0);
+
+
+
+
+assign HEX0     = fpga_out.SEG7_0;
+assign HEX1     = fpga_out.SEG7_1;
+assign HEX2     = fpga_out.SEG7_2;
+assign HEX3     = fpga_out.SEG7_3;
+assign HEX4     = fpga_out.SEG7_4;
+assign HEX5     = fpga_out.SEG7_5;
+assign LEDR     = fpga_out.LED; //SW;//
+assign VGA_R     = vga_out.VGA_R; //inDisplayArea ? 4'b1111 : '0;//
+assign VGA_G     = vga_out.VGA_G; //inDisplayArea ? 4'b0011 : '0;//
+assign VGA_B     = vga_out.VGA_B; //inDisplayArea ? SW[3:0] : '0;//
+assign VGA_HS     = vga_out.VGA_HS;
+assign VGA_VS     = vga_out.VGA_VS;
+
+// =======================================================    
+//  This logic is just to clean all the warnings    
+// =======================================================    
 //outputs
 `MAFIA_DFF(DRAM_ADDR[12:0] ,{SW[9:0], SW[2:0]} , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_BA[1:0]    , SW[1:0] , MAX10_CLK1_50)
@@ -127,11 +193,11 @@ logic next_temp;
 assign next_temp = (|KEY) || (|GSENSOR_INT);
 `MAFIA_DFF(temp    , next_temp   , ADC_CLK_10)
 //inout
-logic       	NEXT_GSENSOR_SDI;
-logic       	NEXT_GSENSOR_SDO;
-logic       	NEXT_ARDUINO_RESET_N;
-logic [15:0]	NEXT_DRAM_DQ;
-logic [15:0]	NEXT_ARDUINO_IO;
+logic           NEXT_GSENSOR_SDI;
+logic           NEXT_GSENSOR_SDO;
+logic           NEXT_ARDUINO_RESET_N;
+logic [15:0]    NEXT_DRAM_DQ;
+logic [15:0]    NEXT_ARDUINO_IO;
 logic [35:0]	NEXT_GPIO;
 `MAFIA_DFF( NEXT_GSENSOR_SDI      , SW[0] , MAX10_CLK2_50)
 `MAFIA_DFF( NEXT_GSENSOR_SDO      , SW[0] , MAX10_CLK2_50)

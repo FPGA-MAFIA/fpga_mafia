@@ -12,6 +12,7 @@
 
 +incdir+../../../source/common/
 //RTL FIles
+../../../source/common/common_pkg.sv
 ../../../source/big_core/big_core_pkg.sv
 ../../../source/big_core/big_core.sv
 ../../../source/big_core/big_core_top.sv

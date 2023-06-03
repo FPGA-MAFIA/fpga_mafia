@@ -18,6 +18,7 @@
 
 module big_core_tb ;
 import big_core_pkg::*;
+import common_pkg::*;
 
 logic        Clk;
 logic        Rst;
@@ -67,8 +68,16 @@ logic EndOfTest;
 // Instantiating the big_core_top
 //=========================================
 big_core_top big_core_top(
-    .Clk            (Clk     ),
-    .Rst            (Rst     ),
+    .Clk            (Clk),
+    .Rst            (Rst),
+    .RstPc          (1'b0),
+    .local_tile_id  ('0),       //input  t_tile_id    local_tile_id,
+    // Fabric interface
+    .InFabricValidQ503H ('0),//input  logic        ,
+    .InFabricQ503H      ('0),//input  t_tile_trans ,
+    .OutFabricValidQ505H(),  //output logic        ,
+    .OutFabricQ505H     (),  //output t_tile_trans ,
+    // FPGA interface
     .Button_0       (Button_0),
     .Button_1       (Button_1),
     .Switch         (Switch  ),

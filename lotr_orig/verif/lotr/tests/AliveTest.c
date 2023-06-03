@@ -28,7 +28,7 @@ void ANDI(int a){
 void ORI(int a){
     a=a|26;
     if(a==30)
-    	D_MEM_SHARED[3] = 1;
+         D_MEM_SHARED[3] = 1;
 }
 void XORI(int a){
     D_MEM_SHARED[4] = a^42;
@@ -36,37 +36,37 @@ void XORI(int a){
 void SLLI(int a){
     a=a<<3;
     if(a==64)
-    	D_MEM_SHARED[5] = 1;
+         D_MEM_SHARED[5] = 1;
 }
 void SRLI(int a){
     __asm__("lui a5,0x41;"
     "addi a5,a5,-512;"
     "lw a4,-20(s0);"
     "srli a4,a4,0xc;"
-    "sw	a4,24(a5)");
+    "sw     a4,24(a5)");
 }
 
 void SRAI(int a){
     a=a>>3;
     if(a==-1024)
-    	D_MEM_SHARED[7] = 1;
+         D_MEM_SHARED[7] = 1;
 }
 
 //////////////////Register-Register Instructions//////////////////
 void ADD(int a, int b){
     a=a+b;
     if(a==579)
-    	D_MEM_SHARED[8] = 1;
+         D_MEM_SHARED[8] = 1;
 }
 
 
 void SLT(int a, int b){
-	D_MEM_SHARED[9]= a<b ? 1 : 0;
+     D_MEM_SHARED[9]= a<b ? 1 : 0;
 } 
 
 /////////////////////////////////////
 void SLTU(int a){
-	D_MEM_SHARED[10]= a==0 ? 0 : 1;
+     D_MEM_SHARED[10]= a==0 ? 0 : 1;
 }
 /////////////////////////////////////
 
@@ -76,7 +76,7 @@ void AND(int a, int b){
 void OR(int a, int b){
     a=a|b;
     if(a==3798)
-    	D_MEM_SHARED[12] = 1;
+         D_MEM_SHARED[12] = 1;
 }
 void XOR(int a, int b){
     D_MEM_SHARED[13] = a^b;
@@ -84,7 +84,7 @@ void XOR(int a, int b){
 void SLL(int a, int b){
     a=a<<b;
     if(a==32768)
-    	D_MEM_SHARED[14] = 1;
+         D_MEM_SHARED[14] = 1;
 }
 void SRL(int a, int b){
     __asm__("lui a5,0x41;"
@@ -100,7 +100,7 @@ void SUB(int a, int b){
 void SRA(int a, int b){
     a=a>>b;
     if(a==-1024)
-    	D_MEM_SHARED[17] = 1;
+         D_MEM_SHARED[17] = 1;
 }
 
 ////////////////Conditional Branches///////////////////
@@ -125,24 +125,24 @@ void BGE(int a, int b){
 
 int main()
 {
-	ADDI(0);
-	SLTI(1);
-	ANDI(1);
-	ORI(12);
-	XORI(41);
-	SLLI(8);
-	SRLI(4096);
-	SRAI(-4096);
+     ADDI(0);
+     SLTI(1);
+     ANDI(1);
+     ORI(12);
+     XORI(41);
+     SLLI(8);
+     SRLI(4096);
+     SRAI(-4096);
     ADD(123,456);
     AND(85,171);
     OR(1234,3654);
     XOR(42,41);
     SLL(4096,3);
-	SRL(4096,12);
-	SUB(123,122);
-	SRA(-4096,3);
-	BEQ(5,9);
-	BNE(42,42);
-	BLT(9,4);
-	BGE(1,7);
+     SRL(4096,12);
+     SUB(123,122);
+     SRA(-4096,3);
+     BEQ(5,9);
+     BNE(42,42);
+     BLT(9,4);
+     BGE(1,7);
 }

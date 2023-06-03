@@ -26,6 +26,7 @@ import big_core_pkg::*;
 (
     input  logic        Clk,
     input  logic        Rst,
+    input  logic        RstPc,
     // Instruction Memory
     output logic [31:0] PcQ100H,             // To I_MEM
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
@@ -126,7 +127,7 @@ assign NextPcQ10XH   = InterruptJumpQ101H   ? interruptJumpAddrQ101H :
                        MretQ101H            ? MePcQ101H   :
                        SelNextPcAluOutQ102H ? AluOutQ102H :
                                               PcPlus4Q100H;
-`MAFIA_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst)
+`MAFIA_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst | RstPc )
 
 // Q100H to Q101H Flip Flops. 
 `MAFIA_EN_DFF(PcQ101H,      PcQ100H,      Clk, PcEnQ101H)
