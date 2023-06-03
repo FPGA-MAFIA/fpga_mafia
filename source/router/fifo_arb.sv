@@ -4,7 +4,7 @@
 `include "macros.sv"
 
 module fifo_arb
- import router_pkg::*;
+ import common_pkg::*;
  #(parameter NUM_CLIENTS = 4,
    parameter FIFO_ARB_FIFO_DEPTH = 4)
 (

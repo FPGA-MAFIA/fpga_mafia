@@ -12,7 +12,7 @@
 
 `include "macros.sv"
 module next_tile_fifo_arb
-import router_pkg::*;
+import common_pkg::*;
 #(parameter NEXT_TILE_CARDINAL=NULL_CARDINAL)
 (
     input logic         clk,

@@ -17,11 +17,18 @@ import big_core_pkg::*;
 (
     input  logic        Clk,
     input  logic        Rst,
+    input  t_tile_id    local_tile_id,
+    input  logic        RstPc,
     
     // FPGA interface inputs              
     input  logic       Button_0, // CR_MEM
     input  logic       Button_1, // CR_MEM
     input  logic [9:0] Switch,   // CR_MEM
+    // Fabric interface
+    input  logic            InFabricValidQ503H  ,
+    input  var t_tile_trans InFabricQ503H       ,
+    output logic            OutFabricValidQ505H ,
+    output var t_tile_trans OutFabricQ505H      ,
     // FPGA interface outputs
     output t_fpga_out fpga_out,      // CR_MEM
     // VGA output
@@ -47,6 +54,7 @@ logic [31:0] DMemRdRspQ104H;      // From D_MEM
 big_core big_core (
     .Clk                 (Clk),
     .Rst                 (Rst),
+    .RstPc               (RstPc),            // logic
     .PcQ100H             (PcQ100H),          // To I_MEM
     .PreInstructionQ101H (InstructionQ101H), // From I_MEM
     .DMemWrDataQ103H     (DMemWrDataQ103H),  // To D_MEM
@@ -63,6 +71,8 @@ big_core big_core (
 big_core_mem_wrap big_core_mem_wrap (
     .Clk              (Clk),     
     .Rst              (Rst),
+    .local_tile_id    (local_tile_id),       //input  t_tile_id    local_tile_id,
+    //
     .PcQ100H          (PcQ100H),             // I_MEM
     .InstructionQ101H (InstructionQ101H),    // I_MEM
     .DMemWrDataQ103H  (DMemWrDataQ103H),     // D_MEM
@@ -71,6 +81,12 @@ big_core_mem_wrap big_core_mem_wrap (
     .DMemWrEnQ103H    (DMemWrEnQ103H),       // D_MEM
     .DMemRdEnQ103H    (DMemRdEnQ103H),       // D_MEM
     .DMemRdRspQ104H   (DMemRdRspQ104H),      // D_MEM
+    // Fabric interface
+    .InFabricValidQ503H (InFabricValidQ503H), //input  logic        ,
+    .InFabricQ503H      (InFabricQ503H),      //input  t_tile_trans ,
+    .OutFabricValidQ505H(OutFabricValidQ505H),//output logic        ,
+    .OutFabricQ505H     (OutFabricQ505H),     //output t_tile_trans ,
+    //
     .Button_0         (Button_0),            // CR_MEM
     .Button_1         (Button_1),            // CR_MEM
     .Switch           (Switch),              // CR_MEM

@@ -17,7 +17,6 @@
 //---------------------------------------------------
 module mini_mem_wrap
 import mini_core_pkg::*;
-import router_pkg::*;
 import common_pkg::*;
 (
                 input  logic        Clock  ,
@@ -113,6 +112,7 @@ logic LocalDMemWrEnQ103H;
 logic NonLocalDMemReqQ103H;
 assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
                               (DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0);
+// FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 mem   
@@ -140,6 +140,10 @@ mem
 logic [31:0] F2C_RspDataQ504H;
 logic [31:0] F2C_CrMemRspDataQ504H;
 assign F2C_CrMemRspDataQ504H = '0;
+assign F2C_CrMemHitQ504H     = '0;
+`MAFIA_DFF(F2C_IMemHitQ504H , F2C_IMemHitQ503H , Clock)
+`MAFIA_DFF(F2C_DMemHitQ504H , F2C_DMemHitQ503H , Clock)
+
 assign F2C_RspDataQ504H   = F2C_CrMemHitQ504H ? F2C_CrMemRspDataQ504H : //CR hit is the highest priority
                             F2C_IMemHitQ504H  ? F2C_IMemRspDataQ504H  :
                             F2C_DMemHitQ504H  ? F2C_DMemRspDataQ504H  :
@@ -153,11 +157,11 @@ assign F2C_InFabricQ503H       = F2C_OutFabricValidQ503H   ?  InFabricQ503H  :  
 // Set the target address to the requestor id (This is the Read response address)
 assign F2C_RdRspAddressQ503H = {F2C_InFabricQ503H.requestor_id[7:0],F2C_InFabricQ503H.address[23:0]};
 `MAFIA_DFF(F2C_OutFabricValidQ504H                 , F2C_OutFabricValidQ503H , Clock)
-`MAFIA_DFF(F2C_OutFabricQ504H.address              , F2C_RdRspAddressQ503H , Clock) 
-`MAFIA_DFF(F2C_OutFabricQ504H.opcode               , RD_RSP                , Clock)
-`MAFIA_DFF(F2C_OutFabricQ504H.data                 , F2C_RspDataQ504H      , Clock)
-`MAFIA_DFF(F2C_OutFabricQ504H.requestor_id         , local_tile_id         , Clock)// The requestor id is the local tile id
-`MAFIA_DFF(F2C_OutFabricQ504H.next_tile_fifo_arb_id, NULL_CARDINAL         , Clock)//will be overwritten in the tile
+`MAFIA_DFF(F2C_OutFabricQ504H.address              , F2C_RdRspAddressQ503H   , Clock) 
+`MAFIA_DFF(F2C_OutFabricQ504H.opcode               , RD_RSP                  , Clock)
+`MAFIA_DFF(F2C_OutFabricQ504H.data                 , F2C_RspDataQ504H        , Clock)
+`MAFIA_DFF(F2C_OutFabricQ504H.requestor_id         , local_tile_id           , Clock) // The requestor id is the local tile id
+`MAFIA_DFF(F2C_OutFabricQ504H.next_tile_fifo_arb_id, NULL_CARDINAL           , Clock) //will be overwritten in the tile
 
 
 //==================================
