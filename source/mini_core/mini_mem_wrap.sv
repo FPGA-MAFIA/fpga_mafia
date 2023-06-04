@@ -221,6 +221,7 @@ c2f_req_fifo  (.clk       (Clock),
 // Arbiter - choose between the different transactions trying to access the fabric
 //==================================
 // The arbiter is a Round Robin arbiter 
+// FIXME add back pressure from the fabric using ready signals
 assign valid_candidate[0] = !F2C_RspEmpty;  // add back pressure from the fabric
 assign valid_candidate[1] = !C2F_ReqEmpty;  // add back pressure from the fabric
 arbiter #(
