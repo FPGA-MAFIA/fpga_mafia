@@ -51,15 +51,15 @@ logic F2C_DMemHitQ503H, F2C_DMemWrEnQ503H, F2C_DMemHitQ504H;
 logic F2C_CrMemHitQ503H, F2C_CrMemWrEnQ503H, F2C_CrMemHitQ504H;
 logic [31:0] F2C_IMemRspDataQ504H;
 logic [31:0] F2C_DMemRspDataQ504H;
-assign F2C_IMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > I_MEM_REGION_FLOOR) && 
+assign F2C_IMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= I_MEM_REGION_FLOOR) && 
                            (InFabricQ503H.address[MSB_REGION:LSB_REGION] < I_MEM_REGION_ROOF) ;
 assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 // Set the F2C DMEM hit indications
-assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > D_MEM_REGION_FLOOR) && 
+assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= D_MEM_REGION_FLOOR) && 
                            (InFabricQ503H.address[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
 assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 // Set the F2C CrMEM hit indications
-assign F2C_CrMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > CR_MEM_REGION_FLOOR) && 
+assign F2C_CrMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && 
                             (InFabricQ503H.address[MSB_REGION:LSB_REGION] < CR_MEM_REGION_ROOF) ;
 assign F2C_CrMemWrEnQ503H = F2C_CrMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 

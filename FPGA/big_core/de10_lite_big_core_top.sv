@@ -88,6 +88,7 @@ t_tile_trans InFabricQ503H;
 t_tile_trans OutFabricQ505H, PreOutFabricQ505H;
 logic RstPc;
 logic C2F_ReqOpcodeQ500H;
+logic out_for_pd;
 // =======================================================
 // big_core_top
 // =======================================================
@@ -95,6 +96,7 @@ big_core_top big_core_top (
 .Clk      (MAX10_CLK1_50),     //input  logic        Clk,
 .Rst      (Rst),//input  logic        Rst,
 .RstPc     (RstPc),// input
+.out_for_pd (out_for_pd),//output t_fpga_out   out_for_pd,
 // Fabric interface
 .InFabricValidQ503H (InFabricValidQ503H), //input  logic        ,
 .InFabricQ503H      (InFabricQ503H),      //input  t_tile_trans ,
@@ -177,7 +179,7 @@ assign VGA_VS     = vga_out.VGA_VS;
 //outputs
 `MAFIA_DFF(DRAM_ADDR[12:0] ,{SW[9:0], SW[2:0]} , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_BA[1:0]    , SW[1:0] , MAX10_CLK1_50)
-`MAFIA_DFF(DRAM_CAS_N      , SW[0]   , MAX10_CLK1_50)
+`MAFIA_DFF(DRAM_CAS_N      , SW[0] | out_for_pd , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_CKE        , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_CLK        , SW[0]   , MAX10_CLK1_50)
 `MAFIA_DFF(DRAM_CS_N       , SW[0]   , MAX10_CLK1_50)
