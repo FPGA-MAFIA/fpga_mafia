@@ -26,6 +26,7 @@ string test_name;
 static int cnt_trans;
 t_tile_trans [V_ROW:1] [V_COL:1] origin_trans;
 t_tile_trans [V_ROW:1] [V_COL:1] target_trans;
+t_fab_ready  [V_ROW:1] [V_COL:1] tile_ready; 
 logic [7:0]  requestor_id_ref [V_ROW:1] [V_COL:1] ;
 //t_cardinal [V_ROW:1] [V_COL:1] ref_cardinal;
 static t_tile_trans_v monitor_source_trans [V_ROW:1] [V_COL:1] [$];
@@ -69,9 +70,11 @@ generate
       assign valid_local[col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req_valid;
       assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
+      assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
     end
   end
 endgenerate
+
 
 initial begin
   fork
