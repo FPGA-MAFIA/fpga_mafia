@@ -196,10 +196,9 @@ t_tile_trans  C2F_OutFabricQ104H;
 t_tile_trans  C2F_ReqQ103H;
 logic         C2F_ReqValidQ103H;
 logic         C2F_OutFabricValidQ104H;
-logic         C2F_RspFull, C2F_RspEmpty;
+logic         C2F_ReqFull, C2F_ReqEmpty;
 logic [1:0] winner_dec_id;
 logic [1:0] valid_candidate;
-logic C2F_ReqEmpty;
 assign C2F_ReqQ103H.address      = DMemAddressQ103H;
 assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
 assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
@@ -213,8 +212,8 @@ c2f_req_fifo  (.clk       (Clock),
                .push_data (C2F_ReqQ103H),           //alloc_req#
                .pop       (C2F_OutFabricValidQ104H),//arbiter chose this fifo to pop.
                .pop_data  (C2F_OutFabricQ104H),     //arbiter input
-               .full      (C2F_RspFull),            //out_ready_fifo#
-               .empty     (C2F_RspEmpty)
+               .full      (C2F_ReqFull),            //out_ready_fifo#
+               .empty     (C2F_ReqEmpty)
                );// indication to arbiter that the fifo is empty
 
 
