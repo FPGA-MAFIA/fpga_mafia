@@ -506,5 +506,8 @@ fifo_arb fifo_arb_local (
 .in_ready_local_arb_fifo(in_local_ready.local_arb)
 );
 
+// Note: there is request that should be sent from local to local 
+// - so there is no real need for the local ready signal towards the local mini_core
+assign out_local_ready.local_arb = 1'b1;
 
 endmodule 
