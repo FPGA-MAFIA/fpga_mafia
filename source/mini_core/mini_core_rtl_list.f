@@ -15,7 +15,6 @@
 
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv
-../../../source/router/router_pkg.sv
 ../../../source/common/common_pkg.sv
 
 // Common

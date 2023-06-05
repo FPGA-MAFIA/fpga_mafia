@@ -2,7 +2,7 @@
 
 
 module fabric
-import router_pkg::*;
+import common_pkg::*;
 (
     input logic clk,
     input logic rst

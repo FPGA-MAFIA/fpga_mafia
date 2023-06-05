@@ -109,7 +109,7 @@ always_comb begin : write_block
             10'h004:  NEXT_HEX4 = C2F_ReqDataQ500H[7:0];
             10'h005:  NEXT_HEX5 = C2F_ReqDataQ500H[7:0];
             10'h006:  NEXT_LED  = C2F_ReqDataQ500H[9:0];
-				default:  NEXT_LED  = 10'hFF;
+                    default:  NEXT_LED  = 10'hFF;
         endcase
     end
 end

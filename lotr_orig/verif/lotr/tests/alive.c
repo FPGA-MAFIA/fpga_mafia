@@ -23,7 +23,7 @@ int main()
     D_MEM_SHARED[14] = b << a;
     D_MEM_SHARED[15] = b >> a;
     
-    	
+         
 
 
 }

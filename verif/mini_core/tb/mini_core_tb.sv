@@ -20,9 +20,7 @@
 
 module mini_core_tb  ;
 import mini_core_pkg::*;
-import router_pkg::*;
-
-
+import common_pkg::*;
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;

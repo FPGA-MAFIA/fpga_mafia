@@ -5,7 +5,7 @@
 `define RAND_EP(rand_ep)  rand_ep = {4'($urandom_range(4'd1, 4'd3)), 4'($urandom_range(4'd1, 4'd3))};
 
 module fabric_tb;
-import router_pkg::*;
+import common_pkg::*;
 import mini_core_pkg::*;
 typedef struct packed {
     t_tile_trans trans;

@@ -1,6 +1,6 @@
-	.text
-	.globl	main
-	.type	main, @function
+     .text
+     .globl     main
+     .type     main, @function
 main:
   li    x1,  1
   li    x2,  2
@@ -54,5 +54,5 @@ eot:
     nop
     nop
     nop
-	.size	main, .-main
-	.ident	"GCC: (xPack GNU RISC-V Embedded GCC x86_64) 10.2.0"
+     .size     main, .-main
+     .ident     "GCC: (xPack GNU RISC-V Embedded GCC x86_64) 10.2.0"
