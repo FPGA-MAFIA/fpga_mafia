@@ -11,6 +11,10 @@ $display("Finished elaborating the design...");
             source[3:0] = row;
             for(int i=0; i< V_REQUESTS; i++) begin
                 //if($bits(target_trans[col][row]) === '0 || $bits(target_trans[col][row]) === 'x )begin
+                while(!(&tile_ready[col][row])) begin
+                    $display("Waiting for tile %d %d to be ready", col, row);
+                    delay(1);
+                end
                 send_rand_req_from_tile(source);
                 delay(rand_cycles);
                 //end
