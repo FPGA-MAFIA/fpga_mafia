@@ -156,27 +156,26 @@ assign F2C_RspOpcodeQ500H  =RD;
 assign F2C_RspAddressQ500H ='0;
 assign F2C_RspDataQ500H    ='0;
     
-uart_io 
-    uart_io_inst
+uart_io  uart_io_inst
     (
-    .clk                    (QClk)                      ,//input
-    .rstn                   (~RstQnnnH)                 ,//input
-    .core_id                (CoreID)                    ,//input
+    .clk                    (QClk)                 ,//input
+    .rstn                   (~RstQnnnH)            ,//input
+    .core_id                (CoreID)               ,//input
     //================================================
     //        Core to Fabric
     //================================================
     // input - Rsp to Core
-    .C2F_RspValidQ502H      (C2F_RspValidQ502H)         ,//input
-    .C2F_RspOpcodeQ502H     (C2F_RspOpcodeQ502H)        ,//input
-    .C2F_RspThreadIDQ502H   (C2F_RspThreadIDQ502H)      ,//input
-    .C2F_RspDataQ502H       (C2F_RspDataQ502H)          ,//input
-    .C2F_RspStall           (C2F_RspStall)              ,//input
+    .C2F_RspValidQ502H      (C2F_RspValidQ502H)    ,//input
+    .C2F_RspOpcodeQ502H     (C2F_RspOpcodeQ502H)   ,//input
+    .C2F_RspThreadIDQ502H   (C2F_RspThreadIDQ502H) ,//input
+    .C2F_RspDataQ502H       (C2F_RspDataQ502H)     ,//input
+    .C2F_RspStall           (C2F_RspStall)         ,//input
     // output - Req from Core
-    .C2F_ReqValidQ500H      (C2F_ReqValidQ500H)         ,//output
-    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H)        ,//output
+    .C2F_ReqValidQ500H      (C2F_ReqValidQ500H)    ,//output
+    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H)   ,//output
     .C2F_ReqThreadIDQ500H   (C2F_ReqThreadIDQ500H) ,//output
-    .C2F_ReqAddressQ500H    (C2F_ReqAddressQ500H)       ,//output
-    .C2F_ReqDataQ500H       (C2F_ReqDataQ500H)          ,//output
+    .C2F_ReqAddressQ500H    (C2F_ReqAddressQ500H)  ,//output
+    .C2F_ReqDataQ500H       (C2F_ReqDataQ500H)     ,//output
     // UART RX/TX
     .uart_master_tx         (uart_master_tx),
     .uart_master_rx         (uart_master_rx),
