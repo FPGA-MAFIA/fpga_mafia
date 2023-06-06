@@ -43,6 +43,7 @@ import common_pkg::*;
                 //============================================
                 input  logic            InFabricValidQ503H  ,
                 input  var t_tile_trans InFabricQ503H       ,
+                input t_fab_ready       fab_ready           ,   
                 output logic            OutFabricValidQ505H ,
                 output var t_tile_trans OutFabricQ505H 
 );
@@ -222,8 +223,8 @@ c2f_req_fifo  (.clk       (Clock),
 //==================================
 // The arbiter is a Round Robin arbiter 
 // FIXME add back pressure from the fabric using ready signals
-assign valid_candidate[0] = !F2C_RspEmpty;  // add back pressure from the fabric
-assign valid_candidate[1] = !C2F_ReqEmpty;  // add back pressure from the fabric
+assign valid_candidate[0] = !F2C_RspEmpty && (|fab_ready);  // add back pressure from the fabric
+assign valid_candidate[1] = !C2F_ReqEmpty && (|fab_ready);  // add back pressure from the fabric
 arbiter #(
     .NUM_CLIENTS        (2)
 ) u_arbiter (
