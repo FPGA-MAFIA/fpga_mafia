@@ -4,7 +4,10 @@ W
 0x1
 WB
 0x00000000
-../../../target/big_core/tests/alive_fpga/gcc_files/inst_mem.sv
+../../../target/big_core/tests/uart_test/gcc_files/inst_mem.sv
+WB
+0x00010000
+../../../target/big_core/tests/uart_test/gcc_files/data_mem.sv
 W
 0xFFFFFFFF
 0x0

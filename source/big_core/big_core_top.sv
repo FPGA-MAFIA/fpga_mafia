@@ -19,6 +19,7 @@ import big_core_pkg::*;
     input  logic        Rst,
     input  t_tile_id    local_tile_id,
     input  logic        RstPc,
+    output logic        out_for_pd,
     
     // FPGA interface inputs              
     input  logic       Button_0, // CR_MEM
@@ -55,6 +56,7 @@ big_core big_core (
     .Clk                 (Clk),
     .Rst                 (Rst),
     .RstPc               (RstPc),            // logic
+    .out_for_pd          (out_for_pd),       // logic
     .PcQ100H             (PcQ100H),          // To I_MEM
     .PreInstructionQ101H (InstructionQ101H), // From I_MEM
     .DMemWrDataQ103H     (DMemWrDataQ103H),  // To D_MEM
