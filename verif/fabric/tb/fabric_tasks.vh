@@ -7,6 +7,8 @@ task run_fabric_test(input string test);
      `include "fabric_alive.sv"
   end else if(test == "fabric_all_tiles") begin
      `include "fabric_all_tiles.sv"
+  end else if(test == "fabric_wr_rd_data") begin
+     `include "fabric_wr_rd_data.sv"
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end
@@ -35,7 +37,7 @@ assign target_col = target_id[7:4];
       if ( (source_row == row) && (source_col == col) )begin
          valid_tile[col][row] = 1'b1;          
          origin_trans[col][row].data = (opcode == WR) ? $urandom_range(0,1024) : '0;
-         origin_trans[col][row].address = {target_id, 24'h0};
+         origin_trans[col][row].address = {target_id, 24'h11};
          origin_trans[col][row].opcode = opcode;
          origin_trans[col][row].requestor_id = source_id;                     
          //monitor_origin_trans[col][row].source = {source_col,source_row};                     
