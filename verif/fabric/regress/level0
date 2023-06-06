@@ -1,2 +1,2 @@
-fabric_alive -gV_REQUESTS=10
-fabric_all_tiles -gV_REQUESTS=10
+fabric_alive
+fabric_all_tiles
