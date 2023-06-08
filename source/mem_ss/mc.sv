@@ -82,13 +82,14 @@ localparam D_MEM_BASE_RANGE = 32'h00010000;
 localparam D_MEM_TOP_RANGE  = 32'h0001ffff;
 logic sram_rsp_is_to_i_cache;
 logic sram_rsp_is_to_d_cache;
+//FIXME - instead of limiting the address range, we should set valid according to the source of the request. (can be done once we understand the SRAM communication protocol)
 assign sram_rsp_is_to_i_cache = (cl_rsp_from_sram.address < I_MEM_TOP_RANGE) && (cl_rsp_from_sram.address >= I_MEM_BASE_RANGE);
 assign sram_rsp_is_to_d_cache = (cl_rsp_from_sram.address < D_MEM_TOP_RANGE) && (cl_rsp_from_sram.address >= D_MEM_BASE_RANGE);
 assign i_fm2cache_rd_rsp.valid = sram_rsp_is_to_i_cache && cl_rsp_from_sram.valid;
 assign d_fm2cache_rd_rsp.valid = sram_rsp_is_to_d_cache && cl_rsp_from_sram.valid;
 assign i_fm2cache_rd_rsp.data  = cl_rsp_from_sram.data;
 assign d_fm2cache_rd_rsp.data  = cl_rsp_from_sram.data;
-assign d_fm2cache_rd_rsp.tq_id = '0;//TODO - keep track of the transaction to assign the correct TQ
+assign d_fm2cache_rd_rsp.address = cl_rsp_from_sram.address;//TODO - keep track of the transaction to assign the correct TQ
 
 assign cl_req_to_sram = winner_dec_id[0] ? i_cache2fm_req_q4 :
                         winner_dec_id[1] ? d_cache2fm_req_q4 :

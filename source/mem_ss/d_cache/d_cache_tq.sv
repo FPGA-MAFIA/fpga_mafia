@@ -250,7 +250,8 @@ always_comb begin
                 end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
             end
             S_MB_WAIT_FILL                : begin
-                if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i)) begin
+            //FIXME add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
+                if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_cl_address[i])) begin
                     next_tq_state[i] = S_MB_FILL_READY;
                     en_tq_merge_buffer_data  [i] = 1'b1;
                     // If the tq_merge_buffer_e_modified[i][x] is set, then the data in the merge buffer already has the correct data - we don't want to override it with the fill data
@@ -259,7 +260,6 @@ always_comb begin
                     next_tq_merge_buffer_data[i][95:64]  = tq_merge_buffer_e_modified[i][2] ? tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
                     next_tq_merge_buffer_data[i][127:96] = tq_merge_buffer_e_modified[i][3] ? tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
                 end
-
             end //S_MB_WAIT_FILL
             S_MB_FILL_READY               : begin
                 if (first_fill[i] && (!core2cache_req.valid)) begin // opportunistic pipe lookup - if no core request, then fill
@@ -306,7 +306,7 @@ always_comb begin
 
                     // This is to fix a corner case where we have a fill & a write in the same cycle!!
                     // This will make sure that the fm2cache response will not be ignored
-                    if( (tq_state[i] == S_MB_WAIT_FILL) && fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i) )begin
+                    if( (tq_state[i] == S_MB_WAIT_FILL) && fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) )begin
                         next_tq_merge_buffer_data[i][31:0]   = next_tq_merge_buffer_e_modified[i][0] ? next_tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
                         next_tq_merge_buffer_data[i][63:32]  = next_tq_merge_buffer_e_modified[i][1] ? next_tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
                         next_tq_merge_buffer_data[i][95:64]  = next_tq_merge_buffer_e_modified[i][2] ? next_tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];

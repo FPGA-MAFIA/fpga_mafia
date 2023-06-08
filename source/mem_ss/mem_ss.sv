@@ -9,12 +9,12 @@ module mem_ss
     //=========================================================================
     //i_cache
     input  var t_req    imem_core2cache_req,
-    output logic    imem_ready,
-    output t_rd_rsp imem_cache2core_rsp,
+    output logic        imem_ready,
+    output t_rd_rsp     imem_cache2core_rsp,
     //d_cache
     input  var t_req    dmem_core2cache_req,
-    output logic    dmem_ready,
-    output t_rd_rsp dmem_cache2core_rsp,
+    output logic        dmem_ready,
+    output t_rd_rsp     dmem_cache2core_rsp,
     //=========================================================================
     // interface to the off die sram 
     //=========================================================================
@@ -69,7 +69,7 @@ mc mc ( //memory controller
    .i_cache2fm_req_q3    (imem_cache2fm_req_q3),//output  t_fm_req
    // sram interface   TODO
    .cl_req_to_sram       (cl_req_to_sram),      //output  t_fm_req
-   .sram_ready           ('0),                  //input   logic           sram_ready,
+   .sram_ready           (1'b1),                  //input   logic           sram_ready,
    .cl_rsp_from_sram     (cl_rsp_from_sram)     //input  t_fm_rd_rsp
 );
 

@@ -24,7 +24,7 @@ endtask
 //=======================================================
 //=======================================================
 task wr_req( input logic [19:0]  address, 
-             input logic [127:0] data ,
+             input logic [31:0] data ,
              input logic [4:0]   id );
     while (~ready) begin
       delay(1); $display("-> not ready! cant send write: %h ", address );

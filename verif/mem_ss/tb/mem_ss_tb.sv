@@ -3,10 +3,15 @@
 module mem_ss_tb;
 import mem_ss_param_pkg::*;  //FIXME: what about i_cache_param_pkg
 
+string test_name;
 logic    clk;
 logic    rst;
+logic imem_ready;
+logic dmem_ready;
 t_req    dmem_core2cache_req;
 t_req    imem_core2cache_req;
+t_rd_rsp imem_cache2core_rsp;
+t_rd_rsp dmem_cache2core_rsp;
 //create clock
 //==================
 //      clk Gen
@@ -19,15 +24,15 @@ initial begin: clock_gen
 end// clock_gen
 
 `include "mem_ss_tasks.vh"
-string test_name;
+`include "mem_ss_trk.vh"
 initial begin : start_test
-    if ($value$plusargs ("STRING=%s", test_name)) begin
-        $display("STRING value %s", test_name);
-    end
-    $display("================\n     START\n================\n");
-            rst= 1'b1;
-            dmem_core2cache_req = '0;
-            imem_core2cache_req = '0;
+if ($value$plusargs ("STRING=%s", test_name)) begin
+    $display("STRING value %s", test_name);
+end
+$display("================\n     START\n================\n");
+        rst= 1'b1;
+        dmem_core2cache_req = '0;
+        imem_core2cache_req = '0;
 //exit reset
 delay(80);  rst= 1'b0;
 $display("=========================");
@@ -48,7 +53,8 @@ end else begin
     $finish;
 end
 $display("\n\n================\n     Done\n================\n");
-delay(80); $finish;
+delay(80);
+eot("END-OF-TEST: TIME OUT!");
 end// initial
 
 t_sram_rd_rsp cl_rsp_from_sram;
@@ -59,11 +65,11 @@ mem_ss mem_ss (
 .clk                (clk),                  // input logic clock,
 .rst                (rst),                  // input logic rst,
 .imem_core2cache_req(imem_core2cache_req),  // input  t_req    imem_core2cache_req,
-.imem_ready         (),                     // output logic    imem_ready,
-.imem_cache2core_rsp(),                     // output t_rd_rsp imem_cache2core_rsp,
+.imem_ready         (imem_ready),                     // output logic    imem_ready,
+.imem_cache2core_rsp(imem_cache2core_rsp),                     // output t_rd_rsp imem_cache2core_rsp,
 .dmem_core2cache_req(dmem_core2cache_req),  // input  t_req    dmem_core2cache_req,
-.dmem_ready         (),                     // output logic    dmem_ready,
-.dmem_cache2core_rsp(),                     // output t_rd_rsp dmem_cache2core_rsp,
+.dmem_ready         (dmem_ready),                     // output logic    dmem_ready,
+.dmem_cache2core_rsp(dmem_cache2core_rsp),                     // output t_rd_rsp dmem_cache2core_rsp,
 .cl_req_to_sram     (cl_req_to_sram),       // output t_fm_req    cl_req_to_sram,
 .cl_rsp_from_sram   (cl_rsp_from_sram)      // input  t_sram_rd_rsp cl_rsp_from_sram
 );

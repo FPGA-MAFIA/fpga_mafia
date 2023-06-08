@@ -190,7 +190,7 @@ always_comb begin
                 end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
             end
             S_MB_WAIT_FILL                : begin
-                if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.tq_id == i)) begin
+                if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_cl_address[i])) begin
                     next_tq_state[i] = S_MB_FILL_READY;
                     en_tq_merge_buffer_data  [i] = 1'b1;
                     // If the tq_merge_buffer_e_modified[i][x] is set, then the data in the merge buffer already has the correct data - we don't want to override it with the fill data
