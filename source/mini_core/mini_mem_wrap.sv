@@ -160,9 +160,9 @@ assign F2C_RdRspAddressQ503H = {F2C_InFabricQ503H.requestor_id[7:0],F2C_InFabric
 `MAFIA_DFF(F2C_OutFabricValidQ504H                 , F2C_OutFabricValidQ503H , Clock)
 `MAFIA_DFF(F2C_OutFabricQ504H.address              , F2C_RdRspAddressQ503H   , Clock) 
 `MAFIA_DFF(F2C_OutFabricQ504H.opcode               , RD_RSP                  , Clock)
-`MAFIA_DFF(F2C_OutFabricQ504H.data                 , F2C_RspDataQ504H        , Clock)
 `MAFIA_DFF(F2C_OutFabricQ504H.requestor_id         , local_tile_id           , Clock) // The requestor id is the local tile id
 `MAFIA_DFF(F2C_OutFabricQ504H.next_tile_fifo_arb_id, NULL_CARDINAL           , Clock) //will be overwritten in the tile
+assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
 
 
 //==================================
