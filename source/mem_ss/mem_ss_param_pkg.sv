@@ -115,7 +115,7 @@ typedef struct packed {
 // fm -> cache response
 typedef struct packed {
     logic       valid;
-    t_tq_id     tq_id;
+    t_address   address;
     t_cl        data;
 } t_fm_rd_rsp ;
 

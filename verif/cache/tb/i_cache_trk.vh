@@ -130,9 +130,9 @@ always @(posedge clk) begin
         imem_cache2fm_req_q3.address[MSB_SET:LSB_SET]);
     end
     if(fm2cache_rd_rsp.valid) begin
-        $fwrite(i_cache_top_trk,"%t     FM_FILL_RSP     (see tq_id)   %h        ----   ----     %h_%h_%h_%h \n",
+        $fwrite(i_cache_top_trk,"%t     FM_FILL_RSP      %h               ----   ----     %h_%h_%h_%h \n",
         $realtime, 
-        fm2cache_rd_rsp.tq_id, 
+        fm2cache_rd_rsp.address, 
         fm2cache_rd_rsp.data[127:96], 
         fm2cache_rd_rsp.data[95:64], 
         fm2cache_rd_rsp.data[63:32], 
