@@ -161,7 +161,7 @@ end
 
 // Temp TODO FIXME - override with xmr for TB
 //This is the local mini_core output placeholder (inputs into the router)
-localparam TEMP_STRAP_TO_ZEROL = 1;
+localparam TEMP_STRAP_TO_ZEROL = 0;
 assign in_local_req_valid = TEMP_STRAP_TO_ZEROL ? '0        : OutFabricValidQ505H ;
 assign pre_in_local_req   = TEMP_STRAP_TO_ZEROL ? '0        : OutFabricQ505H ;
 assign in_local_ready     =  5'b11111;
@@ -182,6 +182,7 @@ mini_top mini_top (
  //      fabric interface
  //============================================
  .InFabricValidQ503H (InFabricValidQ503H), //input  logic            InFabricValidQ503H  ,
+ .fab_ready          (out_local_ready),    //ready for arbiter
  .InFabricQ503H      (InFabricQ503H),      //input  var t_tile_trans InFabricQ503H       ,
  .OutFabricValidQ505H(OutFabricValidQ505H),//output logic            OutFabricValidQ505H ,
  .OutFabricQ505H     (OutFabricQ505H)     //output var t_tile_trans OutFabricQ505H ,

@@ -23,15 +23,21 @@ logic              rst;
 int fabric_test_true;
 int mini_core_tile_test_true;
 string test_name;
-static int cnt_trans;
+static int cnt_trans_source;
+static int cnt_trans_source_rsp;
+static int cnt_trans_target;
 t_tile_trans [V_ROW:1] [V_COL:1] origin_trans;
+t_tile_trans [V_ROW:1] [V_COL:1] origin_trans_fab;
 t_tile_trans [V_ROW:1] [V_COL:1] target_trans;
+t_tile_trans [V_ROW:1] [V_COL:1] tile_rsp_trans;
 t_fab_ready  [V_ROW:1] [V_COL:1] tile_ready; 
 logic [7:0]  requestor_id_ref [V_ROW:1] [V_COL:1] ;
 //t_cardinal [V_ROW:1] [V_COL:1] ref_cardinal;
 static t_tile_trans_v monitor_source_trans [V_ROW:1] [V_COL:1] [$];
+static t_tile_trans_v monitor_source_trans_rsp [V_ROW:1] [V_COL:1] [$];
 static t_tile_trans_v monitor_target_trans [V_ROW:1] [V_COL:1] [$];
 bit [V_ROW:1] [V_COL:1] valid_tile;
+bit [V_ROW:1] [V_COL:1] valid_tile_rsp;
 bit [V_ROW:1] [V_COL:1] valid_local;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
@@ -60,13 +66,26 @@ genvar row, col;
 generate
   for (col = 1; col <= V_COL; col = col + 1) begin : gen_col
     for (row = 1; row <= V_ROW; row = row + 1) begin : gen_row
-    // fabric to if
-      assign fabric.col[col].row[row].mini_core_tile_ins.in_local_req_valid            = valid_tile  [col][row];           
-      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.data         = origin_trans[col][row].data;    
-      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.address      = origin_trans[col][row].address;
-      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.opcode       = origin_trans[col][row].opcode;  
-      assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id = origin_trans[col][row].requestor_id;                 
+    // fabric to if 
+      //assign fabric.col[col].row[row].mini_core_tile_ins.in_local_req_valid            = valid_tile  [col][row];           
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqValidQ103H = valid_tile[col][row];    
+      //assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H = valid_tile_rsp[col][row];    
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.data         = origin_trans[col][row].data       ;    
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.address      = origin_trans[col][row].address    ;    
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.opcode       = origin_trans[col][row].opcode     ;    
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.requestor_id = origin_trans[col][row].requestor_id;    
+      //assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.data      = origin_trans[col][row].data;
+      //assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.address      = origin_trans[col][row].address;
+      //assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.opcode       = origin_trans[col][row].opcode;  
+      //assign fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id = origin_trans[col][row].requestor_id;                 
     // if to fabric
+      assign origin_trans_fab[col][row].data         = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.data        ; 
+      assign origin_trans_fab[col][row].address      = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.address     ; 
+      assign origin_trans_fab[col][row].opcode       = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.opcode      ; 
+      assign origin_trans_fab[col][row].requestor_id = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.requestor_id;
+      
+      assign tile_rsp_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricQ504H;
+      assign valid_tile_rsp[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H;    
       assign valid_local[col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req_valid;
       assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
@@ -158,7 +177,6 @@ initial begin
     $display("==============================");
     $display("[INFO] this is FABRIC test");
     $display("==============================");
-    cnt_trans = 0;
   fork 
       run_fabric_test(test_name);
       fork  
