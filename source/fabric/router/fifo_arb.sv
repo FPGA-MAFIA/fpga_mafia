@@ -74,6 +74,7 @@ generate for (i=0; i<NUM_CLIENTS; i=i+1) begin : gen_fifo
                       .pop       (fifo_pop[i]),//arbiter chose this fifo to pop.
                       .pop_data  (dout_fifo[i]), // arbiter input
                       .full      (full[i]),//out_ready_fifo#
+                      .almost_full (),// output
                       .empty     (empty[i])
                      );// indication to arbiter that the fifo is empty
 end endgenerate

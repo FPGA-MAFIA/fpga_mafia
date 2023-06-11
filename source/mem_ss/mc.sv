@@ -44,6 +44,7 @@ fifo #(.DATA_WIDTH($bits(t_fm_req)),.FIFO_DEPTH(4))
                          .pop       (pop_i_mem_fifo),
                          .pop_data  (i_cache2fm_req_q4),
                          .full      (i_mem_fifo_full),
+                         .almost_full (),// output
                          .empty     (i_mem_fifo_empty)
                         );
 
@@ -55,6 +56,7 @@ fifo #(.DATA_WIDTH($bits(t_fm_req)),.FIFO_DEPTH(4))
                          .pop       (pop_d_mem_fifo),
                          .pop_data  (d_cache2fm_req_q4),
                          .full      (d_mem_fifo_full),
+                         .almost_full (),// output
                          .empty     (d_mem_fifo_empty)
                         );
 

@@ -2,7 +2,6 @@
 `include "macros.sv"
 
 module mini_top
-import mini_core_pkg::*;
 import common_pkg::*;
 (
 input  logic        Clock  ,
@@ -12,10 +11,12 @@ input  t_tile_id    local_tile_id,
 //      fabric interface
 //============================================
 input  logic            InFabricValidQ503H  ,
-input  t_fab_ready      fab_ready           ,
 input  var t_tile_trans InFabricQ503H       ,
+output logic            mini_core_ready     ,
+//
 output logic            OutFabricValidQ505H ,
-output var t_tile_trans OutFabricQ505H 
+output var t_tile_trans OutFabricQ505H      ,
+input  var t_fab_ready  fab_ready 
 );
 
 logic [31:0] PcQ100H;             // To I_MEM
@@ -66,9 +67,11 @@ mini_mem_wrap mini_mem_wrap(
 //============================================
  .InFabricValidQ503H    (InFabricValidQ503H),   // input  logic        F2C_ReqValidQ503H     ,
  .InFabricQ503H         (InFabricQ503H),        // input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .fab_ready             (fab_ready),            // 
+ .mini_core_ready       (mini_core_ready),      // output logic ready for arbiter
+ //
  .OutFabricQ505H        (OutFabricQ505H),       // output t_rdata      F2C_RspDataQ504H      ,
- .OutFabricValidQ505H   (OutFabricValidQ505H)   // output logic        F2C_RspValidQ504H
+ .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
+ .fab_ready             (fab_ready)             // input
 );
 
 

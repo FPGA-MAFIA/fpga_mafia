@@ -12,9 +12,9 @@
 
 
 +incdir+../../../source/common/
++incdir+../../../source/mini_core/
 
 // param packages
-../../../source/mini_core/mini_core_pkg.sv
 ../../../source/common/common_pkg.sv
 
 // Common

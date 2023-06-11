@@ -19,7 +19,6 @@
 
 
 module mini_core_tb  ;
-import mini_core_pkg::*;
 import common_pkg::*;
 logic        Clk;
 logic        Rst;

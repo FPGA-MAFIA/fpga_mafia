@@ -16,7 +16,6 @@
 
 //---------------------------------------------------
 module mini_mem_wrap
-import mini_core_pkg::*;
 import common_pkg::*;
 (
                 input  logic        Clock  ,
@@ -43,9 +42,11 @@ import common_pkg::*;
                 //============================================
                 input  logic            InFabricValidQ503H  ,
                 input  var t_tile_trans InFabricQ503H       ,
-                input t_fab_ready       fab_ready           ,   
+                output logic            mini_core_ready     ,
+                //
                 output logic            OutFabricValidQ505H ,
-                output var t_tile_trans OutFabricQ505H 
+                output var t_tile_trans OutFabricQ505H      ,
+                input  var t_fab_ready  fab_ready              
 );
 
 logic        F2C_IMemHitQ503H;
@@ -178,6 +179,7 @@ assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
 //==================================
 // a FIFO to accumulate the read responses to the fabric
 logic F2C_RspFull, F2C_RspEmpty;
+logic F2C_AlmostFull;
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 f2c_rsp_fifo  (.clk       (Clock),
                .rst       (Rst),
@@ -186,9 +188,13 @@ f2c_rsp_fifo  (.clk       (Clock),
                .pop       (F2C_OutFabricValidQ505H),  // input
                .pop_data  (F2C_OutFabricQ505H),       // output
                .full      (F2C_RspFull),              // output
+               .almost_full(F2C_AlmostFull),          // output
                .empty     (F2C_RspEmpty)              // output
                );// indication to arbiter that the fifo is empty
 
+// this is to solve the issue that  there is a 1 cycle latency on the memory ready from F2C
+// Need to make sure we have a 1 entry margin in the fifo when we declare not ready 
+assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
 //==================================
 // C2F FIFO - accumulate core 2 Fabric requests
 //==================================
@@ -214,17 +220,17 @@ c2f_req_fifo  (.clk       (Clock),
                .pop       (C2F_OutFabricValidQ104H),//arbiter chose this fifo to pop.
                .pop_data  (C2F_OutFabricQ104H),     //arbiter input
                .full      (C2F_ReqFull),            //out_ready_fifo#
+               .almost_full (),
                .empty     (C2F_ReqEmpty)
                );// indication to arbiter that the fifo is empty
-
 
 //==================================
 // Arbiter - choose between the different transactions trying to access the fabric
 //==================================
 // The arbiter is a Round Robin arbiter 
-// FIXME add back pressure from the fabric using ready signals
-assign valid_candidate[0] = !F2C_RspEmpty && (|fab_ready);  // add back pressure from the fabric
-assign valid_candidate[1] = !C2F_ReqEmpty && (|fab_ready);  // add back pressure from the fabric
+// FIXME currently this is a naive implementation - not checking the target fifo_arb - waiting until all fifo_arb are ready
+assign valid_candidate[0] = !F2C_RspEmpty && (&fab_ready);  // add back pressure from the fabric
+assign valid_candidate[1] = !C2F_ReqEmpty && (&fab_ready);  // add back pressure from the fabric
 arbiter #(
     .NUM_CLIENTS        (2)
 ) u_arbiter (
