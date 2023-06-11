@@ -18,6 +18,7 @@ module fifo #(parameter int DATA_WIDTH = 8,
     input  logic                   pop,
     output logic [DATA_WIDTH-1:0]  pop_data,
     output logic                   full,
+    output logic                   almost_full,
     output logic                   empty
     );
 
@@ -75,8 +76,9 @@ always_comb begin
         default: next_count = count;
     endcase
 end // always_comb
-assign empty = (count == 0); 
-assign full  = (count == FIFO_DEPTH-1);
+assign empty        = (count == 0); 
+assign full         = (count == FIFO_DEPTH);
+assign almost_full  = (count == FIFO_DEPTH-1);
 
 //=============================================================================
 //=============================================================================

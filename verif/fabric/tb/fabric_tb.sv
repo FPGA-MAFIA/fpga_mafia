@@ -84,12 +84,12 @@ generate
       assign origin_trans_fab[col][row].opcode       = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.opcode      ; 
       assign origin_trans_fab[col][row].requestor_id = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H.requestor_id;
       
-      assign tile_rsp_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricQ504H;
-      assign valid_tile_rsp[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H;    
-      assign valid_local[col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req_valid;
-      assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req;
+      assign tile_rsp_trans  [col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricQ504H;
+      assign valid_tile_rsp  [col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H;    
+      assign valid_local     [col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req_valid;
+      assign target_trans    [col][row] = fabric.col[col].row[row].mini_core_tile_ins.router_inst.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
-      assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
+      assign tile_ready      [col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
     end
   end
 endgenerate
