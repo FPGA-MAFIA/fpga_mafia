@@ -1,5 +1,6 @@
 +incdir+../../../source/common/
 +incdir+../../../source/mini_core/
++incdir+../../../source/big_core/
 
 //=======================================
 //RTL FIles

@@ -3,7 +3,7 @@
 `include "macros.sv"
 
 module ref_core
-import big_core_pkg::*;
+import common_pkg::*;
 (
     input logic Clk,
     input logic Rst

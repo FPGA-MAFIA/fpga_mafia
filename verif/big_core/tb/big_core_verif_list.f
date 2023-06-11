@@ -1,4 +1,5 @@
 +incdir+../../../source/common/
++incdir+../../../source/big_core/
 +incdir+../../../verif/big_core/tb/
 +incdir+../../../verif/big_core/tests/
 ../../../verif/big_core/tb/big_core_tb.sv

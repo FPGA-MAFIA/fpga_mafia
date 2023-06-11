@@ -14,6 +14,9 @@ set_global_assignment -name NUM_PARALLEL_PROCESSORS 2
 # SEARCH_PATH
 #============================================================
 set_global_assignment -name SEARCH_PATH ../../source/common/
+set_global_assignment -name SEARCH_PATH ../../source/mini_core/
+set_global_assignment -name SEARCH_PATH ../../source/big_core/
+set_global_assignment -name SEARCH_PATH ../../source/fabric/
 set_global_assignment -name SEARCH_PATH ../../source/uart/
 set_global_assignment -name SEARCH_PATH ../../lotr_orig/source/common/
 
@@ -22,7 +25,6 @@ set_global_assignment -name SEARCH_PATH ../../lotr_orig/source/common/
 #============================================================
 # set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/i_mem.sv - using the FPGA internal memory
 # set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/d_mem.sv - using the FPGA internal memory
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/common_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../lotr_orig/source/common/lotr_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_big_core_top.sv

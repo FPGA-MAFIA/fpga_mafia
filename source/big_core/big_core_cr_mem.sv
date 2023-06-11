@@ -18,7 +18,7 @@
 `include "macros.sv"
 
 module big_core_cr_mem 
-import big_core_pkg::*;
+import common_pkg::*;
 (
     input  logic       Clk,
     input  logic       Rst,

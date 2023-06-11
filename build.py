@@ -427,11 +427,10 @@ def main():
             while os.path.exists('target/'+args.dut+'/tests/'+test.name+'_'+str(i)):
                 i += 1
             shutil.copytree('target/'+args.dut+'/tests/'+test.name, 'target/'+args.dut+'/tests/'+test.name+'_'+str(i))
-            # remove the test directory
-            shutil.rmtree('target/'+args.dut+'/tests/'+test.name)
-            # create the test directory again
-            os.makedirs('target/'+args.dut+'/tests/'+test.name)
-        
+            # remove the test directory log files
+            rm_test_log_cmd  = 'rm -rf target/'+args.dut+'/tests/'+test.name+'/*.log'
+            run_cmd(rm_test_log_cmd)
+
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
         print_message('******************************************************************************')

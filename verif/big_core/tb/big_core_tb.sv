@@ -17,7 +17,6 @@
 `include "macros.sv"
 
 module big_core_tb ;
-import big_core_pkg::*;
 import common_pkg::*;
 
 logic        Clk;
@@ -71,6 +70,7 @@ big_core_top big_core_top(
     .Clk            (Clk),
     .Rst            (Rst),
     .RstPc          (1'b0),
+    .out_for_pd     (), 
     .local_tile_id  ('0),       //input  t_tile_id    local_tile_id,
     // Fabric interface
     .InFabricValidQ503H ('0),//input  logic        ,

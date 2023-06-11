@@ -14,7 +14,7 @@
 `include "macros.sv"
 
 module vga_mem 
-import big_core_pkg::*;
+import common_pkg::*;
 (
     input  logic        clock_a,
     input  logic        clock_b,
