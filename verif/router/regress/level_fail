@@ -1,0 +1,1 @@
+fifo_arb_back_pressure   -gV_REQUESTS=10 -gV_FIFO_DEPTH=4 -gV_NUM_FIFO=4 -gV_MAX_DELAY=5 -gV_BACK_PRESSURE=1
