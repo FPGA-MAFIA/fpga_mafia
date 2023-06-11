@@ -53,6 +53,6 @@ typedef struct packed {
     logic  local_arb;
 } t_fab_ready;
 
-`include "mini_core_pkg.vh"
+`include "../mini_core/mini_core_pkg.vh"
 
 endpackage

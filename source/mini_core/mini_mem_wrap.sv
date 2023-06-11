@@ -194,7 +194,6 @@ f2c_rsp_fifo  (.clk       (Clock),
 
 // this is to solve the issue that  there is a 1 cycle latency on the memory ready from F2C
 // Need to make sure we have a 1 entry margin in the fifo when we declare not ready 
-assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
 //==================================
 // C2F FIFO - accumulate core 2 Fabric requests
 //==================================
@@ -206,6 +205,7 @@ logic         C2F_OutFabricValidQ104H;
 logic         C2F_ReqFull, C2F_ReqEmpty;
 logic [1:0] winner_dec_id;
 logic [1:0] valid_candidate;
+assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
 assign C2F_ReqQ103H.address      = DMemAddressQ103H;
 assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
 assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
