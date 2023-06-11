@@ -22,7 +22,7 @@
 `include "macros.sv"
 
 module mini_core 
-import mini_core_pkg::*;
+import common_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,

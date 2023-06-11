@@ -1,13 +1,24 @@
 +incdir+../../../source/common/
-// === packages === 
-../../../source/common/common_pkg.sv
++incdir+../../../source/mini_core/
+
+//=======================================
 //RTL FIles
-// === dot f files from subIPs ===
+//=======================================
+// common files
+../../../source/common/common_pkg.sv
+../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
+
 // Router files
--f ../../../source/fabric/router/router_rtl_list.f
+../../../source/fabric/router/router.sv
+../../../source/fabric/router/fifo_arb.sv
+../../../source/fabric/router/next_tile_fifo_arb.sv
+
 //  mini_core files
--f ../../../source/mini_core/mini_core_rtl_list.f
+../../../source/mini_core/mini_core.sv
+../../../source/mini_core/mini_top.sv
+../../../source/mini_core/mini_mem_wrap.sv
+
 // fabric files
 ../../../source/fabric/fabric.sv
-// mini_core_tile files
 ../../../source/fabric/mini_core_tile.sv

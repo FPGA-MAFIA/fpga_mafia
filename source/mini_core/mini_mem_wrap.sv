@@ -16,7 +16,6 @@
 
 //---------------------------------------------------
 module mini_mem_wrap
-import mini_core_pkg::*;
 import common_pkg::*;
 (
                 input  logic        Clock  ,
@@ -43,7 +42,7 @@ import common_pkg::*;
                 //============================================
                 input  logic            InFabricValidQ503H  ,
                 input  var t_tile_trans InFabricQ503H       ,
-                input t_fab_ready       fab_ready           ,   
+                input  var t_fab_ready  fab_ready           ,   
                 output logic            OutFabricValidQ505H ,
                 output var t_tile_trans OutFabricQ505H 
 );

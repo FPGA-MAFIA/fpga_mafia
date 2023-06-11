@@ -16,11 +16,10 @@
 //-----------------------------------------------------------------------------
 
 package common_pkg;
-// RV32I common parameters
-//parameter XLEN       = 32;
-//parameter XLEN_BYTES = XLEN/8;
-//parameter MSB_XLEN   = XLEN-1;
 
+//==============================
+//Fabric definitions
+//==============================
 typedef logic [7:0] t_tile_id;
 typedef enum logic[1:0] {  
  NULL =   2'b00 ,
@@ -38,7 +37,6 @@ typedef enum logic[2:0] {
  LOCAL         =     3'b101 
 } t_cardinal;
 
-
 typedef struct packed {
     logic [31:0]    address;
     t_tile_opcode   opcode;
@@ -55,5 +53,6 @@ typedef struct packed {
     logic  local_arb;
 } t_fab_ready;
 
+`include "mini_core_pkg.vh"
 
 endpackage

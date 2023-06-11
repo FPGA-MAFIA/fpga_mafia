@@ -2,7 +2,6 @@
 `include "macros.sv"
 
 module mini_top
-import mini_core_pkg::*;
 import common_pkg::*;
 (
 input  logic        Clock  ,
@@ -12,7 +11,7 @@ input  t_tile_id    local_tile_id,
 //      fabric interface
 //============================================
 input  logic            InFabricValidQ503H  ,
-input  t_fab_ready      fab_ready           ,
+input  var t_fab_ready      fab_ready           ,
 input  var t_tile_trans InFabricQ503H       ,
 output logic            OutFabricValidQ505H ,
 output var t_tile_trans OutFabricQ505H 
