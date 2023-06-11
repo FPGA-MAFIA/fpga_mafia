@@ -8,6 +8,7 @@
 // common files
 ../../../source/common/common_pkg.sv
 ../../../source/common/fifo.sv
+../../../source/common/mem.sv
 ../../../source/common/arbiter.sv
 
 // Router files
