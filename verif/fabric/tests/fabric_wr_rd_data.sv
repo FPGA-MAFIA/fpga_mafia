@@ -11,7 +11,6 @@ delay(20);
 wait(tile_ready[1][1]==5'b11111);
 send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(RD));
 wait(valid_local[1][1] == 1'b1);
-delay(20);
 wr_rd_data_out.data = target_trans[1][1].data;
 $display("#### data_rd is %0h",wr_rd_data_out.data);
 delay(20);
