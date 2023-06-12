@@ -14,7 +14,7 @@
 // I_MEM, D_MEM and CR_MEM will support sync memory read.
 `include "macros.sv"
 module big_core_mem_wrap 
-import big_core_pkg::*;
+import common_pkg::*;
 (   input  logic        Clk,
     input  logic        Rst,
     input  t_tile_id    local_tile_id,
