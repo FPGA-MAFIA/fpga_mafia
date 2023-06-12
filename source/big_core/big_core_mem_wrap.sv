@@ -186,19 +186,20 @@ big_core_cr_mem big_core_cr_mem (
 
 //assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
 logic [31:0] VgaAddressWithOffsetQ103H;
+logic [31:0] PreShiftVGAMemRdDataQ104H;
 assign VgaAddressWithOffsetQ103H = DMemAddressQ103H - VGA_MEM_REGION_FLOOR;
 big_core_vga_ctrl big_core_vga_ctrl (
    .CLK_50            (Clk),
    .Reset             (Rst),
    // Core interface
    // write
-   .F2C_ReqDataQ503H   (DMemWrDataQ103H),
+   .F2C_ReqDataQ503H   (ShiftDMemWrDataQ103H),
    .F2C_ReqAddressQ503H(VgaAddressWithOffsetQ103H),
-   .CtrlVGAMemByteEn   (DMemByteEnQ103H),
+   .CtrlVGAMemByteEn   (ShiftDMemByteEnQ103H),
    .CtrlVgaMemWrEnQ503 (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
    // read
    .CtrlVgaMemRdEnQ503 (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
-   .VgaRspDataQ504H    (PreVGAMemRdDataQ104H),
+   .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),
    // VGA output
    .inDisplayArea     (inDisplayArea),
    .RED               (vga_out.VGA_R),
@@ -208,7 +209,11 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .v_sync            (vga_out.VGA_VS)
 );
 
-
+// Half & Byte READ
+assign PreVGAMemRdDataQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftVGAMemRdDataQ104H[31:8] } : 
+                              (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftVGAMemRdDataQ104H[31:16]} : 
+                              (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftVGAMemRdDataQ104H[31:24]} : 
+                                                                        PreShiftVGAMemRdDataQ104H         ; 
 
 //==================================
 // F2C response 504 ( D_MEM/I_MEM )
