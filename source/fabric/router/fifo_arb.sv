@@ -119,7 +119,7 @@ assign fifo_pop[3:0] = winner_dec_id[3:0];
 logic assert_pop_without_valid_winner;
 assign assert_pop_without_valid_winner = (|fifo_pop[3:0] & !winner_req_valid);
 
-`ASSERT("assert_pop_without_valid_winner", assert_pop_without_valid_winner, 1'b1, "Pop fifo when not valid_req")
+`MAFIA_ASSERT("assert_pop_without_valid_winner", assert_pop_without_valid_winner, 1'b1, "Pop fifo when not valid_req")
 `endif
 
 endmodule

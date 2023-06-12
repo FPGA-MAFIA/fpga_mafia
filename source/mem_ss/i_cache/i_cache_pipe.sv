@@ -147,8 +147,8 @@ end
 
 assign set_ways_lru_q2  = ~rd_data_set_rsp_q2.mru;
 assign set_ways_free_q2 = ~rd_data_set_rsp_q2.valid;
-`FIND_FIRST(first_free_way_q2, set_ways_free_q2)
-`FIND_FIRST(first_lru_way_q2 , set_ways_lru_q2)
+`MAFIA_FIND_FIRST(first_free_way_q2, set_ways_free_q2)
+`MAFIA_FIND_FIRST(first_lru_way_q2 , set_ways_lru_q2)
 
 always_comb begin : fill_victim_way
     set_ways_victim_q2 = '0; //TODO
@@ -213,7 +213,7 @@ end
 //    DATA_FETCH
 //======================
 
-//`ENCODER(way_tag_enc_match_q2 , valid_match, way_tag_match_q2 )
+//`MAFIA_ENCODER(way_tag_enc_match_q2 , valid_match, way_tag_match_q2 )
 always_comb begin
     unique case (way_tag_match_q2)
         4'b0001 : way_tag_enc_match_q2 = 2'b00;
@@ -224,7 +224,7 @@ always_comb begin
     endcase
 end
 
-//`ENCODER(set_ways_enc_victim_q2 , set_ways_victim_q2 )
+//`MAFIA_ENCODER(set_ways_enc_victim_q2 , set_ways_victim_q2 )
 always_comb begin
     unique case (set_ways_victim_q2)
         4'b0001 : set_ways_enc_victim_q2 = 2'b00;

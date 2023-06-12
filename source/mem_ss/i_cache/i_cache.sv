@@ -63,7 +63,7 @@ i_cache_pipe_wrap i_cache_pipe_wrap (
 //======================================
 
 // the assertion will make sure the simulation sends only rd request to the i_cache
-`ASSERT("core2cache_wr_req",                                          //name
+`MAFIA_ASSERT("core2cache_wr_req",                                          //name
         ( (core2cache_req.valid && (core2cache_req.opcode == WR_OP) )),//expression
         (!rst),                                                       //enabled
         "in the i cache, we can only accept rd requests");            //message
