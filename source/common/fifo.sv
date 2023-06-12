@@ -84,8 +84,8 @@ assign almost_full  = (count == FIFO_DEPTH-1);
 //=============================================================================
 //=============================================================================
 `ifdef SIM_ONLY
-`ASSERT("Push when full", full && push, !rst, "Push when full");
-`ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
+`MAFIA_ASSERT("Push when full", full && push, !rst, "Push when full");
+`MAFIA_ASSERT("Pop when empty", empty && pop, !rst, "Pop when empty");
 // Assertion for push when full
 //assert property (@(posedge clk) disable iff (rst) (full |-> !push)) else $error("Push when full"); // iff -> if and only if.
 // Assertion for pop when empty
