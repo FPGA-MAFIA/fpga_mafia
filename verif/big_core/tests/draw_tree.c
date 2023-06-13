@@ -12,6 +12,8 @@
 //------------------------------------------------------------
 #include "big_core_defines.h"
 #include "graphic_vga.h"
+
+// 360 elements for sin and cos in millidegrees (Scaled by 1000)
 unsigned int sin_table[360]  = {0,17,35,52,70,87,105,122,139,156,174,191,208,225,
                                 242,259,276,292,309,326,342,358,375,391,407,423,438,
                                 454,469,485,500,515,530,545,559,574,588,602,616,629,
@@ -57,30 +59,65 @@ unsigned int cos_table[360]  =  {1000,1000,999,999,998,996,995,993,990,988,985,9
                                 961,966,970,974,978,982,985,988,990,993,995,996,998,999,999,1000};
 
 
-
 #define MAX_ANGLE 360
 
-void draw_fractal_tree(int x1, int y1, int angle, int length, int depth) {
+
+void draw_fractal_tree(int x1, int y1, int angle, int length, int branch_angle, int length_ratio_A, int length_ratio_B) {
     if (length < 2) {
         return;
     }
+    
+    // Correct the negative angle value
+    if (angle < 0) {
+        angle = MAX_ANGLE + angle;
+    }
+    
+    // Calculate x2
+    int cos_value = cos_table[angle];
+    int length_times_cos = length * cos_value;
+    int length_times_cos_divided = length_times_cos / 1000;
+    int x2 = x1 + length_times_cos_divided;
 
-    int x2 = x1 + (length * cos_table[angle]) / 1024;
-    int y2 = y1 + (length * sin_table[angle]) / 1024;
+    // Calculate y2
+    int sin_value = sin_table[angle];
+    int length_times_sin = length * sin_value;
+    int length_times_sin_divided = length_times_sin / 1000;
+    int y2 = y1 - length_times_sin_divided;
 
     draw_line(x1, y1, x2, y2, 1);
 
-    draw_fractal_tree(x2, y2, (angle + 30) % MAX_ANGLE, length >> 1, depth + 1);
-    draw_fractal_tree(x2, y2, (angle - 30 + MAX_ANGLE) % MAX_ANGLE, length >> 1, depth + 1);
+    // Correct the new angle for the left branch
+    int new_angle_left = angle - branch_angle;
+    if (new_angle_left < 0) {
+        new_angle_left = MAX_ANGLE + new_angle_left;
+    }
+    // Calculate the new length for the left branch
+    int new_length_left = length * length_ratio_A / length_ratio_B;
+    
+    // Call the function for the left branch
+    draw_fractal_tree(x2, y2, new_angle_left, new_length_left, branch_angle, length_ratio_A, length_ratio_B);
+
+    // Correct the new angle for the right branch
+    int new_angle_right = (angle + branch_angle) % MAX_ANGLE;
+    // Calculate the new length for the right branch
+    int new_length_right = length * length_ratio_A / length_ratio_B;
+
+    // Call the function for the right branch
+    draw_fractal_tree(x2, y2, new_angle_right, new_length_right, branch_angle, length_ratio_A, length_ratio_B);
 }
 
-int main()  {  
-    int x1 = 20;  // Starting x-coordinate
-    int y1 = 20;  // Starting y-coordinate
-    int angle = 0;  // Starting angle (facing upwards)
-    int length = 8;  // Starting length
-    int depth = 0;  // Starting depth
 
-    draw_fractal_tree(x1, y1, angle, length, depth);
+int main() {
+    int x1 = 5;            // Starting x-coordinate
+    int y1 = 20;           // Starting y-coordinate
+    int angle = 0;         // Starting angle (facing right)
+    int length = 32;       // Starting length
+    int branch_angle = 30; // Angle for each branch
+    int length_ratio_A = 1; // Numerator of the length ratio
+    int length_ratio_B = 2; // Denominator of the length ratio
+
+    set_cursor(0, 0);
+    draw_fractal_tree(x1, y1, angle, length, branch_angle, length_ratio_A, length_ratio_B);
+
     return 0;
 }

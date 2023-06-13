@@ -13,9 +13,16 @@
 #include "big_core_defines.h"
 #include "graphic_vga.h"
 int main()  {  
-    set_pixel(1,1,1);
-  
-    draw_line(5, 10, 25, 25, 1);
-    draw_circle(30, 30, 10, 1);
+   // set_pixel(1,1,1);
+    set_cursor(5,0);
+    //draw a house:
+    draw_line(7, 0, 0, 5, 1);   //left side of the roof
+    draw_line(8, 0, 15, 5, 1);  //right side of the roof
+    draw_line(0, 5, 15, 5, 1);  //base of the roof
+    draw_line(0, 5, 0, 15, 1);  //left side of the house
+    draw_line(15, 5, 15, 15, 1);//right side of the house
+    draw_line(1, 15, 15, 15, 1);//base of the house
+    
+    //draw_circle(30, 30, 10, 1);
 return 0;
 }  // main()

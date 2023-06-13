@@ -440,64 +440,6 @@ void set_pixel(int x, int y, int value)
     VGA_MEM[byte_addr] = val;
 }
 
-void draw_line(int x1, int y1, int x2, int y2, int value) {
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-
-    int x = x1;
-    int y = y1;
-
-    // Check if the line is steep and swap axes if it is
-    int steep = 0;
-    if((dx < 0 ? -dx : dx) < (dy < 0 ? -dy : dy)) {
-        steep = 1;
-        {
-            int temp = x;
-            x = y;
-            y = temp;
-        }
-
-        {
-            int temp = dx;
-            dx = dy;
-            dy = temp;
-        }
-    }
-
-    // If the start is at a higher value than the end, swap start and end
-    int x_step = 1;
-    if(dx < 0) {
-        x_step = -1;
-        dx = -dx;
-    }
-
-    int y_step = 1;
-    if(dy < 0) {
-        y_step = -1;
-        dy = -dy;
-    }
-
-    int err = dx / 2;
-
-    // Bresenham's line algorithm
-    for( ; x != x2; x += x_step) {
-        if(steep) {
-            set_pixel(y, x, value);
-        } else {
-            set_pixel(x, y, value);
-        }
-
-        err -= dy;
-        if(err < 0) {
-            y += y_step;
-            err += dx;
-        }
-    }
-    // Draw last point
-    set_pixel(x2, y2, value);
-}
-
-
 void draw_circle(int x0, int y0, int radius, int value) {
     int x = radius;
     int y = 0;
@@ -523,6 +465,39 @@ void draw_circle(int x0, int y0, int radius, int value) {
         {
             x -= 1;
             err -= 2*x + 1;
+        }
+    }
+}
+
+int abs(int value) {
+    if(value < 0) {
+        return -value;
+    }
+    return value;
+}
+
+
+void draw_line(int x1, int y1, int x2, int y2, int value) {
+    int dx = abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
+    int dy = -abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
+    int err = dx + dy, e2; 
+
+    while(1){
+        set_pixel(x1, y1, value);
+        
+        if (x1==x2 && y1==y2) break;
+        
+        e2 = 2 * err;
+        
+        // Either X or Y step
+        if (e2 >= dy) {
+            err += dy;
+            x1 += sx;
+        }
+        
+        if (e2 <= dx) {
+            err += dx;
+            y1 += sy;
         }
     }
 }
