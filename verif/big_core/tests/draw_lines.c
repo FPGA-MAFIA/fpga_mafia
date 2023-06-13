@@ -23,6 +23,7 @@ int main()  {
     draw_line(15, 5, 15, 15, 1);//right side of the house
     draw_line(1, 15, 15, 15, 1);//base of the house
     
+    draw_circle(25, 8, 5, 1);    //draw a circle next to the house
     //draw_circle(30, 30, 10, 1);
 return 0;
 }  // main()
