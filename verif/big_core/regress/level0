@@ -4,5 +4,5 @@ floating_point.c
 gcd.c
 primary_numbers.c
 bss_test.c
-draw_lines.c
-draw_tree.c -gMAX_TEST_DURATION=500000  
+draw_lines.c  -gMAX_TEST_DURATION=500000  
+draw_tree.c   -gMAX_TEST_DURATION=500000  
