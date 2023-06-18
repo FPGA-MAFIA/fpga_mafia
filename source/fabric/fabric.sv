@@ -95,14 +95,14 @@ always_comb begin
 //TODO FIXME - connect the READY signal correctly
 for(int col =0; col< 5; col++) begin
     for(int row =0; row< 5; row++) begin
-        in_north_ready [col][row] =  5'b11111;//out_south_ready[col]  [row-1];
-        in_east_ready  [col][row] =  5'b11111;//out_west_ready [col+1][row];
-        in_west_ready  [col][row] =  5'b11111;//out_east_ready [col-1][row];
-        in_south_ready [col][row] =  5'b11111;//out_north_ready[col]  [row+1];
-        out_north_ready[col][row] =  5'b11111;//in_south_ready [col]  [row-1];
-        out_east_ready [col][row] =  5'b11111;//in_west_ready  [col+1][row];
-        out_west_ready [col][row] =  5'b11111;//in_east_ready  [col-1][row];
-        out_south_ready[col][row] =  5'b11111;//in_north_ready [col]  [row+1];
+        in_north_ready [col][row] =  out_south_ready[col]  [row-1];         // 5'b11111;
+        in_east_ready  [col][row] =  out_west_ready [col+1][row];           // 5'b11111;
+        in_west_ready  [col][row] =  out_east_ready [col-1][row];           // 5'b11111;
+        in_south_ready [col][row] =  out_north_ready[col]  [row+1];         // 5'b11111;
+        //out_north_ready[col][row] =  in_south_ready [col]  [row-1];         // 5'b11111;
+        //out_east_ready [col][row] =  in_west_ready  [col+1][row];           // 5'b11111;
+        //out_west_ready [col][row] =  in_east_ready  [col-1][row];           // 5'b11111;
+        //out_south_ready[col][row] =  in_north_ready [col]  [row+1];         // 5'b11111;
     end // row
     end // col
 end

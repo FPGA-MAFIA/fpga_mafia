@@ -7,7 +7,7 @@ for(int i = 0; i<V_NUM_FIFO; i++) begin
   in_ready_arb_fifo = 5'b0000;
   fork begin 
     $display("this is fifo %d at time %t test BACK_PRESSURE",fifo,$time);
-    for(int j = 0; j < V_FIFO_DEPTH-1; j++)begin
+    for(int j = 0; j < V_REQUESTS-1; j++)begin
         wait(fifo_arb_ins.full[fifo] == '0);
         cycle_delay = $urandom_range(0, V_MAX_DELAY);
         delay(cycle_delay);  
