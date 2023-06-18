@@ -4,6 +4,12 @@ target/*
 transcript
 
 FPGA/big_core/*
+FPGA/*/incremental_db/*
+FPGA/*/output_files/*
+FPGA/*/db/*
+FPGA/*/*.rpt
+FPGA/*/*.summary
+*.bak
 !FPGA/big_core/de10_lite_big_core_top.sdc
 !FPGA/big_core/de10_lite_big_core_top.sv
 !FPGA/big_core/sv/*
@@ -12,3 +18,5 @@ FPGA/big_core/*
 !FPGA/big_core/de10_lite_big_core.qpf
 !FPGA/big_core/de10_lite_big_core.qsf
 verif/cache/__pycache__
+*/__pycache__/*
+lotr_orig/target/*

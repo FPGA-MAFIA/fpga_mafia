@@ -12,15 +12,16 @@
 
 
 +incdir+../../../source/common/
++incdir+../../../source/mini_core/
++incdir+../../../source/big_core/
++incdir+../../../source/fabric/
 
 // param packages
-../../../source/mini_core/mini_core_pkg.sv
-../../../source/router/router_pkg.sv
 ../../../source/common/common_pkg.sv
 
 // Common
-../../../source/router/arbiter.sv
-../../../source/router/fifo.sv
+../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
 ../../../source/common/mem.sv
 
 //RTL FIles

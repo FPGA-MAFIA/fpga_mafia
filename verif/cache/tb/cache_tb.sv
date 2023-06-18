@@ -7,7 +7,7 @@ import d_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
 logic             clk;
 logic             rst;
 t_req             core2cache_req;
-logic             stall;
+logic             ready;
 t_rd_rsp          cache2core_rsp;
 t_fm_req          cache2fm_req_q3;
 t_fm_rd_rsp [9:0] samp_fm2cache_rd_rsp;
@@ -123,7 +123,7 @@ end// initial
 //==================
 // D_CACHE DUT
 //==================
-logic      dmem_stall;
+logic      dmem_ready;
 t_rd_rsp   dmem_cache2core_rsp;
 t_fm_req   dmem_cache2fm_req_q3;
 t_req      dmem_core2cache_req;
@@ -136,7 +136,7 @@ d_cache d_cache ( //DUT
    .rst                (rst),            //input   logic
     //Agent Interface                      
    .core2cache_req     (dmem_core2cache_req), //input   
-   .stall              (dmem_stall),          //output  logic
+   .ready              (dmem_ready),          //output  logic
    .cache2core_rsp     (dmem_cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
    .cache2fm_req_q3    (dmem_cache2fm_req_q3),//output  t_fm_req
@@ -146,7 +146,7 @@ d_cache d_cache ( //DUT
 //==================
 // I_CACHE DUT
 //==================
-logic      imem_stall;
+logic      imem_ready;
 t_rd_rsp   imem_cache2core_rsp;
 t_fm_req   imem_cache2fm_req_q3;
 t_req      imem_core2cache_req;
@@ -158,15 +158,15 @@ i_cache i_cache ( //DUT
    .rst                (rst),            //input   logic
     //Agent Interface                      
    .core2cache_req     (imem_core2cache_req), //input   
-   .stall              (imem_stall),          //output  logic
+   .ready              (imem_ready),          //output  logic
    .cache2core_rsp     (imem_cache2core_rsp), //output  t_rd_rsp
     // FM Interface                   
    .cache2fm_req_q3    (imem_cache2fm_req_q3),//output  t_fm_req
    .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
 );
     
-assign stall           = V_D_CACHE_TEST ? dmem_stall : 
-                         V_I_CACHE_TEST ? imem_stall : 1'b0;
+assign ready           = V_D_CACHE_TEST ? dmem_ready : 
+                         V_I_CACHE_TEST ? imem_ready : 1'b0;
 assign cache2core_rsp  = V_D_CACHE_TEST ? dmem_cache2core_rsp : 
                          V_I_CACHE_TEST ? imem_cache2core_rsp : '0;
 assign cache2fm_req_q3 = V_D_CACHE_TEST ? dmem_cache2fm_req_q3 : 
@@ -175,7 +175,7 @@ assign cache2fm_req_q3 = V_D_CACHE_TEST ? dmem_cache2fm_req_q3 :
 assign dmem_core2cache_req = V_D_CACHE_TEST ? core2cache_req :  t_req'('0);
 assign imem_core2cache_req = V_I_CACHE_TEST ? core2cache_req :  t_req'('0);
 
-`ASSERT("single_test_enabled",                             //name
+`MAFIA_ASSERT("single_test_enabled",                             //name
         ( (V_D_CACHE_TEST == 1) && (V_I_CACHE_TEST == 1) ),//expression
         1'b1,                                              //enabled
         "Only one cache test can be enabled at a time - please review the TB parameters overrides");//message
@@ -198,8 +198,8 @@ array  #(
 );
 
 // One Cycle Latency on memory read - sample the id & Valid.
-`MAFIA_DFF(samp_fm2cache_rd_rsp[0].tq_id   ,cache2fm_req_q3.tq_id     , clk)
-`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid   ,cache2fm_req_q3.valid  && (cache2fm_req_q3.opcode == FILL_REQ_OP)   , clk)
+`MAFIA_DFF(samp_fm2cache_rd_rsp[0].address   ,cache2fm_req_q3.address   , clk)
+`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid     ,cache2fm_req_q3.valid  && (cache2fm_req_q3.opcode == FILL_REQ_OP)   , clk)
 // Shift register to add 10 cycle latecy on FM read.
 `MAFIA_DFF(samp_fm2cache_rd_rsp[9:1]       ,samp_fm2cache_rd_rsp[8:0] , clk)
 `MAFIA_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , clk)

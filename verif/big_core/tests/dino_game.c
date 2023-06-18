@@ -1,5 +1,5 @@
-#include "../../../app/defines/big_core_defines.h"
-#include "../../../app/defines/graphic_vga.h"
+#include "big_core_defines.h"
+#include "graphic_vga.h"
 
 /* Define the dimensions of the game screen */
 #define SCREEN_WIDTH 80

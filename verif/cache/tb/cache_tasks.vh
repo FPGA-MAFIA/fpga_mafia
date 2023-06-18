@@ -24,10 +24,10 @@ endtask
 //=======================================================
 //=======================================================
 task wr_req( input logic [19:0]  address, 
-             input logic [127:0] data ,
+             input logic [31:0] data ,
              input logic [4:0]   id );
-    while (stall) begin
-      delay(1); $display("-> stall! cant send write: %h ", address );
+    while (~ready) begin
+      delay(1); $display("-> not ready! cant send write: %h ", address );
     end
 $display("wr_req: %h , address %h:", id, address);
     core2cache_req.valid   =  1'b1;
@@ -43,8 +43,8 @@ endtask
 //=======================================================
 task rd_req( input logic [19:0] address,
              input logic [4:0] id); 
-    while (stall) begin 
-    delay(1);  $display("-> stall! cant send read: %h ", address);
+    while (~ready) begin 
+    delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
 $display("rd_req: %h , address %h:", id, address);
     core2cache_req.valid   =  1'b1;

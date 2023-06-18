@@ -15,30 +15,30 @@
 `ifndef MACROS_VS
 `define MACROS_VS
 
-`define  MAFIA_DFF(q,i,clk)              \
-         always_ff @(posedge clk)      \
+`define  MAFIA_DFF(q,i,clk)       \
+         always_ff @(posedge clk) \
             q<=i;
 
-`define  MAFIA_EN_DFF(q,i,clk,en)        \
-         always_ff @(posedge clk)      \
+`define  MAFIA_EN_DFF(q,i,clk,en) \
+         always_ff @(posedge clk) \
             if(en) q<=i;
 
-`define  MAFIA_RST_DFF(q,i,clk,rst)      \
+`define  MAFIA_RST_DFF(q,i,clk,rst)    \
          always_ff @(posedge clk) begin\
             if (rst) q <='0;           \
             else     q <= i;           \
          end
 
-`define  MAFIA_RST_VAL_DFF(q,i,clk,rst,val)      \
-         always_ff @(posedge clk) begin\
-            if (rst) q <=val;          \
-            else     q <= i;           \
+`define  MAFIA_RST_VAL_DFF(q,i,clk,rst,val) \
+         always_ff @(posedge clk) begin     \
+            if (rst) q <=val;               \
+            else     q <= i;                \
          end
 
 
 `define  MAFIA_EN_RST_DFF(q,i,clk,en,rst)\
-         always_ff @(posedge clk)      \
-            if (rst)    q <='0;        \
+         always_ff @(posedge clk)        \
+            if (rst)    q <='0;          \
             else if(en) q <= i;
 
 
@@ -50,7 +50,7 @@ always_comb begin                                   \
     end                                             \
 end
 
-`define  FIND_FIRST(first , candidates )                    \
+`define  MAFIA_FIND_FIRST(first , candidates )              \
     always_comb begin                                       \
         first = '0;                                         \
         for(int i =0; i < $bits(candidates); i++) begin     \
@@ -58,7 +58,7 @@ end
         end                                                 \
     end                                        
 
-`define  ENCODER(encoded ,valid, decoded )            \
+`define  MAFIA_ENCODER(encoded ,valid, decoded )      \
    always_comb begin                                  \
         encoded = '0 ;                                \
         valid   = |decoded;                           \
@@ -68,17 +68,17 @@ end
     end                                               \
     end 
 
-`define  DECODER(decoded , encoded, valid )\
-    always_comb begin                      \
-      decoded = '0 ;                       \
-      if(valid) decoded[encoded] = 1'b1 ;  \
+`define  MAFIA_DECODER(decoded , encoded, valid )\
+    always_comb begin                            \
+      decoded = '0 ;                             \
+      if(valid) decoded[encoded] = 1'b1 ;        \
    end 
 
-`define ASSERT(name, expr, en, msg)                      \
-   always @(posedge clk) begin                           \
-      if (en && expr) begin                              \
-         $error($sformatf("[ASSERT] %s: %s", name, msg));\
-      end                                                \
+`define MAFIA_ASSERT(name, expr, en, msg)                      \
+   always @(posedge clk) begin                                 \
+      if (en && expr) begin                                    \
+         $error($sformatf("[MAFIA_ASSERT] %s: %s", name, msg));\
+      end                                                      \
    end          
 
 

@@ -1,4 +1,6 @@
 /* VGA defines */
+
+
 #define VGA_MEM_SIZE_BYTES 38400
 #define VGA_MEM_SIZE_WORDS 9600
 #define LINE               320
@@ -8,6 +10,7 @@
 #define VGA_PTR(PTR,OFF)   PTR    = (volatile int *) (VGA_MEM_BASE + OFF)
 #define WRITE_REG(REG,VAL) (*REG) = VAL
 #define READ_REG(VAL,REG)  VAL    = (*REG)
+#define VGA_MEM ((volatile char *) (VGA_MEM_BASE))
 
 /* ASCII Values */
 #define SPACE_TOP    0x0                         
@@ -417,4 +420,166 @@ void rvc_delay(int delay){
     while(timer < delay){
         timer++;
     }      
+}
+
+
+
+// The monochrome VGA support is 480x640 pixels
+// The way we achieve is every pixel is a single bit
+// so we need 480*640/8 = 38400 bytes
+// each row has 8*80 = 640 bits (80 bytes)
+// each col has 4*120 = 480 bits 
+
+// demonstration on how to access the VGA memory to different pixels:
+// we can write to any "byte" in the VGA memory in the range of 0-38400
+// the first byte is the first 8 bits in the first row
+// the second byte is the first 8 bits in the second row
+// the third byte is the first 8 bits in the third row
+// the fourth byte is the first 8 bits in the fourth row
+// the fifth byte is the second 8 bits in the first row  (Note First ROW!!!)
+
+// will write it out in a table:
+// <  0x0  > _ <  0x4  > _ <  0x8  > _ <  0xC  > _ ... < 0x13C >
+// <  0x1  > _ <  0x5  > _ <  0x9  > _ <  0xD  > _ ... < 0x13D >
+// <  0x2  > _ <  0x6  > _ <  0xA  > _ <  0xE  > _ ... < 0x13E >
+// <  0x3  > _ <  0x7  > _ <  0xB  > _ <  0xF  > _ ... < 0x13F >
+// < 0x140 > _ < 0x144 > _ < 0x148 > _ < 0x14C > _ ... < 0x27C >
+// < 0x141 > _ < 0x145 > _ < 0x149 > _ < 0x14D > _ ... < 0x27D >
+// < 0x142 > _ < 0x146 > _ < 0x14A > _ < 0x14E > _ ... < 0x27E >
+// < 0x143 > _ < 0x147 > _ < 0x14B > _ < 0x14F > _ ... < 0x27F >
+// < 0x280 > _ < 0x284 > _ < 0x288 > _ < 0x28C > _ ... < 0x3BC >
+// ...
+// ...
+// ...
+// < 0x94C0> _ < 0x94C4> _ < 0x94C8> _ < 0x94CC> _ ... < 0x95FC>
+// < 0x94C1> _ < 0x94C5> _ < 0x94C9> _ < 0x94CD> _ ... < 0x95FD>
+// < 0x94C2> _ < 0x94C6> _ < 0x94CA> _ < 0x94CE> _ ... < 0x95FE>
+// < 0x94C3> _ < 0x94C7> _ < 0x94CB> _ < 0x94CF> _ ... < 0x95FF>
+
+// the 0x9600 in hex is 38400 in decimal (the number of bytes in the VGA memory)
+
+//Example x=0, y=0 -> should set the byte_address to 0x0
+//Example x=1, y=1 -> should set the byte_address to 0x5
+//Example x=2, y=2 -> should set the byte_address to 0xA
+//Example x=3, y=3 -> should set the byte_address to 0xF
+//Example x=4, y=4 -> should set the byte_address to 0x150
+//Example x=5, y=5 -> should set the byte_address to 0x155
+//Example x=6, y=6 -> should set the byte_address to 0x15A
+//Example x=7, y=7 -> should set the byte_address to 0x15F
+
+// each row_range is 4 rows. in total we have 120 row_ranges -> 480 rows
+// to calculate the row_range we need to divide the row number by 4
+// to calculate the row_offset we need to take the row number mod 4
+// each col_range is 8 cols. in total we have 80 col_ranges -> 640 cols
+// to calculate the col_range we need to divide the col number by 8
+// to calculate the col_offset we need to take the col number mod 8
+
+// the byte address is calculated by the following formula:
+// byte_address = row_range * 80 + col_range * 4 + row_offset * 80 + col_offset
+
+
+#define SCREEN_WIDTH  640
+#define SCREEN_HEIGHT 480
+#define ROWS_PER_BLOCK 4
+#define COLS_PER_BLOCK 80
+#define BITS_PER_BYTE 8
+#define BYTES_PER_BLOCK (ROWS_PER_BLOCK * COLS_PER_BLOCK)
+
+/* Function to set/reset a single pixel at (x, y) position */
+void set_pixel(int x, int y, int value)
+{
+    // Checking the boundaries
+    if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT)
+        return;
+
+    // Calculating the block and the offset within the block // Example: for x=5, y=5
+    int row_block = y / ROWS_PER_BLOCK;                      // row_block : 5/4 = 1
+    int row_offset = y % ROWS_PER_BLOCK;                     // row_offset: 5%4 = 1
+
+    // Calculating the column and the bit within the byte
+    int col = x / BITS_PER_BYTE;                             // col    : 5/8 = 0         
+    int bit_pos = x % BITS_PER_BYTE;                         // bit_pos: 5%8 = 5
+
+    // Calculating the byte address
+    int byte_addr = row_block * BYTES_PER_BLOCK +  //   1*320 +
+                    col * ROWS_PER_BLOCK +         //   0*4
+                    row_offset;                    //   1  -> 321
+    //rvc_print_int(byte_addr);
+    //rvc_printf("\n");
+
+    // Reading the current value of the word
+    unsigned char val;
+    val = VGA_MEM[byte_addr];
+
+    // Setting/resetting the bit
+    if (value) {
+        val |= (1 << (bit_pos));   // Set the bit
+    } else {
+        val &= ~(1 << (bit_pos));  // Reset the bit
+    }
+    
+    // Writing the new value back to the VGA buffer
+    VGA_MEM[byte_addr] = val;
+}
+
+void draw_circle(int x0, int y0, int radius, int value) {
+    int x = radius;
+    int y = 0;
+    int err = 0;
+
+    while (x >= y)
+    {
+        set_pixel(x0 + x, y0 + y, value);
+        set_pixel(x0 + y, y0 + x, value);
+        set_pixel(x0 - y, y0 + x, value);
+        set_pixel(x0 - x, y0 + y, value);
+        set_pixel(x0 - x, y0 - y, value);
+        set_pixel(x0 - y, y0 - x, value);
+        set_pixel(x0 + y, y0 - x, value);
+        set_pixel(x0 + x, y0 - y, value);
+
+        if (err <= 0)
+        {
+            y += 1;
+            err += 2*y + 1;
+        }
+        if (err > 0)
+        {
+            x -= 1;
+            err -= 2*x + 1;
+        }
+    }
+}
+
+int abs(int value) {
+    if(value < 0) {
+        return -value;
+    }
+    return value;
+}
+
+
+void draw_line(int x1, int y1, int x2, int y2, int value) {
+    int dx = abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
+    int dy = -abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
+    int err = dx + dy, e2; 
+
+    while(1){
+        set_pixel(x1, y1, value);
+        
+        if (x1==x2 && y1==y2) break;
+        
+        e2 = 2 * err;
+        
+        // Either X or Y step
+        if (e2 >= dy) {
+            err += dy;
+            x1 += sx;
+        }
+        
+        if (e2 <= dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
 }

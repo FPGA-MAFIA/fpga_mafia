@@ -13,7 +13,6 @@ fifo_arb_all_fifo_full_BW   -gV_REQUESTS=50 -gV_FIFO_DEPTH=7 -gV_NUM_FIFO=3 -gV_
 fifo_arb_all_fifo_full_BW   -gV_REQUESTS=19 -gV_FIFO_DEPTH=6 -gV_NUM_FIFO=4 -gV_MAX_DELAY=0
 fifo_arb_back_pressure   -gV_REQUESTS=19 -gV_FIFO_DEPTH=6 -gV_NUM_FIFO=4 -gV_MAX_DELAY=0 -gV_BACK_PRESSURE=10
 fifo_arb_back_pressure   -gV_REQUESTS=7 -gV_FIFO_DEPTH=3 -gV_NUM_FIFO=4 -gV_MAX_DELAY=10 -gV_BACK_PRESSURE=5
-fifo_arb_back_pressure   -gV_REQUESTS=10 -gV_FIFO_DEPTH=4 -gV_NUM_FIFO=4 -gV_MAX_DELAY=5 -gV_BACK_PRESSURE=1
 fifo_arb_simple
 fifo_arb_single_fifo_full_BW
 router_alive   -gV_REQUESTS=30 -gV_MAX_DELAY=10

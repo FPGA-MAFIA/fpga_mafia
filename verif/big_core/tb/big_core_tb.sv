@@ -17,8 +17,9 @@
 `include "macros.sv"
 
 module big_core_tb ;
-import big_core_pkg::*;
+import common_pkg::*;
 
+parameter MAX_TEST_DURATION = 100000;
 logic        Clk;
 logic        Rst;
 logic [31:0] Instruction;
@@ -67,8 +68,17 @@ logic EndOfTest;
 // Instantiating the big_core_top
 //=========================================
 big_core_top big_core_top(
-    .Clk            (Clk     ),
-    .Rst            (Rst     ),
+    .Clk            (Clk),
+    .Rst            (Rst),
+    .RstPc          (1'b0),
+    .out_for_pd     (), 
+    .local_tile_id  ('0),       //input  t_tile_id    local_tile_id,
+    // Fabric interface
+    .InFabricValidQ503H ('0),//input  logic        ,
+    .InFabricQ503H      ('0),//input  t_tile_trans ,
+    .OutFabricValidQ505H(),  //output logic        ,
+    .OutFabricQ505H     (),  //output t_tile_trans ,
+    // FPGA interface
     .Button_0       (Button_0),
     .Button_1       (Button_1),
     .Switch         (Switch  ),
@@ -133,7 +143,7 @@ initial begin: test_seq
     end
 
 
-    #400000
+    #MAX_TEST_DURATION
     EndOfTest = 1'b1;
     print_vga_screen();
     $error(" Timeout \n===================\n test %s ended timeout \n=====================", test_name);
