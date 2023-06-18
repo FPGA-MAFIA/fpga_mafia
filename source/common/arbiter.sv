@@ -50,14 +50,14 @@ end
 
 
 assign mask_candidate = (valid_candidate & (~mask_out));
-`FIND_FIRST(first_top    , mask_candidate)
-`FIND_FIRST(first_bottom , valid_candidate)
+`MAFIA_FIND_FIRST(first_top    , mask_candidate)
+`MAFIA_FIND_FIRST(first_bottom , valid_candidate)
 
 assign hit_top = (|first_top);
 assign winner_dec_id = hit_top ? first_top : first_bottom;
 assign valid_winner = (|winner_dec_id);
 
-//`ENCODER(next_enc_last_winner,1,winner_dec_id)
+//`MAFIA_ENCODER(next_enc_last_winner,1,winner_dec_id)
 always_comb begin
 case (winner_dec_id)
 4'b0001 : next_enc_last_winner = 2'd0;

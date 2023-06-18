@@ -175,7 +175,7 @@ assign cache2fm_req_q3 = V_D_CACHE_TEST ? dmem_cache2fm_req_q3 :
 assign dmem_core2cache_req = V_D_CACHE_TEST ? core2cache_req :  t_req'('0);
 assign imem_core2cache_req = V_I_CACHE_TEST ? core2cache_req :  t_req'('0);
 
-`ASSERT("single_test_enabled",                             //name
+`MAFIA_ASSERT("single_test_enabled",                             //name
         ( (V_D_CACHE_TEST == 1) && (V_I_CACHE_TEST == 1) ),//expression
         1'b1,                                              //enabled
         "Only one cache test can be enabled at a time - please review the TB parameters overrides");//message

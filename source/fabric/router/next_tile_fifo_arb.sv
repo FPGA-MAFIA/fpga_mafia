@@ -155,7 +155,7 @@ end
   //  (next_tile_fifo_arb_card == SOUTH && req_valid[2] && req_address[2][3:0] <= next_tile_id[3:0]);
   //endproperty
 logic going_back;
-`ASSERT ("target_next_tile_same_as_req_source", // name of the assertion
+`MAFIA_ASSERT ("target_next_tile_same_as_req_source", // name of the assertion
         (((NEXT_TILE_CARDINAL == WEST)  && in_west_req_valid  ) ||
          ((NEXT_TILE_CARDINAL == EAST)  && in_east_req_valid  ) ||
          ((NEXT_TILE_CARDINAL == NORTH) && in_north_req_valid ) ||

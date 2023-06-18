@@ -1,6 +1,6 @@
 `include "macros.sv"
 module big_core_csr
-import big_core_pkg::*;
+import common_pkg::*;
 (
     input logic Clk,
     input logic Rst,

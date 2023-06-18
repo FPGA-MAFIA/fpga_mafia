@@ -370,16 +370,16 @@ always_comb begin
         fill_entries[i] = (tq_state[i] == S_MB_FILL_READY);
     end
 end
-`FIND_FIRST(first_free, free_entries)
+`MAFIA_FIND_FIRST(first_free, free_entries)
 //suppress the first free entry if there is a read hit in the merge buffer
 
 //FIXME - need to replace with round robin
-`FIND_FIRST(first_fill, fill_entries)
+`MAFIA_FIND_FIRST(first_fill, fill_entries)
 
-`ENCODER(enc_first_free, free_exists, first_free)
-`ENCODER(enc_first_fill, fill_exists, first_fill)
-`ENCODER(enc_wr_req_hit_mb, wr_hit_exists, wr_req_hit_mb)
-`ENCODER(enc_rd_req_hit_mb, rd_hit_exists, rd_req_hit_mb)
+`MAFIA_ENCODER(enc_first_free, free_exists, first_free)
+`MAFIA_ENCODER(enc_first_fill, fill_exists, first_fill)
+`MAFIA_ENCODER(enc_wr_req_hit_mb, wr_hit_exists, wr_req_hit_mb)
+`MAFIA_ENCODER(enc_rd_req_hit_mb, rd_hit_exists, rd_req_hit_mb)
 
 //=================
 // Pipe lookup mux - core request vs fill request

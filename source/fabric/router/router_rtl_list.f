@@ -11,6 +11,8 @@
 //-----------------------------------------------------------------------------
 
 +incdir+../../../source/common/
++incdir+../../../source/big_core/
++incdir+../../../source/mini_core/
 //RTL FIles
 ../../../source/common/common_pkg.sv
 ../../../source/common/fifo.sv

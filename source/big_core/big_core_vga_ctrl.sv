@@ -15,7 +15,7 @@
 `include "macros.sv"
 
 module big_core_vga_ctrl 
-import big_core_pkg::*;
+import common_pkg::*;
 (
     input  logic        CLK_50,
     input  logic        Reset,
