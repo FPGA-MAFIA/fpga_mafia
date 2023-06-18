@@ -19,6 +19,7 @@
 module big_core_tb ;
 import common_pkg::*;
 
+parameter MAX_TEST_DURATION = 100000;
 logic        Clk;
 logic        Rst;
 logic [31:0] Instruction;
@@ -142,7 +143,7 @@ initial begin: test_seq
     end
 
 
-    #100000
+    #MAX_TEST_DURATION
     EndOfTest = 1'b1;
     print_vga_screen();
     $error(" Timeout \n===================\n test %s ended timeout \n=====================", test_name);
