@@ -9,8 +9,8 @@ task run_fabric_test(input string test);
      `include "fabric_all_tiles.sv"
   end else if(test == "fabric_wr_rd_data") begin
      `include "fabric_wr_rd_data.sv"
-//  end else if(test == "fabric_BP_test") begin
-//     `include "fabric_BP_test.sv"
+  end else if(test == "fabric_BP_test") begin
+     `include "fabric_BP_test.sv"
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end
