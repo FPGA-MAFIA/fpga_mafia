@@ -205,7 +205,6 @@ logic         C2F_OutFabricValidQ104H;
 logic         C2F_ReqFull, C2F_ReqEmpty;
 logic [1:0] winner_dec_id;
 logic [1:0] valid_candidate;
-assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
 assign C2F_ReqQ103H.address      = DMemAddressQ103H;
 assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
 assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
@@ -247,4 +246,6 @@ assign OutFabricValidQ505H =  F2C_OutFabricValidQ505H | C2F_OutFabricValidQ104H;
 assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
                               C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
                                                         '0;                 
+                                                        
+assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
 endmodule

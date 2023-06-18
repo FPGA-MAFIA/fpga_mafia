@@ -46,7 +46,7 @@ assign target_col = target_id[7:4];
          //monitor_origin_trans[col][row].target = {target_col,target_row};                     
          delay(1);                                                                                                     
          valid_tile[col][row] = 1'b0;          
-         //$display("origin_trans = %p at time %t from tile [%0d,%0d] to tile: [%0d,%0d]",origin_trans[col][row],$time,col,row,target_col,target_row);
+         $display("origin_trans = %p at time %t from tile [%0d,%0d] to tile: [%0d,%0d]",origin_trans[col][row],$time,col,row,target_col,target_row);
       end
     end
   end 
