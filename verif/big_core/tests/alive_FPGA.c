@@ -103,7 +103,7 @@ int main()  {
     clear_screen();
     set_cursor(0, 0);
     //writing a string VGA
-    rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
+    rvc_printf("\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
     int test = 123456789;
     //writing an integer to VGA
     rvc_print_int(test);
