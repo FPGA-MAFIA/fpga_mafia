@@ -22,17 +22,25 @@ void wait(int cycles) {
 int main()  {  
     rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
     int test = 123456789;
+    volatile unsigned int button_1_value, button_0_value;
     rvc_print_int(test);
-    int row = 20;
-    int col = 0;
-    int width = 10;
-    int height = 20;
+    Rectangle rect;
+    rect.row = 20;
+    rect.col = 0;
+    rect.width = 10;
+    rect.height = 20;
     char direction = 'R';
-    draw_rectangle(row, col, width, height, 1);
+    draw_rectangle(rect, 1);
     while(1) {
+        READ_REG(button_0_value, CR_Button_0);
+        READ_REG(button_1_value, CR_Button_1);
+        rvc_printf("\nBOTTOM 0 - ");
+        rvc_print_int(button_0_value);
+        rvc_printf("\nBOTTOM 1 - ");
+        rvc_print_int(button_1_value);
         wait(1000000);
-        move_rectangle(row, col, width, height, direction);
-        col++;
+        move_rectangle(rect, direction);
+        rect.col++;
     }
     return 0;
     
