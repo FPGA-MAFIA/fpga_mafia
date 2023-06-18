@@ -74,6 +74,13 @@ import common_pkg::*;
     input   var t_fab_ready     in_local_ready  // south_arb, east_arb, west_arb, local_arb
 );
 
+// just to clear the x from the interrace = there is no real need for self "ready"
+assign out_local_ready.local_arb = 1'b1; // the local assumes that all bits are 5'b11111 to be able to send request/response
+assign out_north_ready.north_arb = 1'b0;
+assign out_east_ready.east_arb   = 1'b0;
+assign out_south_ready.south_arb = 1'b0;
+assign out_west_ready.west_arb   = 1'b0;
+
 //==============================
 //  signals declaration
 //==============================
@@ -506,8 +513,5 @@ fifo_arb fifo_arb_local (
 .in_ready_local_arb_fifo(in_local_ready.local_arb)
 );
 
-// Note: there is request that should be sent from local to local 
-// - so there is no real need for the local ready signal towards the local mini_core
-assign out_local_ready.local_arb = 1'b1;
 
 endmodule 
