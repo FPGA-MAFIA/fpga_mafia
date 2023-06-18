@@ -40,6 +40,7 @@ bit [V_ROW:1] [V_COL:1] valid_tile_rsp;
 bit [V_ROW:1] [V_COL:1] valid_local;
 logic [V_ROW:1] [V_COL:1] mini_core_ready;
 bit [V_ROW:1] [V_COL:1] mini_core_ready_bit;
+bit flg;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"

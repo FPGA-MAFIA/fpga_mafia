@@ -2,10 +2,10 @@
 //`include "uvm_macros.svh"
 module router_tb;
 import common_pkg::*;
-parameter V_REQUESTS   = 1;
+parameter V_REQUESTS   = 40;
 parameter V_FIFO_DEPTH = 4; // currently this value causes failure in the test due to FIFO size must be grater than 3
 parameter V_NUM_FIFO   = 4;  // number of fifos to exercise in the test (HW is always 4, simulation may stimuli only some of them)
-parameter V_NO_BACK_PRESSURE = 0; // used to disable back pressure in the test which will cause a failure in the test
+parameter V_NO_BACK_PRESSURE = 1; // used to disable back pressure in the test which will cause a failure in the test
 parameter V_MAX_DELAY  = 5; // max delay in the test
 parameter V_BACK_PRESURE = 10;
 logic              clk;

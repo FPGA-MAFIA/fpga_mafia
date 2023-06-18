@@ -61,6 +61,7 @@ $display("Finished elaborating the design...");
 //    delay(1);
 //end
 for(int i=0; i< $ceil(V_REQUESTS); i++) begin
+wait(tile_ready[1][1] == 5'b11111);
 send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
 delay(10);
 end
@@ -68,6 +69,15 @@ end
 force fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready = 1'b0;
 $display("send force at time %0t",$time);
 for(int i=0; i< $ceil(V_REQUESTS); i++) begin
+fork
+wait(tile_ready[1][1] == 5'b11111);
+begin delay(100);
+flg = 1; end
+join_any
+if(flg == 1'b1) begin 
+  $display("full fabric at time %0t",$time);
+  break;
+end
 send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
 delay(10);
 end
@@ -78,6 +88,7 @@ release fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core
 $display("release force at time %0t",$time);
 delay(100);
 for(int i=0; i< $ceil(V_REQUESTS); i++) begin
+wait(tile_ready[1][1] == 5'b11111);
 send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
 delay(10);
 end

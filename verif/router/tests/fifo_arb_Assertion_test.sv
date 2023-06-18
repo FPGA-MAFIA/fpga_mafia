@@ -5,7 +5,7 @@ for(int i = 0; i<V_NUM_FIFO; i++) begin
   automatic int fifo = i;
   fork begin 
     $display("this is fifo %d at time %t",fifo,$time);
-    for(int j = 0; j < 30; j++)begin
+    for(int j = 0; j < 300; j++)begin
         cycle_delay = $urandom_range(0, V_MAX_DELAY);
         //delay(cycle_delay);  
         $display("fifo %d and request %d at time: %t",fifo,j,$time);

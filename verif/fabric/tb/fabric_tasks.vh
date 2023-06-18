@@ -46,7 +46,7 @@ assign target_col = target_id[7:4];
          //monitor_origin_trans[col][row].target = {target_col,target_row};                     
          delay(1);                                                                                                     
          valid_tile[col][row] = 1'b0;          
-         $display("origin_trans = %p at time %t from tile [%0d,%0d] to tile: [%0d,%0d]",origin_trans[col][row],$time,col,row,target_col,target_row);
+         //$display("origin_trans = %p at time %t from tile [%0d,%0d] to tile: [%0d,%0d]",origin_trans[col][row],$time,col,row,target_col,target_row);
       end
     end
   end 
@@ -115,7 +115,7 @@ t_tile_trans_v [V_COL:1][V_ROW:1] temp_trans_rsp;
         temp_trans_req[col][row].target = origin_trans_fab[col][row].address[31:24];
         //$display("source_trans.source is %h and target_trans.target is %h in tile [%0d,%0d] ",temp_trans_req[col][row].source,temp_trans_req[col][row].target,col,row);
         monitor_source_trans[col][row].push_back(temp_trans_req[col][row]);
-        $display("time: %0t monitor_source_trans is %p",$time,monitor_source_trans[col][row]);
+        //$display("time: %0t monitor_source_trans is %p",$time,monitor_source_trans[col][row]);
         cnt_trans_source = cnt_trans_source + 1;
         wait(valid_tile[col][row] == 1'b0);
       end forever begin // RD_RSP
@@ -139,7 +139,7 @@ t_tile_trans_v [V_COL:1][V_ROW:1] temp_trans_rsp;
         //$display("source_trans.source is %h and target_trans.target is %h in tile [%0d,%0d] ",temp_trans_rsp[col][row].source,temp_trans_rsp[col][row].target,col,row);
         monitor_source_trans_rsp[col][row].push_back(temp_trans_rsp[col][row]);
 
-        $display("time: %0t monitor_source_trans_rsp is %p",$time,monitor_source_trans_rsp[col][row]);
+        //$display("time: %0t monitor_source_trans_rsp is %p",$time,monitor_source_trans_rsp[col][row]);
         cnt_trans_source_rsp = cnt_trans_source_rsp + 1;
         wait(valid_tile_rsp[col][row] == 1'b0);
       end
@@ -156,7 +156,8 @@ t_tile_trans_v [V_COL:1][V_ROW:1] temp_trans;
       automatic int row = j;
       fork forever begin
         t_tile_id target_id;
-        wait(valid_local[col][row] == 1'b1);
+        @(target_trans);
+        if(valid_local[col][row] == 1'b1) begin
         target_id[7:4] = col; // {col,row} dosent work as expected
         target_id[3:0] = row;
         //$display("############### time %t after this is req_id %h,temp_trans.source %h",$time,requestor_id_ref[col][row],temp_trans[col][row].source);
@@ -181,9 +182,11 @@ t_tile_trans_v [V_COL:1][V_ROW:1] temp_trans;
         
         monitor_target_trans[col][row].push_back(temp_trans[col][row]);
         cnt_trans_target = cnt_trans_target + 1;
-        $display("time: %0t monitor_target_trans is %p",$time,monitor_target_trans[col][row]);
-        wait(valid_local[col][row] == 1'b0);
+        //$display("time: %0t monitor_target_trans is %p",$time,monitor_target_trans[col][row]);
+        //wait(valid_local[col][row] == 1'b0);
+      end 
       end join_none
+
 
     end
   end
