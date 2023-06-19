@@ -526,7 +526,7 @@ void draw_circle(int x0, int y0, int radius, int value) {
     int x = radius;
     int y = 0;
     int err = 0;
-
+    // loop until x < y
     while (x >= y)
     {
         set_pixel(x0 + x, y0 + y, value);
@@ -538,15 +538,15 @@ void draw_circle(int x0, int y0, int radius, int value) {
         set_pixel(x0 + y, y0 - x, value);
         set_pixel(x0 + x, y0 - y, value);
 
-        if (err <= 0)
+        if (err <= 0)       // x and y are the same or y is greater than x
         {
-            y += 1;
-            err += 2*y + 1;
+            y += 1;         // increment y
+            err += 2*y + 1; // calculate new error
         }
-        if (err > 0)
+        if (err > 0)        // x is greater than y
         {
-            x -= 1;
-            err -= 2*x + 1;
+            x -= 1;         // decrement x
+            err -= 2*x + 1; // calculate new error
         }
     }
 }
@@ -560,23 +560,27 @@ int abs(int value) {
 
 
 void draw_line(int x1, int y1, int x2, int y2, int value) {
-    int dx = abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
-    int dy = -abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
+    // Calculate the x and y deltas, and the signs of them
+    int dx = abs(x2 - x1);
+    int sx = x1 < x2 ? 1 : -1;
+    int dy = -abs(y2 - y1);
+    int sy = y1 < y2 ? 1 : -1;
+    // Calculate the first error term
     int err = dx + dy, e2; 
 
+    // While not at the end
     while(1){
+        // Set the pixel
         set_pixel(x1, y1, value);
-        
+        // If the end is reached
         if (x1==x2 && y1==y2) break;
-        
+        // Calculate the error term
         e2 = 2 * err;
-        
         // Either X or Y step
         if (e2 >= dy) {
             err += dy;
             x1 += sx;
         }
-        
         if (e2 <= dx) {
             err += dx;
             y1 += sy;
