@@ -40,6 +40,7 @@ bit [V_ROW:1] [V_COL:1] valid_tile_rsp;
 bit [V_ROW:1] [V_COL:1] valid_local;
 logic [V_ROW:1] [V_COL:1] mini_core_ready;
 bit [V_ROW:1] [V_COL:1] mini_core_ready_bit;
+bit flg;
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
@@ -63,6 +64,7 @@ task rst_ins();
     //release reset
     rst = '0;
 endtask
+
 genvar row, col;
 generate
   for (col = 1; col <= V_COL; col = col + 1) begin : gen_col
@@ -73,7 +75,7 @@ generate
       //assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H = valid_tile_rsp[col][row];    
       assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H = origin_trans[col][row];     
       //assign fabric.col[col].row[row].mini_core_tile_ins.in_local_ready[0] = mini_core_ready[col][row];
-      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready = mini_core_ready[col][row];
+      //assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready = mini_core_ready[col][row];
                 
     // if to fabric
       assign origin_trans_fab[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H;   // input_data to req_fifo    
@@ -81,6 +83,7 @@ generate
       assign valid_tile_rsp[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H;// valid input_data to rd_rsp fifo
       assign valid_local[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req_valid;
       assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
+      //assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
       assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
     end

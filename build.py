@@ -94,7 +94,7 @@ class Test:
         if not os.path.exists(TARGET+'tests/'+self.name):
             mkdir(TARGET+'tests/'+self.name)
         if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
-            if(args.app):
+            if(args.app or args.mif or args.fpga):
                 mkdir(TARGET+'tests/'+self.name+'/gcc_files')
         if not os.path.exists(MODELSIM):
             mkdir(MODELSIM)
@@ -447,7 +447,10 @@ def main():
             if (args.sim or args.full_run) and not test.fail_flag:
                 test._start_simulation()
             if (args.fpga) and not test.fail_flag:
-                test._start_mif()
+                if not args.mif:
+                    test._start_mif()
+                    if not args.app:
+                        test._compile_sw()
                 test._start_fpga()
             if (args.mif):
                 if not args.app:

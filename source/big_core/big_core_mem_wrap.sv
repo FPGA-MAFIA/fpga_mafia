@@ -187,18 +187,28 @@ big_core_cr_mem big_core_cr_mem (
 //assign vga_out = '0;// Instantiating the mafia_asap_5pl_vga_ctrl
 logic [31:0] VgaAddressWithOffsetQ103H;
 logic [31:0] PreShiftVGAMemRdDataQ104H;
+
 assign VgaAddressWithOffsetQ103H = DMemAddressQ103H - VGA_MEM_REGION_FLOOR;
+logic [31:0]  VgaWrData;
+logic [31:0]  VgaAdrsReq;
+logic [3:0]   VgaWrBE;
+logic         VgaWrEn;
+assign VgaWrData    = ShiftDMemWrDataQ103H;
+assign VgaAdrsReq   = VgaAddressWithOffsetQ103H;
+assign VgaWrBE      = ShiftDMemByteEnQ103H;
+assign VgaWrEn      = DMemWrEnQ103H && MatchVGAMemRegionQ103H;
+
 big_core_vga_ctrl big_core_vga_ctrl (
    .CLK_50            (Clk),
    .Reset             (Rst),
    // Core interface
    // write
-   .F2C_ReqDataQ503H   (ShiftDMemWrDataQ103H),
-   .F2C_ReqAddressQ503H(VgaAddressWithOffsetQ103H),
-   .CtrlVGAMemByteEn   (ShiftDMemByteEnQ103H),
+   .ReqDataQ503H       (VgaWrData),
+   .ReqAddressQ503H    (VgaAdrsReq),
+   .CtrlVGAMemByteEn   (VgaWrBE),
    .CtrlVgaMemWrEnQ503 (DMemWrEnQ103H && MatchVGAMemRegionQ103H),
    // read
-   .CtrlVgaMemRdEnQ503 (DMemRdEnQ103H && MatchVGAMemRegionQ103H),
+   .CtrlVgaMemRdEnQ503 (VgaWrEn),
    .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),
    // VGA output
    .inDisplayArea     (inDisplayArea),

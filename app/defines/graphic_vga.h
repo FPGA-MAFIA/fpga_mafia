@@ -6,7 +6,7 @@
 #define LINE               320
 #define BYTES              4
 #define COLUMN             80 /* COLUMN between 0 - 79 (80x60) */
-#define RAWS               60 /* RAWS between 0 - 59 (80x60) */
+#define ROWS               60 /* ROWS between 0 - 59 (80x60) */
 #define VGA_PTR(PTR,OFF)   PTR    = (volatile int *) (VGA_MEM_BASE + OFF)
 #define WRITE_REG(REG,VAL) (*REG) = VAL
 #define READ_REG(VAL,REG)  VAL    = (*REG)
@@ -143,18 +143,27 @@ void draw_char(char note, int row, int col)
     WRITE_REG(ptr_bottom , ASCII_BOTTOM[note]);
 }
 
+/* Structure to represent a rectangle */
+typedef struct Rectangle {
+    int row;
+    int col;
+    int width;
+    int height;
+} Rectangle ;
+
+
 /* This function draws a rectangle on the screen at the specified location and size */
-void draw_rectangle(int row, int col, int width, int height, int value)
+void draw_rectangle(Rectangle rect, int value)
 {
     int i, j;
-    unsigned int vertical = row * LINE;
-    unsigned int horizontal = col * BYTES;
+    unsigned int vertical = rect.row * LINE;
+    unsigned int horizontal = rect.col * BYTES;
     volatile int *ptr_top;
     volatile int *ptr_bottom;
 
-    for (i = 0; i < height; i++)
+    for (i = 0; i < rect.height; i++)
     {
-        for (j = 0; j < width; j++)
+        for (j = 0; j < rect.width; j++)
         {
             VGA_PTR(ptr_top, horizontal + j * BYTES + vertical);
             VGA_PTR(ptr_bottom, horizontal + j * BYTES + vertical + LINE);
@@ -174,11 +183,11 @@ void draw_rectangle(int row, int col, int width, int height, int value)
     }
 }
 
-void move_rectangle(int row, int col, int width, int height, char direction)
+void move_rectangle(Rectangle rect, char direction)
 {
     // Calculate the new position based on the direction
-    int newRow = row;
-    int newCol = col;
+    int newRow = rect.row;
+    int newCol = rect.col;
 
     switch (direction)
     {
@@ -199,17 +208,89 @@ void move_rectangle(int row, int col, int width, int height, char direction)
     }
 
     // Check if the new position is within the screen boundaries
-    if (newRow < 0 || newRow + height > RAWS || newCol < 0 || newCol + width > COLUMN)
+    if (newRow < 0 || newRow + rect.height > ROWS || newCol < 0 || newCol + rect.width > COLUMN)
     {
         return; // New position is outside the screen boundaries, exit the function
     }
 
     // Turn off the original rectangle
-    draw_rectangle(row, col, width, height, 0);
+    draw_rectangle(rect, 0);
 
-    // Draw the new rectangle in the new position
-    draw_rectangle(newRow, newCol, width, height, 1);
+    // Update the position of the rectangle
+    rect.row = newRow;
+    rect.col = newCol;
+
+    // Draw the rectangle in the new position
+    draw_rectangle(rect, 1);
 }
+
+///* This function draws a rectangle on the screen at the specified location and size */
+//void draw_rectangle(int row, int col, int width, int height, int value)
+//{
+//    int i, j;
+//    unsigned int vertical = row * LINE;
+//    unsigned int horizontal = col * BYTES;
+//    volatile int *ptr_top;
+//    volatile int *ptr_bottom;
+//
+//    for (i = 0; i < height; i++)
+//    {
+//        for (j = 0; j < width; j++)
+//        {
+//            VGA_PTR(ptr_top, horizontal + j * BYTES + vertical);
+//            VGA_PTR(ptr_bottom, horizontal + j * BYTES + vertical + LINE);
+//
+//            if (value == 0)
+//            {
+//                WRITE_REG(ptr_top, 0x00000000);    // Turn off the pixel
+//                WRITE_REG(ptr_bottom, 0x00000000); // Turn off the pixel
+//            }
+//            else
+//            {
+//                WRITE_REG(ptr_top, 0xFFFFFFFF);    // Draw the pixel
+//                WRITE_REG(ptr_bottom, 0xFFFFFFFF); // Draw the pixel
+//            }
+//        }
+//        vertical += LINE;
+//    }
+//}
+//
+//void move_rectangle(int row, int col, int width, int height, char direction)
+//{
+//    // Calculate the new position based on the direction
+//    int newRow = row;
+//    int newCol = col;
+//
+//    switch (direction)
+//    {
+//        case 'U':
+//            newRow--;
+//            break;
+//        case 'D':
+//            newRow++;
+//            break;
+//        case 'L':
+//            newCol--;
+//            break;
+//        case 'R':
+//            newCol++;
+//            break;
+//        default:
+//            return; // Invalid direction, exit the function
+//    }
+//
+//    // Check if the new position is within the screen boundaries
+//    if (newRow < 0 || newRow + height > ROWS || newCol < 0 || newCol + width > COLUMN)
+//    {
+//        return; // New position is outside the screen boundaries, exit the function
+//    }
+//
+//    // Turn off the original rectangle
+//    draw_rectangle(row, col, width, height, 0);
+//
+//    // Draw the new rectangle in the new position
+//    draw_rectangle(newRow, newCol, width, height, 1);
+//}
 
 /* This function print a string on the screen in (CR_CURSOR_V,CR_CURSOR_H) position */
 void rvc_printf(const char *c)
@@ -227,7 +308,7 @@ void rvc_printf(const char *c)
         {
             col = 0;
             raw = raw + 2 ;
-            if(raw == (RAWS * 2)) /* End of screen */
+            if(raw == (ROWS * 2)) /* End of screen */
             {
                 raw = 0;
             }
@@ -241,7 +322,7 @@ void rvc_printf(const char *c)
         {
             col = 0;
             raw = raw + 2 ;
-            if(raw == (RAWS * 2)) /* End of screen */
+            if(raw == (ROWS * 2)) /* End of screen */
             {
                 raw = 0;
             }
@@ -286,6 +367,7 @@ void clear_screen()
     {
         ptr[i] = 0;
     }
+    set_cursor(0,0);
 }
 
 void rvc_print_int(int num)
@@ -324,7 +406,7 @@ void rvc_print_int(int num)
             col = 0;
             raw += 2;
         }
-        if (raw >= RAWS * 2) {
+        if (raw >= ROWS * 2) {
             raw = 0;
         }
     }
