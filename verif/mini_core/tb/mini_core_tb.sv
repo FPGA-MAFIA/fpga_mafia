@@ -66,7 +66,8 @@ initial begin: test_seq
     //load the program to the TB
     //======================================
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_top.mini_mem_wrap.i_mem.mem = IMem;
+    force mini_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force core_rv32i_ref.imem              = IMem; //backdoor to reference model memory
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #1000 $finish;
 end // test_seq
@@ -84,11 +85,25 @@ mini_top mini_top (
 //============================================
  .InFabricValidQ503H    ('0),// input  logic        F2C_ReqValidQ503H     ,
  .InFabricQ503H         ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
+ .mini_core_ready       (),  // output  logic  mini_core_ready       ,
+ //
  .OutFabricQ505H        (),  // output t_rdata      F2C_RspDataQ504H      ,
- .OutFabricValidQ505H   ()   // output logic        F2C_RspValidQ504H
+ .OutFabricValidQ505H   (),  // output logic        F2C_RspValidQ504H
+ .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
 );      
 
 `include "mini_core_trk.sv"
+
+core_rv32i_ref
+# (
+    .I_MEM_LSB (I_MEM_OFFSET_MINI),
+    .I_MEM_MSB (I_MEM_MSB_MINI),
+    .D_MEM_LSB (D_MEM_OFFSET_MINI),
+    .D_MEM_MSB (D_MEM_MSB_MINI)
+)  core_rv32i_ref (
+.clk                 (Clk),
+.rst                 (Rst)
+);
 
 endmodule //mini_core_tb
 
