@@ -1,7 +1,7 @@
 `include "macros.sv"
-`define MINI_CORE_TILE(col,row) fabric.col``col``.row``row``.mini_core_tile_ins
-`define IN_LOCAL_REQ(col,row)   `MINI_CORE_TILE(col,row).in_local_req
-`define MINI_CORE_TILE_READY(col,row) `MINI_CORE_TILE(col,row).mini_core_ready
+`define MINI_CORE_TILE(col,row)           fabric.col``col``.row``row``.mini_core_tile_ins
+`define IN_LOCAL_REQ(col,row)             fabric.col``col``.row``row``.mini_core_tile_ins.in_local_req
+`define MINI_CORE_TILE_READY(m_col,m_row) fabric.col[m_col].row[m_row].mini_core_tile_ins.mini_core_ready
 `define RAND_EP(rand_ep)  rand_ep = {4'($urandom_range(4'd1, 4'd3)), 4'($urandom_range(4'd1, 4'd3))};
 
 
