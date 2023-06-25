@@ -22,6 +22,15 @@ typedef enum logic [2:0] {
    BGEU = 3'b111
 } t_branch_type ;
 
+// Define VGA memory sizes
+parameter SIZE_VGA_MEM          = 38400; 
+parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
+parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
+// VGA Memory array 
+logic [7:0]  VGAMem     [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR]; //80 x 480
+logic [7:0]  NextVGAMem [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR]; 
+
+
 t_branch_type CtrlBranchOp;
 logic [31:0] instruction;
 logic [31:0] pc, next_pc;
@@ -51,10 +60,10 @@ logic [6:0] funct7;
 //=======================================================
 // DFF - the synchronous elements in the reference RV32I model
 //=======================================================
-`MAFIA_DFF(regfile, next_regfile,  clk);
-`MAFIA_DFF(dmem,     next_dmem,     clk);
-`MAFIA_DFF(imem,     next_imem,     clk);
-`MAFIA_EN_RST_DFF(pc               ,  next_pc, clk , (!end_of_simulation) , rst);
+`MAFIA_DFF       (regfile, next_regfile,  clk);
+`MAFIA_DFF       (dmem,    next_dmem,     clk);
+`MAFIA_DFF       (imem,    next_imem,     clk);
+`MAFIA_EN_RST_DFF(pc  ,    next_pc,       clk , (!end_of_simulation) , rst);
 
 `MAFIA_EN_RST_DFF(end_of_simulation,  1'b1   , clk , en_end_of_simulation , rst)
 //=======================================================
@@ -192,52 +201,5 @@ end// always_comb
 assign en_end_of_simulation = ecall_was_called || ebreak_was_called || illegal_instruction;
 
 
-integer trk_reg_write;
-initial begin: trk_inst_gen
-    $timeformat(-9, 1, " ", 6);
-    trk_reg_write = $fopen({"../../../target/mini_core/trk_reg_write_ref.log"},"w");
-    $fwrite(trk_reg_write,"---------------------------------------------------------\n");
-    $fwrite(trk_reg_write," Time |Instruction|     X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
-    $fwrite(trk_reg_write,"---------------------------------------------------------\n");  
-end
-always_ff @(posedge clk ) begin
-    if(regfile!=next_regfile) begin        //0, 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
-        $fwrite(trk_reg_write,"%6d | %8h | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
-        ,$time,instruction,regfile[0],
-                           regfile[1],
-                           regfile[2],
-                           regfile[3],
-                           regfile[4],
-                           regfile[5],
-                           regfile[6],
-                           regfile[7],
-                           regfile[8],
-                           regfile[9],
-                           regfile[10],
-                           regfile[11],
-                           regfile[12],
-                           regfile[13],
-                           regfile[14],
-                           regfile[15],
-                           regfile[16],
-                           regfile[17],
-                           regfile[18],
-                           regfile[19],
-                           regfile[20],
-                           regfile[21],
-                           regfile[22],
-                           regfile[23],
-                           regfile[24],
-                           regfile[25],
-                           regfile[26],
-                           regfile[27],
-                           regfile[28],
-                           regfile[29],
-                           regfile[30],
-                           regfile[31]
-                           );
-    end
-    
-end
 
 endmodule

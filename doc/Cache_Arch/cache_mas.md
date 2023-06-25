@@ -16,7 +16,6 @@ The write indication bit will trigger the modified bit for the Cache Line once t
 *Read indication bit:*
 When a write requests hits an existing TQ merge buffer entry.
 
-
 ## Read response to core paths
 1. simple LU read hit
 2. LU miss:
@@ -24,7 +23,6 @@ When a write requests hits an existing TQ merge buffer entry.
    - Option 2: LU miss merged into an existing TQ entry that is already serving a FW fill request. 
      Note: it was a write entry, which now is setting the rd_indication bit
 ## The tq_rd_indication
-
 
 ## B2B write request in pipe
 We allow B2B write requests.
