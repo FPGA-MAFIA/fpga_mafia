@@ -28,7 +28,6 @@ unsigned int sin_table[360]  =  { 0   , 18  , 36  , 54  , 71  , 89  , 107 , 125 
                                  -512 ,-496 ,-481 ,-465 ,-449 ,-433 ,-416 ,-400 ,-384 ,-367 ,-350 ,-333 ,-316 ,-299 ,-282 ,-265 ,-248 ,-230 ,-213 ,-195 ,-178 ,-160 ,-143 ,-125 ,-107 ,-89  ,-71  ,-54  ,-36  ,-18
                                 };
 
-
 unsigned int cos_table[360]  =  { 1024, 1024, 1023, 1023, 1022, 1020, 1018, 1016, 1014, 1011, 1008, 1005, 1002, 998 , 994 , 989 , 984 , 979 , 974 , 968 , 962 , 956 , 949 , 943 , 935 , 928 , 920 , 912 , 904 , 896  ,
                                   887 , 878 , 868 , 859 , 849 , 839 , 828 , 818 , 807 , 796 , 784 , 773 , 761 , 749 , 737 , 724 , 711 , 698 , 685 , 672 , 658 , 644 , 630 , 616 , 602 , 587 , 573 , 558 , 543 , 527  ,
                                   512 , 496 , 481 , 465 , 449 , 433 , 416 , 400 , 384 , 367 , 350 , 333 , 316 , 299 , 282 , 265 , 248 , 230 , 213 , 195 , 178 , 160 , 143 , 125 , 107 , 89  , 71  , 54  , 36  , 18   ,
@@ -92,16 +91,18 @@ void draw_fractal_tree(int x1, int y1, int angle, int length, int branch_angle, 
 
 
 int main() {
-    int x1 = 5;            // Starting x-coordinate
-    int y1 = 30;           // Starting y-coordinate
-    int angle = 0;         // Starting angle (facing right)
-    int length = 32;       // Starting length
+    //clear_screen();
+    //while (1){
+    int x1 = 320;            // Starting x-coordinate
+    int y1 = 470;          // Starting y-coordinate
+    int angle = 90;         // Starting angle (facing right)
+    int length = 16 ;     // Starting length
     int branch_angle = 45; // Angle for each branch
     int length_ratio_A = 1;// Numerator of the length ratio   -> A/B
     int length_ratio_B = 2;// Denominator of the length ratio -> A/B
 
-    set_cursor(0, 0);
     draw_fractal_tree(x1, y1, angle, length, branch_angle, length_ratio_A, length_ratio_B);
+    //}
 
     return 0;
 }

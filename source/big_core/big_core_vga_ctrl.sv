@@ -20,8 +20,8 @@ import common_pkg::*;
     input  logic        CLK_50,
     input  logic        Reset,
     // VGA memory Access
-    input  logic [31:0] F2C_ReqDataQ503H,
-    input  logic [31:0] F2C_ReqAddressQ503H,
+    input  logic [31:0] ReqDataQ503H,
+    input  logic [31:0] ReqAddressQ503H,
     input  logic [3:0]  CtrlVGAMemByteEn,
     input  logic        CtrlVgaMemWrEnQ503,
     // Read core
@@ -118,8 +118,8 @@ vga_mem vga_mem (
     .clock_a        (CLK_50),
     .clock_b        (CLK_25),
     // Write
-    .data_a         (F2C_ReqDataQ503H),
-    .address_a      (F2C_ReqAddressQ503H[31:2]),
+    .data_a         (ReqDataQ503H),
+    .address_a      (ReqAddressQ503H[31:2]),
     .byteena_a      (CtrlVGAMemByteEn),
     .wren_a         (CtrlVgaMemWrEnQ503),
     // Read from core`
@@ -133,9 +133,6 @@ vga_mem vga_mem (
 );
 
 
-//assign NextRED   = (inDisplayArea) ? 4'b1111 : '0;//{4{CurentPixelQ2}} : '0;
-//assign NextGREEN = (inDisplayArea) ? 4'b1111 : '0;//{4{CurentPixelQ2}} : '0;
-//assign NextBLUE  = (inDisplayArea) ? 4'b1111 : '0;//{4{CurentPixelQ2}} : '0;
 assign NextRED   = (inDisplayArea) ? {4{CurentPixelQ2}} : '0;
 assign NextGREEN = (inDisplayArea) ? {4{CurentPixelQ2}} : '0;
 assign NextBLUE  = (inDisplayArea) ? {4{CurentPixelQ2}} : '0;
