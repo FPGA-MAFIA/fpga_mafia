@@ -87,7 +87,7 @@ logic InFabricValidQ503H, OutFabricValidQ505H, PreOutFabricValidQ505H;
 t_tile_trans InFabricQ503H;
 t_tile_trans OutFabricQ505H, PreOutFabricQ505H;
 logic RstPc;
-logic C2F_ReqOpcodeQ500H;
+logic InFabricReqOpcodeQ500H;
 logic out_for_pd;
 // =======================================================
 // big_core_top
@@ -135,23 +135,23 @@ uart_io  uart_io_inst
     //        Core to Fabric
     //================================================
     // input - Rsp to Core
-    .C2F_RspValidQ502H      (OutFabricValidQ505H),//input
-    .C2F_RspThreadIDQ502H   ('0),                 //input
-    .C2F_RspDataQ502H       (OutFabricQ505H.data),//input
-    .C2F_RspStall           ('0),                 //input
+    .OutFabricRspValidQ502H      (OutFabricValidQ505H),//input
+    .OutFabricRspThreadIDQ502H   ('0),                 //input
+    .OutFabricRspDataQ502H       (OutFabricQ505H.data),//input
+    .OutFabricRspStall           ('0),                 //input
     // output - Req from Core
-    .C2F_ReqValidQ500H      (InFabricValidQ503H),//output
-    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H),//output
-    .C2F_ReqThreadIDQ500H   (                  ),//output
-    .C2F_ReqAddressQ500H    (InFabricQ503H.address),//output
-    .C2F_ReqDataQ500H       (InFabricQ503H.data)   ,//output
+    .InFabricReqValidQ500H      (InFabricValidQ503H),//output
+    .InFabricReqOpcodeQ500H     (InFabricReqOpcodeQ500H),//output
+    .InFabricReqThreadIDQ500H   (                  ),//output
+    .InFabricReqAddressQ500H    (InFabricQ503H.address),//output
+    .InFabricReqDataQ500H       (InFabricQ503H.data)   ,//output
     // UART RX/TX
     .uart_master_tx         (UART_TXD),
     .uart_master_rx         (UART_RXD),
     .interrupt              (INTERRUPT)
     );
-assign InFabricQ503H.opcode = (C2F_ReqOpcodeQ500H == 1'b0) ? RD :
-                              (C2F_ReqOpcodeQ500H == 1'b1) ? WR :
+assign InFabricQ503H.opcode = (InFabricReqOpcodeQ500H == 1'b0) ? RD :
+                              (InFabricReqOpcodeQ500H == 1'b1) ? WR :
                                                              RD ;
 
 assign InFabricQ503H.requestor_id = '0;
