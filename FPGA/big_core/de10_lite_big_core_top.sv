@@ -93,24 +93,24 @@ logic out_for_pd;
 // big_core_top
 // =======================================================
 big_core_top big_core_top (
-.Clk      (MAX10_CLK1_50),     //input  logic        Clk,
-.Rst      (Rst),//input  logic        Rst,
-.RstPc     (RstPc),// input
-.out_for_pd (out_for_pd),//output t_fpga_out   out_for_pd,
+.Clk                    (MAX10_CLK1_50),    //input  logic        Clk,
+.Rst                    (Rst),              //input  logic        Rst,
+.RstPc                  (RstPc),            //input
+.out_for_pd             (out_for_pd),       //output t_fpga_out   out_for_pd,
 // Fabric interface
-.InFabricValidQ503H (InFabricValidQ503H), //input  logic        ,
-.InFabricQ503H      (InFabricQ503H),      //input  t_tile_trans ,
-.OutFabricValidQ505H(PreOutFabricValidQ505H),//output logic        ,
-.OutFabricQ505H     (PreOutFabricQ505H),     //output t_tile_trans ,
+.InFabricValidQ503H     (InFabricValidQ503H),     //input  logic        ,
+.InFabricQ503H          (InFabricQ503H),          //input  t_tile_trans ,
+.OutFabricValidQ505H    (PreOutFabricValidQ505H), //output logic        ,
+.OutFabricQ505H         (PreOutFabricQ505H),      //output t_tile_trans ,
 // FPGA interface inputs              
-.Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
-.Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
-.Switch   (SW),           //input  logic [9:0] Switch,   // CR_MEM
+.Button_0               (KEY[0]),                 //input  logic       Button_0, // CR_MEM
+.Button_1               (KEY[1]),                 //input  logic       Button_1, // CR_MEM
+.Switch                 (SW),                     //input  logic [9:0] Switch,   // CR_MEM
 // FPGA interface outputs
-.fpga_out     (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
+.fpga_out               (fpga_out),               //output logic [7:0] SEG7_0,   // CR_MEM
 // VGA output
-.inDisplayArea(inDisplayArea), // VGA_OUTPUT
-.vga_out        (vga_out)        //output logic       v_sync,
+.inDisplayArea          (inDisplayArea),          //VGA_OUTPUT
+.vga_out                (vga_out)                 //output logic       v_sync,
 );
 
 logic EnRstPc;
@@ -136,13 +136,11 @@ uart_io  uart_io_inst
     //================================================
     // input - Rsp to Core
     .OutFabricRspValidQ502H      (OutFabricValidQ505H),//input
-    .OutFabricRspThreadIDQ502H   ('0),                 //input
     .OutFabricRspDataQ502H       (OutFabricQ505H.data),//input
     .OutFabricRspStall           ('0),                 //input
     // output - Req from Core
     .InFabricReqValidQ500H      (InFabricValidQ503H),//output
     .InFabricReqOpcodeQ500H     (InFabricReqOpcodeQ500H),//output
-    .InFabricReqThreadIDQ500H   (                  ),//output
     .InFabricReqAddressQ500H    (InFabricQ503H.address),//output
     .InFabricReqDataQ500H       (InFabricQ503H.data)   ,//output
     // UART RX/TX
