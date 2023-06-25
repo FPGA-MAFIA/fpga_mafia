@@ -67,7 +67,9 @@ delay(10);
 end
 
 force fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready = 1'b0;
-$display("send force at time %0t",$time);
+//force mini_core_ready[3][3] = 1'b0;
+$display("send force at time %0t real signal is: %0b and mini_core_ready is %0b",$time,fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready,mini_core_ready[3][3]);
+$display("send force at time %0t real signal is: %0b and mini_core_ready is %0b",$time,`MINI_CORE_TILE_READY(3,3));
 for(int i=0; i< $ceil(V_REQUESTS); i++) begin
 fork
 wait(tile_ready[1][1] == 5'b11111);
@@ -75,7 +77,7 @@ begin delay(100);
 flg = 1; end
 join_any
 if(flg == 1'b1) begin 
-  $display("full fabric at time %0t",$time);
+  $display("full fabric at time %0t with %0d req in pipe",$time,i);
   break;
 end
 send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
@@ -84,11 +86,14 @@ end
 
 delay(10);
 //release mini_core_ready[3][3];
-release fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready;
-$display("release force at time %0t",$time);
+//release fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready;
+//release `MINI_CORE_TILE_READY(3,3);
+$display("send release at time %0t real signal is: %0b and mini_core_ready is %0b",$time,fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready,mini_core_ready[3][3]);
+//$display("release force at time %0t",$time);
 delay(100);
 for(int i=0; i< $ceil(V_REQUESTS); i++) begin
 wait(tile_ready[1][1] == 5'b11111);
+$display("time %0t real signal is: %0b and mini_core_ready is %0b",$time,fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready,mini_core_ready[3][3]);
 send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
 delay(10);
 end
