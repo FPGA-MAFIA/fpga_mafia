@@ -83,6 +83,8 @@ class Test:
         self.target , self.gcc_dir = self._create_test_dir()
         self.path = TESTS+self.file_name
         self.fail_flag = False
+        self.app_flag = False
+        self.mif_flag = False
         self.duration = 0
         # the tests parameters
         self.params = params # FIXME ABD
@@ -182,6 +184,7 @@ class Test:
             print_message('[ERROR] Can\'t find the c files of '+self.name)
             self.fail_flag = True
         chdir(MODEL_ROOT)
+        self.app_flag = True
     def _compile_hw(self):
         chdir(MODELSIM)
         print_message('[INFO] Starting to compile HW ...')
@@ -275,6 +278,7 @@ class Test:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
                 self.fail_flag = True
         chdir(MODEL_ROOT)       
+        self.mif_flag = True
 
     def _start_fpga(self):
         chdir(FPGA_ROOT)
@@ -447,13 +451,13 @@ def main():
             if (args.sim or args.full_run) and not test.fail_flag:
                 test._start_simulation()
             if (args.fpga) and not test.fail_flag:
-                if not args.mif:
+                if not test.app_flag:
+                    test._compile_sw()
+                if not test.mif_flag:
                     test._start_mif()
-                    if not args.app:
-                        test._compile_sw()
                 test._start_fpga()
             if (args.mif):
-                if not args.app:
+                if not test.app_flag:
                     test._compile_sw()
                 test._start_mif()
             if (args.gui):

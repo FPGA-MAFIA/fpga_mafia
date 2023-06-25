@@ -87,30 +87,30 @@ logic InFabricValidQ503H, OutFabricValidQ505H, PreOutFabricValidQ505H;
 t_tile_trans InFabricQ503H;
 t_tile_trans OutFabricQ505H, PreOutFabricQ505H;
 logic RstPc;
-logic C2F_ReqOpcodeQ500H;
+logic InFabricReqOpcodeQ500H;
 logic out_for_pd;
 // =======================================================
 // big_core_top
 // =======================================================
 big_core_top big_core_top (
-.Clk      (MAX10_CLK1_50),     //input  logic        Clk,
-.Rst      (Rst),//input  logic        Rst,
-.RstPc     (RstPc),// input
-.out_for_pd (out_for_pd),//output t_fpga_out   out_for_pd,
+.Clk                    (MAX10_CLK1_50),    //input  logic        Clk,
+.Rst                    (Rst),              //input  logic        Rst,
+.RstPc                  (RstPc),            //input
+.out_for_pd             (out_for_pd),       //output t_fpga_out   out_for_pd,
 // Fabric interface
-.InFabricValidQ503H (InFabricValidQ503H), //input  logic        ,
-.InFabricQ503H      (InFabricQ503H),      //input  t_tile_trans ,
-.OutFabricValidQ505H(PreOutFabricValidQ505H),//output logic        ,
-.OutFabricQ505H     (PreOutFabricQ505H),     //output t_tile_trans ,
+.InFabricValidQ503H     (InFabricValidQ503H),     //input  logic        ,
+.InFabricQ503H          (InFabricQ503H),          //input  t_tile_trans ,
+.OutFabricValidQ505H    (PreOutFabricValidQ505H), //output logic        ,
+.OutFabricQ505H         (PreOutFabricQ505H),      //output t_tile_trans ,
 // FPGA interface inputs              
-.Button_0 (KEY[0]),    //input  logic       Button_0, // CR_MEM
-.Button_1 (KEY[1]),    //input  logic       Button_1, // CR_MEM
-.Switch   (SW),           //input  logic [9:0] Switch,   // CR_MEM
+.Button_0               (KEY[0]),                 //input  logic       Button_0, // CR_MEM
+.Button_1               (KEY[1]),                 //input  logic       Button_1, // CR_MEM
+.Switch                 (SW),                     //input  logic [9:0] Switch,   // CR_MEM
 // FPGA interface outputs
-.fpga_out     (fpga_out),    //output logic [7:0] SEG7_0,   // CR_MEM
+.fpga_out               (fpga_out),               //output logic [7:0] SEG7_0,   // CR_MEM
 // VGA output
-.inDisplayArea(inDisplayArea), // VGA_OUTPUT
-.vga_out        (vga_out)        //output logic       v_sync,
+.inDisplayArea          (inDisplayArea),          //VGA_OUTPUT
+.vga_out                (vga_out)                 //output logic       v_sync,
 );
 
 logic EnRstPc;
@@ -135,23 +135,21 @@ uart_io  uart_io_inst
     //        Core to Fabric
     //================================================
     // input - Rsp to Core
-    .C2F_RspValidQ502H      (OutFabricValidQ505H),//input
-    .C2F_RspThreadIDQ502H   ('0),                 //input
-    .C2F_RspDataQ502H       (OutFabricQ505H.data),//input
-    .C2F_RspStall           ('0),                 //input
+    .OutFabricRspValidQ502H      (OutFabricValidQ505H),//input
+    .OutFabricRspDataQ502H       (OutFabricQ505H.data),//input
+    .OutFabricRspStall           ('0),                 //input
     // output - Req from Core
-    .C2F_ReqValidQ500H      (InFabricValidQ503H),//output
-    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H),//output
-    .C2F_ReqThreadIDQ500H   (                  ),//output
-    .C2F_ReqAddressQ500H    (InFabricQ503H.address),//output
-    .C2F_ReqDataQ500H       (InFabricQ503H.data)   ,//output
+    .InFabricReqValidQ500H      (InFabricValidQ503H),//output
+    .InFabricReqOpcodeQ500H     (InFabricReqOpcodeQ500H),//output
+    .InFabricReqAddressQ500H    (InFabricQ503H.address),//output
+    .InFabricReqDataQ500H       (InFabricQ503H.data)   ,//output
     // UART RX/TX
     .uart_master_tx         (UART_TXD),
     .uart_master_rx         (UART_RXD),
     .interrupt              (INTERRUPT)
     );
-assign InFabricQ503H.opcode = (C2F_ReqOpcodeQ500H == 1'b0) ? RD :
-                              (C2F_ReqOpcodeQ500H == 1'b1) ? WR :
+assign InFabricQ503H.opcode = (InFabricReqOpcodeQ500H == 1'b0) ? RD :
+                              (InFabricReqOpcodeQ500H == 1'b1) ? WR :
                                                              RD ;
 
 assign InFabricQ503H.requestor_id = '0;
