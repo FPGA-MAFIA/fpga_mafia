@@ -39,7 +39,11 @@ parser.add_argument('-params',    default=' ',            help='used for overrid
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
 parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
+parser.add_argument('-top',       default=None,           help='insert your top module name for simulation (default is the dut name)')
 args = parser.parse_args()
+# if -top was not specified, use the dut name
+if args.top is None:
+    args.top = args.dut
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 VERIF     = './verif/'+args.dut+'/'
@@ -86,6 +90,7 @@ class Test:
         self.app_flag = False
         self.mif_flag = False
         self.duration = 0
+        self.top = args.top
         # the tests parameters
         self.params = params # FIXME ABD
     def _create_test_dir(self):
@@ -212,7 +217,7 @@ class Test:
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
-            sim_cmd = 'vsim.exe work.' + self.dut + '_tb -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            sim_cmd = 'vsim.exe work.' + self.top + '_tb -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)

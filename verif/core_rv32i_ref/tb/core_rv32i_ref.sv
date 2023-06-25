@@ -63,6 +63,7 @@ logic [6:0] funct7;
 `MAFIA_DFF       (regfile, next_regfile,  clk);
 `MAFIA_DFF       (dmem,    next_dmem,     clk);
 `MAFIA_DFF       (imem,    next_imem,     clk);
+`MAFIA_DFF       (VGAMem,  NextVGAMem,    clk);
 `MAFIA_EN_RST_DFF(pc  ,    next_pc,       clk , (!end_of_simulation) , rst);
 
 `MAFIA_EN_RST_DFF(end_of_simulation,  1'b1   , clk , en_end_of_simulation , rst)
@@ -90,10 +91,37 @@ assign mem_rd_addr  = data_rd1 + I_ImmediateQ101H;
 assign mem_wr_addr  = data_rd1 + S_ImmediateQ101H;
 assign CtrlBranchOp = t_branch_type'(funct3);
 
+logic [31:0] lb_data    , lh_data    , lw_data    , lbu_data    , lhu_data;
+logic [31:0] vga_lb_data, vga_lh_data, vga_lw_data, vga_lbu_data, vga_lhu_data;
+logic hit_vga_mem_rd;
+logic hit_vga_mem_wr;
+//=======================================================
+// load data from memory - byte, half-word, word
+//=======================================================
+assign lb_data [31:0] = { {8{dmem[mem_rd_addr+0][7]}}  ,{8{dmem[mem_rd_addr+0][7]}}   ,{8{dmem[mem_rd_addr+0][7]}}, dmem[mem_rd_addr+0]};//LB
+assign lh_data [31:0] = { {8{dmem[mem_rd_addr+1][7]}}  ,{8{dmem[mem_rd_addr+1][7]}}   ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LH
+assign lw_data [31:0] = {   dmem[mem_rd_addr+3]        ,  dmem[mem_rd_addr+2]         ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LW
+assign lbu_data[31:0] = { {8{1'b0}}                    ,{8{1'b0}}                     ,{8{1'b0}}                  , dmem[mem_rd_addr+0]};//LBU
+assign lhu_data[31:0] = { {8{1'b0}}                    ,{8{1'b0}}                     ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LHU
+//=======================================================
+// load data from VGA memory - byte, half-word, word
+assign vga_lb_data [31:0] = { {8{VGAMem[mem_rd_addr+0][7]}} ,{8{VGAMem[mem_rd_addr+0][7]}} ,{8{VGAMem[mem_rd_addr+0][7]}}, VGAMem[mem_rd_addr+0]};//LB
+assign vga_lh_data [31:0] = { {8{VGAMem[mem_rd_addr+1][7]}} ,{8{VGAMem[mem_rd_addr+1][7]}} ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LH
+assign vga_lw_data [31:0] = {    VGAMem[mem_rd_addr+3]      ,  VGAMem[mem_rd_addr+2]       ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LW
+assign vga_lbu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,{8{1'b0}}                    , VGAMem[mem_rd_addr+0]};//LBU
+assign vga_lhu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LHU
+assign hit_vga_mem_rd = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF);
+assign hit_vga_mem_wr = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF);
 
+//=======================================================
+// This main logic of the reference model
+//=======================================================
+// using a single always_comb block with a case statement
+// to decode+execute+mem+write_back
+//=======================================================
 always_comb begin
     //=======================
-    // default assignments
+    // default assignments       
     //=======================
     next_pc             = pc + 4;
     next_regfile        = regfile;
@@ -102,7 +130,6 @@ always_comb begin
     illegal_instruction = 1'b0;
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
-
     //=================================================================
     // decode+execute+mem+write_back 
     // using a single case statement on the instruction
@@ -118,6 +145,10 @@ always_comb begin
         next_regfile[rd] = pc + 4;
         next_pc = pc + J_ImmediateQ101H;
     end
+    32'b????????????_?????_???_?????_1100111: begin // JAL
+        next_regfile[rd] = pc + 4;
+        next_pc = regfile[rs1] + I_ImmediateQ101H;
+    end
     //BEQ/BNE/BLT/BGE/BLTU/BGEU
     32'b???????_?????_?????_???_?????_1100011: begin
         if((CtrlBranchOp == BEQ)  && ( (data_rd1==data_rd2)                 )) next_pc = pc + B_ImmediateQ101H;
@@ -129,26 +160,33 @@ always_comb begin
     end
     //LB/LH/LW/LBU/LHU
     32'b???????_?????_?????_???_?????_0000011: begin
-        if(funct3 == 3'b000) next_regfile[rd] = { {8{dmem[mem_rd_addr+0][7]}}  ,{8{dmem[mem_rd_addr+0][7]}}   ,{8{dmem[mem_rd_addr+0][7]}}, dmem[mem_rd_addr+0]};//LB
-        if(funct3 == 3'b001) next_regfile[rd] = { {8{dmem[mem_rd_addr+1][7]}}  ,{8{dmem[mem_rd_addr+1][7]}}   ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LH
-        if(funct3 == 3'b010) next_regfile[rd] = {   dmem[mem_rd_addr+3]        ,  dmem[mem_rd_addr+2]         ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LW
-        if(funct3 == 3'b100) next_regfile[rd] = { {8{1'b0}}                    ,{8{1'b0}}                     ,{8{1'b0}}                  , dmem[mem_rd_addr+0]};//LBU
-        if(funct3 == 3'b101) next_regfile[rd] = { {8{1'b0}}                    ,{8{1'b0}}                     ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LHU
+        if(funct3 == 3'b000) next_regfile[rd] = hit_vga_mem_rd ? vga_lb_data  : lb_data [31:0];
+        if(funct3 == 3'b001) next_regfile[rd] = hit_vga_mem_rd ? vga_lh_data  : lh_data [31:0];
+        if(funct3 == 3'b010) next_regfile[rd] = hit_vga_mem_rd ? vga_lw_data  : lw_data [31:0];
+        if(funct3 == 3'b100) next_regfile[rd] = hit_vga_mem_rd ? vga_lbu_data : lbu_data[31:0];
+        if(funct3 == 3'b101) next_regfile[rd] = hit_vga_mem_rd ? vga_lhu_data : lhu_data[31:0];
     end
     //SB/SH/SW
     32'b???????_?????_?????_???_?????_0100011: begin
         if(funct3 == 3'b000) begin
-            next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
         end
         if(funct3 == 3'b001) begin
-            next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SH
-            next_dmem[mem_wr_addr+1] = data_rd2[15: 8];//SH
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SH
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+1] = data_rd2[15: 8];//SH
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SH
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+1] = data_rd2[15: 8];//SH
         end
         if(funct3 == 3'b010) begin
-            next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SW
-            next_dmem[mem_wr_addr+1] = data_rd2[15: 8];//SW
-            next_dmem[mem_wr_addr+2] = data_rd2[23:16];//SW
-            next_dmem[mem_wr_addr+3] = data_rd2[31:24];//SW
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SW
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+1] = data_rd2[15: 8];//SW
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+2] = data_rd2[23:16];//SW
+            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+3] = data_rd2[31:24];//SW
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SW
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+1] = data_rd2[15: 8];//SW
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+2] = data_rd2[23:16];//SW
+            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+3] = data_rd2[31:24];//SW
         end
     end
     //ADDI/SLTI/SLTIU/XORI/ORI/ANDI/SLLI/SRLI/SRAI
@@ -181,13 +219,12 @@ always_comb begin
     32'b????????????_?????_???_?????_0001111: begin //FENCE
         //do nothing -> order is preserved without doing anything
     end
-    32'b????????????_?????_???_?????_1110011: begin //ECALL/EBREAK
-        if((funct3 == 3'b000)&&(funct7 == 7'b0000000)) begin //ECALL
+    32'b000000000000_00000_000_00000_1110011: begin //ECALL/EBREAK
            ecall_was_called  = 1'b1;
-        end
-        if((funct3 == 3'b000)&&(funct7 == 7'b0000001)) begin //EBREAK
+    end
+    32'b000000000001_00000_000_00000_1110011: begin //ECALL/EBREAK
            ebreak_was_called = 1'b1;
-        end
+    
     end
     default: begin
         illegal_instruction = 1'b1 && ~rst;
