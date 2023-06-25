@@ -37,13 +37,116 @@ always_comb begin
     if(csr_wren) begin
         unique casez ({csr_op,csr_addr}) // address holds the offset
             // ---- RW CSR ----
-            {2'b01,CSR_SCRATCH}   : next_csr.csr_scratch = csr_data;
-            {2'b10,CSR_SCRATCH}   : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
-            {2'b11,CSR_SCRATCH}   : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
 
-            {2'b01,CSR_MCAUSE}    : next_csr.csr_mcause = csr_data;                    
-            {2'b10,CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause |  csr_data;
-            {2'b11,CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause & ~csr_data;
+            // CSR_SCRATCH
+            {2'b01,CSR_SCRATCH}       : next_csr.csr_scratch = csr_data;
+            {2'b10,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
+            {2'b11,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
+            // CSR_MCYCLE
+            {2'b01, CSR_MCYCLE}    : next_csr.csr_mcycle = csr_data;
+            {2'b10, CSR_MCYCLE}    : next_csr.csr_mcycle = csr.csr_mcycle | csr_data;
+            {2'b11, CSR_MCYCLE}    : next_csr.csr_mcycle = csr.csr_mcycle & ~csr_data;
+            // CSR_MCYCLEH
+            {2'b01, CSR_MCYCLEH}    : next_csr.csr_mcycleh = csr_data;
+            {2'b10, CSR_MCYCLEH}    : next_csr.csr_mcycleh = csr.csr_mcycleh | csr_data;
+            {2'b11, CSR_MCYCLEH}    : next_csr.csr_mcycleh = csr.csr_mcycleh & ~csr_data;
+            // CSR_MINSTRET
+            {2'b01, CSR_MINSTRET}    : next_csr.csr_minstret = csr_data;
+            {2'b10, CSR_MINSTRET}    : next_csr.csr_minstret = csr.csr_minstret | csr_data;
+            {2'b11, CSR_MINSTRET}    : next_csr.csr_minstret = csr.csr_minstret & ~csr_data;
+            // CSR_MINSTRETH
+            {2'b01, CSR_MINSTRETH}    : next_csr.csr_minstreth = csr_data;
+            {2'b10, CSR_MINSTRETH}    : next_csr.csr_minstreth = csr.csr_minstreth | csr_data;
+            {2'b11, CSR_MINSTRETH}    : next_csr.csr_minstreth = csr.csr_minstreth & ~csr_data;
+            // CSR_MHPMCOUNTER3
+            {2'b01, CSR_MHPMCOUNTER3}    : next_csr.csr_mhpmcounter3 = csr_data;
+            {2'b10, CSR_MHPMCOUNTER3}    : next_csr.csr_mhpmcounter3 = csr.csr_mhpmcounter3 | csr_data;
+            {2'b11, CSR_MHPMCOUNTER3}    : next_csr.csr_mhpmcounter3 = csr.csr_mhpmcounter3 & ~csr_data;
+            // CSR_MHPMCOUNTER3H
+            {2'b01, CSR_MHPMCOUNTER3H}    : next_csr.csr_mhpmcounter3h = csr_data;
+            {2'b10, CSR_MHPMCOUNTER3H}    : next_csr.csr_mhpmcounter3h = csr.csr_mhpmcounter3h | csr_data;
+            {2'b11, CSR_MHPMCOUNTER3H}    : next_csr.csr_mhpmcounter3h = csr.csr_mhpmcounter3h & ~csr_data;
+            // CSR_MHPMCOUNTER4
+            {2'b01, CSR_MHPMCOUNTER4}    : next_csr.csr_mhpmcounter4 = csr_data;
+            {2'b10, CSR_MHPMCOUNTER4}    : next_csr.csr_mhpmcounter4 = csr.csr_mhpmcounter4 | csr_data;
+            {2'b11, CSR_MHPMCOUNTER4}    : next_csr.csr_mhpmcounter4 = csr.csr_mhpmcounter4 & ~csr_data;
+            // CSR_MHPMCOUNTER4H
+            {2'b01, CSR_MHPMCOUNTER4H}    : next_csr.csr_mhpmcounter4h = csr_data;
+            {2'b10, CSR_MHPMCOUNTER4H}    : next_csr.csr_mhpmcounter4h = csr.csr_mhpmcounter4h | csr_data;
+            {2'b11, CSR_MHPMCOUNTER4H}    : next_csr.csr_mhpmcounter4h = csr.csr_mhpmcounter4h & ~csr_data;
+            // CSR_MCOUNTINHIBIT
+            {2'b01, CSR_MCOUNTINHIBIT}    : next_csr.csr_mcountinhibit = csr_data;
+            {2'b10, CSR_MCOUNTINHIBIT}    : next_csr.csr_mcountinhibit = csr.csr_mcountinhibit | csr_data;
+            {2'b11, CSR_MCOUNTINHIBIT}    : next_csr.csr_mcountinhibit = csr.csr_mcountinhibit & ~csr_data;
+            // CSR_MHPMEVENT3
+            {2'b01, CSR_MHPMEVENT3}    : next_csr.csr_mhpmevent3 = csr_data;
+            {2'b10, CSR_MHPMEVENT3}    : next_csr.csr_mhpmevent3 = csr.csr_mhpmevent3 | csr_data;
+            {2'b11, CSR_MHPMEVENT3}    : next_csr.csr_mhpmevent3 = csr.csr_mhpmevent3 & ~csr_data;
+            // CSR_MHPMEVENT4
+            {2'b01, CSR_MHPMEVENT4}    : next_csr.csr_mhpmevent4 = csr_data;
+            {2'b10, CSR_MHPMEVENT4}    : next_csr.csr_mhpmevent4 = csr.csr_mhpmevent4 | csr_data;
+            {2'b11, CSR_MHPMEVENT4}    : next_csr.csr_mhpmevent4 = csr.csr_mhpmevent4 & ~csr_data;
+            // CSR_MSTATUS
+            {2'b01, CSR_MSTATUS}    : next_csr.csr_mstatus = csr_data;
+            {2'b10, CSR_MSTATUS}    : next_csr.csr_mstatus = csr.csr_mstatus | csr_data;
+            {2'b11, CSR_MSTATUS}    : next_csr.csr_mstatus = csr.csr_mstatus & ~csr_data;
+            // CSR_MSTATUSH
+            {2'b01, CSR_MSTATUSH}    : next_csr.csr_mstatush = csr_data;
+            {2'b10, CSR_MSTATUSH}    : next_csr.csr_mstatush = csr.csr_mstatush | csr_data;
+            {2'b11, CSR_MSTATUSH}    : next_csr.csr_mstatush = csr.csr_mstatush & ~csr_data;
+            // CSR_MISA
+            {2'b01, CSR_MISA}    : next_csr.csr_misa = csr_data;
+            {2'b10, CSR_MISA}    : next_csr.csr_misa = csr.csr_misa | csr_data;
+            {2'b11, CSR_MISA}    : next_csr.csr_misa = csr.csr_misa & ~csr_data;
+            // CSR_MEDELEG
+            {2'b01, CSR_MEDELEG}    : next_csr.csr_medeleg = csr_data;
+            {2'b10, CSR_MEDELEG}    : next_csr.csr_medeleg = csr.csr_medeleg | csr_data;
+            {2'b11, CSR_MEDELEG}    : next_csr.csr_medeleg = csr.csr_medeleg & ~csr_data;
+            // CSR_MIDELEG
+            {2'b01, CSR_MIDELEG}    : next_csr.csr_mideleg = csr_data;
+            {2'b10, CSR_MIDELEG}    : next_csr.csr_mideleg = csr.csr_mideleg | csr_data;
+            {2'b11, CSR_MIDELEG}    : next_csr.csr_mideleg = csr.csr_mideleg & ~csr_data;
+            // CSR_MIE
+            {2'b01, CSR_MIE}    : next_csr.csr_mie = csr_data;
+            {2'b10, CSR_MIE}    : next_csr.csr_mie = csr.csr_mie | csr_data;
+            {2'b11, CSR_MIE}    : next_csr.csr_mie = csr.csr_mie & ~csr_data;
+            // CSR_MTVEC
+            {2'b01, CSR_MTVEC}    : next_csr.csr_mtvec = csr_data;
+            {2'b10, CSR_MTVEC}    : next_csr.csr_mtvec = csr.csr_mtvec | csr_data;
+            {2'b11, CSR_MTVEC}    : next_csr.csr_mtvec = csr.csr_mtvec & ~csr_data;
+            // CSR_MCOUNTERN
+            {2'b01, CSR_MCOUNTERN}    : next_csr.csr_mcounthern = csr_data;
+            {2'b10, CSR_MCOUNTERN}    : next_csr.csr_mcounthern = csr.csr_mcounthern | csr_data;
+            {2'b11, CSR_MCOUNTERN}    : next_csr.csr_mcounthern = csr.csr_mcounthern & ~csr_data;
+            // CSR_MSCRATCH
+            {2'b01, CSR_MSCRATCH}    : next_csr.csr_mscratch = csr_data;
+            {2'b10, CSR_MSCRATCH}    : next_csr.csr_mscratch = csr.csr_mscratch | csr_data;
+            {2'b11, CSR_MSCRATCH}    : next_csr.csr_mscratch = csr.csr_mscratch & ~csr_data;
+            // CSR_MEPC
+            {2'b01, CSR_MEPC}    : next_csr.csr_mepc = csr_data;
+            {2'b10, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc | csr_data;
+            {2'b11, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc & ~csr_data;
+            // CSR_MCAUSE
+            {2'b01, CSR_MCAUSE}    : next_csr.csr_mcause = csr_data;
+            {2'b10, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause | csr_data;
+            {2'b11, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause & ~csr_data;
+            // CSR_MTVAL
+            {2'b01, CSR_MTVAL}    : next_csr.csr_mtval = csr_data;
+            {2'b10, CSR_MTVAL}    : next_csr.csr_mtval = csr.csr_mtval | csr_data;
+            {2'b11, CSR_MTVAL}    : next_csr.csr_mtval = csr.csr_mtval & ~csr_data;
+            // CSR_MIP
+            {2'b01, CSR_MIP}    : next_csr.csr_mip = csr_data;
+            {2'b10, CSR_MIP}    : next_csr.csr_mip = csr.csr_mip | csr_data;
+            {2'b11, CSR_MIP}    : next_csr.csr_mip = csr.csr_mip & ~csr_data;
+            // CSR_MTINST
+            {2'b01, CSR_MTINST}    : next_csr.csr_mtinst = csr_data;
+            {2'b10, CSR_MTINST}    : next_csr.csr_mtinst = csr.csr_mtinst | csr_data;
+            {2'b11, CSR_MTINST}    : next_csr.csr_mtinst = csr.csr_mtinst & ~csr_data;
+            // CSR_MTVAL2
+            {2'b01, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr_data;
+            {2'b10, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 | csr_data;
+            {2'b11, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 & ~csr_data;
+
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
@@ -54,6 +157,7 @@ always_comb begin
     // the cycle counter is incremented on every clock cycle
         {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
         next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
+
     //==========================================================================
 
     //==========================================================================
@@ -92,19 +196,56 @@ always_comb begin
     CsrReadDataQ102H = 32'b0;
     if(csr_rden) begin
         unique casez (csr_addr) // address holds the offset
-            // ---- RW CSR ----
-            CSR_SCRATCH    : CsrReadDataQ102H = csr.csr_scratch;
             // ---- RO CSR ----
             CSR_CYCLE_LOW  : CsrReadDataQ102H = csr.csr_cycle_low;
             CSR_CYCLE_HIGH : CsrReadDataQ102H = csr.csr_cycle_high;
-            CSR_MCAUSE     : CsrReadDataQ102H = csr.csr_mcause;
-            CSR_MEPC       : CsrReadDataQ102H = csr.csr_mepc;
+            
+            CSR_MVENDORID      : CsrReadDataQ102H = csr.csr_mvendorid;
+            CSR_MARCHID        : CsrReadDataQ102H = csr.csr_marchid;
+            CSR_MIMPID         : CsrReadDataQ102H = csr.csr_mimpid;
+            CSR_MHARTID        : CsrReadDataQ102H = csr.csr_mhartid;
+            CSR_MCONFIGPTR     : CsrReadDataQ102H = csr.csr_mconfigptr;
+            // ---- RW CSR ----
+
+            CSR_SCRATCH        : CsrReadDataQ102H = csr.csr_scratch;
+            CSR_MCYCLE         : CsrReadDataQ102H = csr.csr_mcycle;
+            CSR_MCYCLEH        : CsrReadDataQ102H = csr.csr_mcycleh;
+            CSR_MINSTRET       : CsrReadDataQ102H = csr.csr_minstret;
+            CSR_MINSTRETH      : CsrReadDataQ102H = csr.csr_minstreth;
+            CSR_MHPMCOUNTER3   : CsrReadDataQ102H = csr.csr_mhpmcounter3;
+            CSR_MHPMCOUNTER3H  : CsrReadDataQ102H = csr.csr_mhpmcounter3h;
+            CSR_MHPMCOUNTER4   : CsrReadDataQ102H = csr.csr_mhpmcounter4;
+            CSR_MHPMCOUNTER4H  : CsrReadDataQ102H = csr.csr_mhpmcounter4h;
+            CSR_MCOUNTINHIBIT  : CsrReadDataQ102H = csr.csr_mcountinhibit;
+            CSR_MHPMEVENT3     : CsrReadDataQ102H = csr.csr_mhpmevent3;
+            CSR_MHPMEVENT4     : CsrReadDataQ102H = csr.csr_mhpmevent4;
+            CSR_MSTATUS        : CsrReadDataQ102H = csr.csr_mstatus;
+            CSR_MSTATUSH       : CsrReadDataQ102H = csr.csr_mstatush;
+            CSR_MISA           : CsrReadDataQ102H = csr.csr_misa;
+            CSR_MEDELEG        : CsrReadDataQ102H = csr.csr_medeleg;
+            CSR_MIDELEG        : CsrReadDataQ102H = csr.csr_mideleg;
+            CSR_MIE            : CsrReadDataQ102H = csr.csr_mie;
+            CSR_MTVEC          : CsrReadDataQ102H = csr.csr_mtvec;
+            CSR_MCOUNTERN      : CsrReadDataQ102H = csr.csr_mcounthern;
+            CSR_MSCRATCH       : CsrReadDataQ102H = csr.csr_mscratch;
+            CSR_MEPC           : CsrReadDataQ102H = csr.csr_mepc;
+            CSR_MCAUSE         : CsrReadDataQ102H = csr.csr_mcause;
+            CSR_MTVAL          : CsrReadDataQ102H = csr.csr_mtval;
+            CSR_MIP            : CsrReadDataQ102H = csr.csr_mip;
+            CSR_MTINST         : CsrReadDataQ102H = csr.csr_mtinst;
+            CSR_MTVAL2         : CsrReadDataQ102H = csr.csr_mtval2;
+
             default        : CsrReadDataQ102H = 32'b0 ;
         endcase
     end
 end
 
 assign MePc = csr.csr_mepc;
+assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
+assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
+assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
+assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
+assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 
 
 always_comb begin
