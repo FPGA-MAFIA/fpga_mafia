@@ -23,6 +23,15 @@ initial begin: clock_gen
     end
 end// clock_gen
 
+
+// t_set_rd_rsp back_door_entry ;
+// localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
+// t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
+// logic [SET_WIDTH-1:0] tag_mem   [(2**SET_ADRS_WIDTH)-1:0];
+// logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
+
+
+
 `include "mem_ss_tasks.vh"
 `include "mem_ss_trk.vh"
 initial begin : start_test
@@ -44,6 +53,9 @@ $display("====== start test =======");
 $display("=========================\n");
 if(test_name == "alive") begin
 `include "alive.sv"
+end 
+if(test_name == "wr_rd_dmem") begin
+`include "wr_rd_dmem.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);
@@ -75,6 +87,10 @@ mem_ss mem_ss (
 );
 
 
+//============================
+//          Far Memory ARRAY
+//============================
+
 array  #(
     .WORD_WIDTH     (CL_WIDTH),
     .ADRS_WIDTH     (SET_ADRS_WIDTH + TAG_WIDTH)
@@ -94,6 +110,14 @@ t_fm_req sample_cl_req_to_sram;
 assign cl_rsp_from_sram.valid = sample_cl_req_to_sram.valid;
 assign cl_rsp_from_sram.address = sample_cl_req_to_sram.address;
 
+
+// cache_ref_model cache_ref_model (
+//     .clk                (clk),            //input   logic
+//     .rst                (rst),            //input   logic
+//     //Agent Interface                      
+//     .imem_core2cache_req(imem_core2cache_req),  // input  
+//     .imem_cache2core_rsp(imem_cache2core_rsp)                     // output t_rd_rsp imem_cache2core_rsp,
+// ); 
    
 
 endmodule 

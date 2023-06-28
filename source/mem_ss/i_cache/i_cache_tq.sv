@@ -165,8 +165,8 @@ always_comb begin
             S_IDLE                : begin
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
                 if (allocate_entry[i]) begin
-                    next_tq_state[i] =  ((core2cache_req.opcode == RD_OP) || ( core2cache_req.opcode == WR_OP)) ? S_LU_CORE :
-                                                                                                                  S_ERROR   ;
+                    next_tq_state[i] =  ((core2cache_req.opcode == RD_OP) ) ?   S_LU_CORE :
+                                                                                S_ERROR   ;
                     en_tq_rd_indication             [i] = 1'b1;
                     en_tq_cl_word_offset            [i] = 1'b1;
                     en_tq_reg_id                    [i] = 1'b1;
@@ -185,7 +185,7 @@ always_comb begin
                     next_tq_state[i]=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
                                         (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
                                         (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_LU_CORE         : // this FILL is from an older request, don't want it to affect the entry
-                                        /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR           ;
+                                                                                  S_ERROR           ;
 
                 end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
             end
