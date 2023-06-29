@@ -69,8 +69,8 @@ arbiter #(.NUM_CLIENTS(2))
 rr_arb(
     .clk(clk),
     .rst(rst),
-    .valid_candidate(valid_candidate[1:0]),    // input from each fifo - not empty indication, valid candidate.
-    .winner_dec_id  (winner_dec_id[1:0])  // the arbiter winner use to fifo pop.        
+    .valid_candidate(valid_candidate[1:0]),// input from each fifo - not empty indication, valid candidate.
+    .winner_dec_id  (winner_dec_id[1:0])   // the arbiter winner use to fifo pop.        
 );
 
 assign fifo_pop[1:0]   = winner_dec_id[1:0];
@@ -78,10 +78,10 @@ assign pop_i_mem_fifo  = fifo_pop[0] ;
 assign pop_d_mem_fifo  = fifo_pop[1] ;
 
 //detect if the response is for the I or D cache according to the 
-localparam I_MEM_BASE_RANGE = 32'h00000000;
-localparam I_MEM_TOP_RANGE  = 32'h0000ffff;
-localparam D_MEM_BASE_RANGE = 32'h00010000;
-localparam D_MEM_TOP_RANGE  = 32'h0001ffff;
+localparam I_MEM_BASE_RANGE = 32'h000_00_00_0;
+localparam I_MEM_TOP_RANGE  = 32'h000_0f_ff_f;
+localparam D_MEM_BASE_RANGE = 32'h000_10_00_0;
+localparam D_MEM_TOP_RANGE  = 32'h000_1f_ff_f;
 logic sram_rsp_is_to_i_cache;
 logic sram_rsp_is_to_d_cache;
 //FIXME - instead of limiting the address range, we should set valid according to the source of the request. (can be done once we understand the SRAM communication protocol)

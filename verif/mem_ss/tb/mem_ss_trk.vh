@@ -101,14 +101,14 @@ always @(posedge clk) begin
 //==================================================
 // tracker of reference model - core<->cache
 //==================================================
-    //if(ref_cache2core_rsp.valid) begin
-    //    $fwrite(mem_ss_ref_gold_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
-    //    ref_cache2core_rsp.address, 
-    //    ref_cache2core_rsp.reg_id, 
-    //    ref_cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
-    //    ref_cache2core_rsp.address[MSB_SET:LSB_SET], 
-    //    ref_cache2core_rsp.data);
-    //end
+    if(dmem_ref_cache2core_rsp.valid) begin
+        $fwrite(mem_ss_ref_gold_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
+        dmem_ref_cache2core_rsp.address, 
+        dmem_ref_cache2core_rsp.reg_id, 
+        dmem_ref_cache2core_rsp.address[MSB_TAG:LSB_TAG] , 
+        dmem_ref_cache2core_rsp.address[MSB_SET:LSB_SET], 
+        dmem_ref_cache2core_rsp.data);
+    end
 //==================================================
 // tracker of reference model - core<->cache
 //==================================================

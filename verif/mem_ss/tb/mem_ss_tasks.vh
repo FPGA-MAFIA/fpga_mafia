@@ -97,3 +97,59 @@ task eot(input string msg);
   $display("END-OF-TEST Message: %s =\n", msg);
   $finish;
 endtask 
+
+
+//systemverilog task to create the pull of tags and sets to be used in the test
+task create_dmem_addrs_pull();
+    int i;
+    for (i = 0; i < V_MAX_NUM_TAG_PULL+1; i = i + 1) begin
+        dmem_tag_pull[i] = $urandom_range(8'h10, 8'h1F); 
+    end
+    for (i = 0; i < V_MAX_NUM_SET_PULL+1; i = i + 1) begin
+        dmem_set_pull[i] = $urandom_range(8'h00, 8'hFF);
+    end
+endtask
+
+//=======================================================
+task dmem_create_addrs(output logic [19:0] addr);
+    // assign the tag bits to the addr[19:12]
+    // choose random tag from the tag_pull
+    logic [7:0] rand_num;
+    rand_num = $urandom_range(0, V_MAX_NUM_TAG_PULL);
+    addr[19:12] = dmem_tag_pull[rand_num];
+    // assign the set bits for the addr[11:4]
+    // choose random set from the set_pull
+    rand_num = $urandom_range(0, V_MAX_NUM_SET_PULL);
+    addr[11:4] = dmem_set_pull[rand_num];
+    // assign random offset bits for the addr[3:0]
+    addr[3:2] = $urandom_range(0, 3);
+    addr[1:0] = 2'b0;
+endtask
+
+//=======================================================
+
+task dmem_random_wr( ); 
+    logic [19:0] addr;
+    logic [31:0] data;
+    logic [4:0]  id;
+    int i;
+    dmem_create_addrs(.addr(addr) );
+    data = $urandom_range(0, 32'hFFFFFFFF);
+    id = $urandom_range(0, 5'd31);
+    dmem_wr_req(addr, data, id);
+    i = $urandom_range(V_MIN_REQ_DELAY, V_MAX_REQ_DELAY);
+    delay(i);
+endtask
+
+//=======================================================
+task dmem_random_rd(); 
+    logic [19:0] addr;
+    logic [4:0]  id;
+    int i;
+    dmem_create_addrs(.addr(addr));
+    id = $urandom_range(0, 5'd31);
+    dmem_rd_req(addr, id);
+    i = $urandom_range(V_MIN_REQ_DELAY, V_MAX_REQ_DELAY);
+    delay(i);
+endtask
+
