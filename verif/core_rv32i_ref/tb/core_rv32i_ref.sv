@@ -110,8 +110,6 @@ assign vga_lh_data [31:0] = { {8{VGAMem[mem_rd_addr+1][7]}} ,{8{VGAMem[mem_rd_ad
 assign vga_lw_data [31:0] = {    VGAMem[mem_rd_addr+3]      ,  VGAMem[mem_rd_addr+2]       ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LW
 assign vga_lbu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,{8{1'b0}}                    , VGAMem[mem_rd_addr+0]};//LBU
 assign vga_lhu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LHU
-assign hit_vga_mem_rd = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF);
-assign hit_vga_mem_wr = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF);
 
 //=======================================================
 // This main logic of the reference model
@@ -125,11 +123,15 @@ always_comb begin
     //=======================
     next_pc             = pc + 4;
     next_regfile        = regfile;
-    next_dmem           = dmem;
-    next_imem           = imem;
     illegal_instruction = 1'b0;
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
+    hit_vga_mem_rd      = 1'b0;
+    hit_vga_mem_wr      = 1'b0;
+    next_dmem           = dmem;
+    next_imem           = imem;
+    NextVGAMem          = VGAMem;
+    if(rst) NextVGAMem  = '{default: '0};
     //=================================================================
     // decode+execute+mem+write_back 
     // using a single case statement on the instruction
@@ -160,6 +162,7 @@ always_comb begin
     end
     //LB/LH/LW/LBU/LHU
     32'b???????_?????_?????_???_?????_0000011: begin
+        hit_vga_mem_rd = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF);
         if(funct3 == 3'b000) next_regfile[rd] = hit_vga_mem_rd ? vga_lb_data  : lb_data [31:0];
         if(funct3 == 3'b001) next_regfile[rd] = hit_vga_mem_rd ? vga_lh_data  : lh_data [31:0];
         if(funct3 == 3'b010) next_regfile[rd] = hit_vga_mem_rd ? vga_lw_data  : lw_data [31:0];
@@ -168,6 +171,7 @@ always_comb begin
     end
     //SB/SH/SW
     32'b???????_?????_?????_???_?????_0100011: begin
+        hit_vga_mem_wr = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF);
         if(funct3 == 3'b000) begin
             if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
             if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB

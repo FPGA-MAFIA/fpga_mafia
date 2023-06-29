@@ -5,5 +5,5 @@ int main()  {
     x = 2;  
     y = 3;  
     z = x+y;  
-    rvc_print_int(z);
+    rvc_printf("HELLO WORLD\n");
 }  // main()
