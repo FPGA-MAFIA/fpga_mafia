@@ -67,7 +67,7 @@ initial begin: test_seq
     //======================================
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force mini_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
-    force core_rv32i_ref.imem              = IMem; //backdoor to reference model memory
+    force rv32i_ref.imem              = IMem; //backdoor to reference model memory
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #1000 $finish;
 end // test_seq
@@ -94,13 +94,13 @@ mini_top mini_top (
 
 `include "mini_core_trk.sv"
 
-core_rv32i_ref
+rv32i_ref
 # (
     .I_MEM_LSB (I_MEM_OFFSET_MINI),
     .I_MEM_MSB (I_MEM_MSB_MINI),
     .D_MEM_LSB (D_MEM_OFFSET_MINI),
     .D_MEM_MSB (D_MEM_MSB_MINI)
-)  core_rv32i_ref (
+)  rv32i_ref (
 .clk                 (Clk),
 .rst                 (Rst)
 );

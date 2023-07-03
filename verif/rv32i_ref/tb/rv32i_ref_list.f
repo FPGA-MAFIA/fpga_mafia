@@ -6,5 +6,5 @@
 +incdir+../../../source/router/
 
 ../../../source/common/common_pkg.sv
-../../../verif/core_rv32i_ref/tb/core_rv32i_ref.sv
-../../../verif/core_rv32i_ref/tb/core_rv32i_ref_tb.sv
+../../../verif/rv32i_ref/tb/rv32i_ref.sv
+../../../verif/rv32i_ref/tb/rv32i_ref_tb.sv

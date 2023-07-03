@@ -17,7 +17,7 @@
 
 `include "macros.sv"
 
-module core_rv32i_ref_tb;
+module rv32i_ref_tb;
 import common_pkg::*;
 logic        Clk;
 logic        Rst;
@@ -53,34 +53,32 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../../target/core_rv32i_ref/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    $readmemh({"../../../target/core_rv32i_ref/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-    force core_rv32i_ref.imem = IMem; //backdoor to reference model memory
-    force core_rv32i_ref.dmem = DMem; //backdoor to reference model memory
+    $readmemh({"../../../target/rv32i_ref/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    $readmemh({"../../../target/rv32i_ref/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+    force rv32i_ref.imem = IMem; //backdoor to reference model memory
+    force rv32i_ref.dmem = DMem; //backdoor to reference model memory
     #10;
-    release core_rv32i_ref.imem;
-    release core_rv32i_ref.dmem;
+    release rv32i_ref.imem;
+    release rv32i_ref.dmem;
     //======================================
     // EOT - end of test
     //======================================
-    #100000 
-    print_vga_ref_screen();
-    #10 
-    $finish;
+    #100000;
+    eot("ERROR: TIMEOUT");
 end // test_seq
 
-core_rv32i_ref
+rv32i_ref
 # (
     .I_MEM_LSB (I_MEM_OFFSET_MINI),
     .I_MEM_MSB (I_MEM_MSB_MINI),
     .D_MEM_LSB (D_MEM_OFFSET_MINI),
     .D_MEM_MSB (D_MEM_MSB_MINI)
-)  core_rv32i_ref (
+)  rv32i_ref (
 .clk  (Clk),
 .rst  (Rst)
 );
 
-`include "core_rv32i_ref_tasks.vh"
+`include "rv32i_ref_tasks.vh"
 
 
 endmodule 
