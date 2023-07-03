@@ -80,6 +80,9 @@ rv32i_ref
 
 `include "rv32i_ref_tasks.vh"
 
+import rv32i_ref_pkg::*;
+t_debug_info debug_info;
 
+assign debug_info = rv32i_ref.debug_info;
 endmodule 
 

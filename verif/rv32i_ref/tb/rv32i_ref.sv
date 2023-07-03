@@ -12,63 +12,14 @@ module rv32i_ref
     input clk,
     input rst
 );
-
-typedef enum logic [5:0] {
-    NULL  = 6'd0,
-    LUI   = 6'd1,
-    AUIPC = 6'd2,
-    JAL   = 6'd3,
-    JALR  = 6'd4,
-    BEQ   = 6'd5,
-    BNE   = 6'd6,
-    BLT   = 6'd7,
-    BGE   = 6'd8,
-    BLTU  = 6'd9,
-    BGEU  = 6'd10,
-    LB    = 6'd11,
-    LH    = 6'd12,
-    LW    = 6'd13,
-    LBU   = 6'd14,
-    LHU   = 6'd15,
-    SB    = 6'd16,
-    SH    = 6'd17,
-    SW    = 6'd18,
-    ADDI  = 6'd19,
-    SLTI  = 6'd20,
-    SLTIU = 6'd21,
-    XORI  = 6'd22,
-    ORI   = 6'd23,
-    ANDI  = 6'd24,
-    SLLI  = 6'd25,
-    SRLI  = 6'd26,
-    SRAI  = 6'd27,
-    ADD   = 6'd28,
-    SUB   = 6'd29,
-    SLL   = 6'd30,
-    SLT   = 6'd31,
-    SLTU  = 6'd32,
-    XOR   = 6'd33,
-    SRL   = 6'd34,
-    SRA   = 6'd35,
-    OR    = 6'd36,
-    AND   = 6'd37,
-    FENCE = 6'd38,
-    ECALL = 6'd39,
-    EBREAK= 6'd40,
-    CSRRW = 6'd41,
-    CSRRS = 6'd42,
-    CSRRC = 6'd43,
-    CSRRWI= 6'd44,
-    CSRRSI= 6'd45,
-    CSRRCI= 6'd46
-  } t_rv32i_instr;
-
+import rv32i_ref_pkg::*;
 // Define VGA memory sizes
 parameter SIZE_VGA_MEM          = 38400; 
 parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
 parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
+
 // VGA Memory array 
-logic [7:0]  VGAMem     [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR]; //80 x 480
+logic [7:0]  VGAMem     [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR]; 
 logic [7:0]  NextVGAMem [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR]; 
 t_rv32i_instr instr_type;
 logic [31:0] instruction;
@@ -95,6 +46,28 @@ logic        en_end_of_simulation;
 logic        end_of_simulation;
 logic [2:0]  funct3;
 logic [6:0]  funct7;
+logic [31:0] lb_data    , lh_data    , lw_data    , lbu_data    , lhu_data;
+logic [31:0] vga_lb_data, vga_lh_data, vga_lw_data, vga_lbu_data, vga_lhu_data;
+logic        hit_vga_mem_rd;
+logic        hit_vga_mem_wr;
+logic [31:0] reg_wr_data;
+
+
+t_debug_info debug_info;
+assign debug_info.clk         = clk;
+assign debug_info.pc          = pc;
+assign debug_info.instruction = instruction;
+assign debug_info.instr_type  = instr_type;
+assign debug_info.rd          = rd;
+assign debug_info.rs1         = rs1;
+assign debug_info.rs2         = rs2;
+assign debug_info.mem_rd_addr = mem_rd_addr;
+assign debug_info.mem_wr_addr = mem_wr_addr;
+assign debug_info.data_rd1    = data_rd1;
+assign debug_info.data_rd2    = data_rd2;
+assign debug_info.reg_wr_data = reg_wr_data;
+
+
 //=======================================================
 // DFF - the synchronous elements in the reference RV32I model
 //=======================================================
@@ -118,20 +91,16 @@ assign I_ImmediateQ101H = { {20{instruction[31]}} , instruction[31:20] };       
 assign S_ImmediateQ101H = { {20{instruction[31]}} , instruction[31:25] , instruction[11:7]  };                            // S_Immediate
 assign B_ImmediateQ101H = { {20{instruction[31]}} , instruction[7]     , instruction[30:25] , instruction[11:8]  , 1'b0}; // B_Immediate
 assign J_ImmediateQ101H = { {12{instruction[31]}} , instruction[19:12] , instruction[20]    , instruction[30:21] , 1'b0}; // J_Immediate
-assign rd           = instruction[11:7];
-assign rs1          = instruction[19:15];
-assign rs2          = instruction[24:20];
-assign funct3       = instruction[14:12];
-assign funct7       = instruction[31:25];
-assign data_rd1     = regfile[rs1];
-assign data_rd2     = regfile[rs2];
-assign mem_rd_addr  = data_rd1 + I_ImmediateQ101H;
-assign mem_wr_addr  = data_rd1 + S_ImmediateQ101H;
-
-logic [31:0] lb_data    , lh_data    , lw_data    , lbu_data    , lhu_data;
-logic [31:0] vga_lb_data, vga_lh_data, vga_lw_data, vga_lbu_data, vga_lhu_data;
-logic hit_vga_mem_rd;
-logic hit_vga_mem_wr;
+assign rd               = instruction[11:7];
+assign rs1              = instruction[19:15];
+assign rs2              = instruction[24:20];
+assign funct3           = instruction[14:12];
+assign funct7           = instruction[31:25];
+assign data_rd1         = regfile[rs1];
+assign data_rd2         = regfile[rs2];
+assign mem_rd_addr      = data_rd1 + I_ImmediateQ101H;
+assign mem_wr_addr      = data_rd1 + S_ImmediateQ101H;
+assign reg_wr_data      = next_regfile[rd];
 //=======================================================
 // load data from memory - byte, half-word, word
 //=======================================================
