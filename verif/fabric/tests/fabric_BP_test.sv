@@ -68,10 +68,11 @@ $display("Finished elaborating the design...");
 //end
 
 // Starting the Back pressure test by forcing mini_core_ready to 0 at the End-Point
-force `MINI_CORE_TILE_READY(3,1) = 1'b0;
-$display("send force at time %0t real signal is: %0b \n",$time,`MINI_CORE_TILE_READY(3,1));
+mini_core_ready[3][3] = '0;
+force `MINI_CORE_TILE_READY(3,3) = mini_core_ready[3][3];
+$display("send force at time %0t real signal is: %0b \n",$time,`MINI_CORE_TILE_READY(3,3));
 for(int i=0; i< $ceil(V_REQUESTS); i++) begin
-  fork
+  fork : mini_ready
     // ============================================================================
     // The fork has 2 branches - if any of them is done, we join_any and exit the fork
     // ============================================================================
@@ -83,19 +84,20 @@ for(int i=0; i< $ceil(V_REQUESTS); i++) begin
       flg = 1;
     end
   join_any
+  disable mini_ready;
   //
   if(flg == 1'b1) begin 
     $display("full fabric at time %0t with %0d req in pipe",$time,i);
     break;
   end
-  send_req(.source_id(8'h1_1), .target_id(8'h3_1), .opcode(WR));
+  send_req(.source_id(8'h1_1), .target_id(8'h3_3), .opcode(WR));
   delay(10);
 end
 
 delay(10);
 //release mini_core_ready[3][3];
 //release fabric.col[3].row[3].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready;
-release `MINI_CORE_TILE_READY(3,1);
+release `MINI_CORE_TILE_READY(3,3);
 $display("release force at time %0t",$time);
 delay(100);
 //for(int i=0; i< $ceil(V_REQUESTS); i++) begin

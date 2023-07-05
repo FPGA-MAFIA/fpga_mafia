@@ -89,6 +89,7 @@ generate
       //assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
       assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
+      //`MINI_CORE_TILE_READY(col,row)
       //assign mini_core_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready;
     end
   end
