@@ -1,33 +1,26 @@
-/*
- 
- 
-
- */
 `timescale 1ns/1ns
 
 `include "uart_defines.v"
-`include "lotr_defines.sv"
+`include "macros.sv"
 
 module uart_io
-  import lotr_pkg::*;
+  import common_pkg::*;
   (
    input  logic            clk,
    input  logic            rstn,
    input  logic [7:0]   core_id,
    //RC <---> Core C2F
    // Request
-   output logic         C2F_ReqValidQ500H      ,
-   output logic         C2F_ReqOpcodeQ500H     , //1 for write, 0 for read
-   output logic  [31:0] C2F_ReqAddressQ500H    ,
-   output logic  [31:0] C2F_ReqDataQ500H       ,
-   output logic  [1:0]  C2F_ReqThreadIDQ500H   ,
+   output logic         InFabricReqValidQ500H      ,
+   output logic         InFabricReqOpcodeQ500H     , //1 for write, 0 for read
+   output logic  [31:0] InFabricReqAddressQ500H    ,
+   output logic  [31:0] InFabricReqDataQ500H       ,
    // Response
-   input  logic         C2F_RspValidQ502H      ,
-   input  logic  [31:0] C2F_RspDataQ502H       ,
-   input  logic         C2F_RspStall           ,
-   input  logic  [1:0]  C2F_RspThreadIDQ502H   ,     
+   input  logic         OutFabricRspValidQ502H      ,
+   input  logic  [31:0] OutFabricRspDataQ502H       ,
+   input  logic         OutFabricRspStall           ,
    // uart RX/TX signals
-   input   logic            uart_master_tx, 
+   input   logic        uart_master_tx, 
    output  logic        uart_master_rx,
    output  logic        interrupt
    );
@@ -38,14 +31,13 @@ module uart_io
   logic write_transfer_valid;
   logic read_transfer_valid;
 
-  t_opcode      C2F_RspOpcodeQ502H;
-  assign C2F_RspOpcodeQ502H   = RD_RSP;
-  assign interrupt            = uart_interrupt;
-  assign C2F_ReqValidQ500H    = (write_transfer_valid | read_transfer_valid);
-  assign C2F_ReqOpcodeQ500H   = ((write_transfer_valid) ? 1'b1 : 1'b0);
-  assign write_resp_valid     = (C2F_RspValidQ502H & (C2F_RspOpcodeQ502H==WR));
-  assign read_resp_valid      = (C2F_RspValidQ502H & (C2F_RspOpcodeQ502H==RD_RSP));
-  assign C2F_ReqThreadIDQ500H = '0;
+  t_tile_opcode      OutFabricRspOpcodeQ502H;
+  assign OutFabricRspOpcodeQ502H   = RD_RSP;
+  assign interrupt               = uart_interrupt;
+  assign InFabricReqValidQ500H    = (write_transfer_valid | read_transfer_valid);
+  assign InFabricReqOpcodeQ500H   = ((write_transfer_valid) ? 1'b1 : 1'b0);
+  assign write_resp_valid     = (OutFabricRspValidQ502H & (OutFabricRspOpcodeQ502H==WR));
+  assign read_resp_valid      = (OutFabricRspValidQ502H & (OutFabricRspOpcodeQ502H==RD_RSP));
 
    // wishbone interface
    wishbone 
@@ -75,9 +67,9 @@ module uart_io
         .clk                  (clk),
         .rstn                 (rstn),
         .interrupt            (uart_interrupt),
-        .address              (C2F_ReqAddressQ500H),
-        .data_out             (C2F_ReqDataQ500H),
-        .data_in              (C2F_RspDataQ502H),
+        .address              (InFabricReqAddressQ500H),
+        .data_out             (InFabricReqDataQ500H),
+        .data_in              (OutFabricRspDataQ502H),
         .write_transfer_valid (write_transfer_valid), // once address and data are ready, pulse for one cycle.
         .write_resp_valid     (write_resp_valid),     // is pulsed to indicate write_data is valid from RC.
         .read_transfer_valid  (read_transfer_valid),  // once address and data are ready, pulse for one cycle.

@@ -143,6 +143,13 @@ typedef struct packed {
    t_reg_id      reg_id;
 } t_rd_rsp ;
 
+typedef struct packed {
+    logic [NUM_WAYS-1:0][TAG_WIDTH-1:0] tags;
+    logic [NUM_WAYS-1:0]                valid;
+    logic [NUM_WAYS-1:0]                modified;
+    logic [NUM_WAYS-1:0]                mru;
+} t_set_rd_rsp ;
+
 
 
 endpackage

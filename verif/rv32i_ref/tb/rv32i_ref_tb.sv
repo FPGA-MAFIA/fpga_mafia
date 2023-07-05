@@ -17,24 +17,13 @@
 
 `include "macros.sv"
 
-
-module mini_core_tb  ;
+module rv32i_ref_tb;
 import common_pkg::*;
 logic        Clk;
 logic        Rst;
-logic [31:0] PcQ100H;
-logic [31:0] Instruction;
-logic [31:0] DMemAddress;
-logic [31:0] DMemData   ;
-logic [3:0]  DMemByteEn ;
-logic        DMemWrEn   ;
-logic        DMemRdEn   ;
-logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
 logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
 logic  [7:0] NextDMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
-
-
 
 // ========================
 // clock gen
@@ -54,7 +43,6 @@ initial begin: reset_gen
 #40 Rst = 1'b0;
 end: reset_gen
 
-
 `MAFIA_DFF(IMem, IMem    , Clk)
 `MAFIA_DFF(DMem, NextDMem, Clk)
 
@@ -65,34 +53,19 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
-    $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
-    force rv32i_ref.imem              = IMem; //backdoor to reference model memory
-    //$readmemh({"../app/data_mem.sv"}, DMem);
-    #1000 $finish;
+    $readmemh({"../../../target/rv32i_ref/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    $readmemh({"../../../target/rv32i_ref/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+    force rv32i_ref.imem = IMem; //backdoor to reference model memory
+    force rv32i_ref.dmem = DMem; //backdoor to reference model memory
+    #10;
+    release rv32i_ref.imem;
+    release rv32i_ref.dmem;
+    //======================================
+    // EOT - end of test
+    //======================================
+    #100000;
+    eot("ERROR: TIMEOUT");
 end // test_seq
-
-
-// DUT instance mini_core 
-t_tile_id local_tile_id;
-assign  local_tile_id = 8'h2_2;
-mini_top mini_top (
-.Clock               (Clk),
-.Rst                 (Rst),
-.local_tile_id       (local_tile_id),
-//============================================
-//      fabric interface
-//============================================
- .InFabricValidQ503H    ('0),// input  logic        F2C_ReqValidQ503H     ,
- .InFabricQ503H         ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .mini_core_ready       (),  // output  logic  mini_core_ready       ,
- //
- .OutFabricQ505H        (),  // output t_rdata      F2C_RspDataQ504H      ,
- .OutFabricValidQ505H   (),  // output logic        F2C_RspValidQ504H
- .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
-);      
-
-`include "mini_core_trk.sv"
 
 rv32i_ref
 # (
@@ -101,9 +74,15 @@ rv32i_ref
     .D_MEM_LSB (D_MEM_OFFSET_MINI),
     .D_MEM_MSB (D_MEM_MSB_MINI)
 )  rv32i_ref (
-.clk                 (Clk),
-.rst                 (Rst)
+.clk  (Clk),
+.rst  (Rst)
 );
 
-endmodule //mini_core_tb
+`include "rv32i_ref_tasks.vh"
+
+import rv32i_ref_pkg::*;
+t_debug_info debug_info;
+
+assign debug_info = rv32i_ref.debug_info;
+endmodule 
 

@@ -69,30 +69,6 @@ logic        [NUM_TQ_ENTRY-1:0] next_tq_wr_indication;
 t_reg_id     [NUM_TQ_ENTRY-1:0] next_tq_reg_id; 
 
 logic stall;
-//==============
-// logic to handle b2b write requests to the same cache line - review, maybe can be simplified to compare the other pipe LU
-//==============
-//logic     [NUM_TQ_ENTRY-1:0]       en_tq_wr_count; 
-//logic     [NUM_TQ_ENTRY-1:0] [2:0] tq_wr_count; 
-//logic     [NUM_TQ_ENTRY-1:0] [2:0] next_tq_wr_count; 
-//logic     [NUM_TQ_ENTRY-1:0]       tq_wr_count_inc;
-//logic     [NUM_TQ_ENTRY-1:0]       tq_wr_count_dec;
-//
-//always_comb begin
-//    for(int i =0; i < NUM_TQ_ENTRY; i++) begin
-//        casez ({tq_wr_count_inc[i], tq_wr_count_dec[i]})
-//            3'b00:   next_tq_wr_count[i] = tq_wr_count[i];
-//            3'b01:   next_tq_wr_count[i] = tq_wr_count[i] + 1;
-//            3'b10:   next_tq_wr_count[i] = tq_wr_count[i] - 1;
-//            3'b11:   next_tq_wr_count[i] = tq_wr_count[i];
-//            default: next_tq_wr_count[i] = tq_wr_count[i];
-//        endcase
-//    end //for
-//end //always_comb
-//
-//generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_wr_count
-//`MAFIA_EN_RST_DFF(tq_wr_count[TQ_GEN], next_tq_wr_count[TQ_GEN], clk, en_tq_wr_count[TQ_GEN], (tq_state == S_IDLE))
-//end endgenerate
 
 logic sel_reissue;
 logic en_reissue_req;
@@ -122,47 +98,98 @@ logic rd_miss_was_filled;
 logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 logic [4:0] tq_idle_counter;
 
+logic cancel_core_req;
+//================================
+// REISSUE BUFFER
+//================================
+// Incase there was a READ miss in Q2, we will cancel the Q1 request and reissue it when the miss is served
+// Need to remember who is the Q1 request that was cancelled so we can re-issue it
+// Need to remember the Q2 request that caused the cancellation so we can know when the miss was served
+// Once the miss is served, we will re-issue the Q1 request
+//================================
 // Remember the last request that was cancelled due to a miss - will be reissued when the miss is served
+// FIXME need to allow read hit from the TQ, and when that happens, there is no need to cancel the Q1 request
 assign en_reissue_req   = pipe_early_lu_rsp_q2.rd_miss;
+assign cancel_core_req  = pipe_early_lu_rsp_q2.rd_miss; // rename for clarity
 `MAFIA_EN_DFF(reissue_req, pre_core2cache_req, clk, en_reissue_req)
 
-
-//remember the what request read missed - used to determine if the read miss was served by the fill
+// Remember what request read missed - used to determine if the read miss was served by the fill
 `MAFIA_EN_DFF(rd_miss_tq_id,      pipe_early_lu_rsp_q2.lu_tq_id,   clk, en_reissue_req)
 `MAFIA_EN_DFF(rd_miss_cl_address, pipe_early_lu_rsp_q2.cl_address, clk, en_reissue_req)
 
+// Detect if the read miss was served by the fill
+assign set_rd_miss_was_filled = stall_rd_miss_q                                         && // we are currently waiting for the miss to be served 
+                                pipe_early_lu_rsp_q2.alloc_rd_fill                      && // The response was a fill for a read miss
+                                (pipe_early_lu_rsp_q2.lu_tq_id   == rd_miss_tq_id)      && // The read miss that was served matches the tq read miss that we are waiting for
+                                (pipe_early_lu_rsp_q2.cl_address == rd_miss_cl_address) ;  // The read miss that was served matches the address read miss that we are waiting for - TODO - review if needed
 
-assign set_rd_miss_was_filled = stall_rd_miss_q                                         && 
-                                pipe_early_lu_rsp_q2.alloc_rd_fill                      && 
-                                (pipe_early_lu_rsp_q2.lu_tq_id   == rd_miss_tq_id)      && 
-                                (pipe_early_lu_rsp_q2.cl_address == rd_miss_cl_address) ; 
-
-`MAFIA_EN_RST_DFF(rd_miss_was_filled,  1'b1,   clk, set_rd_miss_was_filled, (rst || sel_reissue) )
+// using a EN_RST FF as a set/reset FF by connecting the set condition to the enable and the reset condition to the reset
+// set reset FLIP-FLOP indication:
+`MAFIA_EN_RST_DFF(  rd_miss_was_filled,    // The indication
+                    1'b1,                  // when "enable" we set with 1'b1
+                    clk,                   // clock
+                    set_rd_miss_was_filled,// set indication 
+                    (rst || sel_reissue) ) // reset indication
+// We actually re-issue the request only when the miss was served and there are no other fills in the queue
+// TODO - in this implementation we are prioritizing the fills over the re-issue which is not necessary the best performance
+//        Maybe we should prioritize the re-issue over the fills that are not set for rd miss
 assign sel_reissue = rd_miss_was_filled  && (!fill_exists);
-assign core2cache_req = sel_reissue  ? reissue_req       : // While stall & alloc_rd_fill , reissue the request. (the rd miss was served by the fill)
+// This is the mux that selects the request to be sent to the cache - either the re-issue or the request from the core
+assign core2cache_req = sel_reissue  ? reissue_req       : // Send the re-issue request
                                        pre_core2cache_req; // else, send the request from core
 
-// FIXME - add assertion that a there is no pre_core2cache_req.valid when stall is asserted
 
-assign rd_hit_pipe_rsp_q3     = pipe_lu_rsp_q3.valid               && 
-                               (pipe_lu_rsp_q3.lu_op == RD_LU) &&
-                               (pipe_lu_rsp_q3.lu_result == HIT);
+//================================
+//================================
+// There are 2 flows that return the a read request to the core:
+// 1. Read request (RD_LU) hit in cache
+// 2. Read request that miss the cache, but was served by a fill
+//    two options for this flow:
+//    - The Read request is what initiated the fill
+//    - The Read request hit in the merge buffer an older write miss that was waiting for a fill
+//      Then the TQ entry was set as a "rd_indication" so once that fill is served, the read request will be returned to the core
+//================================
+// 1. Read request (RD_LU) hit in cache
+assign rd_hit_pipe_rsp_q3 = pipe_lu_rsp_q3.valid              && 
+                           (pipe_lu_rsp_q3.lu_op == RD_LU)    &&
+                           (pipe_lu_rsp_q3.lu_result == HIT);
 
-assign fill_with_rd_indication_q3 = pipe_lu_rsp_q3.valid  && 
+// 2. Read request that miss the cache, but was served by a fill
+assign fill_with_rd_indication_q3 = pipe_lu_rsp_q3.valid              && 
                                     (pipe_lu_rsp_q3.lu_op == FILL_LU) &&
                                      pipe_lu_rsp_q3.rd_indication;
 
+//================================
+// setting the CACHE2CORE response
+//================================
 assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication_q3;
 //take the relevant word from cache line
+//FIXME - need to support byte enable -> make sure to shift the "word data" according to the byte enable in the response, and sign extend/zero extend
 assign cache2core_rsp.data    = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
                                 pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
                                 pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.cl_data[95:64] :
                                                                                                     pipe_lu_rsp_q3.cl_data[127:96];
 assign cache2core_rsp.address = pipe_lu_rsp_q3.address;
-assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id; //FIXME
+assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id;
 
 
+//================================
+// The TQ & MB logic
+// (transaction queue & merge buffer)
+//================================
+// The TQ is used to track the transactions life cycle
+// Incase of a hit, the TQ entry has a short life cycle
+// Incase of a miss, the TQ entry has a longer life cycle that needs to wait for the fill
+// Also need the handle the MB data corrects
+// NOTE:  - A TQ can serve multiple writes that are to the same CL
+//        - A TQ can serve a single read to each CL
+//        - Read after Write to the same CL will merge into the same TQ entry.
+//        - Read after Read to the same CL will not merge into the same TQ entry.
+//        - When the tq_rd_indication is set for a TQ entry, there will be no more merges to that TQ entry
 
+//===========================
+// TQ entry states and signals
+//===========================
 genvar TQ_GEN;
 generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_ff_block
     `MAFIA_RST_VAL_DFF(tq_state                  [TQ_GEN], next_tq_state                  [TQ_GEN], clk, rst, S_IDLE)
@@ -175,38 +202,54 @@ generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate
     `MAFIA_EN_DFF     (tq_reg_id                 [TQ_GEN], next_tq_reg_id                 [TQ_GEN], clk, en_tq_reg_id                 [TQ_GEN])
 end endgenerate
 
+//===========================
+// conditions to allocate a new TQ entry
+//===========================
 always_comb begin
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
-        allocate_entry[i] = first_free[i]               &&  // first free entry to allocate exists
-                            core2cache_req.valid        &&  // core request is valid
-                            (!any_rd_hit_mb)            &&  // no read hit in merge buffer
-                            (!any_wr_hit_mb)            &&  // no write hit in merge buffer
-                            (!pipe_early_lu_rsp_q2.rd_miss) ;  // no read miss in pipe -> must cancel request, wil be re-issue from the reissue buffer   
+        allocate_entry[i] = first_free[i]        &&  // first free entry to allocate exists
+                            core2cache_req.valid &&  // core request is valid
+                            (!any_rd_hit_mb)     &&  // no read hit in merge buffer
+                            (!any_wr_hit_mb)     &&  // no write hit in merge buffer
+                            (!cancel_core_req)    ;  // no read miss in pipe -> must cancel request, wil be re-issue from the reissue buffer   
     end
+end //always_comb
+
+//===========================
+// The main TQ logic FSM
+//===========================
+always_comb begin
+    // used to set the correct word offset in the cache line
     new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+    // the for loop will got through all the TQ entries
+    // TODO - review if we want to have a new RTL module called "tq_entry" instead of using this for loop
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
+        // default data values
         next_tq_state                  [i] = tq_state[i];
         next_tq_merge_buffer_e_modified[i] = '0;    //default value
-        next_tq_merge_buffer_data[i] = '0;
-        next_tq_cl_address       [i] = '0;
-        next_tq_rd_indication    [i] = '0;
-        next_tq_wr_indication    [i] = '0;
-        next_tq_reg_id           [i] = '0;
-        next_tq_cl_word_offset   [i] = '0;
-
-        en_tq_rd_indication      [i] = '0;
-        en_tq_wr_indication      [i] = '0;
-        en_tq_cl_word_offset     [i] = '0;
-        en_tq_reg_id             [i] = '0;
-        en_tq_cl_address         [i] = '0;
-        en_tq_merge_buffer_e_modified[i] = '0;
-        en_tq_merge_buffer_data  [i] = '0;
+        next_tq_merge_buffer_data      [i] = '0;
+        next_tq_cl_address             [i] = '0;
+        next_tq_rd_indication          [i] = '0;
+        next_tq_wr_indication          [i] = '0;
+        next_tq_reg_id                 [i] = '0;
+        next_tq_cl_word_offset         [i] = '0;
+        // default enable values
+        en_tq_rd_indication            [i] = '0;
+        en_tq_wr_indication            [i] = '0;
+        en_tq_cl_word_offset           [i] = '0;
+        en_tq_reg_id                   [i] = '0;
+        en_tq_cl_address               [i] = '0;
+        en_tq_merge_buffer_e_modified  [i] = '0;
+        en_tq_merge_buffer_data        [i] = '0;
+        //==================================
+        // start the State Machine per TQ entry
+        //==================================
         unique casez (tq_state[i])
             S_IDLE                : begin
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
                 if (allocate_entry[i]) begin
-                    next_tq_state[i] =  ((core2cache_req.opcode == RD_OP) || ( core2cache_req.opcode == WR_OP)) ? S_LU_CORE :
-                                                                                                                  S_ERROR   ;
+                    next_tq_state[i] =  ((core2cache_req.opcode == RD_OP) || 
+                                         (core2cache_req.opcode == WR_OP))    ? S_LU_CORE : S_ERROR   ;
                     en_tq_rd_indication             [i] = 1'b1;
                     en_tq_wr_indication             [i] = 1'b1;
                     en_tq_cl_word_offset            [i] = 1'b1;
@@ -221,6 +264,7 @@ always_comb begin
                     next_tq_cl_word_offset          [i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                     if(core2cache_req.opcode == WR_OP) begin
                         //write the data to the correct word offset in the merge buffer
+                        // FIXME - need to take into account the byte enable logic
                         next_tq_merge_buffer_data[i][31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data : '0;
                         next_tq_merge_buffer_data[i][63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data : '0;
                         next_tq_merge_buffer_data[i][95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data : '0;
@@ -230,14 +274,16 @@ always_comb begin
                     end
                 end
             end    
-            //FIXME: in case of write after write to same cache line we still need to write the data to mb ?
             S_LU_CORE: begin
-                //if Cache_hit : nex_state == IDLE
+                //if Cache_hit  : nex_state == IDLE
                 //if Cache_miss : next_state == MB_WAIT_FILL
                 if ((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)) begin  
                     next_tq_state[i]=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
                                         (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
-                                        (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_LU_CORE         : // this FILL is from an older request, don't want it to affect the entry
+                                        // There is a corner case where the fill lu_rsp has the TQ id of a new lookup
+                                        // This FILL is from an older request, don't want it to affect the entry
+                                        // so simply ignore it and stay in the S_LU_CORE state
+                                        (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_LU_CORE         : 
                                         /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR           ;
 
                 // Handle the case where there are 2 writes B2B to same cache line
@@ -250,11 +296,13 @@ always_comb begin
                 end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
             end
             S_MB_WAIT_FILL                : begin
-            //FIXME add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
+                // NOTE: We are allowing a single outstanding request per CL address!!!
+                //       this means we can match on the address of the fill rsp to know if it is for this entry
                 if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_cl_address[i])) begin
                     next_tq_state[i] = S_MB_FILL_READY;
                     en_tq_merge_buffer_data  [i] = 1'b1;
                     // If the tq_merge_buffer_e_modified[i][x] is set, then the data in the merge buffer already has the correct data - we don't want to override it with the fill data
+                    // FIXME - This logic needs to take into account the Byte Enable logic that we have not coded yet
                     next_tq_merge_buffer_data[i][31:0]   = tq_merge_buffer_e_modified[i][0] ? tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
                     next_tq_merge_buffer_data[i][63:32]  = tq_merge_buffer_e_modified[i][1] ? tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
                     next_tq_merge_buffer_data[i][95:64]  = tq_merge_buffer_e_modified[i][2] ? tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
@@ -262,7 +310,11 @@ always_comb begin
                 end
             end //S_MB_WAIT_FILL
             S_MB_FILL_READY               : begin
-                if (first_fill[i] && (!core2cache_req.valid)) begin // opportunistic pipe lookup - if no core request, then fill
+                // opportunistic pipe lookup - if no core request, then fill
+                // The fill are a lower priority than the core requests
+                // Note: if we are waiting on a rd_miss, we wont be getting any core requests, 
+                // So the fill will win the arbitration and will send the fill to the LU pipe
+                if (first_fill[i] && (!core2cache_req.valid)) begin 
                     next_tq_state[i] = S_IDLE;
                 end //if
             end//S_MB_FILL_READY
@@ -323,14 +375,14 @@ always_comb begin
                            (core2cache_req.opcode == RD_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
                            (!tq_rd_indication[i])           && // if the entry is already set as read indication, then we don't merge to the same entry
-                           (!(pipe_early_lu_rsp_q2.rd_miss))&& // the request will be reissued later. we don't want to merge it to the same entry
+                           (!(cancel_core_req))             && // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
     
         wr_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == WR_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
                            (!tq_rd_indication[i])           && //if the entry is already set as read indication, then we don't merge to the same entry
-                           (!(pipe_early_lu_rsp_q2.rd_miss))&& // the request will be reissued later. we don't want to merge it to the same entry
+                           (!(cancel_core_req))             && // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_state[i] == S_MB_WAIT_FILL) || (tq_state[i] == S_MB_FILL_READY) || (tq_state[i] == S_LU_CORE));
     
     end
@@ -384,10 +436,14 @@ end
 //=================
 // Pipe lookup mux - core request vs fill request
 //=================
+// The Pipe lookup can come from 2 sources:
+// 1. Core request (or re-issue)
+// 2. Fill request (from the TQ)
+// The Core request has higher priority than the fill request.
 always_comb begin
     pipe_lu_req_q1 = '0;
     if(core2cache_req.valid) begin
-        if(!pipe_early_lu_rsp_q2.rd_miss) begin // incase of rd miss in q2, then we need to cancel the core request and reissue it later
+        if(!cancel_core_req) begin // incase of rd miss in q2, then we need to cancel the core request and reissue it later
             pipe_lu_req_q1.valid   = core2cache_req.valid;
             pipe_lu_req_q1.reg_id  = core2cache_req.reg_id;
             pipe_lu_req_q1.lu_op   = (core2cache_req.opcode == WR_OP) ? WR_LU :
@@ -402,6 +458,8 @@ always_comb begin
             pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
             pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
         end // pipe_early_lu_rsp_q2.rd_miss
+    // There is no valid "core2cache_req.valid" we will check if there is a fill request
+    // if so, we can send a fill to the PIPE
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
         pipe_lu_req_q1.lu_op         = FILL_LU;
@@ -419,5 +477,8 @@ always_comb begin
 
 end
 
+// FIXME - add assertion that We are allowing a single outstanding request per CL address!!!
+// FIXME - add assertion that a there is no pre_core2cache_req.valid when stall is asserted
+// FIXME add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
 
 endmodule
