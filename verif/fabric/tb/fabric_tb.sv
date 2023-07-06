@@ -42,6 +42,9 @@ bit [V_ROW:1] [V_COL:1] valid_local;
 logic [V_ROW:1] [V_COL:1] mini_core_ready;
 bit [V_ROW:1] [V_COL:1] mini_core_ready_bit;
 bit flg;
+t_tile_id m_source;
+t_tile_id m_target;
+int num_cycles = V_NUM_CYCLES;
 
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
