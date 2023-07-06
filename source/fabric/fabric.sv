@@ -23,92 +23,34 @@ t_fab_ready     [4:0] [4:0] out_north_ready,     out_east_ready,     out_west_re
 //| [1,3] | [2,3] | [3,3] |
 //|=======|=======|=======|
 
-//===================================
-// assign the un-used edges outputs to '0 
-// will input 0 to the fabric from the edges
-//===================================
-always_comb begin 
-    for(int row =0; row< 5; row++) begin
-        //The first column strap the valid to 0
-        out_north_req_valid[0][row] = '0;
-        out_south_req_valid[0][row] = '0;
-        out_east_req_valid [0][row] = '0;
-        out_west_req_valid [0][row] = '0;
-        out_north_req      [0][row] = '0;
-        out_south_req      [0][row] = '0;
-        out_east_req       [0][row] = '0;
-        out_west_req       [0][row] = '0;
-        out_south_ready    [0][row] = '0;
-        out_west_ready     [0][row] = '0;
-        out_east_ready     [0][row] = '0;
-        out_north_ready    [0][row] = '0;
-        //The last column strap the valid to 0
-        out_north_req_valid[4][row] = '0;
-        out_south_req_valid[4][row] = '0;
-        out_east_req_valid [4][row] = '0;
-        out_west_req_valid [4][row] = '0;
-        out_north_req      [4][row] = '0;
-        out_south_req      [4][row] = '0;
-        out_east_req       [4][row] = '0;
-        out_west_req       [4][row] = '0;
-        out_south_ready    [4][row] = '0;
-        out_west_ready     [4][row] = '0;
-        out_east_ready     [4][row] = '0;
-        out_north_ready    [4][row] = '0;
-    end
-    for(int col =0; col< 5; col++) begin
-        //The first row strap the valid to 0
-        out_north_req_valid[col][0] = '0;
-        out_south_req_valid[col][0] = '0;
-        out_east_req_valid [col][0] = '0;
-        out_west_req_valid [col][0] = '0;
-        out_north_req      [col][0] = '0;
-        out_south_req      [col][0] = '0;
-        out_east_req       [col][0] = '0;
-        out_west_req       [col][0] = '0;
-        out_south_ready    [col][0] = '0;
-        out_west_ready     [col][0] = '0;
-        out_east_ready     [col][0] = '0;
-        out_north_ready    [col][0] = '0;
-        //The last row strap the valid to 0
-        out_north_req_valid[col][4] = '0;
-        out_south_req_valid[col][4] = '0;
-        out_east_req_valid [col][4] = '0;
-        out_west_req_valid [col][4] = '0;
-        out_north_req      [col][4] = '0;
-        out_south_req      [col][4] = '0;
-        out_east_req       [col][4] = '0;
-        out_west_req       [col][4] = '0;
-        out_south_ready    [col][4] = '0;
-        out_west_ready     [col][4] = '0;
-        out_east_ready     [col][4] = '0;
-        out_north_ready    [col][4] = '0;
-    end
-end //always_comb
 //==================================================
 //==================================================
 //==================================================
 
 //===================================
-// assign the outputs to the inputs.
-// The fabric real edge row=1/3, col=1/3
-// will be connected to the row=0/4, col=0/4 which are just straps to 0
+// Assign the outputs to the inputs.
+// The fabric real tile edge are row=1/3, col=1/3
+// The fabric row=0/4, col=0/4 output are strap to 0, and are used as the boundary input to the real fabric
 //===================================
 always_comb begin : assign_the_grid_to_tiles
     for(int row =1 ; row< 4; row++) begin
         for(int col =1 ; col< 4; col++) begin
             // connect the in_south to the out_north
-            in_south_req_valid[col][row] = (row!=4) ? out_north_req_valid[col][row+1] : '0;//note the row+1 in the boundary reaches row=4 which is strap to 0
-            in_south_req      [col][row] = (row!=4) ? out_north_req      [col][row+1] : '0;
+            in_south_req_valid[col][row] = out_north_req_valid[col][row+1];//note the row+1 in the boundary reaches row=4 which is strap to 0
+            in_south_req      [col][row] = out_north_req      [col][row+1];
+            in_south_ready    [col][row] = out_north_ready    [col][row+1];
             // connect the in_north to the out_south
-            in_north_req_valid[col][row] = (row!=0) ? out_south_req_valid[col][row-1] : '0;//note the row-1 in the boundary reaches row=0 which is strap to 0
-            in_north_req      [col][row] = (row!=0) ? out_south_req      [col][row-1] : '0;
+            in_north_req_valid[col][row] = out_south_req_valid[col][row-1];//note the row-1 in the boundary reaches row=0 which is strap to 0
+            in_north_req      [col][row] = out_south_req      [col][row-1];
+            in_north_ready    [col][row] = out_south_ready    [col][row-1];
             // connect the in_east to the out_west
-            in_east_req_valid [col][row] = (col!=4) ? out_west_req_valid [col+1][row] : '0;//note the col+1 in the boundary reaches col=4 which is strap to 0
-            in_east_req       [col][row] = (col!=4) ? out_west_req       [col+1][row] : '0;
+            in_east_req_valid [col][row] = out_west_req_valid [col+1][row];//note the col+1 in the boundary reaches col=4 which is strap to 0
+            in_east_req       [col][row] = out_west_req       [col+1][row];
+            in_east_ready     [col][row] = out_west_ready     [col+1][row];
             // connect the in_west to the out_east
-            in_west_req_valid [col][row] = (col!=0) ? out_east_req_valid [col-1][row] : '0;//note the col-1 in the boundary reaches col=0 which is strap to 0
-            in_west_req       [col][row] = (col!=0) ? out_east_req       [col-1][row] : '0;
+            in_west_req_valid [col][row] = out_east_req_valid [col-1][row];//note the col-1 in the boundary reaches col=0 which is strap to 0
+            in_west_req       [col][row] = out_east_req       [col-1][row];
+            in_west_ready     [col][row] = out_east_ready     [col-1][row];
         end//for col
     end//for row
 end//always_comb
@@ -116,23 +58,8 @@ end//always_comb
 //==================================================
 //==================================================
 
-always_comb begin 
-    for(int col =1; col< 4; col++) begin
-        for(int row =1; row< 4; row++) begin
-            // connect the in_<cardinal>_ready to the out_<cardinal>_ready
-            // Note: this is the opposite direction of the req!
-            in_north_ready [col][row] =  (row!=0) ? out_south_ready[col  ][row-1] : '0;
-            in_south_ready [col][row] =  (row!=4) ? out_north_ready[col  ][row+1] : '0;
-            in_east_ready  [col][row] =  (col!=4) ? out_west_ready [col+1][row  ] : '0;  //TODO review! intuitively it should be col-1, why is it col+1?
-            in_west_ready  [col][row] =  (col!=0) ? out_east_ready [col-1][row  ] : '0;  //TODO review! intuitively it should be col+1, why is it col-1?
-        end // row
-    end // col
-end //always_comb
-
-
 genvar ROW;
 genvar COL;
-
 t_tile_id [3:1] [3:1]       local_tile_id;
 logic     [3:1] [3:1] [3:0] local_tile_id_row;
 logic     [3:1] [3:1] [3:0] local_tile_id_col;
@@ -142,7 +69,7 @@ for(COL = 1; COL<4; COL++) begin : col
     // generate the local_tile_id
     assign local_tile_id_row[COL][ROW] = ROW;
     assign local_tile_id_col[COL][ROW] = COL;
-    assign local_tile_id[COL][ROW] = {local_tile_id_col[COL][ROW],local_tile_id_row[COL][ROW]};
+    assign local_tile_id    [COL][ROW] = {local_tile_id_col[COL][ROW],local_tile_id_row[COL][ROW]};
     mini_core_tile mini_core_tile_ins (
         .clk                 (clk),
         .rst                 (rst),
@@ -178,8 +105,30 @@ for(COL = 1; COL<4; COL++) begin : col
       );
     end // row
 end // col
+
+//===================================
+// assign the un-used edges outputs to '0 
+// will input 0 to the fabric from the edges
+//===================================
+for(COL =0; COL< 5; COL++) begin : col_strap
+    for(ROW =0; ROW< 5; ROW++) begin : row_strap
+        //The first/last column/row output strap to 0. (the rest will connect to the tiles)
+        if((ROW == 0) || (ROW == 4) || (COL == 0) || (COL == 4)) begin
+            assign out_north_req_valid[COL][ROW] = '0;
+            assign out_south_req_valid[COL][ROW] = '0;
+            assign out_east_req_valid [COL][ROW] = '0;
+            assign out_west_req_valid [COL][ROW] = '0;
+            assign out_north_req      [COL][ROW] = '0;
+            assign out_south_req      [COL][ROW] = '0;
+            assign out_east_req       [COL][ROW] = '0;
+            assign out_west_req       [COL][ROW] = '0;
+            assign out_south_ready    [COL][ROW] = '0;
+            assign out_west_ready     [COL][ROW] = '0;
+            assign out_east_ready     [COL][ROW] = '0;
+            assign out_north_ready    [COL][ROW] = '0;
+        end // if
+    end// for row
+end// for col
 endgenerate
 
 endmodule
-
-
