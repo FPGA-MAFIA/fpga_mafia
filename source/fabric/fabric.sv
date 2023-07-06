@@ -7,23 +7,13 @@ import common_pkg::*;
     input logic clk,
     input logic rst
 );
-// all north:
-logic           [4:0] [4:0] in_north_req_valid, out_north_req_valid;
-t_tile_trans    [4:0] [4:0] in_north_req,       out_north_req;
-t_fab_ready     [4:0] [4:0] in_north_ready,     out_north_ready;
-// all east:                                   
-logic           [4:0] [4:0] in_east_req_valid,  out_east_req_valid;
-t_tile_trans    [4:0] [4:0] in_east_req,        out_east_req;
-t_fab_ready     [4:0] [4:0] in_east_ready,      out_east_ready;
-// all west:                                   
-logic           [4:0] [4:0] in_west_req_valid,  out_west_req_valid;
-t_tile_trans    [4:0] [4:0] in_west_req,        out_west_req;
-t_fab_ready     [4:0] [4:0] in_west_ready,      out_west_ready;
-// all south:                                  
-logic           [4:0] [4:0] in_south_req_valid, out_south_req_valid;
-t_tile_trans    [4:0] [4:0] in_south_req,       out_south_req;
-t_fab_ready     [4:0] [4:0] in_south_ready,     out_south_ready;
-
+//                          all north:           all east:           all west:           all south:
+logic           [3:1] [3:1] in_north_req_valid,  in_east_req_valid,  in_west_req_valid,  in_south_req_valid;
+t_tile_trans    [3:1] [3:1] in_north_req,        in_east_req,        in_west_req,        in_south_req;      
+t_fab_ready     [3:1] [3:1] in_north_ready,      in_east_ready,      in_west_ready,      in_south_ready;    
+logic           [4:0] [4:0] out_north_req_valid, out_east_req_valid, out_west_req_valid, out_south_req_valid;
+t_tile_trans    [4:0] [4:0] out_north_req,       out_east_req,       out_west_req,       out_south_req;
+t_fab_ready     [4:0] [4:0] out_north_ready,     out_east_ready,     out_west_ready,     out_south_ready;
 
 //|=======|=======|=======|
 //| [1,1] | [2,1] | [3,1] |
@@ -108,20 +98,20 @@ always_comb begin : assign_the_grid_to_tiles
     for(int row =1 ; row< 4; row++) begin
         for(int col =1 ; col< 4; col++) begin
             // connect the in_south to the out_north
-            in_south_req_valid[col][row] = out_north_req_valid[col][row+1];//note the row+1 in the boundary reaches row=4 which is strap to 0
-            in_south_req      [col][row] = out_north_req      [col][row+1];
+            in_south_req_valid[col][row] = (row!=4) ? out_north_req_valid[col][row+1] : '0;//note the row+1 in the boundary reaches row=4 which is strap to 0
+            in_south_req      [col][row] = (row!=4) ? out_north_req      [col][row+1] : '0;
             // connect the in_north to the out_south
-            in_north_req_valid[col][row] = out_south_req_valid[col][row-1];//note the row-1 in the boundary reaches row=0 which is strap to 0
-            in_north_req      [col][row] = out_south_req      [col][row-1];
+            in_north_req_valid[col][row] = (row!=0) ? out_south_req_valid[col][row-1] : '0;//note the row-1 in the boundary reaches row=0 which is strap to 0
+            in_north_req      [col][row] = (row!=0) ? out_south_req      [col][row-1] : '0;
             // connect the in_east to the out_west
-            in_east_req_valid [col][row] = out_west_req_valid [col+1][row];//note the col+1 in the boundary reaches col=4 which is strap to 0
-            in_east_req       [col][row] = out_west_req       [col+1][row];
+            in_east_req_valid [col][row] = (col!=4) ? out_west_req_valid [col+1][row] : '0;//note the col+1 in the boundary reaches col=4 which is strap to 0
+            in_east_req       [col][row] = (col!=4) ? out_west_req       [col+1][row] : '0;
             // connect the in_west to the out_east
-            in_west_req_valid [col][row] = out_east_req_valid [col-1][row];//note the col-1 in the boundary reaches col=0 which is strap to 0
-            in_west_req       [col][row] = out_east_req       [col-1][row];
-        end
-    end
-end
+            in_west_req_valid [col][row] = (col!=0) ? out_east_req_valid [col-1][row] : '0;//note the col-1 in the boundary reaches col=0 which is strap to 0
+            in_west_req       [col][row] = (col!=0) ? out_east_req       [col-1][row] : '0;
+        end//for col
+    end//for row
+end//always_comb
 //==================================================
 //==================================================
 //==================================================
@@ -129,10 +119,12 @@ end
 always_comb begin 
     for(int col =1; col< 4; col++) begin
         for(int row =1; row< 4; row++) begin
-            in_north_ready [col][row] =  out_south_ready[col  ][row-1];
-            in_south_ready [col][row] =  out_north_ready[col  ][row+1];
-            in_east_ready  [col][row] =  out_west_ready [col+1][row  ];  
-            in_west_ready  [col][row] =  out_east_ready [col-1][row  ];  
+            // connect the in_<cardinal>_ready to the out_<cardinal>_ready
+            // Note: this is the opposite direction of the req!
+            in_north_ready [col][row] =  (row!=0) ? out_south_ready[col  ][row-1] : '0;
+            in_south_ready [col][row] =  (row!=4) ? out_north_ready[col  ][row+1] : '0;
+            in_east_ready  [col][row] =  (col!=4) ? out_west_ready [col+1][row  ] : '0;  //TODO review! intuitively it should be col-1, why is it col+1?
+            in_west_ready  [col][row] =  (col!=0) ? out_east_ready [col-1][row  ] : '0;  //TODO review! intuitively it should be col+1, why is it col-1?
         end // row
     end // col
 end //always_comb
