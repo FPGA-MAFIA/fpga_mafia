@@ -17,3 +17,10 @@ fifo_arb_simple
 fifo_arb_single_fifo_full_BW
 router_alive   -gV_REQUESTS=30 -gV_MAX_DELAY=10
 router_alive   -gV_REQUESTS=300 -gV_MAX_DELAY=1
+fabric_all_tiles -gV_REQUESTS=10
+fabric_all_tiles -gV_REQUESTS=10
+fabric_all_tiles -gV_REQUESTS=100
+fabric_wr_rd_data
+fabric_BP_test -gV_REQUESTS=15 -gV_NUM_CYCLES=20
+fabric_BP_test -gV_REQUESTS=20 -gV_NUM_CYCLES=20
+fabric_BP_test -gV_REQUESTS=100 -gV_NUM_CYCLES=20

@@ -1,8 +1,9 @@
 `include "macros.sv"
-`define MINI_CORE_TILE(col,row) fabric.col[col].row[row].mini_core_tile_ins
-`define IN_LOCAL_REQ(col,row)   `MINI_CORE_TILE(col,row).in_local_req
-
+`define MINI_CORE_TILE(col,row)           fabric.col``col``.row``row``.mini_core_tile_ins
+`define IN_LOCAL_REQ(col,row)             fabric.col``col``.row``row``.mini_core_tile_ins.in_local_req
+`define MINI_CORE_TILE_READY(m_col,m_row) fabric.col[m_col].row[m_row].mini_core_tile_ins.mini_core_ready
 `define RAND_EP(rand_ep)  rand_ep = {4'($urandom_range(4'd1, 4'd3)), 4'($urandom_range(4'd1, 4'd3))};
+
 
 module fabric_tb;
 import common_pkg::*;
@@ -41,11 +42,16 @@ bit [V_ROW:1] [V_COL:1] valid_local;
 logic [V_ROW:1] [V_COL:1] mini_core_ready;
 bit [V_ROW:1] [V_COL:1] mini_core_ready_bit;
 bit flg;
+t_tile_id m_source;
+t_tile_id m_target;
+int num_cycles = V_NUM_CYCLES;
+
 `include "mini_core_tile_dut.vh"
 `include "fabric_dut.vh"
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
 `include "fabric_inputs_trk.vh"
+
 // =============================
 // CLK GEN
 // =============================
@@ -86,6 +92,8 @@ generate
       //assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
       assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
+      //`MINI_CORE_TILE_READY(col,row)
+      //assign mini_core_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready;
     end
   end
 endgenerate
