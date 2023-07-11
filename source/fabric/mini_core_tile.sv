@@ -175,7 +175,7 @@ assign InFabricQ503H      = out_local_req;
 //========================================
 // mini core - Local
 //========================================
-mini_top mini_top (
+mini_core_top mini_core_top (
  .Clock              (clk)          , //input  logic        Clock  ,
  .Rst                (rst)          , //input  logic        Rst    ,
  .local_tile_id      (local_tile_id), //input  t_tile_id    local_tile_id,

@@ -66,7 +66,7 @@ initial begin: test_seq
     //load the program to the TB
     //======================================
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem              = IMem; //backdoor to reference model memory
     //$readmemh({"../app/data_mem.sv"}, DMem);
     #1000 $finish;
@@ -76,7 +76,7 @@ end // test_seq
 // DUT instance mini_core 
 t_tile_id local_tile_id;
 assign  local_tile_id = 8'h2_2;
-mini_top mini_top (
+mini_core_top mini_core_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),

@@ -14,7 +14,7 @@ initial begin: trk_alu_gen
 end
 //tracker on ALU operations
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H, mini_top.mini_core.AluIn1Q102H , mini_top.mini_core.AluIn2Q102H, mini_top.mini_core.AluOutQ102H);
+    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H, mini_core_top.mini_core.AluIn1Q102H , mini_core_top.mini_core.AluIn2Q102H, mini_core_top.mini_core.AluOutQ102H);
 end
 
 integer trk_inst;
@@ -52,7 +52,7 @@ initial begin: trk_memory_access_gen
 
 end
 //
-assign PcQ100H = mini_top.PcQ100H;
+assign PcQ100H = mini_core_top.PcQ100H;
 `MAFIA_DFF(PcQ101H,  PcQ100H , Clk)
 `MAFIA_DFF(PcQ102H,  PcQ101H , Clk)
 `MAFIA_DFF(PcQ103H,  PcQ102H , Clk)

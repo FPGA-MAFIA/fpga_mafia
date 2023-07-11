@@ -1,7 +1,7 @@
 
 `include "macros.sv"
 
-module mini_top
+module mini_core_top
 import common_pkg::*;
 (
 input  logic        Clock  ,
