@@ -96,7 +96,6 @@ t_tq_id enc_rd_req_hit_mb;
 logic set_rd_miss_was_filled;
 logic rd_miss_was_filled;
 logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
-logic [4:0] tq_idle_counter;
 
 logic cancel_core_req;
 //================================
@@ -326,6 +325,7 @@ always_comb begin
             end
 
         endcase //casez
+
         //==================================================================================================
         //  Merge buffer hit logic
         //==================================================================================================
@@ -388,15 +388,7 @@ always_comb begin
     end
 end
 
-always_comb begin : tq_full_logic
-    tq_idle_counter = '0;
-    for(int i =0; i<NUM_TQ_ENTRY; ++i) begin
-        if(tq_state[i] == S_IDLE) begin     //if there is an idle entry, then no stall
-            tq_idle_counter = tq_idle_counter +1;
-        end
-    end
-    tq_full = (tq_idle_counter == 1 ) || (tq_idle_counter == 0 ) ;
-end
+assign tq_full = &(~free_entries[NUM_TQ_ENTRY-1:0] | allocate_entry[NUM_TQ_ENTRY-1:0]);
 
 //sticky stall indication - used for read miss stall logic
 assign set_rd_miss_stall = pipe_early_lu_rsp_q2.rd_miss;

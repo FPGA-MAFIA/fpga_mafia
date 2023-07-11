@@ -10,16 +10,16 @@ from termcolor import colored
 
 examples = '''
 Examples:
-python build.py -dut 'big_core' -debug -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
+python build.py -dut 'big_core' -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
 python build.py -dut 'big_core'        -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
-python build.py -dut 'big_core' -debug -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
-python build.py -dut 'big_core' -debug -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
-python build.py -dut 'router' -debug -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
-python build.py -dut 'router' -debug -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'big_core' -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
+python build.py -dut 'big_core' -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
+python build.py -dut 'big_core' -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
+python build.py -dut 'big_core' -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
+python build.py -dut 'big_core' -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
+python build.py -dut 'big_core' -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
+python build.py -dut 'router' -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
+python build.py -dut 'router' -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')

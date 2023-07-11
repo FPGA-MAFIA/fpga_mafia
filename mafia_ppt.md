@@ -152,9 +152,9 @@ For easy access, you can run the following commands in the GitBash shell for Win
 
 ```bash
 ./build.py -h  
-./build.py -dut big_core -debug -tests alive -app -hw -sim
-./build.py -dut cache -debug -tests cache_alive -hw -sim -pp
-./build.py -dut sc_core -debug -tests alive -full_run
+./build.py -dut big_core -tests alive -app -hw -sim
+./build.py -dut cache -tests cache_alive -hw -sim -pp
+./build.py -dut sc_core -tests alive -full_run
 ```
 
 ---
