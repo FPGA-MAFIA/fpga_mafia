@@ -15,23 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run build BIG_CORE -all -app -hw -sim -keep_going
-        run:  python build.py -dut 'big_core' -debug -regress level0 -app -hw -sim -keep_going
+        run:  python build.py -dut 'big_core' -regress level0 -app -hw -sim -keep_going
         continue-on-error: true
       - name: Run build MINI_CORE -all -app -hw -sim -keep_going
-        run:  python build.py -dut 'mini_core' -debug -all -app -hw -sim -keep_going
+        run:  python build.py -dut 'mini_core' -all -app -hw -sim -keep_going
         continue-on-error: true
       - name: Run build SC_CORE -all -app -hw -sim  -keep_going
-        run:  python build.py -dut 'sc_core' -debug -all -app -hw -sim -keep_going
+        run:  python build.py -dut 'sc_core' -all -app -hw -sim -keep_going
         continue-on-error: true
       - name: Run build CACHE -regress level0 -hw -sim -pp -keep_going
-        run:  python build.py -dut 'cache' -debug -regress level0 -hw -sim -pp -keep_going
+        run:  python build.py -dut 'cache' -regress level0 -hw -sim -pp -keep_going
         continue-on-error: true
       - name: Run build I_CACHE -regress level0_i_cache -hw -sim -pp -keep_going
-        run:  python build.py -dut 'cache' -debug -regress level0_i_cache -hw -sim -pp -keep_going
+        run:  python build.py -dut 'cache' -regress level0_i_cache -hw -sim -pp -keep_going
         continue-on-error: true
       - name: Run build ROUTER -regress level0 -hw -sim -keep_going
-        run:  python build.py -dut 'router' -debug -regress level0 -hw -sim -keep_going
+        run:  python build.py -dut 'router' -regress level0 -hw -sim -keep_going
         continue-on-error: true
       - name: Run build FABRIC -regress level0 -hw -sim -keep_going
-        run:  python build.py -dut 'fabric' -debug -regress level0 -hw -sim -keep_going
+        run:  python build.py -dut 'fabric' -regress level0 -hw -sim -keep_going
 
