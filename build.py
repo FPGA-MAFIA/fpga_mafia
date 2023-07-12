@@ -10,21 +10,21 @@ from termcolor import colored
 
 examples = '''
 Examples:
-python build.py -dut 'big_core' -debug -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
+python build.py -dut 'big_core' -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
 python build.py -dut 'big_core'        -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
-python build.py -dut 'big_core' -debug -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
-python build.py -dut 'big_core' -debug -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
-python build.py -dut 'big_core' -debug -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
-python build.py -dut 'router' -debug -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
-python build.py -dut 'router' -debug -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'big_core' -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
+python build.py -dut 'big_core' -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
+python build.py -dut 'big_core' -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 
+python build.py -dut 'big_core' -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
+python build.py -dut 'big_core' -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
+python build.py -dut 'big_core' -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
+python build.py -dut 'router'  -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
+python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
 parser.add_argument('-tests',     default='',             help='list of the tests for run the script on')
-parser.add_argument('-debug',     action='store_true',    help='run simulation with debug flag')
+parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
 parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
 parser.add_argument('-app',       action='store_true',    help='compile the RISCV SW into SV executables')
 parser.add_argument('-hw',        action='store_true',    help='compile the RISCV HW into simulation')
@@ -41,9 +41,9 @@ parser.add_argument('-keep_going',action='store_true',    help='keep going even 
 parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
 parser.add_argument('-top',       default=None,           help='insert your top module name for simulation (default is the dut name)')
 args = parser.parse_args()
-# if -top was not specified, use the dut name
+# if -top was not specified, use the dut name + the _tb suffix
 if args.top is None:
-    args.top = args.dut
+    args.top = args.dut + '_tb'
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 VERIF     = './verif/'+args.dut+'/'
@@ -217,7 +217,7 @@ class Test:
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
-            sim_cmd = 'vsim.exe work.' + self.top + '_tb -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            sim_cmd = 'vsim.exe work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -470,7 +470,7 @@ def main():
             if (args.pp) and not test.fail_flag:
                 if (test._post_process()):# if return value is 0, then the post process is done successfully
                     test.fail_flag = True
-            if not args.debug:
+            if args.no_debug:
                 test._no_debug()
 
             # print the test execution time
