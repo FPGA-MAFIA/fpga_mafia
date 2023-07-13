@@ -223,8 +223,8 @@ if(d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
 // // tracker on TQ
 // //==================================================
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
-        if ((d_cache.d_cache_tq.tq_state[i] != d_cache.d_cache_tq.next_tq_state[i]) ||
-             ((d_cache.d_cache_tq.tq_state[i] != S_IDLE) &&  dmem_core2cache_req.valid && (d_cache.d_cache_tq.rd_req_hit_mb[i] || d_cache.d_cache_tq.wr_req_hit_mb[i]) )
+        if ((d_cache.d_cache_tq.tq_entry[i].state != d_cache.d_cache_tq.next_tq_state[i]) ||
+             ((d_cache.d_cache_tq.tq_entry[i].state != S_IDLE) &&  dmem_core2cache_req.valid && (d_cache.d_cache_tq.rd_req_hit_mb[i] || d_cache.d_cache_tq.wr_req_hit_mb[i]) )
              ) begin
         $fwrite(d_cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
         $realtime,
