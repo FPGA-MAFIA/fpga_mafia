@@ -244,4 +244,18 @@ typedef struct packed {
     t_tq_id      lu_tq_id;
     t_cl_address cl_address;
 } t_early_lu_rsp;
+
+
+
+
+typedef struct packed {
+t_tq_state                         state;
+logic        [NUM_WORDS_IN_CL-1:0] merge_buffer_e_modified; 
+//t_cl                               merge_buffer_data; 
+//t_cl_address                       cl_address;
+//t_word_offset                      cl_word_offset; 
+//logic                              rd_indication; 
+//logic                              wr_indication; 
+//t_reg_id                           reg_id; 
+} t_tq_entry ;
 endpackage
