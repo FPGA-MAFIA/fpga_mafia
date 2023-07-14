@@ -39,7 +39,7 @@ parser.add_argument('-params',    default=' ',            help='used for overrid
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
 parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
-parser.add_argument('-top',       default=None,           help='insert your top module name for simulation (default is the dut name)')
+parser.add_argument('-top',       default=None,           help='insert your top module name for simulation (default is the <dut>+_tb name)')
 args = parser.parse_args()
 # if -top was not specified, use the dut name + the _tb suffix
 if args.top is None:
