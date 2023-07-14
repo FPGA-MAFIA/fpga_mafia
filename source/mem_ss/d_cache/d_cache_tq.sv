@@ -51,20 +51,7 @@ logic    [NUM_TQ_ENTRY-1:0] en_tq_rd_indication;
 logic    [NUM_TQ_ENTRY-1:0] en_tq_wr_indication; 
 logic    [NUM_TQ_ENTRY-1:0] en_tq_reg_id; 
 t_tq_entry [NUM_TQ_ENTRY-1:0] tq_entry;
-t_cl         [NUM_TQ_ENTRY-1:0]                      tq_merge_buffer_data; 
-t_cl_address [NUM_TQ_ENTRY-1:0]                      tq_cl_address;
-t_word_offset[NUM_TQ_ENTRY-1:0]                      tq_cl_word_offset; 
-logic        [NUM_TQ_ENTRY-1:0]                      tq_rd_indication; 
-logic        [NUM_TQ_ENTRY-1:0]                      tq_wr_indication; 
-t_reg_id     [NUM_TQ_ENTRY-1:0]                      tq_reg_id; 
-t_tq_state   [NUM_TQ_ENTRY-1:0]                      next_tq_state;
-logic        [NUM_TQ_ENTRY-1:0][NUM_WORDS_IN_CL-1:0] next_tq_merge_buffer_e_modified; 
-t_cl         [NUM_TQ_ENTRY-1:0]                      next_tq_merge_buffer_data; 
-t_cl_address [NUM_TQ_ENTRY-1:0]                      next_tq_cl_address; 
-t_word_offset[NUM_TQ_ENTRY-1:0]                      next_tq_cl_word_offset; 
-logic        [NUM_TQ_ENTRY-1:0]                      next_tq_rd_indication; 
-logic        [NUM_TQ_ENTRY-1:0]                      next_tq_wr_indication; 
-t_reg_id     [NUM_TQ_ENTRY-1:0]                      next_tq_reg_id; 
+t_tq_entry [NUM_TQ_ENTRY-1:0] next_tq_entry;
 
 logic stall;
 
@@ -189,14 +176,14 @@ assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id;
 //===========================
 genvar TQ_GEN;
 generate for(TQ_GEN=0; TQ_GEN<NUM_TQ_ENTRY; TQ_GEN=TQ_GEN+1) begin : tq_generate_ff_block
-    `MAFIA_RST_VAL_DFF(tq_entry[TQ_GEN].state                  , next_tq_state                  [TQ_GEN], clk, rst, S_IDLE)
-    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].merge_buffer_e_modified, next_tq_merge_buffer_e_modified[TQ_GEN], clk, en_tq_merge_buffer_e_modified[TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_rd_indication          [TQ_GEN], next_tq_rd_indication          [TQ_GEN], clk, en_tq_rd_indication          [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_wr_indication          [TQ_GEN], next_tq_wr_indication          [TQ_GEN], clk, en_tq_wr_indication          [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_merge_buffer_data      [TQ_GEN], next_tq_merge_buffer_data      [TQ_GEN], clk, en_tq_merge_buffer_data      [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_cl_address             [TQ_GEN], next_tq_cl_address             [TQ_GEN], clk, en_tq_cl_address             [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_cl_word_offset         [TQ_GEN], next_tq_cl_word_offset         [TQ_GEN], clk, en_tq_cl_word_offset         [TQ_GEN]) 
-    `MAFIA_EN_DFF     (tq_reg_id                 [TQ_GEN], next_tq_reg_id                 [TQ_GEN], clk, en_tq_reg_id                 [TQ_GEN])
+    `MAFIA_RST_VAL_DFF(tq_entry[TQ_GEN].state                  , next_tq_entry[TQ_GEN].state                  , clk, rst, S_IDLE)
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].merge_buffer_e_modified, next_tq_entry[TQ_GEN].merge_buffer_e_modified, clk, en_tq_merge_buffer_e_modified[TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].rd_indication          , next_tq_entry[TQ_GEN].rd_indication          , clk, en_tq_rd_indication          [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].wr_indication          , next_tq_entry[TQ_GEN].wr_indication          , clk, en_tq_wr_indication          [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].merge_buffer_data      , next_tq_entry[TQ_GEN].merge_buffer_data      , clk, en_tq_merge_buffer_data      [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].cl_address             , next_tq_entry[TQ_GEN].cl_address             , clk, en_tq_cl_address             [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].cl_word_offset         , next_tq_entry[TQ_GEN].cl_word_offset         , clk, en_tq_cl_word_offset         [TQ_GEN]) 
+    `MAFIA_EN_DFF     (tq_entry[TQ_GEN].reg_id                 , next_tq_entry[TQ_GEN].reg_id                 , clk, en_tq_reg_id                 [TQ_GEN])
 end endgenerate
 
 //===========================
@@ -222,14 +209,14 @@ always_comb begin
     // TODO - review if we want to have a new RTL module called "tq_entry" instead of using this for loop
     for (int i=0; i<NUM_TQ_ENTRY; ++i) begin
         // default data values
-        next_tq_state                  [i] = tq_entry[i].state;
-        next_tq_merge_buffer_e_modified[i] = '0;    //default value
-        next_tq_merge_buffer_data      [i] = '0;
-        next_tq_cl_address             [i] = '0;
-        next_tq_rd_indication          [i] = '0;
-        next_tq_wr_indication          [i] = '0;
-        next_tq_reg_id                 [i] = '0;
-        next_tq_cl_word_offset         [i] = '0;
+        next_tq_entry[i].state                   = tq_entry[i].state;
+        next_tq_entry[i].merge_buffer_e_modified = '0;    //default value
+        next_tq_entry[i].merge_buffer_data       = '0;
+        next_tq_entry[i].cl_address              = '0;
+        next_tq_entry[i].rd_indication           = '0;
+        next_tq_entry[i].wr_indication           = '0;
+        next_tq_entry[i].reg_id                  = '0;
+        next_tq_entry[i].cl_word_offset          = '0;
         // default enable values
         en_tq_rd_indication            [i] = '0;
         en_tq_wr_indication            [i] = '0;
@@ -245,7 +232,7 @@ always_comb begin
             S_IDLE                : begin
                 //if core_req && tq_entry_winner : next_state == LU_CORE_WR/RD_REQ 
                 if (allocate_entry[i]) begin
-                    next_tq_state[i] =  ((core2cache_req.opcode == RD_OP) || 
+                    next_tq_entry[i].state =  ((core2cache_req.opcode == RD_OP) || 
                                          (core2cache_req.opcode == WR_OP))    ? S_LU_CORE : S_ERROR   ;
                     en_tq_rd_indication             [i] = 1'b1;
                     en_tq_wr_indication             [i] = 1'b1;
@@ -254,20 +241,20 @@ always_comb begin
                     en_tq_cl_address                [i] = 1'b1;
                     en_tq_merge_buffer_e_modified   [i] = 1'b1;
                     en_tq_merge_buffer_data         [i] = 1'b1;
-                    next_tq_rd_indication           [i] = (core2cache_req.opcode == RD_OP);
-                    next_tq_wr_indication           [i] = (core2cache_req.opcode == WR_OP);
-                    next_tq_reg_id                  [i] = core2cache_req.reg_id;
-                    next_tq_cl_address              [i] = core2cache_req.address[MSB_TAG:LSB_SET];
-                    next_tq_cl_word_offset          [i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    next_tq_entry[i].rd_indication      = (core2cache_req.opcode == RD_OP);
+                    next_tq_entry[i].wr_indication      = (core2cache_req.opcode == WR_OP);
+                    next_tq_entry[i].reg_id             = core2cache_req.reg_id;
+                    next_tq_entry[i].cl_address         = core2cache_req.address[MSB_TAG:LSB_SET];
+                    next_tq_entry[i].cl_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
                     if(core2cache_req.opcode == WR_OP) begin
                         //write the data to the correct word offset in the merge buffer
                         // FIXME - need to take into account the byte enable logic
-                        next_tq_merge_buffer_data[i][31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data : '0;
-                        next_tq_merge_buffer_data[i][63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data : '0;
-                        next_tq_merge_buffer_data[i][95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data : '0;
-                        next_tq_merge_buffer_data[i][127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data : '0;
+                        next_tq_entry[i].merge_buffer_data[31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data : '0;
+                        next_tq_entry[i].merge_buffer_data[63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data : '0;
+                        next_tq_entry[i].merge_buffer_data[95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data : '0;
+                        next_tq_entry[i].merge_buffer_data[127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data : '0;
                         //set the corresponding bit in the e_modified vector
-                        next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
+                        next_tq_entry[i].merge_buffer_e_modified[new_alloc_word_offset] = 1'b1;
                     end
                 end
             end    
@@ -275,7 +262,7 @@ always_comb begin
                 //if Cache_hit  : nex_state == IDLE
                 //if Cache_miss : next_state == MB_WAIT_FILL
                 if ((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)) begin  
-                    next_tq_state[i]=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
+                    next_tq_entry[i].state=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
                                         (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
                                         // There is a corner case where the fill lu_rsp has the TQ id of a new lookup
                                         // This FILL is from an older request, don't want it to affect the entry
@@ -288,22 +275,22 @@ always_comb begin
                 // only when the last write is done we can go to idle - if other write match in pipe we need to wait for it in the S_LU_CORE state
                 // Note: this is still within the if((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)
                     if( pipe_lu_rsp_q3.wr_match_in_pipe && (pipe_lu_rsp_q3.lu_result == HIT)) begin
-                         next_tq_state[i] = S_LU_CORE ;
+                         next_tq_entry[i].state = S_LU_CORE ;
                     end
                 end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
             end
             S_MB_WAIT_FILL                : begin
                 // NOTE: We are allowing a single outstanding request per CL address!!!
                 //       this means we can match on the address of the fill rsp to know if it is for this entry
-                if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_cl_address[i])) begin
-                    next_tq_state[i] = S_MB_FILL_READY;
+                if(fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_entry[i].cl_address)) begin
+                    next_tq_entry[i].state = S_MB_FILL_READY;
                     en_tq_merge_buffer_data  [i] = 1'b1;
                     // If the tq_entry.merge_buffer_e_modified[i][x] is set, then the data in the merge buffer already has the correct data - we don't want to override it with the fill data
                     // FIXME - This logic needs to take into account the Byte Enable logic that we have not coded yet
-                    next_tq_merge_buffer_data[i][31:0]   = tq_entry[i].merge_buffer_e_modified[0] ? tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
-                    next_tq_merge_buffer_data[i][63:32]  = tq_entry[i].merge_buffer_e_modified[1] ? tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
-                    next_tq_merge_buffer_data[i][95:64]  = tq_entry[i].merge_buffer_e_modified[2] ? tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
-                    next_tq_merge_buffer_data[i][127:96] = tq_entry[i].merge_buffer_e_modified[3] ? tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
+                    next_tq_entry[i].merge_buffer_data[31:0]   = tq_entry[i].merge_buffer_e_modified[0] ? tq_entry[i].merge_buffer_data[31:0]   : fm2cache_rd_rsp.data[31:0];
+                    next_tq_entry[i].merge_buffer_data[63:32]  = tq_entry[i].merge_buffer_e_modified[1] ? tq_entry[i].merge_buffer_data[63:32]  : fm2cache_rd_rsp.data[63:32];
+                    next_tq_entry[i].merge_buffer_data[95:64]  = tq_entry[i].merge_buffer_e_modified[2] ? tq_entry[i].merge_buffer_data[95:64]  : fm2cache_rd_rsp.data[95:64];
+                    next_tq_entry[i].merge_buffer_data[127:96] = tq_entry[i].merge_buffer_e_modified[3] ? tq_entry[i].merge_buffer_data[127:96] : fm2cache_rd_rsp.data[127:96];
                 end
             end //S_MB_WAIT_FILL
             S_MB_FILL_READY               : begin
@@ -312,14 +299,14 @@ always_comb begin
                 // Note: if we are waiting on a rd_miss, we wont be getting any core requests, 
                 // So the fill will win the arbitration and will send the fill to the LU pipe
                 if (first_fill[i] && (!core2cache_req.valid)) begin 
-                    next_tq_state[i] = S_IDLE;
+                    next_tq_entry[i].state = S_IDLE;
                 end //if
             end//S_MB_FILL_READY
             S_ERROR                       : begin
-                next_tq_state[i] = tq_entry[i].state;
+                next_tq_entry[i].state = tq_entry[i].state;
             end
             default: begin
-                next_tq_state[i] = tq_entry[i].state;
+                next_tq_entry[i].state = tq_entry[i].state;
             end
 
         endcase //casez
@@ -333,9 +320,9 @@ always_comb begin
                     en_tq_rd_indication   [i] = 1'b1;
                     en_tq_cl_word_offset  [i] = 1'b1;
                     en_tq_reg_id          [i] = 1'b1;
-                    next_tq_rd_indication [i] = 1'b1;
-                    next_tq_cl_word_offset[i] = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
-                    next_tq_reg_id        [i] = core2cache_req.reg_id;
+                    next_tq_entry[i].rd_indication = 1'b1;
+                    next_tq_entry[i].cl_word_offset= core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    next_tq_entry[i].reg_id        = core2cache_req.reg_id;
                 end //if
                 
                 // The case of write after write - we set the write indication and update the merge buffer data:
@@ -343,24 +330,24 @@ always_comb begin
                     en_tq_wr_indication          [i] = 1'b1;
                     en_tq_merge_buffer_data      [i] = 1'b1;
                     en_tq_merge_buffer_e_modified[i] = 1'b1;
-                    next_tq_wr_indication        [i] = 1'b1;
+                    next_tq_entry[i].wr_indication   = 1'b1;
                     //write the data to the correct word offset in the merge buffer
-                    next_tq_merge_buffer_data[i][31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data :  tq_merge_buffer_data[i][31:0]  ;
-                    next_tq_merge_buffer_data[i][63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data :  tq_merge_buffer_data[i][63:32] ;
-                    next_tq_merge_buffer_data[i][95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data :  tq_merge_buffer_data[i][95:64] ;
-                    next_tq_merge_buffer_data[i][127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data :  tq_merge_buffer_data[i][127:96];
+                    next_tq_entry[i].merge_buffer_data[31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data :  tq_entry[i].merge_buffer_data[31:0]  ;
+                    next_tq_entry[i].merge_buffer_data[63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data :  tq_entry[i].merge_buffer_data[63:32] ;
+                    next_tq_entry[i].merge_buffer_data[95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data :  tq_entry[i].merge_buffer_data[95:64] ;
+                    next_tq_entry[i].merge_buffer_data[127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data :  tq_entry[i].merge_buffer_data[127:96];
                     //set the corresponding bit in the e_modified vector
-                    next_tq_merge_buffer_e_modified[i]                        = tq_entry[i].merge_buffer_e_modified;
-                    next_tq_merge_buffer_e_modified[i][new_alloc_word_offset] = 1'b1;
+                    next_tq_entry[i].merge_buffer_e_modified                        = tq_entry[i].merge_buffer_e_modified;
+                    next_tq_entry[i].merge_buffer_e_modified[new_alloc_word_offset] = 1'b1;
 
 
                     // This is to fix a corner case where we have a fill & a write in the same cycle!!
                     // This will make sure that the fm2cache response will not be ignored
-                    if( (tq_entry[i].state == S_MB_WAIT_FILL) && fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) )begin
-                        next_tq_merge_buffer_data[i][31:0]   = next_tq_merge_buffer_e_modified[i][0] ? next_tq_merge_buffer_data[i][31:0]   : fm2cache_rd_rsp.data[31:0];
-                        next_tq_merge_buffer_data[i][63:32]  = next_tq_merge_buffer_e_modified[i][1] ? next_tq_merge_buffer_data[i][63:32]  : fm2cache_rd_rsp.data[63:32];
-                        next_tq_merge_buffer_data[i][95:64]  = next_tq_merge_buffer_e_modified[i][2] ? next_tq_merge_buffer_data[i][95:64]  : fm2cache_rd_rsp.data[95:64];
-                        next_tq_merge_buffer_data[i][127:96] = next_tq_merge_buffer_e_modified[i][3] ? next_tq_merge_buffer_data[i][127:96] : fm2cache_rd_rsp.data[127:96];
+                    if( (tq_entry[i].state == S_MB_WAIT_FILL) && fm2cache_rd_rsp.valid && (fm2cache_rd_rsp.address[MSB_TAG:LSB_SET] == tq_entry[i].cl_address) )begin
+                        next_tq_entry[i].merge_buffer_data[31:0]   = next_tq_entry[i].merge_buffer_e_modified[0] ? next_tq_entry[i].merge_buffer_data[31:0]   : fm2cache_rd_rsp.data[31:0];
+                        next_tq_entry[i].merge_buffer_data[63:32]  = next_tq_entry[i].merge_buffer_e_modified[1] ? next_tq_entry[i].merge_buffer_data[63:32]  : fm2cache_rd_rsp.data[63:32];
+                        next_tq_entry[i].merge_buffer_data[95:64]  = next_tq_entry[i].merge_buffer_e_modified[2] ? next_tq_entry[i].merge_buffer_data[95:64]  : fm2cache_rd_rsp.data[95:64];
+                        next_tq_entry[i].merge_buffer_data[127:96] = next_tq_entry[i].merge_buffer_e_modified[3] ? next_tq_entry[i].merge_buffer_data[127:96] : fm2cache_rd_rsp.data[127:96];
                     end
                 end //if
 
@@ -371,15 +358,15 @@ always_comb begin
     for(int i =0; i<NUM_TQ_ENTRY; ++i) begin
         rd_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == RD_OP) &&
-                           (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
-                           (!tq_rd_indication[i])           && // if the entry is already set as read indication, then we don't merge to the same entry
+                           (core2cache_req.address[MSB_TAG:LSB_SET] == tq_entry[i].cl_address) &&
+                           (!tq_entry[i].rd_indication)           && // if the entry is already set as read indication, then we don't merge to the same entry
                            (!(cancel_core_req))             && // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_entry[i].state == S_MB_WAIT_FILL) || (tq_entry[i].state == S_MB_FILL_READY) || (tq_entry[i].state == S_LU_CORE));
     
         wr_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == WR_OP) &&
-                           (core2cache_req.address[MSB_TAG:LSB_SET] == tq_cl_address[i]) &&
-                           (!tq_rd_indication[i])           && //if the entry is already set as read indication, then we don't merge to the same entry
+                           (core2cache_req.address[MSB_TAG:LSB_SET] == tq_entry[i].cl_address) &&
+                           (!tq_entry[i].rd_indication)           && //if the entry is already set as read indication, then we don't merge to the same entry
                            (!(cancel_core_req))             && // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_entry[i].state == S_MB_WAIT_FILL) || (tq_entry[i].state == S_MB_FILL_READY) || (tq_entry[i].state == S_LU_CORE));
     
@@ -453,12 +440,13 @@ always_comb begin
     end else if (fill_exists) begin
         pipe_lu_req_q1.valid         = 1'b1;
         pipe_lu_req_q1.lu_op         = FILL_LU;
-        pipe_lu_req_q1.address       = {tq_cl_address      [enc_first_fill],tq_cl_word_offset[enc_first_fill],2'b00} ;//FIXME need to remember the correct address offset for the case that rd indication is set
-        pipe_lu_req_q1.cl_data       = tq_merge_buffer_data[enc_first_fill];
         pipe_lu_req_q1.tq_id         = enc_first_fill;
-        pipe_lu_req_q1.rd_indication = tq_rd_indication    [enc_first_fill];
-        pipe_lu_req_q1.wr_indication = tq_wr_indication    [enc_first_fill];
-        pipe_lu_req_q1.reg_id        = tq_reg_id           [enc_first_fill];
+        pipe_lu_req_q1.address       = {tq_entry[enc_first_fill].cl_address,
+                                        tq_entry[enc_first_fill].cl_word_offset,2'b00} ;//FIXME support byte offset 
+        pipe_lu_req_q1.cl_data       =  tq_entry[enc_first_fill].merge_buffer_data;
+        pipe_lu_req_q1.rd_indication =  tq_entry[enc_first_fill].rd_indication;
+        pipe_lu_req_q1.wr_indication =  tq_entry[enc_first_fill].wr_indication;
+        pipe_lu_req_q1.reg_id        =  tq_entry[enc_first_fill].reg_id;
     end //else if
 
     //incase of a read miss, we need to cancel the request and re-issue it later from the re-issue buffer
