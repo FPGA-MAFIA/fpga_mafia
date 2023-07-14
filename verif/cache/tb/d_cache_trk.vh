@@ -8,7 +8,7 @@
 // Created          : 12/2022
 //-----------------------------------------------------------------------------
 // Description :
-// Create the differents Trackers for our Cache   
+// Create the different Trackers for our Cache   
 //-----------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ initial begin
     $fwrite(d_cache_tq_trk,"                      D_CACHE TQ TRACKER  -  Test: ",test_name,"\n");
     $fwrite(d_cache_tq_trk,"====================================================================================================================\n");
     $fwrite(d_cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(d_cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
+    $fwrite(d_cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl address ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
     $fwrite(d_cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
     cache_ref_gold_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
