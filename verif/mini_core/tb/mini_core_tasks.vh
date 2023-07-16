@@ -18,6 +18,7 @@ fork forever begin
             rf_cur_write.RegDst = mini_core_top.mini_core.RegDstQ104H;
             rf_cur_write.Data   = mini_core_top.mini_core.RegWrDataQ104H;
             rf_write_history.push_back(rf_cur_write);
+    // $display("rf_cur_write = %p", rf_cur_write);
         end
     end
 end
@@ -27,10 +28,13 @@ endtask
 task get_ref_rf_write();
 fork forever begin 
     @(posedge Clk) begin
-        if (!(rv32i_ref.regfile[31:1] === rv32i_ref.next_regfile[31:1])) begin
+        if (rv32i_ref.reg_wr_en) begin
             ref_rf_cur_write.RegDst = rv32i_ref.rd;
             ref_rf_cur_write.Data   = rv32i_ref.next_regfile[rv32i_ref.rd];
-            ref_rf_write_history.push_back(ref_rf_cur_write);
+            if (rv32i_ref.rd != 5'b0) begin
+                ref_rf_write_history.push_back(ref_rf_cur_write);
+                // $display("ref_rf_cur_write = %p", ref_rf_cur_write);
+            end
         end
     end
 end
@@ -39,21 +43,18 @@ endtask
 
 
 task di_register_write();
-foreach(ref_rf_write_history[i])begin
+$display("ref_rf_write_history size = %0d", ref_rf_write_history.size());
+$display("rf_write_history size     = %0d", rf_write_history.size());
+
+foreach(rf_write_history[i])begin
     if (ref_rf_write_history[i]==rf_write_history[i]) begin
-        $display("rf_write_history[%0d] match", i);
-        $display(" match-ref_rf_write_history[%0d].RegDst = %0d", i, ref_rf_write_history[i].RegDst);
-        $display(" match-ref_rf_write_history[%0d].Data   = %0d", i, ref_rf_write_history[i].Data);
-        $display(" match-rf_write_history[%0d].RegDst = %0d", i, rf_write_history[i].RegDst);
-        $display(" match-rf_write_history[%0d].Data   = %0d", i, rf_write_history[i].Data);
-        ref_rf_write_history.delete(i);
-        rf_write_history.delete(i);
+        $display(" >> rf_write_history[%0d] match: %p", i, rf_write_history[i]);
+        //ref_rf_write_history.delete(i);
+        //rf_write_history.delete(i);
     end else begin
-        $display(" Note: Mismatch!!", i);
-        $display("      ref_rf_write_history[%0d].RegDst = %0d", i, ref_rf_write_history[i].RegDst);
-        $display("      ref_rf_write_history[%0d].Data   = %0d", i, ref_rf_write_history[i].Data);
-        $display("      rf_write_history[%0d].RegDst = %0d", i, rf_write_history[i].RegDst);
-        $display("      rf_write_history[%0d].Data   = %0d", i, rf_write_history[i].Data);
+        $display(" >> rf_write_history[%0d] Mismatch!!", i);
+        $display("      ref_rf_write_history[%0d] = %p", i, ref_rf_write_history[i]);
+        $display("      rf_write_history[%0d]     = %p", i, rf_write_history[i]);
         $error("ERROR: rf_write_history mismatch");
     end
 end
@@ -64,11 +65,11 @@ end else begin
     $display("rf_write_history size match");
 end
 
-if(ref_rf_write_history.size() != 0) begin
-    $error("ERROR: rf_write_history size mismatch");
-end else begin
-    $display("rf_write_history size match");
-end
+//if(ref_rf_write_history.size() != 0) begin
+//    $error("ERROR: rf_write_history not empty");
+//end else begin
+//    $display("rf_write_history size match");
+//end
 
 endtask
 
@@ -78,7 +79,7 @@ endtask
 task eot (string msg);
     #10;
     $display("=========\n -- Calling di_register_write -- \n=========");
-    //di_register_write(); FIXME - enable this DI
+    di_register_write();
     $display("===============================");
     $display("End of simulation: %s", msg);
     $display("===============================");

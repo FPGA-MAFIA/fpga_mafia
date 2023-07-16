@@ -52,6 +52,7 @@ logic [31:0] vga_lb_data, vga_lh_data, vga_lw_data, vga_lbu_data, vga_lhu_data;
 logic        hit_vga_mem_rd;
 logic        hit_vga_mem_wr;
 logic [31:0] reg_wr_data;
+logic        reg_wr_en;
 
 
 t_debug_info debug_info;
@@ -132,6 +133,7 @@ always_comb begin
     //=======================
     next_pc             = pc + 4;
     next_regfile        = regfile;
+    reg_wr_en           = 1'b0;
     illegal_instruction = 1'b0;
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
@@ -151,6 +153,7 @@ always_comb begin
     32'b????????????????????_?????_0110111: begin
         instr_type       = LUI;
         next_regfile[rd] = U_ImmediateQ101H;
+        reg_wr_en        = 1'b1;
     end
     //=======================================================
     // AUIPC
@@ -158,6 +161,7 @@ always_comb begin
     32'b????????????????????_?????_0010111: begin
         instr_type       = AUIPC;
         next_regfile[rd] = pc + U_ImmediateQ101H;
+        reg_wr_en        = 1'b1;
     end
     //=======================================================
     //  JAL
@@ -165,6 +169,7 @@ always_comb begin
     32'b????????????????????_?????_1101111: begin
         instr_type       = JAL ;
         next_regfile[rd] = pc + 4;
+        reg_wr_en        = 1'b1;
         next_pc = pc + J_ImmediateQ101H;
     end
     //=======================================================
@@ -173,6 +178,7 @@ always_comb begin
     32'b????????????_?????_???_?????_1100111: begin
         instr_type       = JALR;
         next_regfile[rd] = pc + 4;
+        reg_wr_en        = 1'b1;
         next_pc = regfile[rs1] + I_ImmediateQ101H;
     end
     //=======================================================
@@ -208,22 +214,27 @@ always_comb begin
     32'b???????_?????_?????_000_?????_0000011: begin
         instr_type       = LB;
         next_regfile[rd] = hit_vga_mem_rd ? vga_lb_data  : lb_data;
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_001_?????_0000011: begin
         instr_type       = LH;
         next_regfile[rd] = hit_vga_mem_rd ? vga_lh_data  : lh_data;
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_010_?????_0000011: begin
         instr_type       = LW;
         next_regfile[rd] = hit_vga_mem_rd ? vga_lw_data  : lw_data;
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_100_?????_0000011: begin
         instr_type       = LBU;
         next_regfile[rd] = hit_vga_mem_rd ? vga_lbu_data : lbu_data;
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_101_?????_0000011: begin
         instr_type       = LHU;
         next_regfile[rd] = hit_vga_mem_rd ? vga_lhu_data : lhu_data;
+        reg_wr_en        = 1'b1;
     end
     //=======================================================
     //SB/SH/SW
@@ -257,38 +268,47 @@ always_comb begin
     32'b???????_?????_?????_000_?????_0010011: begin
         instr_type       = ADDI;
         next_regfile[rd] = data_rd1 + I_ImmediateQ101H;//ADDI
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_010_?????_0010011: begin
         instr_type       = SLTI;
         next_regfile[rd] = data_rd1 < I_ImmediateQ101H;//SLTI
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_011_?????_0010011: begin
         instr_type       = SLTIU;
         next_regfile[rd] = data_rd1 < I_ImmediateQ101H;//SLTIU
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_100_?????_0010011: begin
         instr_type       = XORI;
         next_regfile[rd] = data_rd1 ^ I_ImmediateQ101H;//XORI
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_110_?????_0010011: begin
         instr_type       = ORI;
         next_regfile[rd] = data_rd1 | I_ImmediateQ101H;//ORI
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_111_?????_0010011: begin
         instr_type       = ANDI;
         next_regfile[rd] = data_rd1 & I_ImmediateQ101H;//ANDI
+        reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_001_?????_0010011: begin
         instr_type       = SLLI;
         next_regfile[rd] = data_rd1 << I_ImmediateQ101H;//SLLI
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_101_?????_0010011: begin
         instr_type       = SRLI;
         next_regfile[rd] = data_rd1 >> I_ImmediateQ101H[4:0];//SRLI
+        reg_wr_en        = 1'b1;
     end
     32'b0100000_?????_?????_101_?????_0010011: begin
         instr_type       = SRAI;
         next_regfile[rd] = $signed(data_rd1) >>> I_ImmediateQ101H[4:0];//SRAI
+        reg_wr_en        = 1'b1;
     end
     //=======================================================
     //ADD/SUB/SLL/SLT/SLTU/XOR/SRL/SRA/OR/AND
@@ -296,42 +316,52 @@ always_comb begin
     32'b0000000_?????_?????_000_?????_0110011: begin
         instr_type       = ADD;
         next_regfile[rd] = data_rd1 + data_rd2;//ADD
+        reg_wr_en        = 1'b1;
     end
     32'b0100000_?????_?????_000_?????_0110011: begin
         instr_type       = SUB;
         next_regfile[rd] = data_rd1 - data_rd2;//SUB
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_001_?????_0110011: begin
         instr_type       = SLL;
         next_regfile[rd] = data_rd1 << data_rd2[4:0];//SLL
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_010_?????_0110011: begin
         instr_type       = SLT;
         next_regfile[rd] = data_rd1 < data_rd2;//SLT
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_011_?????_0110011: begin
         instr_type       = SLTU;
         next_regfile[rd] = data_rd1 < data_rd2;//SLTU
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_100_?????_0110011: begin
         instr_type       = XOR;
         next_regfile[rd] = data_rd1 ^ data_rd2;//XOR
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_101_?????_0110011: begin
         instr_type       = SRL;
         next_regfile[rd] = data_rd1 >> data_rd2[4:0];//SRL
+        reg_wr_en        = 1'b1;
     end
     32'b0100000_?????_?????_101_?????_0110011: begin
         instr_type       = SRA;
         next_regfile[rd] = $signed(data_rd1) >>> data_rd2[4:0];//SRA
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_110_?????_0110011: begin
         instr_type       = OR;
         next_regfile[rd] = data_rd1 | data_rd2;//OR
+        reg_wr_en        = 1'b1;
     end
     32'b0000000_?????_?????_111_?????_0110011: begin
         instr_type       = AND;
         next_regfile[rd] = data_rd1 & data_rd2;//AND
+        reg_wr_en        = 1'b1;
     end
     //=======================================================
     //  FENCE
