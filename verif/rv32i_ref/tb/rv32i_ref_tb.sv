@@ -67,6 +67,15 @@ initial begin: test_seq
     eot("ERROR: TIMEOUT");
 end // test_seq
 
+initial begin: check_eot
+    forever begin
+        #10 
+        if(rv32i_ref.ebreak_was_called)   eot("ebreak_was_called");
+        if(rv32i_ref.ecall_was_called)    eot("ecall_was_called");
+        if(rv32i_ref.illegal_instruction) eot("ERROR: illegal_instruction");
+    end
+end
+
 rv32i_ref
 # (
     .I_MEM_LSB (I_MEM_OFFSET_MINI),
@@ -75,7 +84,8 @@ rv32i_ref
     .D_MEM_MSB (D_MEM_MSB_MINI)
 )  rv32i_ref (
 .clk  (Clk),
-.rst  (Rst)
+.rst  (Rst),
+.run  (1'b1)
 );
 
 `include "rv32i_ref_tasks.vh"

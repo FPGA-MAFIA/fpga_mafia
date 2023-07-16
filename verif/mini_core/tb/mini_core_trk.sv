@@ -56,7 +56,7 @@ assign PcQ100H = mini_core_top.PcQ100H;
 `MAFIA_DFF(PcQ101H,  PcQ100H , Clk)
 `MAFIA_DFF(PcQ102H,  PcQ101H , Clk)
 `MAFIA_DFF(PcQ103H,  PcQ102H , Clk)
-//`MAFIA_DFF(PcQ104H,  PcQ103H , Clk)
+`MAFIA_DFF(PcQ104H,  PcQ103H , Clk)
 ////tracker on memory_access operations
 //always @(posedge Clk) begin : memory_access_print
 //    if(DMemWrEn) begin
@@ -66,4 +66,57 @@ assign PcQ100H = mini_core_top.PcQ100H;
 //    $fwrite(trk_memory_access,"%t\t| %8h \t|read \t|%8h \t|%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemDataQ104H);
 //    end
 //end
+
+
+integer trk_reg_write;
+initial begin: trk_reg_write_gen
+    $timeformat(-9, 1, " ", 6);
+    trk_reg_write = $fopen({"../../../target/mini_core/tests/",test_name,"/trk_reg_write_ref.log"},"w");
+    $fwrite(trk_reg_write,"---------------------------------------------------------\n");
+    $fwrite(trk_reg_write," Time | PC |reg_dst|  X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
+    $fwrite(trk_reg_write,"---------------------------------------------------------\n");  
+end
+
+always_ff @(posedge Clk ) begin
+        $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+        ,$time,            
+                           PcQ104H,
+                           mini_core_top.mini_core.RegDstQ104H,
+                           mini_core_top.mini_core.Register[0],
+                           mini_core_top.mini_core.Register[1],
+                           mini_core_top.mini_core.Register[2],
+                           mini_core_top.mini_core.Register[3],
+                           mini_core_top.mini_core.Register[4],
+                           mini_core_top.mini_core.Register[5],
+                           mini_core_top.mini_core.Register[6],
+                           mini_core_top.mini_core.Register[7],
+                           mini_core_top.mini_core.Register[8],
+                           mini_core_top.mini_core.Register[9],
+                           mini_core_top.mini_core.Register[10],
+                           mini_core_top.mini_core.Register[11],
+                           mini_core_top.mini_core.Register[12],
+                           mini_core_top.mini_core.Register[13],
+                           mini_core_top.mini_core.Register[14],
+                           mini_core_top.mini_core.Register[15],
+                           mini_core_top.mini_core.Register[16],
+                           mini_core_top.mini_core.Register[17],
+                           mini_core_top.mini_core.Register[18],
+                           mini_core_top.mini_core.Register[19],
+                           mini_core_top.mini_core.Register[20],
+                           mini_core_top.mini_core.Register[21],
+                           mini_core_top.mini_core.Register[22],
+                           mini_core_top.mini_core.Register[23],
+                           mini_core_top.mini_core.Register[24],
+                           mini_core_top.mini_core.Register[25],
+                           mini_core_top.mini_core.Register[26],
+                           mini_core_top.mini_core.Register[27],
+                           mini_core_top.mini_core.Register[28],
+                           mini_core_top.mini_core.Register[29],
+                           mini_core_top.mini_core.Register[30],
+                           mini_core_top.mini_core.Register[31]
+                           );
+end
+
+
+
 // FIXME

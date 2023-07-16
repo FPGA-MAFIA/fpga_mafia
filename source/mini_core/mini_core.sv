@@ -82,7 +82,7 @@ logic [31:0]        RdDataAfterShiftQ104H;
 logic [3:0]         ByteEnQ104H, ByteenaRestoreQ104H;
 // Hazard unit detection ctrl
 logic               PcEnQ101H;
-logic [31:0]        PreviousInstructionQ101H;
+logic [31:0]        PreviousInstructionQ102H;
 logic               LoadHzrdDetectQ101H, LoadHzrdDetectQ102H;
 // End hazard unit detection ctrl
 
@@ -152,7 +152,7 @@ assign PcEnQ101H                = !LoadHzrdDetectQ101H;
 assign InstructionQ101H         = flushQ102H ? NOP :
                                   flushQ103H ? NOP :
                                   LoadHzrdDetectQ101H ? NOP: 
-                                  LoadHzrdDetectQ102H ? PreviousInstructionQ101H :
+                                  LoadHzrdDetectQ102H ? PreviousInstructionQ102H :
                                                         PreInstructionQ101H;
 
 // End Load and Ctrl hazard detection
@@ -177,6 +177,9 @@ assign CtrlDMemByteEnQ101H   = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE))
                                ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : // LW || SW
                                                                                               4'b0000 ;
 assign CtrlBranchOpQ101H     = t_branch_type'(Funct3Q101H);
+
+logic ebreak_was_calledQ101H; 
+assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
 
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
@@ -227,6 +230,8 @@ end
 //===================
 //  Register File
 //===================
+//---- The Register File ----
+ `MAFIA_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clock , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
 assign RegDstQ101H  = InstructionQ101H[11:7];
 assign RegSrc1Q101H = InstructionQ101H[19:15];
 assign RegSrc2Q101H = InstructionQ101H[24:20];
@@ -266,7 +271,7 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 `MAFIA_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clock)
 `MAFIA_DFF(RegDstQ102H              , RegDstQ101H           , Clock)
 `MAFIA_DFF(OpcodeQ102H              , OpcodeQ101H           , Clock)
-`MAFIA_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clock)
+`MAFIA_DFF(PreviousInstructionQ102H , PreInstructionQ101H   , Clock)
 `MAFIA_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clock)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -287,14 +292,12 @@ assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // for
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-//---- The Register File ----
- `MAFIA_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clock , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
 // Hazard Detection
 assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc1Q102H != 5'b0);
 assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);
 assign Hazard1Data2Q102H = (RegSrc2Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc2Q102H != 5'b0);
 assign Hazard2Data2Q102H = (RegSrc2Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc2Q102H != 5'b0);
-// Forwording unite
+// Forwarding unite
 assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
                          Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
                                              PreRegRdData1Q102H; // Common Case - No Hazard

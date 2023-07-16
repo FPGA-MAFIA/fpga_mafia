@@ -69,14 +69,7 @@ always_ff @(posedge Clk ) begin
                            );
 end
 
-initial begin: check_eot
-    forever begin
-        #10 
-        if(rv32i_ref.ebreak_was_called)   eot("ebreak_was_called");
-        if(rv32i_ref.ecall_was_called)    eot("ecall_was_called");
-        if(rv32i_ref.illegal_instruction) eot("ERROR: illegal_instruction");
-    end
-end
+
 task eot (string msg);
     #10;
     print_vga_ref_screen();

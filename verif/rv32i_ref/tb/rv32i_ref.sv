@@ -10,7 +10,8 @@ module rv32i_ref
     parameter D_MEM_MSB = 'h2_0000 - 1'h1 
 ) (
     input clk,
-    input rst
+    input rst,
+    input run
 );
 import rv32i_ref_pkg::*;
 // Define VGA memory sizes
@@ -71,11 +72,11 @@ assign debug_info.reg_wr_data = reg_wr_data;
 //=======================================================
 // DFF - the synchronous elements in the reference RV32I model
 //=======================================================
-`MAFIA_DFF       (regfile, next_regfile,  clk);
-`MAFIA_DFF       (dmem,    next_dmem,     clk);
-`MAFIA_DFF       (imem,    next_imem,     clk);
-`MAFIA_DFF       (VGAMem,  NextVGAMem,    clk);
-`MAFIA_EN_RST_DFF(pc  ,    next_pc,       clk , (!end_of_simulation) , rst);
+`MAFIA_EN_DFF    (regfile, next_regfile,  clk, run);
+`MAFIA_EN_DFF    (dmem,    next_dmem,     clk, run);
+`MAFIA_EN_DFF    (imem,    next_imem,     clk, run);
+`MAFIA_EN_DFF    (VGAMem,  NextVGAMem,    clk, run);
+`MAFIA_EN_RST_DFF(pc  ,    next_pc,       clk , ((!end_of_simulation) && run) , rst);
 
 `MAFIA_EN_RST_DFF(end_of_simulation,  1'b1   , clk , en_end_of_simulation , rst)
 //=======================================================
