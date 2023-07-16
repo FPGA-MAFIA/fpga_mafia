@@ -32,10 +32,11 @@ logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
 logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
-logic  [7:0] NextDMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
 
 
+string test_name;
 `include "mini_core_tasks.vh"
+`include "mini_core_trk.sv"
 
 
 // ========================
@@ -57,21 +58,30 @@ initial begin: reset_gen
 end: reset_gen
 
 
-`MAFIA_DFF(IMem, IMem    , Clk)
-`MAFIA_DFF(DMem, NextDMem, Clk)
+`MAFIA_DFF(IMem, IMem, Clk)
+`MAFIA_DFF(DMem, DMem, Clk)
 
-string test_name;
+integer file;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
     //======================================
-    //load the program to the TB
+    //load the program to the DUT & reference model
     //======================================
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
-    //$readmemh({"../app/data_mem.sv"}, DMem);
-    
+    //load the data to the DUT & reference model 
+    file = $fopen({"../../../target/mini_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    if (file) begin
+        $fclose(file);
+        $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        force mini_core_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
+        #10
+        release mini_core_top.mini_mem_wrap.d_mem.mem;
+        release rv32i_ref.dmem;
+    end
     
     //=======================================
     // enable the checker data collection (monitor)
@@ -115,7 +125,6 @@ mini_core_top mini_core_top (
  .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
 );      
 
-`include "mini_core_trk.sv"
 rv32i_ref
 # (
     .I_MEM_LSB (I_MEM_OFFSET_MINI),

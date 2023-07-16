@@ -98,7 +98,7 @@ always_comb begin : alu_logic
     AND     : AluOutQ102H = AluIn1Q102H & AluIn2Q102H;                              // AND
     default : AluOutQ102H = AluIn1Q102H + AluIn2Q102H;
   endcase
-  if (CtrlLuiQ102H) AluOutQ102H = AluIn2Q102H;                                      // LUI
+  if (Ctrl.LuiQ102H) AluOutQ102H = AluIn2Q102H;                                     // LUI
 end
 
 always_comb begin : branch_comp

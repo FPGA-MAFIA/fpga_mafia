@@ -26,9 +26,10 @@ import common_pkg::*;
     output  t_ctrl_rf    CtrlRf,
     output  t_ctrl_exe   CtrlExe,
     output  t_ctrl_mem   CtrlMem,
-    output  t_ctrl_wb    CtrlWb
+    output  t_ctrl_wb    CtrlWb,
+    // output data path signals
+    output  logic [31:0] ImmediateQ101H 
 );
-
 
 `MAFIA_DFF(PreviousInstructionQ102H , PreInstructionQ101H   , Clock)
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,9 +136,6 @@ always_comb begin
     default: ImmediateQ101H = {     InstructionQ101H[31:12], 12'b0 };                                                                             // U_Immediate
   endcase
 end
-
-
-
 
 endmodule
 

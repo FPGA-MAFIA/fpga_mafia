@@ -1,8 +1,4 @@
 
-logic [31:0] PcQ101H;             // To I_MEM
-logic [31:0] PcQ102H;             // To I_MEM
-logic [31:0] PcQ103H;             // To I_MEM
-logic [31:0] PcQ104H;             // To I_MEM
 integer trk_alu;
 initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
