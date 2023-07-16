@@ -1,3 +1,9 @@
 fabric_alive
 fabric_all_tiles
 fabric_wr_rd_data
+fabric_all_tiles -gV_REQUESTS=10
+fabric_all_tiles -gV_REQUESTS=10
+fabric_wr_rd_data
+fabric_BP_test -gV_REQUESTS=15 -gV_NUM_CYCLES=20
+fabric_BP_test -gV_REQUESTS=20 -gV_NUM_CYCLES=20
+fabric_BP_test -gV_REQUESTS=100 -gV_NUM_CYCLES=20
