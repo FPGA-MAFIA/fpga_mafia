@@ -17,4 +17,3 @@ fifo_arb_simple
 fifo_arb_single_fifo_full_BW
 router_alive   -gV_REQUESTS=30 -gV_MAX_DELAY=10
 router_alive   -gV_REQUESTS=300 -gV_MAX_DELAY=1
-
