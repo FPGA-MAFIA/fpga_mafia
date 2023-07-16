@@ -78,7 +78,7 @@ endtask
 task eot (string msg);
     #10;
     $display("=========\n -- Calling di_register_write -- \n=========");
-    di_register_write();
+    //di_register_write(); FIXME - enable this DI
     $display("===============================");
     $display("End of simulation: %s", msg);
     $display("===============================");

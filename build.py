@@ -397,7 +397,7 @@ def main():
             params_list = [line.split()[1:] for line in open(REGRESS+args.regress)]
             print_message(f'[INFO] params_list: {params_list}')
         except:
-            print_message(f'[ERROR] Failed to find the regression file \'{args.regress}\' in your tests directory')
+            print_message(f'[ERROR] Failed to run regression file \'{args.regress}\' in your tests directory')
             exit(1)
         else:
             for idx, test in enumerate(level_list):
