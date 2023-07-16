@@ -77,23 +77,23 @@ generate
     for (row = 1; row <= V_ROW; row = row + 1) begin : gen_row
     // fabric to if 
       //assign fabric.col[col].row[row].mini_core_tile_ins.in_local_req_valid            = valid_tile  [col][row];           
-      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqValidQ103H = valid_tile[col][row]; // input to req_fifo 
-      //assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H = valid_tile_rsp[col][row];    
-      assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H = origin_trans[col][row];     
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.C2F_ReqValidQ103H = valid_tile[col][row]; // input to req_fifo 
+      //assign fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.F2C_OutFabricValidQ504H = valid_tile_rsp[col][row];    
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.C2F_ReqQ103H = origin_trans[col][row];     
       //assign fabric.col[col].row[row].mini_core_tile_ins.in_local_ready[0] = mini_core_ready[col][row];
-      //assign fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready = mini_core_ready[col][row];
+      //assign fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.mini_core_ready = mini_core_ready[col][row];
                 
     // if to fabric
-      assign origin_trans_fab[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.C2F_ReqQ103H;   // input_data to req_fifo    
-      assign tile_rsp_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricQ504H;// input_data to rd_rsp fifo
-      assign valid_tile_rsp[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.F2C_OutFabricValidQ504H;// valid input_data to rd_rsp fifo
+      assign origin_trans_fab[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.C2F_ReqQ103H;   // input_data to req_fifo    
+      assign tile_rsp_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.F2C_OutFabricQ504H;// input_data to rd_rsp fifo
+      assign valid_tile_rsp[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.F2C_OutFabricValidQ504H;// valid input_data to rd_rsp fifo
       assign valid_local[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req_valid;
       assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
       //assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
       assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
       //`MINI_CORE_TILE_READY(col,row)
-      //assign mini_core_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_top.mini_mem_wrap.mini_core_ready;
+      //assign mini_core_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.mini_core_ready;
     end
   end
 endgenerate

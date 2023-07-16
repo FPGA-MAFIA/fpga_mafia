@@ -35,6 +35,8 @@ logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MI
 logic  [7:0] NextDMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
 
 
+`include "mini_core_tasks.vh"
+
 
 // ========================
 // clock gen
@@ -66,17 +68,38 @@ initial begin: test_seq
     //load the program to the TB
     //======================================
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
-    force rv32i_ref.imem              = IMem; //backdoor to reference model memory
+    force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //$readmemh({"../app/data_mem.sv"}, DMem);
-    #1000 $finish;
+    
+    
+    //=======================================
+    // enable the checker data collection (monitor)
+    //=======================================
+    fork
+    get_rf_write();
+    get_ref_rf_write();
+    begin wait(mini_core_top.mini_core.ebreak_was_calledQ101H == 1'b1);
+        eot("ebreak was called");
+    end
+    join
+
 end // test_seq
+
+initial begin: detect_timeout
+    //=======================================
+    // timeout
+    //=======================================
+    #1000 
+    eot("test ended with timeout");
+end
+
 
 
 // DUT instance mini_core 
 t_tile_id local_tile_id;
 assign  local_tile_id = 8'h2_2;
-mini_top mini_top (
+mini_core_top mini_core_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),
@@ -93,7 +116,6 @@ mini_top mini_top (
 );      
 
 `include "mini_core_trk.sv"
-
 rv32i_ref
 # (
     .I_MEM_LSB (I_MEM_OFFSET_MINI),
@@ -101,9 +123,10 @@ rv32i_ref
     .D_MEM_LSB (D_MEM_OFFSET_MINI),
     .D_MEM_MSB (D_MEM_MSB_MINI)
 )  rv32i_ref (
-.clk                 (Clk),
-.rst                 (Rst)
+.clk    (Clk),
+.rst    (Rst),
+.run    (1'b1) // FIXME - set the RUN only when the mini_core DUT is retiring the instruction.
+               // every time the run is set, the next instruction is executed
 );
-
 endmodule //mini_core_tb
 
