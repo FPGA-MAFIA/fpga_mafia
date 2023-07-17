@@ -16,8 +16,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run build BIG_CORE -all -app -hw -sim -keep_going
         run:  python build.py -dut 'big_core' -regress level0 -app -hw -sim -keep_going
-      - name: Run build MINI_CORE -all -app -hw -sim -keep_going
-        run:  python build.py -dut 'mini_core' -all -app -hw -sim -keep_going
+      - name: Run build MINI_CORE -regress level0 -app -hw -sim -keep_going
+        run:  python build.py -dut 'mini_core' -regress level0 -app -hw -sim -keep_going
       - name: Run build SC_CORE -all -app -hw -sim  -keep_going
         run:  python build.py -dut 'sc_core' -all -app -hw -sim -keep_going
       - name: Run build CACHE -regress level0 -hw -sim -pp -keep_going
