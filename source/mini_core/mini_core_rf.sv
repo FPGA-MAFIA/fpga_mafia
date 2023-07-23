@@ -47,6 +47,9 @@ assign RegRdData2Q101H = (Ctrl.RegSrc2Q101H == 5'b0) ? 32'b0                    
                          MatchRd2AftrWrQ101H         ? RegWrDataQ104H             : // forwards WrDataQ104H -> RdDataQ101H
                                                        Register[Ctrl.RegSrc2Q101H]; // Common Case - reading from Register file
 
-`MAFIA_DFF(ImmediateQ102H, ImmediateQ101H, Clock)
-`MAFIA_DFF(PcQ102H,        PcQ101H,        Clock)
+`MAFIA_EN_DFF(ImmediateQ102H,  ImmediateQ101H,  Clock, ReadyQ102H)
+`MAFIA_EN_DFF(PcQ102H,         PcQ101H,         Clock, ReadyQ102H)
+`MAFIA_EN_DFF(RegRdData1Q102H, RegRdData1Q101H, Clock, ReadyQ102H)
+`MAFIA_EN_DFF(RegRdData2Q102H, RegRdData2Q101H, Clock, ReadyQ102H)
+
 endmodule
