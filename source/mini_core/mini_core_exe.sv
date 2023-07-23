@@ -9,6 +9,8 @@
 // Created          : 7/2023
 //-----------------------------------------------------------------------------
 
+`include "macros.sv"
+
 module mini_core_exe
 import common_pkg::*;
 (
