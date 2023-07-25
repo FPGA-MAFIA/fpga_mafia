@@ -258,7 +258,11 @@ always_comb begin
 end
 
 assign MePc = csr.csr_mepc;
-
+// assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
+// assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
+// assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
+// assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
+// assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 
 
 always_comb begin
