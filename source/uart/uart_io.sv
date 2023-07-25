@@ -38,7 +38,7 @@ module uart_io
   logic write_transfer_valid;
   logic read_transfer_valid;
 
-  t_opcode      OutFabricRspOpcodeQ502H;
+  t_tile_opcode      OutFabricRspOpcodeQ502H;
   assign OutFabricRspOpcodeQ502H   = RD_RSP;
   assign interrupt            = uart_interrupt;
   assign InFabricReqValidQ500H    = (write_transfer_valid | read_transfer_valid);

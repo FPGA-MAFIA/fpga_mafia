@@ -148,7 +148,7 @@ typedef enum logic [11:0] {
  CSR_MTVAL          = 12'h343 ,
  CSR_MIP            = 12'h344 ,
  CSR_MTINST         = 12'h34A ,
- CSR_MTVAL2         = 12'h34B ,
+ CSR_MTVAL2         = 12'h34B 
 } t_csr_addr ;
 
 typedef struct packed {

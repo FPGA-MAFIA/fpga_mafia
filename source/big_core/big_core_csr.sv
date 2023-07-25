@@ -115,9 +115,9 @@ always_comb begin
             {2'b10, CSR_MTVEC}    : next_csr.csr_mtvec = csr.csr_mtvec | csr_data;
             {2'b11, CSR_MTVEC}    : next_csr.csr_mtvec = csr.csr_mtvec & ~csr_data;
             // CSR_MCOUNTERN
-            {2'b01, CSR_MCOUNTERN}    : next_csr.csr_mcounthern = csr_data;
-            {2'b10, CSR_MCOUNTERN}    : next_csr.csr_mcounthern = csr.csr_mcounthern | csr_data;
-            {2'b11, CSR_MCOUNTERN}    : next_csr.csr_mcounthern = csr.csr_mcounthern & ~csr_data;
+            {2'b01, CSR_MCOUNTERN}    : next_csr.csr_mcountern = csr_data;
+            {2'b10, CSR_MCOUNTERN}    : next_csr.csr_mcountern = csr.csr_mcountern | csr_data;
+            {2'b11, CSR_MCOUNTERN}    : next_csr.csr_mcountern = csr.csr_mcountern & ~csr_data;
             // CSR_MSCRATCH
             {2'b01, CSR_MSCRATCH}    : next_csr.csr_mscratch = csr_data;
             {2'b10, CSR_MSCRATCH}    : next_csr.csr_mscratch = csr.csr_mscratch | csr_data;
@@ -226,7 +226,7 @@ always_comb begin
             CSR_MIDELEG        : CsrReadDataQ102H = csr.csr_mideleg;
             CSR_MIE            : CsrReadDataQ102H = csr.csr_mie;
             CSR_MTVEC          : CsrReadDataQ102H = csr.csr_mtvec;
-            CSR_MCOUNTERN      : CsrReadDataQ102H = csr.csr_mcounthern;
+            CSR_MCOUNTERN      : CsrReadDataQ102H = csr.csr_mcountern;
             CSR_MSCRATCH       : CsrReadDataQ102H = csr.csr_mscratch;
             CSR_MEPC           : CsrReadDataQ102H = csr.csr_mepc;
             CSR_MCAUSE         : CsrReadDataQ102H = csr.csr_mcause;
@@ -241,11 +241,11 @@ always_comb begin
 end
 
 assign MePc = csr.csr_mepc;
-assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
-assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
-assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
-assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
-assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
+// assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
+// assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
+// assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
+// assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
+// assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 
 
 always_comb begin

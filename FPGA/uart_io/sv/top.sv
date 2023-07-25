@@ -24,47 +24,73 @@ module top(
         output logic        v_sync
     );
 
-import lotr_pkg::*;
+import common_pkg::*;
 
 
 
 logic        C2F_RspValidQ502H   ;  
-t_opcode     C2F_RspOpcodeQ502H  ;  
 logic [1:0]  C2F_RspThreadIDQ502H;  
 logic [31:0] C2F_RspDataQ502H    ;
 logic        C2F_RspStall        ;
 // C2F_Req
 logic        C2F_ReqValidQ500H   ;
-t_opcode     C2F_ReqOpcodeQ500H  ;
+logic        C2F_ReqOpcodeQ500H  ;
 logic [1:0]  C2F_ReqThreadIDQ500H;
 logic [31:0] C2F_ReqAddressQ500H ;
 logic [31:0] C2F_ReqDataQ500H    ;
 
+//uart_io  uart_io_inst
+//    (
+//    .clk                    (CLK_50)               ,//input
+//    .rstn                   (BUTTON[0])            ,//input
+//    .core_id                ('0)                   ,//input
+//    //================================================
+//    //        Core to Fabric
+//    //================================================
+//    // input - Rsp to Core
+//    .C2F_RspValidQ502H      (C2F_RspValidQ502H)   ,//input
+//    .C2F_RspOpcodeQ502H     (RD_RSP)  ,//input
+//    .C2F_RspThreadIDQ502H   ('0)                  ,//input
+//    .C2F_RspDataQ502H       (C2F_RspDataQ502H)    ,//input
+//    .C2F_RspStall           ('0)                  ,//input
+//    // output - Req from Core
+//    .C2F_ReqValidQ500H      (C2F_ReqValidQ500H)   ,//output
+//    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H)  ,//output
+//    .C2F_ReqThreadIDQ500H   (                    ),//output
+//    .C2F_ReqAddressQ500H    (C2F_ReqAddressQ500H) ,//output
+//    .C2F_ReqDataQ500H       (C2F_ReqDataQ500H)    ,//output
+//    // UART RX/TX
+//    .uart_master_tx         (UART_TXD)      ,
+//    .uart_master_rx         (UART_RXD)      ,
+//    .interrupt              (INTERRUPT)
+//    );
+
 uart_io  uart_io_inst
     (
-    .clk                    (CLK_50)               ,//input
+    .clk                    (CLK_50)        ,//input
     .rstn                   (BUTTON[0])            ,//input
     .core_id                ('0)                   ,//input
     //================================================
     //        Core to Fabric
     //================================================
     // input - Rsp to Core
-    .C2F_RspValidQ502H      (C2F_RspValidQ502H)   ,//input
-    .C2F_RspOpcodeQ502H     (RD_RSP)  ,//input
-    .C2F_RspThreadIDQ502H   ('0)                  ,//input
-    .C2F_RspDataQ502H       (C2F_RspDataQ502H)    ,//input
-    .C2F_RspStall           ('0)                  ,//input
+    .OutFabricRspValidQ502H      (C2F_RspValidQ502H),//input
+    .OutFabricRspThreadIDQ502H   ('0),                 //input
+    .OutFabricRspDataQ502H       (C2F_RspDataQ502H),//input
+    .OutFabricRspStall           ('0),                 //input
     // output - Req from Core
-    .C2F_ReqValidQ500H      (C2F_ReqValidQ500H)   ,//output
-    .C2F_ReqOpcodeQ500H     (C2F_ReqOpcodeQ500H)  ,//output
-    .C2F_ReqThreadIDQ500H   (                    ),//output
-    .C2F_ReqAddressQ500H    (C2F_ReqAddressQ500H) ,//output
-    .C2F_ReqDataQ500H       (C2F_ReqDataQ500H)    ,//output
+    .InFabricReqValidQ500H      (C2F_ReqValidQ500H),//output
+    .InFabricReqOpcodeQ500H     (C2F_ReqOpcodeQ500H),//output
+    .InFabricReqThreadIDQ500H   (                  ),//output
+    .InFabricReqAddressQ500H    (C2F_ReqAddressQ500H),//output
+    .InFabricReqDataQ500H       (C2F_ReqDataQ500H)   ,//output
     // UART RX/TX
-    .uart_master_tx         (UART_TXD)      ,
-    .uart_master_rx         (UART_RXD)      ,
+    .uart_master_tx         (UART_TXD),
+    .uart_master_rx         (UART_RXD),
     .interrupt              (INTERRUPT)
     );
+
+
 
 
 logic [7:0]  NEXT_HEX0;
@@ -100,7 +126,7 @@ always_comb begin : write_block
     NEXT_HEX4 = HEX4;
     NEXT_HEX5 = HEX5;
     NEXT_LED  = LED ;
-    if(C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == WR)) begin
+    if(C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == 1'b1)) begin
         unique case (C2F_ReqAddressQ500H[9:0])
             10'h000:  NEXT_HEX0 = C2F_ReqDataQ500H[7:0];
             10'h001:  NEXT_HEX1 = C2F_ReqDataQ500H[7:0];
@@ -117,7 +143,7 @@ end
 logic [31:0] read_data;
 always_comb begin : read_block
     read_data = '0;
-    if(C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == RD)) begin
+    if(C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == 1'b0)) begin
         unique case (C2F_ReqAddressQ500H[9:0])
             10'h000:  read_data = {24'b0, HEX0};
             10'h001:  read_data = {24'b0, HEX1};
@@ -133,7 +159,7 @@ always_comb begin : read_block
 end
 
 `LOTR_MSFF(C2F_RspDataQ502H,  read_data,                                       CLK_50)
-`LOTR_MSFF(C2F_RspValidQ502H, C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == RD), CLK_50)
+`LOTR_MSFF(C2F_RspValidQ502H, C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == 1'b0), CLK_50)
 
 
 endmodule
