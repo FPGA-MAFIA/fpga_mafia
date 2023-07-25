@@ -8,7 +8,7 @@
 // Created          : 12/2022
 //-----------------------------------------------------------------------------
 // Description :
-// Create the differents Trackers for our Cache   
+// Create the different Trackers for our Cache   
 //-----------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ initial begin
     $fwrite(d_cache_tq_trk,"                      D_CACHE TQ TRACKER  -  Test: ",test_name,"\n");
     $fwrite(d_cache_tq_trk,"====================================================================================================================\n");
     $fwrite(d_cache_tq_trk,"--------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(d_cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl adress ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
+    $fwrite(d_cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl address ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
     $fwrite(d_cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
     cache_ref_gold_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
@@ -223,19 +223,19 @@ if(d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q2.lu_valid) begin
 // // tracker on TQ
 // //==================================================
     for (int i=0; i< NUM_TQ_ENTRY; ++i) begin
-        if ((d_cache.d_cache_tq.tq_state[i] != d_cache.d_cache_tq.next_tq_state[i]) ||
-             ((d_cache.d_cache_tq.tq_state[i] != S_IDLE) &&  dmem_core2cache_req.valid && (d_cache.d_cache_tq.rd_req_hit_mb[i] || d_cache.d_cache_tq.wr_req_hit_mb[i]) )
+        if ((d_cache.d_cache_tq.tq_entry[i].state != d_cache.d_cache_tq.next_tq_entry[i].state) ||
+             ((d_cache.d_cache_tq.tq_entry[i].state != S_IDLE) &&  dmem_core2cache_req.valid && (d_cache.d_cache_tq.rd_req_hit_mb[i] || d_cache.d_cache_tq.wr_req_hit_mb[i]) )
              ) begin
         $fwrite(d_cache_tq_trk,"%t Entry[%1d]  %-15s   %h       %h       %h      %h     %h            %h              \n",
         $realtime,
         i,
-        d_cache.d_cache_tq.next_tq_state              [i].name,     
-        d_cache.d_cache_tq.next_tq_rd_indication      [i],     
-        d_cache.d_cache_tq.next_tq_wr_indication      [i],         
-        d_cache.d_cache_tq.next_tq_cl_address         [i],
-        d_cache.d_cache_tq.next_tq_merge_buffer_data  [i],      
-        d_cache.d_cache_tq.next_tq_cl_word_offset     [i],     
-        d_cache.d_cache_tq.next_tq_reg_id             [i]
+        d_cache.d_cache_tq.next_tq_entry[i].state.name       ,     
+        d_cache.d_cache_tq.next_tq_entry[i].rd_indication    ,     
+        d_cache.d_cache_tq.next_tq_entry[i].wr_indication    ,         
+        d_cache.d_cache_tq.next_tq_entry[i].cl_address       ,
+        d_cache.d_cache_tq.next_tq_entry[i].merge_buffer_data,      
+        d_cache.d_cache_tq.next_tq_entry[i].cl_word_offset   ,     
+        d_cache.d_cache_tq.next_tq_entry[i].reg_id           
         );
 
 

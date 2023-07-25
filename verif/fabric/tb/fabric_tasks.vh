@@ -269,3 +269,26 @@ join_any
 
 endtask
 
+task force_target(input t_tile_id trgt);
+if(trgt == {4'd3,4'd3}) force `MINI_CORE_TILE_READY(3,3) = '0;
+if(trgt == {4'd3,4'd2}) force `MINI_CORE_TILE_READY(3,2) = '0;
+if(trgt == {4'd3,4'd1}) force `MINI_CORE_TILE_READY(3,1) = '0;
+if(trgt == {4'd2,4'd3}) force `MINI_CORE_TILE_READY(2,3) = '0;
+if(trgt == {4'd2,4'd2}) force `MINI_CORE_TILE_READY(2,2) = '0;
+if(trgt == {4'd2,4'd1}) force `MINI_CORE_TILE_READY(2,1) = '0;
+if(trgt == {4'd1,4'd3}) force `MINI_CORE_TILE_READY(1,3) = '0;
+if(trgt == {4'd1,4'd2}) force `MINI_CORE_TILE_READY(1,2) = '0;
+if(trgt == {4'd1,4'd1}) force `MINI_CORE_TILE_READY(1,1) = '0;
+endtask
+
+task release_target(input t_tile_id trgt);
+if(trgt == {4'd3,4'd3}) release `MINI_CORE_TILE_READY(3,3);
+if(trgt == {4'd3,4'd2}) release `MINI_CORE_TILE_READY(3,2);
+if(trgt == {4'd3,4'd1}) release `MINI_CORE_TILE_READY(3,1);
+if(trgt == {4'd2,4'd3}) release `MINI_CORE_TILE_READY(2,3);
+if(trgt == {4'd2,4'd2}) release `MINI_CORE_TILE_READY(2,2);
+if(trgt == {4'd2,4'd1}) release `MINI_CORE_TILE_READY(2,1);
+if(trgt == {4'd1,4'd3}) release `MINI_CORE_TILE_READY(1,3);
+if(trgt == {4'd1,4'd2}) release `MINI_CORE_TILE_READY(1,2);
+if(trgt == {4'd1,4'd1}) release `MINI_CORE_TILE_READY(1,1);
+endtask

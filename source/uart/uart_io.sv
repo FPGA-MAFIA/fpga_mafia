@@ -1,8 +1,3 @@
-/*
- 
- 
-
- */
 `timescale 1ns/1ns
 
 `include "uart_defines.v"
@@ -20,12 +15,10 @@ module uart_io
    output logic         InFabricReqOpcodeQ500H     , //1 for write, 0 for read
    output logic  [31:0] InFabricReqAddressQ500H    ,
    output logic  [31:0] InFabricReqDataQ500H       ,
-   output logic  [1:0]  InFabricReqThreadIDQ500H   ,
    // Response
    input  logic         OutFabricRspValidQ502H      ,
    input  logic  [31:0] OutFabricRspDataQ502H       ,
    input  logic         OutFabricRspStall           ,
-   input  logic  [1:0]  OutFabricRspThreadIDQ502H   ,     
    // uart RX/TX signals
    input   logic        uart_master_tx, 
    output  logic        uart_master_rx,
@@ -40,12 +33,11 @@ module uart_io
 
   t_tile_opcode      OutFabricRspOpcodeQ502H;
   assign OutFabricRspOpcodeQ502H   = RD_RSP;
-  assign interrupt            = uart_interrupt;
+  assign interrupt               = uart_interrupt;
   assign InFabricReqValidQ500H    = (write_transfer_valid | read_transfer_valid);
   assign InFabricReqOpcodeQ500H   = ((write_transfer_valid) ? 1'b1 : 1'b0);
   assign write_resp_valid     = (OutFabricRspValidQ502H & (OutFabricRspOpcodeQ502H==WR));
   assign read_resp_valid      = (OutFabricRspValidQ502H & (OutFabricRspOpcodeQ502H==RD_RSP));
-  assign InFabricReqThreadIDQ500H = '0;
 
    // wishbone interface
    wishbone 

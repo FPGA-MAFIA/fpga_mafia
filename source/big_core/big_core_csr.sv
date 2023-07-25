@@ -43,65 +43,65 @@ always_comb begin
             {2'b10,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
             {2'b11,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
             // CSR_MCYCLE
-            {2'b01, CSR_MCYCLE}    : next_csr.csr_mcycle = csr_data;
-            {2'b10, CSR_MCYCLE}    : next_csr.csr_mcycle = csr.csr_mcycle | csr_data;
-            {2'b11, CSR_MCYCLE}    : next_csr.csr_mcycle = csr.csr_mcycle & ~csr_data;
+            {2'b01, CSR_MCYCLE}       : next_csr.csr_mcycle = csr_data;
+            {2'b10, CSR_MCYCLE}       : next_csr.csr_mcycle = csr.csr_mcycle | csr_data;
+            {2'b11, CSR_MCYCLE}       : next_csr.csr_mcycle = csr.csr_mcycle & ~csr_data;
             // CSR_MCYCLEH
-            {2'b01, CSR_MCYCLEH}    : next_csr.csr_mcycleh = csr_data;
-            {2'b10, CSR_MCYCLEH}    : next_csr.csr_mcycleh = csr.csr_mcycleh | csr_data;
-            {2'b11, CSR_MCYCLEH}    : next_csr.csr_mcycleh = csr.csr_mcycleh & ~csr_data;
+            {2'b01, CSR_MCYCLEH}      : next_csr.csr_mcycleh = csr_data;
+            {2'b10, CSR_MCYCLEH}      : next_csr.csr_mcycleh = csr.csr_mcycleh | csr_data;
+            {2'b11, CSR_MCYCLEH}      : next_csr.csr_mcycleh = csr.csr_mcycleh & ~csr_data;
             // CSR_MINSTRET
-            {2'b01, CSR_MINSTRET}    : next_csr.csr_minstret = csr_data;
-            {2'b10, CSR_MINSTRET}    : next_csr.csr_minstret = csr.csr_minstret | csr_data;
-            {2'b11, CSR_MINSTRET}    : next_csr.csr_minstret = csr.csr_minstret & ~csr_data;
+            {2'b01, CSR_MINSTRET}     : next_csr.csr_minstret = csr_data;
+            {2'b10, CSR_MINSTRET}     : next_csr.csr_minstret = csr.csr_minstret | csr_data;
+            {2'b11, CSR_MINSTRET}     : next_csr.csr_minstret = csr.csr_minstret & ~csr_data;
             // CSR_MINSTRETH
             {2'b01, CSR_MINSTRETH}    : next_csr.csr_minstreth = csr_data;
             {2'b10, CSR_MINSTRETH}    : next_csr.csr_minstreth = csr.csr_minstreth | csr_data;
             {2'b11, CSR_MINSTRETH}    : next_csr.csr_minstreth = csr.csr_minstreth & ~csr_data;
             // CSR_MHPMCOUNTER3
-            {2'b01, CSR_MHPMCOUNTER3}    : next_csr.csr_mhpmcounter3 = csr_data;
-            {2'b10, CSR_MHPMCOUNTER3}    : next_csr.csr_mhpmcounter3 = csr.csr_mhpmcounter3 | csr_data;
-            {2'b11, CSR_MHPMCOUNTER3}    : next_csr.csr_mhpmcounter3 = csr.csr_mhpmcounter3 & ~csr_data;
+            {2'b01, CSR_MHPMCOUNTER3} : next_csr.csr_mhpmcounter3 = csr_data;
+            {2'b10, CSR_MHPMCOUNTER3} : next_csr.csr_mhpmcounter3 = csr.csr_mhpmcounter3 | csr_data;
+            {2'b11, CSR_MHPMCOUNTER3} : next_csr.csr_mhpmcounter3 = csr.csr_mhpmcounter3 & ~csr_data;
             // CSR_MHPMCOUNTER3H
-            {2'b01, CSR_MHPMCOUNTER3H}    : next_csr.csr_mhpmcounter3h = csr_data;
-            {2'b10, CSR_MHPMCOUNTER3H}    : next_csr.csr_mhpmcounter3h = csr.csr_mhpmcounter3h | csr_data;
-            {2'b11, CSR_MHPMCOUNTER3H}    : next_csr.csr_mhpmcounter3h = csr.csr_mhpmcounter3h & ~csr_data;
+            {2'b01, CSR_MHPMCOUNTER3H}: next_csr.csr_mhpmcounter3h = csr_data;
+            {2'b10, CSR_MHPMCOUNTER3H}: next_csr.csr_mhpmcounter3h = csr.csr_mhpmcounter3h | csr_data;
+            {2'b11, CSR_MHPMCOUNTER3H}: next_csr.csr_mhpmcounter3h = csr.csr_mhpmcounter3h & ~csr_data;
             // CSR_MHPMCOUNTER4
-            {2'b01, CSR_MHPMCOUNTER4}    : next_csr.csr_mhpmcounter4 = csr_data;
-            {2'b10, CSR_MHPMCOUNTER4}    : next_csr.csr_mhpmcounter4 = csr.csr_mhpmcounter4 | csr_data;
-            {2'b11, CSR_MHPMCOUNTER4}    : next_csr.csr_mhpmcounter4 = csr.csr_mhpmcounter4 & ~csr_data;
+            {2'b01, CSR_MHPMCOUNTER4} : next_csr.csr_mhpmcounter4 = csr_data;
+            {2'b10, CSR_MHPMCOUNTER4} : next_csr.csr_mhpmcounter4 = csr.csr_mhpmcounter4 | csr_data;
+            {2'b11, CSR_MHPMCOUNTER4} : next_csr.csr_mhpmcounter4 = csr.csr_mhpmcounter4 & ~csr_data;
             // CSR_MHPMCOUNTER4H
-            {2'b01, CSR_MHPMCOUNTER4H}    : next_csr.csr_mhpmcounter4h = csr_data;
-            {2'b10, CSR_MHPMCOUNTER4H}    : next_csr.csr_mhpmcounter4h = csr.csr_mhpmcounter4h | csr_data;
-            {2'b11, CSR_MHPMCOUNTER4H}    : next_csr.csr_mhpmcounter4h = csr.csr_mhpmcounter4h & ~csr_data;
+            {2'b01, CSR_MHPMCOUNTER4H}: next_csr.csr_mhpmcounter4h = csr_data;
+            {2'b10, CSR_MHPMCOUNTER4H}: next_csr.csr_mhpmcounter4h = csr.csr_mhpmcounter4h | csr_data;
+            {2'b11, CSR_MHPMCOUNTER4H}: next_csr.csr_mhpmcounter4h = csr.csr_mhpmcounter4h & ~csr_data;
             // CSR_MCOUNTINHIBIT
-            {2'b01, CSR_MCOUNTINHIBIT}    : next_csr.csr_mcountinhibit = csr_data;
-            {2'b10, CSR_MCOUNTINHIBIT}    : next_csr.csr_mcountinhibit = csr.csr_mcountinhibit | csr_data;
-            {2'b11, CSR_MCOUNTINHIBIT}    : next_csr.csr_mcountinhibit = csr.csr_mcountinhibit & ~csr_data;
+            {2'b01, CSR_MCOUNTINHIBIT}: next_csr.csr_mcountinhibit = csr_data;
+            {2'b10, CSR_MCOUNTINHIBIT}: next_csr.csr_mcountinhibit = csr.csr_mcountinhibit | csr_data;
+            {2'b11, CSR_MCOUNTINHIBIT}: next_csr.csr_mcountinhibit = csr.csr_mcountinhibit & ~csr_data;
             // CSR_MHPMEVENT3
-            {2'b01, CSR_MHPMEVENT3}    : next_csr.csr_mhpmevent3 = csr_data;
-            {2'b10, CSR_MHPMEVENT3}    : next_csr.csr_mhpmevent3 = csr.csr_mhpmevent3 | csr_data;
-            {2'b11, CSR_MHPMEVENT3}    : next_csr.csr_mhpmevent3 = csr.csr_mhpmevent3 & ~csr_data;
+            {2'b01, CSR_MHPMEVENT3}   : next_csr.csr_mhpmevent3 = csr_data;
+            {2'b10, CSR_MHPMEVENT3}   : next_csr.csr_mhpmevent3 = csr.csr_mhpmevent3 | csr_data;
+            {2'b11, CSR_MHPMEVENT3}   : next_csr.csr_mhpmevent3 = csr.csr_mhpmevent3 & ~csr_data;
             // CSR_MHPMEVENT4
-            {2'b01, CSR_MHPMEVENT4}    : next_csr.csr_mhpmevent4 = csr_data;
-            {2'b10, CSR_MHPMEVENT4}    : next_csr.csr_mhpmevent4 = csr.csr_mhpmevent4 | csr_data;
-            {2'b11, CSR_MHPMEVENT4}    : next_csr.csr_mhpmevent4 = csr.csr_mhpmevent4 & ~csr_data;
+            {2'b01, CSR_MHPMEVENT4}   : next_csr.csr_mhpmevent4 = csr_data;
+            {2'b10, CSR_MHPMEVENT4}   : next_csr.csr_mhpmevent4 = csr.csr_mhpmevent4 | csr_data;
+            {2'b11, CSR_MHPMEVENT4}   : next_csr.csr_mhpmevent4 = csr.csr_mhpmevent4 & ~csr_data;
             // CSR_MSTATUS
-            {2'b01, CSR_MSTATUS}    : next_csr.csr_mstatus = csr_data;
-            {2'b10, CSR_MSTATUS}    : next_csr.csr_mstatus = csr.csr_mstatus | csr_data;
-            {2'b11, CSR_MSTATUS}    : next_csr.csr_mstatus = csr.csr_mstatus & ~csr_data;
+            {2'b01, CSR_MSTATUS}      : next_csr.csr_mstatus = csr_data;
+            {2'b10, CSR_MSTATUS}      : next_csr.csr_mstatus = csr.csr_mstatus | csr_data;
+            {2'b11, CSR_MSTATUS}      : next_csr.csr_mstatus = csr.csr_mstatus & ~csr_data;
             // CSR_MSTATUSH
-            {2'b01, CSR_MSTATUSH}    : next_csr.csr_mstatush = csr_data;
-            {2'b10, CSR_MSTATUSH}    : next_csr.csr_mstatush = csr.csr_mstatush | csr_data;
-            {2'b11, CSR_MSTATUSH}    : next_csr.csr_mstatush = csr.csr_mstatush & ~csr_data;
+            {2'b01, CSR_MSTATUSH}     : next_csr.csr_mstatush = csr_data;
+            {2'b10, CSR_MSTATUSH}     : next_csr.csr_mstatush = csr.csr_mstatush | csr_data;
+            {2'b11, CSR_MSTATUSH}     : next_csr.csr_mstatush = csr.csr_mstatush & ~csr_data;
             // CSR_MISA
-            {2'b01, CSR_MISA}    : next_csr.csr_misa = csr_data;
-            {2'b10, CSR_MISA}    : next_csr.csr_misa = csr.csr_misa | csr_data;
-            {2'b11, CSR_MISA}    : next_csr.csr_misa = csr.csr_misa & ~csr_data;
+            {2'b01, CSR_MISA}         : next_csr.csr_misa = csr_data;
+            {2'b10, CSR_MISA}         : next_csr.csr_misa = csr.csr_misa | csr_data;
+            {2'b11, CSR_MISA}         : next_csr.csr_misa = csr.csr_misa & ~csr_data;
             // CSR_MEDELEG
-            {2'b01, CSR_MEDELEG}    : next_csr.csr_medeleg = csr_data;
-            {2'b10, CSR_MEDELEG}    : next_csr.csr_medeleg = csr.csr_medeleg | csr_data;
-            {2'b11, CSR_MEDELEG}    : next_csr.csr_medeleg = csr.csr_medeleg & ~csr_data;
+            {2'b01, CSR_MEDELEG}      : next_csr.csr_medeleg = csr_data;
+            {2'b10, CSR_MEDELEG}      : next_csr.csr_medeleg = csr.csr_medeleg | csr_data;
+            {2'b11, CSR_MEDELEG}      : next_csr.csr_medeleg = csr.csr_medeleg & ~csr_data;
             // CSR_MIDELEG
             {2'b01, CSR_MIDELEG}    : next_csr.csr_mideleg = csr_data;
             {2'b10, CSR_MIDELEG}    : next_csr.csr_mideleg = csr.csr_mideleg | csr_data;
@@ -152,14 +152,11 @@ always_comb begin
         endcase
     end
     //==========================================================================
-    // ---- RO CSR - writes from RTL ----
-    //==========================================================================
-    // the cycle counter is incremented on every clock cycle
-        {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
-        next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
-
-    //==========================================================================
-
+    // TODO - see what is the RISCV termology for the following:
+    // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
+    // RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
+    // RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
+    // RW   - read/write from SW. Example: csr_scratch
     //==========================================================================
     // handle HW exceptions:
     //==========================================================================
@@ -167,6 +164,7 @@ always_comb begin
     // 2. misaligned access
     // 3. illegal CSR access
     // 4. breakpoint
+    //FIXME - please review the values of the exceptions - read the spec
     if(CsrHwUpdt.illegal_instruction) next_csr.csr_mcause = 32'h00000002;
     if(CsrHwUpdt.misaligned_access)   next_csr.csr_mcause = 32'h00000004;
     if(CsrHwUpdt.illegal_csr_access)  next_csr.csr_mcause = 32'h0000000B;
@@ -180,18 +178,37 @@ always_comb begin
     if(CsrHwUpdt.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
 
     //==========================================================================
+    // ---- RO/V CSR - writes from RTL ----
+    //==========================================================================
+    // FIXME - please remove this and add the correct CSR for counting cycles.
+    // FIXME - need to figure out how to caount the "retired instructions" (excluding the ones that were flushed, machine nop, etc.)
+    // the cycle counter is incremented on every clock cycle
+        {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
+        next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
+    //==========================================================================
     // Reset values for CSR
     //==========================================================================
     if(Rst) begin
         next_csr = '0;
         //May override the reset values
+        //FIXME - No need to override the reset values of the scratch registers
         next_csr.csr_scratch   = 32'h1001;
     end // if(Rst)
+    //==========================================================================
+    // READ ONLY - constant values
+    //==========================================================================
+    next_csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
+    next_csr.csr_marchid       = 32'b0; // CSR_MARCHID
+    next_csr.csr_mimpid        = 32'b0; // CSR_MIMPID
+    next_csr.csr_mhartid       = 32'b0; // CSR_MHARTID
+    next_csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 end//always_comb
 
 `MAFIA_DFF(csr, next_csr, Clk)
 
-// This is the load
+// ==============================================================================
+// READING THE CSR
+// ==============================================================================
 always_comb begin
     CsrReadDataQ102H = 32'b0;
     if(csr_rden) begin

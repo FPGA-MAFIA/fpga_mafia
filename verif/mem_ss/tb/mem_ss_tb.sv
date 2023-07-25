@@ -23,6 +23,23 @@ initial begin: clock_gen
     end
 end// clock_gen
 
+
+// t_set_rd_rsp back_door_entry ;
+// localparam NUM_FM_CL = 2**(SET_ADRS_WIDTH + TAG_WIDTH);
+// t_cl back_door_fm_mem   [NUM_FM_CL-1:0];
+// logic [SET_WIDTH-1:0] tag_mem   [(2**SET_ADRS_WIDTH)-1:0];
+// logic [CL_WIDTH-1:0]  data_mem  [(2**(SET_ADRS_WIDTH + WAY_WIDTH))-1:0];
+
+
+
+parameter V_NUM_REQ      =200;
+parameter V_RD_RATIO     =50;
+parameter V_MAX_REQ_DELAY=1;
+parameter V_MIN_REQ_DELAY=0;
+parameter V_MAX_NUM_SET_PULL  = 5; //the theory MAX is 2^SET_ADRS_WIDTH (2^8=256)  
+parameter V_MAX_NUM_TAG_PULL  = 5; //the theory MAX is 2^SET_ADRS_WIDTH (2^8=256)  
+logic [7:0] dmem_tag_pull [V_MAX_NUM_TAG_PULL:0];
+logic [7:0] dmem_set_pull [V_MAX_NUM_SET_PULL:0];
 `include "mem_ss_tasks.vh"
 `include "mem_ss_trk.vh"
 initial begin : start_test
@@ -44,6 +61,10 @@ $display("====== start test =======");
 $display("=========================\n");
 if(test_name == "alive") begin
 `include "alive.sv"
+end else if(test_name == "wr_rd_dmem") begin
+`include "wr_rd_dmem.sv"
+end else if(test_name == "simple_rand") begin
+`include "simple_rand.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);
@@ -75,6 +96,10 @@ mem_ss mem_ss (
 );
 
 
+//============================
+//          Far Memory ARRAY
+//============================
+
 array  #(
     .WORD_WIDTH     (CL_WIDTH),
     .ADRS_WIDTH     (SET_ADRS_WIDTH + TAG_WIDTH)
@@ -94,6 +119,19 @@ t_fm_req sample_cl_req_to_sram;
 assign cl_rsp_from_sram.valid = sample_cl_req_to_sram.valid;
 assign cl_rsp_from_sram.address = sample_cl_req_to_sram.address;
 
-   
+//===============================
+// Reference Model
+//===============================
+// Every d_mem access will be checked against this model
+t_rd_rsp        dmem_ref_cache2core_rsp;
+cache_ref_model d_mem_cache_ref_model(
+    .clk                (clk),                //input   logic
+    .rst                (rst),                //input   logic
+    //Agent Interface                      
+    .core2cache_req     (dmem_core2cache_req),     //input   
+    .cache2core_rsp     (dmem_ref_cache2core_rsp)  //output  t_rd_rsp
+);
+
+
 
 endmodule 

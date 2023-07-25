@@ -18,7 +18,7 @@
 
 //  mini_core files
 ../../../source/mini_core/mini_core.sv
-../../../source/mini_core/mini_top.sv
+../../../source/mini_core/mini_core_top.sv
 ../../../source/mini_core/mini_mem_wrap.sv
 
 // fabric files

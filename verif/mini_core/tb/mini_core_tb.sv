@@ -32,8 +32,11 @@ logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
 logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
-logic  [7:0] NextDMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
 
+
+string test_name;
+`include "mini_core_tasks.vh"
+`include "mini_core_trk.sv"
 
 
 // ========================
@@ -55,28 +58,58 @@ initial begin: reset_gen
 end: reset_gen
 
 
-`MAFIA_DFF(IMem, IMem    , Clk)
-`MAFIA_DFF(DMem, NextDMem, Clk)
+`MAFIA_DFF(IMem, IMem, Clk)
+`MAFIA_DFF(DMem, DMem, Clk)
 
-string test_name;
+integer file;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
     //======================================
-    //load the program to the TB
+    //load the program to the DUT & reference model
     //======================================
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
-    force core_rv32i_ref.imem              = IMem; //backdoor to reference model memory
-    //$readmemh({"../app/data_mem.sv"}, DMem);
-    #1000 $finish;
+    force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
+    //load the data to the DUT & reference model 
+    file = $fopen({"../../../target/mini_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    if (file) begin
+        $fclose(file);
+        $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        force mini_core_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
+        #10
+        release mini_core_top.mini_mem_wrap.d_mem.mem;
+        release rv32i_ref.dmem;
+    end
+    
+    //=======================================
+    // enable the checker data collection (monitor)
+    //=======================================
+    fork
+    get_rf_write();
+    get_ref_rf_write();
+    begin wait(mini_core_top.mini_core.ebreak_was_calledQ101H == 1'b1);
+        eot("ebreak was called");
+    end
+    join
+
 end // test_seq
+
+initial begin: detect_timeout
+    //=======================================
+    // timeout
+    //=======================================
+    #1000 
+    eot("test ended with timeout");
+end
+
 
 
 // DUT instance mini_core 
 t_tile_id local_tile_id;
 assign  local_tile_id = 8'h2_2;
-mini_top mini_top (
+mini_core_top mini_core_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),
@@ -92,18 +125,17 @@ mini_top mini_top (
  .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
 );      
 
-`include "mini_core_trk.sv"
-
-core_rv32i_ref
+rv32i_ref
 # (
     .I_MEM_LSB (I_MEM_OFFSET_MINI),
     .I_MEM_MSB (I_MEM_MSB_MINI),
     .D_MEM_LSB (D_MEM_OFFSET_MINI),
     .D_MEM_MSB (D_MEM_MSB_MINI)
-)  core_rv32i_ref (
-.clk                 (Clk),
-.rst                 (Rst)
+)  rv32i_ref (
+.clk    (Clk),
+.rst    (Rst),
+.run    (1'b1) // FIXME - set the RUN only when the mini_core DUT is retiring the instruction.
+               // every time the run is set, the next instruction is executed
 );
-
 endmodule //mini_core_tb
 

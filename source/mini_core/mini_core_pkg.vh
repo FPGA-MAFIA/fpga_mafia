@@ -35,4 +35,14 @@ parameter I_MEM_REGION_ROOF_MINI    = I_MEM_MSB_MINI              ;
 parameter D_MEM_REGION_FLOOR_MINI   = I_MEM_REGION_ROOF_MINI  + 1 ;
 parameter D_MEM_REGION_ROOF_MINI    = D_MEM_MSB_MINI              ;
 
+
+
+
+//typedef struct packed {
+//    
+//} t_mini_ctrl;
+
+
+
+
 //endpackage

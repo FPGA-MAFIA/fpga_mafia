@@ -2,7 +2,7 @@
 
 ## Current Development Status:
 This project is currently a work in progress (WIP). We are in the process of enabling and integrating individual IPs.  
-Working diligently to deliver a fully functional fabric by August 1, 2023.  
+Working diligently to deliver a fully functional fabric by September 1, 2023.  
 Stay tuned for updates!  
 
 # FPGA Multi-Agent FabrIc Architecture (MAFIA)
@@ -93,6 +93,6 @@ Then, reload the bashrc file with this command:
 ### Quick Access Commands
 For easy access, you can run the following commands in the GitBash shell for Windows:
 ./build.py -h  
-./build.py -dut big_core -debug -tests alive -app -hw -sim
-./build.py -dut cache -debug -tests cache_alive -hw -sim -pp
-./build.py -dut sc_core -debug -tests alive -full_run
+./build.py -dut big_core -tests alive -app -hw -sim
+./build.py -dut cache -tests cache_alive -hw -sim -pp
+./build.py -dut sc_core -tests alive -full_run
