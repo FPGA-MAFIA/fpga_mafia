@@ -30,7 +30,7 @@ int main()  {
     rect.width = 10;
     rect.height = 20;
     char direction = 'R';
-    draw_rectangle(rect, 1);
+    draw_rectangle(&rect, 1);
     while(1) {
         READ_REG(button_0_value, CR_Button_0);
         READ_REG(button_1_value, CR_Button_1);
@@ -39,7 +39,7 @@ int main()  {
         rvc_printf("\nBOTTOM 1 - ");
         rvc_print_int(button_1_value);
         wait(1000000);
-        move_rectangle(rect, direction);
+        move_rectangle(&rect, direction);
         rect.col++;
     }
     return 0;
