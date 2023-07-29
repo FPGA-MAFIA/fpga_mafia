@@ -4,6 +4,7 @@ module top(
         input  logic [9:0]  SW,
         input  logic [1:0]  BUTTON,
         input  logic [15:0] Arduino_IO,
+        //input 		        ADC_CLK_10,
 
         input logic         UART_TXD,
         output logic        UART_RXD,
@@ -75,13 +76,11 @@ uart_io  uart_io_inst
     //================================================
     // input - Rsp to Core
     .OutFabricRspValidQ502H      (C2F_RspValidQ502H),//input
-    .OutFabricRspThreadIDQ502H   ('0),                 //input
     .OutFabricRspDataQ502H       (C2F_RspDataQ502H),//input
     .OutFabricRspStall           ('0),                 //input
     // output - Req from Core
     .InFabricReqValidQ500H      (C2F_ReqValidQ500H),//output
     .InFabricReqOpcodeQ500H     (C2F_ReqOpcodeQ500H),//output
-    .InFabricReqThreadIDQ500H   (                  ),//output
     .InFabricReqAddressQ500H    (C2F_ReqAddressQ500H),//output
     .InFabricReqDataQ500H       (C2F_ReqDataQ500H)   ,//output
     // UART RX/TX
@@ -160,6 +159,8 @@ end
 
 `LOTR_MSFF(C2F_RspDataQ502H,  read_data,                                       CLK_50)
 `LOTR_MSFF(C2F_RspValidQ502H, C2F_ReqValidQ500H && (C2F_ReqOpcodeQ500H == 1'b0), CLK_50)
+
+
 
 
 endmodule

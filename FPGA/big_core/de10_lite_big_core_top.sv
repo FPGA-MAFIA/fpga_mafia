@@ -157,7 +157,7 @@ assign HEX2     = fpga_out.SEG7_2;
 assign HEX3     = fpga_out.SEG7_3;
 assign HEX4     = fpga_out.SEG7_4;
 assign HEX5     = fpga_out.SEG7_5;
-assign LEDR     = fpga_out.LED; //SW;//
+//assign LEDR     = fpga_out.LED; //SW;//
 assign VGA_R     = vga_out.VGA_R; //inDisplayArea ? 4'b1111 : '0;//
 assign VGA_G     = vga_out.VGA_G; //inDisplayArea ? 4'b0011 : '0;//
 assign VGA_B     = vga_out.VGA_B; //inDisplayArea ? SW[3:0] : '0;//
@@ -204,5 +204,23 @@ assign VGA_VS     = vga_out.VGA_VS;
 //assign DRAM_DQ[15:0] 	= temp ? NEXT_DRAM_DQ[15:0] 	: 'Z;
 //assign ARDUINO_IO[15:0] = temp ? NEXT_ARDUINO_IO[15:0]: 'Z;
 //assign GPIO[35:0] 		= temp ? NEXT_GPIO[35:0] 		: 'Z;
+
+logic [11:0] adc_ch_0;
+logic [11:0] adc_ch_1;
+        mafia_adc u0 (
+                .CLOCK (ADC_CLK_10),//clk.clk
+                .RESET (Rst),//reset.reset
+                .CH0   (adc_ch_0),//readings.CH0
+                .CH1   (adc_ch_1),//.CH1
+                .CH2   (),//.CH2
+                .CH3   (),//.CH3
+                .CH4   (),//.CH4
+                .CH5   (),//.CH5
+                .CH6   (),//.CH6
+                .CH7   () //.CH7
+        );
+
+assign LEDR[4:0] = adc_ch_0[11:7];
+assign LEDR[9:5] = adc_ch_1[11:7];
 
 endmodule
