@@ -100,11 +100,13 @@ class NeuralNetwork:
 class FlappyBirdGame:
     def __init__(self, num_birds):
         self.state = IDLE
-        self.epochs = 20
+        self.epochs = 30
         self.current_epoch = 0
         self.num_birds = num_birds
         self.birds = []
         self.pipes = []
+        self.pipe_count = 0
+        self.high_score = 0
         self.cycle_count = 0
         self.best_weights = None
 
@@ -112,6 +114,12 @@ class FlappyBirdGame:
         self.font = pygame.font.Font(None, 24)
         self.bird_count_text = self.font.render("", True, (255, 255, 255))
         self.bird_count_rect = self.bird_count_text.get_rect(topright=(10, 10))
+        self.iter_gen_text = self.font.render("", True, (255, 255, 255))
+        self.iter_gen_rect = self.iter_gen_text.get_rect(topright=(10, 40))
+        self.high_score_text = self.font.render("", True, (255, 255, 255))
+        self.high_score_rect = self.high_score_text.get_rect(topright=(10, 70))
+        self.current_score_text = self.font.render("", True, (255, 255, 255))
+        self.current_score_rect = self.current_score_text.get_rect(topright=(10, 100))
 
     def start_game(self):
         self.state = PLAYING
@@ -154,15 +162,24 @@ class FlappyBirdGame:
             
             if live_birds == 0:
                 self.state = GAME_OVER
+                #reset pipe count
+                self.pipe_count = 0
 
             if self.pipes[-1].x < SCREEN_WIDTH - 400:
                 self.pipes.append(Pipe(SCREEN_WIDTH))
+                self.pipe_count += 1
+                #check if high score
+                if self.pipe_count > self.high_score:
+                    self.high_score = self.pipe_count
 
             for pipe in self.pipes:
                 pipe.move()
 
             # Update bird count text
             self.bird_count_text = self.font.render(f"Birds Alive: {live_birds}", True, (255, 255, 255))
+            self.iter_gen_text   = self.font.render(f"Generation: {self.current_epoch}", True, (255, 255, 255))
+            self.high_score_text = self.font.render(f"High Score: {self.high_score}", True, (255, 255, 255))
+            self.current_score_text = self.font.render(f"Current Score: {self.pipe_count}", True, (255, 255, 255))
 
     def get_next_pipe(self):
         for pipe in self.pipes:
@@ -188,6 +205,9 @@ class FlappyBirdGame:
 
         # Draw bird count
         screen.blit(self.bird_count_text, self.bird_count_rect)
+        screen.blit(self.iter_gen_text,   self.iter_gen_rect)
+        screen.blit(self.high_score_text, self.high_score_rect)
+        screen.blit(self.current_score_text, self.current_score_rect)
 
     def update_best_weights(self):
         for bird in self.birds:
@@ -197,7 +217,7 @@ class FlappyBirdGame:
     def add_noise_to_weights(self, weights):
         if weights is None:
             return None
-        noise = [np.random.normal(0, 0.3) for _ in weights]
+        noise = [np.random.normal(0, 0.1, size=weight.shape) for weight in weights]
         return [weight + noise[i] for i, weight in enumerate(weights)]
 
 # Game function
@@ -218,7 +238,7 @@ def play_game(num_birds):
         game.draw(screen)
 
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(1000)
 
         if game.state == IDLE:
             game.start_game()
