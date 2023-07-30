@@ -22,9 +22,7 @@ import common_pkg::*;
     output logic        out_for_pd,
     
     // FPGA interface inputs              
-    input  logic       Button_0, // CR_MEM
-    input  logic       Button_1, // CR_MEM
-    input  logic [9:0] Switch,   // CR_MEM
+    input  t_fpga_in   fpga_in,  // CR_MEM
     // Fabric interface
     input  logic            InFabricValidQ503H  ,
     input  var t_tile_trans InFabricQ503H       ,
@@ -89,9 +87,7 @@ big_core_mem_wrap big_core_mem_wrap (
     .OutFabricValidQ505H(OutFabricValidQ505H),//output logic        ,
     .OutFabricQ505H     (OutFabricQ505H),     //output t_tile_trans ,
     //
-    .Button_0         (Button_0),            // CR_MEM
-    .Button_1         (Button_1),            // CR_MEM
-    .Switch           (Switch),              // CR_MEM
+    .fpga_in          (fpga_in),            // CR_MEM
     .fpga_out         (fpga_out),            // CR_MEM
     .inDisplayArea    (inDisplayArea),       // VGA_OUTPUT
     .vga_out          (vga_out)              // VGA_OUTPUT
