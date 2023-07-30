@@ -20,6 +20,7 @@ import common_pkg::*;
     // Input Control Signals
     //===================
     input  t_ctrl_exe   Ctrl
+    input  logic        ReadyQ103H,
     //===================
     // Output Control Signals
     //===================
@@ -117,8 +118,8 @@ always_comb begin : branch_comp
 end
 
 // Q102H to Q103H Flip Flops
-`MAFIA_DFF(DMemWrDataQ103H     , RegRdData2Q102H     , Clock)
-`MAFIA_DFF(AluOutQ103H         , AluOutQ102H         , Clock)
-`MAFIA_DFF(PcPlus4Q103H        , (PcQ102H+32'd4)     , Clock)
+`MAFIA_EN_DFF(DMemWrDataQ103H     , RegRdData2Q102H     , Clock, ReadyQ103H)
+`MAFIA_EN_DFF(AluOutQ103H         , AluOutQ102H         , Clock, ReadyQ103H)
+`MAFIA_EN_DFF(PcPlus4Q103H        , (PcQ102H+32'd4)     , Clock, ReadyQ103H)
 
 endmodule

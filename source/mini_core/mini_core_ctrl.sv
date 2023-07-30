@@ -98,28 +98,28 @@ assign ebreak_was_called      = (InstructionQ101H == 32'b000000000001_00000_000_
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
     // ---- R type ----
-    {3'b000, 7'b0000000, R_OP} : CtrlQ102H.AluOp = ADD;  // ADD
-    {3'b000, 7'b0100000, R_OP} : CtrlQ102H.AluOp = SUB;  // SUB
-    {3'b001, 7'b0000000, R_OP} : CtrlQ102H.AluOp = SLL;  // SLL
-    {3'b010, 7'b0000000, R_OP} : CtrlQ102H.AluOp = SLT;  // SLT
-    {3'b011, 7'b0000000, R_OP} : CtrlQ102H.AluOp = SLTU; // SLTU
-    {3'b100, 7'b0000000, R_OP} : CtrlQ102H.AluOp = XOR;  // XOR
-    {3'b101, 7'b0000000, R_OP} : CtrlQ102H.AluOp = SRL;  // SRL
-    {3'b101, 7'b0100000, R_OP} : CtrlQ102H.AluOp = SRA;  // SRA
-    {3'b110, 7'b0000000, R_OP} : CtrlQ102H.AluOp = OR;   // OR
-    {3'b111, 7'b0000000, R_OP} : CtrlQ102H.AluOp = AND;  // AND
+    {3'b000, 7'b0000000, R_OP} : CtrlQ101H.AluOp = ADD;  // ADD
+    {3'b000, 7'b0100000, R_OP} : CtrlQ101H.AluOp = SUB;  // SUB
+    {3'b001, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SLL;  // SLL
+    {3'b010, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SLT;  // SLT
+    {3'b011, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SLTU; // SLTU
+    {3'b100, 7'b0000000, R_OP} : CtrlQ101H.AluOp = XOR;  // XOR
+    {3'b101, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SRL;  // SRL
+    {3'b101, 7'b0100000, R_OP} : CtrlQ101H.AluOp = SRA;  // SRA
+    {3'b110, 7'b0000000, R_OP} : CtrlQ101H.AluOp = OR;   // OR
+    {3'b111, 7'b0000000, R_OP} : CtrlQ101H.AluOp = AND;  // AND
     // ---- I type ----
-    {3'b000, 7'b???????, I_OP} : CtrlQ102H.AluOp = ADD;  // ADDI
-    {3'b010, 7'b???????, I_OP} : CtrlQ102H.AluOp = SLT;  // SLTI
-    {3'b011, 7'b???????, I_OP} : CtrlQ102H.AluOp = SLTU; // SLTUI
-    {3'b100, 7'b???????, I_OP} : CtrlQ102H.AluOp = XOR;  // XORI
-    {3'b110, 7'b???????, I_OP} : CtrlQ102H.AluOp = OR;   // ORI
-    {3'b111, 7'b???????, I_OP} : CtrlQ102H.AluOp = AND;  // ANDI
-    {3'b001, 7'b0000000, I_OP} : CtrlQ102H.AluOp = SLL;  // SLLI
-    {3'b101, 7'b0000000, I_OP} : CtrlQ102H.AluOp = SRL;  // SRLI
-    {3'b101, 7'b0100000, I_OP} : CtrlQ102H.AluOp = SRA;  // SRAI
+    {3'b000, 7'b???????, I_OP} : CtrlQ101H.AluOp = ADD;  // ADDI
+    {3'b010, 7'b???????, I_OP} : CtrlQ101H.AluOp = SLT;  // SLTI
+    {3'b011, 7'b???????, I_OP} : CtrlQ101H.AluOp = SLTU; // SLTUI
+    {3'b100, 7'b???????, I_OP} : CtrlQ101H.AluOp = XOR;  // XORI
+    {3'b110, 7'b???????, I_OP} : CtrlQ101H.AluOp = OR;   // ORI
+    {3'b111, 7'b???????, I_OP} : CtrlQ101H.AluOp = AND;  // ANDI
+    {3'b001, 7'b0000000, I_OP} : CtrlQ101H.AluOp = SLL;  // SLLI
+    {3'b101, 7'b0000000, I_OP} : CtrlQ101H.AluOp = SRL;  // SRLI
+    {3'b101, 7'b0100000, I_OP} : CtrlQ101H.AluOp = SRA;  // SRAI
     // ---- Other ----
-    default                    : CtrlQ102H.AluOp = ADD;  // LUI || AUIPC || JAL || JALR || BRANCH || LOAD || STORE
+    default                    : CtrlQ101H.AluOp = ADD;  // LUI || AUIPC || JAL || JALR || BRANCH || LOAD || STORE
     endcase
 end
 // Immediate Generator

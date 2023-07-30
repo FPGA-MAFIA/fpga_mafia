@@ -37,12 +37,12 @@ logic              MatchRd2AftrWrQ101H;
 //---- The Register File ----
  `MAFIA_EN_DFF(Register[Ctrl.RegDstQ104H] , RegWrDataQ104H , Clock , (Ctrl.RegWrEnQ104H && (Ctrl.RegDstQ104H!=5'b0)))
 // ---- Read Register File ----
-assign MatchRd1AftrWrQ101H = (Ctrl.RegSrc1Q101H == Ctrl.RegDstQ104H) && (CtrlRegWrEnQ104H);
+assign MatchRd1AftrWrQ101H = (Ctrl.RegSrc1Q101H == Ctrl.RegDstQ104H) && (Ctrl.CtrlRegWrEnQ104H);
 assign RegRdData1Q101H = (Ctrl.RegSrc1Q101H == 5'b0) ? 32'b0                      : // Reading from Register[0] should result in '0
                          MatchRd1AftrWrQ101H         ? RegWrDataQ104H             : // forwards WrDataQ104H -> RdDataQ101H
                                                        Register[Ctrl.RegSrc1Q101H]; // Common Case - reading from Register file
 
-assign MatchRd2AftrWrQ101H = (Ctrl.RegSrc2Q101H == Ctrl.RegDstQ104H) && (CtrlRegWrEnQ104H);
+assign MatchRd2AftrWrQ101H = (Ctrl.RegSrc2Q101H == Ctrl.RegDstQ104H) && (Ctrl.CtrlRegWrEnQ104H);
 assign RegRdData2Q101H = (Ctrl.RegSrc2Q101H == 5'b0) ? 32'b0                      : // Reading from Register[0] should result in '0 
                          MatchRd2AftrWrQ101H         ? RegWrDataQ104H             : // forwards WrDataQ104H -> RdDataQ101H
                                                        Register[Ctrl.RegSrc2Q101H]; // Common Case - reading from Register file
