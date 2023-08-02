@@ -11,17 +11,20 @@
 
 `include "macros.sv"
 
-module mini_core_mem_access
+module mini_core_mem_acs
 import common_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
-  input  logic           ReadyQ104H,  //input
+  // ctrl
   input  t_ctrl_mem_acs  Ctrl,        //input
+  input  logic           ReadyQ104H,  //input
+  //data path input
   input  logic [31:0]    PcPlus4Q103H,//input
-  output logic [31:0]    PcPlus4Q104H,//input
   input  logic [31:0]    AluOutQ103H, //input
+  // data path output
+  output t_core2mem_req  Core2DmemReqQ103H //output
+  output logic [31:0]    PcPlus4Q104H,//input
   output logic [31:0]    AluOutQ104H, //input
-  output t_core2mem_req Core2DmemReqQ103H //output
 );
 
 // Outputs to memory

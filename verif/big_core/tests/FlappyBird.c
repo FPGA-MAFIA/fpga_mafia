@@ -5,7 +5,7 @@
 #define PIPE_WIDTH 10
 #define PIPE_GAP 15
 #define PIPE_VELOCITY 3
-#define GRAVITY 0.4
+#define GRAVITY 0
 #define INPUT_DIM 3
 #define NULL ((void*)0)
 
@@ -85,10 +85,11 @@ void flap(Bird *bird) {
 
 void updateBird(Bird *bird, int *inputs) {
     if (bird->alive) {
-        int output = feedForward(&bird->network, inputs);
-        if (output > 0.5) {
-            flap(bird);
-        }
+        flap(bird);
+       // int output = feedForward(&bird->network, inputs);
+       // if (output > 0.5) {
+       //     flap(bird);
+       // }
     }
 
     bird->velocity += GRAVITY;
@@ -208,6 +209,7 @@ int feedForward(NeuralNetwork *network, int *inputs) {
 
 // Game function definitions
 void startGame(FlappyBirdGame* game) {
+    rvc_printf("GAME\n");
     game->state = PLAYING;
     game->currentEpoch += 1;
 
@@ -234,10 +236,16 @@ void resetGame(FlappyBirdGame* game) {
 }
 
 void updateGame(FlappyBirdGame* game) {
+
+    rvc_printf("UPDATE\n");
+    rvc_print_int(game->state);
+    rvc_printf("\n");
     if (game->state == PLAYING) {
         int liveBirds = 0;
-
+        rvc_printf("IN IF1\n");
         for (int i = 0; i < game->numBirds; i++) {
+            //rvc_print_int(i);
+            //rvc_printf(" ");
             Pipe *nextPipe = getNextPipe(game);
             int inputs[INPUT_DIM];
 
@@ -251,8 +259,10 @@ void updateGame(FlappyBirdGame* game) {
                 inputs[1] = SCREEN_HEIGHT;
                 inputs[2] = PIPE_VELOCITY;
             }
+            // rvc_printf("BEFORE UPDATE BIRD");
 
             updateBird(&game->birds[i], inputs);
+            // rvc_printf("AFTER UPDATE BIRD");
 
             if (checkCollision(&game->birds[i], game->pipes, game->numPipes)) {
                 game->birds[i].alive = 0;
@@ -330,15 +340,27 @@ void addNoiseToWeights(NeuralNetwork *network, unsigned int *seed) {
 
 // Main function
 int main() {
+    clear_screen();
+    rvc_printf("STARTED\n");
     FlappyBirdGame game;
     game.numBirds = 50;
     game.epochs = 20;
+    game.currentEpoch = 0;
+    rvc_print_int(game.epochs);
+    rvc_printf("\n");
+    rvc_print_int(game.currentEpoch);
+    rvc_printf("\n");
     *(game.seed) = 42;
 
     startGame(&game);
+    rvc_printf("RETURNED\n");
 
     while (game.currentEpoch < game.epochs) {
+        rvc_printf("WHILE\n");
+        
         updateGame(&game);
+        rvc_printf("AFTER UPDATE\n");
+    
         drawGame(&game);
 
         if (game.state == IDLE) {
