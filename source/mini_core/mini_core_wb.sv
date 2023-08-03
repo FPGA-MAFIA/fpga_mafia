@@ -16,7 +16,7 @@ import common_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
   // Ctrl
-  input  t_ctrl_wb       Ctrl, //input
+  input var  t_ctrl_wb       Ctrl, //input
   // Data path input
   input  logic [31:0]    DMemRdDataQ104H, //input
   input  logic [31:0]    AluOutQ104H,     //input
@@ -37,8 +37,8 @@ assign PostSxDMemRdDataQ104H[31:24] =  Ctrl.ByteEnQ104H[3] ? DMemRdDataQ104H[31:
                                        Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ104H[23]}}: 8'b0;
 
 // ---- Select what write to the register file ----
-assign RegWrDataQ104H = (Ctrl.SelWrBackQ104H == WB_DMEM) ? PostSxDMemRdDataQ104H :
-                        (Ctrl.SelWrBackQ104H == WB_ALU)  ? AluOutQ104H           :
-                        (Ctrl.SelWrBackQ104H == WB_PC4)  ? PcPlus4Q104H          : 
+assign RegWrDataQ104H = (Ctrl.e_SelWrBackQ104H == WB_DMEM) ? PostSxDMemRdDataQ104H : // TODO - CHCK THIS ENUM
+                        (Ctrl.e_SelWrBackQ104H == WB_ALU)  ? AluOutQ104H           :
+                        (Ctrl.e_SelWrBackQ104H == WB_PC4)  ? PcPlus4Q104H          : 
                                                            32'b0;
 endmodule

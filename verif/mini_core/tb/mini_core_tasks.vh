@@ -61,11 +61,11 @@ foreach(rf_write_history[i])begin
     if ((ref_rf_write_history[i].RegDst==rf_write_history[i].RegDst ) && 
         (ref_rf_write_history[i].Data==rf_write_history[i].Data ) )
     begin
-        //$display(" >> rf_write_history[%0d] match: %p", i, rf_write_history[i]);
-        //ref_rf_write_history.delete(i);
-        //rf_write_history.delete(i);
+        $display(" >> rf_write_history[%0d] match: %p", i, rf_write_history[i]);
+        ref_rf_write_history.delete(i);
+        rf_write_history.delete(i);
     end else begin
-        //$display(" >> rf_write_history[%0d] Mismatch!!", i);
+        $display(" >> rf_write_history[%0d] Mismatch!!", i);
         $error("ERROR: rf_write_history mismatch");
         $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %0h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
         $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %0h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
@@ -81,11 +81,11 @@ end else begin
 end
 $display("Data Integrity final status: %s", msg);
 $display("===============================\n");
-//if(ref_rf_write_history.size() != 0) begin
-//    $error("ERROR: rf_write_history not empty");
-//end else begin
-//    $display("rf_write_history size match");
-//end
+if(ref_rf_write_history.size() != 0) begin
+    $error("ERROR: rf_write_history not empty");
+end else begin
+    $display("rf_write_history size match");
+end
 
 endtask
 

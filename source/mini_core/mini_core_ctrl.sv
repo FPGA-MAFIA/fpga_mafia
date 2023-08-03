@@ -66,10 +66,11 @@ t_immediate         SelImmTypeQ101H;
  logic        flushQ102H;
  logic        flushQ103H;
  logic        LoadHzrdDetectQ102H;
- t_alu_op     OpcodeQ101H;
+ t_opcode     OpcodeQ101H;
  logic [2:0]  Funct3Q101H;
  logic [6:0]  Funct7Q101H;
 
+t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
 logic CoreFreeze;
 assign CoreFreeze = 1'b0;
 logic [31:0] PreviousInstructionQ102H;
@@ -89,7 +90,6 @@ assign InstructionQ101H         = flushQ102H          ? NOP :
                                                         PreInstructionQ101H;
 
 // End Load and Ctrl hazard detection
-t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
 assign Funct3Q101H                = InstructionQ101H[14:12];
 assign Funct7Q101H                = InstructionQ101H[31:25];
@@ -107,7 +107,7 @@ assign CtrlQ101H.DMemRdEn         = (OpcodeQ101H == LOAD);
 assign CtrlQ101H.SignExt          = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); // Sign extend the LOAD from memory read.
 assign CtrlQ101H.DMemByteEn       = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
                                     ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b01) ? 4'b0011 : // LH || SH
-                                    ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : // LW || SW
+                                    ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : '0; // LW || SW - TODO - check the default value
 assign CtrlQ101H.BranchOp         = t_branch_type'(Funct3Q101H);
 assign CtrlQ101H.RegDst           = InstructionQ101H[11:7];
 assign CtrlQ101H.RegSrc1          = InstructionQ101H[19:15];

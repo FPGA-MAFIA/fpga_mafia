@@ -117,7 +117,7 @@ mini_core_if mini_core_if (
   .Ctrl         (Ctrl        ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
-  .PcQ101H      (PcQ101H     ), // output logic [31:0] PcQ101H
+  .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ mini_core_ctrl mini_core_ctrl (
   .CtrlMem              (CtrlMem            ), //output
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
-  .ImmediateQ101H       (ImmediateQ101H     ), //output
+  .ImmediateQ101H       (ImmediateQ101H     ) //output
 );
 
 mini_core_rf mini_core_rf (
@@ -229,7 +229,7 @@ mini_core_exe mini_core_exe (
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-mini_core_mem_access mini_core_mem_access (
+mini_core_mem_acs mini_core_mem_access (
   .Clock       (Clock),       //input 
   .Rst         (Rst),         //input  
   // Input Control Signals

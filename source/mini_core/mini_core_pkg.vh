@@ -50,12 +50,14 @@ typedef struct packed {
     logic       DMemWrEn;
     logic       DMemRdEn;
     logic       SignExt;
+    logic       SelWrBack;
     logic [3:0] DMemByteEn;
     logic       BranchOp;
     logic [4:0] RegDst;
     logic [4:0] RegSrc1;
     logic [4:0] RegSrc2;
     t_alu_op    AluOp;
+    t_opcode    Opcode;
 } t_mini_ctrl;
 
 typedef struct packed {
@@ -89,10 +91,25 @@ typedef struct packed {
     logic [3:0] DMemByteEnQ103H;
 } t_ctrl_mem;
 
+typedef enum logic [1:0] {
+    WB_DMEM = 2'b000 , 
+    WB_ALU =  2'b001 ,  
+    WB_PC4 =  2'b010      
+} e_wb;
+
 typedef struct packed {
     logic [3:0] ByteEnQ104H;
     logic [3:0] SignExtQ104H;
-    logic       SelWrBackQ104H;
+    logic      SelWrBackQ104H;
+    e_wb       e_SelWrBackQ104H;
 } t_ctrl_wb;
+
+typedef struct packed {
+    logic [31:0] WrData;
+    logic [31:0] Address; 
+    logic       WreEn;  
+    logic       RdEn;  
+    logic [3:0] ByteEn;
+} t_core2mem_req;
 
 //endpackage

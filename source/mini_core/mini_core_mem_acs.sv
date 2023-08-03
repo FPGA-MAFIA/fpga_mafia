@@ -16,15 +16,16 @@ import common_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
   // ctrl
-  input  t_ctrl_mem_acs  Ctrl,        //input
+  input var  t_ctrl_mem      Ctrl,        //input
   input  logic           ReadyQ104H,  //input
   //data path input
   input  logic [31:0]    PcPlus4Q103H,//input
   input  logic [31:0]    AluOutQ103H, //input
+  input  logic [31:0]    RegRdData2Q103H, //input
   // data path output
-  output t_core2mem_req  Core2DmemReqQ103H //output
+  output t_core2mem_req  Core2DmemReqQ103H, //output
   output logic [31:0]    PcPlus4Q104H,//input
-  output logic [31:0]    AluOutQ104H, //input
+  output logic [31:0]    AluOutQ104H //input
 );
 
 // Outputs to memory
