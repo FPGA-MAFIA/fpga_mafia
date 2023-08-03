@@ -19,7 +19,7 @@ import common_pkg::*;
     //===================
     // Input Control Signals
     //===================
-    input  t_ctrl_exe   Ctrl
+    input  var t_ctrl_exe   Ctrl,
     input  logic        ReadyQ103H,
     //===================
     // Output Control Signals
@@ -80,8 +80,8 @@ assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After
                                              PreRegRdData2Q102H; // Common Case - No Hazard
 
 // End Take care to data hazard
-assign AluIn1Q102H = SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
-assign AluIn2Q102H = SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
+assign AluIn1Q102H = Ctrl.SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
+assign AluIn2Q102H = Ctrl.SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
 
 always_comb begin : alu_logic
   ShamtQ102H      = AluIn2Q102H[4:0];
