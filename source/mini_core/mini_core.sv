@@ -139,6 +139,7 @@ mini_core_if mini_core_if (
 //////////////////////////////////////////////////////////////////////////////////////////////////
 mini_core_ctrl mini_core_ctrl (
   .Rst                  (Rst                ), //input
+  .Clock                (Clock              ), //input
   // input instruction 
   .PreInstructionQ101H  (PreInstructionQ101H), //input
   // input feedback from data path
@@ -234,10 +235,15 @@ mini_core_mem_acs mini_core_mem_access (
   .Rst         (Rst),         //input  
   // Input Control Signals
   .Ctrl        (CtrlMem),     //input
+  .ReadyQ104H  (ReadyQ104H),  //input
   // Input Data path
+  .PcPlus4Q103H(PcPlus4Q103H),//input
   .AluOutQ103H (AluOutQ103H), //input
-  .Core2DmemReqQ103H (Core2DmemReqQ103H) //output
-
+  .RegRdData2Q103H(RegRdData2Q103H), //input
+  // data path output
+  .Core2DmemReqQ103H (Core2DmemReqQ103H), //output
+  .PcPlus4Q104H(PcPlus4Q104H),//input
+  .AluOutQ104H(AluOutQ104H) //input
 );
 // Q103H to Q104H Flip Flops
 `MAFIA_DFF(AluOutQ104H      , AluOutQ103H         , Clock)

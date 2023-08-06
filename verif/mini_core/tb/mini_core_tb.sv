@@ -89,7 +89,7 @@ initial begin: test_seq
     fork
     get_rf_write();
     get_ref_rf_write();
-    begin wait(mini_core_top.mini_core.ebreak_was_calledQ101H == 1'b1);
+    begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
         eot("ebreak was called");
     end
     join

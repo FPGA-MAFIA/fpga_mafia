@@ -29,11 +29,11 @@ import common_pkg::*;
     output  logic        ReadyQ103H,
     output  logic        ReadyQ104H,
     // output ctrl signals
-    output  t_ctrl_if    CtrlIf,
-    output  t_ctrl_rf    CtrlRf,
-    output  t_ctrl_exe   CtrlExe,
-    output  t_ctrl_mem   CtrlMem,
-    output  t_ctrl_wb    CtrlWb,
+    output var t_ctrl_if    CtrlIf,
+    output var t_ctrl_rf    CtrlRf,
+    output var t_ctrl_exe   CtrlExe,
+    output var t_ctrl_mem   CtrlMem,
+    output var t_ctrl_wb    CtrlWb,
     // output data path signals
     output  logic [31:0] ImmediateQ101H 
 );
