@@ -35,9 +35,7 @@ logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 // FPGA interface inputs              
-logic        Button_0;
-logic        Button_1;
-logic [9:0]  Switch;
+t_fpga_in   fpga_in;
 
 // FPGA interface outputs
 t_fpga_out  fpga_out;
@@ -79,9 +77,7 @@ big_core_top big_core_top(
     .OutFabricValidQ505H(),  //output logic        ,
     .OutFabricQ505H     (),  //output t_tile_trans ,
     // FPGA interface
-    .Button_0       (Button_0),
-    .Button_1       (Button_1),
-    .Switch         (Switch  ),
+    .fpga_in        (fpga_in),
     .fpga_out       (next_fpga_out),
     .inDisplayArea  (inDisplayArea),
     .vga_out        (vga_out  ) 
@@ -101,9 +97,7 @@ end//initial clock_gen
 // reset generation
 // ========================
 initial begin: reset_gen
-    Button_0 = 1'b0;
-    Button_1 = 1'b0;
-    Switch   = 10'b0;
+    fpga_in = '0;
     EndOfTest = 1'b0;
     Rst = 1'b1;
 #40 Rst = 1'b0;
