@@ -1,16 +1,50 @@
+//-----------------------------------------------------------------------------
+// Title            : 
+// Project          : 
+//-----------------------------------------------------------------------------
+// File             : <TODO>
+// Original Author  : 
+// Code Owner       : 
+// Created          : 
+//-----------------------------------------------------------------------------
+// Description : 
+//
+//
+//-----------------------------------------------------------------------------
+`include "macros.sv"
 
-module d_cache_tq_entry{
-    input  logic clk,
-    input  logic rst,
+module d_cache_tq_entry
+import d_cache_param_pkg::*;  
+(
+    input  logic                clk,
+    input  logic                rst,
+    input  logic  [2:0]         entry_id,
+    // Core requests
+    input  var t_req           core2cache_req,
+    input  logic                allocate_entry,
+    // FM responses from cache miss
+    input  var t_fm_rd_rsp      fm2cache_rd_rsp,
+    // Pipe responses from LU
+    input  var t_lu_rsp         pipe_lu_rsp_q3,
+    // Current TQ entry signals
+    input  logic                first_fill,
+    input  logic                cancel_core_req,
+    output t_tq_entry           tq_entry,
+    output logic                rd_req_hit_mb,
+    output logic                wr_req_hit_mb,
+    output logic                free_entry,
+    output logic                fill_entry
+);
 
-    output t_tq_entry tq_entry,
-    output logic rd_req_hit_mb
-    output logic wr_req_hit_mb
-    output logic free_entry,
-    output logic fill_entry
-};
-
-
+t_tq_entry           next_tq_entry;
+logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
+logic  en_tq_merge_buffer_e_modified; 
+logic  en_tq_merge_buffer_data; 
+logic  en_tq_cl_address; 
+logic  en_tq_cl_word_offset; 
+logic  en_tq_rd_indication; 
+logic  en_tq_wr_indication; 
+logic  en_tq_reg_id; 
 //===========================
 // TQ entry states and signals
 //===========================
@@ -84,7 +118,7 @@ always_comb begin
             S_LU_CORE: begin
                 //if Cache_hit  : nex_state == IDLE
                 //if Cache_miss : next_state == MB_WAIT_FILL
-                if ((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)) begin  
+                if ((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid)) begin  
                     next_tq_entry.state=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
                                         (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
                                         // There is a corner case where the fill lu_rsp has the TQ id of a new lookup
@@ -96,11 +130,11 @@ always_comb begin
                 // Handle the case where there are 2 writes B2B to same cache line
                 // The data is merged in MB, but was already sent to pipe separately, 
                 // only when the last write is done we can go to idle - if other write match in pipe we need to wait for it in the S_LU_CORE state
-                // Note: this is still within the if((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid)
+                // Note: this is still within the if((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid)
                     if( pipe_lu_rsp_q3.wr_match_in_pipe && (pipe_lu_rsp_q3.lu_result == HIT)) begin
                          next_tq_entry.state = S_LU_CORE ;
                     end
-                end //((pipe_lu_rsp_q3.tq_id == i) && (pipe_lu_rsp_q3.valid))                    
+                end //((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid))                    
             end
             S_MB_WAIT_FILL                : begin
                 // NOTE: We are allowing a single outstanding request per CL address!!!
@@ -191,14 +225,6 @@ always_comb begin
                            ((tq_entry.state == S_MB_WAIT_FILL) || (tq_entry.state == S_MB_FILL_READY) || (tq_entry.state == S_LU_CORE));
     
 end
-
-
-
-
-
-
-
-
 
 
 assign free_entry = (tq_entry.state == S_IDLE);
