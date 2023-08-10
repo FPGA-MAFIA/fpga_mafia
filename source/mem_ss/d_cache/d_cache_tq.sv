@@ -169,8 +169,8 @@ assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id;
 // TQ entry states and signals
 //===========================
 genvar TQ_ENTRY;
-generate for(TQ_ENTRY=0; TQ_ENTRY<NUM_TQ_ENTRY; TQ_ENTRY++) begin
-d_cache_tq_entry d_cache_tq_entry (
+generate for(TQ_ENTRY=0; TQ_ENTRY<NUM_TQ_ENTRY; TQ_ENTRY++) begin : tq_e
+d_cache_tq_entry d_cache_tq_entry_i (
 .clk              (clk             ), //    input  logic                     clk,
 .rst              (rst             ), //    input  logic                     rst,
 .entry_id         (3'(TQ_ENTRY)    ), //    input  logic                     entry_id,
@@ -184,6 +184,7 @@ d_cache_tq_entry d_cache_tq_entry (
 // Current TQ entry signals
 .cancel_core_req  (cancel_core_req), //    output logic                     cancel_core_req,
 .first_fill       (first_fill[TQ_ENTRY]), //input  logic                first_fill,
+.next_tq_entry    (next_tq_entry[TQ_ENTRY]        ), //    output t_tq_entry                tq_entry,
 .tq_entry         (tq_entry[TQ_ENTRY]        ), //    output t_tq_entry                tq_entry,
 .rd_req_hit_mb    (rd_req_hit_mb[TQ_ENTRY]   ), //    output logic                     rd_req_hit_mb,
 .wr_req_hit_mb    (wr_req_hit_mb[TQ_ENTRY]   ), //    output logic                     wr_req_hit_mb,
