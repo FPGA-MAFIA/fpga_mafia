@@ -30,13 +30,13 @@ import d_cache_param_pkg::*;
     input  logic                first_fill,
     input  logic                cancel_core_req,
     output t_tq_entry           tq_entry,
+    output t_tq_entry           next_tq_entry, //used for verification & tracker
     output logic                rd_req_hit_mb,
     output logic                wr_req_hit_mb,
     output logic                free_entry,
     output logic                fill_entry
 );
 
-t_tq_entry           next_tq_entry;
 logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 logic  en_tq_merge_buffer_e_modified; 
 logic  en_tq_merge_buffer_data; 
