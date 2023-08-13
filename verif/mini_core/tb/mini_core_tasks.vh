@@ -21,9 +21,9 @@ task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 
     @(posedge Clk) begin
-        if (mini_core_top.mini_core.CtrlRegWrEnQ104H && (mini_core_top.mini_core.RegDstQ104H!=5'b0)) begin
-            rf_cur_write.RegDst = mini_core_top.mini_core.RegDstQ104H;
-            rf_cur_write.Data   = mini_core_top.mini_core.RegWrDataQ104H;
+        if (mini_core_top.mini_core.mini_core_rf.Ctrl.RegWrEnQ104H && (mini_core_top.mini_core.mini_core_rf.Ctrl.RegDstQ104H!=5'b0)) begin
+            rf_cur_write.RegDst = mini_core_top.mini_core.mini_core_rf.Ctrl.RegDstQ104H;
+            rf_cur_write.Data   = mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H;
             rf_cur_write.Pc     = PcQ104H;
             rf_cur_write.cur_time   = $time;
             rf_write_history.push_back(rf_cur_write);
@@ -58,17 +58,20 @@ task di_register_write();
 $display("ref_rf_write_history size = %0d", ref_rf_write_history.size());
 $display("rf_write_history size     = %0d", rf_write_history.size());
 foreach(rf_write_history[i])begin
-    if ((ref_rf_write_history[i].RegDst==rf_write_history[i].RegDst ) && 
-        (ref_rf_write_history[i].Data==rf_write_history[i].Data ) )
+    if ((ref_rf_write_history[i].RegDst == rf_write_history[i].RegDst ) && 
+        (ref_rf_write_history[i].Data   == rf_write_history[i].Data   ) )
     begin
-        //$display(" >> rf_write_history[%0d] match: %p", i, rf_write_history[i]);
+        $display(" >> rf_write_history[%0d] Match: time: %0d, PC: %8h, RegDsd: %d, Data: %h", i, rf_write_history[i].cur_time,
+                                                                                                 rf_write_history[i].Pc,
+                                                                                                 rf_write_history[i].RegDst,
+                                                                                                 rf_write_history[i].Data);
         //ref_rf_write_history.delete(i);
         //rf_write_history.delete(i);
     end else begin
-        //$display(" >> rf_write_history[%0d] Mismatch!!", i);
+        $display(" >> rf_write_history[%0d] Mismatch!!", i);
         $error("ERROR: rf_write_history mismatch");
-        $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %0h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
-        $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %0h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
+        $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
+        $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
         msg = "Data integrity test failed - rf_write_history mismatch";
     end
 end
@@ -81,6 +84,7 @@ end else begin
 end
 $display("Data Integrity final status: %s", msg);
 $display("===============================\n");
+//TODO - review why the below code is not working (history not empty)
 //if(ref_rf_write_history.size() != 0) begin
 //    $error("ERROR: rf_write_history not empty");
 //end else begin
@@ -97,10 +101,10 @@ task eot (string msg);
     $display("===============================");
     $display("End of simulation: %s", msg);
     $display("===============================\n");
+    
     $display("===============================");
     $display("Starting data integrity test");
     $display("===============================");
     di_register_write();
-
     $finish;
 endtask

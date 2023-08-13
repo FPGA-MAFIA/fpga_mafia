@@ -28,6 +28,7 @@ logic        DMemWrEnQ103H;       // To D_MEM
 logic        DMemRdEnQ103H;       // To D_MEM
 logic [31:0] DMemRdRspQ104H;      // From D_MEM
 
+t_core2mem_req Core2DmemReqQ103H;
 
 mini_core mini_core (
    .Clock               ( Clock              ), // input  logic        Clock,
@@ -36,13 +37,16 @@ mini_core mini_core (
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
    .PreInstructionQ101H ( PreInstructionQ101H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM
    // Data Memory
-   .DMemWrDataQ103H     ( DMemWrDataQ103H    ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
-   .DMemAddressQ103H    ( DMemAddressQ103H   ), // output logic [31:0] DMemAddressQ103H,    // To D_MEM
-   .DMemByteEnQ103H     ( DMemByteEnQ103H    ), // output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
-   .DMemWrEnQ103H       ( DMemWrEnQ103H      ), // output logic        DMemWrEnQ103H,       // To D_MEM
-   .DMemRdEnQ103H       ( DMemRdEnQ103H      ), // output logic        DMemRdEnQ103H,       // To D_MEM
+   .Core2DmemReqQ103H     ( Core2DmemReqQ103H  ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
    .DMemRdRspQ104H      ( DMemRdRspQ104H     )  // input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
+
+assign DMemWrDataQ103H = Core2DmemReqQ103H.WrData;
+assign DMemAddressQ103H = Core2DmemReqQ103H.Address;
+assign DMemByteEnQ103H = Core2DmemReqQ103H.ByteEn;
+assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
+assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
+
 
 //---------------------------------------------------
 mini_mem_wrap mini_mem_wrap(
