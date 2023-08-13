@@ -220,8 +220,8 @@ mini_core_exe mini_core_exe (
   .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
   // Input Data path
   //Q102H
-  .PreRegRdData1Q102H  (PreRegRdData1Q102H ), //  input 
-  .PreRegRdData2Q102H  (PreRegRdData2Q102H ), //  input 
+  .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
+  .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input 
   .PcQ102H             (PcQ102H            ), //  input 
   .ImmediateQ102H      (ImmediateQ102H     ), //  input 
   //Q104H

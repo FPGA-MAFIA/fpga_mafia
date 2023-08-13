@@ -79,10 +79,16 @@ logic [31:0] PreviousInstructionQ102H;
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 assign LoadHzrdDetectQ101H       = Rst ? 1'b0 : 
-                                 ((PreRegSrc1Q101H == RegDstQ102H) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == RegDstQ102H) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
+                                 ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
+                                 ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
                                                                                                     1'b0;
+`MAFIA_EN_DFF(LoadHzrdDetectQ102H , LoadHzrdDetectQ101H   , Clock , !(CoreFreeze))
 assign PcEnQ101H                = !LoadHzrdDetectQ101H;
+//incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
+logic IndirectBranchQ102H;
+assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
+assign flushQ102H = IndirectBranchQ102H;
+`MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , !(CoreFreeze))
 assign InstructionQ101H         = flushQ102H          ? NOP :
                                   flushQ103H          ? NOP :
                                   LoadHzrdDetectQ101H ? NOP : 
@@ -93,12 +99,16 @@ assign InstructionQ101H         = flushQ102H          ? NOP :
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
 assign Funct3Q101H                = InstructionQ101H[14:12];
 assign Funct7Q101H                = InstructionQ101H[31:25];
+assign CtrlQ101H.Opcode           = OpcodeQ101H;
 assign CtrlQ101H.SelNextPcAluOutJ = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
 assign CtrlQ101H.SelNextPcAluOutB = (OpcodeQ101H == BRANCH);
 assign CtrlQ101H.SelRegWrPc       = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
 assign CtrlQ101H.SelAluPc         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);
 assign CtrlQ101H.SelAluImm        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
 assign CtrlQ101H.SelDMemWb        = (OpcodeQ101H == LOAD);
+assign CtrlQ101H.e_SelWrBack      = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR) ? WB_PC4  :
+                                    (OpcodeQ101H == LOAD)                         ? WB_DMEM :
+                                                                                    WB_ALU  ;
 assign CtrlQ101H.Lui              = (OpcodeQ101H == LUI);
 assign CtrlQ101H.RegWrEn          = (OpcodeQ101H == LUI ) || (OpcodeQ101H == AUIPC) || (OpcodeQ101H == JAL)  || (OpcodeQ101H == JALR) ||
                                     (OpcodeQ101H == LOAD) || (OpcodeQ101H == I_OP)  || (OpcodeQ101H == R_OP) || (OpcodeQ101H == FENCE);
@@ -175,7 +185,7 @@ assign ReadyQ100H = ReadyQ101H && (1'b1); //
 `MAFIA_EN_DFF(CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
 
 // Instruction Fetch Control Signals
-assign CtrlIf.SelNextPcAluOutQ102H =  (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ); 
+assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
 
 //Register File Control Signals
 assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
@@ -202,9 +212,9 @@ assign CtrlMem.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;
 assign CtrlMem.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
 
 // Write Back Control Signals
-assign CtrlWb.ByteEnQ104H    = CtrlQ104H.DMemByteEn;
-assign CtrlWb.SignExtQ104H   = CtrlQ104H.SignExt;
-assign CtrlWb.SelWrBackQ104H = CtrlQ104H.SelWrBack;
+assign CtrlWb.ByteEnQ104H      = CtrlQ104H.DMemByteEn;
+assign CtrlWb.SignExtQ104H     = CtrlQ104H.SignExt;
+assign CtrlWb.e_SelWrBackQ104H = CtrlQ104H.e_SelWrBack;
 
 endmodule
 
