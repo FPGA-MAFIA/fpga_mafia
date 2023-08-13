@@ -101,10 +101,10 @@ task eot (string msg);
     $display("===============================");
     $display("End of simulation: %s", msg);
     $display("===============================\n");
+    
     $display("===============================");
     $display("Starting data integrity test");
     $display("===============================");
     di_register_write();
-
     $finish;
 endtask

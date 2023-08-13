@@ -206,7 +206,7 @@ always_comb begin
     end
     32'b???????_?????_?????_111_?????_1100011: begin
         instr_type       = BGEU;
-        if(data_rd1<data_rd2) next_pc = pc + B_ImmediateQ101H;
+        if(~(data_rd1<data_rd2)) next_pc = pc + B_ImmediateQ101H;
     end
     //=======================================================
     //LB/LH/LW/LBU/LHU

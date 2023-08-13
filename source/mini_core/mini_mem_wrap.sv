@@ -120,7 +120,7 @@ mem  #(
 logic LocalDMemWrEnQ103H;
 logic NonLocalDMemReqQ103H;
 assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
-                              (DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0);
+                              ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0));
 // FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
