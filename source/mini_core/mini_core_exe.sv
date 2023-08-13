@@ -38,13 +38,13 @@ import common_pkg::*;
     //===================
     // output data path
     //===================
+    output logic [31:0] AluOutQ102H,
     output logic [31:0] AluOutQ103H,
     output logic [31:0] PcPlus4Q103H,
     output logic [31:0] DMemWrDataQ103H
 );
 
 logic        Hazard1Data1Q102H, Hazard2Data1Q102H, Hazard1Data2Q102H, Hazard2Data2Q102H;
-logic [31:0] AluOutQ102H;
 logic [31:0] AluIn1Q102H, AluIn2Q102H;
 logic [4:0]  ShamtQ102H;
 logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
