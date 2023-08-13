@@ -180,9 +180,9 @@ assign ReadyQ102H = ReadyQ103H && (1'b1); //
 assign ReadyQ101H = ReadyQ102H && !(LoadHzrdDetectQ101H); //
 assign ReadyQ100H = ReadyQ101H && (1'b1); //
 // Sample the Ctrl bits though the pipe
-`MAFIA_EN_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H )
-`MAFIA_EN_DFF(CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
-`MAFIA_EN_DFF(CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
+`MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
+`MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
+`MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;

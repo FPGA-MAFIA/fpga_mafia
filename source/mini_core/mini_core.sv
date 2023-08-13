@@ -261,15 +261,7 @@ mini_core_mem_acs mini_core_mem_access (
   .PcPlus4Q104H(PcPlus4Q104H),//input
   .AluOutQ104H(AluOutQ104H) //input
 );
-// Q103H to Q104H Flip Flops
-`MAFIA_DFF(AluOutQ104H      , AluOutQ103H         , Clock)
-`MAFIA_DFF(SelDMemWbQ104H   , SelDMemWbQ103H      , Clock)
-`MAFIA_DFF(PcPlus4Q104H     , PcPlus4Q103H        , Clock)
-`MAFIA_DFF(SelRegWrPcQ104H  , SelRegWrPcQ103H     , Clock)
-`MAFIA_DFF(RegDstQ104H      , RegDstQ103H         , Clock)
-`MAFIA_DFF(CtrlRegWrEnQ104H , CtrlRegWrEnQ103H    , Clock)
-`MAFIA_DFF(CtrlSignExtQ104H , CtrlSignExtQ103H    , Clock)
-`MAFIA_DFF(ByteEnQ104H      , CtrlDMemByteEnQ103H , Clock)
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
@@ -284,6 +276,19 @@ mini_core_mem_acs mini_core_mem_access (
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_wb mini_core_wb
+( 
+ .Clock     (Clock ), // input  logic           Clock,       //input 
+ .Rst       (Rst   ), // input  logic           Rst,         //input  
+ // Ctrl
+ .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
+ // Data path input
+ .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ104H, //input
+ .AluOutQ104H     (AluOutQ104H     ), // input  logic [31:0]    AluOutQ104H,     //input
+ .PcPlus4Q104H    (PcPlus4Q104H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
+ // data path output
+ .RegWrDataQ104H  (RegWrDataQ104H  )  // output logic [31:0]    RegWrDataQ104H  //output
 
+);
 
 endmodule // Module mafia_asap_5pl
