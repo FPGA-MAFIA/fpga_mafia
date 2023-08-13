@@ -9,15 +9,15 @@
 // Created          : 10/2021
 //-----------------------------------------------------------------------------
 // Description :
-// This module will comtain a complite RISCV Core supportint the RV32I
-// Will be implemented in a single cycle microarchitecture.
+// This module will contain a complete RISCV Core supporting the RV32I
+// Will be implemented in a single cycle micro-architecture.
 // The I_MEM & D_MEM will support async memory read. (This will allow the single-cycle arch)
 // ---- 5 Pipeline Stages -----
 // 1) Q100H Instruction Fetch
 // 2) Q101H Instruction Decode 
 // 3) Q102H Execute 
 // 4) Q103H Memory Access
-// 5) Q104H Write back data from Memory/ALU to Registerfile
+// 5) Q104H Write back data from Memory/ALU to Register file
 
 `include "macros.sv"
 
@@ -30,11 +30,7 @@ import common_pkg::*;
     output logic [31:0] PcQ100H,             // To I_MEM
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
     // Data Memory
-    output logic [31:0] DMemWrDataQ103H,     // To D_MEM
-    output logic [31:0] DMemAddressQ103H,    // To D_MEM
-    output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
-    output logic        DMemWrEnQ103H,       // To D_MEM
-    output logic        DMemRdEnQ103H,       // To D_MEM
+    output t_core2mem_req Core2DmemReqQ103H,
     input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
 
@@ -93,6 +89,21 @@ t_immediate         SelImmTypeQ101H;
 t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
 t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
 t_opcode            OpcodeQ101H, OpcodeQ102H;
+logic ReadyQ100H;
+logic ReadyQ101H;
+t_mini_ctrl Ctrl;
+logic DMemReady;
+logic DMemRdRspValid;
+logic ReadyQ102H;
+logic ReadyQ103H;
+logic ReadyQ104H;
+t_ctrl_if CtrlIf;
+t_ctrl_rf CtrlRf;
+t_ctrl_exe CtrlExe;
+t_ctrl_mem CtrlMem;
+t_ctrl_wb CtrlWb;
+
+logic [31:0] DMemWrDataQ103H;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
@@ -114,7 +125,7 @@ mini_core_if mini_core_if (
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
-  .Ctrl         (Ctrl        ), // input  t_ctrl_if    Ctrl,
+  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
@@ -200,17 +211,19 @@ mini_core_exe mini_core_exe (
   .Rst                 (Rst                ), //  input 
   // Input Control Signals
   .Ctrl                (CtrlExe            ), //  input 
+  .ReadyQ103H          (ReadyQ103H         ), //  input
   // Output Control Signals
   .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
   // Input Data path
   //Q102H
-  .PreRegRdData1Q102H  (PreRegRdData1Q102H ), //  input 
-  .PreRegRdData2Q102H  (PreRegRdData2Q102H ), //  input 
+  .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
+  .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input 
   .PcQ102H             (PcQ102H            ), //  input 
   .ImmediateQ102H      (ImmediateQ102H     ), //  input 
   //Q104H
   .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
   // output data path
+  .AluOutQ102H         (AluOutQ102H        ), //  output
   .AluOutQ103H         (AluOutQ103H        ), //  output
   .PcPlus4Q103H        (PcPlus4Q103H       ), //  output
   .DMemWrDataQ103H     (DMemWrDataQ103H    )  //  output
@@ -229,31 +242,22 @@ mini_core_exe mini_core_exe (
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 mini_core_mem_acs mini_core_mem_access (
-  .Clock       (Clock),       //input 
-  .Rst         (Rst),         //input  
+  .Clock              (Clock),          //input 
+  .Rst                (Rst),            //input  
   // Input Control Signals
-  .Ctrl        (CtrlMem),     //input
-  .ReadyQ104H  (ReadyQ104H),  //input
+  .Ctrl               (CtrlMem),        //input
+  .ReadyQ104H         (ReadyQ104H),     //input
   // Input Data path
-  .PcPlus4Q103H(PcPlus4Q103H),//input
-  .AluOutQ103H (AluOutQ103H), //input
-  .RegRdData2Q103H(RegRdData2Q103H), //input
+  .PcPlus4Q103H       (PcPlus4Q103H),   //input
+  .AluOutQ103H        (AluOutQ103H),    //input
+  .DMemWrDataQ103H    (DMemWrDataQ103H),//input
   // data path output
-  .Core2DmemReqQ103H (Core2DmemReqQ103H), //output
-  .PcPlus4Q104H(PcPlus4Q104H),//input
-  .AluOutQ104H(AluOutQ104H) //input
+  .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
+  .PcPlus4Q104H       (PcPlus4Q104H),   //input
+  .AluOutQ104H        (AluOutQ104H)     //input
 );
-// Q103H to Q104H Flip Flops
-`MAFIA_DFF(AluOutQ104H      , AluOutQ103H         , Clock)
-`MAFIA_DFF(SelDMemWbQ104H   , SelDMemWbQ103H      , Clock)
-`MAFIA_DFF(PcPlus4Q104H     , PcPlus4Q103H        , Clock)
-`MAFIA_DFF(SelRegWrPcQ104H  , SelRegWrPcQ103H     , Clock)
-`MAFIA_DFF(RegDstQ104H      , RegDstQ103H         , Clock)
-`MAFIA_DFF(CtrlRegWrEnQ104H , CtrlRegWrEnQ103H    , Clock)
-`MAFIA_DFF(CtrlSignExtQ104H , CtrlSignExtQ103H    , Clock)
-`MAFIA_DFF(ByteEnQ104H      , CtrlDMemByteEnQ103H , Clock)
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
@@ -268,6 +272,19 @@ mini_core_mem_acs mini_core_mem_access (
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_wb mini_core_wb
+( 
+ .Clock     (Clock ), // input  logic           Clock,       //input 
+ .Rst       (Rst   ), // input  logic           Rst,         //input  
+ // Ctrl
+ .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
+ // Data path input
+ .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ104H, //input
+ .AluOutQ104H     (AluOutQ104H     ), // input  logic [31:0]    AluOutQ104H,     //input
+ .PcPlus4Q104H    (PcPlus4Q104H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
+ // data path output
+ .RegWrDataQ104H  (RegWrDataQ104H  )  // output logic [31:0]    RegWrDataQ104H  //output
 
+);
 
 endmodule // Module mafia_asap_5pl

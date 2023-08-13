@@ -21,7 +21,7 @@ import common_pkg::*;
   //data path input
   input  logic [31:0]    PcPlus4Q103H,//input
   input  logic [31:0]    AluOutQ103H, //input
-  input  logic [31:0]    RegRdData2Q103H, //input
+  input  logic [31:0]    DMemWrDataQ103H, //input
   // data path output
   output t_core2mem_req  Core2DmemReqQ103H, //output
   output logic [31:0]    PcPlus4Q104H,//input
@@ -29,9 +29,9 @@ import common_pkg::*;
 );
 
 // Outputs to memory
-assign Core2DmemReqQ103H.WrData  = RegRdData2Q103H;
+assign Core2DmemReqQ103H.WrData  = DMemWrDataQ103H;
 assign Core2DmemReqQ103H.Address = AluOutQ103H;
-assign Core2DmemReqQ103H.WreEn   = Ctrl.DMemWrEnQ103H;
+assign Core2DmemReqQ103H.WrEn    = Ctrl.DMemWrEnQ103H;
 assign Core2DmemReqQ103H.RdEn    = Ctrl.DMemRdEnQ103H;
 assign Core2DmemReqQ103H.ByteEn  = Ctrl.DMemByteEnQ103H;
 

@@ -36,7 +36,11 @@ parameter D_MEM_REGION_FLOOR_MINI   = I_MEM_REGION_ROOF_MINI  + 1;
 parameter D_MEM_REGION_ROOF_MINI    = D_MEM_MSB_MINI             ;
 
 
-
+typedef enum logic [1:0] {
+    WB_DMEM = 2'b00 , 
+    WB_ALU =  2'b01 ,  
+    WB_PC4 =  2'b10      
+} t_e_sel_wb;
 
 typedef struct packed {
     logic       SelNextPcAluOutJ;
@@ -58,6 +62,7 @@ typedef struct packed {
     logic [4:0] RegSrc2;
     t_alu_op    AluOp;
     t_opcode    Opcode;
+    t_e_sel_wb  e_SelWrBack;
 } t_mini_ctrl;
 
 typedef struct packed {
@@ -91,23 +96,18 @@ typedef struct packed {
     logic [3:0] DMemByteEnQ103H;
 } t_ctrl_mem;
 
-typedef enum logic [1:0] {
-    WB_DMEM = 2'b000 , 
-    WB_ALU =  2'b001 ,  
-    WB_PC4 =  2'b010      
-} e_wb;
+
 
 typedef struct packed {
     logic [3:0] ByteEnQ104H;
     logic [3:0] SignExtQ104H;
-    logic      SelWrBackQ104H;
-    e_wb       e_SelWrBackQ104H;
+    t_e_sel_wb    e_SelWrBackQ104H;
 } t_ctrl_wb;
 
 typedef struct packed {
     logic [31:0] WrData;
     logic [31:0] Address; 
-    logic       WreEn;  
+    logic       WrEn;  
     logic       RdEn;  
     logic [3:0] ByteEn;
 } t_core2mem_req;
