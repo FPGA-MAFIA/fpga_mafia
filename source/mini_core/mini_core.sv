@@ -93,6 +93,21 @@ t_immediate         SelImmTypeQ101H;
 t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
 t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
 t_opcode            OpcodeQ101H, OpcodeQ102H;
+logic ReadyQ100H;
+logic ReadyQ101H;
+t_mini_ctrl Ctrl;
+logic DMemReady;
+logic DMemRdRspValid;
+logic ReadyQ102H;
+logic ReadyQ103H;
+logic ReadyQ104H;
+t_ctrl_if CtrlIf;
+t_ctrl_rf CtrlRf;
+t_ctrl_exe CtrlExe;
+t_ctrl_mem CtrlMem;
+t_ctrl_wb CtrlWb;
+t_core2mem_req Core2DmemReqQ103H;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
@@ -114,7 +129,7 @@ mini_core_if mini_core_if (
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
-  .Ctrl         (Ctrl        ), // input  t_ctrl_if    Ctrl,
+  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
@@ -200,6 +215,7 @@ mini_core_exe mini_core_exe (
   .Rst                 (Rst                ), //  input 
   // Input Control Signals
   .Ctrl                (CtrlExe            ), //  input 
+  .ReadyQ103H          (ReadyQ103H         ), //  input
   // Output Control Signals
   .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
   // Input Data path

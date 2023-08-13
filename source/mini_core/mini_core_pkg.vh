@@ -92,9 +92,9 @@ typedef struct packed {
 } t_ctrl_mem;
 
 typedef enum logic [1:0] {
-    WB_DMEM = 2'b000 , 
-    WB_ALU =  2'b001 ,  
-    WB_PC4 =  2'b010      
+    WB_DMEM = 2'b00 , 
+    WB_ALU =  2'b01 ,  
+    WB_PC4 =  2'b10      
 } e_wb;
 
 typedef struct packed {
