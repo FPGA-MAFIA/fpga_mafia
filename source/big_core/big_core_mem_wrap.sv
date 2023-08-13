@@ -33,12 +33,10 @@ import common_pkg::*;
     output logic            OutFabricValidQ505H ,
     output var t_tile_trans OutFabricQ505H      ,
     // FPGA interface inputs              
-    input  logic       Button_0,          // CR_MEM
-    input  logic       Button_1,          // CR_MEM
-    input  logic [9:0] Switch,            // CR_MEM
+    input  t_fpga_in   fpga_in,
     // FPGA interface outputs
     output t_fpga_out  fpga_out,          // CR_MEM output to FPGA
-    output logic        inDisplayArea,
+    output logic       inDisplayArea,
     output t_vga_out   vga_out            // VGA output to FPGA
 );
 
@@ -177,9 +175,7 @@ big_core_cr_mem big_core_cr_mem (
     .wren_b           (F2C_CrMemWrEnQ503H),
     .q_b              (F2C_CrMemRspDataQ504H),
     // FPGA interface
-    .Button_0         (Button_0),
-    .Button_1         (Button_1),
-    .Switch           (Switch),
+    .fpga_in          (fpga_in),  
     .fpga_out         (fpga_out)
 );
 
