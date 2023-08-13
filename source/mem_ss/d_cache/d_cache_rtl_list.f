@@ -20,6 +20,7 @@
 // Data cache
 ../../../source/mem_ss/d_cache/d_cache.sv
 ../../../source/mem_ss/d_cache/d_cache_tq.sv
+../../../source/mem_ss/d_cache/d_cache_tq_entry.sv
 ../../../source/mem_ss/d_cache/d_cache_pipe_wrap.sv
 ../../../source/mem_ss/d_cache/d_cache_pipe.sv
 ../../../source/common/array.sv

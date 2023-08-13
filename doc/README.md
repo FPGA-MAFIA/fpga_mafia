@@ -1,2 +1,5 @@
-Links to the Architectual specifications of this project:
-https://1drv.ms/u/s!Apu_j5InzXdpgdB5j_aFJXq_ASCrCw?e=meXPXb
+### See Web:  
+https://amichai-bd.github.io/fpga_mafia_wiki/
+
+### Deploy and change documentation in the new repository wiki:  
+https://github.com/amichai-bd/fpga_mafia_wiki
