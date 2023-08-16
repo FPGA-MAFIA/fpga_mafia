@@ -1,3 +1,4 @@
 alive.c
 bubblesort.c
 gcd.c
+stress.c

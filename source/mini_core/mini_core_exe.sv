@@ -108,11 +108,11 @@ always_comb begin : branch_comp
   // Check branch condition
   unique casez ({Ctrl.BranchOpQ102H})
     BEQ     : BranchCondMetQ102H =  (RegRdData1Q102H == RegRdData2Q102H);                  // BEQ
-    BNE     : BranchCondMetQ102H = ~(RegRdData1Q102H == RegRdData2Q102H);                  // BNE
+    BNE     : BranchCondMetQ102H = !(RegRdData1Q102H == RegRdData2Q102H);                  // BNE
     BLT     : BranchCondMetQ102H =  ($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BLT
-    BGE     : BranchCondMetQ102H = ~($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BGE
+    BGE     : BranchCondMetQ102H = !($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BGE
     BLTU    : BranchCondMetQ102H =  (RegRdData1Q102H < RegRdData2Q102H);                   // BLTU
-    BGEU    : BranchCondMetQ102H = ~(RegRdData1Q102H < RegRdData2Q102H);                   // BGEU
+    BGEU    : BranchCondMetQ102H = !(RegRdData1Q102H < RegRdData2Q102H);                   // BGEU
     default : BranchCondMetQ102H = 1'b0;
   endcase
 end

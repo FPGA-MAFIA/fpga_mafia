@@ -119,11 +119,43 @@ mem  #(
 //==================================
 logic LocalDMemWrEnQ103H;
 logic NonLocalDMemReqQ103H;
+logic VgaSpaceQ103H;
+//The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
+assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
 assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
-                              (DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0);
+                              ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
+                              (!VgaSpaceQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
 // FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
+
+
+// Support the byte enable for the data memory by shifting the data to the correct position
+// Half & Byte Write
+logic [31:0] ShiftDMemWrDataQ103H;
+logic [3:0]  ShiftDMemByteEnQ103H;
+logic [31:0] PreShiftDMemRdDataQ104H;
+logic [1:0]  DMemAddressQ104H;
+always_comb begin
+ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
+                       (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
+                       (DMemAddressQ103H[1:0] == 2'b11 ) ? { DMemWrDataQ103H[7:0] ,24'b0 } :
+                                                             DMemWrDataQ103H;
+ShiftDMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemByteEnQ103H[2:0],1'b0 } :
+                       (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemByteEnQ103H[1:0],2'b0 } :
+                       (DMemAddressQ103H[1:0] == 2'b11 ) ? { DMemByteEnQ103H[0]  ,3'b0 } :
+                                                             DMemByteEnQ103H;
+end               
+
+
+`MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
+// Half & Byte READ
+assign DMemRdRspQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
+                        (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
+                        (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
+                                                                  PreShiftDMemRdDataQ104H         ; 
+
+
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
   .ADRS_WIDTH(D_MEM_ADRS_MSB_MINI+1) //FIXME - Parametrize!!
@@ -131,10 +163,10 @@ mem
     .clock    (Clock),
     //Core interface (instruction fitch)
     .address_a  (DMemAddressQ103H[D_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
-    .data_a     (DMemWrDataQ103H),
+    .data_a     (ShiftDMemWrDataQ103H),
     .wren_a     (LocalDMemWrEnQ103H),
-    .byteena_a  (DMemByteEnQ103H),
-    .q_a        (DMemRdRspQ104H),
+    .byteena_a  (ShiftDMemByteEnQ103H),
+    .q_a        (PreShiftDMemRdDataQ104H),
     //fabric interface
     .address_b  (InFabricQ503H.address[D_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
     .data_b     (InFabricQ503H.data),              

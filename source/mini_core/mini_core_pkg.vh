@@ -54,9 +54,8 @@ typedef struct packed {
     logic       DMemWrEn;
     logic       DMemRdEn;
     logic       SignExt;
-    logic       SelWrBack;
     logic [3:0] DMemByteEn;
-    logic       BranchOp;
+    t_branch_type BranchOp;
     logic [4:0] RegDst;
     logic [4:0] RegSrc1;
     logic [4:0] RegSrc2;
@@ -81,7 +80,7 @@ typedef struct packed {
     logic [4:0] RegSrc2Q102H;
     t_alu_op    AluOpQ102H;
     logic       LuiQ102H;
-    logic       BranchOpQ102H;
+    t_branch_type BranchOpQ102H;
     logic [4:0] RegDstQ103H;
     logic [4:0] RegDstQ104H;
     logic       RegWrEnQ103H;

@@ -107,8 +107,8 @@ assign reg_wr_data      = next_regfile[rd];
 // load data from memory - byte, half-word, word
 //=======================================================
 assign lb_data [31:0] = { {8{dmem[mem_rd_addr+0][7]}}  ,{8{dmem[mem_rd_addr+0][7]}}   ,{8{dmem[mem_rd_addr+0][7]}}, dmem[mem_rd_addr+0]};//LB
-assign lh_data [31:0] = { {8{dmem[mem_rd_addr+1][7]}}  ,{8{dmem[mem_rd_addr+1][7]}}   ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LH
-assign lw_data [31:0] = {   dmem[mem_rd_addr+3]        ,  dmem[mem_rd_addr+2]         ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LW
+assign lh_data [31:0] = { {8{dmem[mem_rd_addr+1][7]}}  ,{8{dmem[mem_rd_addr+1][7]}}   ,   dmem[mem_rd_addr+1]     , dmem[mem_rd_addr+0]};//LH
+assign lw_data [31:0] = {    dmem[mem_rd_addr+3]       ,   dmem[mem_rd_addr+2]        ,   dmem[mem_rd_addr+1]     , dmem[mem_rd_addr+0]};//LW
 assign lbu_data[31:0] = { {8{1'b0}}                    ,{8{1'b0}}                     ,{8{1'b0}}                  , dmem[mem_rd_addr+0]};//LBU
 assign lhu_data[31:0] = { {8{1'b0}}                    ,{8{1'b0}}                     ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LHU
 //=======================================================
@@ -119,8 +119,12 @@ assign vga_lw_data [31:0] = {    VGAMem[mem_rd_addr+3]      ,  VGAMem[mem_rd_add
 assign vga_lbu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,{8{1'b0}}                    , VGAMem[mem_rd_addr+0]};//LBU
 assign vga_lhu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LHU
 
-assign  hit_vga_mem_rd = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF);
-assign  hit_vga_mem_wr = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF);
+logic DMemRdEn;
+logic DMemWrEn;
+assign  DMemWrEn       = (instr_type == SB) || (instr_type == SH) || (instr_type == SW);
+assign  DMemRdEn       = (instr_type == LB) || (instr_type == LH) || (instr_type == LW) || (instr_type == LBU) || (instr_type == LHU);
+assign  hit_vga_mem_rd = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF) && DMemRdEn;
+assign  hit_vga_mem_wr = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF) && DMemWrEn;
 //=======================================================
 // This main logic of the reference model
 //=======================================================
@@ -206,7 +210,7 @@ always_comb begin
     end
     32'b???????_?????_?????_111_?????_1100011: begin
         instr_type       = BGEU;
-        if(data_rd1<data_rd2) next_pc = pc + B_ImmediateQ101H;
+        if(~(data_rd1<data_rd2)) next_pc = pc + B_ImmediateQ101H;
     end
     //=======================================================
     //LB/LH/LW/LBU/LHU

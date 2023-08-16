@@ -58,17 +58,20 @@ task di_register_write();
 $display("ref_rf_write_history size = %0d", ref_rf_write_history.size());
 $display("rf_write_history size     = %0d", rf_write_history.size());
 foreach(rf_write_history[i])begin
-    if ((ref_rf_write_history[i].RegDst==rf_write_history[i].RegDst ) && 
-        (ref_rf_write_history[i].Data==rf_write_history[i].Data ) )
+    if ((ref_rf_write_history[i].RegDst == rf_write_history[i].RegDst ) && 
+        (ref_rf_write_history[i].Data   == rf_write_history[i].Data   ) )
     begin
-        $display(" >> rf_write_history[%0d] match: %p", i, rf_write_history[i]);
-        ref_rf_write_history.delete(i);
-        rf_write_history.delete(i);
+        $display(" >> rf_write_history[%0d] Match: time: %0d, PC: %8h, RegDsd: %d, Data: %h", i, rf_write_history[i].cur_time,
+                                                                                                 rf_write_history[i].Pc,
+                                                                                                 rf_write_history[i].RegDst,
+                                                                                                 rf_write_history[i].Data);
+        //ref_rf_write_history.delete(i);
+        //rf_write_history.delete(i);
     end else begin
         $display(" >> rf_write_history[%0d] Mismatch!!", i);
         $error("ERROR: rf_write_history mismatch");
-        $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %0h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
-        $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %0h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
+        $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
+        $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
         msg = "Data integrity test failed - rf_write_history mismatch";
     end
 end
@@ -98,10 +101,10 @@ task eot (string msg);
     $display("===============================");
     $display("End of simulation: %s", msg);
     $display("===============================\n");
+    
     $display("===============================");
     $display("Starting data integrity test");
     $display("===============================");
     di_register_write();
-
     $finish;
 endtask
