@@ -241,6 +241,7 @@ assign C2F_ReqQ103H.address      = DMemAddressQ103H;
 assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
 assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
 assign C2F_ReqQ103H.requestor_id = local_tile_id;
+assign C2F_ReqQ103H.next_tile_fifo_arb_id = NULL_CARDINAL;
 assign C2F_ReqValidQ103H         = NonLocalDMemReqQ103H;
 
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
