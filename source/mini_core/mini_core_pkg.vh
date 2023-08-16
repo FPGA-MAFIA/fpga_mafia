@@ -54,7 +54,6 @@ typedef struct packed {
     logic       DMemWrEn;
     logic       DMemRdEn;
     logic       SignExt;
-    logic       SelWrBack;
     logic [3:0] DMemByteEn;
     t_branch_type BranchOp;
     logic [4:0] RegDst;

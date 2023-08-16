@@ -100,7 +100,7 @@ initial begin: detect_timeout
     //=======================================
     // timeout
     //=======================================
-    #100000 
+    #10000000 
     $error("test ended with timeout");
     $display("ERROR: No data integrity running - try to increase the timeout value");
     $finish;

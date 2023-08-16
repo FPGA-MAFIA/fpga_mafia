@@ -18,7 +18,7 @@ initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../../target/mini_core/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
-    $fwrite(trk_inst,"Time\t|\tPC \t | Instraction\t|\n");
+    $fwrite(trk_inst,"Time\t|\tPC \t | Instruction\t|\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
 
 end
@@ -43,9 +43,16 @@ initial begin: trk_memory_access_gen
     $timeformat(-9, 1, " ", 6);
     trk_memory_access = $fopen({"../../../target/mini_core/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_memory_access,"Time\t|\tPC \t | Opcode\t| Adress\t| Data\t|\n");
+    $fwrite(trk_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
-
+end
+integer trk_ref_memory_access;
+initial begin: trk_rf_memory_access_gen
+    $timeformat(-9, 1, " ", 6);
+    trk_ref_memory_access = $fopen({"../../../target/mini_core/tests/",test_name,"/trk_ref_memory_access.log"},"w");
+    $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");
+    $fwrite(trk_ref_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
+    $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  
 end
 //
 assign PcQ100H = mini_core_top.PcQ100H;
@@ -53,16 +60,35 @@ assign PcQ100H = mini_core_top.PcQ100H;
 `MAFIA_DFF(PcQ102H,  PcQ101H , Clk)
 `MAFIA_DFF(PcQ103H,  PcQ102H , Clk)
 `MAFIA_DFF(PcQ104H,  PcQ103H , Clk)
-////tracker on memory_access operations
-//always @(posedge Clk) begin : memory_access_print
-//    if(DMemWrEn) begin
-//    $fwrite(trk_memory_access,"%t\t| %8h \t write \t|%8h \t|%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemDataQ104H);
-//    end
-//    if(DMemRdEn) begin
-//    $fwrite(trk_memory_access,"%t\t| %8h \t|read \t|%8h \t|%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemDataQ104H);
-//    end
-//end
 
+logic DMemRdEnQ104H;
+logic DMemWrEnQ104H;
+logic [31:0] DMemAddressQ104H;
+logic [31:0] DMemWrDataQ104H;
+
+`MAFIA_DFF(DMemWrEnQ104H,    mini_core_top.mini_mem_wrap.DMemWrEnQ103H    , Clk)
+`MAFIA_DFF(DMemRdEnQ104H,    mini_core_top.mini_mem_wrap.DMemRdEnQ103H    , Clk)
+`MAFIA_DFF(DMemAddressQ104H, mini_core_top.mini_mem_wrap.DMemAddressQ103H , Clk)
+`MAFIA_DFF(DMemWrDataQ104H,  mini_core_top.mini_mem_wrap.DMemWrDataQ103H  , Clk)
+//tracker on memory_access operations
+always @(posedge Clk) begin : memory_access_print
+    if(DMemWrEnQ104H) begin
+        $fwrite(trk_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
+    end
+    if(DMemRdEnQ104H) begin
+        $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H);
+    end
+end
+
+import rv32i_ref_pkg::*;
+always @(posedge Clk) begin : memory_ref_access_print
+    if(rv32i_ref.DMemWrEn) begin
+        $fwrite(trk_ref_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_wr_addr, rv32i_ref.data_rd2);
+    end
+    if(rv32i_ref.DMemRdEn) begin
+        $fwrite(trk_ref_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_rd_addr, rv32i_ref.next_regfile[rv32i_ref.rd]);
+    end
+end
 
 integer trk_reg_write;
 initial begin: trk_reg_write_gen
