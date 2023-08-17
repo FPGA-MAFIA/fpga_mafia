@@ -105,6 +105,8 @@ end else  if(test_name == "read_miss_stall_handle") begin
 `include "read_miss_stall_handle.sv"
 end else  if(test_name == "b2b_rd_miss_reissue") begin
 `include "b2b_rd_miss_reissue.sv"
+end else  if(test_name == "abd_test") begin
+`include "abd_test.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);
@@ -113,6 +115,7 @@ end else begin
     delay(80); $finish;
     $finish;
 end
+delay(100);
 $display("\n\n================\n     Done\n================\n");
 
 delay(80); $finish;

@@ -345,7 +345,7 @@ assign wr_match_in_pipe_q1_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_se
                                 ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q1.lu_op == WR_LU);        //Both write q3 and q1
 assign pipe_lu_rsp_q3.wr_match_in_pipe = wr_match_in_pipe_q1_q3 || wr_match_in_pipe_q2_q3;
 
-`MAFIA_DFF(og_set_ways_tags_q3,    og_set_ways_tags_q2, clk)
+`MAFIA_DFF(og_set_ways_tags_q3,    og_set_ways_tags_q2,    clk)
 `MAFIA_DFF(set_ways_enc_victim_q3, set_ways_enc_victim_q2, clk)
 always_comb begin
     cache2fm_req_q3 = '0;   
