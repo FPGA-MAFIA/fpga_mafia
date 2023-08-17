@@ -37,6 +37,7 @@ import d_cache_param_pkg::*;
     output logic                fill_entry
 );
 
+logic rsp_hit_with_wr_match_in_pipe_q3;
 logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 logic  en_tq_merge_buffer_e_modified; 
 logic  en_tq_merge_buffer_data; 
@@ -62,6 +63,7 @@ logic  en_tq_reg_id;
 // The main TQ logic FSM
 //===========================
 always_comb begin
+    rsp_hit_with_wr_match_in_pipe_q3 = '0;
     // used to set the correct word offset in the cache line
     new_alloc_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
     // the for loop will got through all the TQ entries
@@ -118,23 +120,22 @@ always_comb begin
             S_LU_CORE: begin
                 //if Cache_hit  : nex_state == IDLE
                 //if Cache_miss : next_state == MB_WAIT_FILL
-                if ((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid)) begin  
-                    next_tq_entry.state=   (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE            :
-                                        (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL    :
-                                        // There is a corner case where the fill lu_rsp has the TQ id of a new lookup
-                                        // This FILL is from an older request, don't want it to affect the entry
-                                        // so simply ignore it and stay in the S_LU_CORE state
-                                        (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_LU_CORE         : 
-                                        /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR           ;
-
                 // Handle the case where there are 2 writes B2B to same cache line
                 // The data is merged in MB, but was already sent to pipe separately, 
                 // only when the last write is done we can go to idle - if other write match in pipe we need to wait for it in the S_LU_CORE state
                 // Note: this is still within the if((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid)
-                    if( pipe_lu_rsp_q3.wr_match_in_pipe && (pipe_lu_rsp_q3.lu_result == HIT)) begin
-                         next_tq_entry.state = S_LU_CORE ;
-                    end
-                end //((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid))                    
+                rsp_hit_with_wr_match_in_pipe_q3 = (pipe_lu_rsp_q3.lu_result == HIT) && pipe_lu_rsp_q3.wr_match_in_pipe;
+                if ((pipe_lu_rsp_q3.tq_id == entry_id) && (pipe_lu_rsp_q3.valid)) begin  
+                    next_tq_entry.state=    rsp_hit_with_wr_match_in_pipe_q3     ?   S_LU_CORE      :
+                                           (pipe_lu_rsp_q3.lu_result == HIT)     ?   S_IDLE         :
+                                           (pipe_lu_rsp_q3.lu_result == MISS)    ?   S_MB_WAIT_FILL :
+                                           // There is a corner case where the fill lu_rsp has the TQ id of a new lookup
+                                           // This FILL is from an older request, don't want it to affect the entry
+                                           // so simply ignore it and stay in the S_LU_CORE state
+                                           (pipe_lu_rsp_q3.lu_result == FILL)    ?   S_LU_CORE      : 
+                                           /*(pipe_lu_rsp_q3.lu_result == REJECT)*/  S_ERROR        ;
+
+                end                    
             end
             S_MB_WAIT_FILL                : begin
                 // NOTE: We are allowing a single outstanding request per CL address!!!
@@ -196,7 +197,6 @@ always_comb begin
                     //set the corresponding bit in the e_modified vector
                     next_tq_entry.merge_buffer_e_modified                        = tq_entry.merge_buffer_e_modified;
                     next_tq_entry.merge_buffer_e_modified[new_alloc_word_offset] = 1'b1;
-
 
                     // This is to fix a corner case where we have a fill & a write in the same cycle!!
                     // This will make sure that the fm2cache response will not be ignored

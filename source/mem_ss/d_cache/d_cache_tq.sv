@@ -171,25 +171,25 @@ assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id;
 genvar TQ_ENTRY;
 generate for(TQ_ENTRY=0; TQ_ENTRY<NUM_TQ_ENTRY; TQ_ENTRY++) begin : tq_e
 d_cache_tq_entry d_cache_tq_entry_i (
-.clk              (clk             ), //    input  logic                     clk,
-.rst              (rst             ), //    input  logic                     rst,
-.entry_id         (3'(TQ_ENTRY)    ), //    input  logic                     entry_id,
+.clk              (clk           ),          //    input  logic                     clk,
+.rst              (rst           ),          //    input  logic                     rst,
+.entry_id         (3'(TQ_ENTRY)  ),          //    input  logic                     entry_id,
 // Core requests
-.core2cache_req   (core2cache_req  ), //    input  t_req                     core2cache_req,
-.allocate_entry   (allocate_entry[TQ_ENTRY]  ), //    input  logic                     allocate_entry,
+.core2cache_req   (core2cache_req),          //    input  t_req                     core2cache_req,
+.allocate_entry   (allocate_entry[TQ_ENTRY]),//    input  logic           allocate_entry,
 // FM responses from cache miss
-.fm2cache_rd_rsp  (fm2cache_rd_rsp ), //    input  var t_fm_rd_rsp           fm2cache_rd_rsp,
+.fm2cache_rd_rsp  (fm2cache_rd_rsp),         //    input  var t_fm_rd_rsp           fm2cache_rd_rsp,
 // Pipe responses from LU
-.pipe_lu_rsp_q3   (pipe_lu_rsp_q3  ), //    input  var t_lu_rsp              pipe_lu_rsp_q3,
+.pipe_lu_rsp_q3   (pipe_lu_rsp_q3  ),        //    input  var t_lu_rsp              pipe_lu_rsp_q3,
 // Current TQ entry signals
-.cancel_core_req  (cancel_core_req), //    output logic                     cancel_core_req,
-.first_fill       (first_fill[TQ_ENTRY]), //input  logic                first_fill,
-.next_tq_entry    (next_tq_entry[TQ_ENTRY]        ), //    output t_tq_entry                tq_entry,
-.tq_entry         (tq_entry[TQ_ENTRY]        ), //    output t_tq_entry                tq_entry,
-.rd_req_hit_mb    (rd_req_hit_mb[TQ_ENTRY]   ), //    output logic                     rd_req_hit_mb,
-.wr_req_hit_mb    (wr_req_hit_mb[TQ_ENTRY]   ), //    output logic                     wr_req_hit_mb,
-.free_entry       (free_entries[TQ_ENTRY]      ), //    output logic                     free_entry,
-.fill_entry       (fill_entries[TQ_ENTRY]      )  //    output logic                     fill_entry
+.first_fill       (first_fill   [TQ_ENTRY]), //  input  logic
+.cancel_core_req  (cancel_core_req),         //  output logic
+.tq_entry         (tq_entry     [TQ_ENTRY]), //  output t_tq_entry
+.next_tq_entry    (next_tq_entry[TQ_ENTRY]), //  output t_tq_entry // Note: used only for verification - not RTL
+.rd_req_hit_mb    (rd_req_hit_mb[TQ_ENTRY]), //  output logic
+.wr_req_hit_mb    (wr_req_hit_mb[TQ_ENTRY]), //  output logic
+.free_entry       (free_entries [TQ_ENTRY]), //  output logic
+.fill_entry       (fill_entries [TQ_ENTRY])  //  output logic
 );
 end endgenerate
 
@@ -306,5 +306,16 @@ end
 // FIXME - add assertion that We are allowing a single outstanding request per CL address!!!
 // FIXME - add assertion that a there is no pre_core2cache_req.valid when stall is asserted
 // FIXME - add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
+// FIXME - Add assertion that every pipe response HIT/MISS have a matching valid TQ entry
+//logic rsp_hit_or_miss_entry_q3;
+//always_comb begin
+//    rsp_hit_or_miss_entry_q3 = ((pipe_lu_rsp_q3.lu_result == HIT) || (pipe_lu_rsp_q3.lu_result == MISS)) && 
+//                               (tq_entry[pipe_lu_rsp_q3.tq_id].state == S_LU_CORE);
+//end
+//`MAFIA_ASSERT("no_matching_tq_for_hit_or_miss", 
+//             (!rsp_hit_or_miss_entry_q3),                                 // Condition
+//             pipe_lu_rsp_q3.valid && (pipe_lu_rsp_q3.lu_result != FILL),  // En
+//             "no_matching_tq_for_hit_or_miss")     
+
 
 endmodule
