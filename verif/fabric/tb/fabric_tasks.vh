@@ -11,6 +11,9 @@ task run_fabric_test(input string test);
      `include "fabric_wr_rd_data.sv"
   end else if(test == "fabric_BP_test") begin
      `include "fabric_BP_test.sv"
+  // fabric mini_cores tests
+  end else if(test == "non_local_wr") begin
+    $display("hello");
   end else begin
     $error(" [ERROR] : test %s not found",test);
   end

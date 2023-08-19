@@ -6,6 +6,7 @@
 
 
 module fabric_mini_cores_tb;
+import mini_core_pkg::*;
 import common_pkg::*;
 typedef struct packed {
     t_tile_trans trans;
@@ -17,9 +18,15 @@ parameter V_ROW = V_FABRIC_SIZE;
 parameter V_COL = V_FABRIC_SIZE;
 parameter V_REQUESTS = 9;
 parameter V_NUM_CYCLES = 10;
+parameter ADRS_WIDTH = 16;
 
 logic              clk;
 logic              rst;
+
+logic  [7:0] IMem  [V_ROW:1] [V_COL:1]   [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
+logic  [7:0] DMem  [V_ROW:1] [V_COL:1]   [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic [7:0] i_mem  [V_ROW:1] [V_COL:1]   [(2**ADRS_WIDTH)-1:0] ;
+//logic  [7:0]  i_mem    [5:0] [4:0]  [65535:0];
 int fabric_test_true;
 int mini_core_tile_test_true;
 string test_name;
@@ -51,6 +58,7 @@ int num_cycles = V_NUM_CYCLES;
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
 `include "fabric_inputs_trk.vh"
+//`include "mini_core_trk.sv"
 
 // =============================
 // CLK GEN
@@ -92,12 +100,46 @@ generate
       //assign target_trans[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_req;
       assign requestor_id_ref[col][row] = fabric.col[col].row[row].mini_core_tile_ins.pre_in_local_req.requestor_id;
       assign tile_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.out_local_ready;
-      //`MINI_CORE_TILE_READY(col,row)
+      // mini_cores
+      assign fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.i_mem.mem = i_mem[col][row];
       //assign mini_core_ready[col][row] = fabric.col[col].row[row].mini_core_tile_ins.mini_core_top.mini_mem_wrap.mini_core_ready;
     end
   end
 endgenerate
 
+`MAFIA_DFF(IMem, IMem, clk)
+`MAFIA_DFF(DMem, DMem, clk)
+task load_mem(input int col, input int row);
+    $readmemh({"../../../target/fabric/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem[1][1]);
+    force i_mem[col][row] = IMem[col][row]; //backdoor to actual memory
+    //load the data to the DUT & reference model 
+    //file = $fopen({"../../../target/fabric/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    //if (file) begin
+      //  $fclose(file);
+        //$readmemh({"../../../target/fabric/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        //force mini_core_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        //#10
+        //release mini_core_top.mini_mem_wrap.d_mem.mem;
+    //end
+endtask
+
+integer file;
+initial begin: test_seq
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("STRING value %s", test_name);
+    //======================================
+    //load the program to the DUT & reference model
+    //======================================
+    for(int i = 1; i<= V_COL; i++) begin
+    for(int j = 1; j<= V_ROW; j++) begin
+      automatic int col = i;
+      automatic int row = j;
+      fork 
+        load_mem(col,row);
+      join
+    end
+    end
+end
 
 initial begin
   fork
@@ -177,7 +219,7 @@ initial begin
   fork 
       run_mini_core_tile_test(test_name);  
   join
-  end else if(fabric_test_true) begin
+  end else if(1) begin
     $display("==============================");
     $display("[INFO] this is FABRIC test");
     $display("==============================");
