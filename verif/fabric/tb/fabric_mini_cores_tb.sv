@@ -58,7 +58,7 @@ int num_cycles = V_NUM_CYCLES;
 `include "fabric_tasks.vh"
 `include "mini_core_tile_tasks.vh"
 `include "fabric_inputs_trk.vh"
-//`include "mini_core_trk.sv"
+`include "mini_core_trk.sv"
 
 // =============================
 // CLK GEN

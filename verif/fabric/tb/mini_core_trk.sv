@@ -2,14 +2,18 @@
 integer trk_alu;
 initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
-    trk_alu = $fopen({"../../../target/mini_core/tests/",test_name,"/trk_alu.log"},"w");
-    $fwrite(trk_alu,"---------------------------------------------------------\n");
-    $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
-    $fwrite(trk_alu,"---------------------------------------------------------\n");  
+    for(int i = 1 ; i< V_COL; i++) begin
+        for(int j = 1 ; j< V_ROW; j++)begin
+            trk_alu = $fopen({"../../../target/fabric/tests/",test_name,"/trk_alu_cores/trk_alu%d%d.log",i,j},"w");
+            $fwrite(trk_alu,"---------------------------------------------------------\n");
+            $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
+            $fwrite(trk_alu,"---------------------------------------------------------\n");  
+        end
+    end
 
 end
 //tracker on ALU operations
-always @(posedge clk) begin : alu_print
+/*always @(posedge clk) begin : alu_print
     $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H, mini_core_top.mini_core.AluIn1Q102H , mini_core_top.mini_core.AluIn2Q102H, mini_core_top.mini_core.AluOutQ102H);
 end
 
@@ -141,4 +145,4 @@ end
 
 
 
-// FIXME
+// FIXME*/
