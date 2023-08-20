@@ -19,6 +19,6 @@ always_comb begin
     odd_flag = (set_bit_amount%2 == 1'b1);
 end
 
-MAFIA_RST_DFF(odd_parity_flag, odd_flag, Clk, Rst);
+`MAFIA_RST_DFF(odd_parity_flag, odd_flag, Clk, Rst);
 
 endmodule

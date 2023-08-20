@@ -82,6 +82,8 @@ end
    end          
 
 
-
+`define MAFIA_BINARY_TO_GRAY(gray,binary)  \
+   gray = binary ^ (binary >> 1);   
+      
 
 `endif //MACROS_VS

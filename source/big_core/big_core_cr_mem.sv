@@ -31,7 +31,7 @@ import common_pkg::*;
     output logic [31:0] q,
 
     // FPGA interface inputs
-    input  t_fpga_in    fpga_in,
+    input  var t_fpga_in    fpga_in,
     
 
     input  logic [31:0] address_b,

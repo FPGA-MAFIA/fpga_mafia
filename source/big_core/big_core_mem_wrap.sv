@@ -33,7 +33,7 @@ import common_pkg::*;
     output logic            OutFabricValidQ505H ,
     output var t_tile_trans OutFabricQ505H      ,
     // FPGA interface inputs              
-    input  t_fpga_in   fpga_in,
+    input  var t_fpga_in   fpga_in,
     // FPGA interface outputs
     output t_fpga_out  fpga_out,          // CR_MEM output to FPGA
     output logic       inDisplayArea,

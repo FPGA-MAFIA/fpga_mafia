@@ -235,7 +235,7 @@ class Test:
     def _gui(self):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+self.dut+'_tb ' + self.params + ' +STRING='+self.name+' &'
+            gui_cmd = 'vsim.exe -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)

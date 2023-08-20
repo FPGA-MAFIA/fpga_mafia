@@ -22,7 +22,7 @@ import common_pkg::*;
     output logic        out_for_pd,
     
     // FPGA interface inputs              
-    input  t_fpga_in   fpga_in,  // CR_MEM
+    input  var t_fpga_in   fpga_in,  // CR_MEM
     // Fabric interface
     input  logic            InFabricValidQ503H  ,
     input  var t_tile_trans InFabricQ503H       ,

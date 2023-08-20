@@ -248,14 +248,7 @@ typedef enum logic [1:0] {
 } t_uart_opcode ;
 
 
-function logic [SIZE-1:0] binary_to_gray;
-    input logic [SIZE-1:0] binary;
-    logic [SIZE-1:0] gray;
-    begin
-        gray = binary ^ (binary >> 1);
-        return gray;
-    end
-endfunction
+
 
 //endpackage
 `endif 
