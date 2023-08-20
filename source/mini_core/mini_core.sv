@@ -30,8 +30,9 @@ import common_pkg::*;
     output logic [31:0] PcQ100H,             // To I_MEM
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
     // Data Memory
+    input  logic          DMemReadyQ103H,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
-    input  logic [31:0] DMemRdRspQ104H       // From D_MEM
+    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM
 );
 
 // ---- Data-Path signals ----
@@ -92,7 +93,6 @@ t_opcode            OpcodeQ101H, OpcodeQ102H;
 logic ReadyQ100H;
 logic ReadyQ101H;
 t_mini_ctrl Ctrl;
-logic DMemReady;
 logic DMemRdRspValid;
 logic ReadyQ102H;
 logic ReadyQ103H;
@@ -155,8 +155,7 @@ mini_core_ctrl mini_core_ctrl (
   .PreInstructionQ101H  (PreInstructionQ101H), //input
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H ), //input
-  .DMemReady            (DMemReady          ), //input
-  .DMemRdRspValid       (DMemRdRspValid     ), //input
+  .DMemReadyQ103H       (DMemReadyQ103H     ), //input
   // ready signals for "back-pressure" - use as the enable for the pipe stage sample
   .ReadyQ100H           (ReadyQ100H), //  output 
   .ReadyQ101H           (ReadyQ101H), //  output 

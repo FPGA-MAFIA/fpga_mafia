@@ -53,8 +53,8 @@ end//initial clock_gen
 // reset generation
 // ========================
 initial begin: reset_gen
-    Rst = 1'b1;
-#40 Rst = 1'b0;
+     Rst = 1'b1;
+#100 Rst = 1'b0;
 end: reset_gen
 
 
@@ -100,7 +100,7 @@ initial begin: detect_timeout
     //=======================================
     // timeout
     //=======================================
-    #10000000 
+    #1000000 
     $error("test ended with timeout");
     $display("ERROR: No data integrity running - try to increase the timeout value");
     $finish;

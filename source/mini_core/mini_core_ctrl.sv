@@ -20,8 +20,7 @@ import common_pkg::*;
     input   logic [31:0] PreInstructionQ101H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
-    input   logic        DMemReady,
-    input   logic        DMemRdRspValid,
+    input   logic        DMemReadyQ103H,
     // ready signals for "back-pressure" - use as the enable for the pipe stage sample
     output  logic        ReadyQ100H,
     output  logic        ReadyQ101H,
@@ -174,11 +173,11 @@ always_comb begin
 end
 
 //FIXME - there are various reseaus for back-pressure. Need to code it here
-assign ReadyQ104H = 1'b1; // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
-assign ReadyQ103H = ReadyQ104H && (1'b1);
-assign ReadyQ102H = ReadyQ103H && (1'b1); //
-assign ReadyQ101H = ReadyQ102H && !(LoadHzrdDetectQ101H); //
-assign ReadyQ100H = ReadyQ101H && (1'b1); //
+assign ReadyQ104H = Rst || DMemReadyQ103H; // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ103H = Rst || ReadyQ104H && (1'b1);
+assign ReadyQ102H = Rst || ReadyQ103H && (1'b1); //
+assign ReadyQ101H = Rst || ReadyQ102H && !(LoadHzrdDetectQ101H); //
+assign ReadyQ100H = Rst || ReadyQ101H && (1'b1); //
 // Sample the Ctrl bits though the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )

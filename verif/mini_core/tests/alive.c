@@ -1,6 +1,7 @@
+#include "fabric_defines.h"
 int main()  {  
-    int x,y,z;  
-    x = 2;  
-    y = 3;  
-    z = x+y;  
+
+TILE_3_3_SCRATCH[0] = WHO_AM_I[0];
+int read_data = TILE_3_3_SCRATCH[0];
+
 }  // main()

@@ -37,6 +37,7 @@ import common_pkg::*;
                 input  logic        DMemWrEnQ103H   , // To D_MEM
                 input  logic        DMemRdEnQ103H   , // To D_MEM
                 output logic [31:0] DMemRdRspQ104H  , // From D_MEM
+                output logic        DMemReadyQ103H  , // From D_MEM
                 //============================================
                 //      fabric interface
                 //============================================
@@ -86,7 +87,7 @@ assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ5
 // Set the F2C DMEM hit indications
 assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] > D_MEM_REGION_FLOOR_MINI) && 
                            (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] < D_MEM_REGION_ROOF_MINI) ;
-assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
+assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && ((InFabricQ503H.opcode == WR || InFabricQ503H.opcode == RD_RSP));
 // Set the F2C CrMEM hit indications
 assign F2C_CrMemHitQ503H  = 1'b0; //FIXME - Add CR_MEM offset hit indication
 assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
@@ -128,10 +129,32 @@ assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) &&
 // FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
+logic OutstandingReadReqQ103H;
+logic SetOutstandingReadReqQ103H;
+logic RstOutstandingReadReqQ503H;
+assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&
+                                    (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
+
+assign RstOutstandingReadReqQ503H = (OutstandingReadReqQ103H) && (F2C_DMemHitQ503H) && (F2C_DMemWrEnQ503H) 
+                                    || Rst;
+`MAFIA_EN_RST_DFF(OutstandingReadReqQ103H   ,
+                  1'b1                      ,
+                  Clock                     ,
+                  SetOutstandingReadReqQ103H, //Set (Enable bit)
+                  RstOutstandingReadReqQ503H) //Reset 
+
+// There are multiple reasons to unset the DMemReadyQ103H - back pressure the core from accessing the memory
+// 1) A outstanding read request was set and the read response was not received yet
+// 2) The c2f_req_fifo is full
+assign DMemReadyQ103H  =!(OutstandingReadReqQ103H || SetOutstandingReadReqQ103H) &&
+                        !C2F_ReqFull;
+//==================================
+// This logic is a special case for the WhoAmI request
+// We are using a memory address of 0x00FFFFFF to detect the WhoAmI request and respond with the local tile id
+//==================================
 logic WhoAmIReqQ103H;
 logic WhoAmIReqQ104H;
-
 assign WhoAmIReqQ103H = (DMemAddressQ103H[31:24] == 8'b0) && (DMemAddressQ103H[23:0] == 24'hFFFFFF) && DMemRdEnQ103H;
 `MAFIA_DFF(WhoAmIReqQ104H , WhoAmIReqQ103H , Clock)
 // Support the byte enable for the data memory by shifting the data to the correct position
@@ -285,5 +308,5 @@ assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
                               C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
                                                         '0;                 
                                                         
-assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
+assign mini_core_ready = (!F2C_AlmostFull); // add back pressure to the fabric
 endmodule

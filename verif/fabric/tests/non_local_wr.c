@@ -11,9 +11,9 @@ for(int i = 0; i < 100; i++){
 }
 TILE_1_1_SCRATCH[0] = WHO_AM_I[0];
 
-    if(WHO_AM_I[0] != 0x11){
-        while(1){};//busy wait
-    }
+if(WHO_AM_I[0] != 0x11){
+    while(1){};//busy wait
+}
 
     return 0;
 }
