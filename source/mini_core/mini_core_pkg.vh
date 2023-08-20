@@ -13,10 +13,10 @@
 
 //instead of importing the riscv_pkg, include this file in the common_pkg
 //package mini_core_pkg;
-parameter I_MEM_SIZE_MINI   = 'h10000; //FIXME - currently using same as BIG_CORE
-parameter I_MEM_OFFSET_MINI = 'h0;
-parameter D_MEM_SIZE_MINI   = 'h10000;
-parameter D_MEM_OFFSET_MINI = 'h10000;
+parameter I_MEM_SIZE_MINI   = 'h1_0000; //FIXME - currently using same as BIG_CORE
+parameter I_MEM_OFFSET_MINI = 'h0_0000;
+parameter D_MEM_SIZE_MINI   = 'h1_0000;
+parameter D_MEM_OFFSET_MINI = 'h1_0000;
 
 parameter I_MEM_MSB_MINI   = I_MEM_SIZE_MINI-1;               // I_MEM   0x0    - 0x3FFF
 parameter D_MEM_MSB_MINI   = D_MEM_SIZE_MINI+D_MEM_OFFSET_MINI-1;  // D_MEM   0x4000 - 0x6FFF
