@@ -28,6 +28,10 @@ initial begin : free_running_core_clk
     core_Clk = 1'b1;
     forever #1 core_Clk = ~core_Clk;
 end
+initial begin : reset
+    Rst = 1'b1;
+    #50 Rst = 1'b0;
+end
 initial begin : naive_clk_gen
          kbd_Clk = 1'b1;//0
     #100 kbd_Clk = 1'b1;//100

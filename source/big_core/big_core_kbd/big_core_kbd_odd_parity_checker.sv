@@ -16,7 +16,7 @@ always_comb begin
     for(int i = 0; i<9 ; i=i+1) begin
         set_bit_amount = set_bit_amount + Data[i];
     end
-    odd_flag = (set_bit_amount%2 == 1'b1);
+    odd_flag = (^set_bit_amount);
 end
 
 `MAFIA_RST_DFF(odd_parity_flag, odd_flag, Clk, Rst);
