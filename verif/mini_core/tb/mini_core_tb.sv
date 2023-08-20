@@ -127,19 +127,20 @@ always_comb begin
     next_test = test;
     if (OutFabricValidQ505H) begin
         if (OutFabricQ505H.opcode == WR) begin
-            next_TILE33_DMem[OutFabricQ505H.address[15:0]+0] = OutFabricQ505H.data[7:0];
-            next_TILE33_DMem[OutFabricQ505H.address[15:0]+1] = OutFabricQ505H.data[15:8];
-            next_TILE33_DMem[OutFabricQ505H.address[15:0]+2] = OutFabricQ505H.data[23:16];
-            next_TILE33_DMem[OutFabricQ505H.address[15:0]+3] = OutFabricQ505H.data[31:24];
+            //next_TILE33_DMem[OutFabricQ505H.address[15:0]+0] = OutFabricQ505H.data[7:0];
+            //next_TILE33_DMem[OutFabricQ505H.address[15:0]+1] = OutFabricQ505H.data[15:8];
+            //next_TILE33_DMem[OutFabricQ505H.address[15:0]+2] = OutFabricQ505H.data[23:16];
+            //next_TILE33_DMem[OutFabricQ505H.address[15:0]+3] = OutFabricQ505H.data[31:24];
+            next_test = OutFabricQ505H.data; 
         end
     end
 end
 
 logic [31:0] RdDataData;
-assign RdDataData[7:0]   = TILE33_DMem[OutFabricQ505H.address[15:0]+0];
-assign RdDataData[15:8]  = TILE33_DMem[OutFabricQ505H.address[15:0]+1];
-assign RdDataData[23:16] = TILE33_DMem[OutFabricQ505H.address[15:0]+2];
-assign RdDataData[31:24] = TILE33_DMem[OutFabricQ505H.address[15:0]+3];
+assign RdDataData[7:0]   = test;//TILE33_DMem[OutFabricQ505H.address[15:0]+0];
+assign RdDataData[15:8]  = test;//TILE33_DMem[OutFabricQ505H.address[15:0]+1];
+assign RdDataData[23:16] = test;//TILE33_DMem[OutFabricQ505H.address[15:0]+2];
+assign RdDataData[31:24] = test;//TILE33_DMem[OutFabricQ505H.address[15:0]+3];
 
 assign ShiftInFabricValid[0] = OutFabricValidQ505H && (OutFabricQ505H.opcode == RD);
 // Set the target address to the requestor id (This is the Read response address)
