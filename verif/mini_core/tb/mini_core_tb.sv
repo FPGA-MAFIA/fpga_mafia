@@ -89,8 +89,8 @@ initial begin: test_seq
     fork
     get_rf_write();
     get_ref_rf_write();
-    begin wait(mini_core_top.mini_core.ebreak_was_calledQ101H == 1'b1);
-        eot("ebreak was called");
+    begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
+        eot(.msg("ebreak was called"));
     end
     join
 
@@ -100,8 +100,10 @@ initial begin: detect_timeout
     //=======================================
     // timeout
     //=======================================
-    #1000 
-    eot("test ended with timeout");
+    #10000000 
+    $error("test ended with timeout");
+    $display("ERROR: No data integrity running - try to increase the timeout value");
+    $finish;
 end
 
 

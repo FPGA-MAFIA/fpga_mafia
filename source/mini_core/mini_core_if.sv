@@ -11,12 +11,12 @@
 
 `include "macros.sv"
 
-module `mini_core_if 
+module mini_core_if 
 import common_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
-    input  t_ctrl_if    Ctrl,
+    input  var t_ctrl_if    Ctrl,
     input  logic        ReadyQ100H,
     input  logic        ReadyQ101H,
     input  logic [31:0] AluOutQ102H,
@@ -25,7 +25,6 @@ import common_pkg::*;
 );
 
 logic [31:0] PcPlus4Q100H;
-logic [31:0] PcPlus4Q101H;
 logic [31:0] NextPcQnnnH;
 assign PcPlus4Q100H = PcQ100H + 3'h4;
 assign NextPcQnnnH  = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;

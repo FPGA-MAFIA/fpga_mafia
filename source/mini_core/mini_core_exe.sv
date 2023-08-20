@@ -19,7 +19,7 @@ import common_pkg::*;
     //===================
     // Input Control Signals
     //===================
-    input  t_ctrl_exe   Ctrl
+    input  var t_ctrl_exe   Ctrl,
     input  logic        ReadyQ103H,
     //===================
     // Output Control Signals
@@ -38,13 +38,13 @@ import common_pkg::*;
     //===================
     // output data path
     //===================
+    output logic [31:0] AluOutQ102H,
     output logic [31:0] AluOutQ103H,
     output logic [31:0] PcPlus4Q103H,
     output logic [31:0] DMemWrDataQ103H
 );
 
 logic        Hazard1Data1Q102H, Hazard2Data1Q102H, Hazard1Data2Q102H, Hazard2Data2Q102H;
-logic [31:0] AluOutQ102H;
 logic [31:0] AluIn1Q102H, AluIn2Q102H;
 logic [4:0]  ShamtQ102H;
 logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
@@ -80,8 +80,8 @@ assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After
                                              PreRegRdData2Q102H; // Common Case - No Hazard
 
 // End Take care to data hazard
-assign AluIn1Q102H = SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
-assign AluIn2Q102H = SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
+assign AluIn1Q102H = Ctrl.SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
+assign AluIn2Q102H = Ctrl.SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
 
 always_comb begin : alu_logic
   ShamtQ102H      = AluIn2Q102H[4:0];
@@ -108,11 +108,11 @@ always_comb begin : branch_comp
   // Check branch condition
   unique casez ({Ctrl.BranchOpQ102H})
     BEQ     : BranchCondMetQ102H =  (RegRdData1Q102H == RegRdData2Q102H);                  // BEQ
-    BNE     : BranchCondMetQ102H = ~(RegRdData1Q102H == RegRdData2Q102H);                  // BNE
+    BNE     : BranchCondMetQ102H = !(RegRdData1Q102H == RegRdData2Q102H);                  // BNE
     BLT     : BranchCondMetQ102H =  ($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BLT
-    BGE     : BranchCondMetQ102H = ~($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BGE
+    BGE     : BranchCondMetQ102H = !($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BGE
     BLTU    : BranchCondMetQ102H =  (RegRdData1Q102H < RegRdData2Q102H);                   // BLTU
-    BGEU    : BranchCondMetQ102H = ~(RegRdData1Q102H < RegRdData2Q102H);                   // BGEU
+    BGEU    : BranchCondMetQ102H = !(RegRdData1Q102H < RegRdData2Q102H);                   // BGEU
     default : BranchCondMetQ102H = 1'b0;
   endcase
 end
