@@ -18,9 +18,10 @@ import common_pkg::*;
     input   logic        Rst,
     // input instruction 
     input   logic [31:0] PreInstructionQ101H,
+    input   logic [31:0] PcQ101H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
-    input   logic        DMemReadyQ103H,
+    input   logic        DMemReady,
     // ready signals for "back-pressure" - use as the enable for the pipe stage sample
     output  logic        ReadyQ100H,
     output  logic        ReadyQ101H,
@@ -68,12 +69,15 @@ t_immediate         SelImmTypeQ101H;
  t_opcode     OpcodeQ101H;
  logic [2:0]  Funct3Q101H;
  logic [6:0]  Funct7Q101H;
+logic PreValidInstQ101H, ValidInstQ101H;
+logic PreValidInstQ102H, ValidInstQ102H;
+logic PreValidInstQ103H, ValidInstQ103H;
+logic PreValidInstQ104H, ValidInstQ104H;
 
 t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
-logic CoreFreeze;
 assign CoreFreeze = 1'b0;
 logic [31:0] PreviousInstructionQ102H;
-`MAFIA_EN_DFF(PreviousInstructionQ102H , PreInstructionQ101H   , Clock , !(CoreFreeze))
+`MAFIA_EN_DFF(PreviousInstructionQ102H , PreInstructionQ101H   , Clock ,ReadyQ102H)
 // Load and Ctrl hazard detection
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
@@ -88,16 +92,23 @@ logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
 assign flushQ102H = IndirectBranchQ102H;
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , !(CoreFreeze))
-assign InstructionQ101H         = flushQ102H          ? NOP :
-                                  flushQ103H          ? NOP :
-                                  LoadHzrdDetectQ101H ? NOP : 
-                                  LoadHzrdDetectQ102H ? PreviousInstructionQ102H :
-                                                        PreInstructionQ101H;
+assign InstructionQ101H = flushQ102H          ? NOP :
+                          flushQ103H          ? NOP :
+                          LoadHzrdDetectQ101H ? NOP : 
+                          LoadHzrdDetectQ102H ? PreviousInstructionQ102H :
+                                                PreInstructionQ101H;
+assign PreValidInstQ101H = flushQ102H          ? 1'b0 : 
+                           flushQ103H          ? 1'b0 : 
+                           LoadHzrdDetectQ101H ? 1'b0 : 
+                           LoadHzrdDetectQ102H ? 1'b1 : 
+                                                 1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
 assign Funct3Q101H                = InstructionQ101H[14:12];
 assign Funct7Q101H                = InstructionQ101H[31:25];
+assign CtrlQ101H.Pc               = PcQ101H;
+assign CtrlQ101H.Instruction      = InstructionQ101H;
 assign CtrlQ101H.Opcode           = OpcodeQ101H;
 assign CtrlQ101H.SelNextPcAluOutJ = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
 assign CtrlQ101H.SelNextPcAluOutB = (OpcodeQ101H == BRANCH);
@@ -172,16 +183,24 @@ always_comb begin
   endcase
 end
 
-//FIXME - there are various reseaus for back-pressure. Need to code it here
-assign ReadyQ104H = Rst || DMemReadyQ103H; // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
-assign ReadyQ103H = Rst || ReadyQ104H && (1'b1);
-assign ReadyQ102H = Rst || ReadyQ103H && (1'b1); //
+//FIXME - there are various reasons for back-pressure. Need to code it here
+assign ReadyQ104H = Rst || DMemReady;// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ103H = Rst || ReadyQ104H;
+assign ReadyQ102H = Rst || ReadyQ103H;//
 assign ReadyQ101H = Rst || ReadyQ102H && !(LoadHzrdDetectQ101H); //
-assign ReadyQ100H = Rst || ReadyQ101H && (1'b1); //
+assign ReadyQ100H = Rst || ReadyQ101H;//
 // Sample the Ctrl bits though the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
+
+assign ValidInstQ101H = ReadyQ101H && PreValidInstQ101H;
+`MAFIA_EN_RST_DFF(PreValidInstQ102H, ValidInstQ101H, Clock, ReadyQ102H, Rst )
+assign ValidInstQ102H = ReadyQ102H && PreValidInstQ102H;
+`MAFIA_EN_DFF    (PreValidInstQ103H, ValidInstQ102H, Clock, ReadyQ103H)
+assign ValidInstQ103H = ReadyQ103H && PreValidInstQ103H;
+`MAFIA_EN_DFF    (PreValidInstQ104H, ValidInstQ103H, Clock, ReadyQ104H)
+assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
@@ -190,7 +209,7 @@ assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
 assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
 assign CtrlRf.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
 assign CtrlRf.RegDstQ104H   = CtrlQ104H.RegDst;
-assign CtrlRf.RegWrEnQ104H  = CtrlQ104H.RegWrEn;
+assign CtrlRf.RegWrEnQ104H  = ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
 
 //Execute Control Signals
 assign CtrlExe.RegSrc1Q102H  = CtrlQ102H.RegSrc1;

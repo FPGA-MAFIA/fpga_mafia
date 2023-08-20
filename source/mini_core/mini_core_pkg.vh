@@ -62,6 +62,8 @@ typedef struct packed {
     t_alu_op    AluOp;
     t_opcode    Opcode;
     t_e_sel_wb  e_SelWrBack;
+    logic [31:0] Pc;            //Used for debug - not really a control signal
+    logic [31:0] Instruction;   //Used for debug - not really a control signal
 } t_mini_ctrl;
 
 typedef struct packed {

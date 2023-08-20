@@ -14,18 +14,26 @@ t_rf_write_history ref_rf_cur_write;
 
 logic [31:0] PcQ101H;             // To I_MEM
 logic [31:0] PcQ102H;             // To I_MEM
-logic [31:0]  PcQ103H, PcQ104H;
-`MAFIA_DFF(PcQ103H, mini_core_top.mini_core.PcQ102H;, Clk);
-`MAFIA_DFF(PcQ104H, PcQ103H, Clk);
+logic [31:0] PcQ103H, PcQ104H;
+assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
+assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
+assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
+assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
+logic RegWrEnQ104H;
+logic [4:0]  RegDstQ104H;
+logic [31:0] RegWrDataQ104H;
+assign RegWrEnQ104H   = mini_core_top.mini_core.mini_core_ctrl.CtrlRf.RegWrEnQ104H;
+assign RegDstQ104H    = mini_core_top.mini_core.mini_core_ctrl.CtrlRf.RegDstQ104H;
+assign RegWrDataQ104H = mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H;
 task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 
     @(posedge Clk) begin
-        if (mini_core_top.mini_core.mini_core_rf.Ctrl.RegWrEnQ104H && (mini_core_top.mini_core.mini_core_rf.Ctrl.RegDstQ104H!=5'b0)) begin
-            rf_cur_write.RegDst = mini_core_top.mini_core.mini_core_rf.Ctrl.RegDstQ104H;
-            rf_cur_write.Data   = mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H;
-            rf_cur_write.Pc     = PcQ104H;
-            rf_cur_write.cur_time   = $time;
+        if (RegWrEnQ104H && (RegDstQ104H!=5'b0)) begin
+            rf_cur_write.RegDst    = RegDstQ104H;
+            rf_cur_write.Data      = RegWrDataQ104H;
+            rf_cur_write.Pc        = PcQ104H;
+            rf_cur_write.cur_time  = $time;
             rf_write_history.push_back(rf_cur_write);
     // $display("rf_cur_write = %p", rf_cur_write);
         end

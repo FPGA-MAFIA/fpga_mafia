@@ -107,9 +107,57 @@ initial begin: detect_timeout
 end
 
 
-
-// DUT instance mini_core 
 t_tile_id local_tile_id;
+logic        InFabricValidQ503H  ; 
+logic        OutFabricValidQ505H ;
+t_tile_trans InFabricQ503H ; 
+t_tile_trans [2:0] ShiftInFabric ; 
+logic        [2:0] ShiftInFabricValid ; 
+t_tile_trans OutFabricQ505H ;
+
+logic  [7:0] TILE33_DMem      [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] next_TILE33_DMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+`MAFIA_DFF(TILE33_DMem, next_TILE33_DMem, Clk)
+
+logic [31:0] next_test;
+logic [31:0] test;
+`MAFIA_DFF(test, next_test, Clk)
+always_comb begin
+    next_TILE33_DMem = TILE33_DMem;
+    next_test = test;
+    if (OutFabricValidQ505H) begin
+        if (OutFabricQ505H.opcode == WR) begin
+            next_TILE33_DMem[OutFabricQ505H.address[15:0]+0] = OutFabricQ505H.data[7:0];
+            next_TILE33_DMem[OutFabricQ505H.address[15:0]+1] = OutFabricQ505H.data[15:8];
+            next_TILE33_DMem[OutFabricQ505H.address[15:0]+2] = OutFabricQ505H.data[23:16];
+            next_TILE33_DMem[OutFabricQ505H.address[15:0]+3] = OutFabricQ505H.data[31:24];
+        end
+    end
+end
+
+logic [31:0] RdDataData;
+assign RdDataData[7:0]   = TILE33_DMem[OutFabricQ505H.address[15:0]+0];
+assign RdDataData[15:8]  = TILE33_DMem[OutFabricQ505H.address[15:0]+1];
+assign RdDataData[23:16] = TILE33_DMem[OutFabricQ505H.address[15:0]+2];
+assign RdDataData[31:24] = TILE33_DMem[OutFabricQ505H.address[15:0]+3];
+
+assign ShiftInFabricValid[0] = OutFabricValidQ505H && (OutFabricQ505H.opcode == RD);
+// Set the target address to the requestor id (This is the Read response address)
+always_comb begin 
+    ShiftInFabric[0] = '0;
+    if (OutFabricValidQ505H && OutFabricQ505H.opcode == RD) begin
+        ShiftInFabric[0].address[31:0]         = {local_tile_id,OutFabricQ505H.address[23:0]};
+        ShiftInFabric[0].opcode                = RD_RSP;
+        ShiftInFabric[0].data                  = (OutFabricQ505H.opcode==RD) ? RdDataData : '0;
+        ShiftInFabric[0].requestor_id          = OutFabricQ505H.address[31:0];
+        ShiftInFabric[0].next_tile_fifo_arb_id = OutFabricQ505H.next_tile_fifo_arb_id;
+    end
+end
+`MAFIA_DFF(ShiftInFabric[2:1],      ShiftInFabric[1:0],      Clk)
+`MAFIA_DFF(ShiftInFabricValid[2:1], ShiftInFabricValid[1:0], Clk)
+assign InFabricQ503H        = ShiftInFabric[2];
+assign InFabricValidQ503H   = ShiftInFabricValid[2];
+// DUT instance mini_core 
 assign  local_tile_id = 8'h2_2;
 mini_core_top mini_core_top (
 .Clock               (Clk),
@@ -118,14 +166,15 @@ mini_core_top mini_core_top (
 //============================================
 //      fabric interface
 //============================================
- .InFabricValidQ503H    ('0),// input  logic        F2C_ReqValidQ503H     ,
- .InFabricQ503H         ('0),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
+ .InFabricValidQ503H    (InFabricValidQ503H),// input  logic        F2C_ReqValidQ503H     ,
+ .InFabricQ503H         (InFabricQ503H),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
  .mini_core_ready       (),  // output  logic  mini_core_ready       ,
  //
- .OutFabricQ505H        (),  // output t_rdata      F2C_RspDataQ504H      ,
- .OutFabricValidQ505H   (),  // output logic        F2C_RspValidQ504H
+ .OutFabricQ505H        (OutFabricQ505H),  // output t_rdata      F2C_RspDataQ504H      ,
+ .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
  .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
 );      
+
 
 rv32i_ref
 # (

@@ -56,20 +56,18 @@ initial begin: trk_rf_memory_access_gen
 end
 //
 assign PcQ100H = mini_core_top.PcQ100H;
-`MAFIA_DFF(PcQ101H,  PcQ100H , Clk)
-`MAFIA_DFF(PcQ102H,  PcQ101H , Clk)
-`MAFIA_DFF(PcQ103H,  PcQ102H , Clk)
-`MAFIA_DFF(PcQ104H,  PcQ103H , Clk)
 
 logic DMemRdEnQ104H;
 logic DMemWrEnQ104H;
 logic [31:0] DMemAddressQ104H;
 logic [31:0] DMemWrDataQ104H;
 
-`MAFIA_DFF(DMemWrEnQ104H,    mini_core_top.mini_mem_wrap.DMemWrEnQ103H    , Clk)
-`MAFIA_DFF(DMemRdEnQ104H,    mini_core_top.mini_mem_wrap.DMemRdEnQ103H    , Clk)
+assign DMemWrEnQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.DMemWrEn;
+assign DMemRdEnQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.DMemRdEn;
 `MAFIA_DFF(DMemAddressQ104H, mini_core_top.mini_mem_wrap.DMemAddressQ103H , Clk)
 `MAFIA_DFF(DMemWrDataQ104H,  mini_core_top.mini_mem_wrap.DMemWrDataQ103H  , Clk)
+
+
 //tracker on memory_access operations
 always @(posedge Clk) begin : memory_access_print
     if(DMemWrEnQ104H) begin
