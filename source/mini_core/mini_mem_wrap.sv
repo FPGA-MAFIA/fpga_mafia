@@ -129,7 +129,11 @@ assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) &&
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
+logic WhoAmIReqQ103H;
+logic WhoAmIReqQ104H;
 
+assign WhoAmIReqQ103H = (DMemAddressQ103H[31:24] == 8'b0) && (DMemAddressQ103H[23:0] == 24'hFFFFFF) && DMemRdEnQ103H;
+`MAFIA_DFF(WhoAmIReqQ104H , WhoAmIReqQ103H , Clock)
 // Support the byte enable for the data memory by shifting the data to the correct position
 // Half & Byte Write
 logic [31:0] ShiftDMemWrDataQ103H;
@@ -150,7 +154,8 @@ end
 
 `MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
 // Half & Byte READ
-assign DMemRdRspQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
+assign DMemRdRspQ104H = (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
+                        (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
                                                                   PreShiftDMemRdDataQ104H         ; 

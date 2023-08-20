@@ -1,17 +1,40 @@
 
-integer trk_alu;
-initial begin: trk_alu_gen
-    $timeformat(-9, 1, " ", 6);
-    for(int i = 1 ; i< V_COL; i++) begin
-        for(int j = 1 ; j< V_ROW; j++)begin
-            trk_alu = $fopen({"../../../target/fabric/tests/",test_name,"/trk_alu_cores/trk_alu%d%d.log",i,j},"w");
-            $fwrite(trk_alu,"---------------------------------------------------------\n");
-            $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
-            $fwrite(trk_alu,"---------------------------------------------------------\n");  
-        end
-    end
 
+
+integer trk_tile_1_1_input;
+initial begin: trk_tile_1_1_input_gen
+    $timeformat(-9, 1, " ", 6);
+    trk_tile_1_1_input = $fopen({"../../../target/fabric/tests/",test_name,"/trk_tile_1_1_input.log"},"w");
+    $fwrite(trk_tile_1_1_input,"---------------------------------------------------------\n");
+    $fwrite(trk_tile_1_1_input,"Time  | requestor_id |  opcode | address  |   data   | \n");
+    $fwrite(trk_tile_1_1_input,"---------------------------------------------------------\n");  
 end
+
+always_ff @(posedge clk) begin
+    if(fabric.col[1].row[1].mini_core_tile_ins.mini_core_top.mini_mem_wrap.InFabricValidQ503H) begin
+        $fwrite(trk_tile_1_1_input,"%t|    %h       |  %s     | %h |  %h  | \n", $realtime, 
+                                                fabric.col[1].row[1].mini_core_tile_ins.mini_core_top.mini_mem_wrap.InFabricQ503H.requestor_id,
+                                                fabric.col[1].row[1].mini_core_tile_ins.mini_core_top.mini_mem_wrap.InFabricQ503H.opcode,
+                                                fabric.col[1].row[1].mini_core_tile_ins.mini_core_top.mini_mem_wrap.InFabricQ503H.address,
+                                                fabric.col[1].row[1].mini_core_tile_ins.mini_core_top.mini_mem_wrap.InFabricQ503H.data
+                                                
+                                                );
+    end
+end
+    
+//integer trk_alu;
+//initial begin: trk_alu_gen
+//    $timeformat(-9, 1, " ", 6);
+//    for(int i = 1 ; i< V_COL; i++) begin
+//        for(int j = 1 ; j< V_ROW; j++)begin
+//            trk_alu = $fopen({"../../../target/fabric/tests/",test_name,"/trk_alu_cores/trk_alu%d%d.log",i,j},"w");
+//            $fwrite(trk_alu,"---------------------------------------------------------\n");
+//            $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
+//            $fwrite(trk_alu,"---------------------------------------------------------\n");  
+//        end
+//    end
+//
+//end
 //tracker on ALU operations
 /*always @(posedge clk) begin : alu_print
     $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H, mini_core_top.mini_core.AluIn1Q102H , mini_core_top.mini_core.AluIn2Q102H, mini_core_top.mini_core.AluOutQ102H);
