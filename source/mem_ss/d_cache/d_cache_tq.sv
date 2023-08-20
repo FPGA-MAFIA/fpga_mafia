@@ -303,9 +303,9 @@ always_comb begin
 
 end
 
-// FIXME - add assertion that We are allowing a single outstanding request per CL address!!!
-// FIXME - add assertion that a there is no pre_core2cache_req.valid when stall is asserted
-// FIXME - add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
+// FIXME - Add assertion that We are allowing a single outstanding request per CL address!!!
+// FIXME - Add assertion that a there is no pre_core2cache_req.valid when stall is asserted
+// FIXME - Add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
 // FIXME - Add assertion that every pipe response HIT/MISS have a matching valid TQ entry
 //logic rsp_hit_or_miss_entry_q3;
 //always_comb begin
