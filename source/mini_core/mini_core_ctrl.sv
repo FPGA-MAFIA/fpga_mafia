@@ -60,7 +60,6 @@ t_immediate         SelImmTypeQ101H;
  logic [4:0]  PreRegSrc1Q101H;
  logic [4:0]  PreRegSrc2Q101H;
  logic        LoadHzrdDetectQ101H;
- logic        PcEnQ101H;
  logic [31:0] InstructionQ101H;
  logic        flushQ102H;
  logic        flushQ103H;
@@ -81,8 +80,7 @@ assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 assign LoadHzrdDetectQ101H       = Rst ? 1'b0 : 
                                  ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
                                  ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                                                                                    1'b0;
-assign PcEnQ101H                = !LoadHzrdDetectQ101H;
+                                                                                                         1'b0;
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);

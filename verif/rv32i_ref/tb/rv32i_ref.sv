@@ -29,6 +29,8 @@ logic [7:0] imem        [I_MEM_MSB:I_MEM_LSB];
 logic [7:0] next_imem   [I_MEM_MSB:I_MEM_LSB];
 logic [7:0] dmem        [D_MEM_MSB:D_MEM_LSB];
 logic [7:0] next_dmem   [D_MEM_MSB:D_MEM_LSB];
+logic [7:0] dmem_33     [D_MEM_MSB:D_MEM_LSB];
+logic [7:0] next_dmem_33[D_MEM_MSB:D_MEM_LSB];
 logic [31:0][31:0]  next_regfile; 
 logic [31:0][31:0]  regfile; 
 logic [4:0] rd, rs1, rs2;
@@ -75,6 +77,7 @@ assign debug_info.reg_wr_data = reg_wr_data;
 //=======================================================
 `MAFIA_EN_DFF    (regfile, next_regfile,  clk, run);
 `MAFIA_EN_DFF    (dmem,    next_dmem,     clk, run);
+`MAFIA_EN_DFF    (dmem_33, next_dmem_33,  clk, run);
 `MAFIA_EN_DFF    (imem,    next_imem,     clk, run);
 `MAFIA_EN_DFF    (VGAMem,  NextVGAMem,    clk, run);
 `MAFIA_EN_RST_DFF(pc  ,    next_pc,       clk , ((!end_of_simulation) && run) , rst);
@@ -106,25 +109,48 @@ assign reg_wr_data      = next_regfile[rd];
 //=======================================================
 // load data from memory - byte, half-word, word
 //=======================================================
-assign lb_data [31:0] = { {8{dmem[mem_rd_addr+0][7]}}  ,{8{dmem[mem_rd_addr+0][7]}}   ,{8{dmem[mem_rd_addr+0][7]}}, dmem[mem_rd_addr+0]};//LB
-assign lh_data [31:0] = { {8{dmem[mem_rd_addr+1][7]}}  ,{8{dmem[mem_rd_addr+1][7]}}   ,   dmem[mem_rd_addr+1]     , dmem[mem_rd_addr+0]};//LH
-assign lw_data [31:0] = {    dmem[mem_rd_addr+3]       ,   dmem[mem_rd_addr+2]        ,   dmem[mem_rd_addr+1]     , dmem[mem_rd_addr+0]};//LW
-assign lbu_data[31:0] = { {8{1'b0}}                    ,{8{1'b0}}                     ,{8{1'b0}}                  , dmem[mem_rd_addr+0]};//LBU
-assign lhu_data[31:0] = { {8{1'b0}}                    ,{8{1'b0}}                     ,  dmem[mem_rd_addr+1]      , dmem[mem_rd_addr+0]};//LHU
-//=======================================================
-// load data from VGA memory - byte, half-word, word
-assign vga_lb_data [31:0] = { {8{VGAMem[mem_rd_addr+0][7]}} ,{8{VGAMem[mem_rd_addr+0][7]}} ,{8{VGAMem[mem_rd_addr+0][7]}}, VGAMem[mem_rd_addr+0]};//LB
-assign vga_lh_data [31:0] = { {8{VGAMem[mem_rd_addr+1][7]}} ,{8{VGAMem[mem_rd_addr+1][7]}} ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LH
-assign vga_lw_data [31:0] = {    VGAMem[mem_rd_addr+3]      ,  VGAMem[mem_rd_addr+2]       ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LW
-assign vga_lbu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,{8{1'b0}}                    , VGAMem[mem_rd_addr+0]};//LBU
-assign vga_lhu_data[31:0] = { {8{1'b0}}                     ,{8{1'b0}}                     ,  VGAMem[mem_rd_addr+1]      , VGAMem[mem_rd_addr+0]};//LHU
-
 logic DMemRdEn;
 logic DMemWrEn;
-assign  DMemWrEn       = (instr_type == SB) || (instr_type == SH) || (instr_type == SW);
-assign  DMemRdEn       = (instr_type == LB) || (instr_type == LH) || (instr_type == LW) || (instr_type == LBU) || (instr_type == LHU);
-assign  hit_vga_mem_rd = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF) && DMemRdEn;
-assign  hit_vga_mem_wr = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF) && DMemWrEn;
+logic hit_local_mem_rd;
+logic hit_local_mem_wr;
+logic hit_33_mem_rd;
+logic hit_33_mem_wr;
+logic hit_who_am_i;
+assign  DMemWrEn         = (instr_type == SB) || (instr_type == SH) || (instr_type == SW);
+assign  DMemRdEn         = (instr_type == LB) || (instr_type == LH) || (instr_type == LW) || (instr_type == LBU) || (instr_type == LHU);
+assign  hit_vga_mem_rd   = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF) && DMemRdEn;
+assign  hit_vga_mem_wr   = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF) && DMemWrEn;
+assign  hit_local_mem_rd = (mem_rd_addr[31:24]==8'h0 ) && (mem_rd_addr[23:0]<D_MEM_MSB) && DMemRdEn;
+assign  hit_local_mem_wr = (mem_wr_addr[31:24]==8'h0 ) && (mem_wr_addr[23:0]<D_MEM_MSB) && DMemWrEn;
+assign  hit_33_mem_rd    = (mem_rd_addr[31:24]==8'h33) && (mem_rd_addr[23:0]<D_MEM_MSB) && DMemRdEn;
+assign  hit_33_mem_wr    = (mem_wr_addr[31:24]==8'h33) && (mem_wr_addr[23:0]<D_MEM_MSB) && DMemWrEn;
+assign  hit_who_am_i     = (mem_rd_addr[31:24]==8'h0 ) && (mem_rd_addr[23:0]==24'hFFFFFF) && DMemRdEn;
+assign lb_data [31:0] = hit_local_mem_rd ? { {8{dmem  [mem_rd_addr+0][7]}}       ,{8{dmem  [mem_rd_addr+0][7]}}       ,{8{dmem  [mem_rd_addr+0][7]}}       , dmem   [mem_rd_addr+0]}: 
+                        hit_vga_mem_rd   ? { {8{VGAMem[mem_rd_addr+0][7]}}       ,{8{VGAMem[mem_rd_addr+0][7]}}       ,{8{VGAMem[mem_rd_addr+0][7]}}       , VGAMem [mem_rd_addr+0]}:
+                        hit_33_mem_rd    ? { {8{dmem_33[mem_rd_addr[23:0]+0][7]}},{8{dmem_33[mem_rd_addr[23:0]+0][7]}},{8{dmem_33[mem_rd_addr[23:0]+0][7]}}, dmem_33[mem_rd_addr[23:0]+0]}:
+                        hit_who_am_i     ? 32'h0000022                                                                                                            :
+                                                                                                                                           32'b0                  ;
+assign lh_data [31:0] = hit_local_mem_rd ? { {8{dmem  [mem_rd_addr+1][7]}}       ,{8{dmem  [mem_rd_addr+1][7]}}       ,   dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]} :
+                        hit_vga_mem_rd   ? { {8{VGAMem[mem_rd_addr+1][7]}}       ,{8{VGAMem[mem_rd_addr+1][7]}}       ,   VGAMem[mem_rd_addr+1]        , VGAMem [mem_rd_addr+0]} :
+                        hit_33_mem_rd    ? { {8{dmem_33[mem_rd_addr[23:0]+1][7]}},{8{dmem_33[mem_rd_addr[23:0]+1][7]}},   dmem_33[mem_rd_addr[23:0]+1] , dmem_33[mem_rd_addr[23:0]+0]} :
+                        hit_who_am_i     ? 32'h0000022                                                                                                            :
+                                                                                                                                          32'b0                   ;
+assign lw_data [31:0] = hit_local_mem_rd ? {    dmem[mem_rd_addr+3]          ,   dmem  [mem_rd_addr+2]       ,   dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]} :
+                        hit_vga_mem_rd   ? {    VGAMem[mem_rd_addr+3]        ,   VGAMem[mem_rd_addr+2]       ,   VGAMem[mem_rd_addr+1]        , VGAMem [mem_rd_addr+0]} :
+                        hit_33_mem_rd    ? {    dmem_33[mem_rd_addr[23:0]+3] ,   dmem_33[mem_rd_addr[23:0]+2],   dmem_33[mem_rd_addr[23:0]+1] , dmem_33[mem_rd_addr[23:0]+0]} :
+                        hit_who_am_i     ? 32'h0000022                                                                                                            :
+                                                                                                                                          32'b0                   ;
+assign lbu_data[31:0] = hit_local_mem_rd ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , dmem   [mem_rd_addr+0]} :
+                        hit_vga_mem_rd   ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , VGAMem [mem_rd_addr+0]} :
+                        hit_33_mem_rd    ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , dmem_33[mem_rd_addr[23:0]+0]} :
+                        hit_who_am_i     ? 32'h0000022                                                                    :
+                                                                                                  32'b0                   ;
+assign lhu_data[31:0] = hit_local_mem_rd ? { {8{1'b0}} ,{8{1'b0}} , dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]}       :  
+                        hit_vga_mem_rd   ? { {8{1'b0}} ,{8{1'b0}} , VGAMem[mem_rd_addr+1]        , VGAMem [mem_rd_addr+0]}       :
+                        hit_33_mem_rd    ? { {8{1'b0}} ,{8{1'b0}} , dmem_33[mem_rd_addr[23:0]+1] , dmem_33[mem_rd_addr[23:0]+0]} :
+                        hit_who_am_i     ? 32'h0000022                                                                           :
+                                                                                                    32'b0                        ;
+
 //=======================================================
 // This main logic of the reference model
 //=======================================================
@@ -142,6 +168,7 @@ always_comb begin
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
     next_dmem           = dmem;
+    next_dmem_33        = dmem_33;
     next_imem           = imem;
     NextVGAMem          = VGAMem;
     instr_type          = NULL;
@@ -217,27 +244,27 @@ always_comb begin
     //=======================================================
     32'b???????_?????_?????_000_?????_0000011: begin
         instr_type       = LB;
-        next_regfile[rd] = hit_vga_mem_rd ? vga_lb_data  : lb_data;
+        next_regfile[rd] = lb_data;
         reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_001_?????_0000011: begin
         instr_type       = LH;
-        next_regfile[rd] = hit_vga_mem_rd ? vga_lh_data  : lh_data;
+        next_regfile[rd] = lh_data;
         reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_010_?????_0000011: begin
         instr_type       = LW;
-        next_regfile[rd] = hit_vga_mem_rd ? vga_lw_data  : lw_data;
+        next_regfile[rd] = lw_data;
         reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_100_?????_0000011: begin
         instr_type       = LBU;
-        next_regfile[rd] = hit_vga_mem_rd ? vga_lbu_data : lbu_data;
+        next_regfile[rd] = lbu_data;
         reg_wr_en        = 1'b1;
     end
     32'b???????_?????_?????_101_?????_0000011: begin
         instr_type       = LHU;
-        next_regfile[rd] = hit_vga_mem_rd ? vga_lhu_data : lhu_data;
+        next_regfile[rd] = lhu_data;
         reg_wr_en        = 1'b1;
     end
     //=======================================================
@@ -245,26 +272,33 @@ always_comb begin
     //=======================================================
     32'b???????_?????_?????_000_?????_0100011: begin
         instr_type       = SB;
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+0]  = data_rd2[ 7: 0];//SB
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SB
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr+0]  = data_rd2[ 7: 0];//SB
     end
     32'b???????_?????_?????_001_?????_0100011: begin
         instr_type       = SH;
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SH
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+1] = data_rd2[15: 8];//SH
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SH
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+1] = data_rd2[15: 8];//SH
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+0]  = data_rd2[ 7: 0];//SH
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+1]  = data_rd2[15: 8];//SH
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SH
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+1] = data_rd2[15: 8];//SH
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr+0]  = data_rd2[ 7: 0];//SH
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr+1]  = data_rd2[15: 8];//SH
     end
     32'b???????_?????_?????_010_?????_0100011: begin
         instr_type       = SW;
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+0] = data_rd2[ 7: 0];//SW
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+1] = data_rd2[15: 8];//SW
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+2] = data_rd2[23:16];//SW
-            if(!hit_vga_mem_wr) next_dmem[mem_wr_addr+3] = data_rd2[31:24];//SW
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SW
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+1] = data_rd2[15: 8];//SW
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+2] = data_rd2[23:16];//SW
-            if(hit_vga_mem_wr) NextVGAMem[mem_wr_addr+3] = data_rd2[31:24];//SW
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+0]  = data_rd2[ 7: 0];//SW
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+1]  = data_rd2[15: 8];//SW
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+2]  = data_rd2[23:16];//SW
+            if(hit_local_mem_wr) next_dmem[mem_wr_addr+3]  = data_rd2[31:24];//SW
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+0] = data_rd2[ 7: 0];//SW
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+1] = data_rd2[15: 8];//SW
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+2] = data_rd2[23:16];//SW
+            if(hit_vga_mem_wr)   NextVGAMem[mem_wr_addr+3] = data_rd2[31:24];//SW
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr[23:0]+0]  = data_rd2[ 7: 0];//SW
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr[23:0]+1]  = data_rd2[15: 8];//SW
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr[23:0]+2]  = data_rd2[23:16];//SW
+            if(hit_33_mem_wr)    next_dmem_33[mem_wr_addr[23:0]+3]  = data_rd2[31:24];//SW
     end
     //=======================================================
     //ADDI/SLTI/SLTIU/XORI/ORI/ANDI/SLLI/SRLI/SRAI
