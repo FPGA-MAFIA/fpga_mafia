@@ -28,16 +28,20 @@ logic        DMemWrEnQ103H;       // To D_MEM
 logic        DMemRdEnQ103H;       // To D_MEM
 logic [31:0] DMemRdRspQ104H;      // From D_MEM
 
+logic DMemReady;
+logic ReadyQ101H;
 t_core2mem_req Core2DmemReqQ103H;
 
 mini_core mini_core (
    .Clock               ( Clock              ), // input  logic        Clock,
    .Rst                 ( Rst                ), // input  logic        Rst,
    // Instruction Memory
+   .ReadyQ101H          ( ReadyQ101H    ), // output logic        ReadyQ101H,          // To I_MEM
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
    .PreInstructionQ101H ( PreInstructionQ101H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM
    // Data Memory
-   .Core2DmemReqQ103H     ( Core2DmemReqQ103H  ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
+   .DMemReady      ( DMemReady     ), // input  logic        DMemReady  , // From D_MEM
+   .Core2DmemReqQ103H   ( Core2DmemReqQ103H  ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
    .DMemRdRspQ104H      ( DMemRdRspQ104H     )  // input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );
 
@@ -46,7 +50,6 @@ assign DMemAddressQ103H = Core2DmemReqQ103H.Address;
 assign DMemByteEnQ103H = Core2DmemReqQ103H.ByteEn;
 assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
 assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
-
 
 //---------------------------------------------------
 mini_mem_wrap mini_mem_wrap(
@@ -57,6 +60,7 @@ mini_mem_wrap mini_mem_wrap(
 // //      core interface
 // //============================================
 // i_mem
+ .ReadyQ101H            (ReadyQ101H), // input logic        ReadyQ101H,          // To I_MEM
  .PcQ100H               (PcQ100H),             //input  logic [31:0] PcQ100H,        //curr_pc    ,
  .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction,
 // d_mem
@@ -66,6 +70,7 @@ mini_mem_wrap mini_mem_wrap(
  .DMemWrEnQ103H         (DMemWrEnQ103H),       // input  logic        DMemWrEnQ103H,       // To D_MEM
  .DMemRdEnQ103H         (DMemRdEnQ103H),       // input  logic        DMemRdEnQ103H,       // To D_MEM
  .DMemRdRspQ104H        (DMemRdRspQ104H),      // output logic [31:0] DMemRdRspQ104H       // From D_MEM
+ .DMemReady        (DMemReady),      // output logic        DMemReady  , // From D_MEM
 //============================================
 //      fabric interface
 //============================================

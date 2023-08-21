@@ -27,11 +27,13 @@ import common_pkg::*;
     input  logic        Clock,
     input  logic        Rst,
     // Instruction Memory
+    output logic       ReadyQ101H,
     output logic [31:0] PcQ100H,             // To I_MEM
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
     // Data Memory
+    input  logic          DMemReady,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
-    input  logic [31:0] DMemRdRspQ104H       // From D_MEM
+    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM
 );
 
 // ---- Data-Path signals ----
@@ -90,9 +92,7 @@ t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
 t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
 t_opcode            OpcodeQ101H, OpcodeQ102H;
 logic ReadyQ100H;
-logic ReadyQ101H;
 t_mini_ctrl Ctrl;
-logic DMemReady;
 logic DMemRdRspValid;
 logic ReadyQ102H;
 logic ReadyQ103H;
@@ -149,14 +149,14 @@ mini_core_if mini_core_if (
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 mini_core_ctrl mini_core_ctrl (
-  .Rst                  (Rst                ), //input
-  .Clock                (Clock              ), //input
+  .Rst                  (Rst    ), //input
+  .Clock                (Clock  ), //input
   // input instruction 
   .PreInstructionQ101H  (PreInstructionQ101H), //input
+  .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
   // input feedback from data path
-  .BranchCondMetQ102H   (BranchCondMetQ102H ), //input
-  .DMemReady            (DMemReady          ), //input
-  .DMemRdRspValid       (DMemRdRspValid     ), //input
+  .BranchCondMetQ102H   (BranchCondMetQ102H), //input
+  .DMemReady            (DMemReady), //input
   // ready signals for "back-pressure" - use as the enable for the pipe stage sample
   .ReadyQ100H           (ReadyQ100H), //  output 
   .ReadyQ101H           (ReadyQ101H), //  output 
