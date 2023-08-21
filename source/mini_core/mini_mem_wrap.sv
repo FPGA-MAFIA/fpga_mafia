@@ -161,8 +161,7 @@ logic        FabricDataRspValidQ504H;
 // There are multiple reasons to unset the DMemReady - back pressure the core from accessing the memory
 // 1) A outstanding read request was set and the read response was not received yet
 // 2) The c2f_req_fifo is full
-assign DMemReady  =!(OutstandingReadReq) &&
-                        !C2F_ReqFull;
+assign DMemReady  =!(OutstandingReadReq) &&  !C2F_ReqFull;
 //==================================
 // This logic is a special case for the WhoAmI request
 // We are using a memory address of 0x00FFFFFF to detect the WhoAmI request and respond with the local tile id

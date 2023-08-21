@@ -9,4 +9,4 @@
 #define TILE_3_3_SCRATCH ((volatile int *) (0x3301F000))
 #define LOCAL_SCRATCH    ((volatile int *) (0x0001F000))
 
-#define WHO_AM_I ((volatile int *) (0x00FFFFFF))
+#define WHO_AM_I         ((volatile int *) (0x00FFFFFF))
