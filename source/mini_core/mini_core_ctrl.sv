@@ -85,7 +85,7 @@ assign LoadHzrdDetectQ101H       = Rst ? 1'b0 :
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
 assign flushQ102H = IndirectBranchQ102H;
-`MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , !(CoreFreeze))
+`MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 assign InstructionQ101H = flushQ102H          ? NOP :
                           flushQ103H          ? NOP :
                           LoadHzrdDetectQ101H ? NOP : 

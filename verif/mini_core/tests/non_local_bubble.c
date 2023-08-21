@@ -21,6 +21,8 @@ int array [10] = {4, 2, 3, 1, 5, 6, 7, 8, 9, 10};
 int size = 10;
 //write array to scratchpad
 int i;
+
+
 for (i = 0; i < size; i++) {
     TILE_3_3_SCRATCH[i] = array[i];
 }
