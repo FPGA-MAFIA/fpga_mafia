@@ -118,11 +118,10 @@ mem  #(
     );
 
 logic [31:0] LastInstructionFetchQ101H;
-logic        SampleDMemReady;
-`MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , DMemReady)
-`MAFIA_DFF   (SampleDMemReady,           DMemReady,        Clock )
-
-assign PreInstructionQ101H = SampleDMemReady ? InstructionQ101H : LastInstructionFetchQ101H;
+logic        SampleReadyQ101H;
+`MAFIA_DFF   (SampleReadyQ101H, ReadyQ101H      , Clock)
+`MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , SampleReadyQ101H)
+assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructionFetchQ101H;
 //assign PreInstructionQ101H = InstructionQ101H;
 
 //==================================
@@ -146,6 +145,7 @@ assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&
                                     (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
 
+logic FabricDataRspValidQ503H;
 assign FabricDataRspValidQ503H = (OutstandingReadReq) &&  (InFabricQ503H.opcode == RD_RSP) && InFabricValidQ503H ;
 assign RstOutstandingReadReqQ503H = FabricDataRspValidQ503H || Rst;
 `MAFIA_EN_RST_DFF(OutstandingReadReq,
