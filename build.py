@@ -20,6 +20,7 @@ python build.py -dut 'big_core' -tests 'alive' -app -hw -sim -fpga  -> running a
 python build.py -dut 'big_core' -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
 python build.py -dut 'router'  -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
 python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'fabric -top fabric_mini_cors_tb -app -hw -sim -> Using the -top argument to specify the tb top module name for simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
 parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
