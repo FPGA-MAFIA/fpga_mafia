@@ -15,19 +15,31 @@ class CommandLineBuilder(tk.Tk):
         # Variables for options
         self.dut_var = tk.StringVar(self)
         self.regress_var = tk.StringVar(self)
+        self.regress_enabled_var = tk.BooleanVar(self)
         self.tests_vars = {}  # Dictionary to store each test variable
         self.tests_enabled_var = tk.BooleanVar(self)
         self.app_var = tk.BooleanVar(self)
         self.hw_var = tk.BooleanVar(self)
-        self.regress_enabled_var = tk.BooleanVar(self)
+        self.sim_var = tk.BooleanVar(self)
+        self.full_run_var = tk.BooleanVar(self)
+        self.pp_var = tk.BooleanVar(self)
+        self.mif_var = tk.BooleanVar(self)
+        self.clean_var = tk.BooleanVar(self)
+        self.cmd_var = tk.BooleanVar(self)
 
         # Descriptions
         self.desc = {
-            "-dut": "Specify the Device Under Test.",
-            "-tests": "Specify the tests you'd like to run.",
-            "-app": "Specify if application mode.",
-            "-hw": "Specify if hardware mode.",
-            "-regress": "Specify the regression you'd like to run."
+            "-dut"      : "Specify the Device Under Test.",
+            "-tests"    : "Choose which tests you'd like to run.",
+            "-regress"  : "Specify the regression that has pre-determine test lists to run.",
+            "-app"      : "For CPU tests that needs to compile a C code to create the elf to load to DUT memory.",
+            "-hw"       : "HW Compile the DUT system verilog using vlog.exe - according to the .f file list.",
+            "-sim"      : "HW Elaborate the Compiled model + start running the TB (test-bench).",
+            "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
+            "-pp"       : "HW Post Processing - after simulation is done, run the post processing script ./verif/<dut>/<dut>_pp.py.",
+            "-mif"      : "create the mif memory files for the FPGA load",
+            "-clean"    : "Clean the build directory before building.",
+            "-cmd"      : "Without executing, display the commands that will be executed.",
         }
 
         # -dut drop-down
@@ -50,14 +62,18 @@ class CommandLineBuilder(tk.Tk):
         # -regress checkbox and dropdown
         self.create_combobox_option_with_checkbox("Regression", "-regress", self.get_regress_options)
 
-        # -app checkbox
+        # simple checkboxes
         self.add_checkbox_option("-app", self.app_var)
-
-        # -hw checkbox
         self.add_checkbox_option("-hw", self.hw_var)
+        self.add_checkbox_option("-sim", self.sim_var)
+        self.add_checkbox_option("-full_run", self.full_run_var)
+        self.add_checkbox_option("-pp", self.pp_var)
+        self.add_checkbox_option("-clean", self.clean_var)
+        self.add_checkbox_option("-mif", self.mif_var)
+        self.add_checkbox_option("-cmd", self.cmd_var)
 
         # Command display
-        self.cmd_display = tk.Text(self, height=2, width=50)
+        self.cmd_display = tk.Text(self, height=2, width=150)
         self.cmd_display.pack(padx=10, pady=10)
 
         # Initial setup
@@ -150,21 +166,49 @@ class CommandLineBuilder(tk.Tk):
         cmd += f" -dut {self.dut_var.get()}"
         
         # Collect checked tests
+        # Can't select regression & tests
         selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
         if selected_tests and self.regress_enabled_var.get():
             messagebox.showerror("Error", "Can't run regression & tests - choose one or the other")
+            # uncheck the regression checkbox
+            self.regress_enabled_var.set(False)
             return
+        # Can't select full_run & (app or hw or sim)
+        if self.full_run_var.get() and (self.app_var.get() or self.hw_var.get() or self.sim_var.get()):
+            messagebox.showerror("Error", "Can't run full_run & (app or hw or sim) - choose one or the other")
+            # uncheck the full_run checkbox
+            self.full_run_var.set(False)
+            return
+        # make sure that the file "./verif/<dut>/<dut>_pp.py." exists
+        if self.pp_var.get():
+            pp_path = f"verif/{self.dut_var.get()}/{self.dut_var.get()}_pp.py"
+            if not os.path.exists(pp_path):
+                messagebox.showerror("Error", f"Can't run pp - {pp_path} doesn't exist")
+                # uncheck the pp checkbox
+                self.pp_var.set(False)
+                return
 
         if selected_tests:
-            cmd += " -test " + " ".join(selected_tests)
+            cmd += " -test " + " '" + " ".join(selected_tests) + " '"
 
         if self.regress_enabled_var.get():
             cmd += f" -regress {self.regress_var.get()}"
-
         if self.app_var.get():
             cmd += " -app"
         if self.hw_var.get():
             cmd += " -hw"
+        if self.sim_var.get():
+            cmd += " -sim"
+        if self.pp_var.get():
+            cmd += " -pp"
+        if self.full_run_var.get():
+            cmd += " -full_run"
+        if self.clean_var.get():
+            cmd += " -clean"
+        if self.mif_var.get():
+            cmd += " -mif"
+        if self.cmd_var.get():
+            cmd += " -cmd"
 
         self.cmd_display.delete(1.0, tk.END)
         self.cmd_display.insert(tk.END, cmd)
