@@ -3,6 +3,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 class CommandLineBuilder(tk.Tk):
 
@@ -13,26 +14,28 @@ class CommandLineBuilder(tk.Tk):
 
         # Variables for options
         self.dut_var = tk.StringVar(self)
+        self.regress_var = tk.StringVar(self)
         self.tests_vars = {}  # Dictionary to store each test variable
         self.tests_enabled_var = tk.BooleanVar(self)
         self.app_var = tk.BooleanVar(self)
         self.hw_var = tk.BooleanVar(self)
+        self.regress_enabled_var = tk.BooleanVar(self)
 
         # Descriptions
         self.desc = {
             "-dut": "Specify the Device Under Test.",
             "-tests": "Specify the tests you'd like to run.",
             "-app": "Specify if application mode.",
-            "-hw": "Specify if hardware mode."
+            "-hw": "Specify if hardware mode.",
+            "-regress": "Specify the regression you'd like to run."
         }
 
         # -dut drop-down
-        self.add_combobox_option("DUT", "-dut", self.get_dut_options)
+        self.create_combobox_option("DUT", "-dut", self.get_dut_options)
 
         # -tests checkbox options
         self.tests_frame = ttk.LabelFrame(self, text="-tests Options")
         self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
-
 
         tests_check_frame = ttk.Frame(self)  # New frame to encapsulate both the checkbox and its description
         tests_check_frame.pack(anchor="w", padx=10, pady=5, fill="x")
@@ -44,6 +47,9 @@ class CommandLineBuilder(tk.Tk):
 
         self.update_test_checkboxes()
 
+        # -regress checkbox and dropdown
+        self.create_combobox_option_with_checkbox("Regression", "-regress", self.get_regress_options)
+
         # -app checkbox
         self.add_checkbox_option("-app", self.app_var)
 
@@ -54,11 +60,11 @@ class CommandLineBuilder(tk.Tk):
         self.cmd_display = tk.Text(self, height=2, width=50)
         self.cmd_display.pack(padx=10, pady=10)
 
-        # Now that everything is initialized, you can call the methods.
+        # Initial setup
         self.toggle_test_visibility()  # Hide test options by default
         self.update_command_display()
 
-    def add_combobox_option(self, label_text, flag, fetch_option):
+    def create_combobox_option(self, label_text, flag, fetch_option):
         frame = ttk.Frame(self)
         frame.pack(anchor="w", padx=10, pady=5)
 
@@ -69,6 +75,24 @@ class CommandLineBuilder(tk.Tk):
         dropdown = ttk.Combobox(frame, textvariable=dropdown_var, postcommand=lambda: self.update_dropdown_options(dropdown, fetch_option))
         dropdown.bind("<<ComboboxSelected>>", self.on_combobox_select)
         dropdown.pack(side="left", padx=10)
+
+        # Add description
+        ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
+
+    def create_combobox_option_with_checkbox(self, label_text, flag, fetch_option):
+        frame = ttk.Frame(self)
+        frame.pack(anchor="w", padx=10, pady=5)
+
+        check_var = getattr(self, f"{flag[1:]}_enabled_var")
+        check = ttk.Checkbutton(frame, text=flag, variable=check_var, command=self.update_command_display)
+        check.pack(side="left", anchor="w")
+        
+        dropdown_var = getattr(self, f"{flag[1:]}_var")
+        dropdown = ttk.Combobox(frame, textvariable=dropdown_var, postcommand=lambda: self.update_dropdown_options(dropdown, fetch_option), state=tk.DISABLED)
+        dropdown.bind("<<ComboboxSelected>>", self.on_combobox_select)
+        dropdown.pack(side="left", padx=10)
+        
+        check_var.trace_add('write', lambda *args: dropdown.configure(state=tk.NORMAL if check_var.get() else tk.DISABLED))
 
         # Add description
         ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
@@ -108,6 +132,13 @@ class CommandLineBuilder(tk.Tk):
         else:
             return []
 
+    def get_regress_options(self):
+        regress_path = f"verif/{self.dut_var.get()}/regress"
+        if os.path.exists(regress_path):
+            return os.listdir(regress_path)
+        else:
+            return []
+
     def on_combobox_select(self, event):
         if event.widget.cget("textvariable") == str(self.dut_var):
             self.update_test_checkboxes()
@@ -120,9 +151,16 @@ class CommandLineBuilder(tk.Tk):
         
         # Collect checked tests
         selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
+        if selected_tests and self.regress_enabled_var.get():
+            messagebox.showerror("Error", "Can't run regression & tests - choose one or the other")
+            return
+
         if selected_tests:
             cmd += " -test " + " ".join(selected_tests)
-        
+
+        if self.regress_enabled_var.get():
+            cmd += f" -regress {self.regress_var.get()}"
+
         if self.app_var.get():
             cmd += " -app"
         if self.hw_var.get():
@@ -134,10 +172,7 @@ class CommandLineBuilder(tk.Tk):
     def toggle_test_visibility(self):
         if self.tests_enabled_var.get():
             self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
-            self.update_test_checkboxes()
         else:
-            for test, var in self.tests_vars.items():
-                var.set(False)  # Resetting all the test check boxes
             self.tests_frame.pack_forget()
         self.update_command_display()
 
