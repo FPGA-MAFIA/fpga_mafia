@@ -45,6 +45,7 @@ class CommandLineBuilder(tk.Tk):
         # -dut drop-down
         self.create_combobox_option("DUT", "-dut", self.get_dut_options)
 
+
         # -tests checkbox options
         self.tests_frame = ttk.LabelFrame(self, text="-tests Options")
         self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
