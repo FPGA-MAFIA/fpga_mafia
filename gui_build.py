@@ -324,12 +324,6 @@ class CommandLineBuilder(tk.Tk):
             self.thread.join(timeout=1.0)  # Give it a second to finish
         self.destroy()
 
-    #def execute_command(self):
-    #    cmd = self.cmd_display.get(1.0, tk.END).strip()  # Get the command from the Text widget
-    #    self.output_queue = queue.Queue()  # Initialize a queue for output data
-    #    self.thread = threading.Thread(target=self.run_command_in_thread, args=(cmd,))
-    #    self.thread.start()
-    #    self.after(100, self.check_for_output)  # Schedule a check for new output in 100ms
     def execute_command(self):
         cmd = self.cmd_display.get(1.0, tk.END).strip()  # Get the command from the Text widget
 
