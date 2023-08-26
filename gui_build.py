@@ -34,6 +34,8 @@ class CommandLineBuilder(tk.Tk):
         self.full_run_var = tk.BooleanVar(self)
         self.pp_var = tk.BooleanVar(self)
         self.mif_var = tk.BooleanVar(self)
+        self.fpga_var = tk.BooleanVar(self)
+        self.keep_going_var = tk.BooleanVar(self)
         self.clean_var = tk.BooleanVar(self)
         self.cmd_var = tk.BooleanVar(self)
 
@@ -48,6 +50,8 @@ class CommandLineBuilder(tk.Tk):
             "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
             "-pp"       : "HW Post Processing - after simulation is done, run the post processing script ./verif/<dut>/<dut>_pp.py.",
             "-mif"      : "create the mif memory files for the FPGA load",
+            "-keep_going": "Keep going even if there are errors in one of the tests",
+            "-fpga"     : "Run Compile & Synthesis for FPGA",
             "-clean"    : "Clean the build directory before building.",
             "-cmd"      : "Without executing, display the commands that will be executed.",
         }
@@ -81,6 +85,8 @@ class CommandLineBuilder(tk.Tk):
         self.add_checkbox_option("-pp", self.pp_var)
         self.add_checkbox_option("-clean", self.clean_var)
         self.add_checkbox_option("-mif", self.mif_var)
+        self.add_checkbox_option("-fpga", self.fpga_var)
+        self.add_checkbox_option("-keep_going", self.keep_going_var)
         self.add_checkbox_option("-cmd", self.cmd_var)
 
         # Command display
@@ -206,7 +212,6 @@ class CommandLineBuilder(tk.Tk):
 
         if selected_tests:
             cmd += " -tests " + "\"" + " ".join(selected_tests) + "\""
-
         if self.regress_enabled_var.get():
             cmd += f" -regress {self.regress_var.get()}"
         if self.app_var.get():
@@ -223,6 +228,10 @@ class CommandLineBuilder(tk.Tk):
             cmd += " -clean"
         if self.mif_var.get():
             cmd += " -mif"
+        if self.fpga_var.get():
+            cmd += " -fpga"
+        if self.keep_going_var.get():
+            cmd += " -keep_going"
         if self.cmd_var.get():
             cmd += " -cmd"
 
@@ -239,6 +248,10 @@ class CommandLineBuilder(tk.Tk):
                 test_var.set(False)
         self.update_command_display()
 
+#============================================================
+# Running the command from the GUI on a separate thread, 
+# and displaying the output in a separate window
+#============================================================
 
     def run_command_in_thread(self, cmd):
         try:
@@ -265,7 +278,6 @@ class CommandLineBuilder(tk.Tk):
         except queue.Empty:  # Raised when the queue is empty
             pass
         self.after_id = self.after(100, self.check_for_output)  # Schedule another check in 100ms
-
 
     @staticmethod
     def widget_exists(widget):
