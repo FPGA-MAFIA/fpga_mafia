@@ -1,14 +1,24 @@
 #! /usr/bin/env python
-
 import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+import subprocess
+import threading
+import queue
+
+
+
+
+
 
 class CommandLineBuilder(tk.Tk):
 
     def __init__(self):
         super().__init__()
+        self.protocol("WM_DELETE_WINDOW", self.close_app)
+
+
 
         self.title("Command Line Builder")
 
@@ -45,6 +55,7 @@ class CommandLineBuilder(tk.Tk):
         # -dut drop-down
         self.create_combobox_option("DUT", "-dut", self.get_dut_options)
 
+
         # -tests checkbox options
         self.tests_frame = ttk.LabelFrame(self, text="-tests Options")
         self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
@@ -75,6 +86,10 @@ class CommandLineBuilder(tk.Tk):
         # Command display
         self.cmd_display = tk.Text(self, height=2, width=150)
         self.cmd_display.pack(padx=10, pady=10)
+
+        # Create the Execute button
+        self.execute_btn = ttk.Button(self, text="Run Command", command=self.execute_command)
+        self.execute_btn.pack(pady=10)
 
         # Initial setup
         self.toggle_test_visibility()  # Hide test options by default
@@ -167,7 +182,8 @@ class CommandLineBuilder(tk.Tk):
         
         # Collect checked tests
         # Can't select regression & tests
-        selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
+        #selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
+        selected_tests = [test.rsplit('.', 1)[0] for test, var in self.tests_vars.items() if var.get()]
         if selected_tests and self.regress_enabled_var.get():
             messagebox.showerror("Error", "Can't run regression & tests - choose one or the other")
             # uncheck the regression checkbox
@@ -189,7 +205,7 @@ class CommandLineBuilder(tk.Tk):
                 return
 
         if selected_tests:
-            cmd += " -test " + " '" + " ".join(selected_tests) + " '"
+            cmd += " -tests " + "\"" + " ".join(selected_tests) + "\""
 
         if self.regress_enabled_var.get():
             cmd += f" -regress {self.regress_var.get()}"
@@ -218,7 +234,114 @@ class CommandLineBuilder(tk.Tk):
             self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
         else:
             self.tests_frame.pack_forget()
+            # Add the following lines to unset all test variables:
+            for test_var in self.tests_vars.values():
+                test_var.set(False)
         self.update_command_display()
+
+
+    def run_command_in_thread(self, cmd):
+        try:
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            while True:
+                line = proc.stdout.readline()  # Read a line from the output
+                if line:
+                    self.output_queue.put(line)  # Put the line in the queue for the main thread to process
+                if proc.poll() is not None:  # Check if the process has terminated
+                    break
+        except Exception as e:
+            self.output_queue.put(f"[ERROR] : Command failed with error:\n{str(e)}")
+        finally:
+            self.output_queue.put(None)  # Sentinel value to indicate the command has finished executing
+
+    def check_for_output(self):
+        try:
+            while True:  # Keep checking for all lines currently in the queue
+                line = self.output_queue.get_nowait()  # Non-blocking get from the queue
+                if line is None:  # Sentinel value indicating command finished
+                    break  # Exit the loop
+                else:
+                    self.show_output(line)  # Update the display with the new line
+        except queue.Empty:  # Raised when the queue is empty
+            pass
+        self.after_id = self.after(100, self.check_for_output)  # Schedule another check in 100ms
+
+
+    @staticmethod
+    def widget_exists(widget):
+        try:
+            widget.winfo_exists()
+            return True
+        except tk.TclError:
+            return False
+
+    def show_output(self, line):
+        # Check if the output window is already created, if not, create it
+        if not hasattr(self, "txt_output"):
+            output_window = tk.Toplevel(self.master)  # Create a new window
+            output_window.title("Command Output")
+            output_window.geometry("1000x400")  # Adjust size as necessary
+
+            # Bind the window's close event
+            output_window.protocol("WM_DELETE_WINDOW", self.on_close)
+
+            # Text widget to display output
+            self.txt_output = tk.Text(output_window, wrap=tk.WORD)
+            self.txt_output.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            # Scrollbar for the Text widget
+            scrollbar = tk.Scrollbar(output_window, command=self.txt_output.yview)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            self.txt_output.config(yscrollcommand=scrollbar.set)
+
+            # Define a tag for the word "ERROR" with a red background
+            self.txt_output.tag_configure("error", background="red")
+            close_button = tk.Button(output_window, text="Close", command=self.on_close)
+            close_button.pack(pady=10)
+
+        # Check widget existence before appending the new line to the output display
+        if CommandLineBuilder.widget_exists(self.txt_output):
+            if "[ERROR]" in line:
+                self.txt_output.insert(tk.END, line, "error")
+            else:
+                self.txt_output.insert(tk.END, line)
+
+    def on_close(self):
+        # Assuming check_for_output uses after method
+        if hasattr(self, "after_id"):  # Check if after_id attribute exists
+            self.after_cancel(self.after_id)  # Cancel any scheduled callbacks
+
+        if hasattr(self, "txt_output"):
+            # Destroy the Toplevel window containing the Text widget
+            self.txt_output.master.destroy()
+            del self.txt_output  # Remove the reference to the destroyed widget
+
+    def close_app(self):
+        # Add any required cleanup code here
+        if hasattr(self, 'thread') and self.thread.is_alive():
+            # Terminate the thread if it's running (this might be unsafe if your thread is doing crucial operations)
+            # You might need more graceful handling depending on the operations your thread is performing.
+            self.thread.join(timeout=1.0)  # Give it a second to finish
+        self.destroy()
+
+    #def execute_command(self):
+    #    cmd = self.cmd_display.get(1.0, tk.END).strip()  # Get the command from the Text widget
+    #    self.output_queue = queue.Queue()  # Initialize a queue for output data
+    #    self.thread = threading.Thread(target=self.run_command_in_thread, args=(cmd,))
+    #    self.thread.start()
+    #    self.after(100, self.check_for_output)  # Schedule a check for new output in 100ms
+    def execute_command(self):
+        cmd = self.cmd_display.get(1.0, tk.END).strip()  # Get the command from the Text widget
+
+        # Create an empty output window immediately:
+        self.show_output("Running command...\n")
+
+        self.output_queue = queue.Queue()  # Initialize a queue for output data
+        self.thread = threading.Thread(target=self.run_command_in_thread, args=(cmd,))
+        self.thread.start()
+        self.after(50, self.check_for_output)  # Reduce the delay to 50ms
+
+
 
 if __name__ == "__main__":
     app = CommandLineBuilder()
