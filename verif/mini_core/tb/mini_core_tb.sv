@@ -103,11 +103,12 @@ initial begin: test_seq
 
 end // test_seq
 
+parameter V_TIMEOUT = 100000;
 initial begin: detect_timeout
     //=======================================
     // timeout
     //=======================================
-    #100000 
+    #V_TIMEOUT 
     $error("test ended with timeout");
     $display("ERROR: No data integrity running - try to increase the timeout value");
     $finish;
