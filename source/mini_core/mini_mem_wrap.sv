@@ -141,6 +141,7 @@ assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
 logic OutstandingReadReq;
 logic SetOutstandingReadReqQ103H;
 logic RstOutstandingReadReqQ503H;
+// Set the OutstandingReadReq indication when there is a non local read request (MSB is not the local tile id or 0)
 assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&
                                     (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
