@@ -2,3 +2,5 @@ alive.c
 bubblesort.c
 gcd.c
 stress.c
+non_local_bubble.c
+non_local_rd_wr.c

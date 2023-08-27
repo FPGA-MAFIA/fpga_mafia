@@ -26,6 +26,7 @@ import common_pkg::*;
                 //============================================
                 //     i_mem
                 //============================================
+                input  logic        ReadyQ101H,
                 input  logic [31:0] PcQ100H,             //cur_pc    ,
                 output logic [31:0] PreInstructionQ101H, //instruction,
                 //============================================
@@ -37,6 +38,7 @@ import common_pkg::*;
                 input  logic        DMemWrEnQ103H   , // To D_MEM
                 input  logic        DMemRdEnQ103H   , // To D_MEM
                 output logic [31:0] DMemRdRspQ104H  , // From D_MEM
+                output logic        DMemReady  , // From D_MEM
                 //============================================
                 //      fabric interface
                 //============================================
@@ -86,11 +88,12 @@ assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ5
 // Set the F2C DMEM hit indications
 assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] > D_MEM_REGION_FLOOR_MINI) && 
                            (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] < D_MEM_REGION_ROOF_MINI) ;
-assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
+assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && ((InFabricQ503H.opcode == WR));
 // Set the F2C CrMEM hit indications
 assign F2C_CrMemHitQ503H  = 1'b0; //FIXME - Add CR_MEM offset hit indication
 assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
 
+logic [31:0] InstructionQ101H; //instruction,
 //==================================
 // Instruction Memory
 //==================================
@@ -105,7 +108,7 @@ mem  #(
     .data_a     ('0),
     .wren_a     (1'b0),
     .byteena_a  (4'b0),
-    .q_a        (PreInstructionQ101H),
+    .q_a        (InstructionQ101H),
     //fabric interface
     .address_b  (InFabricQ503H.address[I_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
     .data_b     (InFabricQ503H.data),              
@@ -113,6 +116,13 @@ mem  #(
     .byteena_b  (4'b1111), // NOTE no need to support byte enable for instruction memory
     .q_b        (F2C_IMemRspDataQ504H)              
     );
+
+logic [31:0] LastInstructionFetchQ101H;
+logic        SampleReadyQ101H;
+`MAFIA_DFF   (SampleReadyQ101H, ReadyQ101H      , Clock)
+`MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , SampleReadyQ101H)
+assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructionFetchQ101H;
+//assign PreInstructionQ101H = InstructionQ101H;
 
 //==================================
 // DATA Memory
@@ -128,8 +138,39 @@ assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) &&
 // FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
+logic OutstandingReadReq;
+logic SetOutstandingReadReqQ103H;
+logic RstOutstandingReadReqQ503H;
+// Set the OutstandingReadReq indication when there is a non local read request (MSB is not the local tile id or 0)
+assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&
+                                    (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
 
+logic FabricDataRspValidQ503H;
+assign FabricDataRspValidQ503H = (OutstandingReadReq) &&  (InFabricQ503H.opcode == RD_RSP) && InFabricValidQ503H ;
+assign RstOutstandingReadReqQ503H = FabricDataRspValidQ503H || Rst;
+`MAFIA_EN_RST_DFF(OutstandingReadReq,
+                  1'b1                      ,
+                  Clock                     ,
+                  SetOutstandingReadReqQ103H, //Set (Enable bit)
+                  RstOutstandingReadReqQ503H) //Reset 
+
+logic [31:0] FabricDataRspQ504H;
+logic        FabricDataRspValidQ504H;
+`MAFIA_DFF(FabricDataRspQ504H      , InFabricQ503H.data      , Clock)
+`MAFIA_DFF(FabricDataRspValidQ504H , FabricDataRspValidQ503H , Clock)
+// There are multiple reasons to unset the DMemReady - back pressure the core from accessing the memory
+// 1) A outstanding read request was set and the read response was not received yet
+// 2) The c2f_req_fifo is full
+assign DMemReady  =!(OutstandingReadReq) &&  !C2F_ReqFull;
+//==================================
+// This logic is a special case for the WhoAmI request
+// We are using a memory address of 0x00FFFFFF to detect the WhoAmI request and respond with the local tile id
+//==================================
+logic WhoAmIReqQ103H;
+logic WhoAmIReqQ104H;
+assign WhoAmIReqQ103H = (DMemAddressQ103H[31:24] == 8'b0) && (DMemAddressQ103H[23:0] == 24'hFFFFFF) && DMemRdEnQ103H;
+`MAFIA_DFF(WhoAmIReqQ104H , WhoAmIReqQ103H , Clock)
 // Support the byte enable for the data memory by shifting the data to the correct position
 // Half & Byte Write
 logic [31:0] ShiftDMemWrDataQ103H;
@@ -150,7 +191,9 @@ end
 
 `MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
 // Half & Byte READ
-assign DMemRdRspQ104H = (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
+assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
+                        (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
+                        (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
                                                                   PreShiftDMemRdDataQ104H         ; 
@@ -242,7 +285,7 @@ assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
 assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
 assign C2F_ReqQ103H.requestor_id = local_tile_id;
 assign C2F_ReqQ103H.next_tile_fifo_arb_id = NULL_CARDINAL;
-assign C2F_ReqValidQ103H         = NonLocalDMemReqQ103H;
+assign C2F_ReqValidQ103H         = NonLocalDMemReqQ103H && (!OutstandingReadReq);
 
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 c2f_req_fifo  (.clk       (Clock),
@@ -280,5 +323,5 @@ assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
                               C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
                                                         '0;                 
                                                         
-assign mini_core_ready = (!F2C_AlmostFull) && (!C2F_ReqFull); // !(F2C_RspFull || C2F_ReqFull)
+assign mini_core_ready = (!F2C_AlmostFull); // add back pressure to the fabric
 endmodule

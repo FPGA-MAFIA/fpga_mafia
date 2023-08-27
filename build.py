@@ -20,23 +20,24 @@ python build.py -dut 'big_core' -tests 'alive' -app -hw -sim -fpga  -> running a
 python build.py -dut 'big_core' -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
 python build.py -dut 'router'  -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
 python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'fabric -top fabric_mini_cors_tb -app -hw -sim -> Using the -top argument to specify the tb top module name for simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
-parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
+parser.add_argument('-dut',       default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-tests',     default='',             help='list of the tests for run the script on')
-parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
-parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
+parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-app',       action='store_true',    help='compile the RISCV SW into SV executables')
 parser.add_argument('-hw',        action='store_true',    help='compile the RISCV HW into simulation')
 parser.add_argument('-sim',       action='store_true',    help='start simulation')
+parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
 parser.add_argument('-full_run',  action='store_true',    help='compile SW, HW of the test and simulate it')
-parser.add_argument('-dut',       default='big_core',     help='insert your project name (as mentioned in the dirs name')
-parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
-parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
-parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
-parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
-parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
+parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
+parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
+parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
+parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
+parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
+parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
 parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
 parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
 parser.add_argument('-top',       default=None,           help='insert your top module name for simulation (default is the <dut>+_tb name)')
