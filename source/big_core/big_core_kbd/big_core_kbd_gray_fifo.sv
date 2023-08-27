@@ -6,14 +6,15 @@ import common_pkg::*;
     input  logic       core_clk_read,
     // input  logic       Rst,
     input  logic       write_en,
-    input  logic       read_en,
     input  logic [7:0] data_in,
-    output logic       full,
-    output logic       empty,
+    // core clock domain
+    input  logic       read_en,
+    output logic       data_valid,
     output logic [7:0] data_out
 );
 localparam int DEPTH = 4;
 localparam int ADDR_BITS = $clog2(DEPTH);
+logic full, empty;
 
 logic [7:0] mem[0:DEPTH-1];
 logic [ADDR_BITS-1:0] gray_write_addr;

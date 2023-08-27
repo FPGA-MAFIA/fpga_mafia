@@ -144,17 +144,24 @@ initial begin : naive_data_gen
 
     $finish;
 end
+logic core_read_en;
+logic data_ready;
+logic scanf_en;
 big_core_kdb_controller big_core_kdb_controller 
 (
  .kbd_clk         (kbd_clk      ), //   input  logic       kbd_clk,
+ .data_in_kc      (data_in      ), //   input  logic       data_in,
+ //
  .core_clk        (core_clk     ), //   input  logic       core_clk,
  .core_rst        (Rst          ), //   input  logic       Rst, 
- .data_in         (data_in      ), //   input  logic       data_in,
  .core_read_en    (core_read_en ), //   input  logic       data_in,
  .data_out        (data_out     ), //   output logic [7:0] data_out, 
  .valid           (valid        ), //   output logic       valid, 
  .extension       (extension    ), //   output logic       extension,
- .error           (error        )  //   output logic       error
+ .error           (error        ), //   output logic       error
+ //
+ .data_ready      (data_ready), //   output logic       data_ready,
+ .scanf_en        (scanf_en  )  //   input  logic       scanf_en   
 );
 
 

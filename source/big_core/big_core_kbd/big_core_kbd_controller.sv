@@ -18,6 +18,13 @@ import common_pkg::*;
     input  logic       scanf_en   
 );
 
+
+
+
+logic test;
+`MAFIA_METAFLOP(test, scanf_en, kbd_clk)
+
+
 logic        async_rst_core_sw;
 logic        async_rst_core_hw;
 
@@ -54,6 +61,8 @@ assign next_word_count_kc = (word_count_kc == 4'd10) ? 4'd0 : word_count_kc + 4'
 assign release_data_kc = shift_regs_kc[20:13];
 assign release_flag_kc = (release_data_kc == 8'hFE);
 
+logic core_rstWordCount;
+logic valid_kc;
 `MAFIA_RST_DFF(valid_kc, release_flag_kc, word_flag_kc, core_rstWordCount)
 
 logic [1:0] struct_data_0, struct_data_1, struct_data_2;
