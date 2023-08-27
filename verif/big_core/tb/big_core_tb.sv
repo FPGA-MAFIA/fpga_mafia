@@ -115,6 +115,13 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
+    // Check that inst_mem.sv exists
+    file = $fopen({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    if (!file) begin
+        $display("File was not open successfully : %0d", file);
+        $error("File ../../../target/big_core/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
+        $finish;
+    end
     $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;
