@@ -8,10 +8,6 @@ import threading
 import queue
 
 
-
-
-
-
 class CommandLineBuilder(tk.Tk):
 
     def __init__(self):
@@ -209,6 +205,13 @@ class CommandLineBuilder(tk.Tk):
                 # uncheck the pp checkbox
                 self.pp_var.set(False)
                 return
+        
+        # Can't run FPGA & regression - FPGA can only be run with 1 test
+        if self.fpga_var.get() and self.regress_enabled_var.get():
+            messagebox.showerror("Error", "Can't run FPGA & regression - FPGA can only be run with 1 test")
+            # uncheck the fpga checkbox
+            self.fpga_var.set(False)
+            return
 
         if selected_tests:
             cmd += " -tests " + "\"" + " ".join(selected_tests) + "\""

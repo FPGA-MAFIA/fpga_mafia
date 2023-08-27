@@ -68,6 +68,13 @@ initial begin: test_seq
     //======================================
     //load the program to the DUT & reference model
     //======================================
+    // Make sure inst_mem.sv exists
+    file = $fopen({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    if (!file) begin
+        $error("the file: ../../../target/mini_core/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
+        $display("ERROR: inst_mem.sv file does not exist");
+        $finish;
+    end
     $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
@@ -100,7 +107,7 @@ initial begin: detect_timeout
     //=======================================
     // timeout
     //=======================================
-    #1000000 
+    #100000 
     $error("test ended with timeout");
     $display("ERROR: No data integrity running - try to increase the timeout value");
     $finish;
