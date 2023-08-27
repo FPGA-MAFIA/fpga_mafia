@@ -48,10 +48,11 @@
             else if (en)  q <= i;                      \
          end
 
-`define MAFIA_METAFLOP(q2,i,clk) \
-        logic q1;                \
-        `MAFIA_DFF(q1, i,clk)    \
-        `MAFIA_DFF(q2,q1,clk)
+`define MAFIA_METAFLOP(out,i,clk)     \
+   logic next``out;                   \
+        `MAFIA_DFF(next``out, i,clk)  \
+        `MAFIA_DFF(out,next``out,clk)
+
 
 
 `define MAFIA_MUXOR(winner, candidates, select)     \
