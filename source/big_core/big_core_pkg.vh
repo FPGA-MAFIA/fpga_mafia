@@ -225,6 +225,12 @@ typedef struct packed {
     logic       VGA_HS;
 } t_vga_out;
 
+typedef struct packed {
+    logic       start;
+    logic [7:0] data;
+    logic       odd_parity;
+    logic       stop;
+} t_kbd_word;
 
 // CR Address Offsets
 parameter CR_SEG7_0      = CR_MEM_OFFSET + 'h0  ; // RW 8 bit
