@@ -113,40 +113,73 @@ initial begin : naive_clk_gen
     #5   kbd_clk = 1'b0;//605
     #5   kbd_clk = 1'b1;//610
     #90  kbd_clk = 1'b1;//700
-
+    // Clock for any word
+    #5   kbd_clk = 1'b0;//705
+    #5   kbd_clk = 1'b1;//710
+    #5   kbd_clk = 1'b0;//715
+    #5   kbd_clk = 1'b1;//720
+    #5   kbd_clk = 1'b0;//725
+    #5   kbd_clk = 1'b1;//730
+    #5   kbd_clk = 1'b0;//735
+    #5   kbd_clk = 1'b1;//740
+    #5   kbd_clk = 1'b0;//745
+    #5   kbd_clk = 1'b1;//750
+    #5   kbd_clk = 1'b0;//755
+    #5   kbd_clk = 1'b1;//760
+    #5   kbd_clk = 1'b0;//765
+    #5   kbd_clk = 1'b1;//770
+    #5   kbd_clk = 1'b0;//775
+    #5   kbd_clk = 1'b1;//780
+    #5   kbd_clk = 1'b0;//785
+    #5   kbd_clk = 1'b1;//790
+    #5   kbd_clk = 1'b0;//795
+    #5   kbd_clk = 1'b1;//800
+    #5   kbd_clk = 1'b0;//805
+    #5   kbd_clk = 1'b1;//810
+    #90                ;//900
 end
 
 initial begin : naive_data_gen
     data_in = 1'b1;//0
     // "W" Key Code press
-    #102 data_in = 1'b0;//102
-    #10  data_in = 1'b1;//112
-    #10  data_in = 1'b0;//122
-    #10  data_in = 1'b1;//132
-    #30  data_in = 1'b0;//162
-    #30  data_in = 1'b1;//192
-    #108                ;//300
+    #200               ;
+    #102 data_in = 1'b0;//302
+    #10  data_in = 1'b1;//312
+    #10  data_in = 1'b0;//322
+    #10  data_in = 1'b1;//332
+    #30  data_in = 1'b0;//362
+    #30  data_in = 1'b1;//392
+    #108               ;//500
     // "Release" Key Code press
-    #2   data_in = 1'b0;//302 - START bit
-    #10  data_in = 1'b1;//312 - Data  bits
-    #70  data_in = 1'b0;//382 - Odd   bit
-    #10  data_in = 1'b0;//392 - Odd   bit
-    #10  data_in = 1'b1;//402 - STOP  bit
-    #98                ;//500
+    #2   data_in = 1'b0;//502 - START bit
+    #10  data_in = 1'b1;//512 - Data  bits
+    #70  data_in = 1'b0;//582 - Odd   bit
+    #10  data_in = 1'b0;//592 - Odd   bit
+    #10  data_in = 1'b1;//602 - STOP  bit
+    #98                ;//700
     // "W" Key Code press again
-    #2   data_in = 1'b0;//502
-    #10  data_in = 1'b1;//512
-    #10  data_in = 1'b0;//522
-    #10  data_in = 1'b1;//532
-    #30  data_in = 1'b0;//562
-    #30  data_in = 1'b1;//592
-    #108               ;//700
+    #2   data_in = 1'b0;//702
+    #10  data_in = 1'b1;//712
+    #10  data_in = 1'b0;//722
+    #10  data_in = 1'b1;//732
+    #30  data_in = 1'b0;//762
+    #30  data_in = 1'b1;//792
+    #108               ;//900
 
     $finish;
 end
+
+logic scanf_en;
 logic core_read_en;
 logic data_ready;
-logic scanf_en;
+initial begin
+    #120                ;
+
+    scanf_en = 1'b0     ;
+    #40 scanf_en = 1'b1 ;
+    #700                ;
+    core_read_en = 1'b1 ;
+end
 big_core_kdb_controller big_core_kdb_controller 
 (
  .kbd_clk         (kbd_clk      ), //   input  logic       kbd_clk,
