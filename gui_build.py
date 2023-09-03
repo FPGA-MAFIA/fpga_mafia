@@ -22,12 +22,17 @@ class CommandLineBuilder(tk.Tk):
         self.dut_var = tk.StringVar(self)
         self.regress_var = tk.StringVar(self)
         self.regress_enabled_var = tk.BooleanVar(self)
+        self.top_var = tk.StringVar(self)
+        self.top_enabled_var = tk.BooleanVar(self)
         self.tests_vars = {}  # Dictionary to store each test variable
         self.tests_enabled_var = tk.BooleanVar(self)
         self.app_var = tk.BooleanVar(self)
         self.hw_var = tk.BooleanVar(self)
         self.sim_var = tk.BooleanVar(self)
         self.full_run_var = tk.BooleanVar(self)
+        self.params_var = tk.StringVar(self)
+        self.params_enabled_var = tk.BooleanVar(self)
+        self.params_var.trace_add("write", self.update_command_display_on_trace)
         self.pp_var = tk.BooleanVar(self)
         self.mif_var = tk.BooleanVar(self)
         self.fpga_var = tk.BooleanVar(self)
@@ -40,10 +45,12 @@ class CommandLineBuilder(tk.Tk):
             "-dut"      : "Specify the Device Under Test.",
             "-tests"    : "Choose which tests you'd like to run.",
             "-regress"  : "Specify the regression that has pre-determine test lists to run.",
+            "-top"      : "Specify the top module to elaboration & simulate the tb of the DUT.",
             "-app"      : "For CPU tests that needs to compile a C code to create the elf to load to DUT memory.",
             "-hw"       : "HW Compile the DUT system verilog using vlog.exe - according to the .f file list.",
             "-sim"      : "HW Elaborate the Compiled model + start running the TB (test-bench).",
             "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
+            "-params"   : "Specify the parameters for the DUT  Example: -gV_TIMEOUT=1000 -gV_NUM_REQ=20.",
             "-pp"       : "HW Post Processing - after simulation is done, run the post processing script ./verif/<dut>/<dut>_pp.py.",
             "-mif"      : "create the mif memory files for the FPGA load",
             "-keep_going": "Keep going even if there are errors in one of the tests",
@@ -72,6 +79,13 @@ class CommandLineBuilder(tk.Tk):
 
         # -regress checkbox and dropdown
         self.create_combobox_option_with_checkbox("Regression", "-regress", self.get_regress_options)
+
+        # -top checkbox and dropdown
+        self.create_combobox_option_with_checkbox("Top", "-top", self.get_top_options)
+
+        # -params checkbox and entry
+        self.create_textbox_option_with_checkbox("Parameters", "-params", self.params_var)
+
 
         # simple checkboxes
         self.add_checkbox_option("-app", self.app_var)
@@ -108,6 +122,23 @@ class CommandLineBuilder(tk.Tk):
         dropdown = ttk.Combobox(frame, textvariable=dropdown_var, postcommand=lambda: self.update_dropdown_options(dropdown, fetch_option))
         dropdown.bind("<<ComboboxSelected>>", self.on_combobox_select)
         dropdown.pack(side="left", padx=10)
+
+        # Add description
+        ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
+
+    def create_textbox_option_with_checkbox(self, label_text, flag, fetch_option):
+        frame = ttk.Frame(self)
+        frame.pack(anchor="w", padx=10, pady=5)
+
+        check_var = getattr(self, f"{flag[1:]}_enabled_var")
+        check = ttk.Checkbutton(frame, text=flag, variable=check_var, command=self.update_command_display)
+        check.pack(side="left", anchor="w")
+        
+        textbox_var = getattr(self, f"{flag[1:]}_var")
+        textbox = ttk.Entry(frame, textvariable=textbox_var, state=tk.DISABLED)
+        textbox.pack(side="left", padx=10)
+        
+        check_var.trace_add('write', lambda *args: textbox.configure(state=tk.NORMAL if check_var.get() else tk.DISABLED))
 
         # Add description
         ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
@@ -172,9 +203,21 @@ class CommandLineBuilder(tk.Tk):
         else:
             return []
 
+    def get_top_options(self):
+        top_path = f"verif/{self.dut_var.get()}/tb/"
+        if os.path.exists(top_path):
+            # return only the files that end with _tb.sv
+            return [f for f in os.listdir(top_path) if f.endswith("_tb.sv")]
+        else:
+            return []
+
     def on_combobox_select(self, event):
         if event.widget.cget("textvariable") == str(self.dut_var):
             self.update_test_checkboxes()
+        self.update_command_display()
+
+
+    def update_command_display_on_trace(self, *args):
         self.update_command_display()
 
     def update_command_display(self):
@@ -187,13 +230,13 @@ class CommandLineBuilder(tk.Tk):
         #selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
         selected_tests = [test.rsplit('.', 1)[0] for test, var in self.tests_vars.items() if var.get()]
         if selected_tests and self.regress_enabled_var.get():
-            messagebox.showerror("Error", "Can't run regression & tests - choose one or the other")
+            messagebox.showerror("[Error]", "Can't run regression & tests - choose one or the other")
             # uncheck the regression checkbox
             self.regress_enabled_var.set(False)
             return
         # Can't select full_run & (app or hw or sim)
         if self.full_run_var.get() and (self.app_var.get() or self.hw_var.get() or self.sim_var.get()):
-            messagebox.showerror("Error", "Can't run full_run & (app or hw or sim) - choose one or the other")
+            messagebox.showerror("[Error]", "Can't run full_run & (app or hw or sim) - choose one or the other")
             # uncheck the full_run checkbox
             self.full_run_var.set(False)
             return
@@ -201,18 +244,21 @@ class CommandLineBuilder(tk.Tk):
         if self.pp_var.get():
             pp_path = f"verif/{self.dut_var.get()}/{self.dut_var.get()}_pp.py"
             if not os.path.exists(pp_path):
-                messagebox.showerror("Error", f"Can't run pp - {pp_path} doesn't exist")
+                messagebox.showerror("[Error]", f"Can't run pp - {pp_path} doesn't exist")
                 # uncheck the pp checkbox
                 self.pp_var.set(False)
                 return
         
         # Can't run FPGA & regression - FPGA can only be run with 1 test
         if self.fpga_var.get() and self.regress_enabled_var.get():
-            messagebox.showerror("Error", "Can't run FPGA & regression - FPGA can only be run with 1 test")
+            messagebox.showerror("[Error]", "Can't run FPGA & regression - FPGA can only be run with 1 test")
             # uncheck the fpga checkbox
             self.fpga_var.set(False)
             return
 
+        if self.top_enabled_var.get():
+            # and the top file without the .sv
+            cmd += f" -top {self.top_var.get().rsplit('.', 1)[0]}"
         if selected_tests:
             cmd += " -tests " + "\"" + " ".join(selected_tests) + "\""
         if self.regress_enabled_var.get():
@@ -227,6 +273,8 @@ class CommandLineBuilder(tk.Tk):
             cmd += " -pp"
         if self.full_run_var.get():
             cmd += " -full_run"
+        if self.params_enabled_var.get():
+            cmd += f" -params \" {self.params_var.get()}\""
         if self.clean_var.get():
             cmd += " -clean"
         if self.mif_var.get():
@@ -311,6 +359,7 @@ class CommandLineBuilder(tk.Tk):
 
             # Define a tag for the word "ERROR" with a red background
             self.txt_output.tag_configure("error", background="red")
+            self.txt_output.tag_configure("good" , background="green")
             close_button = tk.Button(output_window, text="Close", command=self.on_close)
             close_button.pack(pady=10)
 
@@ -318,6 +367,10 @@ class CommandLineBuilder(tk.Tk):
         if CommandLineBuilder.widget_exists(self.txt_output):
             if "[ERROR]" in line:
                 self.txt_output.insert(tk.END, line, "error")
+            elif "status: FAILED" in line:
+                self.txt_output.insert(tk.END, line, "error")
+            elif "status: PASSED" in line:
+                self.txt_output.insert(tk.END, line, "good")
             else:
                 self.txt_output.insert(tk.END, line)
 
