@@ -38,6 +38,9 @@ import common_pkg::*;
     input  logic [31:0] data_b,
     input  logic        wren_b,
     output logic [31:0] q_b,
+    // Keyboard interface
+    input  var t_kbd_data_rd kbd_data_rd,
+    output t_kbd_ctrl    kbd_ctrl,
     // FPGA interface outputs
     output t_fpga_out   fpga_out
 );
@@ -52,6 +55,8 @@ t_fpga_out fpga_out_1, fpga_out_2;  // fpga_out_2  -> fpga_out_1 -> fpga_out
 logic [31:0] pre_q;
 logic [31:0] pre_q_b;
 
+t_kbd_cr kbd_cr_next;
+t_kbd_cr kbd_cr;
 //==============================
 // Memory Access
 //------------------------------
@@ -60,6 +65,7 @@ logic [31:0] pre_q_b;
 always_comb begin
     // fpga_in_1  = fpga_in_2;
     fpga_out_2 = fpga_out_1; 
+    kbd_cr_next.kbd_scanf_en =  kbd_cr.kbd_scanf_en;
     if(wren) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
@@ -70,6 +76,7 @@ always_comb begin
             CR_SEG7_4   : fpga_out_2.SEG7_4    = data[7:0];
             CR_SEG7_5   : fpga_out_2.SEG7_5    = data[7:0];
             CR_LED      : fpga_out_2.LED       = data[9:0];
+            CR_KBD_SCANF_EN : kbd_cr_next.kbd_scanf_en = data[0];
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
@@ -77,6 +84,7 @@ always_comb begin
     // ---- RO memory - writes from FPGA ----
     // fpga_in_next.Button_0 = Button_0;
 end
+
 
 // `MAFIA_DFF(fpga_out, pre_fpga_out, Clk)
 // `MAFIA_DFF(fpga_in, fpga_in_next, Clk)
@@ -88,8 +96,8 @@ end
 // Reflects outputs to the FPGA - synchorus reflects
 // fpga_in -> fpga_in_1 -> fpga_in_2
 // fpga_out_2 -> fpga_out_1 -> fpga_out
-`MAFIA_DFF(fpga_out     , fpga_out_1 , Clk)
 `MAFIA_DFF(fpga_out_1   , fpga_out_2 , Clk)
+`MAFIA_DFF(fpga_out     , fpga_out_1 , Clk)
 
 `MAFIA_DFF(fpga_in_1    , fpga_in    , Clk)
 `MAFIA_DFF(fpga_in_2    , fpga_in_1  , Clk)
@@ -102,19 +110,22 @@ always_comb begin
     if(rden) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
-            CR_SEG7_0     : pre_q = {24'b0 , fpga_out.SEG7_0}     ; 
-            CR_SEG7_1     : pre_q = {24'b0 , fpga_out.SEG7_1}     ;
-            CR_SEG7_2     : pre_q = {24'b0 , fpga_out.SEG7_2}     ;
-            CR_SEG7_3     : pre_q = {24'b0 , fpga_out.SEG7_3}     ;
-            CR_SEG7_4     : pre_q = {24'b0 , fpga_out.SEG7_4}     ;
-            CR_SEG7_5     : pre_q = {24'b0 , fpga_out.SEG7_5}     ;
-            CR_LED        : pre_q = {22'b0 , fpga_out.LED}        ;
+            CR_SEG7_0       : pre_q = {24'b0 , fpga_out.SEG7_0}     ; 
+            CR_SEG7_1       : pre_q = {24'b0 , fpga_out.SEG7_1}     ;
+            CR_SEG7_2       : pre_q = {24'b0 , fpga_out.SEG7_2}     ;
+            CR_SEG7_3       : pre_q = {24'b0 , fpga_out.SEG7_3}     ;
+            CR_SEG7_4       : pre_q = {24'b0 , fpga_out.SEG7_4}     ;
+            CR_SEG7_5       : pre_q = {24'b0 , fpga_out.SEG7_5}     ;
+            CR_LED          : pre_q = {22'b0 , fpga_out.LED}        ;
+            CR_KBD_SCANF_EN : pre_q = {31'b0 , kbd_cr.kbd_scanf_en} ;
             // ---- RO memory ----
             CR_Button_0   : pre_q = {31'b0 , fpga_in_2.Button_0}  ;
             CR_Button_1   : pre_q = {31'b0 , fpga_in_2.Button_1}  ;
             CR_SWITCH     : pre_q = {22'b0 , fpga_in_2.Switch}    ;
             CR_JOYSTICK_X : pre_q = {20'b0 , fpga_in_2.Joystick_x};
             CR_JOYSTICK_Y : pre_q = {20'b0 , fpga_in_2.Joystick_y};
+            CR_KBD_READY  : pre_q = {31'b0 , kbd_cr.kbd_ready}  ;
+            CR_KBD_DATA   : pre_q = {24'b0 , kbd_cr.kbd_data}   ;
             default       : pre_q = 32'b0                         ;
         endcase
     end
@@ -129,16 +140,36 @@ always_comb begin
         CR_SEG7_4     : pre_q_b = {24'b0 , fpga_out.SEG7_4}   ;
         CR_SEG7_5     : pre_q_b = {24'b0 , fpga_out.SEG7_5}   ;
         CR_LED        : pre_q_b = {22'b0 , fpga_out.LED}      ;
+        CR_KBD_SCANF_EN: pre_q_b = {31'b0 , kbd_cr.kbd_scanf_en} ;
         // ---- RO memory ----
         CR_Button_0   : pre_q_b = {31'b0 , fpga_in_2.Button_0} ;
         CR_Button_1   : pre_q_b = {31'b0 , fpga_in_2.Button_1} ;
         CR_SWITCH     : pre_q_b = {22'b0 , fpga_in_2.Switch}   ;
-        CR_JOYSTICK_X : pre_q_b = {20'b0 , fpga_in_2.Joystick_x}   ;
-        CR_JOYSTICK_Y : pre_q_b = {20'b0 , fpga_in_2.Joystick_y}   ;
+        CR_JOYSTICK_X : pre_q_b = {20'b0 , fpga_in_2.Joystick_x};
+        CR_JOYSTICK_Y : pre_q_b = {20'b0 , fpga_in_2.Joystick_y};
+        CR_KBD_READY  : pre_q_b = {31'b0 , kbd_cr.kbd_ready}  ;
+        CR_KBD_DATA   : pre_q_b = {24'b0 , kbd_cr.kbd_data}   ;
         default       : pre_q_b = 32'b0                         ;
     endcase
 
 end
+
+
+
+// Storing into CR the Keyboard data 
+assign kbd_cr_next.kbd_data  = kbd_data_rd.kbd_data;
+assign kbd_cr_next.kbd_ready = kbd_data_rd.kbd_ready;
+//assign kbd_cr_next.kbd_scanf_en -> This comes from core write request
+`MAFIA_RST_DFF(kbd_cr, kbd_cr_next, Clk, Rst)
+
+
+//==============================
+// output to KBD
+//==============================
+// logic to detect a read from Keyboard so we should pop:
+assign kbd_ctrl.kbd_pop      = ((address   == CR_KBD_DATA) && rden ) ;
+                               //FIXME currently cant read from fabric - need to support the rd_en
+assign kbd_ctrl.kbd_scanf_en = kbd_cr.kbd_scanf_en;
 
 // `MAFIA_DFF(fpga_out.SEG7_2 , fpga_out_next.SEG7_2 , Clk)
 // `MAFIA_DFF(fpga_out.SEG7_3 , fpga_out_next.SEG7_3 , Clk)

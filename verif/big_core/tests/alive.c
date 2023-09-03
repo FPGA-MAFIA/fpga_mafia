@@ -11,6 +11,7 @@
 // This program is a basic sanity test for the target device.
 //------------------------------------------------------------
 #include "big_core_defines.h"
+#include "graphic_vga.h"
 int main()  {  
     int x,y,z;  
     x = 17;  
@@ -20,5 +21,6 @@ int main()  {
     WRITE_REG(CR_LED, 0xf);
     READ_REG(z,CR_LED);
     D_MEM_SCRATCH[1]=z;
+    rvc_printf("HI\n");
     return 0;
 }  // main()

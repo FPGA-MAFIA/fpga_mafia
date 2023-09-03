@@ -246,6 +246,32 @@ parameter CR_SWITCH      = CR_MEM_OFFSET + 'h24 ; // RO 10 bit
 parameter CR_JOYSTICK_X  = CR_MEM_OFFSET + 'h28 ; // RO 10 bit
 parameter CR_JOYSTICK_Y  = CR_MEM_OFFSET + 'h2C ; // RO 10 bit
 
+// Keyboard control & data Address Offsets
+parameter CR_KBD_DATA     = CR_MEM_OFFSET + 'h100 ; // RO 8 bit
+parameter CR_KBD_READY    = CR_MEM_OFFSET + 'h104 ; // RO 1 bit
+parameter CR_KBD_SCANF_EN = CR_MEM_OFFSET + 'h108 ; // RW 1 bit
+
+
+// Interface from kbd -> CR
+typedef struct packed {
+    logic [7:0] kbd_data;
+    logic       kbd_ready;
+} t_kbd_data_rd;
+
+// Interface from CR -> kbd
+typedef struct packed {
+    logic       kbd_scanf_en;
+    logic       kbd_pop;
+} t_kbd_ctrl;
+
+// Internal CR structure for kbd
+typedef struct packed {
+    logic [7:0] kbd_data;
+    logic       kbd_ready;
+    logic       kbd_scanf_en;
+} t_kbd_cr;
+
+
 typedef enum logic [1:0] {
     UART_RD                = 2'b00 , 
     UART_RD_RSP            = 2'b01 ,

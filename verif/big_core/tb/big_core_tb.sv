@@ -76,6 +76,9 @@ big_core_top big_core_top(
     .InFabricQ503H      ('0),//input  t_tile_trans ,
     .OutFabricValidQ505H(),  //output logic        ,
     .OutFabricQ505H     (),  //output t_tile_trans ,
+    // inputs from Keyboard 
+    .kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
+    .data_in_kc  ( 1'b0  ) ,// input logic             data_in_kc, // Data from keyboard
     // FPGA interface
     .fpga_in        (fpga_in),
     .fpga_out       (next_fpga_out),
