@@ -22,12 +22,15 @@ import common_pkg::*;
     output logic        out_for_pd,
     
     // FPGA interface inputs              
-    input  t_fpga_in   fpga_in,  // CR_MEM
+    input  var t_fpga_in   fpga_in,  // CR_MEM
     // Fabric interface
     input  logic            InFabricValidQ503H  ,
     input  var t_tile_trans InFabricQ503H       ,
     output logic            OutFabricValidQ505H ,
     output var t_tile_trans OutFabricQ505H      ,
+    // inputs from Keyboard 
+    input logic             kbd_clk, // Clock from keyboard
+    input logic             data_in_kc, // Data from keyboard
     // FPGA interface outputs
     output t_fpga_out fpga_out,      // CR_MEM
     // VGA output
@@ -35,6 +38,8 @@ import common_pkg::*;
     output t_vga_out    vga_out  // VGA_OUTPUT          
 );
 
+t_kbd_ctrl      kbd_ctrl;
+t_kbd_data_rd   kbd_data_rd;
 //=========================================
 //     Core - Memory interface
 //=========================================
@@ -86,11 +91,34 @@ big_core_mem_wrap big_core_mem_wrap (
     .InFabricQ503H      (InFabricQ503H),      //input  t_tile_trans ,
     .OutFabricValidQ505H(OutFabricValidQ505H),//output logic        ,
     .OutFabricQ505H     (OutFabricQ505H),     //output t_tile_trans ,
+    // Keyboard interface
+    .kbd_data_rd  (kbd_data_rd ), //input  t_kbd_data_rd kbd_data_rd,
+    .kbd_ctrl     (kbd_ctrl    ), //output t_kbd_ctrl    kbd_ctrl,
     //
     .fpga_in          (fpga_in),            // CR_MEM
     .fpga_out         (fpga_out),            // CR_MEM
     .inDisplayArea    (inDisplayArea),       // VGA_OUTPUT
     .vga_out          (vga_out)              // VGA_OUTPUT
 );
+
+big_core_kdb_controller big_core_kdb_controller  
+(
+    .kbd_clk       (kbd_clk    ), //input  logic       kbd_clk,
+    .data_in_kc    (data_in_kc ), //input  logic       data_in_kc,
+
+    .core_clk      (Clk    ), //input  logic       core_clk,
+    .core_rst      (Rst    ), //input  logic       core_rst, 
+    // Pop when the kbd_pop signal is high -> automatically set when core reads the kbd cr data
+    .core_read_en  (kbd_ctrl.kbd_pop     ), //input  logic       core_read_en,
+    // the pop signals from the fifo:
+    .data_out_cc   (kbd_data_rd.kbd_data ), //output logic [7:0] data_out_cc, 
+    .data_ready    (kbd_data_rd.kbd_ready), //output logic       data_ready,
+    .valid_cc      (                     ), //output logic       valid_cc, 
+    .error         (                     ), //output logic       error,
+    // disable keyboard inputs when scanf is disabled
+    .scanf_en      (kbd_ctrl.kbd_scanf_en)  //input  logic       scanf_en   
+);
+
+
 
 endmodule // Module big_core_top

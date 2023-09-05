@@ -76,6 +76,9 @@ big_core_top big_core_top(
     .InFabricQ503H      ('0),//input  t_tile_trans ,
     .OutFabricValidQ505H(),  //output logic        ,
     .OutFabricQ505H     (),  //output t_tile_trans ,
+    // inputs from Keyboard 
+    .kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
+    .data_in_kc  ( 1'b0  ) ,// input logic             data_in_kc, // Data from keyboard
     // FPGA interface
     .fpga_in        (fpga_in),
     .fpga_out       (next_fpga_out),
@@ -115,6 +118,13 @@ initial begin: test_seq
     //======================================
     //load the program to the TB
     //======================================
+    // Check that inst_mem.sv exists
+    file = $fopen({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    if (!file) begin
+        $display("File was not open successfully : %0d", file);
+        $error("File ../../../target/big_core/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
+        $finish;
+    end
     $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force big_core_top.big_core_mem_wrap.i_mem.IMem = IMem;

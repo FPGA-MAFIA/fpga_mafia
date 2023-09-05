@@ -33,7 +33,10 @@ import common_pkg::*;
     output logic            OutFabricValidQ505H ,
     output var t_tile_trans OutFabricQ505H      ,
     // FPGA interface inputs              
-    input  t_fpga_in   fpga_in,
+    input  var t_fpga_in   fpga_in,
+    // Keyboard interface
+    input  var t_kbd_data_rd kbd_data_rd,
+    output t_kbd_ctrl    kbd_ctrl,
     // FPGA interface outputs
     output t_fpga_out  fpga_out,          // CR_MEM output to FPGA
     output logic       inDisplayArea,
@@ -174,6 +177,9 @@ big_core_cr_mem big_core_cr_mem (
     .address_b        (InFabricQ503H.address),
     .wren_b           (F2C_CrMemWrEnQ503H),
     .q_b              (F2C_CrMemRspDataQ504H),
+    // Keyboard interface
+    .kbd_data_rd  (kbd_data_rd ), //input  t_kbd_data_rd kbd_data_rd,
+    .kbd_ctrl     (kbd_ctrl    ), //output t_kbd_ctrl    kbd_ctrl,
     // FPGA interface
     .fpga_in          (fpga_in),  
     .fpga_out         (fpga_out)
