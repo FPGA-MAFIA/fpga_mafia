@@ -74,6 +74,7 @@ assign Rst = (!KEY[0] && SW[9]);
 //  Structural coding
 //=======================================================
 t_fpga_out fpga_out;
+t_fpga_in  fpga_in;
 t_vga_out vga_out;
 logic inDisplayArea;
 logic InFabricValidQ503H, OutFabricValidQ505H, PreOutFabricValidQ505H;
@@ -96,9 +97,7 @@ big_core_top big_core_top (
 .OutFabricValidQ505H    (PreOutFabricValidQ505H), //output logic        ,
 .OutFabricQ505H         (PreOutFabricQ505H),      //output t_tile_trans ,
 // FPGA interface inputs              
-.Button_0               (KEY[0]),                 //input  logic       Button_0, // CR_MEM
-.Button_1               (KEY[1]),                 //input  logic       Button_1, // CR_MEM
-.Switch                 (SW),                     //input  logic [9:0] Switch,   // CR_MEM
+.fpga_in                (fpga_in),
 // FPGA interface outputs
 .fpga_out               (fpga_out),               //output logic [7:0] SEG7_0,   // CR_MEM
 // VGA output
@@ -147,9 +146,6 @@ assign InFabricQ503H.opcode = (InFabricReqOpcodeQ500H == 1'b0) ? RD :
 
 assign InFabricQ503H.requestor_id = '0;
 assign InFabricQ503H.next_tile_fifo_arb_id = t_cardinal'('0);
-
-
-
 
 assign HEX0     = fpga_out.SEG7_0;
 assign HEX1     = fpga_out.SEG7_1;
@@ -222,5 +218,12 @@ logic [11:0] adc_ch_1;
 
 assign LEDR[4:0] = adc_ch_0[11:7];
 assign LEDR[9:5] = adc_ch_1[11:7];
+
+assign fpga_in.Button_0 = KEY[0];      //input  logic       Button_0, // CR_MEM
+assign fpga_in.Button_1 = KEY[1];      //input  logic       Button_1, // CR_MEM
+assign fpga_in.Switch = SW;            //input  logic [9:0] Switch,   // CR_MEM
+assign fpga_in.Joystick_x = adc_ch_0[11:0];            //input  logic [9:0] Switch,   // CR_MEM
+assign fpga_in.Joystick_y = adc_ch_1[11:0];            //input  logic [9:0] Switch,   // CR_MEM
+
 
 endmodule
