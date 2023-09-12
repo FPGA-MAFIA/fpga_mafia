@@ -58,9 +58,8 @@ assign next_word_count_kc = (word_count_kc == 4'd10) ? 4'd0 : word_count_kc + 4'
 // bits 20:13 are the release data - when the release data is 0xFE we have a release and we can sample the data which is the [8:1]
 assign release_flag_kc = (release_word_kc.data == 8'hFE);
 
-logic core_rstWordCount;
 logic valid_kc;
-`MAFIA_RST_DFF(valid_kc, release_flag_kc, word_flag_kc, core_rstWordCount)
+`MAFIA_DFF(valid_kc, release_flag_kc, word_flag_kc)
 
 logic [1:0] struct_data;
 logic struct_error_flag;
