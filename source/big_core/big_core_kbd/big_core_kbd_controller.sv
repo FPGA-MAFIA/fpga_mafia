@@ -11,12 +11,12 @@ import common_pkg::*;
     input  logic       core_read_en,
     output logic [7:0] data_out_cc, 
     output logic       valid_cc, 
-    output logic       extension_cc,
     output logic       error,
     //CR - Control register & indications
     output logic       data_ready,
     input  logic       scanf_en   
 );
+
 // SW kbd enable which activate the module when scanf function is called
 logic scanf_en_kc;
 `MAFIA_METAFLOP(scanf_en_kc, scanf_en, kbd_clk)
