@@ -1,0 +1,50 @@
+-----------
+data hazard
+-----------
+add x1, x2,x3
+add x4, x1, x5
+add x5, x3, x1
+
+solution
+--------
+required data already in the pipe but in wrong stage
+forward from mem_stage and wb_stage to decode_stage
+
+-----------------
+store data hazard
+-----------------
+add x1, x2, x3
+sw  x1, 0(x1)
+
+solution
+--------
+required data already in the pipe but in wrong stage
+forward from mem stage to execution to address calculations when 
+rs1 is also an address and forward rd from mem stage to execution when  
+rs2 ia also a data
+
+----------------
+load data hazard
+----------------
+lw x1, 0(x2)
+add x2, x1, x3
+
+solution
+--------
+required data is not ready yet
+stall fetch and decode stages + insert bubble (nop) into execution stage
+
+
+---------------------
+GPR structural hazard
+---------------------
+addi x1, x0, 0
+addi x2, x1, 0
+addi x3, x1, 0
+addi x4, x1, 0
+
+solution
+--------
+The three first instructions hazard will be solved by data hazard forwarding unit
+but the 4rth instruction will cause error cause we first read x1 and than update it.
+forward from wb_stage to decode_stage

@@ -1,0 +1,154 @@
+//000000b7    //lui t1, 0
+//b7
+//00
+//00
+//00
+//00000137    //lui t2, 0
+//37
+//01
+//00
+//00
+//00000fb7    //lui t31, 0
+//b7
+//0f
+//00
+//00
+//000071B7    //lui t3, 7
+//b7
+//71
+//00
+//00
+//0000a237    //lui t4, a
+//37
+//a2
+//00
+//00
+// for next instructions "define YES_INIT_GPR"
+
+//003202b3    //add t5, t4, t3
+//b3
+//02
+//32
+//00
+//00028333    //add t6, t5, t0
+//0041a193    //slti t3,t3,4
+//00225413    //srli t8,t4,2
+
+//00a00023    //sb t10, 0(t0)
+//00a19023    //sh t10, 0(t3)
+//00a1a0a3    //sw t10, 1(t3) 
+
+// for next instruction  "define YES_INIT_DATA_RAM"
+// for next instructions "define NO_INIT_GPR"
+//00200083    //lb t1, 2(t0)
+//00201083    //lh t1, 2(t0)
+//00202083    //lw t1, 2(t0)  
+//00204083    //lbu t1, 2(t0)  
+//00205083    //lhu t1, 2(t0) 
+
+// for next instructions "define NO_INIT_GPR"
+//00001597    //auipc t11, 1 
+//0000166f    //jal t11, 1
+//6f
+//16
+//00
+//00
+
+// for next instructions "define YES_INIT_GPR"
+//00118667    //jalr t12,1(t3)
+
+//005200e3    //beq t4, t5, 1
+//e3
+//00
+//53
+//00
+//00521fe3    //bne t4, t5, 1
+//e3
+//1f
+//52
+//00
+
+// testing gpr structural hazard
+//000000b7    //lui t1, 0
+//00000137    //lui t2, 0
+//00000fb7    //lui t31, 0
+//000071B7    //lui t3, 7
+//0000a237    //lui t4, a
+
+//00028333    //add t6, t5, t0
+//33
+//83
+//02
+//00
+//000091B7    //lui t3, 9
+//0000b237    //lui t4, b
+//00521fe3    //bne t4, t5, 1
+
+// testing gpr structural hazard
+//000000b7    //lui t1, 0
+//00000137    //lui t2, 0
+//00000fb7    //lui t31, 0
+//000071B7    //lui t3, 7
+//0000a237    //lui t4, a
+
+//00028333    //add t6, t5, t0
+//000091B7    //lui t3, 9
+//0000b237    //lui t4, b
+
+// testing forwarding unit - (immidiate and arithmetic instructions)
+//003202b3    //add t5, t4, t3
+//b3
+//02
+//32
+//00
+//00028333    //add t6, t5, t0
+//33
+//83
+//02
+//00
+//005203b3   //add t7, t4, t5
+//b3
+//03
+//52
+//00
+//00728413  //addi t8, t5, 7
+//13
+//84
+//72
+//00
+
+// testing forwarding unit - (store hazard)
+//003202b3    //add t5, t4, t3
+b3
+02
+32
+00
+//0032a023   //sw t3, 0(t5)
+//23
+//a0
+//32
+//00
+//00528023  // sb t5, 0(t5)
+23
+80
+52
+00
+
+// testing stalling unit
+//00002083  //lw t1, 0(t0)
+//83
+//20
+//00
+//00
+//00308113  //addi t2, t1, 3
+//13
+//81
+//30
+//00
+//00000fb7    //lui t31, 0
+//b7
+//0f
+//00
+//00
+
+
