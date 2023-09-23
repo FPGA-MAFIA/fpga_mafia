@@ -21,8 +21,8 @@ module inst_ram(
     reg [`INST_MEM_WIDTH-1:0] inst_ram [0:`INST_DEPTH-1];
     
          
-    //initial 
-    //    $readmemh("instruction_init_tb.mem", inst_ram);
+    initial 
+        $readmemh("instruction_init_tb.mem", inst_ram);
     
         
     always@(posedge clk) begin
