@@ -25,3 +25,10 @@
 ../../../source/big_core/d_mem.sv
 ../../../source/big_core/i_mem.sv
 ../../../source/big_core/big_core_csr.sv
+
+// KBD FIles
+../../../source/big_core/big_core_kbd/big_core_kbd_controller.sv
+../../../source/big_core/big_core_kbd/big_core_kbd_gray_fifo.sv
+../../../source/big_core/big_core_kbd/big_core_kbd_odd_parity_checker.sv
+../../../source/big_core/big_core_kbd/big_core_kbd_release_checker.sv
+../../../source/big_core/big_core_kbd/big_core_kbd_struct_checker.sv

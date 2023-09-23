@@ -20,11 +20,6 @@ module data_ram(
 
     reg [`DATA_WIDTH-1:0] data_ram [0:`DATA_DEPTH-1];
     
-    `ifdef YES_INIT_DATA_RAM
-        initial 
-            $readmemh("data_init_tb.mem", data_ram); 
-    `endif
-    
     always@(posedge clk) begin
         if(rst) 
             dout <= 0;

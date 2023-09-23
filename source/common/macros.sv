@@ -41,6 +41,19 @@
             if (rst)    q <='0;          \
             else if(en) q <= i;
 
+// a async reset val en flop used for special cases
+`define MAFIA_EN_ASYNC_RST_VAL_DFF(q,i,clk,en,rst,val) \
+         always_ff @(posedge clk or posedge rst) begin \
+            if      (rst) q <= val;                    \
+            else if (en)  q <= i;                      \
+         end
+
+`define MAFIA_METAFLOP(out,i,clk)     \
+   logic next``out;                   \
+        `MAFIA_DFF(next``out, i,clk)  \
+        `MAFIA_DFF(out,next``out,clk)
+
+
 
 `define MAFIA_MUXOR(winner, candidates, select)     \
 always_comb begin                                   \
@@ -82,6 +95,8 @@ end
    end          
 
 
-
+`define MAFIA_BINARY_TO_GRAY(gray,binary)  \
+   gray = binary ^ (binary >> 1);   
+      
 
 `endif //MACROS_VS

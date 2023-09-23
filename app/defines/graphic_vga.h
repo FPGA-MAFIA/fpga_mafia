@@ -518,3 +518,29 @@ void draw_line(int x1, int y1, int x2, int y2, int value) {
         }
     }
 }
+
+
+int rvc_scanf(char* str, int size){
+    // allow new data to push into kbd HW fifo
+    WRITE_REG(CR_KBD_SCANF_EN, 0x1);
+    // polling on the Ready bit to see if there is kbd data
+    int ready=0;
+    int i = 0;
+    char rd_char = 0;
+    while ((i<size) && (rd_char != '\n')){
+        //Start polling
+        while (ready==0){
+            READ_REG(ready, CR_KBD_READY);
+        }
+        // read the data from the kbd HW fifo
+        READ_REG(rd_char , CR_KBD_DATA);// pop -> will trigger in the HW FIFO to update ptr
+        str[i] = rd_char;
+        i++;
+        ready=0;
+    }
+    // stop new data to push into kbd HW fifo
+    WRITE_REG(CR_KBD_SCANF_EN, 0x1);
+    // return what is the number of chars read
+    return i;
+}
+
