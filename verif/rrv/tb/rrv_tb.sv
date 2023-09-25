@@ -3,13 +3,6 @@ module rrv_tb;
 
 logic        Clk;
 logic        Rst;
-logic [31:0] Instruction;
-logic [31:0] DMemAddress;
-logic [31:0] DMemData   ;
-logic [3:0]  DMemByteEn ;
-logic        DMemWrEn   ;
-logic        DMemRdEn   ;
-logic [31:0] DMemRspData;
 
 localparam TOP_IMEM_SIZE = 65536;
 localparam TOP_DMEM_SIZE = 65536;
@@ -22,21 +15,6 @@ logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 
-//=========================================
-// Instantiating the big_core core
-//=========================================
-// big_core big_core (
-//    .Clk                 (Clk),
-//    .Rst                 (Rst),
-//    .PcQ100H             (Pc),          // To I_MEM
-//    .PreInstructionQ101H (Instruction), // From I_MEM
-//    .DMemWrDataQ103H     (DMemData),  // To D_MEM
-//    .DMemAddressQ103H    (DMemAddress), // To D_MEM
-//    .DMemByteEnQ103H     (DMemByteEn),  // To D_MEM
-//    .DMemWrEnQ103H       (DMemWrEn),    // To D_MEM
-//    .DMemRdEnQ103H       (DMemRdEn),    // To D_MEM
-//    .DMemRdRspQ104H      (DMemRspData)    // From D_MEM
-//);
 //=========================================
 // Instantiating the rrv_top_core
 //=========================================
