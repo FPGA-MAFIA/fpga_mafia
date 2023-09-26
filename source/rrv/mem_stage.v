@@ -30,10 +30,19 @@ module mem_stage(
     output [`REG_WIDTH-1:0]            data_rd_wb,       // rd data to write back into when no memory is used.
     output [`REG_WIDTH-1:0]            data_rd_wb_mem,   // rd data to write back into when loaded from memory. 
     output reg [`FUNCT3_WIDTH-1:0]     funct3_mem_wb,    // defines what type of load instruction. pass as is to next stage
-    output reg                         mem_mem_wb        // when '1' is load instruction. when '0' something else. pass as is to next stage
+    output reg                         mem_mem_wb,       // when '1' is load instruction. when '0' something else. pass as is to next stage
     
+    //----- to forwarding -----//
+    output [`REG_ADDR_WIDTH-1:0]   rd_mem_fw,            // rd address sended from memory stage to forwarding 
+    output [`REG_WIDTH-1:0]        data_rd_mem_fw,        // rd value
+    output we_mem      
  );
   
+      // forwarding
+      assign rd_mem_fw        = (!rst) ? addr_rd_ex : 5'b00000;
+      assign data_rd_mem_fw   = (!rst) ? data_rd_ex : 5'b00000;
+      assign we_mem           = (!rst) ? gpr_we_ex  : 1'b0;
+         
       wire [`REG_WIDTH-1:0] mem_out;
       reg  [`REG_WIDTH-1:0] data_rd_ex_ns; // use this reg to create flip flop while passig rd to next state. caused of memory read latency = 1
      

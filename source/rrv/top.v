@@ -22,10 +22,17 @@ module top #(parameter OP = "READ")(
     wire                   jump_en;   // from execution stage 
     wire [`PC_WIDTH-1:0]   load_pc;   // from execution stage 
     
+    wire flash_if_id; 
+    wire flash_id_ex;
+    
+    wire pc_dis;
+    wire flash_id_ex_s;
+    
     //----- fetch stage instantiation -----// 
     fetch fetch_module(
     .clk(clk),
     .rst(rst),
+    .flash_if_id(flash_if_id),
     .jump_en(jump_en),      // load enable incase of branches from execution stage 
     .load_pc(load_pc),      // pc from execution stage in case of branch
     .pc_en(1'b1), 
@@ -33,7 +40,10 @@ module top #(parameter OP = "READ")(
     .inst_mem_we(mem_we),
     .inst_mem_rst(rst),  
     .inst_fetch_out(inst_fetch_id),
-    .pc2id(pc_fetch_id)
+    .pc2id(pc_fetch_id),
+    
+    // from stall unit
+    .pc_stall(pc_dis)
     );
      
     
@@ -58,10 +68,17 @@ module top #(parameter OP = "READ")(
     wire [`REG_ADDR_WIDTH-1:0]   addr_rd_id;     // rd address to write back into. 
     wire [`REG_WIDTH-1:0]        data_rd_id;     // rd data to write back into. 
     
+   
+    wire [`REG_ADDR_WIDTH-1:0]    addr_rs1_ex;  // sends to execution stage for forwarding
+    wire [`REG_ADDR_WIDTH-1:0]    addr_rs2_ex;   
+    
+    
     //----- decode stage instantiation -----//
      decode decode_module(
     .clk(clk),
     .rst(rst),
+    .flash_id_ex(flash_id_ex),
+    .flash_id_ex_s(flash_id_ex_s),
     
     //from fetch stage
     .instruction(inst_fetch_id),
@@ -83,14 +100,17 @@ module top #(parameter OP = "READ")(
     
     //to write back stage 
     .gpr_en_idex(gpr_en_idex),    
-    .gpr_we_idex(gpr_we_idex),       // write enable when write to gpr
-    .addr_rd_idex(addr_rd_idex),     // rd address to write back into
+    .gpr_we_idex(gpr_we_idex),    // write enable when write to gpr
+    .addr_rd_idex(addr_rd_idex),  // rd address to write back into
     
     //from write back stage
     .gpr_en_wb(gpr_en_id),     
     .gpr_we_wb(gpr_we_id),
     .rd_in_wb(data_rd_id),       // value of rd from rightback. calculated at execution stage or load instruction in mem stage
-    .addr_rd_wb(addr_rd_id)      // rd address to write back into
+    .addr_rd_wb(addr_rd_id),     // rd address to write back into
+    
+    .addr_rs1_ex(addr_rs1_ex),   // sends to execution stage for forwarding
+    .addr_rs2_ex(addr_rs2_ex)   
     );
     
     
@@ -105,8 +125,16 @@ module top #(parameter OP = "READ")(
     wire [`REG_WIDTH-1:0]          data_rd_wb;         // rd data to write back into. 
     wire [`FUNCT3_WIDTH-1:0]       funct3_mem;         // defines what type of load instruction
     wire                           mem_wb;             // when '1' is load instruction. when '0' something else
+    wire [`REG_ADDR_WIDTH-1:0]     forward_rs1;        // register address sended to forwarding unit
+    wire [`REG_ADDR_WIDTH-1:0]     forward_rs2;
     
+    wire                  mux_alu1;      // signal from forwarding unit to execution stage
+    wire                  mux_alu2; 
+    wire [`REG_WIDTH-1:0] rd;            // register sended from forwarding unit to execution
     
+    wire                  mux_store;    
+    wire [`REG_WIDTH-1:0] rd_store_fw;
+        
     //----- execution stage instantiation -----//
     execution execution_module(
     .clk(clk),
@@ -137,13 +165,24 @@ module top #(parameter OP = "READ")(
     .gpr_we_idex(gpr_we_idex),       // write enable to gpr. pass as is to next stage
     .addr_rd_idex(addr_rd_idex),     // rd address to write back into. pass as is to next stage
     .gpr_en_wb(gpr_en_wb),    
-    .gpr_we_wb(gpr_we_wb),        // write enable to gpr. pass as is to next stage
+    .gpr_we_wb(gpr_we_wb),         // write enable to gpr. pass as is to next stage
     .addr_rd_wb(addr_rd_wb),       // rd address to write back into. pass as is to next stage
     .data_rd_wb(data_rd_wb),       // rd data to write back into. 
     
     //to fetch stage
     .pc_fetch(load_pc),
-    .jump_en(jump_en)           // when '1' then update pc with pc_fetch value
+    .jump_en(jump_en),           // when '1' then update pc with pc_fetch value
+    
+    //to and from forwarding unit
+    .addr_rs1_ex(addr_rs1_ex),
+    .addr_rs2_ex(addr_rs2_ex),
+    .addr_rs1_fw(forward_rs1),
+    .addr_rs2_fw(forward_rs2),
+    .mux_alu1(mux_alu1),
+    .mux_alu2(mux_alu2),
+    .mux_store(mux_store),
+    .rd(rd),
+    .rd_store_fw(rd_store_fw)
     );
 
 
@@ -155,6 +194,12 @@ module top #(parameter OP = "READ")(
     wire [`REG_WIDTH-1:0]        data_rd_mem_load; // rd data to write back into when loaded from memory. 
     wire [`FUNCT3_WIDTH-1:0]     funct3_mem_wb;    // defines what type of load instruction. pass as is to next stage
     wire                         mem_mem_wb;       // when '1' is load instruction. when '0' something else. pass as is to next stage
+    wire [`REG_ADDR_WIDTH-1:0]   rd_mem_fw;        // rd address sended from memory stage to forwarding   
+    wire [`REG_ADDR_WIDTH-1:0]   rd_wb_fw;
+    wire [`REG_WIDTH-1:0]        data_rd_mem_fw;    // rd data sended from memory stage to forwarding
+    wire [`REG_WIDTH-1:0]        data_rd_wb_fw;    // rd data sended from wb stage to forwarding
+    wire                         we_mem;
+    wire                         we_wb;
     
 
     //----- memory stage instantiation -----//
@@ -178,11 +223,15 @@ module top #(parameter OP = "READ")(
     .data_rd_wb_mem(data_rd_mem_load),
     .gpr_en_wb(gpr_en),    
     .gpr_we_wb(gpr_we),                 // write enable to gpr. pass as is to next stage
-    .addr_rd_wb(addr_rd),                // rd address to write back into. pass as is to next stage
-    .data_rd_wb(data_rd),                // rd data to write back into.
-    .funct3_mem_wb(funct3_mem_wb),       // defines what type of load instruction. pass as is to next stage
-    .mem_mem_wb(mem_mem_wb)             // when '1' is load instruction. when '0' something else. pass as is to next stage
-     
+    .addr_rd_wb(addr_rd),               // rd address to write back into. pass as is to next stage
+    .data_rd_wb(data_rd),               // rd data to write back into.
+    .funct3_mem_wb(funct3_mem_wb),      // defines what type of load instruction. pass as is to next stage
+    .mem_mem_wb(mem_mem_wb),            // when '1' is load instruction. when '0' something else. pass as is to next stage
+    
+    //to forwarding
+    .rd_mem_fw(rd_mem_fw),               // rd address sended from memory stage to forwarding   
+    .data_rd_mem_fw(data_rd_mem_fw),      // rd data sended to forward unit
+    .we_mem(we_mem) 
     );
    
     //----- write back stage instantiation -----//
@@ -196,10 +245,51 @@ module top #(parameter OP = "READ")(
     .gpr_en_id(gpr_en_id),    
     .gpr_we_id(gpr_we_id),         // write enable to gpr. 
     .addr_rd_id(addr_rd_id),       // rd address to write back into. 
-    .data_rd_id(data_rd_id),        // rd data to write back into. 
-    .funct3_mem_wb(funct3_mem_wb),    // defines what type of load instruction. 
-    .mem_mem_wb(mem_mem_wb)       // when '1' is load instruction. when '0' something else. 
+    .data_rd_id(data_rd_id),       // rd data to write back into. 
+    .funct3_mem_wb(funct3_mem_wb), // defines what type of load instruction. 
+    .mem_mem_wb(mem_mem_wb),       // when '1' is load instruction. when '0' something else.
     
+    //----- to forwarding -----//
+    .rd_wb_fw(rd_wb_fw),            // rd address sended from wb stage to forwarding 
+    .data_rd_wb_fw(data_rd_wb_fw),
+    .we_wb(we_wb)
     );
  
+    //----- forwarding unit -----//
+    forwarding_unit fw(
+     .rs1_addr(forward_rs1),    
+     .rs2_addr(forward_rs2),      
+     .rd_addr_mem(rd_mem_fw),   
+     .rd_addr_wb(rd_wb_fw),    
+     .rd_data_mem(data_rd_mem_fw),   
+     .rd_data_wb(data_rd_wb_fw),    
+     .we_mem(we_mem),
+     .we_wb(we_wb), 
+     .data_mem_we(data_mem_we_idex),
+     .mux_alu1(mux_alu1),
+     .mux_alu2(mux_alu2),
+     .mux_store(mux_store),
+     .rd(rd),
+     .rd_store_fw(rd_store_fw)   
+     );
+     
+    //----- flash unit -----//
+     flash_unit flash_unit(
+    .do_flash(jump_en),
+    .flash_if_id(flash_if_id),
+    .flash_id_ex(flash_id_ex)
+    );
+    
+    //----- stall unit -----//
+    stall_unit stall_unit(
+    .instruction(inst_fetch_id),
+    .rd_addr(addr_rd_idex),
+    .data_mem_en(data_mem_en_idex),
+    .pc_dis(pc_dis),              //  prevent PC reg from changing
+    .rst_id_ex_reg(flash_id_ex_s)   // insert zeros(bubble) to excution stage
+    );
+
+
+    
+     
 endmodule

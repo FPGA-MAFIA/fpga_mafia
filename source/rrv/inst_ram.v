@@ -8,27 +8,31 @@
 `include "defines.v"
 
 module inst_ram(
-     input      [$clog2(`INST_DEPTH)-1:0]  addra,
-     input                                 clka,
-     input      [`INST_WIDTH-1:0]          dina, 
-     output reg [`INST_WIDTH-1:0]          douta,
-     input                                 ena, 
-     input                                 wea,
-     input                                 rsta 
+     input  [$clog2(`INST_DEPTH)-1:0]  addr,
+     input                             clk,
+     input  [`INST_MEM_WIDTH-1:0]      din, 
+     output [`INST_WIDTH-1:0]          dout,
+     input                             en, 
+     input                             we,
+     input                             rst 
 );
 
 
-    reg [`INST_WIDTH-1:0] inst_ram [0:`INST_DEPTH-1];
-     
-    always@(posedge clka) begin
-        if(rsta) 
-            douta <= 0;
-        else if(ena) begin
-                if(wea)
-                    inst_ram[addra] <= dina;
-                else
-                    douta <= inst_ram[addra];
-        end   
+    reg [`INST_MEM_WIDTH-1:0] inst_ram [0:`INST_DEPTH-1];
+    
+         
+    //initial 
+    //    $readmemh("instruction_init_tb.mem", inst_ram);
+    
+        
+    always@(posedge clk) begin
+        if(en & we)
+            inst_ram[addr] <= din;
     end
-       
+    
+    //little endian
+    assign dout = (en & !rst) ? {inst_ram[addr + 3], inst_ram[addr + 2], inst_ram[addr + 1], inst_ram[addr + 0]} : 0;
+    
+     
+         
 endmodule

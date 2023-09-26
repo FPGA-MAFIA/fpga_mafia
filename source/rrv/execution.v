@@ -42,21 +42,78 @@ module execution(
     
     //----- to fetch stage -----//
     output reg [`PC_WIDTH-1:0]         pc_fetch,
-    output reg                         jump_en           // when '1' then update pc with pc_fetch value
+    output reg                         jump_en,           // when '1' then update pc with pc_fetch value
 
-
+    //----- rs1, rs2 to forwardng unit -----//
+    input  [`REG_ADDR_WIDTH-1:0]   addr_rs1_ex,           // inputs for forwarding unit
+    input  [`REG_ADDR_WIDTH-1:0]   addr_rs2_ex,    
+    output [`REG_ADDR_WIDTH-1:0]   addr_rs1_fw,           
+    output [`REG_ADDR_WIDTH-1:0]   addr_rs2_fw,
+    
+    //----- from forwarding unit -----//
+     input                  mux_alu1,
+     input                  mux_alu2,
+     input                  mux_store,    // forwarding when sw, rd, x(x)
+     input [`REG_WIDTH-1:0] rd,
+     input [`REG_WIDTH-1:0] rd_store_fw   // forwarding when sw, rd, x(x)
+     
+     
 );
-
+    
+    
+    assign addr_rs1_fw = (!rst) ? addr_rs1_ex : 5'b00000;
+    assign addr_rs2_fw = (!rst) ? addr_rs2_ex : 5'b00000;
+         
     wire [`REG_WIDTH-1:0] result; 
     wire [`FLAGN-1 :0]    flag;
     
+    reg [`REG_WIDTH-1:0]  alu_in1_mux;  
+    reg [`REG_WIDTH-1:0]  alu_in2_mux; 
+    
+    reg [`REG_WIDTH-1:0]  store_rd_mem;  
+    
     alu alu_module (
         .func_code(funct3_alu),
-        .in1(alu_in1),
-        .in2(alu_in2),
+        .in1(alu_in1_mux),
+        .in2(alu_in2_mux),
         .result(result),
         .flag(flag)      
     );
+    
+    
+    // first forwarding mux
+    always @(*) begin
+        case(mux_alu1)
+            1'b0:
+                alu_in1_mux = alu_in1;
+            1'b1: 
+                alu_in1_mux = rd;      
+        endcase
+    end
+    
+    // second forwarding mux
+   always @(*) begin
+        case(mux_alu2)
+            1'b0:
+                alu_in2_mux = alu_in2;
+            1'b1: 
+                alu_in2_mux = rd;      
+        endcase
+    end
+    
+    // mux for store forwarding
+    always@(*) begin
+        case(mux_store)
+            1'b0: 
+               store_rd_mem =  rs2_idex;  
+            1'b1:
+               store_rd_mem =  rd_store_fw; 
+            default:
+               store_rd_mem = 32'h00000000;   
+        endcase
+    end  
+    
+    
     
     reg [`REG_WIDTH-1:0]          data_rd_wb_ns;
     //reg [`PC_WIDTH-1:0]           pc_fetch_ns;
@@ -102,11 +159,11 @@ module execution(
             `s_type: begin
                 addr_mem_ns   = result;
                 if(funct3 == 3'b000)
-                    rs2_mem_ns = rs2_idex[7:0];
+                    rs2_mem_ns = store_rd_mem[7:0];
                 else if(funct3 == 3'b001)
-                    rs2_mem_ns = rs2_idex[15:0];
+                    rs2_mem_ns = store_rd_mem[15:0];
                 else
-                    rs2_mem_ns = rs2_idex; 
+                    rs2_mem_ns = store_rd_mem; 
             end                     
            `i_type_dmem: begin
                 addr_mem_ns   = result;
@@ -152,12 +209,12 @@ module execution(
                end       
            end
            `i_type_jalr: begin
-                data_rd_wb_ns = pc + 1; 
+                data_rd_wb_ns = pc + 4; 
                 pc_fetch      = result;
                 jump_en       = 1'b1;
            end
            `j_type: begin
-                data_rd_wb_ns = pc + 1;
+                data_rd_wb_ns = pc + 4;
                 pc_fetch      = result;
                 jump_en       = 1'b1;  
             end
@@ -177,8 +234,7 @@ module execution(
         pc_fetch      = 0;
         jump_en       = 0;
         funct3_mem_ns = 0;    
-        mem_wb_ns     = 0;        
-     
+        mem_wb_ns     = 0;     
     end
     endtask
     

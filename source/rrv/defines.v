@@ -1,15 +1,17 @@
 //----- General purpose register file -----//
-`define YES_INIT_GPR 
+`define NO_INIT_GPR 
 `define REG_WIDTH  32
 `define GPRN       32
 
 //----- Instruction BRAM defines -----//
-`define INST_DEPTH  2048
-`define INST_WIDTH  32 
+`define INST_DEPTH      65536
+`define INST_MEM_WIDTH  8
+`define INST_WIDTH      32
 
 //----- DATA BRAM defines -----//
-`define YES_INIT_DATA_RAM
-`define DATA_DEPTH  2048
+`define NO_INIT_DATA_RAM
+//`define DATA_DEPTH  2048
+`define DATA_DEPTH  262144
 `define DATA_WIDTH  32 
 
 //----- Fetch stage -----//
@@ -69,6 +71,7 @@
 `define sra  4'b1101
 `define ror  4'b0110
 `define rand 4'b0111
+
 
 
  
