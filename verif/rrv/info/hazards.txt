@@ -16,12 +16,20 @@ store data hazard
 add x1, x2, x3
 sw  x1, 0(x1)
 
+add x1, x2, x3
+sw  x1, 0(x3)
+
+add x1, x2, x3
+add x4, x2, x3
+sw  x4, 0(x1)
+
+
 solution
 --------
 required data already in the pipe but in wrong stage
 forward from mem stage to execution to address calculations when 
 rs1 is also an address and forward rd from mem stage to execution when  
-rs2 ia also a data
+rs2 ia also a data. In third case we need to forward from wb stage to execution.
 
 ----------------
 load data hazard

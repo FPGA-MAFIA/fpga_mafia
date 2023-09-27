@@ -9,8 +9,7 @@
 `define INST_WIDTH      32
 
 //----- DATA BRAM defines -----//
-`define NO_INIT_DATA_RAM
-//`define DATA_DEPTH  2048
+`define YES_INIT_DATA_RAM
 `define DATA_DEPTH  262144
 `define DATA_WIDTH  32 
 

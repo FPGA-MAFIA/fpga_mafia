@@ -3,47 +3,42 @@ module rrv_tb;
 
 logic        Clk;
 logic        Rst;
-logic [31:0] Instruction;
-logic [31:0] DMemAddress;
-logic [31:0] DMemData   ;
-logic [3:0]  DMemByteEn ;
-logic        DMemWrEn   ;
-logic        DMemRdEn   ;
-logic [31:0] DMemRspData;
 
 localparam TOP_IMEM_SIZE = 65536;
 localparam TOP_DMEM_SIZE = 65536;
 localparam D_MEM_SIZE    = 65536;
 localparam D_MEM_OFFSET  = 65536;
 
-logic  [7:0] IMem     [0:TOP_IMEM_SIZE-1];
+logic  [7:0] IMem     [TOP_IMEM_SIZE-1 : 0];
 logic  [7:0] NextIMem [TOP_IMEM_SIZE-1 : 0];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
+`include "rrv_tasks.vh"
 
 //=========================================
-// Instantiating the big_core core
-//=========================================
-// big_core big_core (
-//    .Clk                 (Clk),
-//    .Rst                 (Rst),
-//    .PcQ100H             (Pc),          // To I_MEM
-//    .PreInstructionQ101H (Instruction), // From I_MEM
-//    .DMemWrDataQ103H     (DMemData),  // To D_MEM
-//    .DMemAddressQ103H    (DMemAddress), // To D_MEM
-//    .DMemByteEnQ103H     (DMemByteEn),  // To D_MEM
-//    .DMemWrEnQ103H       (DMemWrEn),    // To D_MEM
-//    .DMemRdEnQ103H       (DMemRdEn),    // To D_MEM
-//    .DMemRdRspQ104H      (DMemRspData)    // From D_MEM
-//);
-//=========================================
-// Instantiating the rrv_top_core
+// Instantiating the rrv_top_core - DUT
 //=========================================
     top top(
         .clk(Clk),
         .rst(Rst)
 );
+
+//=====================================
+//      Reference model for RV32I
+//=====================================
+rv32i_ref
+# (
+    .I_MEM_LSB (0),
+    .I_MEM_MSB (TOP_IMEM_SIZE-1),
+    .D_MEM_LSB (D_MEM_OFFSET),
+    .D_MEM_MSB (D_MEM_SIZE + D_MEM_OFFSET - 1)
+)  rv32i_ref (
+.clk  (Clk),
+.rst  (Rst),
+.run  (1'b1)
+);
+
 
 // ========================
 // clock gen
@@ -86,6 +81,19 @@ initial begin: test_seq
     //$readmemh({"../../../target/rrv/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
     force top.fetch_module.inst_ram_module.inst_ram = IMem;
 
+    // loading the reference model:
+    $readmemh({"../../../target/rrv/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    //$readmemh({"../../../target/rrv/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+    force rv32i_ref.imem = IMem; //backdoor to reference model memory
+    //force rv32i_ref.dmem = DMem; //backdoor to reference model memory
+    //#10;
+    //release rv32i_ref.imem;
+    //release rv32i_ref.dmem;
+
+
+    //======================================
+    // open the file for tracking the GPR
+    //======================================
     trk_gpr = $fopen({"../../../target/rrv/tests/",test_name,"/trk_gpr.log"},"w");
     
     $fdisplay(trk_gpr, "GPR TRACKER");
@@ -110,10 +118,22 @@ initial begin: test_seq
 
     //#10000;
     //$error(" Timeout \n===================\n test %s ended timeout \n=====================", test_name);
+    //========================
+    // before the end on tets, run the Data integrity check
+    //========================
+    di_register_write();
+    //========================
+
     $finish;
 
 end // test_seq
 
+initial begin : used_for_debug_and_test
+    fork
+        get_rf_write();
+        get_ref_rf_write();
+    join
+end
 integer j, k;
 int NUM = 32;
 

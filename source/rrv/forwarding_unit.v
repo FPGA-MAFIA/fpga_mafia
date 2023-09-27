@@ -33,6 +33,8 @@ module forwarding_unit(
     mux_store   = 1'b0;
     rd          = 32'h00000000;
     rd_store_fw = 32'h00000000;
+	// deals with the following case: "add r1, r2, r3 ; sw r1, x(r1)". or "add r1, r2, r3 ; sw r1, x(r2)"
+    // deals with regular data hazard 
     if((rs1_addr == rd_addr_mem) & (we_mem | data_mem_we)) begin   // when data_mem_we = '1', forward occures when rd is the adress of store instruction (sw, x, x(rd))
         mux_alu1  = 1'b1;
         mux_alu2  = 1'b0;
@@ -45,11 +47,15 @@ module forwarding_unit(
             end
         end
     end
-    else if((rs2_addr == rd_addr_mem) & we_mem) begin 
-            mux_alu1  = 1'b0;
-            mux_alu2  = 1'b1;
-            mux_store = 1'b0;
-            rd        = rd_data_mem;
+    else if((rs2_addr == rd_addr_mem) & (we_mem | data_mem_we)) begin 
+        mux_alu1  = 1'b0;
+        mux_alu2  = 1'b1;
+        mux_store = 1'b0;
+        rd        = rd_data_mem;
+        if(we_mem & data_mem_we) begin //forward occures when rd is the content of store instruction (sw, rd, x(x))
+                mux_store   = 1'b1;
+                rd_store_fw = rd_data_mem; 
+        end
     end
     else if((rs1_addr == rd_addr_wb) & we_wb) begin
         mux_alu1  = 1'b1;

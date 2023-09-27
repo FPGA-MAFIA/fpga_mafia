@@ -10,6 +10,8 @@
 module decode(
     input                               clk,
     input                               rst,
+    input                               flash_id_ex,   // transfers zeros to next stage
+    input                               flash_id_ex_s, // from stall unit
     
     //----- from fetch stage -----//
     input  [`INST_WIDTH-1:0]            instruction,
@@ -38,14 +40,19 @@ module decode(
     input                               gpr_en_wb,     
     input                               gpr_we_wb,
     input [`REG_WIDTH-1:0]              rd_in_wb,       // value of rd from rightback. calculated at execution stage or load instruction in mem stage
-    input [`REG_ADDR_WIDTH-1:0]         addr_rd_wb      // rd address to write back into
+    input [`REG_ADDR_WIDTH-1:0]         addr_rd_wb,     // rd address to write back into
 
+    //----- rs1, rs2 to execution unit -----//
+    output reg [`REG_ADDR_WIDTH-1:0]    addr_rs1_ex,   // inputs for forwarding unit
+    output reg [`REG_ADDR_WIDTH-1:0]    addr_rs2_ex       
     
 );
-     
-    wire [`REG_WIDTH-1:0] rs1;  // data of rs1 and rs2 
+        
+    wire [`REG_WIDTH-1:0] rs1;     // data of rs1 and rs2 
     wire [`REG_WIDTH-1:0] rs2;
-       
+    reg  [`REG_WIDTH-1:0] rs1_fw;  // data of rs1 when forward 
+    reg  [`REG_WIDTH-1:0] rs2_fw;  // data of rs2 when forward
+
     gpr gpr_module(
       .clk(clk),
       .we(gpr_we_wb),
@@ -59,6 +66,16 @@ module decode(
       .data_rs2(rs2)
     );
     
+    // forwarding from WB to decode
+    // for example: we need we need rx at decode but it available in WB
+    always@(*) begin
+        rs1_fw = rs1;
+        rs2_fw = rs2;
+        if(`addr_rs1 == addr_rd_wb)
+            rs1_fw = rd_in_wb;
+        if(`addr_rs2 == addr_rd_wb)
+            rs2_fw = rd_in_wb;
+    end
     
     wire [`IMM_ID-1:0] immidiate;
     
@@ -83,9 +100,10 @@ module decode(
    reg                       gpr_we_idex_ns;
    reg                       gpr_en_idex_ns;
    reg [`REG_ADDR_WIDTH-1:0] addr_rd_idex_ns;
+   reg [`REG_ADDR_WIDTH-1:0] addr_rs2_ex_ns;  // in case of forwarding for example add r1, r2, r3 and than addi r4, r5, 1
       
    always@(posedge clk) begin
-        if(rst) begin
+        if(rst | flash_id_ex | flash_id_ex_s) begin
             funct3_alu       <= 32'h00000000;
             alu_in1          <= 32'h00000000;
             alu_in2          <= 32'h00000000; 
@@ -97,7 +115,9 @@ module decode(
             op_code2ex       <= 7'b0000000;
             funct3           <= 3'b000;
             rs2_idex         <= 32'h00000000;
-            immidiate_ex     <= 32'h00000000;         
+            immidiate_ex     <= 32'h00000000; 
+            addr_rs1_ex      <= 32'b00000;
+            addr_rs2_ex      <= 32'b00000;
         end
         else begin
             funct3_alu       <= funct3_alu_ns;
@@ -110,8 +130,10 @@ module decode(
             addr_rd_idex     <= addr_rd_idex_ns;
             op_code2ex       <= instruction[6:0];
             funct3           <= instruction[14:12];
-            rs2_idex         <= rs2;
-            immidiate_ex     <= immidiate; 
+            rs2_idex         <= rs2_fw;
+            immidiate_ex     <= immidiate;
+            addr_rs1_ex      <= `addr_rs1;
+            addr_rs2_ex      <=  addr_rs2_ex_ns; 
         end
    end
       
@@ -122,8 +144,8 @@ module decode(
             `r_type: begin
                 //to execution stage
                 funct3_alu_ns       = {`bit, `funct3};
-                alu_in1_ns          = rs1;
-                alu_in2_ns          = rs2;
+                alu_in1_ns          = rs1_fw;
+                alu_in2_ns          = rs2_fw;
                 //to memory stage
                 data_mem_en_idex_ns = 1'b0;
                 data_mem_we_idex_ns = 1'b0;
@@ -139,9 +161,11 @@ module decode(
                 //to write back stage
                 gpr_en_idex_ns      = 1'b1;
                 gpr_we_idex_ns      = 1'b1;
-                addr_rd_idex_ns     = `addr_rd; 
+                addr_rd_idex_ns     = `addr_rd;
+                // to forwarding unit
+                addr_rs2_ex_ns      = 5'b00000; 
                 //to execution stage
-                alu_in1_ns    = rs1; 
+                alu_in1_ns    = rs1_fw; 
                 if(`funct3 == 3'b001 | `funct3 == 3'b101) begin
                     funct3_alu_ns = {`bit, `funct3};
                     alu_in2_ns    = {{27{1'b0}},`shamt};
@@ -154,7 +178,7 @@ module decode(
             `s_type: begin
                  //to execution stage
                  funct3_alu_ns      = `add;
-                 alu_in1_ns         = rs1;
+                 alu_in1_ns         = rs1_fw;
                  alu_in2_ns         = immidiate;
                 //to memory stage
                 data_mem_en_idex_ns = 1'b1;
@@ -187,8 +211,8 @@ module decode(
                 addr_rd_idex_ns     = `addr_rd;
                 //to execution stage
                 funct3_alu_ns = `add;
-                alu_in1_ns    = rs1;
-                alu_in2_ns    = rs2; 
+                alu_in1_ns    = rs1_fw;
+                alu_in2_ns    = rs2_fw; 
            end
            `i_type_jalr: begin
                 //to memory stage
@@ -200,7 +224,7 @@ module decode(
                 addr_rd_idex_ns     = `addr_rd;
                 //to execution stage
                 funct3_alu_ns = `add;
-                alu_in1_ns    = rs1;
+                alu_in1_ns    = rs1_fw;
                 alu_in2_ns    = immidiate; 
            end
            `j_type: begin
@@ -254,8 +278,9 @@ module decode(
         data_mem_we_idex_ns = 1'b0;
         gpr_en_idex_ns      = 1'b0;
         gpr_we_idex_ns      = 1'b0;
-        addr_rd_idex_ns     = 5'b00000;              
+        addr_rd_idex_ns     = 5'b00000;
+        addr_rs2_ex_ns      = `addr_rs2;              
         end
     endtask
-    
+   
 endmodule
