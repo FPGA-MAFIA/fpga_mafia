@@ -29,6 +29,7 @@ class CommandLineBuilder(tk.Tk):
         self.app_var = tk.BooleanVar(self)
         self.hw_var = tk.BooleanVar(self)
         self.sim_var = tk.BooleanVar(self)
+        self.gui_var = tk.BooleanVar(self)
         self.full_run_var = tk.BooleanVar(self)
         self.params_var = tk.StringVar(self)
         self.params_enabled_var = tk.BooleanVar(self)
@@ -46,9 +47,10 @@ class CommandLineBuilder(tk.Tk):
             "-tests"    : "Choose which tests you'd like to run.",
             "-regress"  : "Specify the regression that has pre-determine test lists to run.",
             "-top"      : "Specify the top module to elaboration & simulate the tb of the DUT.",
-            "-app"      : "For CPU tests that needs to compile a C code to create the elf to load to DUT memory.",
+            "-app"      : "For CPU tests that needs to compile a C or Assembly code to create the elf to load to DUT memory.",
             "-hw"       : "HW Compile the DUT system verilog using vlog.exe - according to the .f file list.",
             "-sim"      : "HW Elaborate the Compiled model + start running the TB (test-bench).",
+            "-gui"      :"Execute this option with the '-sim' flag to open the ModelSim GUI.",
             "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
             "-params"   : "Specify the parameters for the DUT  Example: -gV_TIMEOUT=1000 -gV_NUM_REQ=20.",
             "-pp"       : "HW Post Processing - after simulation is done, run the post processing script ./verif/<dut>/<dut>_pp.py.",
@@ -91,6 +93,7 @@ class CommandLineBuilder(tk.Tk):
         self.add_checkbox_option("-app", self.app_var)
         self.add_checkbox_option("-hw", self.hw_var)
         self.add_checkbox_option("-sim", self.sim_var)
+        self.add_checkbox_option("-gui", self.gui_var) 
         self.add_checkbox_option("-full_run", self.full_run_var)
         self.add_checkbox_option("-pp", self.pp_var)
         self.add_checkbox_option("-clean", self.clean_var)
@@ -98,6 +101,7 @@ class CommandLineBuilder(tk.Tk):
         self.add_checkbox_option("-fpga", self.fpga_var)
         self.add_checkbox_option("-keep_going", self.keep_going_var)
         self.add_checkbox_option("-cmd", self.cmd_var)
+        
 
         # Command display
         self.cmd_display = tk.Text(self, height=2, width=150)
@@ -269,6 +273,8 @@ class CommandLineBuilder(tk.Tk):
             cmd += " -hw"
         if self.sim_var.get():
             cmd += " -sim"
+        if self.gui_var.get():
+            cmd += " -gui"    
         if self.pp_var.get():
             cmd += " -pp"
         if self.full_run_var.get():

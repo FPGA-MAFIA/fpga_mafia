@@ -15,7 +15,6 @@
 `define REG_ADDR_WIDTH 5
 `define addr_rs1       instruction[19:15]
 `define addr_rs2       instruction[24:20]
-`define op_code        instruction[6:0] 
 `define r_type         7'b0110011
 `define i_type_arithm  7'b0010011
 
