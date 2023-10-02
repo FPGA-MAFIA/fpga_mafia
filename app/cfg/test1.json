@@ -1,0 +1,6 @@
+{
+    "I_MEM_OFFSET": 200,
+    "I_MEM_LENGTH": 65536,
+    "D_MEM_OFFSET": 65536,
+    "D_MEM_LENGTH": 61440
+}

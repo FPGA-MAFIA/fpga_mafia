@@ -6,6 +6,7 @@ import subprocess
 import glob
 import argparse
 import sys
+import json
 from termcolor import colored
 
 examples = '''
@@ -23,13 +24,14 @@ python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_RE
 python build.py -dut 'fabric -top fabric_mini_cors_tb -app -hw -sim -> Using the -top argument to specify the tb top module name for simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
+parser.add_argument('-f',         type=str,               help='Specify the JSON configuration file')
 parser.add_argument('-dut',       default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-tests',     default='',             help='list of the tests for run the script on')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-app',       action='store_true',    help='compile the RISCV SW into SV executables')
 parser.add_argument('-hw',        action='store_true',    help='compile the RISCV HW into simulation')
 parser.add_argument('-sim',       action='store_true',    help='start simulation')
-parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
+parser.add_argument('-all',       action='store_true',    default=False, help='running all the tests')
 parser.add_argument('-full_run',  action='store_true',    help='compile SW, HW of the test and simulate it')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
@@ -73,10 +75,6 @@ FPGA_ROOT = './FPGA/'+args.dut+'/'
 #####################################################################################################
 class Test:
     hw_compilation = False
-    I_MEM_OFFSET = str(0x00000000) # -> 0x0000FFFF
-    I_MEM_LENGTH = str(0x00010000)
-    D_MEM_OFFSET = str(0x00010000) # -> 0x0001EFFF
-    D_MEM_LENGTH = str(0x0000F000)
     # SCRATCH_D_MEM_OFFSET = str(0x0001F000) # -> 0x0001FFFF
     # SCRATCH_D_MEM_LENGTH = str(0x00001000)
     # Total of 128KB of memory (64KB for I_MEM and 64KB for D_MEM+SCRATCH_D_MEM)
@@ -94,6 +92,45 @@ class Test:
         self.top = args.top
         # the tests parameters
         self.params = params # FIXME ABD
+
+
+        # Load memory configuration from JSON file or use defaults
+        self.load_memory_config()
+
+    def load_memory_config(self):
+        # Default JSON file location
+        json_directory = 'app/cfg/'
+
+        # Check if the -f flag is provided
+        if args.f:
+            json_file = os.path.join(json_directory, args.f +'.json')
+        else:
+            # If not provided, use a default JSON file located in /app/cfg
+            json_file = os.path.join(json_directory, 'default.json')
+
+        try:
+            # Try to load memory configuration from the specified JSON file
+            with open(json_file) as config_file:
+                config_data = json.load(config_file)
+
+            # Update memory offsets and lengths if they exist in the JSON file
+            Test.I_MEM_OFFSET = str(config_data.get('I_MEM_OFFSET', 0x00000000))
+            Test.I_MEM_LENGTH = str(config_data.get('I_MEM_LENGTH', 0x00010000))
+            Test.D_MEM_OFFSET = str(config_data.get('D_MEM_OFFSET', 0x00010000))
+            Test.D_MEM_LENGTH = str(config_data.get('D_MEM_LENGTH', 0x0000F000))
+
+        except FileNotFoundError:
+            # If the JSON file does not exist, use default values
+            print_message(f'[INFO] Using default memory configuration for {self.name}')
+            Test.I_MEM_OFFSET = str(0x00000000)
+            Test.I_MEM_LENGTH = str(0x00010000)
+            Test.D_MEM_OFFSET = str(0x00010000)
+            Test.D_MEM_LENGTH = str(0x0000F000)
+
+        except Exception as e:
+            print(f'[ERROR] Failed to load memory configuration for {self.name}: {str(e)}')
+
+
     def _create_test_dir(self):
         if not os.path.exists(TARGET):
             mkdir(TARGET)
