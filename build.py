@@ -97,6 +97,18 @@ class Test:
         # Load configuration from JSON file or use defaults
         self.load_config()
 
+    def load_json(self,json_file):
+         #loading configuration from the specified JSON file
+        with open(json_file) as config_file:
+            config_data = json.load(config_file)
+        Test.I_MEM_OFFSET = str(config_data['I_MEM_OFFSET'])
+        Test.I_MEM_LENGTH = str(config_data['I_MEM_LENGTH'])
+        Test.D_MEM_OFFSET = str(config_data['D_MEM_OFFSET'])
+        Test.D_MEM_LENGTH = str(config_data['D_MEM_LENGTH'])
+        Test.crt0_file    = config_data['crt0_file']
+        Test.rv32_gcc     = config_data['rv32_gcc']
+        Test.name         = config_data['name']
+
     def load_config(self):
         # Default JSON file location
         json_directory = 'app/cfg/'
@@ -110,29 +122,11 @@ class Test:
             else:
                 print_message(f'[INFO] Using configuration from \'{args.cfg}\'')
                  #loading configuration from the specified JSON file
-                with open(json_file) as config_file:
-                    config_data = json.load(config_file)
-                # Update configuration as defined in the JSON file
-                Test.I_MEM_OFFSET = str(config_data['I_MEM_OFFSET'])
-                Test.I_MEM_LENGTH = str(config_data['I_MEM_LENGTH'])
-                Test.D_MEM_OFFSET = str(config_data['D_MEM_OFFSET'])
-                Test.D_MEM_LENGTH = str(config_data['D_MEM_LENGTH'])
-                Test.crt0_file    = config_data['crt0_file']
-                Test.rv32_gcc     = config_data['rv32_gcc']
-                Test.name         = config_data['name']
-               
+                self.load_json(json_file)               
         else:
             print_message(f'[INFO] Using default configuration')
             json_file = os.path.join(json_directory, 'default.json')
-            with open(json_file) as config_file:
-                    config_data = json.load(config_file)
-            Test.I_MEM_OFFSET = str(config_data['I_MEM_OFFSET'])
-            Test.I_MEM_LENGTH = str(config_data['I_MEM_LENGTH'])
-            Test.D_MEM_OFFSET = str(config_data['D_MEM_OFFSET'])
-            Test.D_MEM_LENGTH = str(config_data['D_MEM_LENGTH'])
-            Test.crt0_file    = config_data['crt0_file'] 
-            Test.rv32_gcc     = config_data['rv32_gcc']
-            Test.name         = config_data['name']              
+            self.load_json(json_file)              
 
     def _create_test_dir(self):
         if not os.path.exists(TARGET):
