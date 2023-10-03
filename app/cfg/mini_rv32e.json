@@ -1,0 +1,9 @@
+{
+    "I_MEM_OFFSET": 0,
+    "I_MEM_LENGTH": 4096,
+    "D_MEM_OFFSET": 4096,
+    "D_MEM_LENGTH": 8192,
+    "crt0_file"   : "crt0_mini_rv32e.S",
+    "rv32_gcc"    : "rv32e -mabi=ilp32e",
+    "name"        : "rv32e"
+}

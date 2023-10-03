@@ -6,6 +6,7 @@ import subprocess
 import glob
 import argparse
 import sys
+import json
 from termcolor import colored
 
 examples = '''
@@ -23,13 +24,14 @@ python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_RE
 python build.py -dut 'fabric -top fabric_mini_cors_tb -app -hw -sim -> Using the -top argument to specify the tb top module name for simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
+parser.add_argument('-cfg',       type=str,               help='Specify the JSON configuration file')
 parser.add_argument('-dut',       default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-tests',     default='',             help='list of the tests for run the script on')
 parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-app',       action='store_true',    help='compile the RISCV SW into SV executables')
 parser.add_argument('-hw',        action='store_true',    help='compile the RISCV HW into simulation')
 parser.add_argument('-sim',       action='store_true',    help='start simulation')
-parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
+parser.add_argument('-all',       action='store_true',    default=False, help='running all the tests')
 parser.add_argument('-full_run',  action='store_true',    help='compile SW, HW of the test and simulate it')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
@@ -73,10 +75,6 @@ FPGA_ROOT = './FPGA/'+args.dut+'/'
 #####################################################################################################
 class Test:
     hw_compilation = False
-    I_MEM_OFFSET = str(0x00000000) # -> 0x0000FFFF
-    I_MEM_LENGTH = str(0x00010000)
-    D_MEM_OFFSET = str(0x00010000) # -> 0x0001EFFF
-    D_MEM_LENGTH = str(0x0000F000)
     # SCRATCH_D_MEM_OFFSET = str(0x0001F000) # -> 0x0001FFFF
     # SCRATCH_D_MEM_LENGTH = str(0x00001000)
     # Total of 128KB of memory (64KB for I_MEM and 64KB for D_MEM+SCRATCH_D_MEM)
@@ -94,6 +92,42 @@ class Test:
         self.top = args.top
         # the tests parameters
         self.params = params # FIXME ABD
+
+
+        # Load configuration from JSON file or use defaults
+        self.load_config()
+
+    def load_json(self,json_file):
+         #loading configuration from the specified JSON file
+        with open(json_file) as config_file:
+            config_data = json.load(config_file)
+        Test.I_MEM_OFFSET = str(config_data['I_MEM_OFFSET'])
+        Test.I_MEM_LENGTH = str(config_data['I_MEM_LENGTH'])
+        Test.D_MEM_OFFSET = str(config_data['D_MEM_OFFSET'])
+        Test.D_MEM_LENGTH = str(config_data['D_MEM_LENGTH'])
+        Test.crt0_file    = config_data['crt0_file']
+        Test.rv32_gcc     = config_data['rv32_gcc']
+        Test.name         = config_data['name']
+
+    def load_config(self):
+        # Default JSON file location
+        json_directory = 'app/cfg/'
+
+        # Check if the -cfg flag is provided
+        if args.cfg:
+            json_file = os.path.join(json_directory, args.cfg +'.json')
+            if not os.path.exists(json_file):
+                print_message(f'[ERROR] There is no file \'{args.cfg}\'')
+                exit(1)
+            else:
+                print_message(f'[INFO] Using configuration from \'{args.cfg}\'')
+                 #loading configuration from the specified JSON file
+                self.load_json(json_file)               
+        else:
+            print_message(f'[INFO] Using default configuration')
+            json_file = os.path.join(json_directory, 'default.json')
+            self.load_json(json_file)              
+
     def _create_test_dir(self):
         if not os.path.exists(TARGET):
             mkdir(TARGET)
@@ -112,15 +146,16 @@ class Test:
     def _compile_sw(self):
         print_message('[INFO] Starting to compile SW ...')
         if self.path:
-            cs_path =  self.name+'_rv32i.c.s' if not self.assembly else '../../../../../'+self.path
-            elf_path = self.name+'_rv32i.elf'
-            txt_path = self.name+'_rv32i_elf.txt'
+            cs_path =  self.name+'_'+Test.name+'.c.s' if not self.assembly else '../../../../../'+self.path
+            elf_path = self.name+'_'+Test.name+'.elf'
+            txt_path = self.name+'_'+Test.name+'_elf.txt'
             data_init_path = self.name+'_data_init.txt'
             search_path  = '-I ../../../../../app/defines '
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    #first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -129,17 +164,15 @@ class Test:
                 self.fail_flag = True
             else:
                 try:
-                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
-                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
+                    rv32_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=' +Test.rv32_gcc+ ' '
                     i_mem_offset = '-Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+' -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+' '
                     d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
-                    crt0_file    = '../../../../../app/crt0.S '
+                    crt0_file = '../../../../../app/' + Test.crt0_file+' '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
-                    crt0_file    = '../../../../../app/crt0.S '
+                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
+                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -344,7 +377,6 @@ def main():
     if not os.path.exists(VERIF):
         print_message(f'[ERROR] There is no dut \'{args.dut}\'')
         exit(1)
-
     # if args.clean  clean target/dut/tests/ directory before starting running the build script
     if args.clean:
         print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
