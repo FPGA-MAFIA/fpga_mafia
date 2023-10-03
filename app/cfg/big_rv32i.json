@@ -1,0 +1,9 @@
+{
+    "I_MEM_OFFSET": 0,
+    "I_MEM_LENGTH": 8192,
+    "D_MEM_OFFSET": 8192,
+    "D_MEM_LENGTH": 16384,
+    "crt0_file"   : "crt2_big_rv32i.S",
+    "rv32_gcc"    : "rv32i",
+    "name"        : "rv32i"
+}

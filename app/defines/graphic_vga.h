@@ -543,4 +543,3 @@ int rvc_scanf(char* str, int size){
     // return what is the number of chars read
     return i;
 }
-
