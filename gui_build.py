@@ -22,10 +22,10 @@ class CommandLineBuilder(tk.Tk):
         self.dut_var = tk.StringVar(self)
         self.regress_var = tk.StringVar(self)
         self.regress_enabled_var = tk.BooleanVar(self)
+        self.cfg_var = tk.StringVar(self)
+        self.cfg_enabled_var = tk.BooleanVar(self)
         self.top_var = tk.StringVar(self)
         self.top_enabled_var = tk.BooleanVar(self)
-        self.cfg_vars = {}  # Dictionary to store each cfg variable
-        self.cfg_enabled_var = tk.BooleanVar(self)
         self.tests_vars = {}  # Dictionary to store each test variable
         self.tests_enabled_var = tk.BooleanVar(self)
         self.app_var = tk.BooleanVar(self)
@@ -67,20 +67,9 @@ class CommandLineBuilder(tk.Tk):
         # -dut drop-down
         self.create_combobox_option("DUT", "-dut", self.get_dut_options)
 
-        # -cfg checkbox options
-        self.cfg_frame = ttk.LabelFrame(self, text="-config files Options")
-        self.cfg_frame.pack(anchor="w", padx=10, pady=5, fill="x")
+        # -cfg checkbox and dropdown
+        self.create_combobox_option_with_checkbox("Cfg", "-cfg", self.get_cfg_options)
 
-        cfg_check_frame = ttk.Frame(self)  # New frame to encapsulate both the checkbox and its description
-        cfg_check_frame.pack(anchor="w", padx=10, pady=5, fill="x")
-
-        self.cfg_check = ttk.Checkbutton(cfg_check_frame, text="-cfg", variable=self.cfg_enabled_var, command=self.toggle_cfgs_visibility)
-        self.cfg_check.pack(side="left", anchor="w")  # Removed the padx from here
-
-        ttk.Label(cfg_check_frame, text=self.desc["-cfg"], foreground="gray").pack(side="left", anchor="w", padx=10)
-
-        self.update_cfgs_checkboxes()
-        
         # -tests checkbox options
         self.tests_frame = ttk.LabelFrame(self, text="-tests Options")
         self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
@@ -128,7 +117,6 @@ class CommandLineBuilder(tk.Tk):
         self.execute_btn.pack(pady=10)
 
         # Initial setup
-        self.toggle_cfgs_visibility()  # Hide cfg options by default
         self.toggle_test_visibility()  # Hide test options by default
         self.update_command_display()
 
@@ -191,19 +179,6 @@ class CommandLineBuilder(tk.Tk):
         # Add description
         ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
 
-    def update_cfgs_checkboxes(self):
-        for widgets in self.cfg_frame.winfo_children():
-            widgets.destroy()
-
-        cfg = self.get_cfgs_options()
-        for cfgs in cfg:
-            frame = ttk.Frame(self.cfg_frame)
-            frame.pack(anchor="w", fill="x")
-            var = self.cfg_vars.get(cfgs) or tk.BooleanVar(self)
-            self.cfg_vars[cfgs] = var
-            cb = ttk.Checkbutton(frame, text=cfgs, variable=var, command=self.update_command_display)
-            cb.pack(anchor="w", side="left", padx=5)
-
     def update_test_checkboxes(self):
         for widget in self.tests_frame.winfo_children():
             widget.destroy()
@@ -217,17 +192,16 @@ class CommandLineBuilder(tk.Tk):
             cb = ttk.Checkbutton(frame, text=test, variable=var, command=self.update_command_display)
             cb.pack(anchor="w", side="left", padx=5)
 
-
     def update_dropdown_options(self, dropdown, fetch_option):
         dropdown["values"] = fetch_option()
 
     def get_dut_options(self):
         return os.listdir("verif")
-    
-    def get_cfgs_options(self):
-        cfgs_path = f"app/cfg"
-        if os.path.exists(cfgs_path):
-            return os.listdir(cfgs_path)
+
+    def get_cfg_options(self):
+        cfg_path = f"app/cfg"
+        if os.path.exists(cfg_path):
+            return os.listdir(cfg_path)
         else:
             return []
         
@@ -237,7 +211,7 @@ class CommandLineBuilder(tk.Tk):
             return os.listdir(test_path)
         else:
             return []
-    
+
     def get_regress_options(self):
         regress_path = f"verif/{self.dut_var.get()}/regress"
         if os.path.exists(regress_path):
@@ -252,11 +226,6 @@ class CommandLineBuilder(tk.Tk):
             return [f for f in os.listdir(top_path) if f.endswith("_tb.sv")]
         else:
             return []
-
-    def on_combobox_select(self, event):
-        if event.widget.cget("textvariable") == str(self.dut_var):
-            self.update_cfgs_checkboxes()
-        self.update_command_display()
 
     def on_combobox_select(self, event):
         if event.widget.cget("textvariable") == str(self.dut_var):
@@ -275,15 +244,6 @@ class CommandLineBuilder(tk.Tk):
         # Collect checked tests
         # Can't select regression & tests
         #selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
-        selected_cfg = [cfgs.rsplit('.', 1)[0] for cfgs, var in self.cfg_vars.items() if var.get()]
-        selected_cfg_count = len(selected_cfg)
-        if selected_cfg_count > 1:
-            messagebox.showerror("[Error]", "Can't choose more than 1 cfg file")
-        if selected_cfg and self.regress_enabled_var.get():
-            messagebox.showerror("[Error]", "Can't run regression & cfg - choose one or the other")
-            # uncheck the regression checkbox
-            self.regress_enabled_var.set(False)
-            return
         selected_tests = [test.rsplit('.', 1)[0] for test, var in self.tests_vars.items() if var.get()]
         if selected_tests and self.regress_enabled_var.get():
             messagebox.showerror("[Error]", "Can't run regression & tests - choose one or the other")
@@ -312,11 +272,11 @@ class CommandLineBuilder(tk.Tk):
             self.fpga_var.set(False)
             return
 
+        if self.cfg_enabled_var.get():
+            cmd += f" -cfg {self.cfg_var.get().rsplit('.', 1)[0]}"
         if self.top_enabled_var.get():
             # and the top file without the .sv
             cmd += f" -top {self.top_var.get().rsplit('.', 1)[0]}"
-        if selected_cfg:
-            cmd += " -cfg " + "\"" + " ".join(selected_cfg) + "\""
         if selected_tests:
             cmd += " -tests " + "\"" + " ".join(selected_tests) + "\""
         if self.regress_enabled_var.get():
@@ -348,16 +308,6 @@ class CommandLineBuilder(tk.Tk):
 
         self.cmd_display.delete(1.0, tk.END)
         self.cmd_display.insert(tk.END, cmd)
-
-    def toggle_cfgs_visibility(self):
-        if self.cfg_enabled_var.get():
-            self.cfg_frame.pack(anchor="w", padx=10, pady=5, fill="x")
-        else:
-            self.cfg_frame.pack_forget()
-            # Add the following lines to unset all test variables:
-            for cfgs_var in self.cfg_vars.values():
-                cfgs_var.set(False)
-        self.update_command_display()
 
     def toggle_test_visibility(self):
         if self.tests_enabled_var.get():
