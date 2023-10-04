@@ -1,8 +1,0 @@
-{
-    "rv32i_gcc": "riscv-none-embed-gcc.exe -O3 -march=rv32i ",
-    "crt0_file": "../../../../../app/big_core_crt0.S",
-    "I_MEM_OFFSET": "0x00000000",
-    "I_MEM_LENGTH": "0x00010000",
-    "D_MEM_OFFSET": "0x00010000",
-    "D_MEM_LENGTH": "0x0000F000"
-}
