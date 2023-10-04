@@ -276,6 +276,9 @@ class CommandLineBuilder(tk.Tk):
         # Can't select regression & tests
         #selected_tests = [test for test, var in self.tests_vars.items() if var.get()]
         selected_cfg = [cfgs.rsplit('.', 1)[0] for cfgs, var in self.cfg_vars.items() if var.get()]
+        selected_cfg_count = len(selected_cfg)
+        if selected_cfg_count > 1:
+            messagebox.showerror("[Error]", "Can't choose more than 1 cfg file")
         if selected_cfg and self.regress_enabled_var.get():
             messagebox.showerror("[Error]", "Can't run regression & cfg - choose one or the other")
             # uncheck the regression checkbox
