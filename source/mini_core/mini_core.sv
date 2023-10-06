@@ -23,6 +23,7 @@
 
 module mini_core 
 import common_pkg::*;
+#(parameter RF_NUM_MSB) 
 (
     input  logic        Clock,
     input  logic        Rst,
@@ -173,7 +174,9 @@ mini_core_ctrl mini_core_ctrl (
   .ImmediateQ101H       (ImmediateQ101H     ) //output
 );
 
-mini_core_rf mini_core_rf (
+mini_core_rf 
+#( .RF_NUM_MSB(RF_NUM_MSB) )    
+mini_core_rf (
   .Clock            (Clock),          // input
   .Rst              (Rst),            // input 
   .Ctrl             (CtrlRf),         // input

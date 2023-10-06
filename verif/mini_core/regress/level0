@@ -1,6 +1,0 @@
-alive.c
-bubblesort.c
-gcd.c
-stress.c -gV_TIMEOUT=500000 
-non_local_bubble.c
-non_local_rd_wr.c

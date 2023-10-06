@@ -13,6 +13,7 @@
 
 module mini_core_rf 
 import common_pkg::*;
+#(parameter RF_NUM_MSB) 
 (
     input logic Clock,
     input logic Rst,
@@ -31,11 +32,11 @@ import common_pkg::*;
 );
 
 
-logic [31:1][31:0] Register;
-logic              MatchRd1AftrWrQ101H;
-logic              MatchRd2AftrWrQ101H;
-logic [31:0]       RegRdData1Q101H;
-logic [31:0]       RegRdData2Q101H;
+logic [RF_NUM_MSB:1][31:0]  Register;
+logic                       MatchRd1AftrWrQ101H;
+logic                       MatchRd2AftrWrQ101H;
+logic [31:0]                RegRdData1Q101H;
+logic [31:0]                RegRdData2Q101H;
 //===================
 //  Register File
 //===================

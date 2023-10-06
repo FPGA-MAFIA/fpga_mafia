@@ -3,6 +3,7 @@
 
 module mini_core_top
 import common_pkg::*;
+#(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
 input  logic        Clock  ,
 input  logic        Rst    ,
@@ -32,7 +33,9 @@ logic DMemReady;
 logic ReadyQ101H;
 t_core2mem_req Core2DmemReqQ103H;
 
-mini_core mini_core (
+mini_core 
+#( .RF_NUM_MSB(RF_NUM_MSB) )    
+mini_core (
    .Clock               ( Clock              ), // input  logic        Clock,
    .Rst                 ( Rst                ), // input  logic        Rst,
    // Instruction Memory
@@ -40,7 +43,7 @@ mini_core mini_core (
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
    .PreInstructionQ101H ( PreInstructionQ101H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM
    // Data Memory
-   .DMemReady      ( DMemReady     ), // input  logic        DMemReady  , // From D_MEM
+   .DMemReady           ( DMemReady     ), // input  logic        DMemReady  , // From D_MEM
    .Core2DmemReqQ103H   ( Core2DmemReqQ103H  ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
    .DMemRdRspQ104H      ( DMemRdRspQ104H     )  // input  logic [31:0] DMemRdRspQ104H       // From D_MEM
 );

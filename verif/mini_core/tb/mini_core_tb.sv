@@ -104,6 +104,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 100000;
+parameter MINI_RF_NUM_MSB = 31; // For RV32E override this to 15
 initial begin: detect_timeout
     //=======================================
     // timeout
@@ -167,7 +168,9 @@ assign InFabricQ503H        = ShiftInFabric[2];
 assign InFabricValidQ503H   = ShiftInFabricValid[2];
 // DUT instance mini_core 
 assign  local_tile_id = 8'h2_2;
-mini_core_top mini_core_top (
+mini_core_top
+#( .RF_NUM_MSB(MINI_RF_NUM_MSB) )    
+mini_core_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),
