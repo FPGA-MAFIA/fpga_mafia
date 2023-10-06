@@ -65,7 +65,7 @@ string msg = "Data integrity test passed"; // default
 task di_register_write();
 $display("ref_rf_write_history size = %0d", ref_rf_write_history.size());
 $display("rf_write_history size     = %0d", rf_write_history.size());
-foreach(rf_write_history[i])begin
+foreach(ref_rf_write_history[i])begin
     if ((ref_rf_write_history[i].RegDst == rf_write_history[i].RegDst ) && 
         (ref_rf_write_history[i].Data   == rf_write_history[i].Data   ) )
     begin
