@@ -2,7 +2,7 @@
 // Title            : I_Mem cycle core design
 // Project          : single cycle core
 //-----------------------------------------------------------------------------
-// File             : I_Mem
+// File             : i_mem
 // Original Author  : Roman Gilgor
 // Code Owner       : 
 // Created          : 10/2023
@@ -16,15 +16,15 @@
 //-----------------------------------------------------------------------------
 
 
-module I_Mem 
+module i_mem 
 import sc_core_pkg::*;
 (
    input logic   [$clog2(I_MEM_SIZE)-1:0] Pc,
    output logic  [31:0] Instruction
  );
     
-    logic [7:0] I_mem [I_MEM_SIZE-1:I_MEM_OFFSET]; 
+    logic [7:0] IMem [I_MEM_SIZE-1:I_MEM_OFFSET]; 
     
-    assign Instruction = {I_mem[Pc+3], I_mem[Pc+2], I_mem[Pc+1], I_mem[Pc]};  //Little Endian
+    assign Instruction = {IMem[Pc+3], IMem[Pc+2], IMem[Pc+1], IMem[Pc]};  //Little Endian
     
 endmodule

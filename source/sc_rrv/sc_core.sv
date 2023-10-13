@@ -23,10 +23,10 @@ import sc_core_pkg::*; (
     input logic  Rst,
     output logic SimulationDone,
    //Interface with Instruction memory
-   output logic [$clog2(I_MEM_SIZE)-1:0] Pc,
+   output logic [$clog2(I_MEM_SIZE)-1:0] Pc, 
    input logic  [31:0]                   Instruction,
    //Interface with Data Memory
-    output logic [$clog2(D_MEM_SIZE)-1:0] DMemAddress, 
+    output logic [31:0]                   DMemAddress, 
     output logic [31:0]                   DMemData   ,  
     output logic [3:0]                    DMemByteEn ,  
     output logic                          DMemWrEn   ,  

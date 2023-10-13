@@ -28,14 +28,14 @@ import sc_core_pkg::*;(
    logic [31:0]                   Instruction;
    
    //Interface with Data Memory
-    logic [$clog2(D_MEM_SIZE)-1:0] DMemAddress; 
-    logic [31:0]                   DMemData;  
-    logic [3:0]                    DMemByteEn;  
-    logic                          DMemWrEn;  
-    logic                          DMemRdEn;  
-    logic [31:0]                   DMemRspData;
+    logic [31:0]  DMemAddress; 
+    logic [31:0]  DMemData;  
+    logic [3:0]   DMemByteEn;  
+    logic         DMemWrEn;  
+    logic         DMemRdEn;  
+    logic [31:0]  DMemRspData;
     
-    sc_core core(
+    sc_core sc_core(
         .Clk(Clk),
         .Rst(Rst),
         .SimulationDone(SimulationDone),
@@ -51,13 +51,13 @@ import sc_core_pkg::*;(
         .DMemRspData(DMemRspData)
     );
 
-    I_Mem I_Mem(
+    i_mem i_mem(
     .Pc(Pc),
     .Instruction(Instruction) 
     );
 
   
-    D_Mem D_Mem(
+    d_mem d_Mem(
     .Clk(Clk), 
     .DMemAddress(DMemAddress), 
     .DMemData(DMemData),  

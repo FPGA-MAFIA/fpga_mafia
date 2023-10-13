@@ -2,7 +2,7 @@
 // Title            : D_Mem cycle core design
 // Project          : single cycle core
 //-----------------------------------------------------------------------------
-// File             : D_Mem
+// File             : d_mem
 // Original Author  : Roman Gilgor
 // Code Owner       : 
 // Created          : 10/2023
@@ -16,11 +16,11 @@
 //-----------------------------------------------------------------------------
 
 
-module D_Mem
+module d_mem
 import sc_core_pkg::*;
 (
     input  logic Clk, 
-    input  logic [$clog2(D_MEM_SIZE)-1:0] DMemAddress, 
+    input  logic [31:0]                   DMemAddress, 
     input  logic [31:0]                   DMemData   ,  
     input  logic [3:0]                    DMemByteEn ,  
     input  logic                          DMemWrEn   ,  
@@ -46,6 +46,8 @@ import sc_core_pkg::*;
                 DMem[DMemAddress+2] <= DMemData[23:16];
                 DMem[DMemAddress+3] <= DMemData[31:24];
             end
+            else 
+              DMem[DMemAddress]     <= 0;  
          end   
     end
     

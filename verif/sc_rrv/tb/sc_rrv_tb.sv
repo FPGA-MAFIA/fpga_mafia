@@ -8,7 +8,7 @@ logic        SimulationDone;
 
 localparam TOP_IMEM_SIZE = 65536;
 localparam TOP_DMEM_SIZE = 65536;
-localparam D_MEM_SIZE    = 65536;
+localparam D_MEM_SIZE    = 61440;
 localparam D_MEM_OFFSET  = 65536;
 
 logic  [7:0] IMem     [TOP_IMEM_SIZE-1 : 0];
@@ -22,6 +22,7 @@ localparam DELAY    = 10;
 string  test_name;
 
 integer trk_rf_pointer;
+integer trk_dmem_signals_pointer;
 
 `include "sc_rrv_tasks.vh"
 
@@ -61,26 +62,34 @@ initial begin: test_seq
     //load the program to the TB
     //======================================
     $readmemh({"../../../target/sc_rrv/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force sc_top.I_Mem.I_mem = IMem;
+    force sc_top.i_mem.IMem = IMem;
     
     trk_rf_pointer = $fopen({"../../../target/sc_rrv/tests/",test_name,"/gcc_files/trk_rf.txt"} , "w");
-    
+    $fdisplay(trk_rf_pointer, "                                        ============================= Register File Tracker =============================");
+    $fdisplay(trk_rf_pointer, "                                        =================================================================================");
+
+    trk_dmem_signals_pointer = $fopen({"../../../target/sc_rrv/tests/",test_name,"/gcc_files/trk_dmem_signals.txt"} , "w");
+    $fdisplay(trk_dmem_signals_pointer, "============================= Data Memory Interface Tracker =============================");
+    $fdisplay(trk_dmem_signals_pointer, "=========================================================================================");
+
     #40;
 
     while(1) begin
         if(SimulationDone) begin
             $fclose(trk_rf_pointer);
+            $fclose(trk_dmem_signals_pointer);
             $display("Simulation Done");
             $finish();
         end
         else begin 
             trk_rf();
+            trk_dmem_signals();
             #DELAY;
         end
     end
         
-    #SET_TIME;
-    $finish();
+    //#SET_TIME;
+    //$finish();
 
 end // load instruction memory
 
