@@ -18,8 +18,6 @@ main:
   lb    x10, 4(x2)
   lbu    x11, 4(x2)
 
-  
-
 
 eot:
     nop
