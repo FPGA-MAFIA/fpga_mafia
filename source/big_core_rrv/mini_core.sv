@@ -98,11 +98,11 @@ logic DMemRdRspValid;
 logic ReadyQ102H;
 logic ReadyQ103H;
 logic ReadyQ104H;
-t_ctrl_if CtrlIf;
-t_ctrl_rf CtrlRf;
-t_ctrl_exe CtrlExe;
-t_ctrl_mem CtrlMem;
-t_ctrl_wb CtrlWb;
+t_ctrl_if   CtrlIf;
+t_ctrl_rf   CtrlRf;
+t_ctrl_exe  CtrlExe;
+t_ctrl_mem1 CtrlMem1;
+t_ctrl_wb   CtrlWb;
 
 logic [31:0] DMemWrDataQ103H;
 
@@ -168,7 +168,7 @@ mini_core_ctrl mini_core_ctrl (
   .CtrlIf               (CtrlIf             ), //output
   .CtrlRf               (CtrlRf             ), //output
   .CtrlExe              (CtrlExe            ), //output
-  .CtrlMem              (CtrlMem            ), //output
+  .CtrlMem1             (CtrlMem1           ), //output
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
   .ImmediateQ101H       (ImmediateQ101H     ) //output
@@ -241,25 +241,41 @@ mini_core_exe mini_core_exe (
 //  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/  |____/  |_|  |_|
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Memory Access
+// Memory Access1
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
+// 2. In case of Reads (LOAD) send request to memory and wait for response in the next stage
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_mem_acs mini_core_mem_access (
+mini_core_mem_acs1 mini_core_mem_access1 (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
-  .Ctrl               (CtrlMem),        //input
+  .Ctrl               (CtrlMem1),       //input
   .ReadyQ104H         (ReadyQ104H),     //input
   // Input Data path
   .PcPlus4Q103H       (PcPlus4Q103H),   //input
   .AluOutQ103H        (AluOutQ103H),    //input
   .DMemWrDataQ103H    (DMemWrDataQ103H),//input
-  // data path output
+  // data path output 
   .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
   .PcPlus4Q104H       (PcPlus4Q104H),   //input
   .AluOutQ104H        (AluOutQ104H)     //input
 );
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
+//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  | || |   | |  | |
+// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | | | || |_  | |__| |
+// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | | |__   _| |  __  |
+// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |    | |   | |  | |
+//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/     |_|   |_|  |_|
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Memory Access 2
+// -----------------
+// 1. Respond to D_MEM for Reads (LOAD) 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 

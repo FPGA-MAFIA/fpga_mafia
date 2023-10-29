@@ -95,7 +95,7 @@ typedef struct packed {
     logic       DMemWrEnQ103H;  
     logic       DMemRdEnQ103H;  
     logic [3:0] DMemByteEnQ103H;
-} t_ctrl_mem;
+} t_ctrl_mem1;
 
 
 

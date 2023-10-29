@@ -11,12 +11,12 @@
 
 `include "macros.sv"
 
-module mini_core_mem_acs
+module mini_core_mem_acs1
 import common_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
   // ctrl
-  input var  t_ctrl_mem      Ctrl,        //input
+  input var  t_ctrl_mem1 Ctrl,        //input
   input  logic           ReadyQ104H,  //input
   //data path input
   input  logic [31:0]    PcPlus4Q103H,//input

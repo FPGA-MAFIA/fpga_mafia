@@ -32,7 +32,7 @@ import common_pkg::*;
     output var t_ctrl_if    CtrlIf,
     output var t_ctrl_rf    CtrlRf,
     output var t_ctrl_exe   CtrlExe,
-    output var t_ctrl_mem   CtrlMem,
+    output var t_ctrl_mem1  CtrlMem1,
     output var t_ctrl_wb    CtrlWb,
     // output data path signals
     output  logic [31:0] ImmediateQ101H 
@@ -217,9 +217,9 @@ assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
 assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
 
 // Memory access Control Signals
-assign CtrlMem.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
-assign CtrlMem.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
-assign CtrlMem.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
+assign CtrlMem1.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
+assign CtrlMem1.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
+assign CtrlMem1.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
 
 // Write Back Control Signals
 assign CtrlWb.ByteEnQ104H      = CtrlQ104H.DMemByteEn;
