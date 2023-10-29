@@ -28,6 +28,7 @@ import common_pkg::*;
     output  logic        ReadyQ102H,
     output  logic        ReadyQ103H,
     output  logic        ReadyQ104H,
+    output  logic        ReadyQ105H,
     // output ctrl signals
     output var t_ctrl_if    CtrlIf,
     output var t_ctrl_rf    CtrlRf,
@@ -70,6 +71,7 @@ logic PreValidInstQ101H, ValidInstQ101H;
 logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
+logic PreValidInstQ105H, ValidInstQ105H;
 
 t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
 logic CoreFreeze;
@@ -216,7 +218,7 @@ assign CtrlExe.RegDstQ104H   = CtrlQ104H.RegDst;
 assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
 assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
 
-// Memory access Control Signals
+// Memory access1 Control Signals
 assign CtrlMem1.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
 assign CtrlMem1.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
 assign CtrlMem1.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;

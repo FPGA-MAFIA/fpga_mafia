@@ -18,27 +18,26 @@ import common_pkg::*;
   // Ctrl
   input var  t_ctrl_wb       Ctrl, //input
   // Data path input
-  input  logic [31:0]    DMemRdDataQ104H, //input
-  input  logic [31:0]    AluOutQ104H,     //input
-  input  logic [31:0]    PcPlus4Q104H,    //input
+  input  logic [31:0]    DMemRdDataQ105H, //input
+  input  logic [31:0]    AluOutQ105H,     //input
+  input  logic [31:0]    PcPlus4Q105H,    //input
   // data path output
-  output logic [31:0]    RegWrDataQ104H  //output
-
+  output logic [31:0]    RegWrDataQ105H  //output
 );
 
-logic [31:0] PostSxDMemRdDataQ104H;
+logic [31:0] PostSxDMemRdDataQ105H;
 // Sign extend taking care of
-assign PostSxDMemRdDataQ104H[7:0]   =  Ctrl.ByteEnQ104H[0] ? DMemRdDataQ104H[7:0]          : 8'b0;
-assign PostSxDMemRdDataQ104H[15:8]  =  Ctrl.ByteEnQ104H[1] ? DMemRdDataQ104H[15:8]         :
-                                       Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ104H[7]}} : 8'b0;
-assign PostSxDMemRdDataQ104H[23:16] =  Ctrl.ByteEnQ104H[2] ? DMemRdDataQ104H[23:16]        :
-                                       Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ104H[15]}}: 8'b0;
-assign PostSxDMemRdDataQ104H[31:24] =  Ctrl.ByteEnQ104H[3] ? DMemRdDataQ104H[31:24]        :
-                                       Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ104H[23]}}: 8'b0;
+assign PostSxDMemRdDataQ105H[7:0]   =  Ctrl.ByteEnQ104H[0] ? DMemRdDataQ105H[7:0]          : 8'b0;
+assign PostSxDMemRdDataQ105H[15:8]  =  Ctrl.ByteEnQ104H[1] ? DMemRdDataQ105H[15:8]         :
+                                       Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ105H[7]}} : 8'b0;
+assign PostSxDMemRdDataQ105H[23:16] =  Ctrl.ByteEnQ104H[2] ? DMemRdDataQ105H[23:16]        :
+                                       Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ105H[15]}}: 8'b0;
+assign PostSxDMemRdDataQ105H[31:24] =  Ctrl.ByteEnQ104H[3] ? DMemRdDataQ105H[31:24]        :
+                                       Ctrl.SignExtQ104H   ? {8{PostSxDMemRdDataQ105H[23]}}: 8'b0;
 
 // ---- Select what write to the register file ----
-assign RegWrDataQ104H = (Ctrl.e_SelWrBackQ104H == WB_DMEM) ? PostSxDMemRdDataQ104H : // TODO - Conseder using unique case instead of priority mux, to improve timing by reduce number of logical steps for the mux out.
-                        (Ctrl.e_SelWrBackQ104H == WB_ALU)  ? AluOutQ104H           :
-                        (Ctrl.e_SelWrBackQ104H == WB_PC4)  ? PcPlus4Q104H          : 
+assign RegWrDataQ105H = (Ctrl.e_SelWrBackQ104H == WB_DMEM) ? PostSxDMemRdDataQ105H : // TODO - Conseder using unique case instead of priority mux, to improve timing by reduce number of logical steps for the mux out.
+                        (Ctrl.e_SelWrBackQ104H == WB_ALU)  ? AluOutQ105H           :
+                        (Ctrl.e_SelWrBackQ104H == WB_PC4)  ? PcPlus4Q105H          : 
                                                            32'b0;
 endmodule
