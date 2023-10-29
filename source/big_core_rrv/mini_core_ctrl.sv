@@ -73,7 +73,7 @@ logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 logic PreValidInstQ105H, ValidInstQ105H;
 
-t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
+t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
@@ -178,15 +178,17 @@ always_comb begin
 end
 
 //FIXME - there are various reasons for back-pressure. Need to code it here
-assign ReadyQ104H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
 assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrdDetectQ101H); //
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
-// Sample the Ctrl bits though the pipe
+// Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
+`MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104, Clock, ReadyQ104H )
 
 assign ValidInstQ101H = ReadyQ101H && PreValidInstQ101H;
 `MAFIA_EN_RST_DFF(PreValidInstQ102H, ValidInstQ101H, Clock, ReadyQ102H, Rst )
@@ -195,6 +197,8 @@ assign ValidInstQ102H = ReadyQ102H && PreValidInstQ102H;
 assign ValidInstQ103H = ReadyQ103H && PreValidInstQ103H;
 `MAFIA_EN_DFF    (PreValidInstQ104H, ValidInstQ103H, Clock, ReadyQ104H)
 assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
+`MAFIA_EN_DFF    (PreValidInstQ105H, ValidInstQ104H, Clock, ReadyQ104H)
+assign ValidInstQ105H = ReadyQ105H && PreValidInstQ105H;
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
@@ -202,8 +206,8 @@ assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
 //Register File Control Signals
 assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
 assign CtrlRf.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
-assign CtrlRf.RegDstQ104H   = CtrlQ104H.RegDst;
-assign CtrlRf.RegWrEnQ104H  = ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
+assign CtrlRf.RegDstQ105H   = CtrlQ105H.RegDst;
+assign CtrlRf.RegWrEnQ105H  = ValidInstQ105H ? CtrlQ105H.RegWrEn : 1'b0;
 
 //Execute Control Signals
 assign CtrlExe.RegSrc1Q102H  = CtrlQ102H.RegSrc1;
@@ -224,9 +228,9 @@ assign CtrlMem1.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;
 assign CtrlMem1.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
 
 // Write Back Control Signals
-assign CtrlWb.ByteEnQ104H      = CtrlQ104H.DMemByteEn;
-assign CtrlWb.SignExtQ104H     = CtrlQ104H.SignExt;
-assign CtrlWb.e_SelWrBackQ104H = CtrlQ104H.e_SelWrBack;
+assign CtrlWb.ByteEnQ105H      = CtrlQ105H.DMemByteEn;
+assign CtrlWb.SignExtQ105H     = CtrlQ105H.SignExt;
+assign CtrlWb.e_SelWrBackQ105H = CtrlQ105H.e_SelWrBack;
 
 endmodule
 

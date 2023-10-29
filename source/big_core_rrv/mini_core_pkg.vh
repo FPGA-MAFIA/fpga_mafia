@@ -73,8 +73,8 @@ typedef struct packed {
 typedef struct packed {
     logic [4:0] RegSrc1Q101H;
     logic [4:0] RegSrc2Q101H;
-    logic [4:0] RegDstQ104H;
-    logic       RegWrEnQ104H;
+    logic [4:0] RegDstQ105H;
+    logic       RegWrEnQ105H;
 } t_ctrl_rf;
 
 typedef struct packed {
@@ -100,9 +100,9 @@ typedef struct packed {
 
 
 typedef struct packed {
-    logic [3:0] ByteEnQ104H;
-    logic [3:0] SignExtQ104H;
-    t_e_sel_wb    e_SelWrBackQ104H;
+    logic [3:0] ByteEnQ105H;
+    logic [3:0] SignExtQ105H;
+    t_e_sel_wb    e_SelWrBackQ105H;
 } t_ctrl_wb;
 
 typedef struct packed {
