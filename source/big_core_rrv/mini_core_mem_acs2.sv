@@ -11,7 +11,7 @@
 
 `include "macros.sv"
 
-module mini_core_mem_acs1
+module mini_core_mem_acs2
 import common_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  

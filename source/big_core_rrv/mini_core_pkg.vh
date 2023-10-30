@@ -85,8 +85,10 @@ typedef struct packed {
     t_branch_type BranchOpQ102H;
     logic [4:0] RegDstQ103H;
     logic [4:0] RegDstQ104H;
+    logic [4:0] RegDstQ105H;
     logic       RegWrEnQ103H;
     logic       RegWrEnQ104H;
+    logic       RegWrEnQ105H;
     logic       SelAluPcQ102H;
     logic       SelAluImmQ102H;
 } t_ctrl_exe;
@@ -96,7 +98,6 @@ typedef struct packed {
     logic       DMemRdEnQ103H;  
     logic [3:0] DMemByteEnQ103H;
 } t_ctrl_mem1;
-
 
 
 typedef struct packed {

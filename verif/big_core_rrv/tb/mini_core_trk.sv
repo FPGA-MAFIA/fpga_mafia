@@ -74,7 +74,7 @@ always @(posedge Clk) begin : memory_access_print
         $fwrite(trk_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
     end
     if(DMemRdEnQ104H) begin
-        $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H);
+        $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_top.mini_core.mini_core_rf.RegWrDataQ105H);
     end
 end
 
@@ -100,8 +100,8 @@ end
 always_ff @(posedge Clk ) begin
         $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
-                           PcQ104H,
-                           mini_core_top.mini_core.mini_core_rf.Ctrl.RegDstQ104H,
+                           PcQ105H,
+                           mini_core_top.mini_core.mini_core_rf.Ctrl.RegDstQ105H,
                            mini_core_top.mini_core.mini_core_rf.Register[0],
                            mini_core_top.mini_core.mini_core_rf.Register[1],
                            mini_core_top.mini_core.mini_core_rf.Register[2],

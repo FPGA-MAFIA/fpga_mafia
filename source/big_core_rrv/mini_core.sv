@@ -10,14 +10,14 @@
 //-----------------------------------------------------------------------------
 // Description :
 // This module will contain a complete RISCV Core supporting the RV32I
-// Will be implemented in a single cycle micro-architecture.
-// The I_MEM & D_MEM will support async memory read. (This will allow the single-cycle arch)
-// ---- 5 Pipeline Stages -----
+// Will be implemented in a 6 stage pipeline micro-architecture.
+// ---- 6 Pipeline Stages -----
 // 1) Q100H Instruction Fetch
 // 2) Q101H Instruction Decode 
 // 3) Q102H Execute 
-// 4) Q103H Memory Access
-// 5) Q104H Write back data from Memory/ALU to Register file
+// 4) Q103H Memory Access1
+// 5) Q104H Memory Access2
+// 6) Q105H Write back data from Memory/ALU to Register file
 
 `include "macros.sv"
 
@@ -34,7 +34,7 @@ import common_pkg::*;
     // Data Memory
     input  logic          DMemReady,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
-    input  logic [31:0]   DMemRdRspQ105H     // From D_MEM
+    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM  // TODO consider to fix it to  DMemRdRspQ105H
 );
 
 // ---- Data-Path signals ----
@@ -52,7 +52,7 @@ logic [31:0]        AluIn2Q102H;
 logic [31:0]        AluOutQ102H, AluOutQ103H, AluOutQ104H, AluOutQ105H;
 logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H, RegRdData1Q103H;
 logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
-logic [31:0]        RegWrDataQ105H; 
+logic [31:0]        RegWrDataQ104H, RegWrDataQ105H; 
 logic [31:0]        PostSxDMemRdDataQ104H;
 
 // Control bits
@@ -211,26 +211,28 @@ mini_core_rf (
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 mini_core_exe mini_core_exe (
-  .Clock               (Clock              ), //  input 
-  .Rst                 (Rst                ), //  input 
+  .Clock               (Clock              ),  //  input 
+  .Rst                 (Rst                ),  //  input 
   // Input Control Signals
-  .Ctrl                (CtrlExe            ), //  input 
-  .ReadyQ103H          (ReadyQ103H         ), //  input
+  .Ctrl                (CtrlExe            ),  //  input 
+  .ReadyQ103H          (ReadyQ103H         ),  //  input
   // Output Control Signals
-  .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
+  .BranchCondMetQ102H  (BranchCondMetQ102H ),  //  output
   // Input Data path
   //Q102H
-  .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
-  .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input  
-  .PcQ102H             (PcQ102H            ), //  input 
-  .ImmediateQ102H      (ImmediateQ102H     ), //  input 
+  .PreRegRdData1Q102H  (RegRdData1Q102H    ),  //  input 
+  .PreRegRdData2Q102H  (RegRdData2Q102H    ),  //  input  
+  .PcQ102H             (PcQ102H            ),  //  input 
+  .ImmediateQ102H      (ImmediateQ102H     ),  //  input 
+  //Q104H
+  .AluOutQ104H         (AluOutQ104H     ),     //  input 
   //Q105H
-  .RegWrDataQ105H      (RegWrDataQ105H     ), //  input 
+  .RegWrDataQ105H      (RegWrDataQ105H     ),  //  input 
   // output data path
-  .AluOutQ102H         (AluOutQ102H        ), //  output
-  .AluOutQ103H         (AluOutQ103H        ), //  output
-  .PcPlus4Q103H        (PcPlus4Q103H       ), //  output
-  .DMemWrDataQ103H     (DMemWrDataQ103H    )  //  output
+  .AluOutQ102H         (AluOutQ102H        ),  //  output
+  .AluOutQ103H         (AluOutQ103H        ),  //  output
+  .PcPlus4Q103H        (PcPlus4Q103H       ),  //  output
+  .DMemWrDataQ103H     (DMemWrDataQ103H    )   //  output
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,11 +313,11 @@ mini_core_wb mini_core_wb
  // Ctrl
  .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
  // Data path input
- .DMemRdDataQ105H (DMemRdRspQ105H ), // input  logic [31:0]    DMemRdDataQ105H, //input
- .AluOutQ105H     (AluOutQ105H     ), // input  logic [31:0]    AluOutQ104H,     //input
- .PcPlus4Q105H    (PcPlus4Q105H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
+ .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ105H, //input
+ .AluOutQ105H     (AluOutQ105H     ), // input  logic [31:0]    AluOutQ105H,     //input
+ .PcPlus4Q105H    (PcPlus4Q105H    ), // input  logic [31:0]    PcPlus4Q105H,    //input
  // data path output
- .RegWrDataQ105H  (RegWrDataQ105H  )  // output logic [31:0]    RegWrDataQ104H  //output
+ .RegWrDataQ105H  (RegWrDataQ105H  )  // output logic [31:0]    RegWrDataQ105H  //output
 
 );
 
