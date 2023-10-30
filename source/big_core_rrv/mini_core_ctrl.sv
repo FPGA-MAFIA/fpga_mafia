@@ -204,7 +204,7 @@ assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
-`MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ104H )
+`MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ105H )
 
 assign ValidInstQ101H = ReadyQ101H && PreValidInstQ101H;
 `MAFIA_EN_RST_DFF(PreValidInstQ102H, ValidInstQ101H, Clock, ReadyQ102H, Rst )
@@ -213,7 +213,7 @@ assign ValidInstQ102H = ReadyQ102H && PreValidInstQ102H;
 assign ValidInstQ103H = ReadyQ103H && PreValidInstQ103H;
 `MAFIA_EN_DFF    (PreValidInstQ104H, ValidInstQ103H, Clock, ReadyQ104H)
 assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
-`MAFIA_EN_DFF    (PreValidInstQ105H, ValidInstQ104H, Clock, ReadyQ104H)
+`MAFIA_EN_DFF    (PreValidInstQ105H, ValidInstQ104H, Clock, ReadyQ105H)
 assign ValidInstQ105H = ReadyQ105H && PreValidInstQ105H;
 
 // Instruction Fetch Control Signals

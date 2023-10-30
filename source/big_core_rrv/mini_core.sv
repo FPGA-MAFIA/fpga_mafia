@@ -34,7 +34,7 @@ import common_pkg::*;
     // Data Memory
     input  logic          DMemReady,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
-    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM  // TODO consider to fix it to  DMemRdRspQ105H
+    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM  // TODO consider to fix it to DMemRdRspQ105H
 );
 
 // ---- Data-Path signals ----
