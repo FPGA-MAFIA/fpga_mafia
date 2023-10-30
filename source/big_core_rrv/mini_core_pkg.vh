@@ -73,8 +73,8 @@ typedef struct packed {
 typedef struct packed {
     logic [4:0] RegSrc1Q101H;
     logic [4:0] RegSrc2Q101H;
-    logic [4:0] RegDstQ104H;
-    logic       RegWrEnQ104H;
+    logic [4:0] RegDstQ105H;
+    logic       RegWrEnQ105H;
 } t_ctrl_rf;
 
 typedef struct packed {
@@ -85,8 +85,10 @@ typedef struct packed {
     t_branch_type BranchOpQ102H;
     logic [4:0] RegDstQ103H;
     logic [4:0] RegDstQ104H;
+    logic [4:0] RegDstQ105H;
     logic       RegWrEnQ103H;
     logic       RegWrEnQ104H;
+    logic       RegWrEnQ105H;
     logic       SelAluPcQ102H;
     logic       SelAluImmQ102H;
 } t_ctrl_exe;
@@ -95,14 +97,13 @@ typedef struct packed {
     logic       DMemWrEnQ103H;  
     logic       DMemRdEnQ103H;  
     logic [3:0] DMemByteEnQ103H;
-} t_ctrl_mem;
-
+} t_ctrl_mem1;
 
 
 typedef struct packed {
-    logic [3:0] ByteEnQ104H;
-    logic [3:0] SignExtQ104H;
-    t_e_sel_wb    e_SelWrBackQ104H;
+    logic [3:0] ByteEnQ105H;
+    logic [3:0] SignExtQ105H;
+    t_e_sel_wb    e_SelWrBackQ105H;
 } t_ctrl_wb;
 
 typedef struct packed {

@@ -28,11 +28,12 @@ import common_pkg::*;
     output  logic        ReadyQ102H,
     output  logic        ReadyQ103H,
     output  logic        ReadyQ104H,
+    output  logic        ReadyQ105H,
     // output ctrl signals
     output var t_ctrl_if    CtrlIf,
     output var t_ctrl_rf    CtrlRf,
     output var t_ctrl_exe   CtrlExe,
-    output var t_ctrl_mem   CtrlMem,
+    output var t_ctrl_mem1  CtrlMem1,
     output var t_ctrl_wb    CtrlWb,
     // output data path signals
     output  logic [31:0] ImmediateQ101H 
@@ -59,7 +60,10 @@ import common_pkg::*;
 t_immediate         SelImmTypeQ101H;
  logic [4:0]  PreRegSrc1Q101H;
  logic [4:0]  PreRegSrc2Q101H;
- logic        LoadHzrdDetectQ101H;
+ logic        LoadHzrd1DetectQ101H;
+ logic        LoadHzrd2DetectQ101H;
+ logic        LoadHzrd1NopQ101H;
+ logic        LoadHzrd2NopQ102H;
  logic [31:0] InstructionQ101H;
  logic        flushQ102H;
  logic        flushQ103H;
@@ -70,30 +74,44 @@ logic PreValidInstQ101H, ValidInstQ101H;
 logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
+logic PreValidInstQ105H, ValidInstQ105H;
 
-t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
+t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
-assign LoadHzrdDetectQ101H       = Rst ? 1'b0 : 
+assign LoadHzrd1DetectQ101H      = Rst ? 1'b0 : 
                                  ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
                                  ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                                                                                         1'b0;
+                                                                                                         1'b0;                                                                                                        
+assign LoadHzrd2DetectQ101H      = Rst ? 1'b0 : 
+                                 ((PreRegSrc1Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
+                                 ((PreRegSrc2Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
+                                                                                                         1'b0;                                                                                                        
+//incase of LoadHzrd1DetectQ101H, insert two nop's
+assign LoadHzrd1NopQ101H = LoadHzrd1DetectQ101H;
+`MAFIA_EN_DFF(LoadHzrd2NopQ102H , LoadHzrd1NopQ101H   , Clock , ReadyQ103H)
+
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
 assign flushQ102H = IndirectBranchQ102H;
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
-assign InstructionQ101H = flushQ102H          ? NOP :
-                          flushQ103H          ? NOP :
-                          LoadHzrdDetectQ101H ? NOP : 
+
+assign InstructionQ101H = flushQ102H           ? NOP :
+                          flushQ103H           ? NOP :
+                          LoadHzrd1NopQ101H    ? NOP :
+                          LoadHzrd2NopQ102H    ? NOP :
+                          LoadHzrd2DetectQ101H ? NOP : 
                                                 PreInstructionQ101H;
-assign PreValidInstQ101H = flushQ102H          ? 1'b0 : 
-                           flushQ103H          ? 1'b0 : 
-                           LoadHzrdDetectQ101H ? 1'b0 : 
-                                                 1'b1 ;
+assign PreValidInstQ101H = flushQ102H           ? 1'b0 : 
+                           flushQ103H           ? 1'b0 :
+                           LoadHzrd1NopQ101H    ? 1'b0 :
+                           LoadHzrd2NopQ102H    ? 1'b0 :  
+                           LoadHzrd2DetectQ101H ? 1'b0 : 
+                                                  1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
@@ -176,15 +194,17 @@ always_comb begin
 end
 
 //FIXME - there are various reasons for back-pressure. Need to code it here
-assign ReadyQ104H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
-assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrdDetectQ101H); //
+assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrd1DetectQ101H && LoadHzrd1NopQ101H && LoadHzrd2NopQ102H); //
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
-// Sample the Ctrl bits though the pipe
+// Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
+`MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ105H )
 
 assign ValidInstQ101H = ReadyQ101H && PreValidInstQ101H;
 `MAFIA_EN_RST_DFF(PreValidInstQ102H, ValidInstQ101H, Clock, ReadyQ102H, Rst )
@@ -193,6 +213,8 @@ assign ValidInstQ102H = ReadyQ102H && PreValidInstQ102H;
 assign ValidInstQ103H = ReadyQ103H && PreValidInstQ103H;
 `MAFIA_EN_DFF    (PreValidInstQ104H, ValidInstQ103H, Clock, ReadyQ104H)
 assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
+`MAFIA_EN_DFF    (PreValidInstQ105H, ValidInstQ104H, Clock, ReadyQ105H)
+assign ValidInstQ105H = ReadyQ105H && PreValidInstQ105H;
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
@@ -200,8 +222,8 @@ assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
 //Register File Control Signals
 assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
 assign CtrlRf.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
-assign CtrlRf.RegDstQ104H   = CtrlQ104H.RegDst;
-assign CtrlRf.RegWrEnQ104H  = ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
+assign CtrlRf.RegDstQ105H   = CtrlQ105H.RegDst;
+assign CtrlRf.RegWrEnQ105H  = ValidInstQ105H ? CtrlQ105H.RegWrEn : 1'b0;
 
 //Execute Control Signals
 assign CtrlExe.RegSrc1Q102H  = CtrlQ102H.RegSrc1;
@@ -213,19 +235,20 @@ assign CtrlExe.RegDstQ103H   = CtrlQ103H.RegDst;
 assign CtrlExe.RegWrEnQ103H  = CtrlQ103H.RegWrEn;
 assign CtrlExe.RegWrEnQ104H  = CtrlQ104H.RegWrEn;
 assign CtrlExe.RegDstQ104H   = CtrlQ104H.RegDst;
+assign CtrlExe.RegWrEnQ105H  = CtrlQ105H.RegWrEn;
+assign CtrlExe.RegDstQ105H   = CtrlQ105H.RegDst;
 assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
 assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
 
-// Memory access Control Signals
-assign CtrlMem.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
-assign CtrlMem.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
-assign CtrlMem.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
+// Memory access1 Control Signals
+assign CtrlMem1.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
+assign CtrlMem1.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
+assign CtrlMem1.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
 
 // Write Back Control Signals
-assign CtrlWb.ByteEnQ104H      = CtrlQ104H.DMemByteEn;
-assign CtrlWb.SignExtQ104H     = CtrlQ104H.SignExt;
-assign CtrlWb.e_SelWrBackQ104H = CtrlQ104H.e_SelWrBack;
+assign CtrlWb.ByteEnQ105H      = CtrlQ105H.DMemByteEn;
+assign CtrlWb.SignExtQ105H     = CtrlQ105H.SignExt;
+assign CtrlWb.e_SelWrBackQ105H = CtrlQ105H.e_SelWrBack;
 
 endmodule
-
 

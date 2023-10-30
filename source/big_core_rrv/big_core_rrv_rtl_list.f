@@ -29,7 +29,8 @@
 ../../../source/big_core_rrv/mini_core_ctrl.sv
 ../../../source/big_core_rrv/mini_core_rf.sv
 ../../../source/big_core_rrv/mini_core_exe.sv
-../../../source/big_core_rrv/mini_core_mem_acs.sv
+../../../source/big_core_rrv/mini_core_mem_acs1.sv
+../../../source/big_core_rrv/mini_core_mem_acs2.sv
 ../../../source/big_core_rrv/mini_core_wb.sv
 ../../../source/big_core_rrv/mini_core.sv
 ../../../source/big_core_rrv/mini_core_top.sv

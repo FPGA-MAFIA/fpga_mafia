@@ -33,8 +33,10 @@ import common_pkg::*;
     input logic [31:0]  PreRegRdData2Q102H,
     input logic [31:0]  PcQ102H,
     input logic [31:0]  ImmediateQ102H,
-    //Q104H
-    input logic [31:0]  RegWrDataQ104H, // used for forwarding
+    //Q104H 
+    input logic [31:0]  AluOutQ104H, // used for forwarding
+    //Q105H
+    input logic [31:0]  RegWrDataQ105H, // used for forwarding
     //===================
     // output data path
     //===================
@@ -44,7 +46,7 @@ import common_pkg::*;
     output logic [31:0] DMemWrDataQ103H
 );
 
-logic        Hazard1Data1Q102H, Hazard2Data1Q102H, Hazard1Data2Q102H, Hazard2Data2Q102H;
+logic        Hazard1Data1Q102H, Hazard2Data1Q102H, Hazard3Data1Q102H, Hazard1Data2Q102H, Hazard2Data2Q102H, Hazard3Data2Q102H;
 logic [31:0] AluIn1Q102H, AluIn2Q102H;
 logic [4:0]  ShamtQ102H;
 logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
@@ -68,15 +70,19 @@ logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
 // Hazard Detection
 assign Hazard1Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc1Q102H != 5'b0);
 assign Hazard2Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q102H != 5'b0);
+assign Hazard3Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ105H) && (Ctrl.RegWrEnQ105H) && (Ctrl.RegSrc1Q102H != 5'b0);
 assign Hazard1Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q102H != 5'b0);
 assign Hazard2Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc2Q102H != 5'b0);
+assign Hazard3Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ105H) && (Ctrl.RegWrEnQ105H) && (Ctrl.RegSrc2Q102H != 5'b0);
 // Forwarding unite
 assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
+                         Hazard2Data1Q102H ? AluOutQ104H       : // Rd 102 After Wr 104
+                         Hazard3Data1Q102H ? RegWrDataQ105H    : // Rd 102 After Wr 105
                                              PreRegRdData1Q102H; // Common Case - No Hazard
 
 assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data2Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104 
+                         Hazard2Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 104
+                         Hazard3Data2Q102H ? RegWrDataQ105H    : // Rd 102 After Wr 105 
                                              PreRegRdData2Q102H; // Common Case - No Hazard
 
 // End Take care to data hazard
