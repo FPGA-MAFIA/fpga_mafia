@@ -62,8 +62,6 @@ t_immediate         SelImmTypeQ101H;
  logic [4:0]  PreRegSrc2Q101H;
  logic        LoadHzrd1DetectQ101H;
  logic        LoadHzrd2DetectQ101H;
- logic        LoadHzrd1NopQ101H;
- logic        LoadHzrd2NopQ102H;
  logic [31:0] InstructionQ101H;
  logic        flushQ102H;
  logic        flushQ103H;
@@ -90,10 +88,6 @@ assign LoadHzrd2DetectQ101H      = Rst ? 1'b0 :
                                  ((PreRegSrc1Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
                                  ((PreRegSrc2Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
                                                                                                          1'b0;                                                                                                        
-//incase of LoadHzrd1DetectQ101H, insert two nop's
-assign LoadHzrd1NopQ101H = LoadHzrd1DetectQ101H;
-`MAFIA_EN_DFF(LoadHzrd2NopQ102H , LoadHzrd1NopQ101H   , Clock , ReadyQ103H)
-
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
@@ -102,14 +96,12 @@ assign flushQ102H = IndirectBranchQ102H;
 
 assign InstructionQ101H = flushQ102H           ? NOP :
                           flushQ103H           ? NOP :
-                          LoadHzrd1NopQ101H    ? NOP :
-                          LoadHzrd2NopQ102H    ? NOP :
+                          LoadHzrd1DetectQ101H ? NOP :
                           LoadHzrd2DetectQ101H ? NOP : 
                                                 PreInstructionQ101H;
 assign PreValidInstQ101H = flushQ102H           ? 1'b0 : 
                            flushQ103H           ? 1'b0 :
-                           LoadHzrd1NopQ101H    ? 1'b0 :
-                           LoadHzrd2NopQ102H    ? 1'b0 :  
+                           LoadHzrd2DetectQ101H ? 1'b0 :  
                            LoadHzrd2DetectQ101H ? 1'b0 : 
                                                   1'b1 ;
 
@@ -198,7 +190,7 @@ assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wra
 assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
-assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrd1DetectQ101H && LoadHzrd1NopQ101H && LoadHzrd2NopQ102H); //
+assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H); //
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
