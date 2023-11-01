@@ -34,7 +34,7 @@ import common_pkg::*;
     // Data Memory
     input  logic          DMemReady,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
-    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM  // TODO consider to fix it to DMemRdRspQ105H
+    input  logic [31:0]   DMemRdRspQ105H     // From D_MEM  
 );
 
 // ---- Data-Path signals ----
@@ -53,7 +53,7 @@ logic [31:0]        AluOutQ102H, AluOutQ103H, AluOutQ104H, AluOutQ105H;
 logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H, RegRdData1Q103H;
 logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
 logic [31:0]        RegWrDataQ104H, RegWrDataQ105H; 
-logic [31:0]        PostSxDMemRdDataQ104H;
+logic [31:0]        PostSxDMemRdDataQ105H;
 
 // Control bits
 logic               SelNextPcAluOutJQ101H, SelNextPcAluOutJQ102H;
@@ -313,7 +313,7 @@ mini_core_wb mini_core_wb
  // Ctrl
  .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
  // Data path input
- .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ105H, //input
+ .DMemRdDataQ105H (DMemRdRspQ105H ), // input  logic [31:0]    DMemRdDataQ105H, //input
  .AluOutQ105H     (AluOutQ105H     ), // input  logic [31:0]    AluOutQ105H,     //input
  .PcPlus4Q105H    (PcPlus4Q105H    ), // input  logic [31:0]    PcPlus4Q105H,    //input
  // data path output
