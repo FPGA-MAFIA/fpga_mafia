@@ -19,7 +19,7 @@ main:
   xor   x15, x3, x5 # 011 ^ 101     -> 6 (3'b110)
   or    x16, x1, x6 # 001 | 110     -> 7 (3'b111)
 store_to_memory:
-    li   x31 , 0x1000       #D_MEM offset
+    li   x31 , 0x10000       #D_MEM offset (make sure its the right value as set in cfg files)
     sw   x1  , 0x0(x31)
     sw   x2  , 0x4(x31)
     sw   x3  , 0x8(x31)
