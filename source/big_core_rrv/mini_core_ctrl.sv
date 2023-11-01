@@ -190,8 +190,8 @@ assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wra
 assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
-//assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H; //
-assign ReadyQ101H = flushQ102H ? 1'b1 : (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
+assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H; //
+//assign ReadyQ101H = flushQ102H ? 1'b1 : (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )

@@ -37,7 +37,7 @@ import common_pkg::*;
                 input  logic [3:0]  DMemByteEnQ103H , // To D_MEM
                 input  logic        DMemWrEnQ103H   , // To D_MEM
                 input  logic        DMemRdEnQ103H   , // To D_MEM
-                output logic [31:0] DMemRdRspQ104H  , // From D_MEM
+                output logic [31:0] DMemRdRspQ105H  , // From D_MEM
                 output logic        DMemReady  , // From D_MEM
                 //============================================
                 //      fabric interface
@@ -163,6 +163,7 @@ logic        FabricDataRspValidQ504H;
 // 1) A outstanding read request was set and the read response was not received yet
 // 2) The c2f_req_fifo is full
 assign DMemReady  =!(OutstandingReadReq) &&  !C2F_ReqFull;
+
 //==================================
 // This logic is a special case for the WhoAmI request
 // We are using a memory address of 0x00FFFFFF to detect the WhoAmI request and respond with the local tile id
@@ -191,6 +192,7 @@ end
 
 `MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
 // Half & Byte READ
+logic [31:0] DMemRdRspQ104H;
 assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
                         (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
                         (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
@@ -198,6 +200,8 @@ assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H   
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
                                                                   PreShiftDMemRdDataQ104H         ; 
 
+ // increace read latency from 1 to 2 cycle latency 
+`MAFIA_DFF(DMemRdRspQ105H ,DMemRdRspQ104H, Clock)    
 
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!

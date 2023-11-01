@@ -18,16 +18,13 @@ import common_pkg::*;
   // Ctrl
   input var  t_ctrl_wb       Ctrl, //input
   // Data path input
-  input  logic [31:0]    DMemRdDataQ104H, //input
+  input  logic [31:0]    DMemRdDataQ105H, //input
   input  logic [31:0]    AluOutQ105H,     //input
   input  logic [31:0]    PcPlus4Q105H,    //input
   // data path output
   output logic [31:0]    RegWrDataQ105H  //output
 );
 
-// TODO delete this macro when read memory latency becomes 2 cycles 
-logic [31:0] DMemRdDataQ105H;
-`MAFIA_DFF(DMemRdDataQ105H ,DMemRdDataQ104H, Clock)    
 
 logic [31:0] PostSxDMemRdDataQ105H;
 // Sign extend taking care of
