@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import yaml             # instal 'pip install pyyaml' if required
+import yaml             # install 'pip install pyyaml' if required
 import argparse
 import subprocess
 
@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(description="Execute commands from a YAML file.
 parser.add_argument("-test", "--file", required=True, help="YAML file to process")
 
 # Examples:
-# ./sanity_check.py -test mafia_sanity.py
+# ./sanity_check.py -test mafia_sanity
 
 # Parse the command-line arguments
 args = parser.parse_args()
