@@ -2,8 +2,8 @@
      .globl     main
      .type     main, @function
 main:
-  li    x1,  1   
-  li    x2,  2
+  li    x1,  100   
+  li    x2,  200
 
   
   # no hazards

@@ -1,0 +1,4 @@
+alive.c -gMINI_RF_NUM_MSB=31
+basic.c -gMINI_RF_NUM_MSB=31
+data_hazard_check.s -gMINI_RF_NUM_MSB=31
+store_load_check.s -gMINI_RF_NUM_MSB=31
