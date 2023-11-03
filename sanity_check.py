@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-import yaml             # install 'pip install pyyaml' if required
+import yaml             # run "pip install pyyaml" if required
 import argparse
 import subprocess
 
 # Create a command-line argument parser
 parser = argparse.ArgumentParser(description="Execute commands from a YAML file.")
-parser.add_argument("-test", "--file", required=True, help="YAML file to process")
+parser.add_argument("-yml", "--file", required=True, help="YAML file to process")
 
 # Examples:
 # ./sanity_check.py -test mafia_sanity
@@ -20,7 +20,7 @@ try:
     with open(yaml_file_path, 'r') as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
 except FileNotFoundError:
-    print(f"Error: File '{yaml_file_path}' not found.")
+    print("\033[91m" + f"Error: File '{yaml_file_path}' not found." + "\033[0m") 
     exit(1)
 
 # Run the YAML file
