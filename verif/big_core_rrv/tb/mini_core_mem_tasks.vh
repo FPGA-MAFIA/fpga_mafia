@@ -74,14 +74,16 @@ t_mem_load_history ref_rf_mem_load_history[$];
 t_mem_load_history ref_rf_cur_mem_load;
 
 
-logic [31:0] PcQ101H;             // To I_MEM
-logic [31:0] PcQ102H;             // To I_MEM
-logic [31:0] PcQ103H, PcQ104H, PcQ105H;
-assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
-assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
-assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
-assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
-assign PcQ105H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ105H.Pc;
+`ifndef PC_BOTH_CHECKERS              // Avoid multiple Pc declaration signal when using both rf and memory checkers
+    logic [31:0] PcQ101H;             // To I_MEM
+    logic [31:0] PcQ102H;             // To I_MEM
+    logic [31:0] PcQ103H, PcQ104H, PcQ105H;
+    assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
+    assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
+    assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
+    assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
+    assign PcQ105H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ105H.Pc;
+`endif
 
 // signals for store
 logic DMemWrEnQ103H;
@@ -210,7 +212,6 @@ $display("====================================\n");
 //end else begin
 //    $display("rf_mem_store_history size match");
 //end
-l_eot(.l_msg("ebreak was called"));
 endtask
 
 string l_msg = "Load data integrity test passed"; // default
@@ -247,7 +248,7 @@ $display("===============================\n");
 
 endtask
 
-task s_eot (string s_msg);
+task sl_eot (string s_msg, string l_msg);
     #10;
     $display("======================================");
     $display("End of simulation: %s", s_msg);
@@ -257,10 +258,7 @@ task s_eot (string s_msg);
     $display("Starting store data integrity test");
     $display("======================================\n");
     di_mem_store();
-    $finish;
-endtask
 
-task l_eot (string l_msg);
     #10;
     $display("====================================");
     $display("Starting load data integrity test");

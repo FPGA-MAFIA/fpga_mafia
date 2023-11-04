@@ -35,7 +35,7 @@ logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MI
 
 
 string test_name;
-//`include "mini_core_tasks.vh"
+`include "mini_core_tasks.vh"
 `include "mini_core_mem_tasks.vh"
 `include "mini_core_trk.sv"
 
@@ -105,12 +105,15 @@ initial begin: test_seq
     // enable the checker data collection (monitor)
     //=======================================
     fork
+    get_rf_write();
+    get_ref_rf_write();   
     get_mem_store();
     get_ref_mem_store();
     get_mem_load();
     get_ref_mem_load();
     begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
-        s_eot(.s_msg("ebreak was called"));
+        eot(.msg("ebreak was called"));
+        sl_eot(.s_msg("ebreak was called"), .l_msg("ebreak was called"));
     end
     join
 
