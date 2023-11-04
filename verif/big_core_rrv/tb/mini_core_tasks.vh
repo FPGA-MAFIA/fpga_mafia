@@ -11,8 +11,8 @@ t_rf_write_history rf_cur_write;
 t_rf_write_history ref_rf_write_history[$];
 t_rf_write_history ref_rf_cur_write;
 
-`ifndef PC_BOTH_CHECKERS              // Avoid multiple Pc declaration signal when using both rf and memory checkers. When using only this checker please remove `ifndef from $finish() 
-`define PC_BOTH_CHECKERS
+`ifndef USE_RF_AND_MEM_CHK              // Avoid multiple Pc declaration signal when using both rf and memory checkers. When using only this checker please remove `ifndef from $finish() 
+`define USE_RF_AND_MEM_CHK
     logic [31:0] PcQ101H;             // To I_MEM
     logic [31:0] PcQ102H;             // To I_MEM
     logic [31:0] PcQ103H, PcQ104H, PcQ105H;
@@ -118,7 +118,7 @@ task eot (string msg);
     $display("Starting data integrity test");
     $display("===============================");
     di_register_write();
-    `ifndef PC_BOTH_CHECKERS
+    `ifndef USE_RF_AND_MEM_CHK
         $finish;
     `endif
 endtask

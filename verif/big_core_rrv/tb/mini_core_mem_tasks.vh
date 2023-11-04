@@ -74,7 +74,7 @@ t_mem_load_history ref_rf_mem_load_history[$];
 t_mem_load_history ref_rf_cur_mem_load;
 
 
-`ifndef PC_BOTH_CHECKERS              // Avoid multiple Pc declaration signal when using both rf and memory checkers
+`ifndef USE_RF_AND_MEM_CHK              // Avoid multiple Pc declaration signal when using both rf and memory checkers
     logic [31:0] PcQ101H;             // To I_MEM
     logic [31:0] PcQ102H;             // To I_MEM
     logic [31:0] PcQ103H, PcQ104H, PcQ105H;
