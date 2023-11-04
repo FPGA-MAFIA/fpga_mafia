@@ -11,15 +11,18 @@ t_rf_write_history rf_cur_write;
 t_rf_write_history ref_rf_write_history[$];
 t_rf_write_history ref_rf_cur_write;
 
+`ifndef USE_RF_AND_MEM_CHK              // Avoid multiple Pc declaration signal when using both rf and memory checkers. When using only this checker please remove `ifndef from $finish() 
+`define USE_RF_AND_MEM_CHK
+    logic [31:0] PcQ101H;             // To I_MEM
+    logic [31:0] PcQ102H;             // To I_MEM
+    logic [31:0] PcQ103H, PcQ104H, PcQ105H;
+    assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
+    assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
+    assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
+    assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
+    assign PcQ105H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ105H.Pc;
+`endif
 
-logic [31:0] PcQ101H;             // To I_MEM
-logic [31:0] PcQ102H;             // To I_MEM
-logic [31:0] PcQ103H, PcQ104H, PcQ105H;
-assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
-assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
-assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
-assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
-assign PcQ105H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ105H.Pc;
 logic RegWrEnQ105H;
 logic [4:0]  RegDstQ105H;
 logic [31:0] RegWrDataQ105H;
@@ -115,5 +118,7 @@ task eot (string msg);
     $display("Starting data integrity test");
     $display("===============================");
     di_register_write();
-    $finish;
+    `ifndef USE_RF_AND_MEM_CHK
+        $finish;
+    `endif
 endtask
