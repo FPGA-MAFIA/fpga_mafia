@@ -20,6 +20,7 @@
 
 module big_core_rrv_tb  ;
 import common_pkg::*;
+import rv32i_ref_pkg::*;
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;
