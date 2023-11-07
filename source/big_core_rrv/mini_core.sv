@@ -18,6 +18,11 @@
 // 4) Q103H Memory Access1
 // 5) Q104H Memory Access2
 // 6) Q105H Write back data from Memory/ALU to Register file
+// ---- extentions ----
+// Support RV32IE
+// Support CSR 
+// Support Interrupts
+
 
 `include "macros.sv"
 
@@ -54,6 +59,9 @@ logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H, RegRdD
 logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
 logic [31:0]        RegWrDataQ104H, RegWrDataQ105H; 
 logic [31:0]        PostSxDMemRdDataQ105H;
+logic [31:0]        RegRdCsrData1Q101H;    // data to write to CSR
+logic [31:0]        CsrReadDataQ102H;      // data red from CSR
+
 
 // Control bits
 logic               SelNextPcAluOutJQ101H, SelNextPcAluOutJQ102H;
@@ -101,8 +109,10 @@ logic ReadyQ105H;
 t_ctrl_if   CtrlIf;
 t_ctrl_rf   CtrlRf;
 t_ctrl_exe  CtrlExe;
+t_csr_inst  CtrlCsr;
 t_ctrl_mem1 CtrlMem1;
 t_ctrl_wb   CtrlWb;
+
 
 logic [31:0] DMemWrDataQ103H;
 
@@ -169,8 +179,11 @@ mini_core_ctrl mini_core_ctrl (
   .CtrlIf               (CtrlIf             ), //output
   .CtrlRf               (CtrlRf             ), //output
   .CtrlExe              (CtrlExe            ), //output
+  .CtrlCsr              (CtrlCsr            ), //output
   .CtrlMem1             (CtrlMem1           ), //output
   .CtrlWb               (CtrlWb             ), //output
+  // input data path signals
+  .RegRdCsrData1Q101H   (RegRdCsrData1Q101H ), //input
   // output data path signals
   .ImmediateQ101H       (ImmediateQ101H     ) //output
 );
@@ -178,19 +191,20 @@ mini_core_ctrl mini_core_ctrl (
 mini_core_rf 
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
 mini_core_rf (
-  .Clock            (Clock),          // input
-  .Rst              (Rst),            // input 
-  .Ctrl             (CtrlRf),         // input
-  .ReadyQ102H       (ReadyQ102H),     // input
+  .Clock             (Clock),             // input
+  .Rst               (Rst),               // input 
+  .Ctrl              (CtrlRf),            // input
+  .ReadyQ102H        (ReadyQ102H),        // input
   // input data path
-  .ImmediateQ101H   (ImmediateQ101H), // input
-  .PcQ101H          (PcQ101H),        // input  
-  .RegWrDataQ105H   (RegWrDataQ105H), // input 
-  // output data path
-  .PcQ102H          (PcQ102H),        // output   
-  .ImmediateQ102H   (ImmediateQ102H), // output
-  .RegRdData1Q102H  (RegRdData1Q102H),// output
-  .RegRdData2Q102H  (RegRdData2Q102H) // output
+  .ImmediateQ101H    (ImmediateQ101H),    // input
+  .PcQ101H           (PcQ101H),           // input  
+  .RegWrDataQ105H    (RegWrDataQ105H),    // input 
+  // output data path 
+  .PcQ102H           (PcQ102H),           // output   
+  .ImmediateQ102H    (ImmediateQ102H),    // output
+  .RegRdData1Q102H   (RegRdData1Q102H),   // output
+  .RegRdCsrData1Q101H(RegRdCsrData1Q101H),// output
+  .RegRdData2Q102H   (RegRdData2Q102H)    // output
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,6 +229,7 @@ mini_core_exe mini_core_exe (
   .Rst                 (Rst                ),  //  input 
   // Input Control Signals
   .Ctrl                (CtrlExe            ),  //  input 
+  .CtrlCsr             (CtrlCsr            ),  //  input
   .ReadyQ103H          (ReadyQ103H         ),  //  input
   // Output Control Signals
   .BranchCondMetQ102H  (BranchCondMetQ102H ),  //  output
@@ -223,7 +238,8 @@ mini_core_exe mini_core_exe (
   .PreRegRdData1Q102H  (RegRdData1Q102H    ),  //  input 
   .PreRegRdData2Q102H  (RegRdData2Q102H    ),  //  input  
   .PcQ102H             (PcQ102H            ),  //  input 
-  .ImmediateQ102H      (ImmediateQ102H     ),  //  input 
+  .ImmediateQ102H      (ImmediateQ102H     ),  //  input
+  .CsrReadDataQ102H    (CsrReadDataQ102H   ), 
   //Q104H
   .AluOutQ104H         (AluOutQ104H     ),     //  input 
   //Q105H
@@ -234,6 +250,20 @@ mini_core_exe mini_core_exe (
   .PcPlus4Q103H        (PcPlus4Q103H       ),  //  output
   .DMemWrDataQ103H     (DMemWrDataQ103H    )   //  output
 );
+
+mini_core_csr mini_core_csr (
+ .Clk             (Clock),  
+ .Rst             (Rst),  
+ .PcQ102H         (PcQ102H),
+ // Inputs from the core
+ .CsrInstQ102H    (CtrlCsr), 
+ .CsrHwUpdt       ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .MePc            (),
+ .interrupt_counter_expired (),
+ // Outputs to the core
+ .CsrReadDataQ102H(CsrReadDataQ102H)
+);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 

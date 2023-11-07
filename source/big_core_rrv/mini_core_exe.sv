@@ -20,6 +20,7 @@ import common_pkg::*;
     // Input Control Signals
     //===================
     input  var t_ctrl_exe   Ctrl,
+    input  var t_csr_inst   CtrlCsr,
     input  logic        ReadyQ103H,
     //===================
     // Output Control Signals
@@ -33,6 +34,7 @@ import common_pkg::*;
     input logic [31:0]  PreRegRdData2Q102H,
     input logic [31:0]  PcQ102H,
     input logic [31:0]  ImmediateQ102H,
+    input logic [31:0]  CsrReadDataQ102H,
     //Q104H 
     input logic [31:0]  AluOutQ104H, // used for forwarding
     //Q105H
@@ -107,7 +109,8 @@ always_comb begin : alu_logic
     AND     : AluOutQ102H = AluIn1Q102H & AluIn2Q102H;                              // AND
     default : AluOutQ102H = AluIn1Q102H + AluIn2Q102H;
   endcase
-  if (Ctrl.LuiQ102H) AluOutQ102H = AluIn2Q102H;                                     // LUI
+  if (Ctrl.LuiQ102H)    AluOutQ102H = AluIn2Q102H; 
+  if (CtrlCsr.csr_rden) AluOutQ102H = CsrReadDataQ102H;                             // LUI
 end
 
 always_comb begin : branch_comp
