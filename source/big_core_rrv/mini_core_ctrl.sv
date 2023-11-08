@@ -251,7 +251,6 @@ assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
 assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
 
 // Execute Control Signals for Csr
-//assign CtrlCsr.csr_rden = CsrInstQ102H.csr_rden;
 assign CtrlCsr = CsrInstQ102H;
 
 // Memory access1 Control Signals
