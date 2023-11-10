@@ -6,7 +6,7 @@ import common_pkg::*;
     input logic Rst,
     input logic [31:0] PcQ102H,
     // Inputs from the core
-    input var t_csr_inst CsrInstQ102H,
+    input var t_csr_inst_rrv CsrInstQ102H,
     input logic [31:0] CsrWriteDataQ102H,
     input var t_csr_hw_updt CsrHwUpdt, // 32-bit data to be written into the CSR
     // Outputs to the core

@@ -30,12 +30,12 @@ import common_pkg::*;
     output  logic        ReadyQ104H,
     output  logic        ReadyQ105H,
     // output ctrl signals
-    output var t_ctrl_if    CtrlIf,
-    output var t_ctrl_rf    CtrlRf,
-    output var t_ctrl_exe   CtrlExe,
-    output var t_csr_inst   CtrlCsr,
-    output var t_ctrl_mem1  CtrlMem1,
-    output var t_ctrl_wb    CtrlWb,
+    output var t_ctrl_if      CtrlIf,
+    output var t_ctrl_rf      CtrlRf,
+    output var t_ctrl_exe     CtrlExe,
+    output var t_csr_inst_rrv CtrlCsr,
+    output var t_ctrl_mem1    CtrlMem1,
+    output var t_ctrl_wb      CtrlWb,
     // output data path signals
     output  logic [31:0] ImmediateQ101H 
 );
@@ -76,7 +76,7 @@ logic PreValidInstQ104H, ValidInstQ104H;
 logic PreValidInstQ105H, ValidInstQ105H;
 
 t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
-t_csr_inst CsrInstQ101H, CsrInstQ102H;  
+t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection

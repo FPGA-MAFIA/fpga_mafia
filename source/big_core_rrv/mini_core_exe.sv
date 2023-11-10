@@ -19,8 +19,8 @@ import common_pkg::*;
     //===================
     // Input Control Signals
     //===================
-    input  var t_ctrl_exe   Ctrl,
-    input  var t_csr_inst   CtrlCsr,
+    input  var t_ctrl_exe       Ctrl,
+    input  var t_csr_inst_rrv   CtrlCsr,
     input  logic        ReadyQ103H,
     //===================
     // Output Control Signals

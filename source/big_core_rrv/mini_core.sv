@@ -106,12 +106,12 @@ logic ReadyQ102H;
 logic ReadyQ103H;
 logic ReadyQ104H;
 logic ReadyQ105H;
-t_ctrl_if   CtrlIf;
-t_ctrl_rf   CtrlRf;
-t_ctrl_exe  CtrlExe;
-t_csr_inst  CtrlCsr;
-t_ctrl_mem1 CtrlMem1;
-t_ctrl_wb   CtrlWb;
+t_ctrl_if      CtrlIf;
+t_ctrl_rf      CtrlRf;
+t_ctrl_exe     CtrlExe;
+t_csr_inst_rrv CtrlCsr;
+t_ctrl_mem1    CtrlMem1;
+t_ctrl_wb      CtrlWb;
 
 
 logic [31:0] DMemWrDataQ103H;
