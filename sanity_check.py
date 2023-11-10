@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(description="Execute commands from a YAML file.
 parser.add_argument("-yml", "--file", required=True, help="YAML file to process")
 
 # Examples:
-# ./sanity_check.py -test mafia_sanity
+# ./sanity_check.py -yml mafia_sanity
 
 # Parse the command-line arguments
 args = parser.parse_args()
