@@ -111,7 +111,8 @@ typedef struct packed {
     logic [1:0]  csr_op;
     logic [4:0]  csr_rs1;
     logic [11:0] csr_addr;
-    logic [31:0] csr_data;
+    logic [31:0] csr_data_imm;    // TODO - rename csr_data_imm to csr_data when using big_core 
+    logic        csr_imm_bit;
 } t_csr_inst;
 
 

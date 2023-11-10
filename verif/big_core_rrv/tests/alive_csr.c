@@ -24,11 +24,22 @@ int main()  {
 
     //set CSR in offset 0x301 using value 63 - should have the value of 0x3f
     int set_misa_csr = 63;
-     asm volatile ("csrs 0x301, %0" : : "r" (set_misa_csr)); // pseudiInstr: csrs csr, rs. baseInst: csrrs x0, csr, rs 
+    asm volatile ("csrs 0x301, %0" : : "r" (set_misa_csr)); // pseudiInstr: csrs csr, rs. baseInst: csrrs x0, csr, rs 
 
     //clear CSR in offset 0x301 using value 11 - should have the value of 0x14 (use only the first inst with misa)
     int clear_misa_csr = 11;
     asm volatile ("csrc 0x301, %0" : : "r" (clear_misa_csr)); // pseudiInstr: csrc csr, rs. baseInst: csrrc x0, csr, rs 
+
+    int new_value = 20;
+    int previous_value;
+    asm volatile ("csrrw %0, 0x009, %1" : "=r" (previous_value) : "r" (new_value));
+    asm volatile("csrrw %0, 0x009, %1" : "+r" (previous_value) : "r" (new_value));
+    asm volatile ("csrrs %0, 0x009, %1" : "+r" (previous_value) : "r" (new_value));
+    asm volatile ("csrrc %0, 0x009, %1" : "+r" (previous_value) : "r" (new_value));
+    asm volatile ("csrrwi %0, 0x009, 0x1b" :  : "r" (previous_value));
+    asm volatile ("csrrsi %0, 0x009, 0x1b" :  : "r" (previous_value));
+    asm volatile ("csrrci %0, 0x009, 0x1b" :  : "r" (previous_value));
+
     return 0;
 }  
 

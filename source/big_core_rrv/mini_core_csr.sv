@@ -7,6 +7,7 @@ import common_pkg::*;
     input logic [31:0] PcQ102H,
     // Inputs from the core
     input var t_csr_inst CsrInstQ102H,
+    input logic [31:0] CsrWriteDataQ102H,
     input var t_csr_hw_updt CsrHwUpdt, // 32-bit data to be written into the CSR
     // Outputs to the core
     output logic [31:0] MePc, // 32-bit data read from the CSR
@@ -24,12 +25,17 @@ logic        csr_wren;
 logic        csr_rden;
 logic [1:0]  csr_op;
 logic [11:0] csr_addr;
+logic [31:0] csr_data_imm;
+logic        csr_imm_bit;
+assign csr_wren     = CsrInstQ102H.csr_wren;
+assign csr_rden     = CsrInstQ102H.csr_rden;
+assign csr_addr     = CsrInstQ102H.csr_addr;
+assign csr_data_imm = CsrInstQ102H.csr_data_imm;
+assign csr_op       = CsrInstQ102H.csr_op;
+assign csr_imm_bit  = CsrInstQ102H.csr_imm_bit; 
+
 logic [31:0] csr_data;
-assign csr_wren = CsrInstQ102H.csr_wren;
-assign csr_rden = CsrInstQ102H.csr_rden;
-assign csr_addr = CsrInstQ102H.csr_addr;
-assign csr_data = CsrInstQ102H.csr_data;
-assign csr_op   = CsrInstQ102H.csr_op;
+assign csr_data = (csr_imm_bit) ? csr_data_imm : CsrWriteDataQ102H;
 
 logic csr_cycle_low_overflow;
 always_comb begin
