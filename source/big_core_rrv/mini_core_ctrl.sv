@@ -138,7 +138,7 @@ assign CtrlQ101H.RegSrc1          = InstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2          = InstructionQ101H[24:20];
 
 // CSR Control Signals
-assign CsrInstQ101H.csr_wren     = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b01)) && (CtrlQ101H.RegSrc1 =='0 ));  
+assign CsrInstQ101H.csr_wren     = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b10)) && (CtrlQ101H.RegSrc1 =='0 ));  
 assign CsrInstQ101H.csr_rden     = (OpcodeQ101H == SYSCAL) && !((Funct3Q101H[1:0]==2'b01 ) && (CtrlQ101H.RegDst =='0 ));
 assign CsrInstQ101H.csr_op       = InstructionQ101H[13:12];
 assign CsrInstQ101H.csr_rs1      = CtrlQ101H.RegSrc1;
