@@ -28,7 +28,6 @@ import common_pkg::*;
     output logic [31:0] PcQ102H,
     output logic [31:0] ImmediateQ102H,
     output logic [31:0] RegRdData1Q102H,
-    output logic [31:0] RegRdCsrData1Q101H,
     output logic [31:0] RegRdData2Q102H
 );
 
@@ -48,8 +47,6 @@ assign MatchRd1AftrWrQ101H = (Ctrl.RegSrc1Q101H == Ctrl.RegDstQ105H) && (Ctrl.Re
 assign RegRdData1Q101H = (Ctrl.RegSrc1Q101H == 5'b0) ? 32'b0                      : // Reading from Register[0] should result in '0
                          MatchRd1AftrWrQ101H         ? RegWrDataQ105H             : // forwards WrDataQ105H -> RdDataQ101H
                                                        Register[Ctrl.RegSrc1Q101H]; // Common Case - reading from Register file
-
-assign RegRdCsrData1Q101H = RegRdData1Q101H;
 
 assign MatchRd2AftrWrQ101H = (Ctrl.RegSrc2Q101H == Ctrl.RegDstQ105H) && (Ctrl.RegWrEnQ105H);
 assign RegRdData2Q101H = (Ctrl.RegSrc2Q101H == 5'b0) ? 32'b0                      : // Reading from Register[0] should result in '0 

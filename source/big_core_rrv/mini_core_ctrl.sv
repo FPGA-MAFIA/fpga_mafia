@@ -30,14 +30,12 @@ import common_pkg::*;
     output  logic        ReadyQ104H,
     output  logic        ReadyQ105H,
     // output ctrl signals
-    output var t_ctrl_if    CtrlIf,
-    output var t_ctrl_rf    CtrlRf,
-    output var t_ctrl_exe   CtrlExe,
-    output var t_csr_inst   CtrlCsr,
-    output var t_ctrl_mem1  CtrlMem1,
-    output var t_ctrl_wb    CtrlWb,
-    // input data path signals
-    input logic [31:0]      RegRdCsrData1Q101H,
+    output var t_ctrl_if      CtrlIf,
+    output var t_ctrl_rf      CtrlRf,
+    output var t_ctrl_exe     CtrlExe,
+    output var t_csr_inst_rrv CtrlCsr,
+    output var t_ctrl_mem1    CtrlMem1,
+    output var t_ctrl_wb      CtrlWb,
     // output data path signals
     output  logic [31:0] ImmediateQ101H 
 );
@@ -78,7 +76,7 @@ logic PreValidInstQ104H, ValidInstQ104H;
 logic PreValidInstQ105H, ValidInstQ105H;
 
 t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
-t_csr_inst CsrInstQ101H, CsrInstQ102H;  
+t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
@@ -140,13 +138,13 @@ assign CtrlQ101H.RegSrc1          = InstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2          = InstructionQ101H[24:20];
 
 // CSR Control Signals
-assign CsrInstQ101H.csr_wren  = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b01)) && (CtrlQ101H.RegSrc1 =='0 ));  
-assign CsrInstQ101H.csr_rden  = (OpcodeQ101H == SYSCAL) && !((Funct3Q101H[1:0]==2'b01 ) && (CtrlQ101H.RegDst =='0 ));
-assign CsrInstQ101H.csr_op    = InstructionQ101H[13:12];
-assign CsrInstQ101H.csr_rs1   = CtrlQ101H.RegSrc1;
-assign CsrInstQ101H.csr_addr  = InstructionQ101H[31:20];
-assign CsrInstQ101H.csr_data  = InstructionQ101H[14] ? {27'h0, CtrlQ101H.RegSrc1} : RegRdCsrData1Q101H;   
-//assign CsrInstQ101H.SelCsrWb  = CsrInstQ101H.csr_rden;   
+assign CsrInstQ101H.csr_wren     = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b10)) && (CtrlQ101H.RegSrc1 =='0 ));  
+assign CsrInstQ101H.csr_rden     = (OpcodeQ101H == SYSCAL) && !((Funct3Q101H[1:0]==2'b01 ) && (CtrlQ101H.RegDst =='0 ));
+assign CsrInstQ101H.csr_op       = InstructionQ101H[13:12];
+assign CsrInstQ101H.csr_rs1      = CtrlQ101H.RegSrc1;
+assign CsrInstQ101H.csr_addr     = InstructionQ101H[31:20];
+assign CsrInstQ101H.csr_data_imm = {27'h0, CtrlQ101H.RegSrc1}; 
+assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14];  
 
 logic ebreak_was_calledQ101H; 
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
@@ -251,7 +249,6 @@ assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
 assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
 
 // Execute Control Signals for Csr
-//assign CtrlCsr.csr_rden = CsrInstQ102H.csr_rden;
 assign CtrlCsr = CsrInstQ102H;
 
 // Memory access1 Control Signals

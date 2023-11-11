@@ -59,8 +59,8 @@ logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H, RegRdD
 logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
 logic [31:0]        RegWrDataQ104H, RegWrDataQ105H; 
 logic [31:0]        PostSxDMemRdDataQ105H;
-logic [31:0]        RegRdCsrData1Q101H;    // data to write to CSR
 logic [31:0]        CsrReadDataQ102H;      // data red from CSR
+logic [31:0]        CsrWriteDataQ102H;     // data writen to csr
 
 
 // Control bits
@@ -106,12 +106,12 @@ logic ReadyQ102H;
 logic ReadyQ103H;
 logic ReadyQ104H;
 logic ReadyQ105H;
-t_ctrl_if   CtrlIf;
-t_ctrl_rf   CtrlRf;
-t_ctrl_exe  CtrlExe;
-t_csr_inst  CtrlCsr;
-t_ctrl_mem1 CtrlMem1;
-t_ctrl_wb   CtrlWb;
+t_ctrl_if      CtrlIf;
+t_ctrl_rf      CtrlRf;
+t_ctrl_exe     CtrlExe;
+t_csr_inst_rrv CtrlCsr;
+t_ctrl_mem1    CtrlMem1;
+t_ctrl_wb      CtrlWb;
 
 
 logic [31:0] DMemWrDataQ103H;
@@ -182,8 +182,6 @@ mini_core_ctrl mini_core_ctrl (
   .CtrlCsr              (CtrlCsr            ), //output
   .CtrlMem1             (CtrlMem1           ), //output
   .CtrlWb               (CtrlWb             ), //output
-  // input data path signals
-  .RegRdCsrData1Q101H   (RegRdCsrData1Q101H ), //input
   // output data path signals
   .ImmediateQ101H       (ImmediateQ101H     ) //output
 );
@@ -203,7 +201,6 @@ mini_core_rf (
   .PcQ102H           (PcQ102H),           // output   
   .ImmediateQ102H    (ImmediateQ102H),    // output
   .RegRdData1Q102H   (RegRdData1Q102H),   // output
-  .RegRdCsrData1Q101H(RegRdCsrData1Q101H),// output
   .RegRdData2Q102H   (RegRdData2Q102H)    // output
 );
 
@@ -246,6 +243,7 @@ mini_core_exe mini_core_exe (
   .RegWrDataQ105H      (RegWrDataQ105H     ),  //  input 
   // output data path
   .AluOutQ102H         (AluOutQ102H        ),  //  output
+  .CsrWriteDataQ102H   (CsrWriteDataQ102H),    // output
   .AluOutQ103H         (AluOutQ103H        ),  //  output
   .PcPlus4Q103H        (PcPlus4Q103H       ),  //  output
   .DMemWrDataQ103H     (DMemWrDataQ103H    )   //  output
@@ -256,9 +254,10 @@ mini_core_csr mini_core_csr (
  .Rst             (Rst),  
  .PcQ102H         (PcQ102H),
  // Inputs from the core
- .CsrInstQ102H    (CtrlCsr), 
- .CsrHwUpdt       ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
- .MePc            (),
+ .CsrInstQ102H     (CtrlCsr),
+ .CsrWriteDataQ102H(CsrWriteDataQ102H), 
+ .CsrHwUpdt        ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .MePc             (),
  .interrupt_counter_expired (),
  // Outputs to the core
  .CsrReadDataQ102H(CsrReadDataQ102H)

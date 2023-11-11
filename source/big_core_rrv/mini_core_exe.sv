@@ -19,8 +19,8 @@ import common_pkg::*;
     //===================
     // Input Control Signals
     //===================
-    input  var t_ctrl_exe   Ctrl,
-    input  var t_csr_inst   CtrlCsr,
+    input  var t_ctrl_exe       Ctrl,
+    input  var t_csr_inst_rrv   CtrlCsr,
     input  logic        ReadyQ103H,
     //===================
     // Output Control Signals
@@ -43,6 +43,7 @@ import common_pkg::*;
     // output data path
     //===================
     output logic [31:0] AluOutQ102H,
+    output logic [31:0] CsrWriteDataQ102H, 
     output logic [31:0] AluOutQ103H,
     output logic [31:0] PcPlus4Q103H,
     output logic [31:0] DMemWrDataQ103H
@@ -86,6 +87,8 @@ assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After
                          Hazard2Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 104
                          Hazard3Data2Q102H ? RegWrDataQ105H    : // Rd 102 After Wr 105 
                                              PreRegRdData2Q102H; // Common Case - No Hazard
+ 
+assign CsrWriteDataQ102H = RegRdData1Q102H; // input data to csr
 
 // End Take care to data hazard
 assign AluIn1Q102H = Ctrl.SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
