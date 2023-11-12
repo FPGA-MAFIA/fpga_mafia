@@ -26,6 +26,7 @@ reset_handler:
   la   x2, _stack_start
 
   jal x1, main  //jump to main
+  nop
   ebreak        //end
   nop                       
   .section .text
