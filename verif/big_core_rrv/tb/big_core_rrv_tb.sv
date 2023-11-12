@@ -122,7 +122,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 100000;
-parameter MINI_RF_NUM_MSB = 31; // For RV32E override this to 15
+parameter MINI_RF_NUM_MSB = 31;
 initial begin: detect_timeout
     //=======================================
     // timeout

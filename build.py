@@ -7,6 +7,7 @@ import glob
 import argparse
 import sys
 import json
+import fileinput
 from termcolor import colored
 
 examples = '''
@@ -108,6 +109,7 @@ class Test:
         Test.crt0_file    = config_data['crt0_file']
         Test.rv32_gcc     = config_data['rv32_gcc']
         Test.name         = config_data['name']
+        Test.RF_NUM_MSB = str(config_data.get('RF_NUM_MSB', ''))
 
     def load_config(self):
         # Default JSON file location
@@ -227,6 +229,24 @@ class Test:
     def _compile_hw(self):
         chdir(MODELSIM)
         print_message('[INFO] Starting to compile HW ...')
+
+        new_value = Test.RF_NUM_MSB  # New value for RF_NUM_MSB
+        file_to_modify = "../../../" + TB + "/" + self.dut + "_tb.sv"  # The System Verilog test bench file
+
+        # Check if Test.RF_NUM_MSB is not empty before updating the file 
+        if new_value:
+            parameter_found = False
+            lines = []
+            with open(file_to_modify, 'r') as file:
+                for line in file:
+                    if "parameter MINI_RF_NUM_MSB" in line:
+                        parameter_found = True
+                        line = f"parameter MINI_RF_NUM_MSB = {new_value};\n"
+                    lines.append(line)
+            if parameter_found:
+                with open(file_to_modify, 'w') as file:
+                    file.writelines(lines)
+
         if not Test.hw_compilation:
             try:
                 comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.dut+'_list.f'
