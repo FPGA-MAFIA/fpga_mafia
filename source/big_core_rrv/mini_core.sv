@@ -61,6 +61,7 @@ logic [31:0]        RegWrDataQ104H, RegWrDataQ105H;
 logic [31:0]        PostSxDMemRdDataQ105H;
 logic [31:0]        CsrReadDataQ102H;      // data red from CSR
 logic [31:0]        CsrWriteDataQ102H;     // data writen to csr
+t_csr_hw_updt       CsrHwUpdt;
 
 
 // Control bits
@@ -183,7 +184,8 @@ mini_core_ctrl mini_core_ctrl (
   .CtrlMem1             (CtrlMem1           ), //output
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
-  .ImmediateQ101H       (ImmediateQ101H     ) //output
+  .ImmediateQ101H       (ImmediateQ101H     ), //output
+  .CsrHwUpdt            (CsrHwUpdt          ) //output
 );
 
 mini_core_rf 
@@ -256,7 +258,7 @@ mini_core_csr mini_core_csr (
  // Inputs from the core
  .CsrInstQ102H     (CtrlCsr),
  .CsrWriteDataQ102H(CsrWriteDataQ102H), 
- .CsrHwUpdt        ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .CsrHwUpdt        (CsrHwUpdt),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
  .MePc             (),
  .interrupt_counter_expired (),
  // Outputs to the core

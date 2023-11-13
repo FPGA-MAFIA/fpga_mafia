@@ -129,6 +129,8 @@ typedef enum logic [11:0] {
  CSR_SCRATCH        = 12'h009 ,
  CSR_CYCLE_LOW      = 12'hC00 ,
  CSR_CYCLE_HIGH     = 12'hC80 ,
+ CSR_INSTRET_LOW    = 12'hC02 ,
+ CSR_INSTRET_HIGH   = 12'hC82 ,
  CSR_MCYCLE         = 12'hB00 ,
  CSR_MCYCLEH        = 12'hB80 ,
  CSR_MINSTRET       = 12'hB02 ,
@@ -169,12 +171,15 @@ typedef struct packed {
     logic breakpoint;
     logic timer_interrupt;  
     logic external_interrupt;
+    logic ValidInstQ105H;
 } t_csr_hw_updt;
 
 typedef struct packed {
     logic [31:0] csr_scratch;
     logic [31:0] csr_cycle_low;
     logic [31:0] csr_cycle_high;
+    logic [31:0] csr_instret_low;
+    logic [31:0] csr_instret_high;
     logic [31:0] csr_mcycle;
     logic [31:0] csr_minstret;
     logic [31:0] csr_mhpmcounter3;

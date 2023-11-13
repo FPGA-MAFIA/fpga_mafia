@@ -38,6 +38,7 @@ logic [31:0] csr_data;
 assign csr_data = (csr_imm_bit) ? csr_data_imm : CsrWriteDataQ102H;
 
 logic csr_cycle_low_overflow;
+logic csr_instret_low_overflow;
 always_comb begin
     next_csr = csr;
     if(csr_wren) begin
@@ -191,6 +192,10 @@ always_comb begin
     // the cycle counter is incremented on every clock cycle
         {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
         next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
+        if(CsrHwUpdt.ValidInstQ105H) begin
+            {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b1;
+            next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
+        end
     //==========================================================================
     // Reset values for CSR
     //==========================================================================
@@ -220,8 +225,10 @@ always_comb begin
     if(csr_rden) begin
         unique casez (csr_addr) // address holds the offset
             // ---- RO CSR ----
-            CSR_CYCLE_LOW  : CsrReadDataQ102H = csr.csr_cycle_low;
-            CSR_CYCLE_HIGH : CsrReadDataQ102H = csr.csr_cycle_high;
+            CSR_CYCLE_LOW    : CsrReadDataQ102H = csr.csr_cycle_low;
+            CSR_CYCLE_HIGH   : CsrReadDataQ102H = csr.csr_cycle_high;
+            CSR_INSTRET_LOW  : CsrReadDataQ102H = csr.csr_instret_low;
+            CSR_INSTRET_HIGH : CsrReadDataQ102H = csr.csr_instret_high;
             
             CSR_MVENDORID      : CsrReadDataQ102H = csr.csr_mvendorid;
             CSR_MARCHID        : CsrReadDataQ102H = csr.csr_marchid;
