@@ -37,7 +37,8 @@ import common_pkg::*;
     output var t_ctrl_mem1    CtrlMem1,
     output var t_ctrl_wb      CtrlWb,
     // output data path signals
-    output  logic [31:0] ImmediateQ101H 
+    output logic [31:0] ImmediateQ101H,
+    output var t_csr_hw_updt CsrHwUpdt             
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,8 +213,6 @@ assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 `MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ105H )
 
 
-
-
 assign ValidInstQ101H = ReadyQ101H && PreValidInstQ101H;
 `MAFIA_EN_RST_DFF(PreValidInstQ102H, ValidInstQ101H, Clock, ReadyQ102H, Rst )
 assign ValidInstQ102H = ReadyQ102H && PreValidInstQ102H;
@@ -223,6 +222,9 @@ assign ValidInstQ103H = ReadyQ103H && PreValidInstQ103H;
 assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
 `MAFIA_EN_DFF    (PreValidInstQ105H, ValidInstQ104H, Clock, ReadyQ105H)
 assign ValidInstQ105H = ReadyQ105H && PreValidInstQ105H;
+
+// update CSR_INSTRET
+assign CsrHwUpdt.ValidInstQ105H = ValidInstQ105H;  
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
