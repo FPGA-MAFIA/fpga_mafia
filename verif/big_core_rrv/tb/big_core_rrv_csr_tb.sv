@@ -12,11 +12,11 @@
 // (1) generate the clock & rst. 
 // (2) load backdoor the I_MEM & D_MEM.
 // (3) End the test when the ebrake command is executed
+// (4) Calculate IPC = CSR_CYCLE/CSR_INSTRET 
 //-----------------------------------------------------------------------------
 
 
 `include "macros.sv"
-
 
 module big_core_rrv_tb  ;
 import common_pkg::*;
@@ -33,6 +33,7 @@ logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
 logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
 
+`include "mini_core_pmon_tasks.vh"
 
 string test_name;
 
@@ -88,6 +89,7 @@ initial begin: test_seq
     // run until ebreak is found
     //===============================
     begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
+       track_performance();
        $display("ebreak was called");
        $finish();
     end

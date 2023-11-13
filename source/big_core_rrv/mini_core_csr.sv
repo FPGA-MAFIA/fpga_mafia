@@ -39,6 +39,8 @@ assign csr_data = (csr_imm_bit) ? csr_data_imm : CsrWriteDataQ102H;
 
 logic csr_cycle_low_overflow;
 logic csr_instret_low_overflow;
+logic [63:0] csr_cycle_high_low;
+logic [63:0] csr_instret_high_low;
 always_comb begin
     next_csr = csr;
     if(csr_wren) begin
@@ -192,9 +194,11 @@ always_comb begin
     // the cycle counter is incremented on every clock cycle
         {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
         next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
+        csr_cycle_high_low      = {csr.csr_cycle_high, csr.csr_cycle_low};
         if(CsrHwUpdt.ValidInstQ105H) begin
             {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b1;
             next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
+            csr_instret_high_low      = {csr.csr_instret_high, csr.csr_instret_low};
         end
     //==========================================================================
     // Reset values for CSR

@@ -1,0 +1,13 @@
+ integer pmon_file;
+ task track_performance();
+ pmon_file =$fopen({"../../../target/big_core_rrv/tests/trk_cpi_ipc.log"}, "w");
+       $fdisplay(pmon_file,"===========================================");
+       $fdisplay(pmon_file,"PMON tracker for ", test_name, " test");
+       $fdisplay(pmon_file,"Monitoring IPC and CPI");
+       $fdisplay(pmon_file,"==========================================");
+       $fdisplay(pmon_file,"\nSummary report");
+       $fdisplay(pmon_file,"---------------------");
+       $fdisplay(pmon_file, "Number of cycles: %1d\nNumber of valid instructions: %1d\n",mini_core_top.mini_core.mini_core_csr.csr_cycle_high_low, mini_core_top.mini_core.mini_core_csr.csr_instret_high_low);
+       $fdisplay(pmon_file, "\nCPI = Number of cycles/Number of valid instructions\nIPC = Number of valid instructions/Number of cycles");
+       $fclose(pmon_file);
+ endtask;     
