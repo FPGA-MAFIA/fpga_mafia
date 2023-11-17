@@ -45,12 +45,12 @@ assign AluOutQ103H     = mini_core_top.mini_core.mini_core_mem_access1.AluOutQ10
 
 // signals for load
 logic DMemRdEnQ105H;
-logic [31:0] DMemRdDataQ105H;
+logic [31:0] PostSxDMemRdDataQ105H;
 logic [31:0] AluOutQ105H;
 logic [31:0] l_data;
-assign DMemRdEnQ105H   = mini_core_top.mini_core.mini_core_ctrl.CtrlQ105H.DMemRdEn;
-assign DMemRdDataQ105H = mini_core_top.mini_core.mini_core_wb.DMemRdDataQ105H;
-assign AluOutQ105H     = mini_core_top.mini_core.mini_core_wb.AluOutQ105H;   // load address
+assign DMemRdEnQ105H         = mini_core_top.mini_core.mini_core_ctrl.CtrlQ105H.DMemRdEn;
+assign PostSxDMemRdDataQ105H = mini_core_top.mini_core.mini_core_wb.PostSxDMemRdDataQ105H;
+assign AluOutQ105H           = mini_core_top.mini_core.mini_core_wb.AluOutQ105H;   // load address
 assign l_data = (rv32i_ref.instr_type == LB)  ?  rv32i_ref.lb_data :
                 (rv32i_ref.instr_type == LH)  ?  rv32i_ref.lh_data :
                 (rv32i_ref.instr_type == LW)  ?  rv32i_ref.lw_data :
@@ -80,7 +80,7 @@ fork forever begin
     @(posedge Clk) begin
         if (DMemRdEnQ105H) begin
             cur_mem_load.Address  = AluOutQ105H;
-            cur_mem_load.Data     = DMemRdDataQ105H;
+            cur_mem_load.Data     = PostSxDMemRdDataQ105H;
             cur_mem_load.Pc       = PcQ105H;
             cur_mem_load.cur_time = $time;
             mem_load_history.push_back(cur_mem_load);
