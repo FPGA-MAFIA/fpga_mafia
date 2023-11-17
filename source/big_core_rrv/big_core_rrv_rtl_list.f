@@ -32,6 +32,7 @@
 ../../../source/big_core_rrv/mini_core_csr.sv
 ../../../source/big_core_rrv/mini_core_vga_ctrl.sv
 ../../../source/big_core_rrv/mini_core_vga_sync_gen.sv
+../../../source/big_core_rrv/vga_mem.sv
 ../../../source/big_core_rrv/mini_core_mem_acs1.sv
 ../../../source/big_core_rrv/mini_core_mem_acs2.sv
 ../../../source/big_core_rrv/mini_core_wb.sv
