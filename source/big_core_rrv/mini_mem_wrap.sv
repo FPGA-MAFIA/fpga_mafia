@@ -48,7 +48,12 @@ import common_pkg::*;
                 //
                 output logic            OutFabricValidQ505H ,
                 output var t_tile_trans OutFabricQ505H      ,
-                input  var t_fab_ready  fab_ready              
+                input  var t_fab_ready  fab_ready,
+                //============================================
+                //      vga interface
+                //============================================
+                output logic        inDisplayArea,
+                output t_vga_out    vga_out         // VGA_OUTPUT               
 );
 
 logic        F2C_IMemHitQ503H;
@@ -129,12 +134,15 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 //==================================
 logic LocalDMemWrEnQ103H;
 logic NonLocalDMemReqQ103H;
-logic VgaSpaceQ103H;
+logic MatchVGAMemRegionQ103H, MatchVGAMemRegionQ104H;
 //The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
-assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
-assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
-                              ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
-                              (!VgaSpaceQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
+//assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
+assign MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
+`MAFIA_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock)
+
+assign LocalDMemWrEnQ103H     = (DMemWrEnQ103H) && 
+                                ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
+                                (!MatchVGAMemRegionQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
 // FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
@@ -176,7 +184,7 @@ assign WhoAmIReqQ103H = (DMemAddressQ103H[31:24] == 8'b0) && (DMemAddressQ103H[2
 // Half & Byte Write
 logic [31:0] ShiftDMemWrDataQ103H;
 logic [3:0]  ShiftDMemByteEnQ103H;
-logic [31:0] PreShiftDMemRdDataQ104H;
+logic [31:0] PreShiftRdDataQ104H;
 logic [1:0]  DMemAddressQ104H;
 always_comb begin
 ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
@@ -191,14 +199,18 @@ end
 
 
 `MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
+
 // Half & Byte READ
 logic [31:0] DMemRdRspQ104H;
+logic [31:0] PreShiftDMemRdDataQ104H;
+logic [31:0] PreShiftVGAMemRdDataQ104H;
+assign PreShiftRdDataQ104H = MatchVGAMemRegionQ104H ? PreShiftVGAMemRdDataQ104H : PreShiftDMemRdDataQ104H; // FIXME - may include more options
 assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
                         (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
-                        (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
-                        (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
-                        (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
-                                                                  PreShiftDMemRdDataQ104H         ; 
+                        (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftRdDataQ104H[31:8] } : 
+                        (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftRdDataQ104H[31:16]} : 
+                        (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftRdDataQ104H[31:24]} : 
+                                                                  PreShiftRdDataQ104H         ; 
 
  // increace read latency from 1 to 2 cycle latency 
 `MAFIA_DFF(DMemRdRspQ105H ,DMemRdRspQ104H, Clock)    
@@ -221,6 +233,42 @@ mem
     .byteena_b  (4'b1111),//FIXME - should accept the byte enable from the fabric
     .q_b        (F2C_DMemRspDataQ504H)              
     );
+
+ //==================================
+ // VGA cntroller instantiation
+ //==================================
+logic [31:0] VgaAddressWithOffsetQ103H;
+assign VgaAddressWithOffsetQ103H = DMemAddressQ103H - VGA_MEM_REGION_FLOOR;
+
+logic [31:0]  VgaWrData;
+logic [31:0]  VgaAdrsReq;
+logic [3:0]   VgaWrByteEn;
+logic         VgaWrEn;
+assign VgaWrData    = ShiftDMemWrDataQ103H;
+assign VgaAdrsReq   = VgaAddressWithOffsetQ103H;
+assign VgaWrByteEn  = ShiftDMemByteEnQ103H;
+assign VgaWrEn      = DMemWrEnQ103H && MatchVGAMemRegionQ103H;
+
+mini_core_vga_ctrl mini_core_vga_ctrl (
+   .Clk_50            (Clock),
+   .Reset             (Rst),
+   // Core interface
+   // write
+   .ReqDataQ503H       (VgaWrData),
+   .ReqAddressQ503H    (VgaAdrsReq),
+   .CtrlVGAMemByteEn   (VgaWrByteEn),
+   .CtrlVgaMemWrEnQ503 (VgaWrEn),
+   // read
+   .CtrlVgaMemRdEnQ503 (VgaWrEn),
+   .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),
+   // VGA output
+   .inDisplayArea     (inDisplayArea),
+   .RED               (vga_out.VGA_R),
+   .GREEN             (vga_out.VGA_G),
+   .BLUE              (vga_out.VGA_B),
+   .h_sync            (vga_out.VGA_HS),
+   .v_sync            (vga_out.VGA_VS)
+);
 
 //==================================
 // F2C response 504 ( D_MEM/I_MEM )
