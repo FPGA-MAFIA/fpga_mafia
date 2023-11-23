@@ -3,7 +3,7 @@
 #include "graphic_vga.h"
 
 int main()  {  
-    rvc_printf("HELLO_WORLD");
+    rvc_printf("HELLO_WORLD2023");
   
     return 0;
     
