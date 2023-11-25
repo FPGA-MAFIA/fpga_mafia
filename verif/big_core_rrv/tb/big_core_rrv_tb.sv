@@ -41,6 +41,9 @@ string test_name;
 `include "mini_core_pmon_tasks.vh"
 `include "mini_core_trk.sv"
 
+//VGA interface outputs
+t_vga_out   vga_out;
+logic inDisplayArea;
 
 // ========================
 // clock gen
@@ -116,6 +119,7 @@ initial begin: test_seq
     get_ref_mem_load();
     begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
     track_performance();     // monitoring CPI and IPC
+    print_vga_screen();
     eot(.msg("ebreak was called"));
     sl_eot(.s_msg("ebreak was called"), .l_msg("ebreak was called"));
     end
@@ -204,7 +208,12 @@ mini_core_top (
  //
  .OutFabricQ505H        (OutFabricQ505H),  // output t_rdata      F2C_RspDataQ504H      ,
  .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
- .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
+ .fab_ready             (5'b11111),   // input  t_fab_ready  fab_ready 
+//============================================
+//      vga interface
+//============================================
+.inDisplayArea(inDisplayArea),
+.vga_out(vga_out)         // VGA_OUTPUT 
 );      
 
 
@@ -220,5 +229,26 @@ rv32i_ref
 .run    (1'b1) // FIXME - set the RUN only when the mini_core DUT is retiring the instruction.
                // every time the run is set, the next instruction is executed
 );
+
+
+task print_vga_screen ;
+// VGA memory snapshot - simulate a screen
+    integer fd1;
+    string draw;
+    fd1 = $fopen({"../../../target/big_core_rrv/tests/",test_name,"/screen.log"},"w");
+    if (fd1) $display("File was open successfully : %0d", fd1);
+    else $display("File was not open successfully : %0d", fd1);
+    for (int i = 0 ; i < SIZE_VGA_MEM; i = i+320) begin // Lines
+        for (int j = 0 ; j < 4; j = j+1) begin // Bytes
+            for (int k = 0 ; k < 320; k = k+4) begin // Words
+                for (int l = 0 ; l < 8; l = l+1) begin // Bits  
+                    draw = (mini_core_top.mini_mem_wrap.mini_core_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    $fwrite(fd1,"%s",draw);
+                end        
+            end 
+            $fwrite(fd1,"\n");
+        end
+    end
+endtask
 endmodule //mini_core_tb
 
