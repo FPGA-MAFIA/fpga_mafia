@@ -3,7 +3,9 @@
 #include "graphic_vga.h"
 
 int main()  {  
-    rvc_printf("HELLO_WORLD2023");
+    rvc_printf("HELLO_WORLD\n");
+    rvc_printf("WELCOME TO MAFIA\n");
+    rvc_print_int(1234567);
   
     return 0;
     
