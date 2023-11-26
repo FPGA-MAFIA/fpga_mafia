@@ -36,7 +36,9 @@
 #define EIGHT_TOP    0x42423C00                  
 #define EIGHT_BOTTOM 0x003C423C                  
 #define NINE_TOP     0x42423C00                  
-#define NINE_BOTTOM  0x003E407C                  
+#define NINE_BOTTOM  0x003E407C
+#define COLON_TOP    0x00100000
+#define COLON_BOTTOM 0x00001000                 
 #define A_TOP        0x663C1800                  
 #define A_BOTTOM     0x00667E66                  
 #define B_TOP        0x3E221E00                  
@@ -107,13 +109,13 @@
 /* ASCII tables */
 unsigned int ASCII_TOP[97]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,
                                 0,0,0,0,0,0,0,0,0,0,COMMA_TOP,0,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
-                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,0,0,0,0,0,0,0,A_TOP,
+                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,0,0,0,0,0,A_TOP,
                                 B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
                                 N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP};
 unsigned int ASCII_BOTTOM[97] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 SPACE_BOTTOM,0,0,0,0,0,0,0,0,0,0,COMMA_BOTTOM,0,POINT_BOTTOM,0,ZERO_BOTTOM,
                                 ONE_BOTTOM,TWO_BOTTOM,THREE_BOTTOM,FOUR_BOTTOM,FIVE_BOTTOM,SIX_BOTTOM,
-                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,0,0,0,0,0,0,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
+                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,0,0,0,0,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
                                 E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
                                 M_BOTTOM,N_BOTTOM,O_BOTTOM,P_BOTTOM,Q_BOTTOM,R_BOTTOM,S_BOTTOM,T_BOTTOM,
                                 U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM};
@@ -353,6 +355,32 @@ void rvc_delay(int delay){
     }      
 }
 
+// sample relevant csr's for pmon
+void rvc_sample_csr(int *cycle_low, int *instret_low){
+
+    asm volatile ("csrr %0, 0xC00" : "=r" (*cycle_low)); 
+    asm volatile ("csrr %0, 0xC02" : "=r" (*instret_low)); 
+
+}
+
+// print cpi value as remainder and quotient
+void rvc_print_cpi(int cycle, int instret){
+    int remainder, quotient;
+
+    remainder = cycle/instret;
+    quotient = cycle%instret;
+
+    rvc_printf("CPI TEST");
+    rvc_printf("\nCYCLES:");
+    rvc_print_int(cycle);
+    rvc_printf("\nVALID:");
+    rvc_print_int(instret);
+    rvc_printf("\nTHE REMINDER IS:");
+    rvc_print_int(remainder);
+    rvc_printf("\nTHE QUOTIENT IS:");
+    rvc_print_int(quotient);
+
+}
 
 
 // The monochrome VGA support is 480x640 pixels
