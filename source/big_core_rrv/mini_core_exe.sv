@@ -84,7 +84,7 @@ assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After
                                              PreRegRdData1Q102H; // Common Case - No Hazard
 
 assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 104
+                         Hazard2Data2Q102H ? AluOutQ104H       : // Rd 102 After Wr 104
                          Hazard3Data2Q102H ? RegWrDataQ105H    : // Rd 102 After Wr 105 
                                              PreRegRdData2Q102H; // Common Case - No Hazard
  
