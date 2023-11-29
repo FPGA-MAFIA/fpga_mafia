@@ -363,23 +363,35 @@ void rvc_sample_csr(int *cycle_low, int *instret_low){
 
 }
 
+// calculate power of integer numbers with integer exponent
+int pow(int base, int exp) {
+	int result = 1;
+
+	for (int i = 0; i < exp; i++)
+		result *= base;
+
+	return result;
+}
+
 // print cpi value as remainder and quotient
-void rvc_print_cpi(int cycle, int instret){
-    int remainder, quotient;
+void fix_div(int numerator, int denominator, int* quo, int* rem) {
+    int precision = 3;;
+	int sign_numerator   = (numerator > 0) ? 1 : -1;
+	int sign_denominator = (denominator > 0) ? 1 : -1;
 
-    remainder = cycle/instret;
-    quotient = cycle%instret;
+	// convert to positive
+	numerator *= sign_numerator;
+	denominator *= sign_denominator;
 
-    rvc_printf("CPI TEST");
-    rvc_printf("\nCYCLES:");
-    rvc_print_int(cycle);
-    rvc_printf("\nVALID:");
-    rvc_print_int(instret);
-    rvc_printf("\nTHE REMINDER IS:");
-    rvc_print_int(remainder);
-    rvc_printf("\nTHE QUOTIENT IS:");
-    rvc_print_int(quotient);
+	*quo = numerator / denominator;
+	*rem = (((numerator) % denominator) * pow(10, precision)) / denominator;
+	
+	// remove zeros from right
+	while (!(*rem % 10) && *rem!=0)
+		*rem /= 10;
 
+	if (sign_numerator * sign_denominator == -1)
+		*quo = -1 * (*quo);
 }
 
 
