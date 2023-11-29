@@ -32,7 +32,12 @@ int main(){
     int cycle_diff   = cycle1 - cycle2;
     int instret_diff = instret1 - instret2;
     
-    rvc_print_cpi(cycle_diff, instret_diff);
+    int quotient, reminder;
+    fix_div(instret_diff, cycle_diff, &quotient, &reminder);
+
+    rvc_print_int(quotient);
+    rvc_printf(".");
+    rvc_print_int(reminder);
 
     return 0;
 }
