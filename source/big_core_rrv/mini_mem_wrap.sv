@@ -53,7 +53,14 @@ import common_pkg::*;
                 //      vga interface
                 //============================================
                 output logic        inDisplayArea,
-                output t_vga_out    vga_out         // VGA_OUTPUT               
+                output t_vga_out    vga_out,         // VGA_OUTPUT 
+                //============================================
+                //      fpga interface
+                //============================================ 
+                // FPGA interface inputs              
+                input  var t_fpga_in   fpga_in,     
+                output t_fpga_out  fpga_out         // CR_MEM output to FPGA
+           
 );
 
 logic        F2C_IMemHitQ503H;
@@ -66,6 +73,7 @@ logic [31:0] F2C_DMemRspDataQ504H;
 
 logic        F2C_CrMemHitQ503H;
 logic        F2C_CrMemWrEnQ503H;
+logic [31:0] F2C_CrMemRspDataQ504H;
 
 logic   F2C_CrMemHitQ504H;
 logic   F2C_IMemHitQ504H ;
@@ -95,8 +103,9 @@ assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MIN
                            (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] < D_MEM_REGION_ROOF_MINI) ;
 assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && ((InFabricQ503H.opcode == WR));
 // Set the F2C CrMEM hit indications
-assign F2C_CrMemHitQ503H  = 1'b0; //FIXME - Add CR_MEM offset hit indication
-assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
+assign F2C_CrMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && 
+                            (InFabricQ503H.address[MSB_REGION:LSB_REGION] < CR_MEM_REGION_ROOF) ;
+assign F2C_CrMemWrEnQ503H = F2C_CrMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 
 logic [31:0] InstructionQ101H; //instruction,
 //==================================
@@ -130,15 +139,19 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 //assign PreInstructionQ101H = InstructionQ101H;
 
 //==================================
-// DATA Memory
+// Memory regions
 //==================================
-logic LocalDMemWrEnQ103H;
-logic NonLocalDMemReqQ103H;
-logic MatchVGAMemRegionQ103H, MatchVGAMemRegionQ104H;
+logic        LocalDMemWrEnQ103H;
+logic        NonLocalDMemReqQ103H;
+logic        MatchVGAMemRegionQ103H, MatchVGAMemRegionQ104H;
+logic        MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H;
 //The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
 //assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
 assign MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
 `MAFIA_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock)
+
+assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= CR_MEM_REGION_ROOF));
+`MAFIA_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock)
 
 assign LocalDMemWrEnQ103H     = (DMemWrEnQ103H) && 
                                 ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
@@ -186,6 +199,8 @@ logic [31:0] ShiftDMemWrDataQ103H;
 logic [3:0]  ShiftDMemByteEnQ103H;
 logic [31:0] PreShiftRdDataQ104H;
 logic [1:0]  DMemAddressQ104H;
+logic [31:0] PreCRMemRdDataQ104H;
+
 always_comb begin
 ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
                        (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
@@ -204,9 +219,11 @@ end
 logic [31:0] DMemRdRspQ104H;
 logic [31:0] PreShiftDMemRdDataQ104H;
 logic [31:0] PreShiftVGAMemRdDataQ104H;
-assign PreShiftRdDataQ104H = MatchVGAMemRegionQ104H ? PreShiftVGAMemRdDataQ104H : PreShiftDMemRdDataQ104H; // FIXME - may include more options
-assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
-                        (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
+logic [31:0] PreShiftCRMemRdDataQ104H;
+assign PreShiftRdDataQ104H = MatchVGAMemRegionQ104H ? PreShiftVGAMemRdDataQ104H : PreShiftDMemRdDataQ104H; 
+assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                 ://Fabric response to an older core request
+                        (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}              ://Special case - WhoAmI respond the "hard coded" local tile id
+                         MatchCRMemRegionQ104H           ? PreCRMemRdDataQ104H                :
                         (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftRdDataQ104H[31:16]} : 
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftRdDataQ104H[31:24]} : 
@@ -234,6 +251,29 @@ mem
     .q_b        (F2C_DMemRspDataQ504H)              
     );
 
+ //==================================
+ // CR mem instantiation
+ //==================================
+ mini_core_cr_mem mini_core_cr_mem (
+    .Clk              (Clock),
+    .Rst              (Rst),
+    .data             (DMemWrDataQ103H),
+    .address          (DMemAddressQ103H),
+    .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
+    .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
+    .q                (PreCRMemRdDataQ104H),
+    //Fabric access interface
+    .data_b           (InFabricQ503H.data),
+    .address_b        (InFabricQ503H.address),
+    .wren_b           (F2C_CrMemWrEnQ503H),
+    .q_b              (F2C_CrMemRspDataQ504H),
+    // Keyboard interface
+    .kbd_data_rd      (), //input  t_kbd_data_rd kbd_data_rd,
+    .kbd_ctrl         (), //output t_kbd_ctrl    kbd_ctrl,
+    // FPGA interface
+    .fpga_in          (fpga_in),  
+    .fpga_out         (fpga_out)
+);
  //==================================
  // VGA cntroller instantiation
  //==================================
@@ -274,11 +314,9 @@ mini_core_vga_ctrl mini_core_vga_ctrl (
 // F2C response 504 ( D_MEM/I_MEM )
 //==================================
 logic [31:0] F2C_RspDataQ504H;
-logic [31:0] F2C_CrMemRspDataQ504H;
-assign F2C_CrMemRspDataQ504H = '0;
-assign F2C_CrMemHitQ504H     = '0;
 `MAFIA_DFF(F2C_IMemHitQ504H , F2C_IMemHitQ503H , Clock)
 `MAFIA_DFF(F2C_DMemHitQ504H , F2C_DMemHitQ503H , Clock)
+`MAFIA_DFF(F2C_CrMemHitQ504H, F2C_CrMemHitQ503H, Clock)
 
 assign F2C_RspDataQ504H   = F2C_CrMemHitQ504H ? F2C_CrMemRspDataQ504H : //CR hit is the highest priority
                             F2C_IMemHitQ504H  ? F2C_IMemRspDataQ504H  :

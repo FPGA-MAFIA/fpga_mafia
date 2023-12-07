@@ -11,6 +11,6 @@ import common_pkg::*;
 
 logic st_flag;
 assign st_flag = (Data == 2'b10);
-`MAFIA_RST_DFF(Struct_flag, st_flag, Clk, Rst);
+`MAFIA_RST_DFF(Struct_flag, st_flag, Clk, Rst)
 
 endmodule

@@ -18,6 +18,6 @@ always_comb begin
     odd_error_flag = ~set_bit_amount[0];
 end
 
-`MAFIA_DFF(odd_parity_error_flag, odd_error_flag, Clk);
+`MAFIA_DFF(odd_parity_error_flag, odd_error_flag, Clk)
 
 endmodule
