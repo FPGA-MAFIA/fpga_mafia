@@ -22,7 +22,12 @@ input  var t_fab_ready  fab_ready,
 //      vga interface
 //============================================
 output logic        inDisplayArea,
-output t_vga_out    vga_out         // VGA_OUTPUT 
+output t_vga_out    vga_out,         // VGA_OUTPUT
+//============================================
+//      fpga interface
+//============================================             
+input  var t_fpga_in   fpga_in,  // CR_MEM
+output t_fpga_out      fpga_out      // CR_MEM
 );
 
 logic [31:0] PcQ100H;             // To I_MEM
@@ -89,8 +94,16 @@ mini_mem_wrap mini_mem_wrap(
  .OutFabricQ505H        (OutFabricQ505H),       // output t_rdata      F2C_RspDataQ504H      ,
  .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
  .fab_ready             (fab_ready),             // input
+//=========================================
+//     vga interface
+//=========================================
  .inDisplayArea         (inDisplayArea),
- .vga_out               (vga_out)               // VGA_OUTPUT 
+ .vga_out               (vga_out),               // VGA_OUTPUT 
+//=========================================
+//     fpga interface
+//=========================================
+ .fpga_in               (fpga_in),            // CR_MEM
+ .fpga_out              (fpga_out)            // CR_MEM
 );
 
 

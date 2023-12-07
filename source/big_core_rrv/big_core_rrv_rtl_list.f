@@ -28,6 +28,7 @@
 ../../../source/big_core_rrv/mini_core_if.sv
 ../../../source/big_core_rrv/mini_core_ctrl.sv
 ../../../source/big_core_rrv/mini_core_rf.sv
+../../../source/big_core_rrv/mini_core_cr_mem.sv
 ../../../source/big_core_rrv/mini_core_exe.sv
 ../../../source/big_core_rrv/mini_core_csr.sv
 ../../../source/big_core_rrv/mini_core_vga_ctrl.sv
