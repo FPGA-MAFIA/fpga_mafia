@@ -16,6 +16,7 @@ import common_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
+    input  logic        RstPc,
     input  var t_ctrl_if    Ctrl,
     input  logic        ReadyQ100H,
     input  logic        ReadyQ101H,
@@ -28,7 +29,7 @@ logic [31:0] PcPlus4Q100H;
 logic [31:0] NextPcQnnnH;
 assign PcPlus4Q100H = PcQ100H + 3'h4;
 assign NextPcQnnnH  = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
-`MAFIA_EN_RST_DFF(PcQ100H, NextPcQnnnH, Clock, ReadyQ100H, Rst)
+`MAFIA_EN_RST_DFF(PcQ100H, NextPcQnnnH, Clock, ReadyQ100H, Rst | RstPc)
 
 // Q100H to Q101H Flip Flops. 
 `MAFIA_EN_DFF(PcQ101H, PcQ100H, Clock, ReadyQ101H)

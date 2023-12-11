@@ -8,6 +8,7 @@ import common_pkg::*;
 input  logic        Clock  ,
 input  logic        Rst    ,
 input  t_tile_id    local_tile_id,
+input  logic        RstPc,
 //============================================
 //      fabric interface
 //============================================
@@ -48,6 +49,7 @@ mini_core
 mini_core (
    .Clock               ( Clock              ), // input  logic        Clock,
    .Rst                 ( Rst                ), // input  logic        Rst,
+   .RstPc               ( RstPc              ), // input  logic        RstPc,
    // Instruction Memory
    .ReadyQ101H          ( ReadyQ101H    ), // output logic        ReadyQ101H,          // To I_MEM
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
