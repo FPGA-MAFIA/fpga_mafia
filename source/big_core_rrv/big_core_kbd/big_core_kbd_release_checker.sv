@@ -12,6 +12,6 @@ import common_pkg::*;
 
 logic rls_flag;
 assign rls_flag = (Data == 8'hFE);
-`MAFIA_RST_DFF(Release_flag, rls_flag, Clk, Rst);
+`MAFIA_RST_DFF(Release_flag, rls_flag, Clk, Rst)
 
 endmodule

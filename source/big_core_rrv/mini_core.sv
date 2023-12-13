@@ -32,6 +32,7 @@ import common_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
+    input  logic        RstPc,
     // Instruction Memory
     output logic       ReadyQ101H,
     output logic [31:0] PcQ100H,             // To I_MEM
@@ -135,6 +136,7 @@ logic [31:0] DMemWrDataQ103H;
 mini_core_if mini_core_if (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
+  .RstPc        (RstPc       ), // input  logic        RstPc,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
