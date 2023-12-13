@@ -96,8 +96,8 @@ mini_core_top  (
 .InFabricValidQ503H     (InFabricValidQ503H),
 .InFabricQ503H          (InFabricQ503H),
 .mini_core_ready        (),
-.OutFabricValidQ505H    (OutFabricValidQ505H),
-.OutFabricQ505H         (OutFabricQ505H),
+.OutFabricValidQ505H    (PreOutFabricValidQ505H),
+.OutFabricQ505H         (PreOutFabricQ505H),
 .fab_ready              (),
 // Vga interface
 .inDisplayArea          (inDisplayArea),

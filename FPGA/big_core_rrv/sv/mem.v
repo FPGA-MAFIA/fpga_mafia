@@ -4,7 +4,7 @@
 // MODULE: altsyncram 
 
 // ============================================================
-// File Name: i_mem.v
+// File Name: mem.v
 // Megafunction Name(s):
 // 			altsyncram
 //
@@ -37,9 +37,11 @@
 // synopsys translate_off
 `timescale 1 ps / 1 ps
 // synopsys translate_on
-module i_mem (
+module mem #(parameter WORD_WIDTH, parameter ADRS_WIDTH)( 
 	address_a,
 	address_b,
+	byteena_a,
+	byteena_b,
 	clock,
 	data_a,
 	data_b,
@@ -50,6 +52,8 @@ module i_mem (
 
 	input	[13:0]  address_a;
 	input	[13:0]  address_b;
+	input	[3:0]  byteena_a;
+	input	[3:0]  byteena_b;
 	input	  clock;
 	input	[31:0]  data_a;
 	input	[31:0]  data_b;
@@ -60,6 +64,8 @@ module i_mem (
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
+	tri1	[3:0]  byteena_a;
+	tri1	[3:0]  byteena_b;
 	tri1	  clock;
 	tri0	  wren_a;
 	tri0	  wren_b;
@@ -75,6 +81,8 @@ module i_mem (
 	altsyncram	altsyncram_component (
 				.address_a (address_a),
 				.address_b (address_b),
+				.byteena_a (byteena_a),
+				.byteena_b (byteena_b),
 				.clock0 (clock),
 				.data_a (data_a),
 				.data_b (data_b),
@@ -86,8 +94,6 @@ module i_mem (
 				.aclr1 (1'b0),
 				.addressstall_a (1'b0),
 				.addressstall_b (1'b0),
-				.byteena_a (1'b1),
-				.byteena_b (1'b1),
 				.clock1 (1'b1),
 				.clocken0 (1'b1),
 				.clocken1 (1'b1),
@@ -98,12 +104,14 @@ module i_mem (
 				.rden_b (1'b1));
 	defparam
 		altsyncram_component.address_reg_b = "CLOCK0",
+		altsyncram_component.byteena_reg_b = "CLOCK0",
+		altsyncram_component.byte_size = 8,
 		altsyncram_component.clock_enable_input_a = "BYPASS",
 		altsyncram_component.clock_enable_input_b = "BYPASS",
 		altsyncram_component.clock_enable_output_a = "BYPASS",
 		altsyncram_component.clock_enable_output_b = "BYPASS",
 		altsyncram_component.indata_reg_b = "CLOCK0",
-		altsyncram_component.init_file = "./mif/i_mem.mif",
+		altsyncram_component.init_file = "./mif/d_mem.mif",
 		altsyncram_component.intended_device_family = "MAX 10",
 		altsyncram_component.lpm_type = "altsyncram",
 		altsyncram_component.numwords_a = 16384,
@@ -121,8 +129,8 @@ module i_mem (
 		altsyncram_component.widthad_b = 14,
 		altsyncram_component.width_a = 32,
 		altsyncram_component.width_b = 32,
-		altsyncram_component.width_byteena_a = 1,
-		altsyncram_component.width_byteena_b = 1,
+		altsyncram_component.width_byteena_a = 4,
+		altsyncram_component.width_byteena_b = 4,
 		altsyncram_component.wrcontrol_wraddress_reg_b = "CLOCK0";
 
 
@@ -135,8 +143,8 @@ endmodule
 // Retrieval info: PRIVATE: ADDRESSSTALL_B NUMERIC "0"
 // Retrieval info: PRIVATE: BYTEENA_ACLR_A NUMERIC "0"
 // Retrieval info: PRIVATE: BYTEENA_ACLR_B NUMERIC "0"
-// Retrieval info: PRIVATE: BYTE_ENABLE_A NUMERIC "0"
-// Retrieval info: PRIVATE: BYTE_ENABLE_B NUMERIC "0"
+// Retrieval info: PRIVATE: BYTE_ENABLE_A NUMERIC "1"
+// Retrieval info: PRIVATE: BYTE_ENABLE_B NUMERIC "1"
 // Retrieval info: PRIVATE: BYTE_SIZE NUMERIC "8"
 // Retrieval info: PRIVATE: BlankMemory NUMERIC "0"
 // Retrieval info: PRIVATE: CLOCK_ENABLE_INPUT_A NUMERIC "0"
@@ -163,7 +171,7 @@ endmodule
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
 // Retrieval info: PRIVATE: MEMSIZE NUMERIC "524288"
 // Retrieval info: PRIVATE: MEM_IN_BITS NUMERIC "0"
-// Retrieval info: PRIVATE: MIFfilename STRING "./mif/i_mem.mif"
+// Retrieval info: PRIVATE: MIFfilename STRING "./mif/d_mem.mif"
 // Retrieval info: PRIVATE: OPERATION_MODE NUMERIC "3"
 // Retrieval info: PRIVATE: OUTDATA_ACLR_B NUMERIC "0"
 // Retrieval info: PRIVATE: OUTDATA_REG_B NUMERIC "0"
@@ -192,12 +200,14 @@ endmodule
 // Retrieval info: PRIVATE: rden NUMERIC "0"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: CONSTANT: ADDRESS_REG_B STRING "CLOCK0"
+// Retrieval info: CONSTANT: BYTEENA_REG_B STRING "CLOCK0"
+// Retrieval info: CONSTANT: BYTE_SIZE NUMERIC "8"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_B STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_B STRING "BYPASS"
 // Retrieval info: CONSTANT: INDATA_REG_B STRING "CLOCK0"
-// Retrieval info: CONSTANT: INIT_FILE STRING "./mif/i_mem.mif"
+// Retrieval info: CONSTANT: INIT_FILE STRING "./mif/d_mem.mif"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "MAX 10"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
 // Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "16384"
@@ -215,11 +225,13 @@ endmodule
 // Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "14"
 // Retrieval info: CONSTANT: WIDTH_A NUMERIC "32"
 // Retrieval info: CONSTANT: WIDTH_B NUMERIC "32"
-// Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
-// Retrieval info: CONSTANT: WIDTH_BYTEENA_B NUMERIC "1"
+// Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "4"
+// Retrieval info: CONSTANT: WIDTH_BYTEENA_B NUMERIC "4"
 // Retrieval info: CONSTANT: WRCONTROL_WRADDRESS_REG_B STRING "CLOCK0"
 // Retrieval info: USED_PORT: address_a 0 0 14 0 INPUT NODEFVAL "address_a[13..0]"
 // Retrieval info: USED_PORT: address_b 0 0 14 0 INPUT NODEFVAL "address_b[13..0]"
+// Retrieval info: USED_PORT: byteena_a 0 0 4 0 INPUT VCC "byteena_a[3..0]"
+// Retrieval info: USED_PORT: byteena_b 0 0 4 0 INPUT VCC "byteena_b[3..0]"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
 // Retrieval info: USED_PORT: data_a 0 0 32 0 INPUT NODEFVAL "data_a[31..0]"
 // Retrieval info: USED_PORT: data_b 0 0 32 0 INPUT NODEFVAL "data_b[31..0]"
@@ -229,6 +241,8 @@ endmodule
 // Retrieval info: USED_PORT: wren_b 0 0 0 0 INPUT GND "wren_b"
 // Retrieval info: CONNECT: @address_a 0 0 14 0 address_a 0 0 14 0
 // Retrieval info: CONNECT: @address_b 0 0 14 0 address_b 0 0 14 0
+// Retrieval info: CONNECT: @byteena_a 0 0 4 0 byteena_a 0 0 4 0
+// Retrieval info: CONNECT: @byteena_b 0 0 4 0 byteena_b 0 0 4 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
 // Retrieval info: CONNECT: @data_a 0 0 32 0 data_a 0 0 32 0
 // Retrieval info: CONNECT: @data_b 0 0 32 0 data_b 0 0 32 0
@@ -236,10 +250,10 @@ endmodule
 // Retrieval info: CONNECT: @wren_b 0 0 0 0 wren_b 0 0 0 0
 // Retrieval info: CONNECT: q_a 0 0 32 0 @q_a 0 0 32 0
 // Retrieval info: CONNECT: q_b 0 0 32 0 @q_b 0 0 32 0
-// Retrieval info: GEN_FILE: TYPE_NORMAL i_mem.v TRUE
-// Retrieval info: GEN_FILE: TYPE_NORMAL i_mem.inc FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL i_mem.cmp FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL i_mem.bsf FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL i_mem_inst.v FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL i_mem_bb.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.v TRUE
+// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.inc FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.cmp FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.bsf FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem_inst.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem_bb.v FALSE
 // Retrieval info: LIB_FILE: altera_mf
