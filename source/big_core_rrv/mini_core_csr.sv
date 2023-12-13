@@ -200,6 +200,8 @@ always_comb begin
             next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
             csr_instret_high_low      = {csr.csr_instret_high, csr.csr_instret_low};
         end
+        else
+           {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b0; 
     //==========================================================================
     // Reset values for CSR
     //==========================================================================
