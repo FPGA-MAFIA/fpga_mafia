@@ -170,11 +170,7 @@ assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&
 logic FabricDataRspValidQ503H;
 assign FabricDataRspValidQ503H = (OutstandingReadReq) &&  (InFabricQ503H.opcode == RD_RSP) && InFabricValidQ503H ;
 assign RstOutstandingReadReqQ503H = FabricDataRspValidQ503H || Rst;
-`MAFIA_EN_RST_DFF(OutstandingReadReq,
-                  1'b1                      ,
-                  Clock                     ,
-                  SetOutstandingReadReqQ103H, //Set (Enable bit)
-                  RstOutstandingReadReqQ503H) //Reset 
+`MAFIA_EN_RST_DFF(OutstandingReadReq, 1'b1 ,Clock, SetOutstandingReadReqQ103H, RstOutstandingReadReqQ503H) 
 
 logic [31:0] FabricDataRspQ504H;
 logic        FabricDataRspValidQ504H;
