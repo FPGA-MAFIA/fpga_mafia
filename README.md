@@ -1,4 +1,4 @@
-[![mafia_sanity](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml/badge.svg)](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml)
+[![mafia_sanity](https://github.com/amichai-bd/fpga_mafia/actions/workflows/mafia_sanity.yml/badge.svg)](https://github.com/FPGA-MAFIA/fpga_mafia/actions/workflows/mafia_sanity.yml)
 
 ## Current Development Status:
 This project is currently a work in progress (WIP). We are in the process of enabling and integrating individual IPs.  
