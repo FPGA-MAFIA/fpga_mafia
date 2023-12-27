@@ -151,6 +151,7 @@ class Test:
             cs_path =  self.name+'_'+Test.name+'.c.s' if not self.assembly else '../../../../../'+self.path
             elf_path = self.name+'_'+Test.name+'.elf'
             txt_path = self.name+'_'+Test.name+'_elf.txt'
+            txt_path_v2 = self.name+'_'+Test.name+'_elf_v2.txt'
             data_init_path = self.name+'_data_init.txt'
             search_path  = '-I ../../../../../app/defines '
             chdir(self.gcc_dir)
@@ -183,6 +184,10 @@ class Test:
                     try:
                         third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
                         run_cmd(third_cmd)
+                        # clean version of the elf.txt file - using the -M numeric -M no-aliases flags so we get x0,x1,x2 instead of zero, ra, sp.
+                        # also using the ISA instruction instead of the pseudo instruction (instead of nop we get addi x0, x0, 0)
+                        third_cmd_v2  = 'riscv-none-embed-objdump.exe -M numeric -M no-aliases -gd {} > {}'.format(elf_path, txt_path_v2)
+                        run_cmd(third_cmd_v2)
                     except:
                         print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
                         self.fail_flag = True
