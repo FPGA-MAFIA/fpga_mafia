@@ -76,7 +76,7 @@ logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 logic PreValidInstQ105H, ValidInstQ105H;
 
-t_core_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
+t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;

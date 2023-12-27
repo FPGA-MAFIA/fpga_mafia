@@ -14,9 +14,9 @@ set_global_assignment -name NUM_PARALLEL_PROCESSORS 2
 # SEARCH_PATH
 #============================================================
 set_global_assignment -name SEARCH_PATH ../../source/common/
+set_global_assignment -name SEARCH_PATH ../../source/core_rrv/
 set_global_assignment -name SEARCH_PATH ../../source/big_core/
 set_global_assignment -name SEARCH_PATH ../../source/mini_core/
-set_global_assignment -name SEARCH_PATH ../../source/core_rrv/
 set_global_assignment -name SEARCH_PATH ../../source/fabric/
 set_global_assignment -name SEARCH_PATH ../../source/uart/
 #set_global_assignment -name SEARCH_PATH ../../lotr_orig/source/common/

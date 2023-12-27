@@ -14,7 +14,6 @@
 +incdir+../../../source/common/
 +incdir+../../../source/core_rrv/
 +incdir+../../../source/big_core/
-+incdir+../../../source/mini_core/
 +incdir+../../../source/fabric/
 
 // param packages

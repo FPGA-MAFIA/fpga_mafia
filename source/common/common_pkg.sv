@@ -54,7 +54,6 @@ typedef struct packed {
 } t_fab_ready;
 
 `include "big_core_pkg.vh"
-`include "core_rrv_pkg.vh"
 `include "mini_core_pkg.vh"
 
 

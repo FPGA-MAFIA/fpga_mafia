@@ -102,7 +102,7 @@ t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
 t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
 t_opcode            OpcodeQ101H, OpcodeQ102H;
 logic ReadyQ100H;
-t_core_ctrl Ctrl;
+t_mini_ctrl Ctrl;
 logic DMemRdRspValid;
 logic ReadyQ102H;
 logic ReadyQ103H;
