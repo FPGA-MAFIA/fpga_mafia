@@ -52,7 +52,7 @@ To see the build and run options, use the following command:
 For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
 Please add your question discussion tab
 ### A tutorial for getting started with the tool chain:  
-https://github.com/amichai-bd/fpga_mafia/wiki/Getting-started---tool-chain-tutorial. 
+https://fpga-mafia.github.io/fpga_mafia_wiki/docs/build_script/intro
 
 ## Prerequisite
 Before you start, make sure you have the following tools and software installed:
