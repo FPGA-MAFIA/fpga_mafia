@@ -10,7 +10,7 @@ initial begin: trk_alu_gen
 end
 //tracker on ALU operations
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H, mini_core_top.mini_core.AluIn1Q102H , mini_core_top.mini_core.AluIn2Q102H, mini_core_top.mini_core.AluOutQ102H);
+    $fwrite(trk_alu,"%t\t| %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H, mini_core_top.mini_core.mini_core_exe.AluIn1Q102H , mini_core_top.mini_core.mini_core_exe.AluIn2Q102H, mini_core_top.mini_core.mini_core_exe.AluOutQ102H);
 end
 
 integer trk_inst;

@@ -38,73 +38,28 @@ import common_pkg::*;
 );
 
 // ---- Data-Path signals ----
-// Program counter
-logic [31:0]        PcQ101H, PcQ102H;
-logic [31:0]        PcPlus4Q100H, PcPlus4Q101H, PcPlus4Q102H, PcPlus4Q103H, PcPlus4Q104H;
-logic [31:0]        NextPcQ102H;
-logic [31:0]        InstructionQ101H;
-
-logic [31:1][31:0]  Register; 
-logic [31:0]        ImmediateQ101H, ImmediateQ102H;
-logic [4:0]         ShamtQ102H;
-logic [31:0]        AluIn1Q102H;
-logic [31:0]        AluIn2Q102H;
-logic [31:0]        AluOutQ102H, AluOutQ103H, AluOutQ104H;
-logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H, RegRdData1Q103H;
-logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
-logic [31:0]        RegWrDataQ104H; 
-logic [31:0]        WrBackDataQ104H;
-logic [31:0]        PostSxDMemRdDataQ104H;
+logic [31:0]  PcQ101H, PcQ102H;
+logic [31:0]  PcPlus4Q103H, PcPlus4Q104H;
+logic [31:0]  ImmediateQ101H, ImmediateQ102H;
+logic [31:0]  AluOutQ102H, AluOutQ103H, AluOutQ104H;
+logic [31:0]  PreRegRdData1Q102H, RegRdData1Q102H;
+logic [31:0]  PreRegRdData2Q102H, RegRdData2Q102H;
+logic [31:0]  RegWrDataQ104H; 
+logic [31:0]  DMemWrDataQ103H;
 
 // Control bits
-logic               SelNextPcAluOutJQ101H, SelNextPcAluOutJQ102H;
-logic               SelNextPcAluOutBQ101H, SelNextPcAluOutBQ102H;
-logic               SelNextPcAluOutQ102H;
-logic               SelRegWrPcQ101H, SelRegWrPcQ102H, SelRegWrPcQ103H, SelRegWrPcQ104H;
-logic               BranchCondMetQ102H;
-logic               SelDMemWbQ101H, SelDMemWbQ102H, SelDMemWbQ103H, SelDMemWbQ104H;
-logic [2:0]         Funct3Q101H;
-logic [6:0]         Funct7Q101H;
-logic [4:0]         PreRegSrc1Q101H, RegSrc1Q101H, RegSrc1Q102H; 
-logic [4:0]         PreRegSrc2Q101H, RegSrc2Q101H, RegSrc2Q102H;
-logic [4:0]         RegDstQ101H, RegDstQ102H, RegDstQ103H, RegDstQ104H;
-logic [3:0]         CtrlDMemByteEnQ101H, CtrlDMemByteEnQ102H, CtrlDMemByteEnQ103H;
-logic               CtrlDMemWrEnQ101H, CtrlDMemWrEnQ102H, CtrlDMemWrEnQ103H;
-logic               CtrlDMemRdEnQ101H, CtrlDMemRdEnQ102H, CtrlDMemRdEnQ103H;
-logic               CtrlSignExtQ101H, CtrlSignExtQ102H, CtrlSignExtQ103H, CtrlSignExtQ104H;
-logic               CtrlLuiQ101H, CtrlLuiQ102H;
-logic               CtrlRegWrEnQ101H, CtrlRegWrEnQ102H, CtrlRegWrEnQ103H, CtrlRegWrEnQ104H;
-logic               SelAluPcQ101H, SelAluPcQ102H;
-logic               SelAluImmQ101H, SelAluImmQ102H;
-logic [1:0]         ByteOffsetQ104H;
-logic [31:0]        RdDataAfterShiftQ104H;
-logic [3:0]         ByteEnQ104H, ByteenaRestoreQ104H;
-// Hazard unit detection ctrl
-logic               PcEnQ101H;
-logic [31:0]        PreviousInstructionQ102H;
-logic               LoadHzrdDetectQ101H, LoadHzrdDetectQ102H;
-// End hazard unit detection ctrl
+logic         BranchCondMetQ102H;
+logic         ReadyQ100H;
+logic         ReadyQ102H;
+logic         ReadyQ103H;
+logic         ReadyQ104H;
+t_mini_ctrl   Ctrl;
+t_ctrl_if     CtrlIf;
+t_ctrl_rf     CtrlRf;
+t_ctrl_exe    CtrlExe;
+t_ctrl_mem    CtrlMem;
+t_ctrl_wb     CtrlWb;
 
-// For fetch and decode stages flush
-logic               flushQ102H, flushQ103H;
-
-t_immediate         SelImmTypeQ101H;
-t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
-t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
-t_opcode            OpcodeQ101H, OpcodeQ102H;
-logic ReadyQ100H;
-t_mini_ctrl Ctrl;
-logic DMemRdRspValid;
-logic ReadyQ102H;
-logic ReadyQ103H;
-logic ReadyQ104H;
-t_ctrl_if CtrlIf;
-t_ctrl_rf CtrlRf;
-t_ctrl_exe CtrlExe;
-t_ctrl_mem CtrlMem;
-t_ctrl_wb CtrlWb;
-
-logic [31:0] DMemWrDataQ103H;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
