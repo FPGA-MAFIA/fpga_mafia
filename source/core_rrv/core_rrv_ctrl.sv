@@ -38,7 +38,7 @@ import common_pkg::*;
     output var t_ctrl_wb      CtrlWb,
     // output data path signals
     output logic [31:0] ImmediateQ101H,
-    output var t_csr_hw_updt CsrHwUpdt             
+    output var t_csr_hw_updt CsrHwUpdtQ102H             
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
 assign ValidInstQ105H = ReadyQ105H && PreValidInstQ105H;
 
 // update CSR_INSTRET
-assign CsrHwUpdt.ValidInstQ105H = ValidInstQ105H;  
+assign CsrHwUpdtQ102H.ValidInstQ105H = ValidInstQ105H;  
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;

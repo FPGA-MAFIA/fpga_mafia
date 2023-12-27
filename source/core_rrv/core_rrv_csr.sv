@@ -2,17 +2,17 @@
 module core_rrv_csr
 import common_pkg::*;
 (
-    input logic Clk,
-    input logic Rst,
-    input logic [31:0] PcQ102H,
+    input logic                Clk,
+    input logic                Rst,
+    input logic [31:0]         PcQ102H,
     // Inputs from the core
-    input var t_csr_inst_rrv CsrInstQ102H,
-    input logic [31:0] CsrWriteDataQ102H,
-    input var t_csr_hw_updt CsrHwUpdt, // 32-bit data to be written into the CSR
+    input var t_csr_inst_rrv   CsrInstQ102H,
+    input logic [31:0]         CsrWriteDataQ102H,
+    input var t_csr_hw_updt    CsrHwUpdtQ102H, // 32-bit data to be written into the CSR
     // Outputs to the core
-    output logic [31:0] MePc, // 32-bit data read from the CSR
-    output logic        interrupt_counter_expired,
-    output logic [31:0] CsrReadDataQ102H // 32-bit data read from the CSR
+    output var t_csr_pc_update CsrPcUpdateQ102H,
+    output logic               interrupt_counter_expired,
+    output logic [31:0]        CsrReadDataQ102H // 32-bit data read from the CSR
 );
 
     // Define the CSR registers
@@ -174,28 +174,42 @@ always_comb begin
     // 3. illegal CSR access
     // 4. breakpoint
     //FIXME - please review the values of the exceptions - read the spec
-    if(CsrHwUpdt.illegal_instruction) next_csr.csr_mcause = 32'h00000002;
-    if(CsrHwUpdt.misaligned_access)   next_csr.csr_mcause = 32'h00000004;
-    if(CsrHwUpdt.illegal_csr_access)  next_csr.csr_mcause = 32'h0000000B;
-    if(CsrHwUpdt.breakpoint)          next_csr.csr_mcause = 32'h00000003;
+    if(CsrHwUpdtQ102H.illegal_instruction) begin
+        next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mtvec  = 32'h00000100;
+        next_csr.csr_mepc   = PcQ102H;
+    end
+    if(CsrHwUpdtQ102H.misaligned_access) begin
+        next_csr.csr_mcause = 32'h00000004;
+        next_csr.csr_mtvec  = 32'h00000200; // TODO - possible changing of the address
+        next_csr.csr_mepc   = PcQ102H;
+    end
+    if(CsrHwUpdtQ102H.illegal_csr_access) begin
+        next_csr.csr_mcause = 32'h0000000B;
+        next_csr.csr_mtvec  = 32'h00000300; // TODO - possible changing of the address
+        next_csr.csr_mepc   = PcQ102H;
+    end
+    if(CsrHwUpdtQ102H.breakpoint) begin
+        next_csr.csr_mcause = 32'h00000003;
+        next_csr.csr_mtvec  = 32'h00000400; // TODO - possible changing of the address
+        next_csr.csr_mepc   = PcQ102H;
+    end
     // handle HW interrupts:
     // 1. timer interrupt
     // 2. external interrupt
-    if(interrupt_counter_expired)     begin
-        next_csr.csr_mepc   = PcQ102H;
-    end
-    if(CsrHwUpdt.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
+    // TODO - possible fix that. commented by roman
+    //if(interrupt_counter_expired)     begin
+    //    next_csr.csr_mepc   = PcQ102H;
+    //end
+    //if(CsrHwUpdtQ102H.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
 
     //==========================================================================
     // ---- RO/V CSR - writes from RTL ----
     //==========================================================================
-    // FIXME - please remove this and add the correct CSR for counting cycles.
-    // FIXME - need to figure out how to caount the "retired instructions" (excluding the ones that were flushed, machine nop, etc.)
-    // the cycle counter is incremented on every clock cycle
         {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
         next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
         csr_cycle_high_low      = {csr.csr_cycle_high, csr.csr_cycle_low};
-        if(CsrHwUpdt.ValidInstQ105H) begin
+        if(CsrHwUpdtQ102H.ValidInstQ105H) begin
             {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b1;
             next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
             csr_instret_high_low      = {csr.csr_instret_high, csr.csr_instret_low};
@@ -276,16 +290,33 @@ always_comb begin
     end
 end
 
-assign MePc = csr.csr_mepc;
+// Update program counter
+logic  InterruptAcknowladge;
+assign InterruptAcknowladge = (CsrHwUpdtQ102H.illegal_instruction) || (CsrHwUpdtQ102H.misaligned_access) || (CsrHwUpdtQ102H.illegal_csr_access) || (CsrHwUpdtQ102H.breakpoint) || (CsrHwUpdtQ102H.external_interrupt) || (CsrHwUpdtQ102H.timer_interrupt);
+
+//assign CsrPcUpdateQ102H.InterruptJumpQ102H         = InterruptAcknowladge;
+//assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = next_csr.csr_mtvec;
+//assign CsrPcUpdateQ102H.InteruptReturnQ102H        = CsrHwUpdtQ102H.Mret;
+//assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = next_csr.csr_mepc;
+
+assign CsrPcUpdateQ102H.InterruptJumpQ102H         = 0;
+assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = 0;
+assign CsrPcUpdateQ102H.InteruptReturnQ102H        = 0;
+assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = 0;
+
+//assign MePc = csr.csr_mepc;
 // assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
 // assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
 // assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
 // assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
 // assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 
-
 always_comb begin
     //create an interrupt if the cycle counter is equal to the compare value
     interrupt_counter_expired = '0;// csr.csr_cycle_low == csr.csr_scratch;
 end
+
+  
 endmodule
+
+   
