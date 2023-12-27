@@ -16,8 +16,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run build BIG_CORE -all -app -hw -sim -keep_going
         run:  python build.py -dut 'big_core' -regress level0 -app -hw -sim -keep_going
-      - name: Run build BIG_CORE_RRV -all -app -hw -sim -keep_going
-        run:  python build.py -dut big_core_rrv -regress rv32i_level0 -app -hw -sim -keep_going
+      - name: Run build CORE_RRV -all -app -hw -sim -keep_going
+        run:  python build.py -dut core_rrv -regress rv32i_level0 -app -hw -sim -keep_going
       - name: Run build MINI_CORE at rv32e mode
         run:  python build.py -dut 'mini_core' -regress rv32e_level0 -cfg mini_rv32e -app -hw -sim -keep_going
       - name: Run build MINI_CORE at rv3i mode
