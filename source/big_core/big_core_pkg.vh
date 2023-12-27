@@ -172,7 +172,15 @@ typedef struct packed {
     logic timer_interrupt;  
     logic external_interrupt;
     logic ValidInstQ105H;
+    logic Mret;
 } t_csr_hw_updt;
+
+typedef struct packed {
+    logic        InterruptJumpQ102H;
+    logic [31:0] InterruptJumpAddressQ102H;
+    logic        InteruptReturnQ102H;
+    logic [31:0] InteruptReturnAddressQ102H; 
+} t_csr_pc_update;
 
 typedef struct packed {
     logic [31:0] csr_scratch;

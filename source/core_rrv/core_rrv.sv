@@ -57,20 +57,21 @@ logic [31:0]  CsrReadDataQ102H;      // data red from CSR
 logic [31:0]  CsrWriteDataQ102H;     // data writen to csr
 
 // Control bits
-logic         BranchCondMetQ102H;
-logic         ReadyQ100H;
-logic         ReadyQ102H;
-logic         ReadyQ103H;
-logic         ReadyQ104H;
-logic         ReadyQ105H;
-t_csr_hw_updt       CsrHwUpdt;
-t_mini_ctrl   Ctrl;
-t_ctrl_if     CtrlIf;
-t_ctrl_rf     CtrlRf;
-t_ctrl_exe    CtrlExe;
-t_ctrl_mem1    CtrlMem1;
-t_ctrl_wb     CtrlWb;
-t_csr_inst_rrv CtrlCsr;
+logic           BranchCondMetQ102H;
+logic           ReadyQ100H;
+logic           ReadyQ102H;
+logic           ReadyQ103H;
+logic           ReadyQ104H;
+logic           ReadyQ105H;
+t_csr_hw_updt   CsrHwUpdtQ102H;
+t_mini_ctrl     Ctrl;
+t_ctrl_if       CtrlIf;
+t_ctrl_rf       CtrlRf;
+t_ctrl_exe      CtrlExe;
+t_ctrl_mem1     CtrlMem1;
+t_ctrl_wb       CtrlWb;
+t_csr_inst_rrv  CtrlCsr;
+t_csr_pc_update CsrPcUpdateQ102H;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
@@ -88,15 +89,16 @@ t_csr_inst_rrv CtrlCsr;
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
 core_rrv_if core_rrv_if (
-  .Clock        (Clock       ), // input  logic        Clock,
-  .Rst          (Rst         ), // input  logic        Rst,
-  .RstPc        (RstPc       ), // input  logic        RstPc,
-  .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
-  .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
-  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
-  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
-  .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
-  .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
+  .Clock            (Clock       ), // input  logic        Clock,
+  .Rst              (Rst         ), // input  logic        Rst,
+  .RstPc            (RstPc       ), // input  logic        RstPc,
+  .ReadyQ100H       (ReadyQ100H  ), // input  logic        ReadyQ100H,
+  .ReadyQ101H       (ReadyQ101H  ), // input  logic        ReadyQ101H,
+  .Ctrl             (CtrlIf        ), // input  t_ctrl_if    Ctrl,
+  .CsrPcUpdateQ102H (CsrPcUpdateQ102H),
+  .AluOutQ102H      (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  .PcQ100H          (PcQ100H     ), // output logic [31:0] PcQ100H,
+  .PcQ101H          (PcQ101H     ) // output logic [31:0] PcQ101H
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +143,7 @@ core_rrv_ctrl core_rrv_ctrl (
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
   .ImmediateQ101H       (ImmediateQ101H     ), //output
-  .CsrHwUpdt            (CsrHwUpdt          ) //output
+  .CsrHwUpdtQ102H       (CsrHwUpdtQ102H     ) //output
 );
 
 core_rrv_rf 
@@ -208,17 +210,17 @@ core_rrv_exe core_rrv_exe (
 );
 
 core_rrv_csr core_rrv_csr (
- .Clk             (Clock),  
- .Rst             (Rst),  
- .PcQ102H         (PcQ102H),
+ .Clk                       (Clock             ),  
+ .Rst                       (Rst               ),  
+ .PcQ102H                   (PcQ102H           ),
  // Inputs from the core
- .CsrInstQ102H     (CtrlCsr),
- .CsrWriteDataQ102H(CsrWriteDataQ102H), 
- .CsrHwUpdt        (CsrHwUpdt),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
- .MePc             (),
- .interrupt_counter_expired (),
+ .CsrInstQ102H              (CtrlCsr           ),
+ .CsrWriteDataQ102H         (CsrWriteDataQ102H ), 
+ .CsrHwUpdtQ102H            (CsrHwUpdtQ102H    ), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .CsrPcUpdateQ102H          (CsrPcUpdateQ102H  ),
+ .interrupt_counter_expired (                  ),
  // Outputs to the core
- .CsrReadDataQ102H(CsrReadDataQ102H)
+ .CsrReadDataQ102H          (CsrReadDataQ102H  )
 );
 
 
