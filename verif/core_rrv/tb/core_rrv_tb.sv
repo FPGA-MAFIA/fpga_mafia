@@ -129,7 +129,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 100000;
-parameter MINI_RF_NUM_MSB = 31;
+parameter MINI_RF_NUM_MSB = 15;
 initial begin: detect_timeout
     //=======================================
     // timeout
@@ -199,6 +199,7 @@ core_rrv_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),
+.RstPc               (Rst), //input  logic        RstPc,
 //============================================
 //      fabric interface
 //============================================
@@ -213,7 +214,12 @@ core_rrv_top (
 //      vga interface
 //============================================
 .inDisplayArea(inDisplayArea),
-.vga_out(vga_out)         // VGA_OUTPUT 
+.vga_out(vga_out),         // VGA_OUTPUT 
+//============================================
+//      fpga interface
+//============================================             
+.fpga_in  ('0), //input  var t_fpga_in   fpga_in,  // CR_MEM
+.fpga_out (  )  //output t_fpga_out      fpga_out      // CR_MEM
 );      
 
 
