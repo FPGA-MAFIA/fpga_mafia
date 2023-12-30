@@ -30,8 +30,8 @@ logic [31:0] PcPlus4Q100H;
 logic [31:0] NextPcQnnnH;
 assign PcPlus4Q100H = PcQ100H + 3'h4;
 
-assign NextPcQnnnH = CsrPcUpdateQ102H.InterruptJumpQ102H  ? CsrPcUpdateQ102H.InterruptJumpAddressQ102H         :
-                     CsrPcUpdateQ102H.InteruptReturnQ102H ? CsrPcUpdateQ102H.InteruptReturnAddressQ102H + 3'h4 :
+assign NextPcQnnnH = CsrPcUpdateQ102H.InterruptJumpEnQ102H  ? CsrPcUpdateQ102H.InterruptJumpAddressQ102H         :
+                     CsrPcUpdateQ102H.InteruptReturnEnQ102H ? CsrPcUpdateQ102H.InteruptReturnAddressQ102H + 3'h4 :
                      Ctrl.SelNextPcAluOutQ102H            ? AluOutQ102H                                        :
                                                             PcPlus4Q100H;
 //assign NextPcQnnnH  = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;

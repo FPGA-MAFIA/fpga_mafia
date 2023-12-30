@@ -176,9 +176,9 @@ typedef struct packed {
 } t_csr_hw_updt;
 
 typedef struct packed {
-    logic        InterruptJumpQ102H;
+    logic        InterruptJumpEnQ102H;
     logic [31:0] InterruptJumpAddressQ102H;
-    logic        InteruptReturnQ102H;
+    logic        InteruptReturnEnQ102H;
     logic [31:0] InteruptReturnAddressQ102H; 
 } t_csr_pc_update;
 
