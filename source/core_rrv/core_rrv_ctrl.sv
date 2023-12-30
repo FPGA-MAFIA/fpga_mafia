@@ -58,18 +58,17 @@ import common_pkg::*;
 // 4. construct the Immediate types.
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
-t_immediate         SelImmTypeQ101H;
- logic [4:0]  PreRegSrc1Q101H;
- logic [4:0]  PreRegSrc2Q101H;
- logic        LoadHzrd1DetectQ101H;
- logic        LoadHzrd2DetectQ101H;
- logic [31:0] InstructionQ101H;
- logic        flushQ102H;
- logic        flushQ103H;
- t_opcode     OpcodeQ101H;
- logic [2:0]  Funct3Q101H;
- logic [6:0]  Funct7Q101H;
+t_immediate  SelImmTypeQ101H;
+logic [4:0]  PreRegSrc1Q101H;
+logic [4:0]  PreRegSrc2Q101H;
+logic        LoadHzrd1DetectQ101H;
+logic        LoadHzrd2DetectQ101H;
+logic [31:0] InstructionQ101H;
+logic        flushQ102H;
+logic        flushQ103H;
+t_opcode     OpcodeQ101H;
+logic [2:0]  Funct3Q101H;
+logic [6:0]  Funct7Q101H;
 logic PreValidInstQ101H, ValidInstQ101H;
 logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
@@ -78,6 +77,7 @@ logic PreValidInstQ105H, ValidInstQ105H;
 
 t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
+t_csr_hw_updt  CsrHwUpdtQ101H;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
@@ -97,16 +97,24 @@ assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) 
 assign flushQ102H = IndirectBranchQ102H;
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
-assign InstructionQ101H = flushQ102H           ? NOP :
-                          flushQ103H           ? NOP :
-                          LoadHzrd1DetectQ101H ? NOP :
-                          LoadHzrd2DetectQ101H ? NOP : 
+// detect illegal instruction
+`include "illegal_instructions.sv"
+logic IllegalInstructionEn;
+assign IllegalInstructionEn = (PreIllegalInstructionEn) && (!flushQ102H & !flushQ103H);
+assign  CsrHwUpdtQ101H.illegal_instruction = IllegalInstructionEn;
+
+assign InstructionQ101H = flushQ102H              ? NOP :
+                          flushQ103H              ? NOP :
+                          //PreIllegalInstructionEn ? NOP :
+                          LoadHzrd1DetectQ101H    ? NOP :
+                          LoadHzrd2DetectQ101H    ? NOP : 
                                                 PreInstructionQ101H;
-assign PreValidInstQ101H = flushQ102H           ? 1'b0 : 
-                           flushQ103H           ? 1'b0 :
-                           LoadHzrd1DetectQ101H ? 1'b0 :  
-                           LoadHzrd2DetectQ101H ? 1'b0 : 
-                                                  1'b1 ;
+assign PreValidInstQ101H = flushQ102H              ? 1'b0 : 
+                           flushQ103H              ? 1'b0 :
+                           //PreIllegalInstructionEn ? 1'b0 :
+                           LoadHzrd1DetectQ101H    ? 1'b0 :  
+                           LoadHzrd2DetectQ101H    ? 1'b0 : 
+                                                     1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
@@ -208,6 +216,7 @@ assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_RST_DFF(CsrInstQ102H, CsrInstQ101H, Clock, ReadyQ102H, Rst )
+//`MAFIA_EN_RST_DFF(CsrHwUpdtQ102H, CsrHwUpdtQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
 `MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ105H )

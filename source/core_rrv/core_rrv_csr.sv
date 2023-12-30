@@ -291,17 +291,17 @@ always_comb begin
 end
 
 // Update program counter
-logic  InterruptAcknowladge;
-assign InterruptAcknowladge = (CsrHwUpdtQ102H.illegal_instruction) || (CsrHwUpdtQ102H.misaligned_access) || (CsrHwUpdtQ102H.illegal_csr_access) || (CsrHwUpdtQ102H.breakpoint) || (CsrHwUpdtQ102H.external_interrupt) || (CsrHwUpdtQ102H.timer_interrupt);
+logic  BeginInterrupt;
+assign BeginInterrupt = (CsrHwUpdtQ102H.illegal_instruction) || (CsrHwUpdtQ102H.misaligned_access) || (CsrHwUpdtQ102H.illegal_csr_access) || (CsrHwUpdtQ102H.breakpoint) || (CsrHwUpdtQ102H.external_interrupt) || (CsrHwUpdtQ102H.timer_interrupt);
 
-//assign CsrPcUpdateQ102H.InterruptJumpQ102H         = InterruptAcknowladge;
+//assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 //assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = next_csr.csr_mtvec;
-//assign CsrPcUpdateQ102H.InteruptReturnQ102H        = CsrHwUpdtQ102H.Mret;
+//assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrHwUpdtQ102H.Mret;
 //assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = next_csr.csr_mepc;
 
-assign CsrPcUpdateQ102H.InterruptJumpQ102H         = 0;
+assign CsrPcUpdateQ102H.InterruptJumpEnQ102H         = 0;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = 0;
-assign CsrPcUpdateQ102H.InteruptReturnQ102H        = 0;
+assign CsrPcUpdateQ102H.InteruptReturnEnQ102H        = 0;
 assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = 0;
 
 //assign MePc = csr.csr_mepc;
