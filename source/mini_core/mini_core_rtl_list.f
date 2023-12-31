@@ -18,6 +18,7 @@
 
 // param packages
 ../../../source/common/common_pkg.sv
+../../../source/mini_core/mini_core_pkg.sv
 
 // Common
 ../../../source/common/fifo.sv

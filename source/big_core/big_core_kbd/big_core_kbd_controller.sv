@@ -1,6 +1,7 @@
 `include "macros.sv"
 module big_core_kdb_controller 
 import common_pkg::*;
+import big_core_pkg::*;
 (
     // PS2 interface
     input  logic       kbd_clk,
