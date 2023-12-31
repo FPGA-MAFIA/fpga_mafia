@@ -129,7 +129,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 100000;
-parameter MINI_RF_NUM_MSB = 31;
+parameter RF_NUM_MSB = 31;
 initial begin: detect_timeout
     //=======================================
     // timeout
@@ -194,7 +194,7 @@ assign InFabricValidQ503H   = ShiftInFabricValid[2];
 // DUT instance core_rrv 
 assign  local_tile_id = 8'h2_2;
 core_rrv_top
-#( .RF_NUM_MSB(MINI_RF_NUM_MSB) )    
+#( .RF_NUM_MSB(RF_NUM_MSB) )    
 core_rrv_top (
 .Clock               (Clk),
 .Rst                 (Rst),
