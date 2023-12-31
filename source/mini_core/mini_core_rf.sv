@@ -13,6 +13,7 @@
 
 module mini_core_rf 
 import common_pkg::*;
+import mini_core_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input logic Clock,

@@ -100,7 +100,8 @@ assign flushQ102H = IndirectBranchQ102H;
 // detect illegal instruction
 `include "illegal_instructions.vh"
 logic IllegalInstructionEn;
-assign IllegalInstructionEn = (PreIllegalInstructionEn) && (!flushQ102H & !flushQ103H);
+assign IllegalInstructionEn = (PreIllegalInstructionEn) && 
+                              ! (flushQ102H || flushQ103H || LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
 assign  CsrHwUpdtQ101H.illegal_instruction = IllegalInstructionEn;
 
 assign InstructionQ101H = flushQ102H              ? NOP :

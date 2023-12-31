@@ -19,6 +19,7 @@
 
 module big_core_cr_mem 
 import common_pkg::*;
+import big_core_pkg::*;
 (
     input  logic       Clk,
     input  logic       Rst,

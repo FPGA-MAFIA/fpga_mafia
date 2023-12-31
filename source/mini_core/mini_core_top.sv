@@ -3,6 +3,7 @@
 
 module mini_core_top
 import common_pkg::*;
+import mini_core_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
 input  logic        Clock  ,

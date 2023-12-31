@@ -14,7 +14,7 @@
 
 `ifndef BIG_CORE_PKG_VS
 `define BIG_CORE_PKG_VS
-//package big_core_pkg;
+package big_core_pkg;
     
 
 
@@ -304,5 +304,5 @@ typedef enum logic [1:0] {
 
 
 
-//endpackage
+endpackage
 `endif 

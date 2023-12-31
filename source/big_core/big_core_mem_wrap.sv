@@ -15,6 +15,7 @@
 `include "macros.sv"
 module big_core_mem_wrap 
 import common_pkg::*;
+import big_core_pkg::*;
 (   input  logic        Clk,
     input  logic        Rst,
     input  t_tile_id    local_tile_id,
