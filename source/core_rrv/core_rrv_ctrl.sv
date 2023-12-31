@@ -98,7 +98,7 @@ assign flushQ102H = IndirectBranchQ102H;
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
 // detect illegal instruction
-`include "illegal_instructions.sv"
+`include "illegal_instructions.vh"
 logic IllegalInstructionEn;
 assign IllegalInstructionEn = (PreIllegalInstructionEn) && (!flushQ102H & !flushQ103H);
 assign  CsrHwUpdtQ101H.illegal_instruction = IllegalInstructionEn;
