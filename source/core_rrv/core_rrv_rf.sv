@@ -12,7 +12,7 @@
 `include "macros.sv"
 
 module core_rrv_rf 
-import common_pkg::*;
+import core_rrv_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input logic Clock,

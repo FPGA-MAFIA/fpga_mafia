@@ -12,7 +12,7 @@
 `include "macros.sv"
 
 module core_rrv_if 
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
     input  logic                Clock,
     input  logic                Rst,

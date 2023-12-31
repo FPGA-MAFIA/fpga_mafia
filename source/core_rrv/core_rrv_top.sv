@@ -2,7 +2,7 @@
 `include "macros.sv"
 
 module core_rrv_top
-import common_pkg::*;
+import core_rrv_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
 input  logic        Clock  ,

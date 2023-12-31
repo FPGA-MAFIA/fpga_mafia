@@ -27,7 +27,7 @@
 `include "macros.sv"
 
 module core_rrv 
-import common_pkg::*;
+import core_rrv_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input  logic        Clock,
@@ -64,7 +64,7 @@ logic           ReadyQ103H;
 logic           ReadyQ104H;
 logic           ReadyQ105H;
 t_csr_hw_updt   CsrHwUpdtQ102H;
-t_mini_ctrl     Ctrl;
+t_core_rrv_ctrl Ctrl;
 t_ctrl_if       CtrlIf;
 t_ctrl_rf       CtrlRf;
 t_ctrl_exe      CtrlExe;

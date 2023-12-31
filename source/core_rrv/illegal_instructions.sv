@@ -36,8 +36,8 @@ end
 
 always_comb begin
     OpcodeNotMatchRV32I = 0;
-    if (!(OpcodeQ101H == R_OP || OpcodeQ101H == I_OP || OpcodeQ101H == STORE || OpcodeQ101H == LOAD || OpcodeQ101H == BRANCH || OpcodeQ101H == JALR)
-       || (OpcodeQ101H == LUI || OpcodeQ101H == AUIPC || OpcodeQ101H == JAL || OpcodeQ101H == FENCE || OpcodeQ101H == SYSCAL))  OpcodeNotMatchRV32I = 1; 
+    if (!(OpcodeQ101H == R_OP || OpcodeQ101H == I_OP || OpcodeQ101H == STORE || OpcodeQ101H == LOAD || OpcodeQ101H == BRANCH || OpcodeQ101H == JALR
+       || OpcodeQ101H == LUI || OpcodeQ101H == AUIPC || OpcodeQ101H == JAL || OpcodeQ101H == FENCE || OpcodeQ101H == SYSCAL))  OpcodeNotMatchRV32I = 1; 
 end
 
 assign  PreIllegalInstructionEn = Funct3OrFunct7NotMatch || OpcodeNotMatchRV32I;

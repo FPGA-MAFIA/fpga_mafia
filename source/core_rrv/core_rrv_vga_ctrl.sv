@@ -15,7 +15,7 @@
 `include "macros.sv"
 
 module core_rrv_vga_ctrl 
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
     input  logic        Clk_50,
     input  logic        Reset,
