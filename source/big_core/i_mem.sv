@@ -25,6 +25,7 @@ module i_mem (
     output logic [31:0] q_b
 );
 import common_pkg::*;  
+import big_core_pkg::*;
 // Memory array (behavrial - not for FPGA/ASIC)
 logic [7:0]    IMem      [I_MEM_MSB:0];
 logic [7:0]    next_IMem [I_MEM_MSB:0];

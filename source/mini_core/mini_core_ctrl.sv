@@ -13,6 +13,7 @@
 
 module mini_core_ctrl
 import common_pkg::*;
+import mini_core_pkg::*;
 (
     input   logic        Clock,
     input   logic        Rst,

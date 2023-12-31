@@ -14,10 +14,12 @@ logic PreIllegalInstructionEn;
 
 logic OpcodeNotMatchRV32I;
 logic Funct3OrFunct7NotMatch;
+t_opcode     PreOpcodeQ101H;
 
+assign PreOpcodeQ101H                = t_opcode'(PreInstructionQ101H[6:0]);
 always_comb begin
     Funct3OrFunct7NotMatch = 0;
-    case (OpcodeQ101H)
+    case (PreOpcodeQ101H)
         //funct7 do not match the instruction  
         R_OP: if (((CtrlQ101H.AluOp == ADD || CtrlQ101H.AluOp == SLL || CtrlQ101H.AluOp == SLT || CtrlQ101H.AluOp == SLTU || CtrlQ101H.AluOp == XOR || CtrlQ101H.AluOp == SRL || CtrlQ101H.AluOp == OR  || CtrlQ101H.AluOp == AND) && Funct7Q101H != 7'b0000000)
                  || ((CtrlQ101H.AluOp == SUB || CtrlQ101H.AluOp == SRA) && Funct7Q101H != 7'b0100000)) Funct3OrFunct7NotMatch = 1;
