@@ -7,6 +7,7 @@
 
 module fabric_mini_cores_tb;
 import common_pkg::*;
+import mini_core_pkg::*;
 typedef struct packed {
     t_tile_trans trans;
     t_tile_id    source;
