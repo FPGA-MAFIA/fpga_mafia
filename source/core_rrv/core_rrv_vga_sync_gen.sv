@@ -14,7 +14,7 @@
 `include "macros.sv"
 
 module core_rrv_vga_sync_gen
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
         input  logic        Clk_25,
         input  logic        Reset,

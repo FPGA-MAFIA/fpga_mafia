@@ -16,7 +16,7 @@
 
 //---------------------------------------------------
 module core_rrv_mem_wrap
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
@@ -95,12 +95,12 @@ t_tile_trans F2C_OutFabricQ505H;
 //    set F2C request 503 ( D_MEM )
 //===========================================
 // Set the F2C IMEM hit indications
-assign F2C_IMemHitQ503H  = (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] > I_MEM_REGION_FLOOR_MINI) && 
-                           (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] < I_MEM_REGION_ROOF_MINI) ;
+assign F2C_IMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > I_MEM_REGION_FLOOR) && 
+                           (InFabricQ503H.address[MSB_REGION:LSB_REGION] < I_MEM_REGION_ROOF) ;
 assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 // Set the F2C DMEM hit indications
-assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] > D_MEM_REGION_FLOOR_MINI) && 
-                           (InFabricQ503H.address[MSB_REGION_MINI:LSB_REGION_MINI] < D_MEM_REGION_ROOF_MINI) ;
+assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > D_MEM_REGION_FLOOR) && 
+                           (InFabricQ503H.address[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
 assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && ((InFabricQ503H.opcode == WR));
 // Set the F2C CrMEM hit indications
 assign F2C_CrMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && 
@@ -114,17 +114,17 @@ logic [31:0] InstructionQ101H; //instruction,
 //This is the instruction memory
 mem  #(
   .WORD_WIDTH(32),                //FIXME - Parametrize!!
-  .ADRS_WIDTH(I_MEM_ADRS_MSB_MINI+1)   //FIXME - Parametrize!!
+  .ADRS_WIDTH(I_MEM_ADRS_MSB+1)   //FIXME - Parametrize!!
 ) i_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
-    .address_a  (PcQ100H[I_MEM_ADRS_MSB_MINI:2]),           //FIXME - Parametrize!!
+    .address_a  (PcQ100H[I_MEM_ADRS_MSB:2]),           //FIXME - Parametrize!!
     .data_a     ('0),
     .wren_a     (1'b0),
     .byteena_a  (4'b0),
     .q_a        (InstructionQ101H),
     //fabric interface
-    .address_b  (InFabricQ503H.address[I_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
+    .address_b  (InFabricQ503H.address[I_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
     .data_b     (InFabricQ503H.data),              
     .wren_b     (F2C_IMemWrEnQ503H),                
     .byteena_b  (4'b1111), // NOTE no need to support byte enable for instruction memory
@@ -230,17 +230,17 @@ assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H   
 
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
-  .ADRS_WIDTH(D_MEM_ADRS_MSB_MINI+1) //FIXME - Parametrize!!
+  .ADRS_WIDTH(D_MEM_ADRS_MSB+1) //FIXME - Parametrize!!
 ) d_mem  (
     .clock    (Clock),
     //Core interface (instruction fitch)
-    .address_a  (DMemAddressQ103H[D_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
+    .address_a  (DMemAddressQ103H[D_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
     .data_a     (ShiftDMemWrDataQ103H),
     .wren_a     (LocalDMemWrEnQ103H),
     .byteena_a  (ShiftDMemByteEnQ103H),
     .q_a        (PreShiftDMemRdDataQ104H),
     //fabric interface
-    .address_b  (InFabricQ503H.address[D_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
+    .address_b  (InFabricQ503H.address[D_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
     .data_b     (InFabricQ503H.data),              
     .wren_b     (F2C_DMemWrEnQ503H),                
     .byteena_b  (4'b1111),//FIXME - should accept the byte enable from the fabric

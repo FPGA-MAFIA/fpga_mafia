@@ -2,7 +2,7 @@
 `include "macros.sv"
 
 module big_core_kbd_release_checker
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
     input   logic       Clk,
     input   logic       Rst,

@@ -10,14 +10,12 @@
 // Description :
 //-----------------------------------------------------------------------------
 
-
-+incdir+../../../source/common/
 +incdir+../../../source/core_rrv/
-+incdir+../../../source/big_core/
 +incdir+../../../source/fabric/
++incdir+../../../source/common/
 
 // param packages
-../../../source/common/common_pkg.sv
+../../../source/core_rrv/packages/core_rrv_pkg.sv
 
 // Common
 ../../../source/common/fifo.sv

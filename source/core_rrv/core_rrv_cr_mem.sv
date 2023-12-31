@@ -18,7 +18,7 @@
 `include "macros.sv"
 
 module core_rrv_cr_mem 
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
     input  logic       Clk,
     input  logic       Rst,
