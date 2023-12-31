@@ -1,6 +1,6 @@
 `include "macros.sv"
 module big_core_kbd_gray_fifo
-import common_pkg::*;
+import core_rrv_pkg::*;
 (
     input  logic       kbd_clk_write,
     input  logic       core_clk_read,
