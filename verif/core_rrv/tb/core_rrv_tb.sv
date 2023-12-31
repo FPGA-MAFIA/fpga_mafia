@@ -19,7 +19,7 @@
 
 
 module core_rrv_tb  ;
-import common_pkg::*;
+import core_rrv_pkg::*;
 import rv32i_ref_pkg::*;
 logic        Clk;
 logic        Rst;
@@ -31,8 +31,8 @@ logic [3:0]  DMemByteEn ;
 logic        DMemWrEn   ;
 logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
-logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
-logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
+logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 
 string test_name;
@@ -149,8 +149,8 @@ t_tile_trans [2:0] ShiftInFabric ;
 logic        [2:0] ShiftInFabricValid ; 
 t_tile_trans OutFabricQ505H ;
 
-logic  [7:0] TILE33_DMem      [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
-logic  [7:0] next_TILE33_DMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] TILE33_DMem      [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] next_TILE33_DMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 `MAFIA_DFF(TILE33_DMem, next_TILE33_DMem, Clk)
 
 logic [31:0] next_test;
@@ -225,10 +225,10 @@ core_rrv_top (
 
 rv32i_ref
 # (
-    .I_MEM_LSB (I_MEM_OFFSET_MINI),
-    .I_MEM_MSB (I_MEM_MSB_MINI),
-    .D_MEM_LSB (D_MEM_OFFSET_MINI),
-    .D_MEM_MSB (D_MEM_MSB_MINI)
+    .I_MEM_LSB (I_MEM_OFFSET),
+    .I_MEM_MSB (I_MEM_MSB),
+    .D_MEM_LSB (D_MEM_OFFSET),
+    .D_MEM_MSB (D_MEM_MSB)
 )  rv32i_ref (
 .clk    (Clk),
 .rst    (Rst),
