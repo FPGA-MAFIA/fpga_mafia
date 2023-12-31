@@ -8,6 +8,8 @@
 
 #include "big_core_defines.h"
 #include "graphic_vga.h"
+#include "rrv_fixed_point.h"
+
 void my_program(){
 
     int x = 10;

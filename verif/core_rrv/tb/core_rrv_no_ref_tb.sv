@@ -19,7 +19,7 @@
 `include "macros.sv"
 
 module core_rrv_tb  ;
-import common_pkg::*;
+import core_rrv_pkg::*;
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;
@@ -30,8 +30,8 @@ logic [3:0]  DMemByteEn ;
 logic        DMemWrEn   ;
 logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
-logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
-logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET- 1 : I_MEM_OFFSET];
+logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 `include "core_rrv_pmon_tasks.vh"
 
@@ -84,7 +84,7 @@ initial begin: test_seq
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        force core_rrv_core_top.core_rrv_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force core_rrv_top.core_rrv_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         #10
         release core_rrv_top.core_rrv_mem_wrap.d_mem.mem;
     end
@@ -102,7 +102,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 100000;
-parameter MINI_RF_NUM_MSB = 31; // For RV32E override this to 15
+parameter RF_NUM_MSB = 31; // For RV32E override this to 15
 initial begin: detect_timeout
     //=======================================
     // timeout
@@ -114,7 +114,7 @@ initial begin: detect_timeout
 end
 
 core_rrv_top
-#( .RF_NUM_MSB(MINI_RF_NUM_MSB) )    
+#( .RF_NUM_MSB(RF_NUM_MSB) )    
 core_rrv_top (
 .Clock               (Clk),
 .Rst                 (Rst),
@@ -133,7 +133,12 @@ core_rrv_top (
 //      vga interface
 //============================================
  .vga_out               (vga_out),
- .inDisplayArea         (inDisplayArea)
+ .inDisplayArea         (inDisplayArea),
+ //============================================
+//      fpga interface
+//============================================             
+.fpga_in                (),  // CR_MEM
+.fpga_out               ()      // CR_MEM
 );      
 
 task print_vga_screen ;
