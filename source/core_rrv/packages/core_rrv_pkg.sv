@@ -100,7 +100,7 @@ typedef enum logic [2:0] {
    BGE  = 3'b101 ,
    BLTU = 3'b110 ,
    BGEU = 3'b111
-} t_branch_type ;
+} t_branch_type;
 
 typedef enum logic [6:0] {
    LUI    = 7'b0110111 ,
