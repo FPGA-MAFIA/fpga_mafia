@@ -126,3 +126,40 @@ typedef struct packed {
     logic [31:0] csr_mtinst;
     logic [31:0] csr_mtval2;
 } t_csr;
+
+typedef struct packed {
+    logic RopFunct7NotMatchZero;
+    logic RopFunct7NotMatch20OrZero;
+    logic IopFunct7NotMatch20OrZero;
+    logic StoreFunct3NotMatch;
+    logic LoadFunct3NotMatch;
+    logic BranchFunct3NotMatch;
+    logic JalrFunct3NotMatch;
+    logic OpCodeNotMatchBaseISA;
+    logic RegOutOfRangeRV32E;
+} t_illegal_instruction;
+
+typedef enum logic [2:0] {  
+   SB_  = 3'b000 ,
+   SH_  = 3'b001 ,
+   SW_  = 3'b010
+} t_funct3_store_type;
+
+typedef enum logic [2:0] {  
+   LB_  = 3'b000 ,
+   LH_  = 3'b001 ,
+   LW_  = 3'b010 ,
+   LBU_ = 3'b011 ,
+   LBH_ = 3'b100
+} t_funct3_load_type;
+
+typedef enum logic [2:0] {  
+    ADD_  = 3'b000 ,
+    SLL_  = 3'b001 ,
+    SLT_  = 3'b010 ,
+    SLTU_ = 3'b011 ,
+    XOR_  = 3'b100 , 
+    SRL_  = 3'b101 , 
+    OR_   = 3'b110 , 
+    AND_  = 3'b111
+} t_funct3_Rtype;
