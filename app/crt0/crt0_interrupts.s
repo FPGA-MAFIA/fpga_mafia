@@ -38,9 +38,15 @@ reset_handler:
   mv x29, x1
   mv x30, x1
   mv x31, x1
-  /* stack initialization */
+
+csr_init:
+  li t0, 0x100   # Load the immediate value 0x100 into temporary register t0
+  csrw mtvec, t0 # Write the value in t0 to the mtvec CSR
+
+stack_init:
   la   x2, _stack_start
 
+jump_to_main:
   jal x1, main  //jump to main
   nop
   ebreak        //end

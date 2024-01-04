@@ -123,8 +123,8 @@ assign reg_wr_data      = next_regfile[rd];
 // CSR control and data signals
 //=======================================================                                                                                                  
 assign csr_addr  = instruction[31:20];
-assign csr_wren  = (instruction[6:0] == 7'b1110011) && !(((funct3[1:0] == 2'b11) || (funct3[1:0] == 2'b10)) && (rs1 == 0));
-assign csr_rden  = (instruction[6:0] == 7'b1110011) && !((funct3[1:0] == 2'b01) && (rd == 0));
+assign csr_wren  = (instruction[6:0] == 7'b1110011) &&  (funct3[1:0]!=2'b00) && !(((funct3[1:0] == 2'b11) || (funct3[1:0] == 2'b10)) && (rs1 == 0));
+assign csr_rden  = (instruction[6:0] == 7'b1110011) &&  (funct3[1:0]!=2'b00) && !((funct3[1:0] == 2'b01) && (rd == 0));
 assign csr_data  = (instruction[14]) ? {27'h0, rs1} : data_rd1;
 //=======================================================
 // load data from memory - byte, half-word, word

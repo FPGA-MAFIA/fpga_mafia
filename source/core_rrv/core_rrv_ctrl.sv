@@ -84,6 +84,9 @@ assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
+
+//FIXME - Note that the PreRegSrc2Q101H might not be used as a register read. so there is no real need for the hzrd.
+// we can optimize and say that only if its a "valid" PreRegSrc2Q101H then we need to check for hzrd on that register. (branch/store/r_type)
 assign LoadHzrd1DetectQ101H      = Rst ? 1'b0 : 
                                  ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
                                  ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
@@ -94,27 +97,34 @@ assign LoadHzrd2DetectQ101H      = Rst ? 1'b0 :
                                                                                                          1'b0;                                                                                                        
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
+logic IllegalInstructionQ101H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
-assign flushQ102H = IndirectBranchQ102H;
+// We flush when we have an indirect branch/jump or illegal instruction or Mret. 
+// this is due to PC that already fetch the next instruction but we need to flush it.
+// And the new PC is updated to a new value. 
+// in the case of illegal instruction we jump to the exception handler
+// in the case of Mret we jump to the address in the mepc CSR
+assign flushQ102H = IndirectBranchQ102H                         || 
+                    CsrInterruptUpdateQ102H.illegal_instruction ||
+                    CsrInterruptUpdateQ102H.Mret;
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
 // detect illegal instruction
 `include "illegal_instructions.vh"
-logic IllegalInstruction;
-assign IllegalInstruction = (PreIllegalInstruction) && ! (flushQ102H || flushQ103H);
+assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
-assign InstructionQ101H = flushQ102H              ? NOP :
-                          flushQ103H              ? NOP :
-                          PreIllegalInstruction   ? NOP :
-                          LoadHzrd1DetectQ101H    ? NOP :
-                          LoadHzrd2DetectQ101H    ? NOP : 
-                                                PreInstructionQ101H;
-assign PreValidInstQ101H = flushQ102H              ? 1'b0 : 
-                           flushQ103H              ? 1'b0 :
-                           PreIllegalInstruction   ? 1'b0 :
-                           LoadHzrd1DetectQ101H    ? 1'b0 :  
-                           LoadHzrd2DetectQ101H    ? 1'b0 : 
-                                                     1'b1 ;
+assign InstructionQ101H = flushQ102H                  ? NOP :
+                          flushQ103H                  ? NOP :
+                          PreIllegalInstructionQ101H  ? NOP :
+                          LoadHzrd1DetectQ101H        ? NOP :
+                          LoadHzrd2DetectQ101H        ? NOP : 
+                                                        PreInstructionQ101H;
+assign PreValidInstQ101H = flushQ102H                 ? 1'b0 : 
+                           flushQ103H                 ? 1'b0 :
+                           PreIllegalInstructionQ101H ? 1'b0 :
+                           LoadHzrd1DetectQ101H       ? 1'b0 :  
+                           LoadHzrd2DetectQ101H       ? 1'b0 : 
+                                                        1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
@@ -147,8 +157,8 @@ assign CtrlQ101H.RegSrc1          = InstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2          = InstructionQ101H[24:20];
 
 // CSR Control Signals
-assign CsrInstQ101H.csr_wren     = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b10)) && (CtrlQ101H.RegSrc1 =='0 ));  
-assign CsrInstQ101H.csr_rden     = (OpcodeQ101H == SYSCAL) && !((Funct3Q101H[1:0]==2'b01 ) && (CtrlQ101H.RegDst =='0 ));
+assign CsrInstQ101H.csr_wren     = (OpcodeQ101H == SYSCAL) && (Funct3Q101H[1:0]!=2'b00) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b10)) && (CtrlQ101H.RegSrc1 =='0 ));  
+assign CsrInstQ101H.csr_rden     = (OpcodeQ101H == SYSCAL) && (Funct3Q101H[1:0]!=2'b00) && !((Funct3Q101H[1:0]==2'b01 ) && (CtrlQ101H.RegDst =='0 ));
 assign CsrInstQ101H.csr_op       = InstructionQ101H[13:12];
 assign CsrInstQ101H.csr_rs1      = CtrlQ101H.RegSrc1;
 assign CsrInstQ101H.csr_addr     = InstructionQ101H[31:20];
@@ -156,13 +166,15 @@ assign CsrInstQ101H.csr_data_imm = {27'h0, CtrlQ101H.RegSrc1};
 assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14]; 
 
 // Update Interrupts CSR and flow control
-always_comb begin 
-    CsrInterruptUpdateQ101H = '0;
-    CsrInterruptUpdateQ101H.illegal_instruction = IllegalInstruction;
-    CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
+    assign CsrInterruptUpdateQ101H.misaligned_access    = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.illegal_csr_access   = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.breakpoint           = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.timer_interrupt      = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.external_interrupt   = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.illegal_instruction  = IllegalInstructionQ101H;
+    assign CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
                                            (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
                                            (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
-end // always_comb
 
 logic ebreak_was_calledQ101H; 
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
@@ -223,9 +235,10 @@ assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ
 //assign ReadyQ101H = flushQ102H ? 1'b1 : (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
-`MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_RST_DFF(CsrInstQ102H, CsrInstQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_RST_DFF(CsrInterruptUpdateQ102H, CsrInterruptUpdateQ101H, Clock, ReadyQ102H, Rst )
+
+`MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
 `MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ105H )

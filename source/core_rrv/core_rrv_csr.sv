@@ -294,9 +294,9 @@ assign BeginInterrupt = (CsrInterruptUpdateQ102H.illegal_instruction || CsrInter
                        || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt);
 
 assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
-assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = next_csr.csr_mtvec;
+assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
 assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
-assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = next_csr.csr_mepc;
+assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
 
 //assign CsrPcUpdateQ102H.InterruptJumpEnQ102H         = 0;
 //assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = 0;
