@@ -57,21 +57,22 @@ logic [31:0]  CsrReadDataQ102H;      // data red from CSR
 logic [31:0]  CsrWriteDataQ102H;     // data writen to csr
 
 // Control bits
-logic           BranchCondMetQ102H;
-logic           ReadyQ100H;
-logic           ReadyQ102H;
-logic           ReadyQ103H;
-logic           ReadyQ104H;
-logic           ReadyQ105H;
-t_csr_hw_updt   CsrHwUpdtQ102H;
-t_core_rrv_ctrl Ctrl;
-t_ctrl_if       CtrlIf;
-t_ctrl_rf       CtrlRf;
-t_ctrl_exe      CtrlExe;
-t_ctrl_mem1     CtrlMem1;
-t_ctrl_wb       CtrlWb;
-t_csr_inst_rrv  CtrlCsr;
-t_csr_pc_update CsrPcUpdateQ102H;
+logic                   BranchCondMetQ102H;
+logic                   ReadyQ100H;
+logic                   ReadyQ102H;
+logic                   ReadyQ103H;
+logic                   ReadyQ104H;
+logic                   ReadyQ105H;
+logic                   ValidInstQ105H;
+t_csr_interrupt_update  CsrInterruptUpdateQ102H;
+t_core_rrv_ctrl         Ctrl;
+t_ctrl_if               CtrlIf;
+t_ctrl_rf               CtrlRf;
+t_ctrl_exe              CtrlExe;
+t_ctrl_mem1             CtrlMem1;
+t_ctrl_wb               CtrlWb;
+t_csr_inst_rrv          CtrlCsr;
+t_csr_pc_update         CsrPcUpdateQ102H;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
@@ -135,15 +136,16 @@ core_rrv_ctrl core_rrv_ctrl (
   .ReadyQ104H           (ReadyQ104H), //  output 
   .ReadyQ105H           (ReadyQ105H), //  output 
   // output ctrl signals
-  .CtrlIf               (CtrlIf             ), //output
-  .CtrlRf               (CtrlRf             ), //output
-  .CtrlExe              (CtrlExe            ), //output
-  .CtrlCsr              (CtrlCsr            ), //output
-  .CtrlMem1             (CtrlMem1           ), //output
-  .CtrlWb               (CtrlWb             ), //output
+  .CtrlIf                   (CtrlIf                   ), //output
+  .CtrlRf                   (CtrlRf                   ), //output
+  .CtrlExe                  (CtrlExe                  ), //output
+  .CtrlCsr                  (CtrlCsr                  ), //output
+  .CtrlMem1                 (CtrlMem1                 ), //output
+  .CtrlWb                   (CtrlWb                   ), //output
   // output data path signals
-  .ImmediateQ101H       (ImmediateQ101H     ), //output
-  .CsrHwUpdtQ102H       (CsrHwUpdtQ102H     ) //output
+  .ImmediateQ101H           (ImmediateQ101H           ), //output
+  .CsrInterruptUpdateQ102H  (CsrInterruptUpdateQ102H  ), //output
+  .ValidInstQ105H           (ValidInstQ105H           )
 );
 
 core_rrv_rf 
@@ -161,7 +163,7 @@ core_rrv_rf (
   .PcQ102H           (PcQ102H),           // output   
   .ImmediateQ102H    (ImmediateQ102H),    // output
   .RegRdData1Q102H   (RegRdData1Q102H),   // output
-  .RegRdData2Q102H   (RegRdData2Q102H)    // output
+  .RegRdData2Q102H   (RegRdData2Q102H)   // output
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,17 +212,18 @@ core_rrv_exe core_rrv_exe (
 );
 
 core_rrv_csr core_rrv_csr (
- .Clk                       (Clock             ),  
- .Rst                       (Rst               ),  
- .PcQ102H                   (PcQ102H           ),
+ .Clk                       (Clock                  ),  
+ .Rst                       (Rst                    ),  
+ .PcQ102H                   (PcQ102H                ),
  // Inputs from the core
- .CsrInstQ102H              (CtrlCsr           ),
- .CsrWriteDataQ102H         (CsrWriteDataQ102H ), 
- .CsrHwUpdtQ102H            (CsrHwUpdtQ102H    ), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
- .CsrPcUpdateQ102H          (CsrPcUpdateQ102H  ),
- .interrupt_counter_expired (                  ),
+ .CsrInstQ102H              (CtrlCsr                ),
+ .CsrWriteDataQ102H         (CsrWriteDataQ102H      ),
+ .ValidInstQ105H            (ValidInstQ105H         ), 
+ .CsrInterruptUpdateQ102H   (CsrInterruptUpdateQ102H), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .CsrPcUpdateQ102H          (CsrPcUpdateQ102H       ),
+ .interrupt_counter_expired (                       ),
  // Outputs to the core
- .CsrReadDataQ102H          (CsrReadDataQ102H  )
+ .CsrReadDataQ102H          (CsrReadDataQ102H       )
 );
 
 

@@ -2,17 +2,18 @@
 module core_rrv_csr
 import core_rrv_pkg::*;
 (
-    input logic                Clk,
-    input logic                Rst,
-    input logic [31:0]         PcQ102H,
+    input logic                       Clk,
+    input logic                       Rst,
+    input logic [31:0]                PcQ102H,
     // Inputs from the core
-    input var t_csr_inst_rrv   CsrInstQ102H,
-    input logic [31:0]         CsrWriteDataQ102H,
-    input var t_csr_hw_updt    CsrHwUpdtQ102H, // 32-bit data to be written into the CSR
+    input var t_csr_inst_rrv          CsrInstQ102H,
+    input logic [31:0]                CsrWriteDataQ102H,
+    input var t_csr_interrupt_update  CsrInterruptUpdateQ102H, // 32-bit data to be written into the CSR
+    input     ValidInstQ105H,
     // Outputs to the core
-    output var t_csr_pc_update CsrPcUpdateQ102H,
-    output logic               interrupt_counter_expired,
-    output logic [31:0]        CsrReadDataQ102H // 32-bit data read from the CSR
+    output var t_csr_pc_update        CsrPcUpdateQ102H,
+    output logic                      interrupt_counter_expired,
+    output logic [31:0]               CsrReadDataQ102H // 32-bit data read from the CSR
 );
 
     // Define the CSR registers
@@ -174,24 +175,20 @@ always_comb begin
     // 3. illegal CSR access
     // 4. breakpoint
     //FIXME - please review the values of the exceptions - read the spec
-    if(CsrHwUpdtQ102H.illegal_instruction) begin
+    if(CsrInterruptUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
-        next_csr.csr_mtvec  = 32'h00000100;
         next_csr.csr_mepc   = PcQ102H;
     end
-    if(CsrHwUpdtQ102H.misaligned_access) begin
+    if(CsrInterruptUpdateQ102H.misaligned_access) begin
         next_csr.csr_mcause = 32'h00000004;
-        next_csr.csr_mtvec  = 32'h00000200; // TODO - possible changing of the address
         next_csr.csr_mepc   = PcQ102H;
     end
-    if(CsrHwUpdtQ102H.illegal_csr_access) begin
+    if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
         next_csr.csr_mcause = 32'h0000000B;
-        next_csr.csr_mtvec  = 32'h00000300; // TODO - possible changing of the address
         next_csr.csr_mepc   = PcQ102H;
     end
-    if(CsrHwUpdtQ102H.breakpoint) begin
+    if(CsrInterruptUpdateQ102H.breakpoint) begin
         next_csr.csr_mcause = 32'h00000003;
-        next_csr.csr_mtvec  = 32'h00000400; // TODO - possible changing of the address
         next_csr.csr_mepc   = PcQ102H;
     end
     // handle HW interrupts:
@@ -201,7 +198,7 @@ always_comb begin
     //if(interrupt_counter_expired)     begin
     //    next_csr.csr_mepc   = PcQ102H;
     //end
-    //if(CsrHwUpdtQ102H.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
+    //if(CsrInterruptUpdateQ102H.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
 
     //==========================================================================
     // ---- RO/V CSR - writes from RTL ----
@@ -209,7 +206,7 @@ always_comb begin
         {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
         next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
         csr_cycle_high_low      = {csr.csr_cycle_high, csr.csr_cycle_low};
-        if(CsrHwUpdtQ102H.ValidInstQ105H) begin
+        if(ValidInstQ105H) begin
             {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b1;
             next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
             csr_instret_high_low      = {csr.csr_instret_high, csr.csr_instret_low};
@@ -292,17 +289,19 @@ end
 
 // Update program counter
 logic  BeginInterrupt;
-assign BeginInterrupt = (CsrHwUpdtQ102H.illegal_instruction) || (CsrHwUpdtQ102H.misaligned_access) || (CsrHwUpdtQ102H.illegal_csr_access) || (CsrHwUpdtQ102H.breakpoint) || (CsrHwUpdtQ102H.external_interrupt) || (CsrHwUpdtQ102H.timer_interrupt);
+assign BeginInterrupt = (CsrInterruptUpdateQ102H.illegal_instruction || CsrInterruptUpdateQ102H.misaligned_access 
+                       || CsrInterruptUpdateQ102H.illegal_csr_access || CsrInterruptUpdateQ102H.breakpoint 
+                       || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt);
 
-//assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
-//assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = next_csr.csr_mtvec;
-//assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrHwUpdtQ102H.Mret;
-//assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = next_csr.csr_mepc;
+assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
+assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = next_csr.csr_mtvec;
+assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
+assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = next_csr.csr_mepc;
 
-assign CsrPcUpdateQ102H.InterruptJumpEnQ102H         = 0;
-assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = 0;
-assign CsrPcUpdateQ102H.InteruptReturnEnQ102H        = 0;
-assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = 0;
+//assign CsrPcUpdateQ102H.InterruptJumpEnQ102H         = 0;
+//assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = 0;
+//assign CsrPcUpdateQ102H.InteruptReturnEnQ102H        = 0;
+//assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = 0;
 
 //assign MePc = csr.csr_mepc;
 // assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID

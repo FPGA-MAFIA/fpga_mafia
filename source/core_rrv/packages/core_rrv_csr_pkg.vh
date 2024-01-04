@@ -77,9 +77,8 @@ typedef struct packed {
     logic breakpoint;
     logic timer_interrupt;  
     logic external_interrupt;
-    logic ValidInstQ105H;
     logic Mret;
-} t_csr_hw_updt;
+} t_csr_interrupt_update;
 
 typedef struct packed {
     logic        InterruptJumpEnQ102H;
