@@ -70,5 +70,5 @@ assign illegal_instructions.OpCodeNotMatchBaseISA = !(PreOpcodeQ101H == R_OP || 
 assign illegal_instructions.RegOutOfRangeRV32E = 0; // TODO - must be asserterd if RF num greater that 15 and we work at RV32E configuration
 
 assign PreIllegalInstruction = (illegal_instructions.RopFunct7NotMatchZero  || illegal_instructions.RopFunct7NotMatch20OrZero || illegal_instructions.IopFunct7NotMatch20OrZero
-                                || illegal_instructions.StoreFunct3NotMatch || illegal_instructions.LoadFunct3NotMatch || illegal_instructions.BranchFunct3NotMatch 
+                                || illegal_instructions.StoreFunct3NotMatch || illegal_instructions.LoadFunct3NotMatch        || illegal_instructions.BranchFunct3NotMatch 
                                 || illegal_instructions.JalrFunct3NotMatch  || illegal_instructions. OpCodeNotMatchBaseISA);

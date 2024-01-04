@@ -102,7 +102,6 @@ assign flushQ102H = IndirectBranchQ102H;
 `include "illegal_instructions.vh"
 logic IllegalInstruction;
 assign IllegalInstruction = (PreIllegalInstruction) && ! (flushQ102H || flushQ103H);
-assign  CsrInterruptUpdateQ101H.illegal_instruction = IllegalInstruction;
 
 assign InstructionQ101H = flushQ102H              ? NOP :
                           flushQ103H              ? NOP :
@@ -156,10 +155,14 @@ assign CsrInstQ101H.csr_addr     = InstructionQ101H[31:20];
 assign CsrInstQ101H.csr_data_imm = {27'h0, CtrlQ101H.RegSrc1}; 
 assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14]; 
 
-// returm from interupt
-assign CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
-                                       (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
-                                       (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
+// Update Interrupts CSR and flow control
+always_comb begin 
+    CsrInterruptUpdateQ101H = '0;
+    CsrInterruptUpdateQ101H.illegal_instruction = IllegalInstruction;
+    CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
+                                           (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
+                                           (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
+end // always_comb
 
 logic ebreak_was_calledQ101H; 
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);

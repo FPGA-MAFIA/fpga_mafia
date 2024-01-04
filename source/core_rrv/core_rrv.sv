@@ -96,7 +96,7 @@ core_rrv_if core_rrv_if (
   .ReadyQ100H       (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H       (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .Ctrl             (CtrlIf        ), // input  t_ctrl_if    Ctrl,
-  .CsrPcUpdateQ102H (CsrPcUpdateQ102H),
+  .CsrPcUpdateQ102H (CsrPcUpdateQ102H),//input t_csr_pc_update
   .AluOutQ102H      (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H          (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H          (PcQ101H     ) // output logic [31:0] PcQ101H
@@ -220,7 +220,7 @@ core_rrv_csr core_rrv_csr (
  .CsrWriteDataQ102H         (CsrWriteDataQ102H      ),
  .ValidInstQ105H            (ValidInstQ105H         ), 
  .CsrInterruptUpdateQ102H   (CsrInterruptUpdateQ102H), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
- .CsrPcUpdateQ102H          (CsrPcUpdateQ102H       ),
+ .CsrPcUpdateQ102H          (CsrPcUpdateQ102H       ), //output
  .interrupt_counter_expired (                       ),
  // Outputs to the core
  .CsrReadDataQ102H          (CsrReadDataQ102H       )
