@@ -43,12 +43,13 @@ typedef enum logic [5:0] {
     FENCE = 6'd38,
     ECALL = 6'd39,
     EBREAK= 6'd40,
-    CSRRW = 6'd41,
-    CSRRS = 6'd42,
-    CSRRC = 6'd43,
-    CSRRWI= 6'd44,
-    CSRRSI= 6'd45,
-    CSRRCI= 6'd46
+    MRET  = 6'd41,
+    CSRRW = 6'd42,
+    CSRRS = 6'd43,
+    CSRRC = 6'd44,
+    CSRRWI= 6'd45,
+    CSRRSI= 6'd46,
+    CSRRCI= 6'd47
   } t_rv32i_instr;
 
 // csr registers

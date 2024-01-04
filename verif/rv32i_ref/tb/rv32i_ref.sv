@@ -353,7 +353,7 @@ always_comb begin
         next_regfile[rd] = data_rd1 & I_ImmediateQ101H;//ANDI
         reg_wr_en        = 1'b1;
     end
-    32'b???????_?????_?????_001_?????_0010011: begin
+    32'b0000000_?????_?????_001_?????_0010011: begin
         instr_type       = SLLI;
         next_regfile[rd] = data_rd1 << I_ImmediateQ101H;//SLLI
         reg_wr_en        = 1'b1;
@@ -443,6 +443,13 @@ always_comb begin
         ebreak_was_called = 1'b1;
     end
     //=======================================================
+    // MRET
+    //=======================================================
+    32'b001100000010_00000_000_00000_1110011: begin
+        instr_type       = MRET;
+        next_pc          = csr.csr_mepc + 4;
+    end
+    //=======================================================
     //  CSRRW/CSRRS/CSRRC/CSRRWI/CSRRSI/CSRRCI
     //=======================================================
     32'b????????????_?????_??1_?????_1110011: begin
@@ -471,6 +478,9 @@ always_comb begin
     default: begin
         instr_type       = NULL;
         illegal_instruction = 1'b1 && ~rst;
+        if(illegal_instruction) begin
+            next_pc = csr.csr_mtvec;
+        end
     end
     endcase
 
@@ -659,6 +669,10 @@ always_comb begin
         next_csr = '0;
         next_csr.csr_scratch   = 32'h1001;
     end 
+    if(illegal_instruction) begin
+        next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mepc   = pc;
+    end
 
     next_csr.csr_mvendorid     = 32'b1; // CSR_MVENDORID
     next_csr.csr_marchid       = 32'b0; // CSR_MARCHID
@@ -668,6 +682,6 @@ always_comb begin
     MePc = csr.csr_mepc;
 end//always_comb
     
-assign en_end_of_simulation = ecall_was_called || ebreak_was_called || illegal_instruction;
+assign en_end_of_simulation = ecall_was_called || ebreak_was_called;
 
 endmodule
