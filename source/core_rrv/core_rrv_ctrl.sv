@@ -85,19 +85,26 @@ assign CoreFreeze = !DMemReady;
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 
+// detect illegal instruction
+`include "illegal_instructions.vh"
+logic IllegalInstructionQ101H;
+assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
+
 //FIXME - Note that the PreRegSrc2Q101H might not be used as a register read. so there is no real need for the hzrd.
 // we can optimize and say that only if its a "valid" PreRegSrc2Q101H then we need to check for hzrd on that register. (branch/store/r_type)
 assign LoadHzrd1DetectQ101H      = Rst ? 1'b0 : 
                                  ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
+                                 ((PreRegSrc2Q101H == CtrlQ102H.RegDst && (PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH))
+                                 && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
                                                                                                          1'b0;                                                                                                        
 assign LoadHzrd2DetectQ101H      = Rst ? 1'b0 : 
                                  ((PreRegSrc1Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
+                                 ((PreRegSrc2Q101H == CtrlQ103H.RegDst && (PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH))
+                                 && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
                                                                                                          1'b0;                                                                                                        
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
-logic IllegalInstructionQ101H;
+//logic IllegalInstructionQ101H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
 // We flush when we have an indirect branch/jump or illegal instruction or Mret. 
 // this is due to PC that already fetch the next instruction but we need to flush it.
@@ -110,8 +117,8 @@ assign flushQ102H = IndirectBranchQ102H                         ||
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
 // detect illegal instruction
-`include "illegal_instructions.vh"
-assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
+//`include "illegal_instructions.vh"
+//assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
 assign InstructionQ101H = flushQ102H                  ? NOP :
                           flushQ103H                  ? NOP :
