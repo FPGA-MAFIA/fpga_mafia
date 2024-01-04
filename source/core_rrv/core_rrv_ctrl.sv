@@ -37,8 +37,9 @@ import core_rrv_pkg::*;
     output var t_ctrl_mem1    CtrlMem1,
     output var t_ctrl_wb      CtrlWb,
     // output data path signals
-    output logic [31:0] ImmediateQ101H,
-    output var t_csr_hw_updt CsrHwUpdtQ102H             
+    output logic [31:0]               ImmediateQ101H,
+    output var t_csr_interrupt_update CsrInterruptUpdateQ102H,
+    output                            ValidInstQ105H             
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,11 +74,11 @@ logic PreValidInstQ101H, ValidInstQ101H;
 logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
-logic PreValidInstQ105H, ValidInstQ105H;
+logic PreValidInstQ105H;
 
 t_core_rrv_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
-t_csr_hw_updt  CsrHwUpdtQ101H;
+t_csr_interrupt_update  CsrInterruptUpdateQ101H;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
@@ -101,7 +102,7 @@ assign flushQ102H = IndirectBranchQ102H;
 `include "illegal_instructions.vh"
 logic IllegalInstruction;
 assign IllegalInstruction = (PreIllegalInstruction) && ! (flushQ102H || flushQ103H);
-assign  CsrHwUpdtQ101H.illegal_instruction = IllegalInstruction;
+assign  CsrInterruptUpdateQ101H.illegal_instruction = IllegalInstruction;
 
 assign InstructionQ101H = flushQ102H              ? NOP :
                           flushQ103H              ? NOP :
@@ -156,9 +157,9 @@ assign CsrInstQ101H.csr_data_imm = {27'h0, CtrlQ101H.RegSrc1};
 assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14]; 
 
 // returm from interupt
-assign CsrHwUpdtQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
-                              (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
-                              (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
+assign CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
+                                       (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
+                                       (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
 
 logic ebreak_was_calledQ101H; 
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
@@ -221,11 +222,10 @@ assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_RST_DFF(CsrInstQ102H, CsrInstQ101H, Clock, ReadyQ102H, Rst )
-//`MAFIA_EN_RST_DFF(CsrHwUpdtQ102H, CsrHwUpdtQ101H, Clock, ReadyQ102H, Rst )
+`MAFIA_EN_RST_DFF(CsrInterruptUpdateQ102H, CsrInterruptUpdateQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
 `MAFIA_EN_DFF    (CtrlQ105H, CtrlQ104H, Clock, ReadyQ105H )
-
 
 assign ValidInstQ101H = ReadyQ101H && PreValidInstQ101H;
 `MAFIA_EN_RST_DFF(PreValidInstQ102H, ValidInstQ101H, Clock, ReadyQ102H, Rst )
@@ -236,9 +236,6 @@ assign ValidInstQ103H = ReadyQ103H && PreValidInstQ103H;
 assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
 `MAFIA_EN_DFF    (PreValidInstQ105H, ValidInstQ104H, Clock, ReadyQ105H)
 assign ValidInstQ105H = ReadyQ105H && PreValidInstQ105H;
-
-// update CSR_INSTRET
-assign CsrHwUpdtQ102H.ValidInstQ105H = ValidInstQ105H;  
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
