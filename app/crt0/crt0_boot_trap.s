@@ -40,7 +40,7 @@ reset_handler:
   mv x31, x1
 
 csr_init:
-  li t0, 0x100   # Load the immediate value 0x100 into temporary register t0
+  li t0, 0x100   # Load the immediate value 0x100 of trap handler address
   csrw mtvec, t0 # Write the value in t0 to the mtvec CSR
 
 stack_init:
@@ -56,10 +56,10 @@ jump_to_main:
 
 
   
-##################################################
-# Interrupt handler for the counter in location 
-##################################################
-handle_interrupt:
+###############################################
+# Trap handler for interrupts and exceptions 
+###############################################
+trap_handler:
   .org 0x100
     # Save registers on the stack
     addi sp, sp, -128     # Allocate stack space for 31 registers
@@ -95,7 +95,8 @@ handle_interrupt:
     sw t5, 8(sp)         
     sw t6, 4(sp)
 
-handle_exception:
+call call_handle_exception
+call_handle_exception:
     # General instructions for debugging
     addi t0, zero, 0
     addi t1, zero, 0
