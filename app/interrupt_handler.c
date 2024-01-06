@@ -1,3 +1,4 @@
+#include "big_core_defines.h"
 #include "graphic_vga.h"
 #include "csr.h"
 
@@ -13,9 +14,3 @@ void interrupt_handler() {
         rvc_printf("ILLEGAL_INSTRUCTION\n");
     }
 }
-
-
-
-
-
-

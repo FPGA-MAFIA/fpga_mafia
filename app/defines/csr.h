@@ -1,16 +1,10 @@
-// CSR address for exception handler and interrupt handler
-#define CSR_MCAUSE 0x342
-#define CSR_MEPC   0x341
-#define CSR_MTVAL  0x343
-#define CSR_MSTATUS 0x300
-#define CSR_MIE 0x304
-#define CSR_MIP 0x344
-
-
+/*******************************************************
+ * RISC-V Interrupts and Exceptions CSR read functions
+*******************************************************/
 int read_mcause() {
 
     int mcause;
-    asm volatile ("csrr %0, CSR_MCAUSE" : "=r"(mcause));
+    asm volatile ("csrr %0, mcause" : "=r"(mcause));
     return mcause;
 
 }
@@ -18,7 +12,7 @@ int read_mcause() {
 int read_mepc() {
 
     int mepc;
-    asm volatile ("csrr %0, CSR_MEPC" : "=r"(mepc));
+    asm volatile ("csrr %0, mepc" : "=r"(mepc));
     return mepc;
 
 }
@@ -26,7 +20,7 @@ int read_mepc() {
 int read_mtval() {
 
     int mtval;
-    asm volatile ("csrr %0, CSR_MTVAL" : "=r"(mtval));
+    asm volatile ("csrr %0, mtval" : "=r"(mtval));
     return mtval;
 
 }
@@ -34,7 +28,7 @@ int read_mtval() {
 int read_mstatus() {
 
     int mstatus;
-    asm volatile ("csrr %0, CSR_MSTATUS" : "=r"(mstatus));
+    asm volatile ("csrr %0, mstatus" : "=r"(mstatus));
     return mstatus;
 
 }
@@ -42,7 +36,7 @@ int read_mstatus() {
 int read_mie() {
 
     int mie;
-    asm volatile ("csrr %0, CSR_MIE" : "=r"(mie));
+    asm volatile ("csrr %0, mie" : "=r"(mie));
     return mie;
 
 }
@@ -50,7 +44,7 @@ int read_mie() {
 int read_mip() {
 
     int mip;
-    asm volatile ("csrr %0, CSR_MIP" : "=r"(mip));
+    asm volatile ("csrr %0, mip" : "=r"(mip));
     return mip;
 
 }
