@@ -95,8 +95,7 @@ trap_handler:
     sw t5, 8(sp)         
     sw t6, 4(sp)
 
-call call_handle_exception
-call_handle_exception:
+call_interrupt_handler:
     # General instructions for debugging
     addi t0, zero, 0
     addi t1, zero, 0
