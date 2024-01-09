@@ -1,3 +1,7 @@
+#ifndef GRAPHIC_VGA_H  // Check if GRAPHIC_VGA_H is not defined
+#define GRAPHIC_VGA_H  // Define GRAPHIC_VGA_H
+
+
 /* VGA defines */
 #define VGA_MEM_SIZE_BYTES 38400
 #define VGA_MEM_SIZE_WORDS 9600
@@ -543,3 +547,5 @@ int rvc_scanf(char* str, int size){
     // return what is the number of chars read
     return i;
 }
+
+#endif /* GRAPHIC_VGA_H */

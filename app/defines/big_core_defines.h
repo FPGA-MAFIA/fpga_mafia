@@ -1,3 +1,7 @@
+#ifndef BIG_CORE_DEFINES_H  // Check if GRAPHIC_VGA_H is not defined
+#define BIG_CORE_DEFINES_H  // Define GRAPHIC_VGA_H
+
+
 
 #define D_MEM_BASE      0x00010000
 #define SCRATCH_OFFSET  0x0001F000
@@ -104,3 +108,5 @@ void fpga_7seg_print(int number){
     WRITE_REG(CR_SEG7_4, hex7seg((number/10000)%10));
     WRITE_REG(CR_SEG7_5, hex7seg((number/100000)%10));
 }
+
+#endif /* BIG_CORE_DEFINES_H */

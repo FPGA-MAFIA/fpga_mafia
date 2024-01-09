@@ -1,50 +1,14 @@
 /*******************************************************
  * RISC-V Interrupts and Exceptions CSR read functions
 *******************************************************/
-int read_mcause() {
+#ifndef CSR_H
+#define READ_CSR(reg) ({ int __val; asm volatile ("csrr %0, " #reg : "=r"(__val)); __val; })
 
-    int mcause;
-    asm volatile ("csrr %0, mcause" : "=r"(mcause));
-    return mcause;
+#define read_mcause()   READ_CSR(mcause)
+#define read_mepc()     READ_CSR(mepc)
+#define read_mtval()    READ_CSR(mtval)
+#define read_mstatus()  READ_CSR(mstatus)
+#define read_mie()      READ_CSR(mie)
+#define read_mip()      READ_CSR(mip)
 
-}
-
-int read_mepc() {
-
-    int mepc;
-    asm volatile ("csrr %0, mepc" : "=r"(mepc));
-    return mepc;
-
-}
-
-int read_mtval() {
-
-    int mtval;
-    asm volatile ("csrr %0, mtval" : "=r"(mtval));
-    return mtval;
-
-}
-
-int read_mstatus() {
-
-    int mstatus;
-    asm volatile ("csrr %0, mstatus" : "=r"(mstatus));
-    return mstatus;
-
-}
-
-int read_mie() {
-
-    int mie;
-    asm volatile ("csrr %0, mie" : "=r"(mie));
-    return mie;
-
-}
-
-int read_mip() {
-
-    int mip;
-    asm volatile ("csrr %0, mip" : "=r"(mip));
-    return mip;
-
-}
+#endif /* CSR_H */
