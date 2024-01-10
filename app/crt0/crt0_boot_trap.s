@@ -1,3 +1,5 @@
+.extern interrupt_handler
+
 _start:
   .global _start
   .org 0x00
@@ -96,9 +98,11 @@ trap_handler:
     sw t6, 4(sp)
 
 call_interrupt_handler:
+  call interrupt_handler
+
     # General instructions for debugging
-    addi t0, zero, 0
-    addi t1, zero, 0
+    #addi t0, zero, 0
+    #addi t1, zero, 0
     addi t2, zero, 0
     
 restore_and_return:

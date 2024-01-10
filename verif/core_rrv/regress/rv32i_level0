@@ -1,5 +1,4 @@
 alive.c             -gRF_NUM_MSB=31
-alive_illigal.c     -gRF_NUM_MSB=31
 basic.c             -gRF_NUM_MSB=31
 alive_csr.c         -gRF_NUM_MSB=31
 alive_vga.c         -gRF_NUM_MSB=31

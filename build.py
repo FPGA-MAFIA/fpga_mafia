@@ -154,11 +154,11 @@ class Test:
             txt_path_v2 = self.name+'_'+Test.name+'_elf_v2.txt'
             data_init_path = self.name+'_data_init.txt'
             search_path  = '-I ../../../../../app/defines '
+            cs_interrupt_handler_name = ' interrupt_handler_rv32i.c.s'
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
                     first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
-                    #first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -173,7 +173,6 @@ class Test:
                     mem_offset   = i_mem_offset+d_mem_offset
                     crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
                     second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
