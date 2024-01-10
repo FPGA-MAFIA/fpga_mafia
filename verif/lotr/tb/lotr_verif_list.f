@@ -1,4 +1,4 @@
-+incdir+../../../source/common/
++incdir+../../../source/lotr/common/
 +incdir+../../../verif/lotr/tb/
 +incdir+../../../verif/lotr/tests/
 ../../../verif/lotr/tb/lotr_tb.sv

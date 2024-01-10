@@ -1,12 +1,5 @@
-#define THREAD_STACK_ADDRESS 0xC0000C
-
 _start:
   .global _start
-  
-/* PipeLine CleanUp  */
-
-  .section .vectors, "ax"
-  .option norvc;
   .org 0x00
   nop
   nop
@@ -51,19 +44,13 @@ reset_handler:
   mv x29, x1
   mv x30, x1
   mv x31, x1
+
   /* stack initilization */
-  li   x5,THREAD_STACK_ADDRESS
+  la   x2, _stack_start
+
   lw   x2, 0(x5)
-  jal x1, main      //jump to main
-  ebreak        //end
-  
+  jal x1, main
+  ebreak
+
   .section .text
-
-
-
-
-
-
   
-
-

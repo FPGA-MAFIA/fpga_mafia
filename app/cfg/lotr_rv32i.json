@@ -1,0 +1,10 @@
+{
+    "I_MEM_OFFSET": 0,
+    "I_MEM_LENGTH": 8192,
+    "D_MEM_OFFSET": 4194304,
+    "D_MEM_LENGTH": 4096,
+    "crt0_file"   : "lotr_crt0.s",
+    "rv32_gcc"    : "rv32i",
+    "name"        : "rv32i"
+}
+

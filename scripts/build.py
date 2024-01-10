@@ -6,6 +6,8 @@ import subprocess
 import glob
 import argparse
 import sys
+import json
+import fileinput
 from termcolor import colored
 
 examples = '''
@@ -18,31 +20,36 @@ python build.py -dut 'big_core' -tests 'alive' -hw                  -> compiling
 python build.py -dut 'big_core' -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
 python build.py -dut 'big_core' -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
 python build.py -dut 'big_core' -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
-python build.py -dut 'router' -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
-python build.py -dut 'router' -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'router'  -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
+python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'fabric -top fabric_mini_cors_tb -app -hw -sim -> Using the -top argument to specify the tb top module name for simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
-parser.add_argument('-all',       action='store_true', default=False, help='running all the tests')
+parser.add_argument('-cfg',       type=str,               help='Specify the JSON configuration file')
+parser.add_argument('-dut',       default='big_core',     help='insert your project name (as mentioned in the dirs name')
 parser.add_argument('-tests',     default='',             help='list of the tests for run the script on')
-parser.add_argument('-debug',     action='store_true',    help='run simulation with debug flag')
-parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
+parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
 parser.add_argument('-app',       action='store_true',    help='compile the RISCV SW into SV executables')
 parser.add_argument('-hw',        action='store_true',    help='compile the RISCV HW into simulation')
 parser.add_argument('-sim',       action='store_true',    help='start simulation')
+parser.add_argument('-all',       action='store_true',    default=False, help='running all the tests')
 parser.add_argument('-full_run',  action='store_true',    help='compile SW, HW of the test and simulate it')
-parser.add_argument('-dut',       default='big_core',     help='insert your project name (as mentioned in the dirs name')
-parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
-parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
-parser.add_argument('-regress',   default='',             help='insert a level of regression to run on')
-parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
-parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
+parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
+parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
+parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
+parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
+parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
+parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
 parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
 parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
+parser.add_argument('-top',       default=None,           help='insert your top module name for simulation (default is the <dut>+_tb name)')
 args = parser.parse_args()
+# if -top was not specified, use the dut name + the _tb suffix
+if args.top is None:
+    args.top = args.dut + '_tb'
 
-MODEL_ROOT_ORIG = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
-MODEL_ROOT = MODEL_ROOT_ORIG + '/lotr_orig'
+MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 VERIF     = './verif/'+args.dut+'/'
 TB        = './verif/'+args.dut+'/tb/'
 SOURCE    = './source/'+args.dut+'/'
@@ -69,10 +76,6 @@ FPGA_ROOT = './FPGA/'+args.dut+'/'
 #####################################################################################################
 class Test:
     hw_compilation = False
-    I_MEM_OFFSET = str(0x00000000)
-    I_MEM_LENGTH = str(0x00002000)
-    D_MEM_OFFSET = str(0x00002000)
-    D_MEM_LENGTH = str(0x00002000)
     # SCRATCH_D_MEM_OFFSET = str(0x0001F000) # -> 0x0001FFFF
     # SCRATCH_D_MEM_LENGTH = str(0x00001000)
     # Total of 128KB of memory (64KB for I_MEM and 64KB for D_MEM+SCRATCH_D_MEM)
@@ -84,9 +87,49 @@ class Test:
         self.target , self.gcc_dir = self._create_test_dir()
         self.path = TESTS+self.file_name
         self.fail_flag = False
+        self.app_flag = False
+        self.mif_flag = False
         self.duration = 0
+        self.top = args.top
         # the tests parameters
         self.params = params # FIXME ABD
+
+
+        # Load configuration from JSON file or use defaults
+        self.load_config()
+
+    def load_json(self,json_file):
+         #loading configuration from the specified JSON file
+        with open(json_file) as config_file:
+            config_data = json.load(config_file)
+        Test.I_MEM_OFFSET = str(config_data['I_MEM_OFFSET'])
+        Test.I_MEM_LENGTH = str(config_data['I_MEM_LENGTH'])
+        Test.D_MEM_OFFSET = str(config_data['D_MEM_OFFSET'])
+        Test.D_MEM_LENGTH = str(config_data['D_MEM_LENGTH'])
+        Test.crt0_file    = config_data['crt0_file']
+        Test.rv32_gcc     = config_data['rv32_gcc']
+        Test.name         = config_data['name']
+        Test.RF_NUM_MSB = str(config_data.get('RF_NUM_MSB', ''))
+
+    def load_config(self):
+        # Default JSON file location
+        json_directory = 'app/cfg/'
+
+        # Check if the -cfg flag is provided
+        if args.cfg:
+            json_file = os.path.join(json_directory, args.cfg +'.json')
+            if not os.path.exists(json_file):
+                print_message(f'[ERROR] There is no file \'{args.cfg}\'')
+                exit(1)
+            else:
+                print_message(f'[INFO] Using configuration from \'{args.cfg}\'')
+                 #loading configuration from the specified JSON file
+                self.load_json(json_file)               
+        else:
+            print_message(f'[INFO] Using default configuration')
+            json_file = os.path.join(json_directory, 'default.json')
+            self.load_json(json_file)              
+
     def _create_test_dir(self):
         if not os.path.exists(TARGET):
             mkdir(TARGET)
@@ -95,7 +138,7 @@ class Test:
         if not os.path.exists(TARGET+'tests/'+self.name):
             mkdir(TARGET+'tests/'+self.name)
         if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
-            if(args.app):
+            if(args.app or args.mif or args.fpga):
                 mkdir(TARGET+'tests/'+self.name+'/gcc_files')
         if not os.path.exists(MODELSIM):
             mkdir(MODELSIM)
@@ -105,18 +148,17 @@ class Test:
     def _compile_sw(self):
         print_message('[INFO] Starting to compile SW ...')
         if self.path:
-            cs_path =  self.name+'_rv32i.c.s' if not self.assembly else '../../../../../'+self.path
-            elf_path = self.name+'_rv32i.elf'
-            txt_path = self.name+'_rv32i_elf.txt'
+            cs_path =  self.name+'_'+Test.name+'.c.s' if not self.assembly else '../../../../../'+self.path
+            elf_path = self.name+'_'+Test.name+'.elf'
+            txt_path = self.name+'_'+Test.name+'_elf.txt'
+            txt_path_v2 = self.name+'_'+Test.name+'_elf_v2.txt'
             data_init_path = self.name+'_data_init.txt'
             search_path  = '-I ../../../../../app/defines '
-            #make sure self.gcc_dir exists - if not, create it
-            if not os.path.exists(self.gcc_dir):
-                mkdir(self.gcc_dir)
+            cs_interrupt_handler_name = ' interrupt_handler_rv32i.c.s'
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march=rv32i '+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -125,17 +167,14 @@ class Test:
                 self.fail_flag = True
             else:
                 try:
-                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
-                    rv32i_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=rv32i '
+                    rv32_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=' +Test.rv32_gcc+ ' '
                     i_mem_offset = '-Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+' -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+' '
                     d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
-                    crt0_file    = '../../../../../app/crt0.S '
+                    crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
-                    crt0_file    = '../../../../../app/crt0.S '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32i_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
+                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
@@ -144,6 +183,10 @@ class Test:
                     try:
                         third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
                         run_cmd(third_cmd)
+                        # clean version of the elf.txt file - using the -M numeric -M no-aliases flags so we get x0,x1,x2 instead of zero, ra, sp.
+                        # also using the ISA instruction instead of the pseudo instruction (instead of nop we get addi x0, x0, 0)
+                        third_cmd_v2  = 'riscv-none-embed-objdump.exe -M numeric -M no-aliases -gd {} > {}'.format(elf_path, txt_path_v2)
+                        run_cmd(third_cmd_v2)
                     except:
                         print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
                         self.fail_flag = True
@@ -155,16 +198,29 @@ class Test:
                             print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')
                             self.fail_flag = True
                         else:
-                            memories = open('inst_mem.sv', 'r').read()
-                            if "@00400000" in memories:
-                                split_memories = memories.split("@00400000")
-                                with open('inst_mem.sv', 'w') as imem:
-                                    imem.write(split_memories[0])
-                                with open('data_mem.sv', 'w') as dmem:
-                                    dmem.write("@00400000" + split_memories[1])
-                            else:
-                                print_message(f'[INFO] "@00400000" not found in "inst_mem.sv" for the test - {self.name}')                            
-
+                            if(args.cmd==False):
+                                # copy the inst_mem to a new file, call it og_inst_mem.sv
+                                os.system('cp inst_mem.sv og_inst_mem.sv')
+                                # same the content of the inst_mem.sv to the variable "memories"
+                                memories = open('inst_mem.sv', 'r').read()
+                                #The string that we want to search for to check if the data memory is exist
+                                # example: @00010000
+                                dmem_string = '@{:08x}'.format(int(Test.D_MEM_OFFSET))
+                                #print_message(dmem_string)
+                                if dmem_string in memories:
+                                    print_message('[INFO] Data memory exist')
+                                    # save the content before D_MEM_OFFSET to inst_mem.sv
+                                    # save the content after D_MEM_OFFSET to data_mem.sv
+                                    # Split the memories string into two parts - before and after D_MEM_OFFSET
+                                    inst_mem, data_mem = memories.split(dmem_string)
+                                    # Save the content before D_MEM_OFFSET to inst_mem.sv
+                                    with open('inst_mem.sv', 'w') as imem:
+                                        imem.write(inst_mem)
+                                    # Save the content after D_MEM_OFFSET to data_mem.sv
+                                    with open('data_mem.sv', 'w') as dmem:
+                                        dmem.write(dmem_string + data_mem)
+                                else:
+                                    print_message('[INFO] data memory dos not exist')
                                     # Leave the inst_mem.sv as it is - there is no D_MEM_OFFSET in the inst_mem.sv
 
             if not self.fail_flag:
@@ -173,9 +229,28 @@ class Test:
             print_message('[ERROR] Can\'t find the c files of '+self.name)
             self.fail_flag = True
         chdir(MODEL_ROOT)
+        self.app_flag = True
     def _compile_hw(self):
         chdir(MODELSIM)
         print_message('[INFO] Starting to compile HW ...')
+
+        new_value = Test.RF_NUM_MSB  # New value for RF_NUM_MSB
+        file_to_modify = "../../../" + TB + "/" + self.dut + "_tb.sv"  # The System Verilog test bench file
+
+        # Check if Test.RF_NUM_MSB is not empty before updating the file 
+        if new_value:
+            parameter_found = False
+            lines = []
+            with open(file_to_modify, 'r') as file:
+                for line in file:
+                    if "parameter MINI_RF_NUM_MSB" in line:
+                        parameter_found = True
+                        line = f"parameter MINI_RF_NUM_MSB = {new_value};\n"
+                    lines.append(line)
+            if parameter_found:
+                with open(file_to_modify, 'w') as file:
+                    file.writelines(lines)
+
         if not Test.hw_compilation:
             try:
                 comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.dut+'_list.f'
@@ -200,7 +275,7 @@ class Test:
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
-            sim_cmd = 'vsim.exe work.' + self.dut + '_tb -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            sim_cmd = 'vsim.exe work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -218,7 +293,7 @@ class Test:
     def _gui(self):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+self.dut+'_tb ' + self.params + ' +STRING='+self.name+' &'
+            gui_cmd = 'vsim.exe -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -266,6 +341,7 @@ class Test:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
                 self.fail_flag = True
         chdir(MODEL_ROOT)       
+        self.mif_flag = True
 
     def _start_fpga(self):
         chdir(FPGA_ROOT)
@@ -325,7 +401,6 @@ def main():
     if not os.path.exists(VERIF):
         print_message(f'[ERROR] There is no dut \'{args.dut}\'')
         exit(1)
-
     # if args.clean  clean target/dut/tests/ directory before starting running the build script
     if args.clean:
         print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
@@ -379,7 +454,7 @@ def main():
             params_list = [line.split()[1:] for line in open(REGRESS+args.regress)]
             print_message(f'[INFO] params_list: {params_list}')
         except:
-            print_message(f'[ERROR] Failed to find the regression file \'{args.regress}\' in your tests directory')
+            print_message(f'[ERROR] Failed to run regression file \'{args.regress}\' in your tests directory')
             exit(1)
         else:
             for idx, test in enumerate(level_list):
@@ -418,11 +493,10 @@ def main():
             while os.path.exists('target/'+args.dut+'/tests/'+test.name+'_'+str(i)):
                 i += 1
             shutil.copytree('target/'+args.dut+'/tests/'+test.name, 'target/'+args.dut+'/tests/'+test.name+'_'+str(i))
-            # remove the test directory
-            shutil.rmtree('target/'+args.dut+'/tests/'+test.name)
-            # create the test directory again
-            os.makedirs('target/'+args.dut+'/tests/'+test.name)
-        
+            # remove the test directory log files
+            rm_test_log_cmd  = 'rm -rf target/'+args.dut+'/tests/'+test.name+'/*.log'
+            run_cmd(rm_test_log_cmd)
+
         print_message('******************************************************************************')
         print_message('                               Test - '+test.name)
         print_message('******************************************************************************')
@@ -439,10 +513,13 @@ def main():
             if (args.sim or args.full_run) and not test.fail_flag:
                 test._start_simulation()
             if (args.fpga) and not test.fail_flag:
-                test._start_mif()
+                if not test.app_flag:
+                    test._compile_sw()
+                if not test.mif_flag:
+                    test._start_mif()
                 test._start_fpga()
             if (args.mif):
-                if not args.app:
+                if not test.app_flag:
                     test._compile_sw()
                 test._start_mif()
             if (args.gui):
@@ -450,7 +527,7 @@ def main():
             if (args.pp) and not test.fail_flag:
                 if (test._post_process()):# if return value is 0, then the post process is done successfully
                     test.fail_flag = True
-            if not args.debug:
+            if args.no_debug:
                 test._no_debug()
 
             # print the test execution time
