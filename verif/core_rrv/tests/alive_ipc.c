@@ -8,6 +8,7 @@
 
 #include "big_core_defines.h"
 #include "graphic_vga.h"
+#include "csr.h"
 #include "rrv_fixed_point.h"
 
 void my_program(){
@@ -15,8 +16,6 @@ void my_program(){
     int x = 10;
     int y = 20;
     int z = x + y;
-
-
 }
 int main(){
     int cycle1, cycle2;

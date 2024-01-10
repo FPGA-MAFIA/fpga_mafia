@@ -11,4 +11,13 @@
 #define read_mie()      READ_CSR(mie)
 #define read_mip()      READ_CSR(mip)
 
+// sample relevant csr's for pmon
+void rvc_sample_csr(int *cycle_low, int *instret_low){
+
+    asm volatile ("csrr %0, 0xb00" : "=r" (*cycle_low)); 
+    asm volatile ("csrr %0, 0xb02" : "=r" (*instret_low)); 
+
+}
+
+
 #endif /* CSR_H */

@@ -37,21 +37,15 @@ assign csr_imm_bit  = CsrInstQ102H.csr_imm_bit;
 
 logic [31:0] csr_data;
 assign csr_data = (csr_imm_bit) ? csr_data_imm : CsrWriteDataQ102H;
-
-logic csr_cycle_low_overflow;
-logic csr_instret_low_overflow;
-logic [63:0] csr_cycle_high_low;
-logic [63:0] csr_instret_high_low;
+logic csr_mcycle_overflow;
+logic csr_minstret_overflow;
+logic [63:0] csr_minstret_high_low;
+logic [63:0] csr_mcycle_high_low;
 always_comb begin
     next_csr = csr;
     if(csr_wren) begin
         unique casez ({csr_op,csr_addr}) // address holds the offset
             // ---- RW CSR ----
-
-            // CSR_SCRATCH
-            {2'b01,CSR_SCRATCH}       : next_csr.csr_scratch = csr_data;
-            {2'b10,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
-            {2'b11,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
             // CSR_MCYCLE
             {2'b01, CSR_MCYCLE}       : next_csr.csr_mcycle = csr_data;
             {2'b10, CSR_MCYCLE}       : next_csr.csr_mcycle = csr.csr_mcycle | csr_data;
@@ -203,24 +197,21 @@ always_comb begin
     //==========================================================================
     // ---- RO/V CSR - writes from RTL ----
     //==========================================================================
-        {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
-        next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
-        csr_cycle_high_low      = {csr.csr_cycle_high, csr.csr_cycle_low};
+        {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
+        next_csr.csr_mcycleh  = csr.csr_mcycleh + csr_mcycle_overflow;
+        csr_mcycle_high_low   = {csr.csr_mcycleh, csr.csr_mcycle};
+
         if(ValidInstQ105H) begin
-            {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b1;
-            next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
-            csr_instret_high_low      = {csr.csr_instret_high, csr.csr_instret_low};
+            {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret + 1'b1;
+            next_csr.csr_minstreth = csr.csr_minstreth + csr_minstret_overflow;
+            csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret};
         end
-        else
-           {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b0; 
     //==========================================================================
     // Reset values for CSR
     //==========================================================================
     if(Rst) begin
         next_csr = '0;
         //May override the reset values
-        //FIXME - No need to override the reset values of the scratch registers
-        next_csr.csr_scratch   = 32'h1001;
     end // if(Rst)
     //==========================================================================
     // READ ONLY - constant values
@@ -242,19 +233,12 @@ always_comb begin
     if(csr_rden) begin
         unique casez (csr_addr) // address holds the offset
             // ---- RO CSR ----
-            CSR_CYCLE_LOW    : CsrReadDataQ102H = csr.csr_cycle_low;
-            CSR_CYCLE_HIGH   : CsrReadDataQ102H = csr.csr_cycle_high;
-            CSR_INSTRET_LOW  : CsrReadDataQ102H = csr.csr_instret_low;
-            CSR_INSTRET_HIGH : CsrReadDataQ102H = csr.csr_instret_high;
-            
             CSR_MVENDORID      : CsrReadDataQ102H = csr.csr_mvendorid;
             CSR_MARCHID        : CsrReadDataQ102H = csr.csr_marchid;
             CSR_MIMPID         : CsrReadDataQ102H = csr.csr_mimpid;
             CSR_MHARTID        : CsrReadDataQ102H = csr.csr_mhartid;
             CSR_MCONFIGPTR     : CsrReadDataQ102H = csr.csr_mconfigptr;
             // ---- RW CSR ----
-
-            CSR_SCRATCH        : CsrReadDataQ102H = csr.csr_scratch;
             CSR_MCYCLE         : CsrReadDataQ102H = csr.csr_mcycle;
             CSR_MCYCLEH        : CsrReadDataQ102H = csr.csr_mcycleh;
             CSR_MINSTRET       : CsrReadDataQ102H = csr.csr_minstret;
@@ -297,18 +281,6 @@ assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
 assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
 assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
-
-//assign CsrPcUpdateQ102H.InterruptJumpEnQ102H         = 0;
-//assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = 0;
-//assign CsrPcUpdateQ102H.InteruptReturnEnQ102H        = 0;
-//assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = 0;
-
-//assign MePc = csr.csr_mepc;
-// assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
-// assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
-// assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
-// assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
-// assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 
 always_comb begin
     //create an interrupt if the cycle counter is equal to the compare value
