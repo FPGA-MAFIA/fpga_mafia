@@ -32,11 +32,8 @@ typedef struct packed {
 
 
 typedef enum logic [11:0] {
- CSR_SCRATCH        = 12'h009 ,
- CSR_CYCLE_LOW      = 12'hC00 ,
- CSR_CYCLE_HIGH     = 12'hC80 ,
- CSR_INSTRET_LOW    = 12'hC02 ,
- CSR_INSTRET_HIGH   = 12'hC82 ,
+
+//Machine CSR -  
  CSR_MCYCLE         = 12'hB00 ,
  CSR_MCYCLEH        = 12'hB80 ,
  CSR_MINSTRET       = 12'hB02 ,

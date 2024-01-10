@@ -1,11 +1,3 @@
-// sample relevant csr's for pmon
-void rvc_sample_csr(int *cycle_low, int *instret_low){
-
-    asm volatile ("csrr %0, 0xC00" : "=r" (*cycle_low)); 
-    asm volatile ("csrr %0, 0xC02" : "=r" (*instret_low)); 
-
-}
-
 // calculate power of integer numbers with integer exponent
 int pow(int base, int exp) {
 	int result = 1;
