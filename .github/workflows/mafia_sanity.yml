@@ -14,7 +14,7 @@ jobs:
     runs-on: [self-hosted , windows, x64]
     steps:
       - uses: actions/checkout@v2
-      - name: Run build BIG_CORE -all -app -hw -sim -keep_going
+      - name: BIG_CORE - all
         run:  python build.py -dut 'big_core' -regress level0 -app -hw -sim -keep_going
 
       - name: CORE_RRV - rv32i_level0 
@@ -23,18 +23,24 @@ jobs:
       - name: CORE_RRV - rv32i_level0_cfg_intrpt -cfg core_rrv_boot_trap
         run:  python build.py -dut core_rrv -cfg core_rrv_boot_trap -regress rv32i_level0_cfg_intrpt -app -hw -sim -keep_going
       
-      - name: Run build MINI_CORE at rv32e mode
+      - name: MINI_CORE at rv32e mode
         run:  python build.py -dut 'mini_core' -regress rv32e_level0 -cfg mini_rv32e -app -hw -sim -keep_going
-      - name: Run build MINI_CORE at rv3i mode
+
+      - name: MINI_CORE at rv3i mode
         run:  python build.py -dut 'mini_core' -regress rv32i_level0 -app -hw -sim -keep_going
-      - name: Run build SC_CORE -all -app -hw -sim  -keep_going
+
+      - name: SC_CORE -all -app -hw -sim  -keep_going
         run:  python build.py -dut 'sc_core' -all -app -hw -sim -keep_going
-      - name: Run build CACHE -regress level0 -hw -sim -pp -keep_going
+
+      - name: CACHE level0 
         run:  python build.py -dut 'cache' -regress level0 -hw -sim -pp -keep_going
-      - name: Run build I_CACHE -regress level0_i_cache -hw -sim -pp -keep_going
+
+      - name: I_CACHE -regress level0_i_cache
         run:  python build.py -dut 'cache' -regress level0_i_cache -hw -sim -pp -keep_going
-      - name: Run build ROUTER -regress level0 -hw -sim -keep_going
+
+      - name: ROUTER -regress level0
         run:  python build.py -dut 'router' -regress level0 -hw -sim -keep_going
-      - name: Run build FABRIC -regress level0 -hw -sim -keep_going
+
+      - name: FABRIC -regress level0
         run:  python build.py -dut 'fabric' -regress level0 -hw -sim -keep_going
 
