@@ -46,7 +46,7 @@ reset_handler:
   mv x31, x1
 
   /* stack initilization */
-  la   x2, _stack_start
+  la   x2, 0xC0000C
 
   lw   x2, 0(x5)
   jal x1, main
