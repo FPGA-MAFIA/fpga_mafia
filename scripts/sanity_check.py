@@ -14,7 +14,7 @@ parser.add_argument("-yml", "--file", required=True, help="YAML file to process"
 args = parser.parse_args()
 
 # Read the specified YAML file
-yaml_file_path = '.github/workflows/' + args.file + ".yml"
+yaml_file_path = '../.github/workflows/' + args.file + ".yml"
 
 try:
     with open(yaml_file_path, 'r') as file:
