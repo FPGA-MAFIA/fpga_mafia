@@ -20,10 +20,14 @@
 module rv32i_ref_tb;
 import common_pkg::*;
 
-parameter I_MEM_SIZE   = 'h1_0000; 
 parameter I_MEM_OFFSET = 'h0_0000;
-parameter D_MEM_SIZE   = 'h1_0000;
+parameter I_MEM_SIZE   = 'h1_0000; 
+
 parameter D_MEM_OFFSET = 'h1_0000;
+parameter D_MEM_SIZE   = 'h1_0000;
+
+parameter I_MEM_MSB     = I_MEM_SIZE + I_MEM_OFFSET - 1;                // I_MEM   0x0    - 0x3FFF
+parameter D_MEM_MSB     = D_MEM_SIZE + D_MEM_OFFSET - 1; // D_MEM   0x4000 - 0x6FFF
 
 logic        Clk;
 logic        Rst;

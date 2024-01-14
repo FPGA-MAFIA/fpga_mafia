@@ -16,7 +16,7 @@
 
 //---------------------------------------------------
 module mem #(
-    parameter WORD_WIDTH,   //no defualt value.
+    parameter WORD_WIDTH,   //no default value.
     parameter ADRS_WIDTH    //no default value.
 ) (
     input  logic                  clock      ,

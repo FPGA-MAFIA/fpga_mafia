@@ -8,8 +8,8 @@
 // The empty indicates that the fifo is empty.
 
 `include "macros.sv"
-module fifo #(parameter int DATA_WIDTH = 8, 
-                  parameter int FIFO_DEPTH = 4)
+module fifo #(parameter DATA_WIDTH = 8, 
+              parameter FIFO_DEPTH = 4)
     (
     input  logic                   clk,
     input  logic                   rst,

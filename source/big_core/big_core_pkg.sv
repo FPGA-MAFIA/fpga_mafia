@@ -9,22 +9,18 @@
 //-----------------------------------------------------------------------------
 // Description :
 //-----------------------------------------------------------------------------
-
-
-
 `ifndef BIG_CORE_PKG_VS
 `define BIG_CORE_PKG_VS
 package big_core_pkg;
     
-
-
-parameter I_MEM_SIZE   = 'h1_0000;
 parameter I_MEM_OFFSET = 'h0_0000;
-parameter D_MEM_SIZE   = 'h1_0000;
-parameter D_MEM_OFFSET = 'h1_0000;
+parameter I_MEM_SIZE   = 'h1_0000;
+parameter I_MEM_MSB    = I_MEM_SIZE-1;               
 
-parameter I_MEM_MSB   = I_MEM_SIZE-1;               
-parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  
+parameter D_MEM_OFFSET = 'h1_0000;
+parameter D_MEM_SIZE   = 'h1_0000;
+parameter D_MEM_MSB    = D_MEM_SIZE + D_MEM_OFFSET-1;  
+
 // Region bits
 parameter LSB_REGION = 0;
 parameter MSB_REGION = 23;
@@ -43,11 +39,11 @@ parameter CR_MEM_OFFSET       = 'h00FE_0000;
 parameter CR_MEM_REGION_FLOOR = CR_MEM_OFFSET;
 parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 -4;
 
-
-// define VGA memory sizes
+// VGA memory 
 parameter SIZE_VGA_MEM          = 38400; 
 parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
 parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
+
 
 parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
 
@@ -289,8 +285,6 @@ typedef enum logic [1:0] {
     UART_WR                = 2'b10 , 
     UART_WR_BCAST          = 2'b11 
 } t_uart_opcode ;
-
-
 
 
 endpackage

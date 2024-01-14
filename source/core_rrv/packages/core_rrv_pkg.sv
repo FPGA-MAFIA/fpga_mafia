@@ -18,8 +18,8 @@ parameter I_MEM_OFFSET = 'h0_0000;
 parameter D_MEM_SIZE   = 'h1_0000;
 parameter D_MEM_OFFSET = 'h1_0000;
 
-parameter I_MEM_MSB  = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
-parameter D_MEM_MSB  = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
+parameter I_MEM_MSB  = I_MEM_SIZE-1;               // I_MEM
+parameter D_MEM_MSB  = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM
 
 parameter I_MEM_ADRS_MSB = 15;
 parameter D_MEM_ADRS_MSB = 15;
@@ -46,7 +46,7 @@ parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 // define CR memory sizes
 parameter CR_MEM_OFFSET       = 'h00FE_0000;
 parameter CR_MEM_REGION_FLOOR = CR_MEM_OFFSET;
-parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 -4;
+parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 - 1;
 
 // CR Address Offsets
 parameter CR_SEG7_0      = CR_MEM_OFFSET + 'h0  ; // RW 8 bit

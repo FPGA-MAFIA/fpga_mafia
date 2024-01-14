@@ -25,10 +25,10 @@ parameter D_MEM_SIZE   = 'h1_0000;
 parameter D_MEM_OFFSET = 'h1_0000;
 
 // define VGA memory sizes
-parameter SIZE_VGA_MEM       = 38400; 
-parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
-parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
-parameter CR_MEM_MSB  = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
+parameter SIZE_VGA_MEM  = 38400; 
+parameter I_MEM_MSB     = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
+parameter D_MEM_MSB     = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
+parameter CR_MEM_MSB    = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
 // Region bits
 parameter LSB_REGION = 0;
 parameter MSB_REGION = 15;
