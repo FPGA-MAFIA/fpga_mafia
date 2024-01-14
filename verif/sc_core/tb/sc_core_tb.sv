@@ -33,6 +33,8 @@ logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic [31:0] Pc;
 
+`include "sc_core_tasks.vh"
+
 //=========================================
 // Instantiating the sc_core core
 //=========================================
@@ -110,33 +112,49 @@ initial begin: test_seq
     //======================================
     $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , NextIMem);
+    force rv32i_ref.imem = IMem;
 
     file = $fopen({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
         $readmemh({"../../../target/sc_core/tests/",test_name,"/gcc_files/data_mem.sv"} , NextDMem);
+        force rv32i_ref.dmem = DMem;
+        #10
+        release rv32i_ref.dmem;
     end
-    #10000
-    end_tb("timeout");
+
+    //=======================================
+    // enable the checker data collection (monitor)
+    //=======================================
+        fork
+        get_rf_write();
+        get_ref_rf_write();
+        begin wait(sc_core.Instruction == EBREAK);
+            eot(.msg("ebreak was called"));
+        end
+        join
 end // test_seq
 
 
 `include "sc_core_trk.vh"
 
-parameter EBREAK = 32'h00100073;
-// EBREAK detection
-always @(posedge Clk) begin : ebrake_status
-    if (EBREAK == sc_core.Instruction) begin // ebrake instruction opcode
-        end_tb("ended with EBREAK");
-    end
+parameter V_TIMEOUT = 100000;
+initial begin: detect_timeout
+    //=======================================
+    // timeout
+    //=======================================
+    #V_TIMEOUT 
+    $error("test ended with timeout");
+    $display("ERROR: No data integrity running - try to increase the timeout value");
+    $finish;
 end
 
-task end_tb (string eot_msg);
-print_vga_screen();
-$display("===================\n End of test %s - with message: %s \n=====================", test_name, eot_msg);
-$finish;
-endtask
+//task end_tb (string eot_msg);
+//print_vga_screen();
+//$display("===================\n End of test %s - with message: %s \n=====================", test_name, eot_msg);
+//$finish;
+//endtask
 
 task print_vga_screen ;
 // VGA memory snapshot - simulate a screen
@@ -157,6 +175,19 @@ task print_vga_screen ;
         end
     end
 endtask
+
+
+rv32i_ref
+# (
+    .I_MEM_LSB (I_MEM_OFFSET),
+    .I_MEM_MSB (I_MEM_MSB),
+    .D_MEM_LSB (D_MEM_OFFSET),
+    .D_MEM_MSB (D_MEM_MSB)
+)  rv32i_ref (
+.clk    (Clk),
+.rst    (Rst),
+.run    (1'b1) // every time the run is set, the next instruction is executed
+);
 
 endmodule //big_core_tb
 
