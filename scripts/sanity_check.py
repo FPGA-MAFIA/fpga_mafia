@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import yaml             # run "pip install pyyaml" if required
 import argparse
 import subprocess
@@ -13,8 +14,12 @@ parser.add_argument("-yml", "--file", required=True, help="YAML file to process"
 # Parse the command-line arguments
 args = parser.parse_args()
 
+# Return to root dir no matter where the file is located
+MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+os.chdir(MODEL_ROOT)
+
 # Read the specified YAML file
-yaml_file_path = '../.github/workflows/' + args.file + ".yml"
+yaml_file_path = './.github/workflows/' + args.file + ".yml"
 
 try:
     with open(yaml_file_path, 'r') as file:
