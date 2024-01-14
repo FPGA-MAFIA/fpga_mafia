@@ -8,6 +8,8 @@ import threading
 import queue
 
 
+MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+os.chdir(MODEL_ROOT)
 class CommandLineBuilder(tk.Tk):
 
     def __init__(self):
@@ -56,7 +58,7 @@ class CommandLineBuilder(tk.Tk):
             "-gui"      :"Execute this option with the '-sim' flag to open the ModelSim GUI.",
             "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
             "-params"   : "Specify the parameters for the DUT  Example: -gV_TIMEOUT=1000 -gV_NUM_REQ=20.",
-            "-pp"       : "HW Post Processing - after simulation is done, run the post processing script .././verif/<dut>/<dut>_pp.py.",
+            "-pp"       : "HW Post Processing - after simulation is done, run the post processing script ./verif/<dut>/<dut>_pp.py.",
             "-mif"      : "create the mif memory files for the FPGA load",
             "-keep_going": "Keep going even if there are errors in one of the tests",
             "-fpga"     : "Run Compile & Synthesis for FPGA",
@@ -196,31 +198,31 @@ class CommandLineBuilder(tk.Tk):
         dropdown["values"] = fetch_option()
 
     def get_dut_options(self):
-        return os.listdir("../verif")
+        return os.listdir("./verif")
 
     def get_cfg_options(self):
-        cfg_path = f"../app/cfg"
+        cfg_path = f"./app/cfg"
         if os.path.exists(cfg_path):
             return os.listdir(cfg_path)
         else:
             return []
         
     def get_test_options(self):
-        test_path = f"../verif/{self.dut_var.get()}/tests"
+        test_path = f"./verif/{self.dut_var.get()}/tests"
         if os.path.exists(test_path):
             return os.listdir(test_path)
         else:
             return []
 
     def get_regress_options(self):
-        regress_path = f"../verif/{self.dut_var.get()}/regress"
+        regress_path = f"./verif/{self.dut_var.get()}/regress"
         if os.path.exists(regress_path):
             return os.listdir(regress_path)
         else:
             return []
 
     def get_top_options(self):
-        top_path = f"../verif/{self.dut_var.get()}/tb/"
+        top_path = f"./verif/{self.dut_var.get()}/tb/"
         if os.path.exists(top_path):
             # return only the files that end with _tb.sv
             return [f for f in os.listdir(top_path) if f.endswith("_tb.sv")]
@@ -256,9 +258,9 @@ class CommandLineBuilder(tk.Tk):
             # uncheck the full_run checkbox
             self.full_run_var.set(False)
             return
-        # make sure that the file ".././verif/<dut>/<dut>_pp.py." exists
+        # make sure that the file "./verif/<dut>/<dut>_pp.py." exists
         if self.pp_var.get():
-            pp_path = f"../verif/{self.dut_var.get()}/{self.dut_var.get()}_pp.py"
+            pp_path = f"./verif/{self.dut_var.get()}/{self.dut_var.get()}_pp.py"
             if not os.path.exists(pp_path):
                 messagebox.showerror("[Error]", f"Can't run pp - {pp_path} doesn't exist")
                 # uncheck the pp checkbox
