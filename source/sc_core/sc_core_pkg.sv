@@ -53,8 +53,8 @@ parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
 
 
-
-parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
+parameter EBREAK = 32'b00000000000100000000000001110011 ;
+parameter NOP    = 32'b00000000000000000000000000010011; // addi x0 , x0 , 0
 
 typedef enum logic [2:0] {
     U_TYPE = 3'b000 , 

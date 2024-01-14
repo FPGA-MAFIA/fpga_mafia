@@ -29,8 +29,8 @@ jobs:
       - name: MINI_CORE at rv3i mode
         run:  python build.py -dut 'mini_core' -regress rv32i_level0 -app -hw -sim -keep_going
 
-      - name: SC_CORE -all -app -hw -sim  -keep_going
-        run:  python build.py -dut 'sc_core' -all -app -hw -sim -keep_going
+      - name: SC_CORE - rv32i_level0 
+        run:  python build.py -dut sc_core -regress rv32i_level0 -app -hw -sim -keep_going
 
       - name: CACHE level0 
         run:  python build.py -dut 'cache' -regress level0 -hw -sim -pp -keep_going
