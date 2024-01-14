@@ -118,6 +118,11 @@ class CommandLineBuilder(tk.Tk):
         self.execute_btn = ttk.Button(self, text="Run Command", command=self.execute_command)
         self.execute_btn.pack(pady=10)
 
+        # Create the Execute button
+        self.print_btn = ttk.Button(self, text="Print Command", command=self.print_command)
+        self.print_btn.pack(pady=10)
+
+
         # Initial setup
         self.toggle_test_visibility()  # Hide test options by default
         self.update_command_display()
@@ -425,6 +430,10 @@ class CommandLineBuilder(tk.Tk):
         self.thread.start()
         self.after(50, self.check_for_output)  # Reduce the delay to 50ms
 
+    def print_command(self):
+        cmd = self.cmd_display.get(1.0, tk.END).strip()  # Get the command from the Text widget
+        # print the command to the original terminal
+        print(cmd)
 
 
 if __name__ == "__main__":
