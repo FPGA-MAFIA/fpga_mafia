@@ -62,8 +62,10 @@ logic        csr_wren, csr_rden;
 logic [31:0] csr_data;
 logic [31:0] csr_read_data;
 logic        csr_hit;
-logic        csr_cycle_low_overflow;
-logic        csr_instret_low_overflow;
+logic        csr_mcycle_overflow;
+logic        csr_minstret_overflow;
+logic [63:0] csr_mcycle_high_low;
+logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_cycle_high_low;
 logic [63:0] csr_instret_high_low;
 logic        MePc;
@@ -498,10 +500,6 @@ always_comb begin
 
     if(csr_wren && csr_hit) begin
         unique casez ({funct3[1:0],csr_addr}) 
-            // CSR_SCRATCH
-            {2'b01,CSR_SCRATCH}       : next_csr.csr_scratch = csr_data;
-            {2'b10,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
-            {2'b11,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
             // CSR_MCYCLE
             {2'b01, CSR_MCYCLE}       : next_csr.csr_mcycle = csr_data;
             {2'b10, CSR_MCYCLE}       : next_csr.csr_mcycle = csr.csr_mcycle | csr_data;
@@ -613,10 +611,10 @@ always_comb begin
     if(csr_rden && csr_hit) begin
         unique casez (csr_addr) 
             // ---- RO CSR ----
-            CSR_CYCLE_LOW      : csr_read_data = csr.csr_cycle_low;
-            CSR_CYCLE_HIGH     : csr_read_data = csr.csr_cycle_high;
-            CSR_INSTRET_LOW    : csr_read_data = csr.csr_instret_low;
-            CSR_INSTRET_HIGH   : csr_read_data = csr.csr_instret_high;
+            CSR_CYCLE          : csr_read_data = csr.csr_cycle;
+            CSR_CYCLEH         : csr_read_data = csr.csr_cycleh;
+            CSR_INSTRET        : csr_read_data = csr.csr_instret;
+            CSR_INSTRETH       : csr_read_data = csr.csr_instreth;
             
             CSR_MVENDORID      : csr_read_data = csr.csr_mvendorid;
             CSR_MARCHID        : csr_read_data = csr.csr_marchid;
@@ -625,7 +623,6 @@ always_comb begin
             CSR_MCONFIGPTR     : csr_read_data = csr.csr_mconfigptr;
             // ---- RW CSR ----
 
-            CSR_SCRATCH        : csr_read_data = csr.csr_scratch;
             CSR_MCYCLE         : csr_read_data = csr.csr_mcycle;
             CSR_MCYCLEH        : csr_read_data = csr.csr_mcycleh;
             CSR_MINSTRET       : csr_read_data = csr.csr_minstret;
@@ -656,18 +653,26 @@ always_comb begin
         endcase
     end//if(csr_rden && csr_hit)
 
-    // counters for PMON - cycle and instret must be the same 
-    {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
-    next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
-    csr_cycle_high_low      = {csr.csr_cycle_high, csr.csr_cycle_low};
+    // counters for PMON - cycle and instret must be the same in that model
+    {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
+    next_csr.csr_mcycleh    = csr.csr_mcycleh + csr_mcycle_overflow;
+    csr_mcycle_high_low     = {csr.csr_mcycleh, csr.csr_mcycle};
     
-    {csr_instret_low_overflow , next_csr.csr_instret_low}  = csr.csr_instret_low  + 1'b1;
-    next_csr.csr_instret_high = csr.csr_instret_high + csr_instret_low_overflow;
-    csr_instret_high_low      = {csr.csr_instret_high, csr.csr_instret_low};
+    {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret  + 1'b1;
+    next_csr.csr_minstreth    = csr.csr_minstreth + csr_minstret_overflow;
+    csr_minstret_high_low      = {csr.csr_minstreth, csr.csr_minstret};
+
+    // URO CSR's
+    next_csr.csr_cycle    = next_csr.csr_mcycle;
+    next_csr.csr_cycleh   = next_csr.csr_mcycleh;
+    csr_cycle_high_low    = csr_mcycle_high_low;  
+    next_csr.csr_instret  = next_csr.csr_minstret;
+    next_csr.csr_instreth = next_csr.csr_minstreth;
+    csr_instret_high_low  = csr_minstret_high_low;
 
     if(rst) begin
         next_csr = '0;
-        next_csr.csr_scratch   = 32'h1001;
+        next_csr.csr_mscratch   = 32'h1001;
     end 
     if(illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
