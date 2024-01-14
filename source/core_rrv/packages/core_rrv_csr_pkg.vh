@@ -32,7 +32,11 @@ typedef struct packed {
 
 
 typedef enum logic [11:0] {
-
+//User CSR - 
+ CSR_CYCLE         = 12'hC00 ,
+ CSR_CYCLEH        = 12'hC80 ,
+ CSR_INSTRET       = 12'hC02 ,
+ CSR_INSTRETH      = 12'hC82 ,
 //Machine CSR -  
  CSR_MCYCLE         = 12'hB00 ,
  CSR_MCYCLEH        = 12'hB80 ,
@@ -85,11 +89,10 @@ typedef struct packed {
 } t_csr_pc_update;
 
 typedef struct packed {
-    logic [31:0] csr_scratch;
-    logic [31:0] csr_cycle_low;
-    logic [31:0] csr_cycle_high;
-    logic [31:0] csr_instret_low;
-    logic [31:0] csr_instret_high;
+    logic [31:0] csr_cycle;
+    logic [31:0] csr_cycleh;
+    logic [31:0] csr_instret;
+    logic [31:0] csr_instreth;
     logic [31:0] csr_mcycle;
     logic [31:0] csr_minstret;
     logic [31:0] csr_mhpmcounter3;

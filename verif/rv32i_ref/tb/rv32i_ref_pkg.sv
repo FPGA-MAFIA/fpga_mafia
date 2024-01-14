@@ -54,11 +54,12 @@ typedef enum logic [5:0] {
 
 // csr registers
 typedef enum logic [11:0] {
- CSR_SCRATCH        = 12'h009 ,
- CSR_CYCLE_LOW      = 12'hC00 ,
- CSR_CYCLE_HIGH     = 12'hC80 ,
- CSR_INSTRET_LOW    = 12'hC02 ,
- CSR_INSTRET_HIGH   = 12'hC82 ,
+//User CSR - 
+ CSR_CYCLE         = 12'hC00 ,
+ CSR_CYCLEH        = 12'hC80 ,
+ CSR_INSTRET       = 12'hC02 ,
+ CSR_INSTRETH      = 12'hC82 ,
+//Machine CSR -  
  CSR_MCYCLE         = 12'hB00 ,
  CSR_MCYCLEH        = 12'hB80 ,
  CSR_MINSTRET       = 12'hB02 ,
@@ -93,11 +94,10 @@ typedef enum logic [11:0] {
 } t_csr_addr ;
 
 typedef struct packed {
-    logic [31:0] csr_scratch;
-    logic [31:0] csr_cycle_low;
-    logic [31:0] csr_cycle_high;
-    logic [31:0] csr_instret_low;
-    logic [31:0] csr_instret_high;
+    logic [31:0] csr_cycle;
+    logic [31:0] csr_cycleh;
+    logic [31:0] csr_instret;
+    logic [31:0] csr_instreth;
     logic [31:0] csr_mcycle;
     logic [31:0] csr_minstret;
     logic [31:0] csr_mhpmcounter3;

@@ -41,6 +41,9 @@ logic csr_mcycle_overflow;
 logic csr_minstret_overflow;
 logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_mcycle_high_low;
+logic [63:0] csr_instret_high_low;
+logic [63:0] csr_cycle_high_low;
+
 always_comb begin
     next_csr = csr;
     if(csr_wren) begin
@@ -199,13 +202,21 @@ always_comb begin
     //==========================================================================
         {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
         next_csr.csr_mcycleh  = csr.csr_mcycleh + csr_mcycle_overflow;
-        csr_mcycle_high_low   = {csr.csr_mcycleh, csr.csr_mcycle};
+        csr_mcycle_high_low   = {csr.csr_mcycleh, csr.csr_mcycle}; //TODO - csr_mcycle_high_low is not part of the spec
 
         if(ValidInstQ105H) begin
             {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret + 1'b1;
             next_csr.csr_minstreth = csr.csr_minstreth + csr_minstret_overflow;
-            csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret};
+            csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //TODO - csr_minstret_high_low is not part of the spec
         end
+
+        // URO CSR's
+        next_csr.csr_cycle    = next_csr.csr_mcycle;
+        next_csr.csr_cycleh   = next_csr.csr_mcycleh;
+        csr_cycle_high_low    = csr_mcycle_high_low;  
+        next_csr.csr_instret  = next_csr.csr_minstret;
+        next_csr.csr_instreth = next_csr.csr_minstreth;
+        csr_instret_high_low  = csr_minstret_high_low;      
     //==========================================================================
     // Reset values for CSR
     //==========================================================================
@@ -233,6 +244,10 @@ always_comb begin
     if(csr_rden) begin
         unique casez (csr_addr) // address holds the offset
             // ---- RO CSR ----
+            CSR_CYCLE          : CsrReadDataQ102H = csr.csr_cycle; 
+            CSR_CYCLEH         : CsrReadDataQ102H = csr.csr_cycleh; 
+            CSR_INSTRET        : CsrReadDataQ102H = csr.csr_instret; 
+            CSR_INSTRETH       : CsrReadDataQ102H = csr.csr_instreth; 
             CSR_MVENDORID      : CsrReadDataQ102H = csr.csr_mvendorid;
             CSR_MARCHID        : CsrReadDataQ102H = csr.csr_marchid;
             CSR_MIMPID         : CsrReadDataQ102H = csr.csr_mimpid;
