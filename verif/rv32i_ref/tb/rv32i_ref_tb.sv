@@ -19,11 +19,17 @@
 
 module rv32i_ref_tb;
 import common_pkg::*;
+
+parameter I_MEM_SIZE   = 'h1_0000; 
+parameter I_MEM_OFFSET = 'h0_0000;
+parameter D_MEM_SIZE   = 'h1_0000;
+parameter D_MEM_OFFSET = 'h1_0000;
+
 logic        Clk;
 logic        Rst;
-logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
-logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
-logic  [7:0] NextDMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
+logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 // ========================
 // clock gen
@@ -79,10 +85,10 @@ end
 
 rv32i_ref
 # (
-    .I_MEM_LSB (I_MEM_OFFSET_MINI),
-    .I_MEM_MSB (I_MEM_MSB_MINI),
-    .D_MEM_LSB (D_MEM_OFFSET_MINI),
-    .D_MEM_MSB (D_MEM_MSB_MINI)
+    .I_MEM_LSB (I_MEM_OFFSET),
+    .I_MEM_MSB (I_MEM_MSB),
+    .D_MEM_LSB (D_MEM_OFFSET),
+    .D_MEM_MSB (D_MEM_MSB)
 )  rv32i_ref (
 .clk  (Clk),
 .rst  (Rst),

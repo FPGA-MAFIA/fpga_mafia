@@ -19,15 +19,16 @@ package sc_core_pkg;
     
 
 
-parameter I_MEM_SIZE   = 'h2000;
-parameter I_MEM_OFFSET = 'h0;
-parameter D_MEM_SIZE   = 'h100000;
-parameter D_MEM_OFFSET = 'h2000;
+parameter I_MEM_SIZE   = 'h1_0000; 
+parameter I_MEM_OFFSET = 'h0_0000;
+parameter D_MEM_SIZE   = 'h1_0000;
+parameter D_MEM_OFFSET = 'h1_0000;
 
+// define VGA memory sizes
+parameter SIZE_VGA_MEM       = 38400; 
 parameter I_MEM_MSB   = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
 parameter D_MEM_MSB   = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
 parameter CR_MEM_MSB  = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
-parameter VGA_MEM_MSB = 'h11600-1;                  // VGA_MEM 0x8000 - 0x115FF
 // Region bits
 parameter LSB_REGION = 0;
 parameter MSB_REGION = 15;
@@ -45,14 +46,12 @@ parameter D_MEM_REGION_ROOF    = D_MEM_MSB              ;
 parameter CR_MEM_REGION_FLOOR  = D_MEM_REGION_ROOF  + 1 ;
 parameter CR_MEM_REGION_ROOF   = CR_MEM_MSB             ;
 
-parameter VGA_MEM_REGION_FLOOR = CR_MEM_REGION_ROOF + 1 ;
-parameter VGA_MEM_REGION_ROOF  = VGA_MEM_MSB            ;
+parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
+parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 
 // define data memory sizes
 parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
 
-// define VGA memory sizes
-parameter SIZE_VGA_MEM       = 38400; 
 
 
 parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
