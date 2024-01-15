@@ -3,14 +3,17 @@
 This script generates a list of parameters of the DUT (Device Under Test) that is being tested.
 It reads the DUT name as an argument, searches for parameters in the source files, and outputs 
 a list of these parameters along with their values in a specified format.
+For example: ./gen_parameter_list.py core_rrv
 """
 
 import os
 import sys
 import re
 import argparse
+import subprocess
 
-
+MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+os.chdir(MODEL_ROOT)
 def parse_parameters(content):
     """
     Parses the parameters from the given content.
