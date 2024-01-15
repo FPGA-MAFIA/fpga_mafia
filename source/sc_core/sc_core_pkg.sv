@@ -24,8 +24,7 @@ parameter I_MEM_OFFSET = 'h0_0000;
 parameter D_MEM_SIZE   = 'h1_0000;
 parameter D_MEM_OFFSET = 'h1_0000;
 
-// define VGA memory sizes
-parameter SIZE_VGA_MEM  = 38400; 
+
 parameter I_MEM_MSB     = I_MEM_SIZE-1;               // I_MEM   0x0    - 0x3FFF
 parameter D_MEM_MSB     = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM   0x4000 - 0x6FFF
 parameter CR_MEM_MSB    = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
@@ -33,8 +32,10 @@ parameter CR_MEM_MSB    = 'h5000-1;                   // CR_MEM  0x7000 - 0x7FFF
 parameter LSB_REGION = 0;
 parameter MSB_REGION = 15;
 
-// VGA Region bits
-parameter VGA_MSB_REGION = 19;
+// define VGA memory sizes and region bits
+parameter SIZE_VGA_MEM          = 38400; 
+parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
+parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 
 // Encoded regions
 parameter I_MEM_REGION_FLOOR   = 'h0                    ;
@@ -45,9 +46,6 @@ parameter D_MEM_REGION_ROOF    = D_MEM_MSB              ;
 
 parameter CR_MEM_REGION_FLOOR  = D_MEM_REGION_ROOF  + 1 ;
 parameter CR_MEM_REGION_ROOF   = CR_MEM_MSB             ;
-
-parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
-parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
 
 // define data memory sizes
 parameter SIZE_D_MEM       = D_MEM_REGION_ROOF - D_MEM_REGION_FLOOR + 1; 
