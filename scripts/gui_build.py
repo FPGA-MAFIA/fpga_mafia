@@ -186,18 +186,26 @@ class CommandLineBuilder(tk.Tk):
         # Add description
         ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
 
+
     def update_test_checkboxes(self):
+        # Clear existing widgets in the frame
         for widget in self.tests_frame.winfo_children():
             widget.destroy()
 
+        # Get the tests and arrange them in a grid
         tests = self.get_test_options()
+        row = 0
+        col = 0
         for test in tests:
-            frame = ttk.Frame(self.tests_frame)
-            frame.pack(anchor="w", fill="x")
             var = self.tests_vars.get(test) or tk.BooleanVar(self)
             self.tests_vars[test] = var
-            cb = ttk.Checkbutton(frame, text=test, variable=var, command=self.update_command_display)
-            cb.pack(anchor="w", side="left", padx=5)
+            cb = ttk.Checkbutton(self.tests_frame, text=test, variable=var, command=self.update_command_display)
+            cb.grid(row=row, column=col, sticky="w", padx=5, pady=2)
+            col += 1
+            if col == 5:  # Move to next row after every 3 checkboxes
+                row += 1
+                col = 0
+
 
     def update_dropdown_options(self, dropdown, fetch_option):
         dropdown["values"] = fetch_option()

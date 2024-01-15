@@ -225,7 +225,7 @@ assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H   
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftRdDataQ104H[31:24]} : 
                                                                   PreShiftRdDataQ104H         ; 
 
- // increace read latency from 1 to 2 cycle latency 
+ // increase read latency from 1 to 2 cycle latency 
 `MAFIA_DFF(DMemRdRspQ105H ,DMemRdRspQ104H, Clock)    
 
 mem   
