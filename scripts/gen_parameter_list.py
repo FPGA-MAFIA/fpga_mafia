@@ -14,12 +14,8 @@ import argparse
 def parse_parameters(content):
     """
     Parses the parameters from the given content.
-
-    Args:
-    content (str): The content to parse the parameters from.
-
-    Returns:
-    str: Parsed parameters in 'name, value' format.
+    Args: content (str): The content to parse the parameters from.
+    Returns: str: Parsed parameters in 'name, value' format.
     """
     parsed_output = ""
     for line in content.splitlines():
@@ -32,14 +28,9 @@ def parse_parameters(content):
 
 
 def search_parameters(dut_path):
-    """
-    Searches for parameters in the files located at the given path.
-
-    Args:
-    dut_path (str): The path where the DUT files are located.
-
-    Returns:
-    str: The content of the files with parameters.
+    """  Searches for parameters in the files located at the given path.
+    Args: dut_path (str): The path where the DUT files are located.
+    Returns:   str: The content of the files with parameters.
     """
     content = ""
     for root, dirs, files in os.walk(dut_path):
@@ -48,6 +39,8 @@ def search_parameters(dut_path):
                 file_content = file_handle.read()
                 if "parameter" in file_content:
                     content += file_content
+    # make sure each parameter appears only once
+    content = "\n".join(list(set(content.splitlines())))
     return content
 
 def main():
@@ -56,23 +49,22 @@ def main():
     args = parser.parse_args()
 
     dut_name = args.dut_name
-    print(f"DUT name: {dut_name}")
+    #print(f"DUT name: {dut_name}")
 
-    dut_path = os.path.join("source", dut_name)
+    dut_path = os.path.join("verif", dut_name)
     if not os.path.isdir(dut_path):
         print(f"Error: Directory '{dut_path}' does not exist.")
         sys.exit(1)
 
-    print(f"DUT path: {dut_path}")
-
-    target_path = os.path.join("target", dut_name)
-    if not os.path.exists(target_path):
+    # check if target/dut_parameters directory exists and create it if not
+    target_path = os.path.join("target", "dut_parameters")
+    if not os.path.isdir(target_path):
         os.makedirs(target_path)
 
-    print(f"Target path: {target_path}")
-
-    parameter_list_file = os.path.join(target_path, f"{dut_name}_parameter_list.txt")
-    print(f"Parameter list file: {parameter_list_file}")
+    # remove any existing parameter list file
+    parameter_list_file = os.path.join(target_path, f"{dut_name}_parameter_list.csv")
+    if os.path.isfile(parameter_list_file):
+        os.remove(parameter_list_file)
 
     try:
         content = search_parameters(dut_path)
@@ -88,8 +80,8 @@ def main():
     with open(parameter_list_file, "w") as file:
         file.write(parsed_output)
 
-    print("Parsed output:")
-    print(parsed_output)
+    #print("Parsed output:")
+    #print(parsed_output)
 
 if __name__ == "__main__":
     main()

@@ -6,6 +6,7 @@ from tkinter import messagebox
 import subprocess
 import threading
 import queue
+import csv
 
 
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
@@ -15,8 +16,6 @@ class CommandLineBuilder(tk.Tk):
     def __init__(self):
         super().__init__()
         self.protocol("WM_DELETE_WINDOW", self.close_app)
-
-
 
         self.title("Command Line Builder")
 
@@ -30,14 +29,13 @@ class CommandLineBuilder(tk.Tk):
         self.top_enabled_var = tk.BooleanVar(self)
         self.tests_vars = {}  # Dictionary to store each test variable
         self.tests_enabled_var = tk.BooleanVar(self)
+        self.params_vars = {}  # Dictionary to store each test variable
+        self.params_enabled_var = tk.BooleanVar(self)
         self.app_var = tk.BooleanVar(self)
         self.hw_var = tk.BooleanVar(self)
         self.sim_var = tk.BooleanVar(self)
         self.gui_var = tk.BooleanVar(self)
         self.full_run_var = tk.BooleanVar(self)
-        self.params_var = tk.StringVar(self)
-        self.params_enabled_var = tk.BooleanVar(self)
-        self.params_var.trace_add("write", self.update_command_display_on_trace)
         self.pp_var = tk.BooleanVar(self)
         self.mif_var = tk.BooleanVar(self)
         self.fpga_var = tk.BooleanVar(self)
@@ -79,21 +77,33 @@ class CommandLineBuilder(tk.Tk):
         tests_check_frame = ttk.Frame(self)  # New frame to encapsulate both the checkbox and its description
         tests_check_frame.pack(anchor="w", padx=10, pady=5, fill="x")
 
-        self.tests_check = ttk.Checkbutton(tests_check_frame, text="-tests", variable=self.tests_enabled_var, command=self.toggle_test_visibility)
+        self.tests_check = ttk.Checkbutton(tests_check_frame, text="-tests", variable=self.tests_enabled_var, command=self.toggle_tests_visibility)
         self.tests_check.pack(side="left", anchor="w")  # Removed the padx from here
 
         ttk.Label(tests_check_frame, text=self.desc["-tests"], foreground="gray").pack(side="left", anchor="w", padx=10)
 
-        self.update_test_checkboxes()
+        self.update_tests_checkboxes()
+
+        # -params checkbox options
+        self.params_frame = ttk.LabelFrame(self, text="-params Options")
+        self.params_frame.pack(anchor="w", padx=10, pady=5, fill="x")
+
+        params_check_frame = ttk.Frame(self)  # New frame to encapsulate both the checkbox and its description
+        params_check_frame.pack(anchor="w", padx=10, pady=5, fill="x")
+
+        self.params_check = ttk.Checkbutton(params_check_frame, text="-params", variable=self.params_enabled_var, command=self.toggle_params_visibility)
+        self.params_check.pack(side="left", anchor="w")  # Removed the padx from here
+
+        ttk.Label(params_check_frame, text=self.desc["-params"], foreground="gray").pack(side="left", anchor="w", padx=10)
+
+        self.update_params_checkboxes()
+
 
         # -regress checkbox and dropdown
         self.create_combobox_option_with_checkbox("Regression", "-regress", self.get_regress_options)
 
         # -top checkbox and dropdown
         self.create_combobox_option_with_checkbox("Top", "-top", self.get_top_options)
-
-        # -params checkbox and entry
-        self.create_textbox_option_with_checkbox("Parameters", "-params", self.params_var)
 
 
         # simple checkboxes
@@ -114,18 +124,37 @@ class CommandLineBuilder(tk.Tk):
         self.cmd_display = tk.Text(self, height=2, width=150)
         self.cmd_display.pack(padx=10, pady=10)
 
-        # Create the Execute button
-        self.execute_btn = ttk.Button(self, text="Run Command", command=self.execute_command)
-        self.execute_btn.pack(pady=10)
+        # Frame for buttons
+        button_frame = ttk.Frame(self)
+        button_frame.pack(pady=10)
 
-        # Create the Execute button
-        self.print_btn = ttk.Button(self, text="Print Command", command=self.print_command)
-        self.print_btn.pack(pady=10)
+        # Create the Execute button inside the button frame
+        self.execute_btn = ttk.Button(button_frame, text="Run Command", command=self.execute_command)
+        self.execute_btn.pack(side="left", padx=5)
 
-
+        # Create the Print button inside the button frame
+        self.print_btn = ttk.Button(button_frame, text="Print Command", command=self.print_command)
+        self.print_btn.pack(side="left", padx=5)
+        
         # Initial setup
-        self.toggle_test_visibility()  # Hide test options by default
+        self.toggle_tests_visibility()  # Hide test options by default
+        self.toggle_params_visibility()  # Hide test options by default
         self.update_command_display()
+        # Parameter generation
+        self.run_parameter_generation()
+
+    
+    def run_parameter_generation(self):
+        script_path = os.path.join("./scripts", "gen_parameter_list.py")
+        dut_list = self.get_dut_options()  # Assuming this method returns a list of DUT names
+
+        for dut in dut_list:
+            try:
+                #print(f"Running parameter generation for {dut}...")
+                subprocess.run(["python", script_path, dut], check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error running parameter generation for {dut}: {e}")
+
 
     def create_combobox_option(self, label_text, flag, fetch_option):
         frame = ttk.Frame(self)
@@ -187,7 +216,7 @@ class CommandLineBuilder(tk.Tk):
         ttk.Label(frame, text=self.desc[flag], foreground="gray").pack(side="left", padx=10)
 
 
-    def update_test_checkboxes(self):
+    def update_tests_checkboxes(self):
         # Clear existing widgets in the frame
         for widget in self.tests_frame.winfo_children():
             widget.destroy()
@@ -202,10 +231,58 @@ class CommandLineBuilder(tk.Tk):
             cb = ttk.Checkbutton(self.tests_frame, text=test, variable=var, command=self.update_command_display)
             cb.grid(row=row, column=col, sticky="w", padx=5, pady=2)
             col += 1
-            if col == 5:  # Move to next row after every 3 checkboxes
+            if col == 7:  # Move to next row after every 3 checkboxes
                 row += 1
                 col = 0
 
+    
+    def update_params_checkboxes(self):
+        # Clear existing widgets in the frame
+        for widget in self.params_frame.winfo_children():
+            widget.destroy()
+    
+        params = self.get_params_options()
+        # print(f"Number of parameters: {len(params)}")  # Debug print
+        row = 0
+        col = 0
+        for param_value_pair in params:
+            # print(f"Adding checkbox for: {param_value_pair[0]}")
+            param, value = param_value_pair  # Extract parameter name and value
+            var = self.params_vars.get(param) or tk.BooleanVar(self)
+            self.params_vars[param] = var
+
+            # Create the Checkbutton with a text
+            cb = ttk.Checkbutton(self.params_frame, text=param, variable=var)
+            cb.grid(row=row, column=col*2, sticky="w", padx=5, pady=2)
+
+            # Create the Entry next to the Checkbutton and insert the default value
+            entry = ttk.Entry(self.params_frame)
+            entry.grid(row=row, column=col*2+1, sticky="w", padx=5, pady=2)
+            entry.insert(0, value)
+            # Bind the text modification event to update the command display
+            entry.bind("<KeyRelease>", self.on_entry_change)
+
+            # Enable or disable the Entry based on the Checkbutton
+            def toggle_entry_state(var=var, entry=entry):
+                state = 'normal' if var.get() else 'disabled'
+                entry.configure(state=state)
+                self.update_command_display()
+    
+            # Bind the command to the Checkbutton
+            cb.config(command=toggle_entry_state)
+
+            # Initialize the Entry state based on the Checkbutton
+            toggle_entry_state()
+    
+            col += 1
+            if col == 4:  # Adjust the column count as needed
+                row += 1
+                col = 0
+
+
+    def on_entry_change(self, event):
+        # Call the update command display function
+        self.update_command_display()
 
     def update_dropdown_options(self, dropdown, fetch_option):
         dropdown["values"] = fetch_option()
@@ -227,6 +304,25 @@ class CommandLineBuilder(tk.Tk):
         else:
             return []
 
+
+    def get_params_options(self):
+        param_path = f"./target/dut_parameters/{self.dut_var.get()}_parameter_list.csv"
+        # print(f"Parameter path: {param_path}")  # Debug: Print the file path
+        params_options = []
+    
+        if os.path.exists(param_path):
+            with open(param_path, mode='r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row and len(row) >= 2:
+                        # Assuming the CSV reader correctly parses the CSV file,
+                        # row should already be a list with two elements.
+                        param, value = row[0].strip(), row[1].strip()
+                        params_options.append([param, value])
+    
+        # print(f"Number of parameters: {len(params_options)}")  # Debug: Print the number of parameters found
+        return params_options
+
     def get_regress_options(self):
         regress_path = f"./verif/{self.dut_var.get()}/regress"
         if os.path.exists(regress_path):
@@ -244,7 +340,8 @@ class CommandLineBuilder(tk.Tk):
 
     def on_combobox_select(self, event):
         if event.widget.cget("textvariable") == str(self.dut_var):
-            self.update_test_checkboxes()
+            self.update_tests_checkboxes()
+            self.update_params_checkboxes()
         self.update_command_display()
 
 
@@ -265,6 +362,16 @@ class CommandLineBuilder(tk.Tk):
             # uncheck the regression checkbox
             self.regress_enabled_var.set(False)
             return
+        
+        # Collect selected parameters and their values
+        selected_params = []
+        for param, var in self.params_vars.items():
+            if var.get():  # If the parameter is selected
+                entry_widget = self.find_param_entry_widget(param)
+                if entry_widget:
+                    value = entry_widget.get()
+                    selected_params.append(f" -g{param}={value}")
+
         # Can't select full_run & (app or hw or sim)
         if self.full_run_var.get() and (self.app_var.get() or self.hw_var.get() or self.sim_var.get()):
             messagebox.showerror("[Error]", "Can't run full_run & (app or hw or sim) - choose one or the other")
@@ -294,6 +401,8 @@ class CommandLineBuilder(tk.Tk):
             cmd += f" -top {self.top_var.get().rsplit('.', 1)[0]}"
         if selected_tests:
             cmd += " -tests " + "\"" + " ".join(selected_tests) + "\""
+        if selected_params:
+            cmd += " -params " + "\"" + " ".join(selected_params) + "\""
         if self.regress_enabled_var.get():
             cmd += f" -regress {self.regress_var.get()}"
         if self.app_var.get():
@@ -308,8 +417,6 @@ class CommandLineBuilder(tk.Tk):
             cmd += " -pp"
         if self.full_run_var.get():
             cmd += " -full_run"
-        if self.params_enabled_var.get():
-            cmd += f" -params \" {self.params_var.get()}\""
         if self.clean_var.get():
             cmd += " -clean"
         if self.mif_var.get():
@@ -323,8 +430,19 @@ class CommandLineBuilder(tk.Tk):
 
         self.cmd_display.delete(1.0, tk.END)
         self.cmd_display.insert(tk.END, cmd)
-
-    def toggle_test_visibility(self):
+    
+    def find_param_entry_widget(self, param):
+        # Find the entry widget corresponding to a parameter
+        for widget in self.params_frame.winfo_children():
+            if isinstance(widget, ttk.Checkbutton) and widget.cget("text") == param:
+                # Assuming the Entry is always after the Checkbutton
+                entry_index = self.params_frame.winfo_children().index(widget) + 1
+                if entry_index < len(self.params_frame.winfo_children()):
+                    entry_widget = self.params_frame.winfo_children()[entry_index]
+                    if isinstance(entry_widget, ttk.Entry):
+                        return entry_widget
+        return None
+    def toggle_tests_visibility(self):
         if self.tests_enabled_var.get():
             self.tests_frame.pack(anchor="w", padx=10, pady=5, fill="x")
         else:
@@ -334,6 +452,15 @@ class CommandLineBuilder(tk.Tk):
                 test_var.set(False)
         self.update_command_display()
 
+    def toggle_params_visibility(self):
+        if self.params_enabled_var.get():
+            self.params_frame.pack(anchor="w", padx=10, pady=5, fill="x")
+        else:
+            self.params_frame.pack_forget()
+            # Add the following lines to unset all test variables:
+            for test_var in self.params_vars.values():
+                test_var.set(False)
+        self.update_command_display()
 #============================================================
 # Running the command from the GUI on a separate thread, 
 # and displaying the output in a separate window
