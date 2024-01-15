@@ -1,4 +1,0 @@
-I_MEM_SIZE         'h2000
-I_MEM_OFFSET       'h0
-D_MEM_SIZE         'h3000
-D_MEM_OFFSET       'h2000
