@@ -27,10 +27,12 @@ logic [3:0]  DMemByteEn ;
 logic        DMemWrEn   ;
 logic        DMemRdEn   ;
 logic [31:0] DMemRspData;
-logic  [7:0] IMem     [I_MEM_MSB : 0];
-logic  [7:0] NextIMem [I_MEM_MSB : 0];
-logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
-logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] IMem       [I_MEM_MSB : 0];
+logic  [7:0] NextIMem   [I_MEM_MSB : 0];
+logic  [7:0] DMem       [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] NextDMem   [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] VgaMem     [VGA_MEM_REGION_ROOF : VGA_MEM_REGION_FLOOR];
+logic  [7:0] NextVgaMem [VGA_MEM_REGION_ROOF : VGA_MEM_REGION_FLOOR];
 logic [31:0] Pc;
 
 `include "sc_core_tasks.vh"
@@ -58,17 +60,26 @@ assign Instruction[7:0]   = IMem[Pc+0];
 assign Instruction[15:8]  = IMem[Pc+1];
 assign Instruction[23:16] = IMem[Pc+2];
 assign Instruction[31:24] = IMem[Pc+3];
-//======================
-//  Data memory Write
-//======================
+//===========================
+//  Data and VGA memory Write
+//===========================
+logic DmemVgaHit;
+assign VgaHit = (DMemAddress >= VGA_MEM_REGION_FLOOR && DMemAddress <= VGA_MEM_REGION_ROOF) ? 1'b1 : 1'b0;
 always_comb begin
-    NextDMem = DMem;
-    if(DMemWrEn) begin
+    NextDMem   = DMem;
+    NextVgaMem = VgaMem;
+    if(DMemWrEn && !VgaHit) begin
         if(DMemByteEn[0]) NextDMem[DMemAddress+0] = DMemData[7:0];  
         if(DMemByteEn[1]) NextDMem[DMemAddress+1] = DMemData[15:8];
         if(DMemByteEn[2]) NextDMem[DMemAddress+2] = DMemData[23:16];
         if(DMemByteEn[3]) NextDMem[DMemAddress+3] = DMemData[31:24];
     end //if DMemWrEn
+    else if (DMemWrEn && VgaHit) begin
+        if(DMemByteEn[0]) NextVgaMem[DMemAddress+0] = DMemData[7:0];  
+        if(DMemByteEn[1]) NextVgaMem[DMemAddress+1] = DMemData[15:8];
+        if(DMemByteEn[2]) NextVgaMem[DMemAddress+2] = DMemData[23:16];
+        if(DMemByteEn[3]) NextVgaMem[DMemAddress+3] = DMemData[31:24];
+    end
 end //always_comb
 
 //======================
@@ -101,6 +112,8 @@ end: reset_gen
 
 `MAFIA_DFF(IMem, NextIMem, Clk)
 `MAFIA_DFF(DMem, NextDMem, Clk)
+`MAFIA_DFF(VgaMem, NextVgaMem, Clk)
+
 
 string test_name;
 integer file;
@@ -131,6 +144,7 @@ initial begin: test_seq
         get_rf_write();
         get_ref_rf_write();
         begin wait(sc_core.Instruction == EBREAK);
+            print_vga_screen();
             eot(.msg("ebreak was called"));
         end
         join
@@ -167,7 +181,7 @@ task print_vga_screen ;
         for (int j = 0 ; j < 4; j = j+1) begin // Bytes
             for (int k = 0 ; k < 320; k = k+4) begin // Words
                 for (int l = 0 ; l < 8; l = l+1) begin // Bits  
-                    draw = (DMem['h5000+k+j+i][l] === 1'b1) ? "x" : " ";
+                    draw = (VgaMem[VGA_MEM_REGION_FLOOR+k+j+i][l] === 1'b1) ? "x" : " ";
                     $fwrite(fd1,"%s",draw);
                 end        
             end 
