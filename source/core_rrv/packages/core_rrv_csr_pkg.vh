@@ -79,6 +79,7 @@ typedef struct packed {
     logic timer_interrupt;  
     logic external_interrupt;
     logic Mret;
+    logic [31:0] mtval_instruction; 
 } t_csr_interrupt_update;
 
 typedef struct packed {

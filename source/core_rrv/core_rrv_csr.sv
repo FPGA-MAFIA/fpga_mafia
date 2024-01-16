@@ -175,18 +175,22 @@ always_comb begin
     if(CsrInterruptUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
         next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.misaligned_access) begin
         next_csr.csr_mcause = 32'h00000004;
         next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
         next_csr.csr_mcause = 32'h0000000B;
         next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.breakpoint) begin
         next_csr.csr_mcause = 32'h00000003;
         next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     // handle HW interrupts:
     // 1. timer interrupt

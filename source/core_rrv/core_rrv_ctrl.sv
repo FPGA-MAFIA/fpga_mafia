@@ -182,7 +182,7 @@ assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14];
     assign CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
                                            (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
                                            (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
-
+    assign CsrInterruptUpdateQ101H.mtval_instruction = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
 logic ebreak_was_calledQ101H; 
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
 
