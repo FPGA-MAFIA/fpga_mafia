@@ -1,1 +1,1 @@
-this directory will contain the mesh verification content in our project.
+this directory will contain the FABRIC verification content in our project.

@@ -134,10 +134,8 @@ initial begin: test_seq
     //======================================
     //load the program to the DUT & reference model
     //======================================
-    for(int i = 1; i<= V_COL; i++) begin
-    for(int j = 1; j<= V_ROW; j++) begin
-      automatic int col = i;
-      automatic int row = j;
+    for(int col = 1; col<= V_COL; col++) begin
+    for(int row = 1; row<= V_ROW; row++) begin
       fork 
         load_mem(col,row);
       join
