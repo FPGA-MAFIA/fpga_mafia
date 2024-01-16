@@ -677,6 +677,7 @@ always_comb begin
     if(illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
         next_csr.csr_mepc   = pc;
+        next_csr.csr_mtval  = instruction;
     end
 
     next_csr.csr_mvendorid     = 32'b1; // CSR_MVENDORID
