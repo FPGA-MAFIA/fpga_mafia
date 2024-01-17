@@ -19,6 +19,8 @@
 #define SPACE_BOTTOM 0x0                         
 #define COMMA_TOP    0x00000000                  
 #define COMMA_BOTTOM 0x061E1818                  
+#define DASH_TOP     0x00000000 
+#define DASH_BOTTOM  0x0000003C
 #define POINT_TOP    0x00000000                  
 #define POINT_BOTTOM 0x00181800                  
 #define ZERO_TOP     0x52623C00                  
@@ -112,12 +114,12 @@
 
 /* ASCII tables */
 unsigned int ASCII_TOP[97]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,
-                                0,0,0,0,0,0,0,0,0,0,COMMA_TOP,0,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
+                                0,0,0,0,0,0,0,0,0,0,COMMA_TOP,DASH_TOP,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
                                 THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,0,0,0,0,0,A_TOP,
                                 B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
                                 N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP};
 unsigned int ASCII_BOTTOM[97] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                SPACE_BOTTOM,0,0,0,0,0,0,0,0,0,0,COMMA_BOTTOM,0,POINT_BOTTOM,0,ZERO_BOTTOM,
+                                SPACE_BOTTOM,0,0,0,0,0,0,0,0,0,0,COMMA_BOTTOM,DASH_BOTTOM,POINT_BOTTOM,0,ZERO_BOTTOM,
                                 ONE_BOTTOM,TWO_BOTTOM,THREE_BOTTOM,FOUR_BOTTOM,FIVE_BOTTOM,SIX_BOTTOM,
                                 SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,0,0,0,0,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
                                 E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
@@ -313,26 +315,28 @@ void rvc_print_int(int num)
 {
     char str[12];  // Maximum length of a 32-bit integer is 11 digits + sign
     int i = 0, j = 0;
+    int isNegative = 0;  // Flag to check if the number is negative
 
     // Convert integer to string
     if (num < 0) {
         str[i++] = '-';
         num = -num;
+        isNegative = 1;  // Set flag for negative number
     }
     do {
         str[i++] = num % 10 + '0';
         num /= 10;
     } while (num > 0);
 
-    // Reverse the string
-    j = 0;
-    while (j < i / 2) {
+    // Reverse the string, excluding the '-' sign if present
+    int start = isNegative ? 1 : 0;  // Start from index 1 if negative
+    j = start;
+    while (j < start + (i - start) / 2) {
         char temp = str[j];
-        str[j] = str[i - j - 1];
-        str[i - j - 1] = temp;
+        str[j] = str[i - (j - start) - 1];
+        str[i - (j - start) - 1] = temp;
         j++;
     }
-
 
     // Print each digit using draw_char
     int raw, col;
@@ -354,6 +358,7 @@ void rvc_print_int(int num)
     WRITE_REG(CR_CURSOR_H, col);
     WRITE_REG(CR_CURSOR_V, raw);
 }
+
 
 void rvc_print_unsigned_int_hex(unsigned int num)
 {
