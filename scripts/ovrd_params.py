@@ -1,10 +1,20 @@
 #!/usr/bin/env python
+
+"""
+This script allows you to override parameters in files recursively within a specified DUT directory.
+You can provide a CSV file with parameter overrides, and the script will search for parameters in the files and replace
+them with the new values. 
+Usage: ./scripts/ovrd_params.py -dut core_rrv -ovrd_file override_rrv_rv32e 
+"""
+
+
 import argparse
 import os
 import re
 import sys
 import subprocess
 
+## ./scripts/ovrd_params.py -dut core_rrv -ovrd_file override_rrv_rv32e
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 os.chdir(MODEL_ROOT)
 
