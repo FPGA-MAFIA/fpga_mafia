@@ -229,6 +229,43 @@ void move_rectangle(Rectangle* rect, char direction)
 }
 
 
+
+
+/* This function print a symbol from anime table on the screen in (raw,col) position */
+void draw_symbol(int symbol, int raw, int col)
+{
+    unsigned int vertical   = raw * LINE;
+    unsigned int horizontal = col * BYTES;
+    volatile int *ptr_top;
+    volatile int *ptr_bottom;
+
+    VGA_PTR(ptr_top    , horizontal + vertical);
+    VGA_PTR(ptr_bottom , horizontal + vertical + LINE);
+
+    WRITE_REG(ptr_top    , ANIME_TOP[symbol]);
+    WRITE_REG(ptr_bottom , ANIME_BOTTOM[symbol]);
+}
+
+void set_cursor(int raw, int col)
+{
+    WRITE_REG(CR_CURSOR_H, col);
+    WRITE_REG(CR_CURSOR_V, raw);
+}
+
+
+/* This function clear the screen */
+void clear_screen()
+{
+    int i = 0;
+    volatile int *ptr;
+    VGA_PTR(ptr , 0);
+    for(i = 0 ; i < VGA_MEM_SIZE_WORDS ; i++)
+    {
+        ptr[i] = 0;
+    }
+    set_cursor(0,0);
+}
+
 /* This function print a string on the screen in (CR_CURSOR_V,CR_CURSOR_H) position */
 void rvc_printf(const char *c)
 {
@@ -270,41 +307,6 @@ void rvc_printf(const char *c)
     /* Update CR_CURSOR */
     WRITE_REG(CR_CURSOR_H, col);
     WRITE_REG(CR_CURSOR_V, raw);
-}
-
-/* This function print a symbol from anime table on the screen in (raw,col) position */
-void draw_symbol(int symbol, int raw, int col)
-{
-    unsigned int vertical   = raw * LINE;
-    unsigned int horizontal = col * BYTES;
-    volatile int *ptr_top;
-    volatile int *ptr_bottom;
-
-    VGA_PTR(ptr_top    , horizontal + vertical);
-    VGA_PTR(ptr_bottom , horizontal + vertical + LINE);
-
-    WRITE_REG(ptr_top    , ANIME_TOP[symbol]);
-    WRITE_REG(ptr_bottom , ANIME_BOTTOM[symbol]);
-}
-
-void set_cursor(int raw, int col)
-{
-    WRITE_REG(CR_CURSOR_H, col);
-    WRITE_REG(CR_CURSOR_V, raw);
-}
-
-
-/* This function clear the screen */
-void clear_screen()
-{
-    int i = 0;
-    volatile int *ptr;
-    VGA_PTR(ptr , 0);
-    for(i = 0 ; i < VGA_MEM_SIZE_WORDS ; i++)
-    {
-        ptr[i] = 0;
-    }
-    set_cursor(0,0);
 }
 
 void rvc_print_int(int num)
@@ -352,6 +354,57 @@ void rvc_print_int(int num)
     WRITE_REG(CR_CURSOR_H, col);
     WRITE_REG(CR_CURSOR_V, raw);
 }
+
+void rvc_print_unsigned_int_hex(unsigned int num)
+{
+    char str[10];  // Maximum length of a 32-bit integer in hex is 8 digits + "0X" + null-terminator
+    int i = 0, j = 0;
+    
+    // Handle the special case where num is 0
+    if (num == 0) {
+        str[i++] = '0';
+    }
+
+    // Convert unsigned integer to hexadecimal string
+    while (num > 0) {
+        unsigned int remainder = num % 16;
+        str[i++] = (remainder < 10) ? (remainder + '0') : (remainder - 10 + 'A');
+        num /= 16;
+    }
+
+    str[i++] = 'X';
+    str[i++] = '0';
+    str[i] = '\0'; // Null-terminate the string
+
+    // Reverse the string
+    for (j = 0; j < i / 2; j++) {
+        char temp = str[j];
+        str[j] = str[i - 1 - j];
+        str[i - 1 - j] = temp;
+    }
+
+    // Print each character using draw_char
+    int raw, col;
+    READ_REG(raw, CR_CURSOR_V);
+    READ_REG(col, CR_CURSOR_H);
+    for (j = 0; j < i; j++) {
+        draw_char(str[j], raw, col);
+        col++;
+        if (col == COLUMN) {
+            col = 0;
+            raw += 2;
+        }
+        if (raw >= ROWS * 2) {
+            raw = 0;
+        }
+    }
+
+    // Update cursor position
+    WRITE_REG(CR_CURSOR_H, col);
+    WRITE_REG(CR_CURSOR_V, raw);
+}
+
+
 void rvc_delay(int delay){
     int timer = 0;       
     while(timer < delay){
