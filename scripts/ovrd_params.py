@@ -7,14 +7,13 @@ them with the new values.
 Usage: ./scripts/ovrd_params.py -dut core_rrv -ovrd_file override_rrv_rv32e 
 """
 
-
 import argparse
 import os
 import re
 import sys
 import subprocess
 
-## ./scripts/ovrd_params.py -dut core_rrv -ovrd_file override_rrv_rv32e
+# Get the root directory of the model
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 os.chdir(MODEL_ROOT)
 
@@ -24,48 +23,45 @@ def parse_arguments():
     parser.add_argument('-ovrd_file', required=True, help='File with parameter overrides without .csv extension')
     return parser.parse_args()
 
-def parse_parameters(content):
-    parsed_output = {}
-    for line in content.splitlines():
-        match = re.search(r'parameter\s+(\w+)\s*=\s*(.*?);', line)
-        if match:
-            parameter_name, parameter_value = match.groups()
-            parsed_output[parameter_name] = parameter_value
-    return parsed_output
-
-def search_and_replace_parameters(dut_path, params):
+def search_and_replace_parameters(path, params):
     changed_files = []
-    found_parameters = {}  # Separate dictionary for tracking found parameters
+    replacements_log = []  # Log details of replacements
+    not_found_parameters = params.copy()  # Copy to track not found parameters
 
-    for root, dirs, files in os.walk(dut_path):
+    for root, dirs, files in os.walk(path):
         for file in files:
             file_path = os.path.join(root, file)
             try:
                 with open(file_path, 'r') as file_handle:
-                    content = file_handle.read()
+                    content = file_handle.readlines()
             except FileNotFoundError:
                 print(f"{file_path} file not found", file=sys.stderr)
                 continue
 
             file_changed = False
-            changed_params = []  # Separate list for tracking changed parameters
-            for param, value in params.items():
-                # Construct a regex pattern to match parameter lines like "parameter RF_NUM_MSB = 31;"
-                pattern = r"(parameter\s+" + re.escape(param) + r"\s*=\s*)" + r"(\d+);"
-                # Replace the old value with the new value
-                new_content, num_replacements = re.subn(pattern, fr"parameter {param} = {value};", content)
-                if num_replacements > 0:
-                    content = new_content
-                    file_changed = True
-                    changed_params.append(param)  # Add changed parameter to the list
-                    found_parameters[param] = value  # Add found parameter to the dictionary
+
+            for line_num, line in enumerate(content):
+                for param, new_value in params.items():
+                    # Pattern to match parameter declarations only
+                    pattern = re.compile(r"^\s*parameter\s+" + re.escape(param) + r"\s*=\s*([^;]+)(;.*|$)")
+                    match = pattern.search(line)
+                    if match:
+                        old_value = match.group(1).strip()  # The current value of the parameter
+                        # Replace the entire line, using standard formatting
+                        new_line = f"parameter {param} = {new_value}; // NOTE!!!: auto inserted from script ovrd_params.py\n"
+                        content[line_num] = new_line
+                        file_changed = True
+                        # Log the replacement details
+                        replacements_log.append((param, old_value, new_value, line_num + 1, file_path))
+                        # Correctly update the not_found_parameters
+                        if param in not_found_parameters:
+                            del not_found_parameters[param]
 
             if file_changed:
-                changed_files.append((file_path, content, changed_params))
+                changed_files.append((file_path, ''.join(content)))
 
-    not_found_parameters = set(params.keys()) - set(found_parameters.keys())
+    return changed_files, replacements_log, not_found_parameters
 
-    return changed_files, not_found_parameters
 
 def main():
     args = parse_arguments()
@@ -90,31 +86,48 @@ def main():
         print(f"{args.ovrd_file}.csv file not found in 'ovrd_params' folder", file=sys.stderr)
         exit(1)
 
-    # Adjust the DUT path format to include the correct directory separator
-    dut_path = os.path.join("verif", dut_name.replace('/', os.sep))
-    if not os.path.isdir(dut_path):
-        print(f"Error: Directory '{dut_path}' does not exist.", file=sys.stderr)
-        exit(1)
+    # Define the paths
+    source_path = os.path.join("source", dut_name.replace('/', os.sep))
+    verif_path = os.path.join("verif", dut_name.replace('/', os.sep))
 
-    changed_files, not_found_parameters = search_and_replace_parameters(dut_path, params)
+    # Process both paths
+    total_changed_files = []
+    total_replacements_log = []
+    total_not_found_parameters = params.copy()
 
-    # Print the list of changed files and changed parameters
-    print("Changed Files:")
-    for file_path, _, changed_params in changed_files:
-        print(file_path)
-        if changed_params:
-            print("Changed Parameters:")
-            for param in changed_params:
-                print(f"- {param} (New Value: {params[param]})")
+    for path in [source_path, verif_path]:
+        if not os.path.isdir(path):
+            print(f"Error: Directory '{path}' does not exist.", file=sys.stderr)
+            continue
 
-    # Print the list of parameters not found
-    if not_found_parameters:
-        print("\nParameters Not Found:")
-        for param in not_found_parameters:
-            print(param)
+        changed_files, replacements_log, not_found_parameters = search_and_replace_parameters(path, params)
+
+        total_changed_files.extend(changed_files)
+        total_replacements_log.extend(replacements_log)
+
+        # Remove found parameters from total_not_found_parameters
+        for param in params:
+            if param not in not_found_parameters:
+                total_not_found_parameters.pop(param, None)
+
+
+    # Print the log of replacements in the specified format
+    if total_replacements_log:
+        print("\n     Parameter           |   Old value   |   New Value   |  Line  |   File path")
+        print("-" * 100)
+        for log in total_replacements_log:
+            param, old_value, new_value, line_num, file_path = log
+            print(f"{param:<24} | {old_value:<13} | {new_value:<13} | {line_num:<6} | {file_path}")
+        print("-" * 100)
+
+    if total_not_found_parameters:
+        print("\nParameters not found (source OR verif):")
+        for param in total_not_found_parameters:
+            print(f"- {param}")            
+        print("\n")
 
     # Save the changes to files
-    for file_path, new_content, _ in changed_files:
+    for file_path, new_content in total_changed_files:
         with open(file_path, 'w') as file:
             file.write(new_content)
 

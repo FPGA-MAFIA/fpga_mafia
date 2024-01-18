@@ -100,11 +100,6 @@ trap_handler:
 call_interrupt_handler:
   call interrupt_handler
 
-    # General instructions for debugging
-    #addi t0, zero, 0
-    #addi t1, zero, 0
-    addi t2, zero, 0
-    
 restore_and_return:
     # Restore registers from the stack
     lw ra, 124(sp)        

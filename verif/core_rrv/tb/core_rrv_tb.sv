@@ -129,7 +129,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 100000;
-parameter RF_NUM_MSB = 31;
+parameter RF_NUM_MSB = 15; // NOTE!!!: auto inserted from script ovrd_params.py
 initial begin: detect_timeout
     //=======================================
     // timeout
