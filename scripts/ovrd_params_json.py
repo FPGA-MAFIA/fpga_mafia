@@ -4,7 +4,7 @@
 This script allows you to override parameters in files recursively within a specified DUT directory.
 You can provide a JSON file with parameter overrides, and the script will search for parameters in the files and replace
 them with the new values. 
-Usage: ./scripts/ovrd_params.py -dut core_rrv -cfg override_rrv_rv32e 
+Usage: ./scripts/ovrd_params_json.py -dut core_rrv -cfg mini_rv32e 
 """
 
 import argparse
