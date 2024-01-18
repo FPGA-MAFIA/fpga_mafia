@@ -99,7 +99,7 @@ class Test:
         self.load_config()
 
     def load_json(self,json_file):
-         #loading configuration from the specified JSON file
+        #loading configuration from the specified JSON file
         with open(json_file) as config_file:
             config_data = json.load(config_file)
         Test.I_MEM_OFFSET = str(config_data['I_MEM_OFFSET'])
@@ -109,6 +109,11 @@ class Test:
         Test.crt0_file    = config_data['crt0_file']
         Test.rv32_gcc     = config_data['rv32_gcc']
         Test.name         = config_data['name']
+        #Only of the ovrd_params exist in the JSON file, we will use it
+        if 'ovrd_params' in config_data:
+            Test.ovrd_params  = config_data['ovrd_params']
+        else:
+            Test.ovrd_params  = None
 
     def load_config(self):
         # Default JSON file location
@@ -230,9 +235,23 @@ class Test:
         chdir(MODEL_ROOT)
         self.app_flag = True
     def _compile_hw(self):
-        chdir(MODELSIM)
         print_message('[INFO] Starting to compile HW ...')
 
+        # check if the ovrd_params is not empty
+        if Test.ovrd_params:
+            #check that the file exist ./scripts/ovrd_params/<Test.ovrd_params>
+            csv_param_file = Test.ovrd_params
+            if not os.path.exists('./scripts/ovrd_params/'+csv_param_file+'.csv'):
+                print_message(f'[ERROR] There is no file '+csv_param_file)
+                exit(1)
+            else:
+                #run the script to override the parameters using the csv file
+                cmd_param_script = 'python ./scripts/ovrd_params.py -dut core_rrv -ovrd_file '+csv_param_file
+                results = run_cmd_with_capture(cmd_param_script) 
+                print_message(results.stdout)
+
+
+        chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
                 comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.dut+'_list.f'
