@@ -6,8 +6,5 @@
     "crt0_file"   : "crt0_default.S",
     "rv32_gcc"    : "rv32i",
     "name"        : "rv32i",
-    "rtl_parameter_override"  : {
-        "RF_NUM_MSB"  : 31,
-        "RF_NUM_LSB"  : 0
-    }
+    "ovrd_params" : "override_rrv_rv32i"
 }
