@@ -32,7 +32,7 @@ jobs:
       - name: SC_CORE - rv32i_level0 
         run:  python build.py -dut sc_core -regress rv32i_level0 -app -hw -sim -keep_going
 
-      - name: CACHE level0 
+      - name: D_CACHE level0_d_cache
         run: python build.py -dut 'mem_ss' -top cache_tb -regress cache_alive -hw -sim -pp -keep_going
 
       - name: I_CACHE -regress level0_i_cache
