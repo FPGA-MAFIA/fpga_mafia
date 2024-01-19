@@ -1,1 +1,0 @@
-this directory will contain the mini core verification content in our project.

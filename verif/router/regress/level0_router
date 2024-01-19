@@ -1,2 +1,0 @@
-router_alive   -gV_REQUESTS=30 -gV_MAX_DELAY=10
-router_alive   -gV_REQUESTS=300 -gV_MAX_DELAY=1

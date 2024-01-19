@@ -4,3 +4,4 @@
 
 ../../../verif/mem_ss/tb/mem_ss_tb.sv
 ../../../verif/mem_ss/tb/cache_ref_model.sv
+../../../verif/mem_ss/tb/cache_tb.sv
