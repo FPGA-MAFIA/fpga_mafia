@@ -178,6 +178,7 @@ initial begin
 //======================
   end else begin
     $error("[ERROR] : this is not a valid test name");
+   $finish();
   end
 end
 

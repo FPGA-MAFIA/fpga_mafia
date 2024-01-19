@@ -31,7 +31,7 @@ print_message('--------------------------------------------------------')
 print_message("     Cache Post-Process  : "+args.test_name )
 print_message('--------------------------------------------------------')
 # Path to the directory containing the tests
-base_path = "target/cache/tests"
+base_path = "target/mem_ss/tests"
 # Construct the path to the transcript file
 transcript = args.test_name+"_transcript"
 file_transcript = os.path.join(base_path, args.test_name, transcript).replace("\\", "/")

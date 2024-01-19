@@ -24,10 +24,10 @@ integer d_cache_pipe_stages_trk;
 
 initial begin
     if ($value$plusargs ("STRING=%s", test_name))
-        $display("creating tracker in test directory: target/cache/tests/%s", test_name);
+        $display("creating tracker in test directory: target/mem_ss/tests/%s", test_name);
     $timeformat(-12, 0, "", 6);
     
-    d_cache_top_trk      = $fopen({"../../../target/cache/tests/",test_name,"/d_cache_top_trk.log"},"w");
+    d_cache_top_trk      = $fopen({"../../../target/mem_ss/tests/",test_name,"/d_cache_top_trk.log"},"w");
     $fwrite(d_cache_top_trk, "==================================================================================\n");
     $fwrite(d_cache_top_trk, "                      D_CACHE TOP TRACKER  -  Test: ",test_name,"\n");
     $fwrite(d_cache_top_trk, "==================================================================================\n");
@@ -35,7 +35,7 @@ initial begin
     $fwrite(d_cache_top_trk," Time  ||  OPCODE        || address ||REG/TQ_ID|| tag  || Set ||    Data \n");
     $fwrite(d_cache_top_trk,"-----------------------------------------------------------------------------------\n");
 
-    d_cache_pipe_io_trk = $fopen({"../../../target/cache/tests/",test_name,"/d_cache_pipe_io_trk.log"},"w");
+    d_cache_pipe_io_trk = $fopen({"../../../target/mem_ss/tests/",test_name,"/d_cache_pipe_io_trk.log"},"w");
     $fwrite(d_cache_pipe_io_trk,"==========================================================================================\n");
     $fwrite(d_cache_pipe_io_trk,"                      D_CACHE PIPE I/O TRACKER  -  Test: ",test_name,"\n"); 
     $fwrite(d_cache_pipe_io_trk,"==========================================================================================\n");
@@ -43,7 +43,7 @@ initial begin
     $fwrite(d_cache_pipe_io_trk,"  Time  ||REQ/RSP||  OPCODE  || TQ ID ||  address  || rd ind || wr ind || Data/Result ||   CL־Data \n");
     $fwrite(d_cache_pipe_io_trk,"------------------------------------------------------------------------------------------\n");
 
-    d_cache_pipe_stages_trk = $fopen({"../../../target/cache/tests/",test_name,"/d_cache_pipe_stages_trk.log"},"w");
+    d_cache_pipe_stages_trk = $fopen({"../../../target/mem_ss/tests/",test_name,"/d_cache_pipe_stages_trk.log"},"w");
     $fwrite(d_cache_pipe_stages_trk,"==========================================================================================================================================================================================================================================================================\n");
     $fwrite(d_cache_pipe_stages_trk,"                                                               D_CACHE PIPE STAGES TRACKER  -  Test: ",test_name,"\n"); 
 
@@ -53,7 +53,7 @@ initial begin
     $fwrite(d_cache_pipe_stages_trk,"                  ID                           cancel                                                                                                             modified    rd     evict                                            address                                                                \n");
     $fwrite(d_cache_pipe_stages_trk,"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");  
 
-    d_cache_tq_trk      = $fopen({"../../../target/cache/tests/",test_name,"/d_cache_tq_trk.log"},"w");
+    d_cache_tq_trk      = $fopen({"../../../target/mem_ss/tests/",test_name,"/d_cache_tq_trk.log"},"w");
     $fwrite(d_cache_tq_trk,"====================================================================================================================\n");
     $fwrite(d_cache_tq_trk,"                      D_CACHE TQ TRACKER  -  Test: ",test_name,"\n");
     $fwrite(d_cache_tq_trk,"====================================================================================================================\n");
@@ -61,8 +61,8 @@ initial begin
     $fwrite(d_cache_tq_trk," Time ||ENTRY||    State      ||  RD  ||  WR  || cl address ||             MB DATA            || REG ID  || cl word offset   rd /wr hit\n");
     $fwrite(d_cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
-    cache_ref_gold_trk = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
-    cache_ref_trk      = $fopen({"../../../target/cache/tests/",test_name,"/cache_ref_trk.log"},"w");
+    cache_ref_gold_trk = $fopen({"../../../target/mem_ss/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
+    cache_ref_trk      = $fopen({"../../../target/mem_sS/tests/",test_name,"/cache_ref_trk.log"},"w");
     $fwrite(cache_ref_gold_trk,"====================================================================================================================\n");
     $fwrite(cache_ref_gold_trk,"                      Core<->Cache  -  Test: ",test_name,"\n");
     $fwrite(cache_ref_gold_trk,"====================================================================================================================\n");

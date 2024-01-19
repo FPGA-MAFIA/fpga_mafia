@@ -21,10 +21,10 @@ initial begin
     delay(1); // wait for the test to start
     if(router_test_true) begin
         if ($value$plusargs ("STRING=%s", test_name))
-            $display("creating tracker in test directory: target/router/tests/%s", test_name);
+            $display("creating tracker in test directory: target/fabric/tests/%s", test_name);
         $timeformat(-12, 0, "", 6);
     
-        router_top_trk    = $fopen({"../../../target/router/tests/",test_name,"/router_top_trk.log"},"w");
+        router_top_trk    = $fopen({"../../../target/fabric/tests/",test_name,"/router_top_trk.log"},"w");
         $fwrite(router_top_trk, "==================================================================================\n");
         $fwrite(router_top_trk, "                      ROUTER [%h,%h] TOP TRACKER  -  Test: ", local_tile_id[7:4] , local_tile_id[3:0] , test_name,"\n");
         $fwrite(router_top_trk, "==================================================================================\n");

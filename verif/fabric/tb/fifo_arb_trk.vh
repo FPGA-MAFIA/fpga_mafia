@@ -26,11 +26,11 @@ initial begin
     delay(1); // wait for the test to start
     if(fifo_arb_test_true) begin
         if ($value$plusargs ("STRING=%s", test_name))
-            $display("creating tracker in test directory: target/router/tests/%s", test_name);
+            $display("creating tracker in test directory: target/fabric/tests/%s", test_name);
         $timeformat(-12, 0, "", 6);
 
-        fifo_arb_top_trk    = $fopen({"../../../target/router/tests/",test_name,"/fifo_arb_top_trk.log"},"w");
-        full_empty_trk      = $fopen({"../../../target/router/tests/",test_name,"/full_empty_trk.log"},"w");
+        fifo_arb_top_trk    = $fopen({"../../../target/fabric/tests/",test_name,"/fifo_arb_top_trk.log"},"w");
+        full_empty_trk      = $fopen({"../../../target/fabric/tests/",test_name,"/full_empty_trk.log"},"w");
         $fwrite(fifo_arb_top_trk, "==================================================================================\n");
         $fwrite(fifo_arb_top_trk, "                      FIFO_ARB TOP TRACKER  -  Test: ",test_name,"\n");
         $fwrite(fifo_arb_top_trk, "==================================================================================\n");
