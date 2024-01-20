@@ -4,6 +4,7 @@ import subprocess
 import argparse
 import difflib
 import sys
+sys.dont_write_bytecode = True
 import ref_orderer
 
 parser = argparse.ArgumentParser(description= 'get test name from build')
