@@ -4,11 +4,44 @@ import subprocess
 import argparse
 import difflib
 import sys
-import ref_orderer
+import itertools
+
 
 parser = argparse.ArgumentParser(description= 'get test name from build')
 parser.add_argument('test_name', help='The name of the test to run pp on')
 args = parser.parse_args()
+def orderer_func(input_filename):
+    output_filename = "target/mem_ss/output.log"
+
+    with open(input_filename, 'r') as input_file:
+        lines = input_file.readlines()
+
+    core_rd_req_lines = []
+    cache_rd_rsp_lines = []
+    other_lines = []
+
+    for line in lines:
+        if "CORE_RD_REQ" in line:
+            core_rd_req_lines.append(line)
+        elif "CACHE_RD_RSP" in line:
+            cache_rd_rsp_lines.append(line)
+        else:
+            other_lines.append(line)
+
+    with open(output_filename, 'w') as output_file:
+        # Write header (first 5 lines)
+        output_file.writelines(other_lines[:5])
+        # Write CORE_RD_REQ and CACHE_RD_RSP lines
+        for req, rsp in zip(core_rd_req_lines, cache_rd_rsp_lines):
+            output_file.write(req)
+            output_file.write(rsp)
+        # Write remaining lines
+        output_file.writelines(other_lines[5:])
+
+    # Replace the original file with the output file
+    os.remove(input_filename)
+    os.rename(output_filename, input_filename)
+  
 
 def print_message(msg):
     msg_type = msg.split()[0]
@@ -51,8 +84,8 @@ if not os.path.exists(file_transcript):
     sys.exit(1)
 
 #Reorder the ref_trk files by pairs of Req/rsp
-ref_orderer.orderer_func(file1_path)
-ref_orderer.orderer_func(file2_path)
+orderer_func(file1_path)
+orderer_func(file2_path)
 
 
 if os.path.exists(file2_path):

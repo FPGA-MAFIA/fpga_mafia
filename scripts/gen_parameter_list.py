@@ -30,6 +30,7 @@ def parse_parameters(content):
     return parsed_output
 
 
+
 def search_parameters(dut_path):
     """  Searches for parameters in the files located at the given path.
     Args: dut_path (str): The path where the DUT files are located.
@@ -38,13 +39,21 @@ def search_parameters(dut_path):
     content = ""
     for root, dirs, files in os.walk(dut_path):
         for file in files:
-            with open(os.path.join(root, file), 'r') as file_handle:
-                file_content = file_handle.read()
-                if "parameter" in file_content:
-                    content += file_content
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, 'r') as file_handle:
+                    file_content = file_handle.read()
+                    if "parameter" in file_content:
+                        content += file_content
+            except UnicodeDecodeError as e:
+                # Log the file path and the error
+                print(f"Error reading file {file_path}: {e}")
+                continue
+
     # make sure each parameter appears only once
     content = "\n".join(list(set(content.splitlines())))
     return content
+
 
 def main():
     parser = argparse.ArgumentParser(description='Generate a list of parameters for the DUT')
