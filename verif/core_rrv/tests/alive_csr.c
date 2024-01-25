@@ -11,7 +11,7 @@ int main()  {
 
     asm volatile ("csrw 0x340, 0x7");   
     int scratchpad_csr_value;
-    asm volatile ("csrr %0, 0x340" : "=r" (scratchpad_csr_value));   
+    asm volatile ("csrr %0, 0x340" : "=r" (scratchpad_csr_value));  
 
     //write to CSR in offset 0x301 the value of 30
     // pseudiInstr: csrw csr, rs. baseInst:  csrrw x0, csr, rs 

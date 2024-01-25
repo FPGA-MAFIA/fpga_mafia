@@ -38,37 +38,40 @@ typedef enum logic [11:0] {
  CSR_INSTRET       = 12'hC02 ,
  CSR_INSTRETH      = 12'hC82 ,
 //Machine CSR -  
- CSR_MCYCLE         = 12'hB00 ,
- CSR_MCYCLEH        = 12'hB80 ,
- CSR_MINSTRET       = 12'hB02 ,
- CSR_MINSTRETH      = 12'hB82 ,
- CSR_MHPMCOUNTER3   = 12'hB03 ,
- CSR_MHPMCOUNTER3H  = 12'hB83 ,
- CSR_MHPMCOUNTER4   = 12'hB04 ,
- CSR_MHPMCOUNTER4H  = 12'hB84 ,
- CSR_MCOUNTINHIBIT  = 12'h320 ,
- CSR_MHPMEVENT3     = 12'h323 ,
- CSR_MHPMEVENT4     = 12'h324 ,
- CSR_MVENDORID      = 12'hF11 ,
- CSR_MARCHID        = 12'hF12 ,
- CSR_MIMPID         = 12'hF13 ,
- CSR_MHARTID        = 12'hF14 ,
- CSR_MCONFIGPTR     = 12'hF15 ,
- CSR_MSTATUS        = 12'h300 ,
- CSR_MSTATUSH       = 12'h310 ,
- CSR_MISA           = 12'h301 ,
- CSR_MEDELEG        = 12'h302 ,
- CSR_MIDELEG        = 12'h303 ,
- CSR_MIE            = 12'h304 ,
- CSR_MTVEC          = 12'h305 ,
- CSR_MCOUNTERN      = 12'h306 ,
- CSR_MSCRATCH       = 12'h340 ,
- CSR_MEPC           = 12'h341 ,
- CSR_MCAUSE         = 12'h342 ,
- CSR_MTVAL          = 12'h343 ,
- CSR_MIP            = 12'h344 ,
- CSR_MTINST         = 12'h34A ,
- CSR_MTVAL2         = 12'h34B 
+ CSR_MCYCLE          = 12'hB00 ,
+ CSR_MCYCLEH         = 12'hB80 ,
+ CSR_MINSTRET        = 12'hB02 ,
+ CSR_MINSTRETH       = 12'hB82 ,
+ CSR_MHPMCOUNTER3    = 12'hB03 ,
+ CSR_MHPMCOUNTER3H   = 12'hB83 ,
+ CSR_MHPMCOUNTER4    = 12'hB04 ,
+ CSR_MHPMCOUNTER4H   = 12'hB84 ,
+ CSR_MCOUNTINHIBIT   = 12'h320 ,
+ CSR_MHPMEVENT3      = 12'h323 ,
+ CSR_MHPMEVENT4      = 12'h324 ,
+ CSR_MVENDORID       = 12'hF11 ,
+ CSR_MARCHID         = 12'hF12 ,
+ CSR_MIMPID          = 12'hF13 ,
+ CSR_MHARTID         = 12'hF14 ,
+ CSR_MCONFIGPTR      = 12'hF15 ,
+ CSR_MSTATUS         = 12'h300 ,
+ CSR_MSTATUSH        = 12'h310 ,
+ CSR_MISA            = 12'h301 ,
+ CSR_MEDELEG         = 12'h302 ,
+ CSR_MIDELEG         = 12'h303 ,
+ CSR_MIE             = 12'h304 ,
+ CSR_MTVEC           = 12'h305 ,
+ CSR_MCOUNTERN       = 12'h306 ,
+ CSR_MSCRATCH        = 12'h340 ,
+ CSR_MEPC            = 12'h341 ,
+ CSR_MCAUSE          = 12'h342 ,
+ CSR_MTVAL           = 12'h343 ,
+ CSR_MIP             = 12'h344 ,
+ CSR_MTINST          = 12'h34A ,
+ CSR_MTVAL2          = 12'h34B,
+ //Custom csr's for mtime, mtimecmp
+ CSR_CUSTOM_MTIME    = 12'hFC0,
+ CSR_CUSTOM_MTIMECMP = 12'hBC0
 } t_csr_addr ;
 
 typedef struct packed {
@@ -125,6 +128,8 @@ typedef struct packed {
     logic [31:0] csr_mip;
     logic [31:0] csr_mtinst;
     logic [31:0] csr_mtval2;
+    logic [31:0] csr_custom_mtime;
+    logic [31:0] csr_custom_mtimecmp;
 } t_csr;
 
 typedef struct packed {
