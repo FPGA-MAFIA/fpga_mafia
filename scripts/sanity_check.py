@@ -6,7 +6,7 @@ import subprocess
 
 # Create a command-line argument parser
 parser = argparse.ArgumentParser(description="Execute commands from a YAML file.")
-parser.add_argument("-yml", "--file", required=True, help="YAML file to process")
+parser.add_argument("-yml", "--file", required=True, help="YAML file to process. Example: ./scripts/sanity_check.py -yml mafia_sanity")
 
 # Examples:
 # ./sanity_check.py -yml mafia_sanity
