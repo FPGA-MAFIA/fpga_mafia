@@ -153,6 +153,10 @@ always_comb begin
             {2'b01, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr_data;
             {2'b10, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 | csr_data;
             {2'b11, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 & ~csr_data;
+            // CSR_CUSTOM_MTIMECMP
+            {2'b01, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr_data;
+            {2'b10, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp | csr_data;
+            {2'b11, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp & ~csr_data;
 
             // ---- Other ----
             default   : /* Do nothing */;
@@ -213,6 +217,8 @@ always_comb begin
             next_csr.csr_minstreth = csr.csr_minstreth + csr_minstret_overflow;
             csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //TODO - csr_minstret_high_low is not part of the spec
         end
+
+        next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
 
         // URO CSR's
         next_csr.csr_cycle    = next_csr.csr_mcycle;
@@ -284,6 +290,8 @@ always_comb begin
             CSR_MIP            : CsrReadDataQ102H = csr.csr_mip;
             CSR_MTINST         : CsrReadDataQ102H = csr.csr_mtinst;
             CSR_MTVAL2         : CsrReadDataQ102H = csr.csr_mtval2;
+            CSR_CUSTOM_MTIME   : CsrReadDataQ102H = csr.csr_custom_mtime;
+            CSR_CUSTOM_MTIMECMP: CsrReadDataQ102H = csr.csr_custom_mtimecmp;
 
             default        : CsrReadDataQ102H = 32'b0 ;
         endcase
