@@ -75,7 +75,6 @@ logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 logic PreValidInstQ105H;
-logic LoadHazardValidRegSrc2Q101H;
 
 t_core_rrv_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
@@ -91,17 +90,20 @@ assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 logic IllegalInstructionQ101H;
 assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
-//FIXME - Note that the PreRegSrc2Q101H might not be used as a register read. so there is no real need for the hzrd.
-// we can optimize and say that only if its a "valid" PreRegSrc2Q101H then we need to check for hzrd on that register. (branch/store/r_type)
-assign LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH;
-assign LoadHzrd1DetectQ101H      = Rst ? 1'b0 : 
-                                 ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (LoadHazardValidRegSrc2Q101H) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                                                                                                                         1'b0;                                                                                                        
-assign LoadHzrd2DetectQ101H      = Rst ? 1'b0 : 
-                                 ((PreRegSrc1Q101H == CtrlQ103H.RegDst) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == CtrlQ103H.RegDst) && (LoadHazardValidRegSrc2Q101H) && (CtrlQ103H.Opcode == LOAD)) ? 1'b1:
-                                                                                                                                         1'b0;                                                                                                        
+logic LoadHazardValidRegSrc2Q101H;
+logic RegDstQ102MatchRegSrc1Q101H;
+logic RegDstQ102MatchRegSrc2Q101H;
+logic RegDstQ103MatchRegSrc1Q101H;
+logic RegDstQ103MatchRegSrc2Q101H;
+assign  LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH;
+// Load Hazard 1 detection - between pipe stage 102 and 101
+assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && ValidInstQ102H && (CtrlQ102H.Opcode == LOAD);
+assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && ValidInstQ102H && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
+assign  LoadHzrd1DetectQ101H        =   RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H;
+// Load Hazard 2 detection - between pipe stage 103 and 101
+assign  RegDstQ103MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ103H.RegDst) && ValidInstQ103H && (CtrlQ103H.Opcode == LOAD);
+assign  RegDstQ103MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ103H.RegDst) && ValidInstQ103H && (CtrlQ103H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
+assign  LoadHzrd2DetectQ101H        =  RegDstQ103MatchRegSrc1Q101H ||  RegDstQ103MatchRegSrc2Q101H;          
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
@@ -172,6 +174,14 @@ assign CsrInstQ101H.csr_addr     = InstructionQ101H[31:20];
 assign CsrInstQ101H.csr_data_imm = {27'h0, CtrlQ101H.RegSrc1}; 
 assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14]; 
 
+// system instructions
+logic ebreak_was_calledQ101H; 
+logic ecall_was_calledQ101H;
+logic mret_was_calledQ101H;
+//                                                       {funct7, rs2, rs1, funct3, rd, opcode}
+assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b0000000_00001_00000_000_00000_1110011);
+assign ecall_was_calledQ101H  = (InstructionQ101H == 32'b0000000_00000_00000_000_00000_1110011);
+assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000_00000_1110011);
 // Update Interrupts CSR and flow control
     assign CsrInterruptUpdateQ101H.misaligned_access    = '0; // FIXME - assign correct value
     assign CsrInterruptUpdateQ101H.illegal_csr_access   = '0; // FIXME - assign correct value
@@ -179,12 +189,9 @@ assign CsrInstQ101H.csr_imm_bit  = InstructionQ101H[14];
     assign CsrInterruptUpdateQ101H.timer_interrupt      = '0; // FIXME - assign correct value
     assign CsrInterruptUpdateQ101H.external_interrupt   = '0; // FIXME - assign correct value
     assign CsrInterruptUpdateQ101H.illegal_instruction  = IllegalInstructionQ101H;
-    assign CsrInterruptUpdateQ101H.Mret  = (Funct7Q101H == 7'b0011000)      && (CtrlQ101H.RegSrc2 ==5'b00010) && 
-                                           (CtrlQ101H.RegSrc1 ==5'b00000)   && (Funct3Q101H == 3'b000)        && 
-                                           (CtrlQ101H.RegDst == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
+    assign CsrInterruptUpdateQ101H.Mret  = mret_was_calledQ101H;
     assign CsrInterruptUpdateQ101H.mtval_instruction = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
-logic ebreak_was_calledQ101H; 
-assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
+
 
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})

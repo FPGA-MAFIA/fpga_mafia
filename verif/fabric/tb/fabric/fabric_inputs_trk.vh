@@ -10,12 +10,7 @@
 // 
 //-----------------------------------------------------------------------------
 
-
-
-
-
 integer fabric_top_trk;
-
 initial begin
     delay(1); // wait for the test to start
     if(fabric_test_true) begin

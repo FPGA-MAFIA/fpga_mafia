@@ -29,6 +29,11 @@ parameter D_MEM_SIZE   = 'h1_0000;
 parameter I_MEM_MSB     = I_MEM_SIZE + I_MEM_OFFSET - 1;                // I_MEM   0x0    - 0x3FFF
 parameter D_MEM_MSB     = D_MEM_SIZE + D_MEM_OFFSET - 1; // D_MEM   0x4000 - 0x6FFF
 
+// define VGA memory sizes
+parameter SIZE_VGA_MEM          = 38400; 
+parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;
+parameter VGA_MEM_REGION_ROOF   = VGA_MEM_REGION_FLOOR + SIZE_VGA_MEM - 1;
+
 logic        Clk;
 logic        Rst;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
