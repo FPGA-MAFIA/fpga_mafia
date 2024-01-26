@@ -12,6 +12,7 @@ import core_rrv_pkg::*;
     input     ValidInstQ105H,
     // Outputs to the core
     output var t_csr_pc_update        CsrPcUpdateQ102H,
+    output var t_csr_timer_interrupt  CsrTimerInterruptQ102H,
     output logic                      interrupt_counter_expired,
     output logic [31:0]               CsrReadDataQ102H // 32-bit data read from the CSR
 );
@@ -196,6 +197,11 @@ always_comb begin
         next_csr.csr_mepc   = PcQ102H;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
+    if(CsrInterruptUpdateQ102H.timer_interrupt) begin
+        next_csr.csr_mcause = 32'h80000007;
+        next_csr.csr_mepc   = PcQ102H - 32'h4;
+    end
+
     // handle HW interrupts:
     // 1. timer interrupt
     // 2. external interrupt
@@ -219,6 +225,8 @@ always_comb begin
         end
 
         next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
+        if((csr.csr_custom_mtime == csr.csr_custom_mtimecmp) && (csr.csr_custom_mtime!=0 && csr.csr_custom_mtimecmp!=0))
+            next_csr.csr_mip = 32'h80;
 
         // URO CSR's
         next_csr.csr_cycle    = next_csr.csr_mcycle;
@@ -308,6 +316,11 @@ assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
 assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
 assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
+
+assign CsrTimerInterruptQ102H.csr_mstatus          = csr.csr_mstatus;
+assign CsrTimerInterruptQ102H.csr_mie              = csr.csr_mie;
+assign CsrTimerInterruptQ102H.csr_custom_mtime     = csr.csr_custom_mtime;
+assign CsrTimerInterruptQ102H.csr_custom_mtimecmp  = csr.csr_custom_mtimecmp;
 
 always_comb begin
     //create an interrupt if the cycle counter is equal to the compare value

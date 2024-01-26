@@ -6,7 +6,7 @@
 #define ILLEGAL_INSTRUCTION_EXCEPTION     0x2
 #define MACHINE_TIMER_INTERRUPT           0x80000007
 
-#define TIMER_INTERRUPT_INTERVAL 0x00000FFF
+#define TIMER_INTERRUPT_INTERVAL 0x00003FFF // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
 
 void interrupt_handler() {
 
@@ -31,7 +31,7 @@ void interrupt_handler() {
         csr_mstatus  = read_mstatus();     
         mie_bit  = (csr_mstatus >> 3) & 0x1;                // read mie bit from mstatus. mie = mstatus[3]
         csr_mstatus = csr_mstatus & 0xFFFFFFF7;             // disable interrupts by setting mie bit to 0 in mstatus. 
-        csr_mstatus = csr_mstatus || (mie_bit << 7);        // save mie bit into mpie bit mstatus. mpie = mstatus[7]
+        csr_mstatus = csr_mstatus | (mie_bit << 7);        // save mie bit into mpie bit mstatus. mpie = mstatus[7]
         write_mstatus(csr_mstatus);  
 
         // disable msie, mtie, meie bits in mie
@@ -43,27 +43,23 @@ void interrupt_handler() {
         rvc_printf("TIMER_INTERRUPT\n");
         
         csr_mie = read_mie();
-        csr_mie = csr_mie || 0x00000888;
+        csr_mie = csr_mie | 0x00000888;
         write_mie(csr_mie); // enable msie, mtie, meie bits in mie
 
         csr_mstatus  = read_mstatus();
         mpie_bit     = (csr_mstatus >> 7) & 0x1;   
-        csr_mstatus  = csr_mstatus || (mpie_bit << 3);  // set mie bit to be equal to mpie
+        csr_mstatus  = csr_mstatus | (mpie_bit << 3);  // set mie bit to be equal to mpie
         csr_mstatus  = csr_mstatus & 0xFFFFFF7F;        // set mpie bit to 0
         write_mstatus(csr_mstatus);                     // write mstatus back
 
         csr_mip = 0;
         write_mip(csr_mip); // clear msip, mtip, meip bits in mip
-        
         // update mtimecmp
         unsigned int csr_custom_mtime    = read_custom_mtime();
         unsigned int csr_custom_mtimecmp = read_custom_mtimecmp();
         
         csr_custom_mtimecmp = csr_custom_mtime + TIMER_INTERRUPT_INTERVAL; 
         write_custom_mtimecmp(csr_custom_mtimecmp);
-
-        // update mstatus, mie and mpe
-
 
 
        }
