@@ -91,9 +91,19 @@ assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 logic IllegalInstructionQ101H;
 assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
+logic PreTimerInterruptQ101H;
+assign PreTimerInterruptQ101H = (CsrTimerInterruptQ102H.csr_custom_mtime == CsrTimerInterruptQ102H.csr_custom_mtimecmp);
+
+logic CsrMstatusMieBit, CsrMieMieBit, TimerInterruptEnable;
+assign CsrMstatusMieBit = CsrTimerInterruptQ102H.csr_mstatus[3];
+assign CsrMieMieBit     = CsrTimerInterruptQ102H.csr_mie[7];
+assign TimerInterruptEnable = CsrMstatusMieBit & CsrMieMieBit;
+
 logic TimerInterruptQ101H;
-assign TimerInterruptQ101H = (CsrTimerInterruptQ102H.csr_mstatus[3] && CsrTimerInterruptQ102H.csr_mie[7]) &&
-                              (CsrTimerInterruptQ102H.csr_custom_mtime == CsrTimerInterruptQ102H.csr_custom_mtimecmp);
+//assign TimerInterruptQ101H = (CsrTimerInterruptQ102H.csr_mstatus[3] && CsrTimerInterruptQ102H.csr_mie[7]) &&
+//                              (CsrTimerInterruptQ102H.csr_custom_mtime == CsrTimerInterruptQ102H.csr_custom_mtimecmp);
+
+assign TimerInterruptQ101H = PreTimerInterruptQ101H & TimerInterruptEnable;
 
 logic LoadHazardValidRegSrc2Q101H;
 logic RegDstQ102MatchRegSrc1Q101H;
