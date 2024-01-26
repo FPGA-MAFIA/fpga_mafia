@@ -18,7 +18,7 @@
 
 `include "macros.sv"
 
-module core_rrv_tb  ;
+module core_rrv_no_ref_tb  ;
 import core_rrv_pkg::*;
 logic        Clk;
 logic        Rst;
@@ -33,13 +33,13 @@ logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET- 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
+string test_name;
 `include "core_rrv_pmon_tasks.vh"
 
 // VGA interface outputs
 t_vga_out   vga_out;
 logic inDisplayArea;
 
-string test_name;
 
 // ========================
 // clock gen
@@ -113,6 +113,20 @@ initial begin: detect_timeout
     $finish;
 end
 
+logic        InFabricValidQ503H  ; 
+logic        OutFabricValidQ505H ;
+t_tile_trans InFabricQ503H ; 
+t_tile_trans OutFabricQ505H ;
+assign InFabricValidQ503H = 1'b0;
+assign InFabricQ503H.address               = '0;
+assign InFabricQ503H.opcode                = RD_RSP;
+assign InFabricQ503H.data                  = '0;
+assign InFabricQ503H.requestor_id          = '0;
+assign InFabricQ503H.next_tile_fifo_arb_id = NULL_CARDINAL;
+
+
+t_tile_id local_tile_id;
+assign  local_tile_id = 8'h2_2;
 core_rrv_top
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
 core_rrv_top (
