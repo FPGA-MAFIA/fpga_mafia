@@ -127,20 +127,12 @@ assign flushQ102H = IndirectBranchQ102H                         ||
                     TimerInterruptQ102H;
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
-assign InstructionQ101H = flushQ102H                  ? NOP :
-                          flushQ103H                  ? NOP :
-                          TimerInterruptQ101H        ? NOP :
-                          PreIllegalInstructionQ101H  ? NOP :
-                          LoadHzrd1DetectQ101H        ? NOP :
-                          LoadHzrd2DetectQ101H        ? NOP : 
-                                                        PreInstructionQ101H;
-assign PreValidInstQ101H = flushQ102H                 ? 1'b0 : 
-                           flushQ103H                 ? 1'b0 :   
-                           TimerInterruptQ101H       ? 1'b0 :
-                           PreIllegalInstructionQ101H ? 1'b0 :
-                           LoadHzrd1DetectQ101H       ? 1'b0 :  
-                           LoadHzrd2DetectQ101H       ? 1'b0 : 
-                                                        1'b1 ;
+logic InsertNopQ101H;
+assign InsertNopQ101H = flushQ102H           || flushQ103H                 || //
+                        TimerInterruptQ101H  || PreIllegalInstructionQ101H || 
+                        LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H;
+assign InstructionQ101H = InsertNopQ101H  ? NOP  :  PreInstructionQ101H;
+assign PreValidInstQ101H = InsertNopQ101H ? 1'b0 :  1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);

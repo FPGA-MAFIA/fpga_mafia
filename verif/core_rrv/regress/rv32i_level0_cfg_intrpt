@@ -1,1 +1,2 @@
 alive_illegal.c     -gRF_NUM_MSB=31
+bubblesort_with_timer.c -gRF_NUM_MSB=31
