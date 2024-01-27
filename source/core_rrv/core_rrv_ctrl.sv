@@ -188,7 +188,8 @@ logic ebreak_was_calledQ101H;
 logic ecall_was_calledQ101H;
 logic mret_was_calledQ101H;
 //                                                       {funct7, rs2, rs1, funct3, rd, opcode}
-assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b0000000_00001_00000_000_00000_1110011 && PreValidInstQ101H) ;
+//assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b0000000_00001_00000_000_00000_1110011 && PreValidInstQ101H) ;
+assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b0000000_00001_00000_000_00000_1110011);
 assign ecall_was_calledQ101H  = (InstructionQ101H == 32'b0000000_00000_00000_000_00000_1110011);
 assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000_00000_1110011);
 // Update Interrupts CSR and flow control
