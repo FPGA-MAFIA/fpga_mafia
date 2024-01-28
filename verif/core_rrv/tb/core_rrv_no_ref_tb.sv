@@ -119,7 +119,7 @@ initial begin: detect_timeout
     // timeout
     //=======================================
     #V_TIMEOUT 
-    $error("test ended with timeout");
+    $error("ERROR: test ended with timeout");
     $display("ERROR: No data integrity running - try to increase the timeout value");
     $finish;
 end
