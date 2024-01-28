@@ -18,13 +18,16 @@ initial begin: trk_inst_gen
     $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
-    $fwrite(trk_inst,"Time\t|\tPC \t | Instruction\t|\n");
+    $fwrite(trk_inst,"PC \t | Instruction\t|\n");
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
 
 end
-//always @(posedge Clk) begin : inst_print
-//    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,PcQ100H, Instruction);
-//end
+always @(posedge Clk) begin : inst_print
+    if(core_rrv_top.core_rrv.core_rrv_ctrl.ValidInstQ105H)
+        $fwrite(trk_inst,"%8h \t |%8h | \n", 
+        core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc, 
+        core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Instruction);
+end
 integer trk_fetch;
 initial begin: trk_fetch_gen
     $timeformat(-9, 1, " ", 6);
@@ -46,14 +49,7 @@ initial begin: trk_memory_access_gen
     $fwrite(trk_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
 end
-integer trk_ref_memory_access;
-initial begin: trk_rf_memory_access_gen
-    $timeformat(-9, 1, " ", 6);
-    trk_ref_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_ref_memory_access.log"},"w");
-    $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_ref_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
-    $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  
-end
+
 //
 assign PcQ100H = core_rrv_top.PcQ100H;
 
@@ -78,20 +74,10 @@ always @(posedge Clk) begin : memory_access_print
     end
 end
 
-import rv32i_ref_pkg::*;
-always @(posedge Clk) begin : memory_ref_access_print
-    if(rv32i_ref.DMemWrEn) begin
-        $fwrite(trk_ref_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_wr_addr, rv32i_ref.data_rd2);
-    end
-    if(rv32i_ref.DMemRdEn) begin
-        $fwrite(trk_ref_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_rd_addr, rv32i_ref.next_regfile[rv32i_ref.rd]);
-    end
-end
-
 integer trk_reg_write;
 initial begin: trk_reg_write_gen
     $timeformat(-9, 1, " ", 6);
-    trk_reg_write = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_reg_write_ref.log"},"w");
+    trk_reg_write = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_reg_write.log"},"w");
     $fwrite(trk_reg_write,"---------------------------------------------------------\n");
     $fwrite(trk_reg_write," Time | PC |reg_dst|  X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
     $fwrite(trk_reg_write,"---------------------------------------------------------\n");  

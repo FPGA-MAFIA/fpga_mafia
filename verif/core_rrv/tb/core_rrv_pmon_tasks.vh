@@ -11,11 +11,11 @@ real result_ipc, result_cpi;
        $fdisplay(pmon_file,"==========================================");
        $fdisplay(pmon_file,"\nSummary report");
        $fdisplay(pmon_file,"---------------------");
-       $fdisplay(pmon_file, "Number of cycles: %1d\nNumber of valid instructions: %1d",core_rrv_top.core_rrv.core_rrv_csr.csr_cycle_high_low, core_rrv_top.core_rrv.core_rrv_csr.csr_instret_high_low);
+       $fdisplay(pmon_file, "Number of cycles: %1d\nNumber of valid instructions: %1d",core_rrv_top.core_rrv.core_rrv_csr.csr_mcycle_high_low, core_rrv_top.core_rrv.core_rrv_csr.csr_minstret_high_low);
        
        // calculatin IPC and CPI
-       instret_high_low_real = core_rrv_top.core_rrv.core_rrv_csr.csr_instret_high_low;
-       cycle_high_low_real = core_rrv_top.core_rrv.core_rrv_csr.csr_cycle_high_low;
+       instret_high_low_real = core_rrv_top.core_rrv.core_rrv_csr.csr_minstret_high_low;
+       cycle_high_low_real = core_rrv_top.core_rrv.core_rrv_csr.csr_mcycle_high_low;
        result_ipc = instret_high_low_real / cycle_high_low_real;
        result_cpi = cycle_high_low_real / instret_high_low_real;
        $fdisplay(pmon_file, "IPC(instruction per cycles) =  %f", $sformatf("%.3f", result_ipc));

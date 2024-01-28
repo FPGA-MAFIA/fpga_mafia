@@ -44,14 +44,18 @@ reset_handler:
 csr_init:
   li t0, 0x100      # Load the immediate value 0x100 of trap handler address
   csrw mtvec, t0    # Write the value in t0 to the mtvec CSR
-  li t0, 0x888
-  csrw	mie, t0     # Enable timer, software and external interrupts. Set msie, mtie, meie  fields.
-  li t0, 0x8
-  csrw  mstatus, t0 # Enable interrupts. Set MIE and MPIE bit to 1 and 0 respectively in mstatus register.
-  li t0, 0x0000002F
-  csrw 0xBC0, t0    # update custom csr at address 0xBC0 that serves as mtimecmp register
 
+  # Enable software and external interrupts. Set msie, meie  fields Disable the mtie timer interrupt 
+  li t0, 0x808
+  csrw	mie, t0     
   
+  # Enable interrupts. Set MIE and MPIE bit to 1 and 0 respectively in mstatus register.
+  li t0, 0x8
+  csrw  mstatus, t0 
+  
+  # update custom csr at address 0xBC0 that serves as mtimecmp register
+  li t0, 0x00000500
+  csrw 0xBC0, t0    
 
 stack_init:
   la   x2, _stack_start
