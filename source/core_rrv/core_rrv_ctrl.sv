@@ -19,6 +19,7 @@ import core_rrv_pkg::*;
     // input instruction 
     input   logic [31:0] PreInstructionQ101H,
     input   logic [31:0] PcQ101H,
+    input   logic [31:0] AluOutQ102H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
     input   logic        DMemReady,
@@ -202,7 +203,10 @@ assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000
     assign CsrInterruptUpdateQ101H.Mret  = mret_was_calledQ101H;
     assign CsrInterruptUpdateQ101H.mtval_instruction = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
 
-
+    assign CsrInterruptUpdateQ101H.Pc = CsrInterruptUpdateQ101H.illegal_instruction ? PcQ101H + 32'h4 :
+                                        TimerInterruptQ101H & !IndirectBranchQ102H  ? PcQ101H         :
+                                        TimerInterruptQ101H & IndirectBranchQ102H   ? AluOutQ102H     :
+                                                                                    32'h0;
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
     // ---- R type ----

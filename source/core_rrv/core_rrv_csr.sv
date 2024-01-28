@@ -179,27 +179,27 @@ always_comb begin
     //FIXME - please review the values of the exceptions - read the spec
     if(CsrInterruptUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
-        next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.misaligned_access) begin
         next_csr.csr_mcause = 32'h00000004;
-        next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
         next_csr.csr_mcause = 32'h0000000B;
-        next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.breakpoint) begin
         next_csr.csr_mcause = 32'h00000003;
-        next_csr.csr_mepc   = PcQ102H;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
     if(CsrInterruptUpdateQ102H.timer_interrupt) begin
         next_csr.csr_mcause = 32'h80000007;
-        next_csr.csr_mepc   = PcQ102H - 32'h4;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
     end
 
     // handle HW interrupts:
