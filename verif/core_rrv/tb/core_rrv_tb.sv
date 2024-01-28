@@ -36,10 +36,21 @@ logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 
 string test_name;
+logic [31:0] PcQ101H;
+logic [31:0] PcQ102H;
+logic [31:0] PcQ103H, PcQ104H, PcQ105H;
+assign PcQ101H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ101H.Pc;
+assign PcQ102H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ102H.Pc;
+assign PcQ103H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ103H.Pc;
+assign PcQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.Pc;
+assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
+
+
 `include "core_rrv_tasks.vh"
 `include "core_rrv_mem_tasks.vh"
 `include "core_rrv_pmon_tasks.vh"
-`include "core_rrv_trk.sv"
+`include "core_rrv_trk.vh"
+`include "core_rrv_ref_trk.vh"
 
 //VGA interface outputs
 t_vga_out   vga_out;

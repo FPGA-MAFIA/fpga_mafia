@@ -24,17 +24,6 @@ t_mem_load_history ref_mem_load_history[$];
 t_mem_load_history ref_cur_mem_load;
 
 
-`ifndef USE_RF_AND_MEM_CHK            // Avoid multiple Pc declaration signal when using both rf and memory checkers
-    logic [31:0] PcQ101H;             // To I_MEM
-    logic [31:0] PcQ102H;             // To I_MEM
-    logic [31:0] PcQ103H, PcQ104H, PcQ105H;
-    assign PcQ101H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ101H.Pc;
-    assign PcQ102H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ102H.Pc;
-    assign PcQ103H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ103H.Pc;
-    assign PcQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.Pc;
-    assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
-`endif
-
 // signals for store
 logic DMemWrEnQ103H;
 logic [31:0] DMemWrDataQ103H;

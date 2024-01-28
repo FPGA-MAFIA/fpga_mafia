@@ -91,7 +91,10 @@ assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 logic IllegalInstructionQ101H;
 assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
+
+//FIXME - this logic should be in the CR module and only the "TimerInterruptQ101H" should be here 
 logic PreTimerInterruptQ101H;
+//FIXME - this is not a good name for this signal. MtimecmpGeMtimeQ101H is better (mtimecmp is Greater or Equal to mtime)
 assign PreTimerInterruptQ101H = (CsrTimerInterruptQ102H.csr_custom_mtime == CsrTimerInterruptQ102H.csr_custom_mtimecmp);
 
 logic CsrMstatusMieBit, CsrMieMieBit, TimerInterruptEnable;

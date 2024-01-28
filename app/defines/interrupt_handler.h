@@ -5,8 +5,9 @@
 // RISCV mcause exceptions defines for detection: 
 #define ILLEGAL_INSTRUCTION_EXCEPTION     0x2
 #define MACHINE_TIMER_INTERRUPT           0x80000007
+#define TIMER_INTERRUPT_INTERVAL 0x00000500 // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
 
-#define TIMER_INTERRUPT_INTERVAL 0x00003FFF // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
+unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
 
 void interrupt_handler() {
 
@@ -40,7 +41,8 @@ void interrupt_handler() {
         write_mie(csr_mie); 
 
 
-        rvc_printf("TIMER_INTERRUPT\n");
+        //rvc_printf("TIMER_INTERRUPT\n");
+        COUNT_MACHINE_TIMER_INTRPT[0]++;
         
         csr_mie = read_mie();
         csr_mie = csr_mie | 0x00000888;

@@ -27,6 +27,8 @@ int main() {
     bubbleSort(arr, n);
     printSorted(arr, n);
 
+    rvc_printf("\n");
+    rvc_print_int(COUNT_MACHINE_TIMER_INTRPT[0]);
     return 0;
 }
 
