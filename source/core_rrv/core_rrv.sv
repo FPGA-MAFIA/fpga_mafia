@@ -126,6 +126,7 @@ core_rrv_ctrl core_rrv_ctrl (
   // input instruction 
   .PreInstructionQ101H  (PreInstructionQ101H), //input
   .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
+  .AluOutQ102H          (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input
   .DMemReady            (DMemReady), //input
