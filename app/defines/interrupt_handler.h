@@ -8,7 +8,13 @@
 #define TIMER_INTERRUPT_INTERVAL 0x00000600 // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
 
 unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
+#define TIMER_INTERRUPT_INTERVAL 0x00000600 // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
 
+unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
+
+void mtime_routine_handler() {
+        COUNT_MACHINE_TIMER_INTRPT[0]++;
+}
 void mtime_routine_handler() {
         COUNT_MACHINE_TIMER_INTRPT[0]++;
 }
@@ -59,3 +65,4 @@ void interrupt_handler() {
        }
 
 }
+

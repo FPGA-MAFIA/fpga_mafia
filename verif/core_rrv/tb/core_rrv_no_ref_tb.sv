@@ -20,6 +20,7 @@
 
 module core_rrv_no_ref_tb  ;
 import core_rrv_pkg::*;
+import rv32i_ref_pkg::*;
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;
@@ -34,12 +35,22 @@ logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET- 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 string test_name;
-`include "core_rrv_pmon_tasks.vh"
+logic [31:0] PcQ101H;
+logic [31:0] PcQ102H;
+logic [31:0] PcQ103H, PcQ104H, PcQ105H;
+assign PcQ101H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ101H.Pc;
+assign PcQ102H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ102H.Pc;
+assign PcQ103H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ103H.Pc;
+assign PcQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.Pc;
+assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 
+//`include "core_rrv_tasks.vh"
+//`include "core_rrv_mem_tasks.vh"
+`include "core_rrv_pmon_tasks.vh"
+`include "core_rrv_trk.vh"
 // VGA interface outputs
 t_vga_out   vga_out;
 logic inDisplayArea;
-
 
 // ========================
 // clock gen
@@ -108,7 +119,7 @@ initial begin: detect_timeout
     // timeout
     //=======================================
     #V_TIMEOUT 
-    $error("test ended with timeout");
+    $error("ERROR: test ended with timeout");
     $display("ERROR: No data integrity running - try to increase the timeout value");
     $finish;
 end
@@ -127,11 +138,14 @@ assign InFabricQ503H.next_tile_fifo_arb_id = NULL_CARDINAL;
 
 t_tile_id local_tile_id;
 assign  local_tile_id = 8'h2_2;
+logic RstPc;
+assign RstPc = 1'b0;
 core_rrv_top
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
 core_rrv_top (
 .Clock               (Clk),
 .Rst                 (Rst),
+.RstPc               (RstPc),
 .local_tile_id       (local_tile_id),
 //============================================
 //      fabric interface

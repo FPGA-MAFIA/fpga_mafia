@@ -48,6 +48,11 @@ logic CsrMstatusMieBit, CsrMieMieBit;
 // RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
 // RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
 // RW   - read/write from SW. Example: csr_scratch
+//==========================================================================
+// RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
+// RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
+// RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
+// RW   - read/write from SW. Example: csr_scratch
 always_comb begin
     //==========================================================================
     // default values - no change
@@ -193,6 +198,7 @@ always_comb begin
             {2'b10, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc | csr_data;
             {2'b11, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc & ~csr_data;
             // CSR_MCAUSE 
+            // CSR_MCAUSE 
             {2'b01, CSR_MCAUSE}    : next_csr.csr_mcause = csr_data;
             {2'b10, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause | csr_data;
             {2'b11, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause & ~csr_data;
@@ -221,6 +227,8 @@ always_comb begin
         endcase
     end // if(csr_wren)
 
+    end // if(csr_wren)
+
     //==========================================================================
     // handle HW exceptions:
     //==========================================================================
@@ -229,10 +237,18 @@ always_comb begin
     // 3. illegal CSR access
     // 4. breakpoint
     // ==========================================================================
+    // ==========================================================================
     //==========================================================================
     // ---- RO/V CSR - writes from RTL ----
     // RO/V - read only from SW  , and may be updated from HW. Example: csr_custom_mtime (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
+    // RO/V - read only from SW  , and may be updated from HW. Example: csr_custom_mtime (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
     //==========================================================================
+    next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
+    // the cycle & instret are accessable to read only -> only the mcycle & minstret are updated by the SW/HW
+    next_csr.csr_cycle    = next_csr.csr_mcycle;
+    next_csr.csr_cycleh   = next_csr.csr_mcycleh;
+    next_csr.csr_instret  = next_csr.csr_minstret;
+    next_csr.csr_instreth = next_csr.csr_minstreth;
     next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
     // the cycle & instret are accessable to read only -> only the mcycle & minstret are updated by the SW/HW
     next_csr.csr_cycle    = next_csr.csr_mcycle;
@@ -244,6 +260,10 @@ always_comb begin
     //==========================================================================
     if(Rst) begin
         next_csr = '0;
+        // ==================================================
+        // May override the reset values - add the values here
+        // ==================================================
+        // next_csr.csr_misa = 32'h40001104;
         // ==================================================
         // May override the reset values - add the values here
         // ==================================================

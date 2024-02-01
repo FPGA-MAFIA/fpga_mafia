@@ -11,18 +11,6 @@ t_rf_write_history rf_cur_write;
 t_rf_write_history ref_rf_write_history[$];
 t_rf_write_history ref_rf_cur_write;
 
-`ifndef USE_RF_AND_MEM_CHK              // Avoid multiple Pc declaration signal when using both rf and memory checkers. When using only this checker please remove `ifndef from $finish() 
-`define USE_RF_AND_MEM_CHK
-    logic [31:0] PcQ101H;             // To I_MEM
-    logic [31:0] PcQ102H;             // To I_MEM
-    logic [31:0] PcQ103H, PcQ104H, PcQ105H;
-    assign PcQ101H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ101H.Pc;
-    assign PcQ102H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ102H.Pc;
-    assign PcQ103H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ103H.Pc;
-    assign PcQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.Pc;
-    assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
-`endif
-
 logic RegWrEnQ105H;
 logic [4:0]  RegDstQ105H;
 logic [31:0] RegWrDataQ105H;
