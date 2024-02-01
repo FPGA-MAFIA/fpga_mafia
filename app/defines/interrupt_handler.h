@@ -5,8 +5,13 @@
 // RISCV mcause exceptions defines for detection: 
 #define ILLEGAL_INSTRUCTION_EXCEPTION     0x2
 #define MACHINE_TIMER_INTERRUPT           0x80000007
+#define TIMER_INTERRUPT_INTERVAL 0x00000600 // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
 
-#define TIMER_INTERRUPT_INTERVAL 0x00003FFF // fot 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
+unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
+
+void mtime_routine_handler() {
+        COUNT_MACHINE_TIMER_INTRPT[0]++;
+}
 
 void interrupt_handler() {
 
@@ -28,19 +33,8 @@ void interrupt_handler() {
 
     // For RISC-V, this value is 0x80000007 for machine timer interrupt
     if (mcause == MACHINE_TIMER_INTERRUPT) {
-        csr_mstatus  = read_mstatus();     
-        mie_bit  = (csr_mstatus >> 3) & 0x1;                // read mie bit from mstatus. mie = mstatus[3]
-        csr_mstatus = csr_mstatus & 0xFFFFFFF7;             // disable interrupts by setting mie bit to 0 in mstatus. 
-        csr_mstatus = csr_mstatus | (mie_bit << 7);        // save mie bit into mpie bit mstatus. mpie = mstatus[7]
-        write_mstatus(csr_mstatus);  
-
-        // disable msie, mtie, meie bits in mie
-        csr_mie = read_mie();                   
-        csr_mie = csr_mie & 0xFFFFF777; 
-        write_mie(csr_mie); 
-
-
-        rvc_printf("TIMER_INTERRUPT\n");
+        //Run the mtime interrupt handler routine
+        mtime_routine_handler();
         
         csr_mie = read_mie();
         csr_mie = csr_mie | 0x00000888;

@@ -12,8 +12,7 @@ import core_rrv_pkg::*;
     input     ValidInstQ105H,
     // Outputs to the core
     output var t_csr_pc_update        CsrPcUpdateQ102H,
-    output var t_csr_timer_interrupt  CsrTimerInterruptQ102H,
-    output logic                      interrupt_counter_expired,
+    output logic                      TimerInterruptEnable,
     output logic [31:0]               CsrReadDataQ102H // 32-bit data read from the CSR
 );
 
@@ -42,11 +41,70 @@ logic csr_mcycle_overflow;
 logic csr_minstret_overflow;
 logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_mcycle_high_low;
-logic [63:0] csr_instret_high_low;
-logic [63:0] csr_cycle_high_low;
+logic CsrMstatusMieBit, CsrMieMieBit;
 
+//==========================================================================
+// RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
+// RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
+// RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
+// RW   - read/write from SW. Example: csr_scratch
 always_comb begin
-    next_csr = csr;
+    //==========================================================================
+    // default values - no change
+    //==========================================================================
+    next_csr             = csr;
+    CsrMstatusMieBit     = 0; 
+    CsrMieMieBit         = 0;
+    TimerInterruptEnable = 0;
+    //==========================================================================
+    // RW/V -> HW updates (may be overwritten by SW writes)
+    //==========================================================================
+    {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
+    next_csr.csr_mcycleh  = csr.csr_mcycleh + csr_mcycle_overflow;
+    csr_mcycle_high_low   = {csr.csr_mcycleh, csr.csr_mcycle}; //TODO - csr_mcycle_high_low is not part of the spec
+    if(ValidInstQ105H) begin
+        {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret + 1'b1;
+        next_csr.csr_minstreth = csr.csr_minstreth + csr_minstret_overflow;
+        csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //TODO - csr_minstret_high_low is not part of the spec
+    end
+    if((csr.csr_custom_mtime >= csr.csr_custom_mtimecmp) && (csr.csr_custom_mtime!=0 && csr.csr_custom_mtimecmp!=0)) begin
+        next_csr.csr_mip     = 32'h80;
+        CsrMstatusMieBit     = csr.csr_mstatus[3]; 
+        CsrMieMieBit         = csr.csr_mie[7];
+        TimerInterruptEnable = CsrMstatusMieBit & CsrMieMieBit;
+    end
+    
+    //==========================================================================   
+    if(CsrInterruptUpdateQ102H.illegal_instruction) begin
+        next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
+    end
+    if(CsrInterruptUpdateQ102H.misaligned_access) begin
+        next_csr.csr_mcause = 32'h00000004;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;//FIXME
+    end
+    if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
+        next_csr.csr_mcause = 32'h0000000B;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
+    end
+    if(CsrInterruptUpdateQ102H.breakpoint) begin
+        next_csr.csr_mcause = 32'h00000003;
+        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
+    end
+    if(CsrInterruptUpdateQ102H.timer_interrupt_taken) begin
+        next_csr.csr_mcause   = 32'h80000007;
+        next_csr.csr_mepc     = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mie      = 32'h00000808;  // disable mie 
+        next_csr.csr_mstatus  = 32'h00000080;  // mstatus[7] will be equall to mstatus[3]. If interrupt taken than mstatus[3] = 1
+    end
+
+    //==========================================================================
+    // SW writes
+    //==========================================================================
     if(csr_wren) begin
         unique casez ({csr_op,csr_addr}) // address holds the offset
             // ---- RW CSR ----
@@ -134,7 +192,7 @@ always_comb begin
             {2'b01, CSR_MEPC}    : next_csr.csr_mepc = csr_data;
             {2'b10, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc | csr_data;
             {2'b11, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc & ~csr_data;
-            // CSR_MCAUSE
+            // CSR_MCAUSE 
             {2'b01, CSR_MCAUSE}    : next_csr.csr_mcause = csr_data;
             {2'b10, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause | csr_data;
             {2'b11, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause & ~csr_data;
@@ -158,17 +216,11 @@ always_comb begin
             {2'b01, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr_data;
             {2'b10, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp | csr_data;
             {2'b11, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp & ~csr_data;
-
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
-    end
-    //==========================================================================
-    // TODO - see what is the RISCV termology for the following:
-    // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
-    // RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
-    // RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
-    // RW   - read/write from SW. Example: csr_scratch
+    end // if(csr_wren)
+
     //==========================================================================
     // handle HW exceptions:
     //==========================================================================
@@ -176,71 +228,26 @@ always_comb begin
     // 2. misaligned access
     // 3. illegal CSR access
     // 4. breakpoint
-    //FIXME - please review the values of the exceptions - read the spec
-    if(CsrInterruptUpdateQ102H.illegal_instruction) begin
-        next_csr.csr_mcause = 32'h00000002;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-    end
-    if(CsrInterruptUpdateQ102H.misaligned_access) begin
-        next_csr.csr_mcause = 32'h00000004;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-    end
-    if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
-        next_csr.csr_mcause = 32'h0000000B;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-    end
-    if(CsrInterruptUpdateQ102H.breakpoint) begin
-        next_csr.csr_mcause = 32'h00000003;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-    end
-    if(CsrInterruptUpdateQ102H.timer_interrupt) begin
-        next_csr.csr_mcause = 32'h80000007;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-    end
-
-    // handle HW interrupts:
-    // 1. timer interrupt
-    // 2. external interrupt
-    // TODO - possible fix that. commented by roman
-    //if(interrupt_counter_expired)     begin
-    //    next_csr.csr_mepc   = PcQ102H;
-    //end
-    //if(CsrInterruptUpdateQ102H.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
-
+    // ==========================================================================
     //==========================================================================
     // ---- RO/V CSR - writes from RTL ----
+    // RO/V - read only from SW  , and may be updated from HW. Example: csr_custom_mtime (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
     //==========================================================================
-        {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
-        next_csr.csr_mcycleh  = csr.csr_mcycleh + csr_mcycle_overflow;
-        csr_mcycle_high_low   = {csr.csr_mcycleh, csr.csr_mcycle}; //TODO - csr_mcycle_high_low is not part of the spec
-
-        if(ValidInstQ105H) begin
-            {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret + 1'b1;
-            next_csr.csr_minstreth = csr.csr_minstreth + csr_minstret_overflow;
-            csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //TODO - csr_minstret_high_low is not part of the spec
-        end
-
-        next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
-        if((csr.csr_custom_mtime == csr.csr_custom_mtimecmp) && (csr.csr_custom_mtime!=0 && csr.csr_custom_mtimecmp!=0))
-            next_csr.csr_mip = 32'h80;
-
-        // URO CSR's
-        next_csr.csr_cycle    = next_csr.csr_mcycle;
-        next_csr.csr_cycleh   = next_csr.csr_mcycleh;
-        csr_cycle_high_low    = csr_mcycle_high_low;  
-        next_csr.csr_instret  = next_csr.csr_minstret;
-        next_csr.csr_instreth = next_csr.csr_minstreth;
-        csr_instret_high_low  = csr_minstret_high_low;      
+    next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
+    // the cycle & instret are accessable to read only -> only the mcycle & minstret are updated by the SW/HW
+    next_csr.csr_cycle    = next_csr.csr_mcycle;
+    next_csr.csr_cycleh   = next_csr.csr_mcycleh;
+    next_csr.csr_instret  = next_csr.csr_minstret;
+    next_csr.csr_instreth = next_csr.csr_minstreth;
     //==========================================================================
     // Reset values for CSR
     //==========================================================================
     if(Rst) begin
         next_csr = '0;
-        //May override the reset values
+        // ==================================================
+        // May override the reset values - add the values here
+        // ==================================================
+        // next_csr.csr_misa = 32'h40001104;
     end // if(Rst)
     //==========================================================================
     // READ ONLY - constant values
@@ -310,22 +317,14 @@ end
 logic  BeginInterrupt;
 assign BeginInterrupt = (CsrInterruptUpdateQ102H.illegal_instruction || CsrInterruptUpdateQ102H.misaligned_access 
                        || CsrInterruptUpdateQ102H.illegal_csr_access || CsrInterruptUpdateQ102H.breakpoint 
-                       || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt);
+                       || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt_taken);
 
 assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
 assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
 assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
 
-assign CsrTimerInterruptQ102H.csr_mstatus          = csr.csr_mstatus;
-assign CsrTimerInterruptQ102H.csr_mie              = csr.csr_mie;
-assign CsrTimerInterruptQ102H.csr_custom_mtime     = csr.csr_custom_mtime;
-assign CsrTimerInterruptQ102H.csr_custom_mtimecmp  = csr.csr_custom_mtimecmp;
 
-always_comb begin
-    //create an interrupt if the cycle counter is equal to the compare value
-    interrupt_counter_expired = '0;// csr.csr_cycle_low == csr.csr_scratch;
-end
 
   
 endmodule
