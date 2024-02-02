@@ -263,6 +263,7 @@ always_comb begin
         // May override the reset values - add the values here
         // ==================================================
         // next_csr.csr_misa = 32'h40001104;
+        next_csr.csr_custom_lfsr = 32'hACE1; //seed initialization
     end // if(Rst)
     //==========================================================================
     // READ ONLY - constant values
