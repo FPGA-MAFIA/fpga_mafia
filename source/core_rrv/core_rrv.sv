@@ -56,6 +56,7 @@ logic [31:0]  DMemWrDataQ103H;
 logic [31:0]  CsrReadDataQ102H;      // data red from CSR
 logic [31:0]  CsrWriteDataQ102H;     // data writen to csr
 
+
 // Control bits
 logic                   BranchCondMetQ102H;
 logic                   ReadyQ100H;
@@ -73,7 +74,7 @@ t_ctrl_mem1             CtrlMem1;
 t_ctrl_wb               CtrlWb;
 t_csr_inst_rrv          CtrlCsr;
 t_csr_pc_update         CsrPcUpdateQ102H;
-t_csr_timer_interrupt   CsrTimerInterruptQ102H;
+logic                   TimerInterruptEnable;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
@@ -130,7 +131,7 @@ core_rrv_ctrl core_rrv_ctrl (
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input
   .DMemReady            (DMemReady), //input
-  .CsrTimerInterruptQ102H  (CsrTimerInterruptQ102H), // input from csr unit
+  .TimerInterruptEnable (TimerInterruptEnable),
   // ready signals for "back-pressure" - use as the enable for the pipe stage sample
   .ReadyQ100H           (ReadyQ100H), //  output 
   .ReadyQ101H           (ReadyQ101H), //  output 
@@ -217,15 +218,14 @@ core_rrv_exe core_rrv_exe (
 core_rrv_csr core_rrv_csr (
  .Clk                       (Clock                  ),  
  .Rst                       (Rst                    ),  
- .PcQ102H                   (PcQ102H                ),
- .CsrTimerInterruptQ102H    (CsrTimerInterruptQ102H), 
+ .PcQ102H                   (PcQ102H                ), 
  // Inputs from the core
  .CsrInstQ102H              (CtrlCsr                ),
  .CsrWriteDataQ102H         (CsrWriteDataQ102H      ),
  .ValidInstQ105H            (ValidInstQ105H         ), 
  .CsrInterruptUpdateQ102H   (CsrInterruptUpdateQ102H), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
  .CsrPcUpdateQ102H          (CsrPcUpdateQ102H       ), //output
- .interrupt_counter_expired (                       ),
+ .TimerInterruptEnable      (TimerInterruptEnable   ),
  // Outputs to the core
  .CsrReadDataQ102H          (CsrReadDataQ102H       )
 );

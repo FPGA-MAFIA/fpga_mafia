@@ -79,20 +79,13 @@ typedef struct packed {
     logic misaligned_access;
     logic illegal_csr_access;
     logic breakpoint;
-    logic timer_interrupt;  
+    logic timer_interrupt_taken;  
     logic external_interrupt;
     logic Mret;
     logic [31:0] mtval_instruction;
     logic [31:0] csr_mip;
     logic [31:0] Pc; 
 } t_csr_interrupt_update;
-
-typedef struct packed {
-    logic [31:0] csr_mstatus;
-    logic [31:0] csr_mie;
-    logic [31:0] csr_custom_mtime;
-    logic [31:0] csr_custom_mtimecmp;
-} t_csr_timer_interrupt;
 
 typedef struct packed {
     logic        InterruptJumpEnQ102H;

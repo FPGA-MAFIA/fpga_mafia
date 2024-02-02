@@ -23,7 +23,7 @@ import core_rrv_pkg::*;
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
     input   logic        DMemReady,
-    input   var t_csr_timer_interrupt CsrTimerInterruptQ102H,
+    input   logic        TimerInterruptEnable,
     // ready signals for "back-pressure" - use as the enable for the pipe stage sample
     output  logic        ReadyQ100H,
     output  logic        ReadyQ101H,
@@ -87,27 +87,22 @@ assign CoreFreeze = !DMemReady;
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 
-// detect illegal instruction
+//detect illegal instruction
 `include "illegal_instructions.vh"
 logic IllegalInstructionQ101H;
 assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
+//decide whether to take timer interrupt
+// Timer interrupt is taken only when the instruction is a valid for example: not HW nops
+// and the instruction is not Branch or Jump
+logic JumpOrBranch;
+assign JumpOrBranch = (OpcodeQ101H == BRANCH) || (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR); 
 
-//FIXME - this logic should be in the CR module and only the "TimerInterruptQ101H" should be here 
-logic PreTimerInterruptQ101H;
-//FIXME - this is not a good name for this signal. MtimecmpGeMtimeQ101H is better (mtimecmp is Greater or Equal to mtime)
-assign PreTimerInterruptQ101H = (CsrTimerInterruptQ102H.csr_custom_mtime == CsrTimerInterruptQ102H.csr_custom_mtimecmp);
+logic TimerInterruptTakenQ101H, TimerInterruptTakenQ102H, TimerInterruptTakenQ103H;
+assign TimerInterruptTakenQ101H = (TimerInterruptEnable) & (PreValidInstQ101H) & !(JumpOrBranch) & !(IllegalInstructionQ101H);
+`MAFIA_EN_RST_DFF(TimerInterruptTakenQ102H, TimerInterruptTakenQ101H, Clock, ReadyQ102H, Rst )
+`MAFIA_EN_RST_DFF(TimerInterruptTakenQ103H, TimerInterruptTakenQ102H, Clock, ReadyQ103H, Rst )
 
-logic CsrMstatusMieBit, CsrMieMieBit, TimerInterruptEnable;
-assign CsrMstatusMieBit = CsrTimerInterruptQ102H.csr_mstatus[3];
-assign CsrMieMieBit     = CsrTimerInterruptQ102H.csr_mie[7];
-assign TimerInterruptEnable = CsrMstatusMieBit & CsrMieMieBit;
-
-logic TimerInterruptQ101H;
-//assign TimerInterruptQ101H = (CsrTimerInterruptQ102H.csr_mstatus[3] && CsrTimerInterruptQ102H.csr_mie[7]) &&
-//                              (CsrTimerInterruptQ102H.csr_custom_mtime == CsrTimerInterruptQ102H.csr_custom_mtimecmp);
-
-assign TimerInterruptQ101H = PreTimerInterruptQ101H & TimerInterruptEnable;
 
 logic LoadHazardValidRegSrc2Q101H;
 logic RegDstQ102MatchRegSrc1Q101H;
@@ -132,21 +127,20 @@ assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) 
 // And the new PC is updated to a new value. 
 // in the case of illegal instruction we jump to the exception handler
 // in the case of Mret we jump to the address in the mepc CSR
-logic TimerInterruptQ102H;
-`MAFIA_EN_RST_DFF(TimerInterruptQ102H, TimerInterruptQ101H, Clock, ReadyQ102H, Rst )
 
-assign flushQ102H = IndirectBranchQ102H                         || 
-                    CsrInterruptUpdateQ102H.illegal_instruction ||
-                    CsrInterruptUpdateQ102H.Mret                ||
-                    TimerInterruptQ102H;
+
+assign flushQ102H = IndirectBranchQ102H || CsrInterruptUpdateQ102H.illegal_instruction ||
+                    CsrInterruptUpdateQ102H.timer_interrupt_taken || CsrInterruptUpdateQ102H.Mret;
+
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
 logic InsertNopQ101H;
-assign InsertNopQ101H = flushQ102H           || flushQ103H                 || //
-                        TimerInterruptQ101H  || PreIllegalInstructionQ101H || 
-                        LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H;
-assign InstructionQ101H = InsertNopQ101H  ? NOP  :  PreInstructionQ101H;
-assign PreValidInstQ101H = InsertNopQ101H ? 1'b0 :  1'b1 ;
+assign InsertNopQ101H = flushQ102H                 || flushQ103H               || 
+                        PreIllegalInstructionQ101H || LoadHzrd1DetectQ101H     || 
+                        LoadHzrd2DetectQ101H;
+
+assign InstructionQ101H  = InsertNopQ101H  ? NOP  :  PreInstructionQ101H;
+assign PreValidInstQ101H = InsertNopQ101H  ? 1'b0 :  1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
@@ -197,19 +191,18 @@ assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b0000000_00001_00000_000
 assign ecall_was_calledQ101H  = (InstructionQ101H == 32'b0000000_00000_00000_000_00000_1110011);
 assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000_00000_1110011);
 // Update Interrupts CSR and flow control
-    assign CsrInterruptUpdateQ101H.misaligned_access    = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.illegal_csr_access   = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.breakpoint           = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.timer_interrupt      = TimerInterruptQ101H; 
-    assign CsrInterruptUpdateQ101H.external_interrupt   = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.illegal_instruction  = IllegalInstructionQ101H;
-    assign CsrInterruptUpdateQ101H.Mret  = mret_was_calledQ101H;
-    assign CsrInterruptUpdateQ101H.mtval_instruction = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
+    assign CsrInterruptUpdateQ101H.misaligned_access        = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.illegal_csr_access       = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.breakpoint               = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.timer_interrupt_taken    = TimerInterruptTakenQ101H; 
+    assign CsrInterruptUpdateQ101H.external_interrupt       = '0; // FIXME - assign correct value
+    assign CsrInterruptUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
+    assign CsrInterruptUpdateQ101H.Mret                     = mret_was_calledQ101H;
+    assign CsrInterruptUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
 
-    assign CsrInterruptUpdateQ101H.Pc = CsrInterruptUpdateQ101H.illegal_instruction ? PcQ101H + 32'h4 :
-                                        TimerInterruptQ101H & !IndirectBranchQ102H  ? PcQ101H         :
-                                        TimerInterruptQ101H & IndirectBranchQ102H   ? AluOutQ102H     :
-                                                                                    32'h0;
+    assign CsrInterruptUpdateQ101H.Pc = IllegalInstructionQ101H   ? PcQ101H + 32'h4 :  
+                                        CsrInterruptUpdateQ101H.timer_interrupt_taken ? PcQ101H + 32'h4 : 32'h0;
+  
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
     // ---- R type ----

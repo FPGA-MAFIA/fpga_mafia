@@ -12,8 +12,7 @@ import core_rrv_pkg::*;
     input     ValidInstQ105H,
     // Outputs to the core
     output var t_csr_pc_update        CsrPcUpdateQ102H,
-    output var t_csr_timer_interrupt  CsrTimerInterruptQ102H,
-    output logic                      interrupt_counter_expired,
+    output logic                      TimerInterruptEnable,
     output logic [31:0]               CsrReadDataQ102H // 32-bit data read from the CSR
 );
 
@@ -42,6 +41,7 @@ logic csr_mcycle_overflow;
 logic csr_minstret_overflow;
 logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_mcycle_high_low;
+logic CsrMstatusMieBit, CsrMieMieBit;
 
 //==========================================================================
 // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
@@ -52,7 +52,10 @@ always_comb begin
     //==========================================================================
     // default values - no change
     //==========================================================================
-    next_csr = csr;
+    next_csr             = csr;
+    CsrMstatusMieBit     = 0; 
+    CsrMieMieBit         = 0;
+    TimerInterruptEnable = 0;
     //==========================================================================
     // RW/V -> HW updates (may be overwritten by SW writes)
     //==========================================================================
@@ -64,8 +67,12 @@ always_comb begin
         next_csr.csr_minstreth = csr.csr_minstreth + csr_minstret_overflow;
         csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //TODO - csr_minstret_high_low is not part of the spec
     end
-    if((csr.csr_custom_mtime == csr.csr_custom_mtimecmp) && (csr.csr_custom_mtime!=0 && csr.csr_custom_mtimecmp!=0))
-        next_csr.csr_mip = 32'h80;
+    if((csr.csr_custom_mtime >= csr.csr_custom_mtimecmp) && (csr.csr_custom_mtime!=0 && csr.csr_custom_mtimecmp!=0)) begin
+        next_csr.csr_mip     = 32'h80;
+        CsrMstatusMieBit     = csr.csr_mstatus[3]; 
+        CsrMieMieBit         = csr.csr_mie[7];
+        TimerInterruptEnable = CsrMstatusMieBit & CsrMieMieBit;
+    end
     
     //==========================================================================   
     if(CsrInterruptUpdateQ102H.illegal_instruction) begin
@@ -88,10 +95,19 @@ always_comb begin
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
-    if(CsrInterruptUpdateQ102H.timer_interrupt) begin
-        next_csr.csr_mcause = 32'h80000007;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
+    if(CsrInterruptUpdateQ102H.timer_interrupt_taken) begin
+        TimerInterruptEnable  = 0;
+        next_csr.csr_mcause   = 32'h80000007;
+        next_csr.csr_mepc     = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mie      = 32'h00000808;  // disable mie 
+        next_csr.csr_mstatus  = 32'h00000080;  // mstatus[7] will be equall to mstatus[3]. If interrupt taken than mstatus[3] = 1
     end
+    if(CsrInterruptUpdateQ102H.Mret) begin
+            next_csr.csr_mie     = 32'h00000888;  // enable mie
+            next_csr.csr_mstatus = 32'h00000008;
+            next_csr.csr_mip     = 32'h0; 
+    end
+
 
     //==========================================================================
     // SW writes
@@ -308,22 +324,14 @@ end
 logic  BeginInterrupt;
 assign BeginInterrupt = (CsrInterruptUpdateQ102H.illegal_instruction || CsrInterruptUpdateQ102H.misaligned_access 
                        || CsrInterruptUpdateQ102H.illegal_csr_access || CsrInterruptUpdateQ102H.breakpoint 
-                       || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt);
+                       || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt_taken);
 
 assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
 assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
 assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
 
-assign CsrTimerInterruptQ102H.csr_mstatus          = csr.csr_mstatus;
-assign CsrTimerInterruptQ102H.csr_mie              = csr.csr_mie;
-assign CsrTimerInterruptQ102H.csr_custom_mtime     = csr.csr_custom_mtime;
-assign CsrTimerInterruptQ102H.csr_custom_mtimecmp  = csr.csr_custom_mtimecmp;
 
-always_comb begin
-    //create an interrupt if the cycle counter is equal to the compare value
-    interrupt_counter_expired = '0;// csr.csr_cycle_low == csr.csr_scratch;
-end
 
   
 endmodule
