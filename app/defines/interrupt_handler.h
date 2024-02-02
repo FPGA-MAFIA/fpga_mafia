@@ -5,7 +5,7 @@
 // RISCV mcause exceptions defines for detection: 
 #define ILLEGAL_INSTRUCTION_EXCEPTION     0x2
 #define MACHINE_TIMER_INTERRUPT           0x80000007
-#define TIMER_INTERRUPT_INTERVAL 0x00000800 // for 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
+#define TIMER_INTERRUPT_INTERVAL 0x00000500 // for 2 timer interrupts set to 0x0000004F and comment line 8 in alive_illegal.c
 
 unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
 
