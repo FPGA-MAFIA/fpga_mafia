@@ -98,11 +98,9 @@ assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H |
 logic JumpOrBranch;
 assign JumpOrBranch = (OpcodeQ101H == BRANCH) || (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR); 
 
-logic TimerInterruptTakenQ101H, TimerInterruptTakenQ102H, TimerInterruptTakenQ103H;
+logic TimerInterruptTakenQ101H, TimerInterruptTakenQ102H;
 assign TimerInterruptTakenQ101H = (TimerInterruptEnable) & (PreValidInstQ101H) & !(JumpOrBranch) & !(IllegalInstructionQ101H);
 `MAFIA_EN_RST_DFF(TimerInterruptTakenQ102H, TimerInterruptTakenQ101H, Clock, ReadyQ102H, Rst )
-`MAFIA_EN_RST_DFF(TimerInterruptTakenQ103H, TimerInterruptTakenQ102H, Clock, ReadyQ103H, Rst )
-
 
 logic LoadHazardValidRegSrc2Q101H;
 logic RegDstQ102MatchRegSrc1Q101H;
