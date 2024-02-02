@@ -87,10 +87,22 @@ assign CoreFreeze = !DMemReady;
 assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 
-// detect illegal instruction
+//detect illegal instruction
 `include "illegal_instructions.vh"
 logic IllegalInstructionQ101H;
 assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
+
+//decide whether to take timer interrupt
+// Timer interrupt is taken only when the instruction is a valid for example: not HW nops
+// and the instruction is not Branch or Jump
+logic JumpOrBranch;
+assign JumpOrBranch = (OpcodeQ101H == BRANCH) || (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR); 
+
+logic TimerInterruptTakenQ101H, TimerInterruptTakenQ102H, TimerInterruptTakenQ103H;
+assign TimerInterruptTakenQ101H = (TimerInterruptEnable) & (PreValidInstQ101H) & !(JumpOrBranch) & !(IllegalInstructionQ101H);
+`MAFIA_EN_RST_DFF(TimerInterruptTakenQ102H, TimerInterruptTakenQ101H, Clock, ReadyQ102H, Rst )
+`MAFIA_EN_RST_DFF(TimerInterruptTakenQ103H, TimerInterruptTakenQ102H, Clock, ReadyQ103H, Rst )
+
 
 logic LoadHazardValidRegSrc2Q101H;
 logic RegDstQ102MatchRegSrc1Q101H;
@@ -117,17 +129,18 @@ assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) 
 // in the case of Mret we jump to the address in the mepc CSR
 
 
-assign flushQ102H = IndirectBranchQ102H                         || 
-                    CsrInterruptUpdateQ102H.illegal_instruction ||
-                    CsrInterruptUpdateQ102H.Mret;
+assign flushQ102H = IndirectBranchQ102H || CsrInterruptUpdateQ102H.illegal_instruction ||
+                    CsrInterruptUpdateQ102H.timer_interrupt_taken || CsrInterruptUpdateQ102H.Mret;
+
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
 logic InsertNopQ101H;
-assign InsertNopQ101H = flushQ102H           || flushQ103H     || 
-                        PreIllegalInstructionQ101H             || 
-                        LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H;
-assign InstructionQ101H = InsertNopQ101H  ? NOP  :  PreInstructionQ101H;
-assign PreValidInstQ101H = InsertNopQ101H ? 1'b0 :  1'b1 ;
+assign InsertNopQ101H = flushQ102H                 || flushQ103H               || 
+                        PreIllegalInstructionQ101H || LoadHzrd1DetectQ101H     || 
+                        LoadHzrd2DetectQ101H;
+
+assign InstructionQ101H  = InsertNopQ101H  ? NOP  :  PreInstructionQ101H;
+assign PreValidInstQ101H = InsertNopQ101H  ? 1'b0 :  1'b1 ;
 
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
@@ -181,13 +194,14 @@ assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000
     assign CsrInterruptUpdateQ101H.misaligned_access        = '0; // FIXME - assign correct value
     assign CsrInterruptUpdateQ101H.illegal_csr_access       = '0; // FIXME - assign correct value
     assign CsrInterruptUpdateQ101H.breakpoint               = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.timer_interrupt_taken    = '0; 
+    assign CsrInterruptUpdateQ101H.timer_interrupt_taken    = TimerInterruptTakenQ101H; 
     assign CsrInterruptUpdateQ101H.external_interrupt       = '0; // FIXME - assign correct value
     assign CsrInterruptUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
     assign CsrInterruptUpdateQ101H.Mret                     = mret_was_calledQ101H;
     assign CsrInterruptUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
 
-    assign CsrInterruptUpdateQ101H.Pc = CsrInterruptUpdateQ101H.illegal_instruction ? PcQ101H + 32'h4 :  32'h0;
+    assign CsrInterruptUpdateQ101H.Pc = IllegalInstructionQ101H   ? PcQ101H + 32'h4 :  
+                                        CsrInterruptUpdateQ101H.timer_interrupt_taken ? PcQ101H + 32'h4 : 32'h0;
   
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
