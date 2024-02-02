@@ -42,6 +42,7 @@ logic csr_minstret_overflow;
 logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_mcycle_high_low;
 logic CsrMstatusMieBit, CsrMieMieBit;
+logic left_lfsr_bit;
 
 //==========================================================================
 // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
@@ -108,7 +109,10 @@ always_comb begin
             next_csr.csr_mip     = 32'h0; 
     end
 
-
+    //==========================================================
+    //32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
+    left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
+    next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
     //==========================================================================
     // SW writes
     //==========================================================================
@@ -223,6 +227,10 @@ always_comb begin
             {2'b01, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr_data;
             {2'b10, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp | csr_data;
             {2'b11, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp & ~csr_data;
+            // CSR_CUSTOM_LFSR
+            {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
+            {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
+            {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
             // ---- Other ----
             default   : /* Do nothing */;
         endcase

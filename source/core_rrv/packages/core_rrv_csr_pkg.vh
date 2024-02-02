@@ -71,7 +71,9 @@ typedef enum logic [11:0] {
  CSR_MTVAL2          = 12'h34B,
  //Custom csr's for mtime, mtimecmp
  CSR_CUSTOM_MTIME    = 12'hFC0,
- CSR_CUSTOM_MTIMECMP = 12'hBC0
+ CSR_CUSTOM_MTIMECMP = 12'hBC0,
+ //Custom csr used for LFSR 
+ CSR_CUSTOM_LFSR     = 12'hBC1
 } t_csr_addr ;
 
 typedef struct packed {
@@ -132,6 +134,7 @@ typedef struct packed {
     logic [31:0] csr_mtval2;
     logic [31:0] csr_custom_mtime;
     logic [31:0] csr_custom_mtimecmp;
+    logic [31:0] csr_custom_lfsr;
 } t_csr;
 
 typedef struct packed {
