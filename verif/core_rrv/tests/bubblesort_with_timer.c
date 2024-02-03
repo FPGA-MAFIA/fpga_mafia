@@ -15,7 +15,7 @@ void bubbleSort(int arr[], int n) {
 
 void printSorted(int arr[], int n){
     int i;
-    for (i = 0; i < n-1; i++) {
+    for (i = 0; i < n; i++) {
         rvc_print_int(arr[i]);
         rvc_printf(" ");
     }
