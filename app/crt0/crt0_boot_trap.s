@@ -46,7 +46,7 @@ csr_init:
   csrw mtvec, t0    # Write the value in t0 to the mtvec CSR
 
   # Enable software and external interrupts. Set msie, meie  fields Disable the mtie timer interrupt 
-  li t0, 0x808
+  li t0, 0x888
   csrw	mie, t0     
   
   # Enable interrupts. Set MIE and MPIE bit to 1 and 0 respectively in mstatus register.

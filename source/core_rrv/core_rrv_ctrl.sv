@@ -111,11 +111,11 @@ assign  LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H =
 // Load Hazard 1 detection - between pipe stage 102 and 101
 assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && ValidInstQ102H && (CtrlQ102H.Opcode == LOAD);
 assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && ValidInstQ102H && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
-assign  LoadHzrd1DetectQ101H        =   RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H;
+assign  LoadHzrd1DetectQ101H        = (RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H);
 // Load Hazard 2 detection - between pipe stage 103 and 101
 assign  RegDstQ103MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ103H.RegDst) && ValidInstQ103H && (CtrlQ103H.Opcode == LOAD);
 assign  RegDstQ103MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ103H.RegDst) && ValidInstQ103H && (CtrlQ103H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
-assign  LoadHzrd2DetectQ101H        =  RegDstQ103MatchRegSrc1Q101H ||  RegDstQ103MatchRegSrc2Q101H;          
+assign  LoadHzrd2DetectQ101H        = (RegDstQ103MatchRegSrc1Q101H ||  RegDstQ103MatchRegSrc2Q101H);          
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
@@ -253,7 +253,9 @@ assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wra
 assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
-assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H; //
+assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H || flushQ103H; 
+
+//assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H; //
 //assign ReadyQ101H = flushQ102H ? 1'b1 : (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
