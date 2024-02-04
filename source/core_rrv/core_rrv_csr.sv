@@ -103,7 +103,7 @@ always_comb begin
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
     end
-    if(CsrInterruptUpdateQ102H.Mret && csr.csr_mip) begin
+    if(CsrInterruptUpdateQ102H.Mret && csr.csr_mip[7]) begin
             next_csr.csr_mie     = 32'h00000888;  // enable mie
             next_csr.csr_mstatus = 32'h00000008;
             next_csr.csr_mip     = 32'h0; 
