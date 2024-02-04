@@ -13,7 +13,7 @@ from termcolor import colored
 examples = '''
 Examples:
 python build.py -dut 'big_core' -all -full_run                      -> running full test (app, hw, sim) for all the tests and keeping the outputs 
-python build.py -dut 'big_core'        -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
+python build.py -dut 'big_core' -all -full_run                      -> running full test (app, hw, sim) for all the tests and removing the outputs 
 python build.py -dut 'big_core' -tests 'alive plus_test' -full_run  -> run full test (app, hw, sim) for alive & plus_test only 
 python build.py -dut 'big_core' -tests 'alive' -app                 -> compiling the sw for 'alive' test only 
 python build.py -dut 'big_core' -tests 'alive' -hw                  -> compiling the hw for 'alive' test only 

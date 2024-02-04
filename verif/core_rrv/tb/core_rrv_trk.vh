@@ -1,6 +1,7 @@
 
 integer trk_alu;
 initial begin: trk_alu_gen
+    #1
     $timeformat(-9, 1, " ", 6);
     trk_alu = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
@@ -15,6 +16,7 @@ end
 
 integer trk_inst;
 initial begin: trk_inst_gen
+    #1
     $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
@@ -30,6 +32,7 @@ always @(posedge Clk) begin : inst_print
 end
 integer trk_fetch;
 initial begin: trk_fetch_gen
+    #1
     $timeformat(-9, 1, " ", 6);
     trk_fetch = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_fetch.log"},"w");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");
@@ -43,6 +46,7 @@ end
 
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
+    #1
     $timeformat(-9, 1, " ", 6);
     trk_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
@@ -76,6 +80,7 @@ end
 
 integer trk_reg_write;
 initial begin: trk_reg_write_gen
+    #1
     $timeformat(-9, 1, " ", 6);
     trk_reg_write = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_reg_write.log"},"w");
     $fwrite(trk_reg_write,"---------------------------------------------------------\n");
