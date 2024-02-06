@@ -86,11 +86,10 @@ always_comb begin
     if(CsrInterruptUpdateQ102H.timer_interrupt_taken) begin
         next_csr.csr_mcause    = 32'h80000007;
         next_csr.csr_mepc      = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mie       = 32'h00000808;  // disable mie 
         //next_csr.csr_mstatus   = 32'h00000080;  // mstatus should update the the "p" (prior) bits according to the current state.
         //                                       // the mie bit should be cleared so no new interrupts will be taken until the MRET instruction is executed
-        next_csr.csr_mstatus[11] = csr.csr_mstatus[7];  // according 
-        next_csr.csr_mstatus[7]  = 1'b0;  // disable mie when taking an exception
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // according 
+        next_csr.csr_mstatus[3]  = 1'b0;  // disable mie when taking an exception
     end
     if(CsrInterruptUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
@@ -115,7 +114,7 @@ always_comb begin
     end
 
     if(CsrInterruptUpdateQ102H.Mret) begin //FIXME
-            next_csr.csr_mstatus[7] = csr.csr_mstatus[11];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
+            next_csr.csr_mstatus[3] = csr.csr_mstatus[7];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
     end
 
     //==========================================================
