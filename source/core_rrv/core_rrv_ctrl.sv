@@ -99,6 +99,10 @@ logic JumpOrBranch;
 assign JumpOrBranch = (OpcodeQ101H == BRANCH) || (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR); 
 
 logic TimerInterruptTakenQ101H, TimerInterruptTakenQ102H;
+//Note: To simplfy the design, when we take the timer interrupt we will return to PC+4.
+//      This is why we don't take the timer interrupt when we are in the middle of a branch or jump. (next instruction is not PC+4)
+//Note: We don't take the timer interrupt when we don't have a valid instruction.
+//      This is to solve the issue that the current PC must be a valid value so we can return to pc+4 after the interrupt.
 assign TimerInterruptTakenQ101H = (TimerInterruptEnable) & (PreValidInstQ101H) & !(JumpOrBranch) & !(IllegalInstructionQ101H);
 `MAFIA_EN_RST_DFF(TimerInterruptTakenQ102H, TimerInterruptTakenQ101H, Clock, ReadyQ102H, Rst )
 
@@ -198,8 +202,9 @@ assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000
     assign CsrInterruptUpdateQ101H.Mret                     = mret_was_calledQ101H;
     assign CsrInterruptUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
 
-    assign CsrInterruptUpdateQ101H.Pc = IllegalInstructionQ101H   ? PcQ101H + 32'h4 :  
-                                        CsrInterruptUpdateQ101H.timer_interrupt_taken ? PcQ101H + 32'h4 : 32'h0;
+    assign CsrInterruptUpdateQ101H.Pc = IllegalInstructionQ101H                       ? PcQ101H :   
+                                        CsrInterruptUpdateQ101H.timer_interrupt_taken ? PcQ101H :
+                                                                                        32'h0;
   
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
