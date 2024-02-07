@@ -82,7 +82,7 @@ always_comb begin
         next_csr.csr_mcause    = 32'h80000007;
         next_csr.csr_mepc      = CsrInterruptUpdateQ102H.Pc;
         //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the 
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
     if(CsrInterruptUpdateQ102H.illegal_instruction) begin
@@ -90,7 +90,7 @@ always_comb begin
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
         //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the 
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
     if(CsrInterruptUpdateQ102H.misaligned_access) begin
@@ -98,7 +98,7 @@ always_comb begin
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;//FIXME - need to enter the misaligned address - not the instruction!
         //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the 
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
     if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
@@ -106,7 +106,7 @@ always_comb begin
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
         //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the 
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
 
@@ -115,7 +115,7 @@ always_comb begin
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
         //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the 
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
 
@@ -125,6 +125,7 @@ always_comb begin
     if(CsrInterruptUpdateQ102H.Mret) begin //FIXME
         //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
             next_csr.csr_mstatus[3] = csr.csr_mstatus[7];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
+                                                           // FIXME - review what other mstatus bits should be restored
     end
 
     //==========================================================
@@ -365,7 +366,7 @@ assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
 
 
 
-// unloaded - used onlu for debug and waves review
+// unloaded - used only for debug and waves review
 assign csr_mcycle_high_low    = {csr.csr_mcycleh,   csr.csr_mcycle}; //csr_mcycle_high_low is not part of the spec
 assign csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //csr_minstret_high_low is not part of the spec
 
