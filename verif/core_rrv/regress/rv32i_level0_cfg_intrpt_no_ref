@@ -1,0 +1,2 @@
+bubblesort_with_timer.c -gRF_NUM_MSB=31
+bubblesort_lfsr.c      -gRF_NUM_MSB=31
