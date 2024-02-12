@@ -39,7 +39,6 @@ logic [31:0] csr_data;
 assign csr_data = (csr_imm_bit) ? csr_data_imm : CsrWriteDataQ102H;
 logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_mcycle_high_low;
-logic CsrMstatusMieBit, CsrMieMieBit;
 logic left_lfsr_bit;
 
 
@@ -47,10 +46,10 @@ logic left_lfsr_bit;
 // ==============================================================================
 // mtime and mtimecmp
 // ==============================================================================
-//The condition for taking the timer interrupt is: //FIXME - instead of using hard coded values, use the CSR enumurate values (CSR_MIP_MTIP, CSR_MSTATUS_MIE, CSR_MIE_MTIE)
-assign TimerInterruptEnable =  csr.csr_mip[7]       && // 1) mtime >= mtimecmp : MTIP - Machine Timer Interrupt Pending
-                               csr.csr_mstatus[3]   && // 2) in mstatus register MIE bit is set
-                               csr.csr_mie[7];         // 3) in mie register MTIE bit is set
+//The condition for taking the timer interrupt is: 
+assign TimerInterruptEnable =  csr.csr_mip[CSR_MIP_MTIP]          && // 1) mtime >= mtimecmp : MTIP - Machine Timer Interrupt Pending
+                               csr.csr_mstatus[CSR_MSTATUS_MIE]   && // 2) in mstatus register MIE bit is set
+                               csr.csr_mie[CSR_MIE_MTIE];            // 3) in mie register MTIE bit is set
 
 //==========================================================================
 // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
@@ -73,59 +72,52 @@ always_comb begin
 
     //==========================================================================   
     //The MTIP - Machine Timer Interrupt Pending bit in the mip register is set when the mtime >= mtimecmp 
-    // FIXME - instead of using hard coded values, use the CSR enumurate values (CSR_MIP_MTIP)
-    next_csr.csr_mip[7]  = (csr.csr_custom_mtime >= csr.csr_custom_mtimecmp); // set the MTIP bit in the mip register -     
+    next_csr.csr_mip[CSR_MIP_MTIP]  = (csr.csr_custom_mtime >= csr.csr_custom_mtimecmp); // set the MTIP bit in the mip register -     
     //==========================================================================   
 
     //==========================================================================   
     if(CsrInterruptUpdateQ102H.timer_interrupt_taken) begin
         next_csr.csr_mcause    = 32'h80000007;
         next_csr.csr_mepc      = CsrInterruptUpdateQ102H.Pc;
-        //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
-        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
     if(CsrInterruptUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-        //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
     if(CsrInterruptUpdateQ102H.misaligned_access) begin
         next_csr.csr_mcause = 32'h00000004;
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;//FIXME - need to enter the misaligned address - not the instruction!
-        //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
-        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;  //FIXME - need to enter the misaligned address - not the instruction!
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
     if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
         next_csr.csr_mcause = 32'h0000000B;
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-        //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
-        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                             // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
 
     if(CsrInterruptUpdateQ102H.breakpoint) begin
         next_csr.csr_mcause = 32'h00000003;
         next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
         next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
-        //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-        next_csr.csr_mstatus[7] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
-        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
 
     // ==================================================
     // Return from exception
     // ==================================================
     if(CsrInterruptUpdateQ102H.Mret) begin //FIXME
-        //FIXME instead of using hard coded values, use the CSR enumurate values (CSR_MSTATUS_MIE, CSR_MSTATUS_MPIE)
-            next_csr.csr_mstatus[3] = csr.csr_mstatus[7];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
-                                                           // FIXME - review what other mstatus bits should be restored
+            next_csr.csr_mstatus[CSR_MSTATUS_MIE] = csr.csr_mstatus[CSR_MSTATUS_MPIE];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
+                                                                                       // FIXME - review what other mstatus bits should be restored
     end
 
     //==========================================================
