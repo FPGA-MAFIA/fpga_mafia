@@ -45,7 +45,7 @@ csr_init:
   li t0, 0x100      # Load the immediate value 0x100 of trap handler address
   csrw mtvec, t0    # Write the value in t0 to the mtvec CSR
 
-  # Enable software and external interrupts. Set msie, meie  fields Disable the mtie timer interrupt 
+  # Enable software and external interrupts. Set meie and msie to 1 and mtie to 0 as default values
   li t0, 0x808
   csrw	mie, t0     
   

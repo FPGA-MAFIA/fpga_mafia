@@ -173,3 +173,29 @@ typedef enum logic [2:0] {
     OR_   = 3'b110 , 
     AND_  = 3'b111
 } t_funct3_Rtype;
+
+typedef enum logic [4:0] {
+    CSR_MSTATUS_SIE  = 5'd1,
+    CSR_MSTATUS_MIE  = 5'd3,
+    CSR_MSTATUS_SPIE = 5'd5,
+    CSR_MSTATUS_MPIE = 5'd7
+} t_mstatus_csr_bits;
+
+typedef enum logic [4:0] {
+    CSR_MIE_SSIE  = 5'd1,
+    CSR_MIE_MSIE  = 5'd3,
+    CSR_MIE_STIE  = 5'd5,
+    CSR_MIE_MTIE  = 5'd7,
+    CSR_MIE_SEIE  = 5'd9,
+    CSR_MIE_MEIE  = 5'd11
+} t_mie_csr_bits;
+
+typedef enum logic [4:0] {
+    CSR_MIP_SSIP  = 5'd1,
+    CSR_MIP_MSIP  = 5'd3,
+    CSR_MIP_STIP  = 5'd5,
+    CSR_MIP_MTIP  = 5'd7,
+    CSR_MIP_SEIP  = 5'd9,
+    CSR_MIP_MEIP  = 5'd11
+} t_mip_csr_bits;
+
