@@ -65,7 +65,7 @@ logic                   ReadyQ103H;
 logic                   ReadyQ104H;
 logic                   ReadyQ105H;
 logic                   ValidInstQ105H;
-t_csr_interrupt_update  CsrInterruptUpdateQ102H;
+t_csr_exception_update  CsrExceptionUpdateQ102H;
 t_core_rrv_ctrl         Ctrl;
 t_ctrl_if               CtrlIf;
 t_ctrl_rf               CtrlRf;
@@ -148,7 +148,7 @@ core_rrv_ctrl core_rrv_ctrl (
   .CtrlWb                   (CtrlWb                   ), //output
   // output data path signals
   .ImmediateQ101H           (ImmediateQ101H           ), //output
-  .CsrInterruptUpdateQ102H  (CsrInterruptUpdateQ102H  ), //output
+  .CsrExceptionUpdateQ102H  (CsrExceptionUpdateQ102H  ), //output
   .ValidInstQ105H           (ValidInstQ105H           )
 );
 
@@ -223,7 +223,7 @@ core_rrv_csr core_rrv_csr (
  .CsrInstQ102H              (CtrlCsr                ),
  .CsrWriteDataQ102H         (CsrWriteDataQ102H      ),
  .ValidInstQ105H            (ValidInstQ105H         ), 
- .CsrInterruptUpdateQ102H   (CsrInterruptUpdateQ102H), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .CsrExceptionUpdateQ102H   (CsrExceptionUpdateQ102H), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
  .CsrPcUpdateQ102H          (CsrPcUpdateQ102H       ), //output
  .TimerInterruptEnable      (TimerInterruptEnable   ),
  // Outputs to the core

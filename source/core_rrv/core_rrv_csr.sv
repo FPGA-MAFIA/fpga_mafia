@@ -8,7 +8,7 @@ import core_rrv_pkg::*;
     // Inputs from the core
     input var t_csr_inst_rrv          CsrInstQ102H,
     input logic [31:0]                CsrWriteDataQ102H,
-    input var t_csr_interrupt_update  CsrInterruptUpdateQ102H, // 32-bit data to be written into the CSR
+    input var t_csr_exception_update  CsrExceptionUpdateQ102H, // 32-bit data to be written into the CSR
     input                             ValidInstQ105H,
     // Outputs to the core
     output var t_csr_pc_update        CsrPcUpdateQ102H,
@@ -76,38 +76,38 @@ always_comb begin
     //==========================================================================   
 
     //==========================================================================   
-    if(CsrInterruptUpdateQ102H.timer_interrupt_taken) begin
+    if(CsrExceptionUpdateQ102H.timer_interrupt_taken) begin
         next_csr.csr_mcause    = 32'h80000007;
-        next_csr.csr_mepc      = CsrInterruptUpdateQ102H.Pc;
+        next_csr.csr_mepc      = CsrExceptionUpdateQ102H.Pc;
         next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
-    if(CsrInterruptUpdateQ102H.illegal_instruction) begin
+    if(CsrExceptionUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
         next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
-    if(CsrInterruptUpdateQ102H.misaligned_access) begin
+    if(CsrExceptionUpdateQ102H.misaligned_access) begin
         next_csr.csr_mcause = 32'h00000004;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;  //FIXME - need to enter the misaligned address - not the instruction!
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;  //FIXME - need to enter the misaligned address - not the instruction!
         next_csr.csr_mstatus[7] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
-    if(CsrInterruptUpdateQ102H.illegal_csr_access) begin
+    if(CsrExceptionUpdateQ102H.illegal_csr_access) begin
         next_csr.csr_mcause = 32'h0000000B;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
         next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                             // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
 
-    if(CsrInterruptUpdateQ102H.breakpoint) begin
+    if(CsrExceptionUpdateQ102H.breakpoint) begin
         next_csr.csr_mcause = 32'h00000003;
-        next_csr.csr_mepc   = CsrInterruptUpdateQ102H.Pc;
-        next_csr.csr_mtval  = CsrInterruptUpdateQ102H.mtval_instruction;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
         next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
@@ -115,7 +115,7 @@ always_comb begin
     // ==================================================
     // Return from exception
     // ==================================================
-    if(CsrInterruptUpdateQ102H.Mret) begin //FIXME
+    if(CsrExceptionUpdateQ102H.Mret) begin //FIXME
             next_csr.csr_mstatus[CSR_MSTATUS_MIE] = csr.csr_mstatus[CSR_MSTATUS_MPIE];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
                                                                                        // FIXME - review what other mstatus bits should be restored
     end
@@ -347,13 +347,13 @@ end
 
 // Update program counter
 logic  BeginInterrupt;
-assign BeginInterrupt = (CsrInterruptUpdateQ102H.illegal_instruction || CsrInterruptUpdateQ102H.misaligned_access 
-                       || CsrInterruptUpdateQ102H.illegal_csr_access || CsrInterruptUpdateQ102H.breakpoint 
-                       || CsrInterruptUpdateQ102H.external_interrupt || CsrInterruptUpdateQ102H.timer_interrupt_taken);
+assign BeginInterrupt = (CsrExceptionUpdateQ102H.illegal_instruction || CsrExceptionUpdateQ102H.misaligned_access 
+                       || CsrExceptionUpdateQ102H.illegal_csr_access || CsrExceptionUpdateQ102H.breakpoint 
+                       || CsrExceptionUpdateQ102H.external_interrupt || CsrExceptionUpdateQ102H.timer_interrupt_taken);
 
 assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
-assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrInterruptUpdateQ102H.Mret;
+assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrExceptionUpdateQ102H.Mret;
 assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
 
 
