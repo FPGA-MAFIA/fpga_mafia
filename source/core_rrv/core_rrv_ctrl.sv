@@ -40,7 +40,7 @@ import core_rrv_pkg::*;
     output var t_ctrl_wb      CtrlWb,
     // output data path signals
     output logic [31:0]               ImmediateQ101H,
-    output var t_csr_interrupt_update CsrInterruptUpdateQ102H,
+    output var t_csr_exception_update CsrExceptionUpdateQ102H,
     output                            ValidInstQ105H             
 );
 
@@ -80,7 +80,7 @@ logic PreValidInstQ105H;
 
 t_core_rrv_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
-t_csr_interrupt_update  CsrInterruptUpdateQ101H;
+t_csr_exception_update  CsrExceptionUpdateQ101H;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
@@ -131,8 +131,8 @@ assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) 
 // in the case of Mret we jump to the address in the mepc CSR
 
 
-assign flushQ102H = IndirectBranchQ102H || CsrInterruptUpdateQ102H.illegal_instruction ||
-                    CsrInterruptUpdateQ102H.timer_interrupt_taken || CsrInterruptUpdateQ102H.Mret;
+assign flushQ102H = IndirectBranchQ102H || CsrExceptionUpdateQ102H.illegal_instruction ||
+                    CsrExceptionUpdateQ102H.timer_interrupt_taken || CsrExceptionUpdateQ102H.Mret;
 
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
@@ -193,17 +193,17 @@ assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b0000000_00001_00000_000
 assign ecall_was_calledQ101H  = (InstructionQ101H == 32'b0000000_00000_00000_000_00000_1110011);
 assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000_00000_1110011);
 // Update Interrupts CSR and flow control
-    assign CsrInterruptUpdateQ101H.misaligned_access        = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.illegal_csr_access       = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.breakpoint               = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.timer_interrupt_taken    = TimerInterruptTakenQ101H; 
-    assign CsrInterruptUpdateQ101H.external_interrupt       = '0; // FIXME - assign correct value
-    assign CsrInterruptUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
-    assign CsrInterruptUpdateQ101H.Mret                     = mret_was_calledQ101H;
-    assign CsrInterruptUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
+    assign CsrExceptionUpdateQ101H.misaligned_access        = '0; // FIXME - assign correct value
+    assign CsrExceptionUpdateQ101H.illegal_csr_access       = '0; // FIXME - assign correct value
+    assign CsrExceptionUpdateQ101H.breakpoint               = '0; // FIXME - assign correct value
+    assign CsrExceptionUpdateQ101H.timer_interrupt_taken    = TimerInterruptTakenQ101H; 
+    assign CsrExceptionUpdateQ101H.external_interrupt       = '0; // FIXME - assign correct value
+    assign CsrExceptionUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
+    assign CsrExceptionUpdateQ101H.Mret                     = mret_was_calledQ101H;
+    assign CsrExceptionUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
 
-    assign CsrInterruptUpdateQ101H.Pc = IllegalInstructionQ101H                       ? PcQ101H :   
-                                        CsrInterruptUpdateQ101H.timer_interrupt_taken ? PcQ101H :
+    assign CsrExceptionUpdateQ101H.Pc = IllegalInstructionQ101H                       ? PcQ101H :   
+                                        CsrExceptionUpdateQ101H.timer_interrupt_taken ? PcQ101H :
                                                                                         32'h0;
   
 always_comb begin
@@ -258,14 +258,14 @@ assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wra
 assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
-assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H || flushQ103H; 
+assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H || flushQ103H; // FIXME - review that line 
 
 //assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H; //
 //assign ReadyQ101H = flushQ102H ? 1'b1 : (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CsrInstQ102H, CsrInstQ101H, Clock, ReadyQ102H, Rst )
-`MAFIA_EN_RST_DFF(CsrInterruptUpdateQ102H, CsrInterruptUpdateQ101H, Clock, ReadyQ102H, Rst )
+`MAFIA_EN_RST_DFF(CsrExceptionUpdateQ102H, CsrExceptionUpdateQ101H, Clock, ReadyQ102H, Rst )
 
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
