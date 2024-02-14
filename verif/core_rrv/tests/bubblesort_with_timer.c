@@ -33,6 +33,8 @@ int main() {
     bubbleSort(arr, n);
     printSorted(arr, n);
 
+    clear_mie(0x080); // disable timer interrupts while executing rvc_printf and rcv_print_int 
+    
     rvc_printf("\n");
     rvc_print_int(COUNT_MACHINE_TIMER_INTRPT[0]);
     return 0;
