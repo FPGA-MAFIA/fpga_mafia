@@ -46,4 +46,3 @@ jobs:
 
       - name: FABRIC -regress level0
         run:  python build.py -dut 'fabric' -regress level0 -hw -sim -keep_going
-

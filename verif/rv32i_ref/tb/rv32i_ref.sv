@@ -69,6 +69,7 @@ logic [63:0] csr_minstret_high_low;
 logic [63:0] csr_cycle_high_low;
 logic [63:0] csr_instret_high_low;
 logic        MePc;
+logic        left_lfsr_bit;
 
 t_debug_info debug_info;
 assign debug_info.clk         = clk;
@@ -498,6 +499,29 @@ always_comb begin
     next_csr      = csr;
     csr_read_data = 32'h00000000;
 
+    // counters for PMON - cycle and instret must be the same in that model
+    {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
+    next_csr.csr_mcycleh    = csr.csr_mcycleh + csr_mcycle_overflow;
+    csr_mcycle_high_low     = {csr.csr_mcycleh, csr.csr_mcycle};
+    
+    {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret  + 1'b1;
+    next_csr.csr_minstreth    = csr.csr_minstreth + csr_minstret_overflow;
+    csr_minstret_high_low      = {csr.csr_minstreth, csr.csr_minstret};
+
+    if(illegal_instruction) begin
+        next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mepc   = pc;
+        next_csr.csr_mtval  = instruction;
+    end
+    
+    //==========================================================
+    //  LFSR: Linear Feedback Shift Register - used for random number generation (custom CSR)
+    //==========================================================
+    //32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
+    //==========================================================
+    left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
+    next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
+
     if(csr_wren && csr_hit) begin
         unique casez ({funct3[1:0],csr_addr}) 
             // CSR_MCYCLE
@@ -604,6 +628,30 @@ always_comb begin
             {2'b01, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr_data;
             {2'b10, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 | csr_data;
             {2'b11, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 & ~csr_data;
+            // CSR_CUSTOM_MTIMECMP
+            {2'b01, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr_data;
+            {2'b10, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp | csr_data;
+            {2'b11, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp & ~csr_data;
+            // CSR_CUSTOM_LFSR
+            {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
+            {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
+            {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
+            // CSR_DCSR
+            {2'b01, CSR_DCSR}        : next_csr.csr_dcsr = csr_data;
+            {2'b10, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  | csr_data;
+            {2'b11, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  & ~csr_data;
+            // CSR_DPC
+            {2'b01, CSR_DPC}        : next_csr.csr_dpc = csr_data;
+            {2'b10, CSR_DPC}        : next_csr.csr_dpc = csr.csr_dpc  | csr_data;
+            {2'b11, CSR_DPC}        : next_csr.csr_dpc = csr.csr_dpc  & ~csr_data;
+            // CSR_DSCRATCH0
+            {2'b01, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr_data;
+            {2'b10, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr.csr_dscratch0  | csr_data;
+            {2'b11, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr.csr_dscratch0  & ~csr_data;
+            // CSR_DSCRATCH1
+            {2'b01, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr_data;
+            {2'b10, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr.csr_dscratch1  | csr_data;
+            {2'b11, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr.csr_dscratch1  & ~csr_data;
             default   : /* Do nothing */;
         endcase
     end//if(csr_wren && csr_hit)
@@ -649,18 +697,16 @@ always_comb begin
             CSR_MIP            : csr_read_data = csr.csr_mip;
             CSR_MTINST         : csr_read_data = csr.csr_mtinst;
             CSR_MTVAL2         : csr_read_data = csr.csr_mtval2;
+            CSR_CUSTOM_MTIME   : csr_read_data = csr.csr_custom_mtime;
+            CSR_CUSTOM_MTIMECMP: csr_read_data = csr.csr_custom_mtimecmp;
+            CSR_CUSTOM_LFSR    : csr_read_data = csr.csr_custom_lfsr;
+            CSR_DCSR           : csr_read_data = csr.csr_dcsr;
+            CSR_DPC            : csr_read_data = csr.csr_dpc;
+            CSR_DSCRATCH0      : csr_read_data = csr.csr_dscratch0;
+            CSR_DSCRATCH1      : csr_read_data = csr.csr_dscratch1;
             default            : csr_read_data = 32'b0 ;
         endcase
     end//if(csr_rden && csr_hit)
-
-    // counters for PMON - cycle and instret must be the same in that model
-    {csr_mcycle_overflow , next_csr.csr_mcycle}  = csr.csr_mcycle  + 1'b1;
-    next_csr.csr_mcycleh    = csr.csr_mcycleh + csr_mcycle_overflow;
-    csr_mcycle_high_low     = {csr.csr_mcycleh, csr.csr_mcycle};
-    
-    {csr_minstret_overflow , next_csr.csr_minstret}  = csr.csr_minstret  + 1'b1;
-    next_csr.csr_minstreth    = csr.csr_minstreth + csr_minstret_overflow;
-    csr_minstret_high_low      = {csr.csr_minstreth, csr.csr_minstret};
 
     // URO CSR's
     next_csr.csr_cycle    = next_csr.csr_mcycle;
@@ -670,16 +716,11 @@ always_comb begin
     next_csr.csr_instreth = next_csr.csr_minstreth;
     csr_instret_high_low  = csr_minstret_high_low;
 
-    if(rst) begin
+    if(rst) begin 
         next_csr = '0;
         next_csr.csr_mscratch   = 32'h1001;
     end 
-    if(illegal_instruction) begin
-        next_csr.csr_mcause = 32'h00000002;
-        next_csr.csr_mepc   = pc;
-        next_csr.csr_mtval  = instruction;
-    end
-
+   
     next_csr.csr_mvendorid     = 32'b1; // CSR_MVENDORID
     next_csr.csr_marchid       = 32'b0; // CSR_MARCHID
     next_csr.csr_mimpid        = 32'b0; // CSR_MIMPID

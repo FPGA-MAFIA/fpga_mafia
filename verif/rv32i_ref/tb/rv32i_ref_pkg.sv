@@ -90,7 +90,17 @@ typedef enum logic [11:0] {
  CSR_MTVAL          = 12'h343 ,
  CSR_MIP            = 12'h344 ,
  CSR_MTINST         = 12'h34A ,
- CSR_MTVAL2         = 12'h34B 
+ CSR_MTVAL2         = 12'h34B,
+ //Custom csr's for mtime, mtimecmp
+ CSR_CUSTOM_MTIME    = 12'hFC0,
+ CSR_CUSTOM_MTIMECMP = 12'hBC0,
+ //Custom csr used for LFSR 
+ CSR_CUSTOM_LFSR     = 12'hBC1,
+ //debug csr's
+ CSR_DCSR            = 12'h7B0,
+ CSR_DPC             = 12'h7B1,
+ CSR_DSCRATCH0       = 12'h7B2,
+ CSR_DSCRATCH1       = 12'h7B3 
 } t_csr_addr ;
 
 typedef struct packed {
@@ -129,6 +139,13 @@ typedef struct packed {
     logic [31:0] csr_mip;
     logic [31:0] csr_mtinst;
     logic [31:0] csr_mtval2;
+    logic [31:0] csr_custom_mtime;
+    logic [31:0] csr_custom_mtimecmp;
+    logic [31:0] csr_custom_lfsr;
+    logic [31:0] csr_dcsr;
+    logic [31:0] csr_dpc;
+    logic [31:0] csr_dscratch0;
+    logic [31:0] csr_dscratch1;
 } t_csr;
 
 //systemverilog packed struct for debugging

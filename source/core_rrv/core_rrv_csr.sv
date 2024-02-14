@@ -245,6 +245,23 @@ always_comb begin
             {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
             {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
             {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
+            // CSR_DCSR
+            {2'b01, CSR_DCSR}        : next_csr.csr_dcsr = csr_data;
+            {2'b10, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  | csr_data;
+            {2'b11, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  & ~csr_data;
+            // CSR_DPC
+            {2'b01, CSR_DPC}        : next_csr.csr_dpc = csr_data;
+            {2'b10, CSR_DPC}        : next_csr.csr_dpc = csr.csr_dpc  | csr_data;
+            {2'b11, CSR_DPC}        : next_csr.csr_dpc = csr.csr_dpc  & ~csr_data;
+            // CSR_DSCRATCH0
+            {2'b01, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr_data;
+            {2'b10, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr.csr_dscratch0  | csr_data;
+            {2'b11, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr.csr_dscratch0  & ~csr_data;
+            // CSR_DSCRATCH1
+            {2'b01, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr_data;
+            {2'b10, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr.csr_dscratch1  | csr_data;
+            {2'b11, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr.csr_dscratch1  & ~csr_data;
+
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
@@ -339,6 +356,11 @@ always_comb begin
             CSR_MTVAL2         : CsrReadDataQ102H = csr.csr_mtval2;
             CSR_CUSTOM_MTIME   : CsrReadDataQ102H = csr.csr_custom_mtime;
             CSR_CUSTOM_MTIMECMP: CsrReadDataQ102H = csr.csr_custom_mtimecmp;
+            CSR_CUSTOM_LFSR    : CsrReadDataQ102H = csr.csr_custom_lfsr;
+            CSR_DCSR           : CsrReadDataQ102H = csr.csr_dcsr;
+            CSR_DPC            : CsrReadDataQ102H = csr.csr_dpc;
+            CSR_DSCRATCH0      : CsrReadDataQ102H = csr.csr_dscratch0;
+            CSR_DSCRATCH1      : CsrReadDataQ102H = csr.csr_dscratch1;
 
             default        : CsrReadDataQ102H = 32'b0 ;
         endcase
