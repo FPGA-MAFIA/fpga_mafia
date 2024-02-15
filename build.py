@@ -360,7 +360,15 @@ class Test:
         print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
 
 def print_message(msg):
-    msg_type = msg.split()[0]
+    # Trim whitespace and check if the message is empty
+    if not msg.strip():
+        return  # Exit the function early if there's nothing to print
+
+    # Split the message once and reuse the result
+    msg_parts = msg.split()
+    msg_type = msg_parts[0] if msg_parts else '[INFO]'  # Default to '[INFO]' if msg is empty
+
+    # Use a try-except block to handle KeyError when msg_type isn't found in the dictionary
     try:
         color = {
             '[ERROR]'   : 'red',
@@ -368,10 +376,13 @@ def print_message(msg):
             '[INFO]'    : 'green',
             '[COMMAND]' : 'cyan',
         }[msg_type]
-    except:
-        color = 'blue'
-    if(args.cmd == False) or ( msg_type == '[COMMAND]'):
-        print(colored(msg,color,attrs=['bold']))        
+    except KeyError:
+        color = 'blue'  # Default color if msg_type isn't one of the predefined keys
+
+    # Print the message in color if not in command mode or if it's a command
+    if not args.cmd or msg_type == '[COMMAND]':
+        print(colored(msg, color, attrs=['bold']))
+
 
 def run_cmd(cmd):
     print_message(f'[COMMAND] '+cmd)
