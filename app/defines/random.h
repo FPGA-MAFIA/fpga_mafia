@@ -5,7 +5,7 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
-unsigned int lfsr_seed;
+unsigned int lfsr_seed = 1;
 
 void set_lfsr_seed(int seed){
     lfsr_seed = seed;

@@ -13,8 +13,12 @@
 
 int main(){
 
+    // Test Test the 'get_random_int' function with default seed
+    rvc_print_unsigned_int_hex(get_random_int());  // expect to see '0x8000000'
+
     // Test the 'set_lfsr_seed' function
     set_lfsr_seed(0xACE1);
+    rvc_printf("\n");
     rvc_print_int(lfsr_seed);  // expecting to see '44257'
 
     // Test the 'get_random_int' function
