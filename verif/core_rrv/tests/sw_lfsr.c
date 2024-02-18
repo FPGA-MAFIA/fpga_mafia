@@ -1,9 +1,9 @@
 //------------------------------------------------------------
-// Title : alive_lfsr
+// Title : sw_lfsr
 // Project : core_rrv
 //------------------------------------------------------------
 // Description :
-// Testing random.h LFSR function. 
+// Testing random.h LFSR functions. 
 // The numbers are generated in sw
 //------------------------------------------------------------
 

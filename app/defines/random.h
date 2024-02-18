@@ -23,7 +23,6 @@ unsigned int get_random_int(){
 // generate pseudo random number between 0 - 127
 unsigned int get_random_0_127(){
 
-    //return get_random_int() & 0x7F;
     return get_random_int() % 128;
 
 }
