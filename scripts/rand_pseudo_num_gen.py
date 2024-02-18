@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+
+########################################################## 
+# TODO - consider to delete or move to another directory
+# that script is used for lfsr debugging purpose.
+# we generate random number according to the specified seed
+###########################################################
+
 import os
 
 # Use the current working directory
