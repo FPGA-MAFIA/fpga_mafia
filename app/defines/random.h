@@ -44,26 +44,18 @@ void set_hw_lfsr_seed(int seed) {
 }
 
 // generate 32bit pseudo random number from hardware
-unsigned int get_hw_random_int() {  
-    return read_custom_lfsr();
-}
+//unsigned int get_hw_random_int() {  
+//    return read_custom_lfsr();
+//}
+// Using the macro would be more efficient - no need to call a function
+#define get_hw_random_int() read_custom_lfsr()
 
 // generate pseudo random number between 0 - 127 from hardware
-unsigned int get_hw_random_0_127(){
-
-    return (read_custom_lfsr() & 127);
-
-}
-
-
-
-
-
-
-
-
-
-
+//unsigned int get_hw_random_0_127(){
+//    return (read_custom_lfsr() & 127);
+//}
+// Using the macro would be more efficient - no need to call a function
+#define get_hw_random_0_127() (read_custom_lfsr() & 127)
 
 
 
