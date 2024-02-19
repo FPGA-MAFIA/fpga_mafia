@@ -51,7 +51,13 @@ assign TimerInterruptEnable =  csr.csr_mip[CSR_MIP_MTIP]          && // 1) mtime
                                csr.csr_mstatus[CSR_MSTATUS_MIE]   && // 2) in mstatus register MIE bit is set
                                csr.csr_mie[CSR_MIE_MTIE];            // 3) in mie register MTIE bit is set
 
-//==========================================================================
+
+//========================================================================================
+//  LFSR: Linear Feedback Shift Register - used for random number generation (custom CSR)
+// 32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
+//========================================================================================
+assign left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
+
 // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
 // RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
 // RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
@@ -119,14 +125,9 @@ always_comb begin
             next_csr.csr_mstatus[CSR_MSTATUS_MIE] = csr.csr_mstatus[CSR_MSTATUS_MPIE];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
                                                                                        // FIXME - review what other mstatus bits should be restored
     end
-
-    //==========================================================
-    //  LFSR: Linear Feedback Shift Register - used for random number generation (custom CSR)
-    //==========================================================
-    //32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
-    //==========================================================
-    left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
-    next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
+    
+    if(csr_addr == CSR_CUSTOM_LFSR)
+        next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
     //==========================================================================
     // SW writes
     //==========================================================================
@@ -295,7 +296,7 @@ always_comb begin
         // ==================================================
         // FIXME - add the reset values of the MISA CSR (Machine ISA Register)
         // next_csr.csr_misa = 32'h40001104;
-        next_csr.csr_custom_lfsr = 32'hACE1; //seed initialization
+        next_csr.csr_custom_lfsr = 32'h1; //seed initialization. Avoid form initialize to zero!
     end // if(Rst)
     //==========================================================================
     // READ ONLY - constant values
@@ -356,7 +357,7 @@ always_comb begin
             CSR_MTVAL2         : CsrReadDataQ102H = csr.csr_mtval2;
             CSR_CUSTOM_MTIME   : CsrReadDataQ102H = csr.csr_custom_mtime;
             CSR_CUSTOM_MTIMECMP: CsrReadDataQ102H = csr.csr_custom_mtimecmp;
-            CSR_CUSTOM_LFSR    : CsrReadDataQ102H = csr.csr_custom_lfsr;
+            CSR_CUSTOM_LFSR    : CsrReadDataQ102H = next_csr.csr_custom_lfsr; // reading next avoids from returning the seed at the fisrt read
             CSR_DCSR           : CsrReadDataQ102H = csr.csr_dcsr;
             CSR_DPC            : CsrReadDataQ102H = csr.csr_dpc;
             CSR_DSCRATCH0      : CsrReadDataQ102H = csr.csr_dscratch0;
