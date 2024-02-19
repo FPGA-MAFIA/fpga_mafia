@@ -5,6 +5,8 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
+#include "csr.h"
+
 unsigned int lfsr_seed = 1;
 
 void set_lfsr_seed(int seed){
@@ -36,6 +38,22 @@ unsigned int get_random_range(int min, int max) {
     return (get_random_int() % range) + min;
 }
 
+// set hw lfsr csr
+void set_hw_lfsr_seed(int seed) {
+    write_custom_lfsr(seed);
+}
+
+// generate 32bit pseudo random number from hardware
+unsigned int get_hw_random_int() {  
+    return read_custom_lfsr();
+}
+
+// generate pseudo random number between 0 - 127 from hardware
+unsigned int get_hw_random_0_127(){
+
+    return (read_custom_lfsr() & 127);
+
+}
 
 
 
