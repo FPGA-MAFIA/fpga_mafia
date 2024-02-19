@@ -1,7 +1,10 @@
-/*******************************************************
- * RISC-V Interrupts and Exceptions CSR read functions
-*******************************************************/
+
+/*********************************************************
+ * RISC-V Interrupts and Exceptions CSR read/write macros
+**********************************************************/
 #ifndef CSR_H
+#define CSR_H
+
 #define READ_CSR(reg) ({ unsigned int __val; asm volatile ("csrr %0, " #reg : "=r"(__val)); __val; })
 #define WRITE_CSR(reg, val) asm volatile ("csrw " #reg ", %0" : : "r"(val))
 #define SET_CSR_BITS(reg, mask) asm volatile ("csrrs zero, " #reg ", %0" : : "r"(mask))
@@ -28,6 +31,8 @@
 #define read_custom_mtime() READ_CUSTOM_CSR(0xFC0)
 #define read_custom_mtimecmp() READ_CUSTOM_CSR(0xBC0)
 #define write_custom_mtimecmp(val) WRITE_CUSTOM_CSR(0xBC0, val)
+#define read_custom_lfsr() READ_CUSTOM_CSR(0xBC1)
+#define write_custom_lfsr(val) WRITE_CUSTOM_CSR(0xBC1, val)
 
 // sample relevant csr's for pmon
 void rvc_sample_csr(int *cycle_low, int *instret_low){

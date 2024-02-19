@@ -491,6 +491,11 @@ always_comb begin
 
 end// always_comb
 
+//========================================================================================
+//  LFSR: Linear Feedback Shift Register - used for random number generation (custom CSR)
+// 32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
+//========================================================================================
+assign left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
 
 //=======================================================
 // CSR read and write logic
@@ -514,13 +519,9 @@ always_comb begin
         next_csr.csr_mtval  = instruction;
     end
     
-    //==========================================================
-    //  LFSR: Linear Feedback Shift Register - used for random number generation (custom CSR)
-    //==========================================================
-    //32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
-    //==========================================================
-    left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
-    next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
+   
+    if(csr_addr == CSR_CUSTOM_LFSR)
+        next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
 
     if(csr_wren && csr_hit) begin
         unique casez ({funct3[1:0],csr_addr}) 
@@ -699,7 +700,7 @@ always_comb begin
             CSR_MTVAL2         : csr_read_data = csr.csr_mtval2;
             CSR_CUSTOM_MTIME   : csr_read_data = csr.csr_custom_mtime;
             CSR_CUSTOM_MTIMECMP: csr_read_data = csr.csr_custom_mtimecmp;
-            CSR_CUSTOM_LFSR    : csr_read_data = csr.csr_custom_lfsr;
+            CSR_CUSTOM_LFSR    : csr_read_data = next_csr.csr_custom_lfsr; // reading next avoids from returning the seed at the fisrt read
             CSR_DCSR           : csr_read_data = csr.csr_dcsr;
             CSR_DPC            : csr_read_data = csr.csr_dpc;
             CSR_DSCRATCH0      : csr_read_data = csr.csr_dscratch0;
@@ -719,6 +720,7 @@ always_comb begin
     if(rst) begin 
         next_csr = '0;
         next_csr.csr_mscratch   = 32'h1001;
+        next_csr.csr_custom_lfsr = 32'h1;    //seed initialization. Avoid form initialize to zero!
     end 
    
     next_csr.csr_mvendorid     = 32'b1; // CSR_MVENDORID
