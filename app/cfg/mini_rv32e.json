@@ -6,5 +6,6 @@
     "crt0_file"   : "crt0_mini_rv32e.S",
     "rv32_gcc"    : "rv32e -mabi=ilp32e",
     "name"        : "rv32e",
+    "gcc_optimize": "-O0",
     "ovrd_params" : "override_rrv_rv32e"
 }

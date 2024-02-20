@@ -114,6 +114,10 @@ class Test:
             Test.ovrd_params  = config_data['ovrd_params']
         else:
             Test.ovrd_params  = None
+        if 'gcc_optimize' in config_data:
+            Test.gcc_optimize  = config_data['gcc_optimize']
+        else:
+            Test.gcc_optimize  = ' '
 
     def load_config(self):
         # Default JSON file location
@@ -162,7 +166,7 @@ class Test:
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe -O1 -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    first_cmd  = 'riscv-none-embed-gcc.exe '+Test.gcc_optimize+' -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     #first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:

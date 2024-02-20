@@ -6,5 +6,6 @@
     "crt0_file"   : "crt0_boot_trap.S",
     "rv32_gcc"    : "rv32i",
     "name"        : "rv32i",
+    "gcc_optimize": "-O1",
     "ovrd_params" : "override_rrv_rv32i"
 }
