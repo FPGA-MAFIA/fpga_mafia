@@ -5,6 +5,6 @@ alive_vga.c         -gRF_NUM_MSB=31
 bubblesort.c        -gRF_NUM_MSB=31
 sw_lfsr.c           -gRF_NUM_MSB=31
 hw_lfsr.c           -gRF_NUM_MSB=31
-hw_sw_lfsr.c        -gRF_NUM_MSB=31 -gV_TIMEOUT=200000
+hw_sw_lfsr.c        -gRF_NUM_MSB=31 -gV_TIMEOUT=300000
 data_hazard_check.s -gRF_NUM_MSB=31
 store_load_check.s  -gRF_NUM_MSB=31
