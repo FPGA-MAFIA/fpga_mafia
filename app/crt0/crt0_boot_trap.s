@@ -63,9 +63,7 @@ stack_init:
 jump_to_main:
   jal x1, main  //jump to main
   nop
-  ebreak        //end
-  nop 
-  nop                     
+  ebreak        //end                 
   .section .text
 
 

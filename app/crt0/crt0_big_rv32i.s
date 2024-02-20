@@ -43,7 +43,6 @@ reset_handler:
 
   jal x1, main  //jump to main
   ebreak        //end
-  nop                      
   .section .text
 
 
