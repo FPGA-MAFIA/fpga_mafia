@@ -36,7 +36,7 @@ int main() {
         is_hw_sw_lfsr_same = (hw_lfsr == sw_lfsr);
         if(is_hw_sw_lfsr_same){
             rvc_printf("\nPASS  ");
-            rvc_print_unsigned_int_hex(hw_lfsr);
+            //rvc_print_unsigned_int_hex(hw_lfsr);
         }else{ //If the LFSR are not the same, print FAIL and the values of the LFSR
             rvc_printf("\nFAIL");
             rvc_print_unsigned_int_hex(hw_lfsr);
@@ -52,7 +52,7 @@ int main() {
         is_hw_sw_lfsr_same = (hw_lfsr == sw_lfsr);
         if(is_hw_sw_lfsr_same){
             rvc_printf("\nPASS  ");
-            rvc_print_int(hw_lfsr);  // expect to see '0xC0002B38'
+            //rvc_print_int(hw_lfsr);  // expect to see '0xC0002B38'
         }else{ //If the LFSR are not the same, print FAIL and the values of the LFSR
             rvc_printf("\nFAIL");
             rvc_print_int(hw_lfsr);
