@@ -105,6 +105,7 @@ rv32i_ref
 );
 
 `include "rv32i_ref_tasks.vh"
+`include "rv32i_ref_trk.vh"
 
 import rv32i_ref_pkg::*;
 t_debug_info debug_info;

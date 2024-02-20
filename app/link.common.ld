@@ -8,17 +8,21 @@ _stack_start   = ORIGIN(global_data) + LENGTH(global_data);
 
 SECTIONS {  
     .text : {  
-    . = ALIGN(4);  
-    *(.start);  
-    *(.text);  
-    }  > i_mem 
+        . = ALIGN(4);  
+        *(.start);  
+        *(.text);  
+    } > i_mem 
+
+    .rodata : {
+        . = ALIGN(4);
+        *(.rodata);
+    } > global_data
 
     .data : {  
-    . = ALIGN(4);  
-    *(.rodata);  
-    *(.sdata);  
-    *(.sbss);  
-    *(.bss);  
+        . = ALIGN(4);  
+        *(.data);  
+        *(.sdata);  
+        *(.sbss);  
+        *(.bss);  
     } > global_data  
-    
-}  
+}

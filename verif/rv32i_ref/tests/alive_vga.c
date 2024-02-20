@@ -3,7 +3,7 @@
 #include "graphic_vga.h"
 
 int main()  {  
-    rvc_printf("A");
+    rvc_printf("ABCD");
   
     return 0;
     
