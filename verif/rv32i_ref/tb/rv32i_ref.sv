@@ -520,7 +520,7 @@ always_comb begin
     end
     
    
-    if(csr_addr == CSR_CUSTOM_LFSR)
+    if(csr_addr == CSR_CUSTOM_LFSR & csr_rden & csr_hit)
         next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
 
     if(csr_wren && csr_hit) begin
