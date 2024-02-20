@@ -78,7 +78,7 @@ initial begin: test_seq
     //======================================
     // EOT - end of test
     //======================================
-    #2000000;
+    #100000;
     $error("ERROR: TIMEOUT");
     eot("ERROR: TIMEOUT");
 end // test_seq

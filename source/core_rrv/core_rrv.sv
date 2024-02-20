@@ -310,7 +310,7 @@ core_rrv_wb core_rrv_wb
  // Ctrl
  .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
  // Data path input
- .DMemRdDataQ105H (DMemRdRspQ105H ), // input  logic [31:0]    DMemRdDataQ105H, //input
+ .DMemRdDataQ105H (DMemRdRspQ105H  ), // input  logic [31:0]    DMemRdDataQ105H, //input
  .AluOutQ105H     (AluOutQ105H     ), // input  logic [31:0]    AluOutQ105H,     //input
  .PcPlus4Q105H    (PcPlus4Q105H    ), // input  logic [31:0]    PcPlus4Q105H,    //input
  // data path output

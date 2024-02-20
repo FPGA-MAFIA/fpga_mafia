@@ -162,6 +162,7 @@ class Test:
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
+                    #first_cmd  = 'riscv-none-embed-gcc.exe -O1 -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
                     run_cmd(first_cmd)
                 else:
