@@ -1,5 +1,5 @@
 //------------------------------------------------------------
-// Title   : hw_lfsr
+// Title   : hw_sw_lfsr_perf
 // Project : core_rrv
 //------------------------------------------------------------
 // Description :
@@ -10,6 +10,7 @@
 #include "graphic_vga.h"
 #include "random.h"
 #include "csr.h"
+#include "interrupt_handler.h"
 
 // define number of random numbers to be generated
 #define NUM_RANDOM_NUMBERS 10
