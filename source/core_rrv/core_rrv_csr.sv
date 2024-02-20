@@ -126,7 +126,7 @@ always_comb begin
                                                                                        // FIXME - review what other mstatus bits should be restored
     end
     
-    if(csr_addr == CSR_CUSTOM_LFSR)
+    if(csr_addr == CSR_CUSTOM_LFSR & csr_rden)
         next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
     //==========================================================================
     // SW writes
