@@ -183,7 +183,7 @@ always_comb begin
     //=======================
     // default assignments       
     //=======================
-    next_pc             = pc + 4;
+    next_pc             = (en_end_of_simulation) ? pc : pc + 4;
     next_regfile        = regfile;
     reg_wr_en           = 1'b0;
     illegal_instruction = 1'b0;

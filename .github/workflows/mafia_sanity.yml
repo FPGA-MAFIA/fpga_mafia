@@ -29,7 +29,7 @@ jobs:
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut 'mini_core' -regress rv32e_level0 -cfg mini_rv32e -app -hw -sim -keep_going
 
-      - name: MINI_CORE at rv3i mode
+      - name: MINI_CORE at rv32i mode
         run:  python build.py -dut 'mini_core' -regress rv32i_level0 -app -hw -sim -keep_going
 
       - name: SC_CORE - rv32i_level0 
