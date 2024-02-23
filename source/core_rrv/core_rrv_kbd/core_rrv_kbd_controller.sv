@@ -1,5 +1,5 @@
 `include "macros.sv"
-module big_core_kdb_controller 
+module core_rrv_kdb_controller 
 import core_rrv_pkg::*;
 (
     // PS2 interface
@@ -77,7 +77,7 @@ always_comb begin : error_flag
 end
 `MAFIA_DFF(error, error_next, word_flag_kc)
 
-big_core_kbd_odd_parity_checker odd_parity_checker(
+core_rrv_kbd_odd_parity_checker odd_parity_checker(
     .Clk                      (word_flag_kc),
     .Data                     (odd_parity_data),
     .odd_parity_error_flag    (odd_parity_error_flag)
@@ -86,7 +86,7 @@ big_core_kbd_odd_parity_checker odd_parity_checker(
 // write_en for the fifo = scanf (SW) & valid (HW - KBD)
 assign write_en_kc = valid_kc && scanf_en_kc;
 
-big_core_kbd_gray_fifo big_core_kbd_gray_fifo(
+core_rrv_kbd_gray_fifo core_rrv_kbd_gray_fifo(
   .kbd_clk_write (kbd_clk     ), // input  logic       kbd_clk_write,
   .core_clk_read (core_clk    ), // input  logic       core_clk_read,
   // kc clock domain will write the data
