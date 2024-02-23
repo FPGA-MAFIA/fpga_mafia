@@ -38,3 +38,10 @@
 ../../../source/core_rrv/core_rrv.sv
 ../../../source/core_rrv/core_rrv_top.sv
 ../../../source/core_rrv/core_rrv_mem_wrap.sv
+
+// KBD FIles
+../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_controller.sv
+../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_gray_fifo.sv
+../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_odd_parity_checker.sv
+../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_release_checker.sv
+../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_struct_checker.sv

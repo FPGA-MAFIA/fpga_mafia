@@ -1,5 +1,5 @@
 `include "macros.sv"
-module big_core_kbd_gray_fifo
+module core_rrv_kbd_gray_fifo
 import core_rrv_pkg::*;
 (
     input  logic       kbd_clk_write,

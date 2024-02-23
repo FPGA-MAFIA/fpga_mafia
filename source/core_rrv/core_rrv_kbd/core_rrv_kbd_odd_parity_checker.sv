@@ -1,6 +1,6 @@
 `include "macros.sv"
 
-module big_core_kbd_odd_parity_checker
+module core_rrv_kbd_odd_parity_checker
 import core_rrv_pkg::*;
 (
     input   logic       Clk,

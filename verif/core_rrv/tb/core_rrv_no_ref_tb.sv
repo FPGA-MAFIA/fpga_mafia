@@ -113,7 +113,7 @@ initial begin: test_seq
 end // test_seq
 
 parameter V_TIMEOUT = 500000;
-parameter RF_NUM_MSB = 15; // NOTE!!!: auto inserted from script ovrd_params.py
+parameter RF_NUM_MSB = 31; // NOTE!!!: auto inserted from script ovrd_params.py
 initial begin: detect_timeout
     //=======================================
     // timeout
@@ -157,6 +157,11 @@ core_rrv_top (
  .OutFabricQ505H        (OutFabricQ505H),  // output t_rdata      F2C_RspDataQ504H      ,
  .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
  .fab_ready             (5'b11111),   // input  t_fab_ready  fab_ready 
+//============================================
+//      keyboard interface
+//============================================
+.kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
+.data_in_kc  ( 1'b0  ) ,// input logic             data_in_kc, // Data from keyboard
 //============================================
 //      vga interface
 //============================================
