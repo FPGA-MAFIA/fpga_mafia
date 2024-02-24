@@ -1,8 +1,8 @@
 
 integer trk_alu;
 initial begin: trk_alu_gen
+    $timeformat(-12, 0, " ", 6);
     #1
-    $timeformat(-9, 1, " ", 6);
     trk_alu = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
     $fwrite(trk_alu,"Time\t|\tPC \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
@@ -17,7 +17,6 @@ end
 integer trk_inst;
 initial begin: trk_inst_gen
     #1
-    $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_inst.log"},"w");
     $fwrite(trk_inst,"---------------------------------------------------------\n");
     $fwrite(trk_inst,"PC \t | Instruction\t|\n");
@@ -33,7 +32,6 @@ end
 integer trk_fetch;
 initial begin: trk_fetch_gen
     #1
-    $timeformat(-9, 1, " ", 6);
     trk_fetch = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_fetch.log"},"w");
     $fwrite(trk_fetch,"---------------------------------------------------------\n");
     $fwrite(trk_fetch,"Time\t|\tPC \t |Funct3 \t| Funct7 \t | Opcode|\n");
@@ -47,7 +45,6 @@ end
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
     #1
-    $timeformat(-9, 1, " ", 6);
     trk_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
@@ -81,7 +78,6 @@ end
 integer trk_reg_write;
 initial begin: trk_reg_write_gen
     #1
-    $timeformat(-9, 1, " ", 6);
     trk_reg_write = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_reg_write.log"},"w");
     $fwrite(trk_reg_write,"---------------------------------------------------------\n");
     $fwrite(trk_reg_write," Time | PC |reg_dst|  X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
