@@ -102,6 +102,25 @@ endtask
 
 
 
+task print_vga_screen ;
+// VGA memory snapshot - simulate a screen
+    integer fd1;
+    string draw;
+    fd1 = $fopen({"../../../target/core_rrv/tests/",test_name,"/screen.log"},"w");
+    if (fd1) $display("File was open successfully : %0d", fd1);
+    else $display("File was not open successfully : %0d", fd1);
+    for (int i = 0 ; i < SIZE_VGA_MEM; i = i+320) begin // Lines
+        for (int j = 0 ; j < 4; j = j+1) begin // Bytes
+            for (int k = 0 ; k < 320; k = k+4) begin // Words
+                for (int l = 0 ; l < 8; l = l+1) begin // Bits  
+                    draw = (core_rrv_top.core_rrv_mem_wrap.core_rrv_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    $fwrite(fd1,"%s",draw);
+                end        
+            end 
+            $fwrite(fd1,"\n");
+        end
+    end
+endtask
 
 task eot (string msg);
     #10;
