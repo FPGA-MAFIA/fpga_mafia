@@ -34,6 +34,8 @@ logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
+logic ps2_clk;
+logic ps2_data;
 
 string test_name;
 logic [31:0] PcQ101H;
@@ -51,10 +53,12 @@ assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 `include "core_rrv_pmon_tasks.vh"
 `include "core_rrv_trk.vh"
 `include "core_rrv_ref_trk.vh"
+`include "core_rrv_ps2_tasks.vh"
+`include "core_rrv_hw_seq.vh"
 
 //VGA interface outputs
 t_vga_out   vga_out;
-logic inDisplayArea;
+logic       inDisplayArea;
 
 // ========================
 // clock gen
@@ -224,8 +228,8 @@ core_rrv_top (
 //============================================
 //      keyboard interface
 //============================================
-.kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
-.data_in_kc  ( 1'b0  ) ,// input logic             data_in_kc, // Data from keyboard
+.kbd_clk     ( ps2_clk  ) ,// input logic             kbd_clk, // Clock from keyboard
+.data_in_kc  ( ps2_data ) ,// input logic             data_in_kc, // Data from keyboard
 //============================================
 //      vga interface
 //============================================

@@ -1,0 +1,26 @@
+
+//this is included in the main TB - will drive all the HW sequencer
+// will note that in simple tests we use backdoor to drive the instruction memory of the core
+// But in some cases, we want real HW IO to drive sequences of the CPU that are not "SW - instruction memory" driven.
+
+initial begin
+// initial values;
+ps2_clk  = 1;
+ps2_data = 1;
+//Check which test we are running, then include the appropriate testbench
+if ($value$plusargs ("STRING=%s", test_name)) begin
+    $display("STRING value %s", test_name);
+end
+
+$display("================\n     START\n================\n");
+
+if(test_name == "PS2_alive")   begin  
+    $display("================\n   PS2_alive was included to the run  \n================\n");
+    `include "PS2_alive.vh"    
+end else if(test_name == "PS2_alive_2") begin  
+    `include "PS2_alive_2.vh"  
+end else begin 
+    $display("=====\n Test has no HW driven logic\n ====\n"); 
+end
+
+end

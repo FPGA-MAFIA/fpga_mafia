@@ -26,7 +26,7 @@ parameter D_MEM_ADRS_MSB = 15;
 
 // Region bits
 parameter LSB_REGION = 0;
-parameter MSB_REGION = 17;
+parameter MSB_REGION = 23;
 
 // Encoded regions
 parameter I_MEM_REGION_FLOOR   = 'h0;
