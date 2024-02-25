@@ -3,41 +3,42 @@
 // systemverilog file to create the task needed for driving the PS2 interface of the Core DUT
 // will have a simple task that accepts a byte and sends it to the PS2 interface (clock and data lines)
 
-task send_byte_to_ps2 (input logic [7:0] data , output logic ps2_clk , output logic ps2_data);
+task send_byte_to_ps2 (input logic [7:0] data);
+
     // Clock for release
     //Start bit
     #4 ps2_data = 1'b0;// 4
     #1 ps2_clk = 1'b0;// 5
     #5 ps2_clk = 1'b1;// 10
-    // Byte[0]
+    // bit[0]
     #4 ps2_data = data[0];//14  
     #1 ps2_clk = 1'b0;// 15
     #5 ps2_clk = 1'b1;// 20
-    // Byte[1]
+    // bit[1]
     #4 ps2_data = data[1];// 24
     #1 ps2_clk = 1'b0;// 25
     #5 ps2_clk = 1'b1;// 30
-    // Byte[2]
+    // bit[2]
     #4 ps2_data = data[2];// 34
     #1 ps2_clk = 1'b0;// 35
     #5 ps2_clk = 1'b1;// 40
-    // Byte[3]
+    // bit[3]
     #4 ps2_data = data[3];// 44
     #1 ps2_clk = 1'b0;// 45
     #5 ps2_clk = 1'b1;// 50
-    // Byte[4]
+    // bit[4]
     #4 ps2_data = data[4];//54
     #1 ps2_clk = 1'b0;// 55
     #5 ps2_clk = 1'b1;// 60
-    // Byte[5]
+    // bit[5]
     #4 ps2_data = data[5];// 64
     #1 ps2_clk = 1'b0;// 65
     #5 ps2_clk = 1'b1;// 70
-    // Byte[6]
+    // bit[6]
     #4 ps2_data = data[6];//74
     #1 ps2_clk = 1'b0;// 75
     #5 ps2_clk = 1'b1;// 80
-    // Byte[7]
+    // bit[7]
     #4 ps2_data = data[7];//84
     #1 ps2_clk = 1'b0;// 85
     #5 ps2_clk = 1'b1;// 90
