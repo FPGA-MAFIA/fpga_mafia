@@ -63,8 +63,8 @@ logic inDisplayArea;
 // ========================
 initial begin: clock_gen
     forever begin
-        #5 Clk = 1'b0;
-        #5 Clk = 1'b1;
+        #2 Clk = 1'b0;
+        #2 Clk = 1'b1;
     end //forever
 end//initial clock_gen
 

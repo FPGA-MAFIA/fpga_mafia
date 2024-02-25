@@ -4,7 +4,7 @@
 // will have a simple task that accepts a byte and sends it to the PS2 interface (clock and data lines)
 
 task send_byte_to_ps2 (input logic [7:0] data);
-
+    #10;
     // Clock for release
     //Start bit
     #4 ps2_data = 1'b0;// 4
@@ -50,4 +50,5 @@ task send_byte_to_ps2 (input logic [7:0] data);
     #4 ps2_data = 1'b1;//104
     #1 ps2_clk = 1'b0;// 105
     #5 ps2_clk = 1'b1;// 110
+    #10;
 endtask
