@@ -2,7 +2,7 @@
 
 ## Current Development Status:
 This project is currently a work in progress (WIP). We are in the process of enabling and integrating individual IPs.  
-Working diligently to deliver a fully functional fabric by March 1, 2024.  
+Working diligently to deliver a fully functional fabric by May 1, 2024.  
 Stay tuned for updates!  
 
 # FPGA Multi-Agent FabrIc Architecture (MAFIA)
