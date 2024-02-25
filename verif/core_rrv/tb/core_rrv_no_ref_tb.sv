@@ -44,10 +44,16 @@ assign PcQ103H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ103H.Pc;
 assign PcQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.Pc;
 assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 
-//`include "core_rrv_tasks.vh"
-//`include "core_rrv_mem_tasks.vh"
+logic ps2_clk;
+logic ps2_data;
+
 `include "core_rrv_pmon_tasks.vh"
 `include "core_rrv_trk.vh"
+`include "core_rrv_ps2_tasks.vh"
+`include "core_rrv_hw_seq.vh"
+`include "ps2_kbd_trk.vh"
+
+
 // VGA interface outputs
 t_vga_out   vga_out;
 logic inDisplayArea;
@@ -112,7 +118,7 @@ initial begin: test_seq
    
 end // test_seq
 
-parameter V_TIMEOUT = 500000;
+parameter V_TIMEOUT = 200000;
 parameter RF_NUM_MSB = 31; // NOTE!!!: auto inserted from script ovrd_params.py
 initial begin: detect_timeout
     //=======================================
@@ -160,8 +166,8 @@ core_rrv_top (
 //============================================
 //      keyboard interface
 //============================================
-.kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
-.data_in_kc  ( 1'b0  ) ,// input logic             data_in_kc, // Data from keyboard
+.kbd_clk     ( ps2_clk ) ,// input logic             kbd_clk, // Clock from keyboard
+.data_in_kc  ( ps2_data ) ,// input logic             data_in_kc, // Data from keyboard
 //============================================
 //      vga interface
 //============================================
@@ -192,6 +198,12 @@ task print_vga_screen ;
             $fwrite(fd1,"\n");
         end
     end
+endtask
+
+task delay(input int cycles);
+  for(int i =0; i< cycles; i++) begin
+    @(posedge Clk);
+  end
 endtask
 
 endmodule //core_rrv_tb
