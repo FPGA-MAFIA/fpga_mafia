@@ -53,8 +53,6 @@ assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 `include "core_rrv_pmon_tasks.vh"
 `include "core_rrv_trk.vh"
 `include "core_rrv_ref_trk.vh"
-`include "core_rrv_ps2_tasks.vh"
-`include "core_rrv_hw_seq.vh"
 
 //VGA interface outputs
 t_vga_out   vga_out;
@@ -228,8 +226,8 @@ core_rrv_top (
 //============================================
 //      keyboard interface
 //============================================
-.kbd_clk     ( ps2_clk  ) ,// input logic             kbd_clk, // Clock from keyboard
-.data_in_kc  ( ps2_data ) ,// input logic             data_in_kc, // Data from keyboard
+.kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
+.data_in_kc  ( 1'b0 ) ,// input logic             data_in_kc, // Data from keyboard
 //============================================
 //      vga interface
 //============================================
