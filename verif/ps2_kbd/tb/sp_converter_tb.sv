@@ -14,10 +14,9 @@
 
 
 module sp_converter_tb();
-
-    
+ 
     logic Rst, KbdClk, KbdSerialData, ParallelDataReady;
-    logic [7:0] ParallelData;
+    logic [7:0]  ParallelData;
     logic [10:0] packetW;
     logic [10:0] packetRelease;
     
@@ -39,7 +38,7 @@ module sp_converter_tb();
     // ========================
     initial begin: reset_gen
          Rst = 1'b1;
-    #100 Rst = 1'b0;
+    #50  Rst = 1'b0;
     end: reset_gen
     
     sp_converter sp_converter(
@@ -52,10 +51,10 @@ module sp_converter_tb();
     
     initial begin : main
         
-        // transfering 0x31d 'w'
+        // transfering 0x23A 'w'
         $display("The tranfered packet is %1h", packetW);
 
-        #10 KbdSerialData <= packetW[0];
+        #50 KbdSerialData <= packetW[0];
         
         #10 KbdSerialData <= packetW[1];
         
@@ -89,7 +88,7 @@ module sp_converter_tb();
 
         #10 KbdSerialData <= packetRelease[0];
         
-        #10 KbdSerialData <=packetRelease[1];
+        #10 KbdSerialData <= packetRelease[1];
 
         #10 KbdSerialData <= packetRelease[2];
 
@@ -120,7 +119,18 @@ module sp_converter_tb();
         $display("Test has finished");
 
         $finish();
-    end     
+    end    
+
+parameter V_TIMEOUT = 100000;
+initial begin: detect_timeout
+    //=======================================
+    // timeout
+    //=======================================
+    #V_TIMEOUT 
+    $error("test ended with timeout");
+    $display("ERROR: No data integrity running - try to increase the timeout value");
+    $finish;
+end 
 endmodule
 
 
