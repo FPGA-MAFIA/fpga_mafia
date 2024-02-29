@@ -84,7 +84,7 @@ class Test:
         self.file_name = name
         self.assembly = True if self.file_name[-1] == 's' else False
         self.dut = dut 
-        self.target , self.gcc_dir = self._create_test_dir()
+        self.target = TARGET+'tests/'+self.name+'/'
         self.path = TESTS+self.file_name
         self.fail_flag = False
         self.app_flag = False
@@ -138,21 +138,6 @@ class Test:
             json_file = os.path.join(json_directory, 'default.json')
             self.load_json(json_file)              
 
-    def _create_test_dir(self):
-        if not os.path.exists(TARGET):
-            mkdir(TARGET)
-        if not os.path.exists(TARGET+'tests'):
-            mkdir(TARGET+'tests')
-        if not os.path.exists(TARGET+'tests/'+self.name):
-            mkdir(TARGET+'tests/'+self.name)
-        if not os.path.exists(TARGET+'tests/'+self.name+'/gcc_files'):
-            if(args.app or args.mif or args.fpga):
-                mkdir(TARGET+'tests/'+self.name+'/gcc_files')
-        if not os.path.exists(MODELSIM):
-            mkdir(MODELSIM)
-        if not os.path.exists(MODELSIM+'work'):
-            mkdir(MODELSIM+'work')
-        return TARGET+'tests/'+self.name+'/', TARGET+'tests/'+self.name+'/gcc_files'
     def _compile_sw(self):
         print_message('[INFO] Starting to compile SW ...')
         if self.path:
@@ -163,6 +148,10 @@ class Test:
             data_init_path = self.name+'_data_init.txt'
             search_path  = '-I ../../../../../app/defines '
             cs_interrupt_handler_name = ' interrupt_handler_rv32i.c.s'
+            self.gcc_dir = TARGET+'tests/'+self.name+'/gcc_files'
+
+            if not os.path.exists(self.gcc_dir):
+                mkdir(self.gcc_dir)
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
@@ -256,6 +245,11 @@ class Test:
                 print_message(results.stdout)
 
 
+
+        if not os.path.exists(MODELSIM):
+            mkdir(MODELSIM)
+        if not os.path.exists(MODELSIM+'work'):
+            mkdir(MODELSIM+'work')
         chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
@@ -281,6 +275,8 @@ class Test:
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
+            if not os.path.exists('../tests/'+self.name):
+                mkdir('../tests/'+self.name)
             sim_cmd = 'vsim.exe work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
@@ -294,6 +290,8 @@ class Test:
                 print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
             print_message('=== Simulation results >>>>> target/'+self.dut+'/tests/'+self.name+'/'+self.name+'_transcript')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
+            if not os.path.exists('../tests/'+self.name+'/'+self.name+'_transcript'):
+                mkdir('../tests/'+self.name+'/'+self.name)
             shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         chdir(MODEL_ROOT)
     def _gui(self):
@@ -397,7 +395,7 @@ def run_cmd(cmd):
 
 def mkdir(dir):
     print_message(f'[COMMAND] mkdir '+dir)
-    os.mkdir(dir)
+    os.makedirs(dir)
 
 def chdir(dir):
     print_message(f'[COMMAND] cd '+dir)
@@ -414,7 +412,7 @@ def run_cmd_with_capture(cmd):
 #                                           main
 #####################################################################################################       
 def main():
-    os.chdir(MODEL_ROOT)
+    chdir(MODEL_ROOT)
     if not os.path.exists(VERIF):
         print_message(f'[ERROR] There is no dut \'{args.dut}\'')
         exit(1)
@@ -430,7 +428,7 @@ def main():
     
     # create target/dut/tests/ directory if not exists
     if not os.path.exists('target/'+args.dut+'/tests/'):
-        os.makedirs('target/'+args.dut+'/tests/')
+        mkdir('target/'+args.dut+'/tests/')
     # log_file = "target/big_core/build_log.txt"
     
     # the tests list declared - will be filled using one of the arguments: all, regress, tests
@@ -505,7 +503,7 @@ def main():
         start_test_time = time.time()
 
         # check out the output has an directory with the test name and the *_transcript file, if so, copy the dir with a suffix _1, _2, etc.
-        if os.path.exists('target/'+args.dut+'/tests/'+test.name+'/'+test.name+'_transcript'):
+        if os.path.exists('target/'+args.dut+'/tests/'+test.name):
             i=1
             while os.path.exists('target/'+args.dut+'/tests/'+test.name+'_'+str(i)):
                 i += 1
