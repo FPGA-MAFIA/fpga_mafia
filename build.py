@@ -94,8 +94,6 @@ class Test:
         self.top = args.top
         # the tests parameters
         self.params = params # FIXME ABD
-
-
         # Load configuration from JSON file or use defaults
         self.load_config()
 
@@ -290,7 +288,7 @@ class Test:
                 self.fail_flag = True
                 print_message(results.stdout)
             else:
-                print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                print_message('[INFO] HW simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
             print_message('=== Simulation results >>>>> target/'+self.dut+'/tests/'+self.name+'/'+self.name+'_transcript')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
             if not os.path.exists('../tests/'+self.name+'/'+self.name+'_transcript'):
@@ -425,7 +423,7 @@ def main():
         exit(1)
     # if args.clean  clean target/dut/tests/ directory before starting running the build script
     if args.clean:
-        print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
+        print_message('[INFO] Cleaning target/'+args.dut+'/tests/ directory')
         if os.path.exists('target/'+args.dut+'/tests/'):
             rm_target_cmd  = 'rm -rf target/'+args.dut+'/tests/'
             run_cmd(rm_target_cmd)
@@ -555,7 +553,7 @@ def main():
             # print the test execution time
             end_test_time = time.time()
             test.duration = end_test_time - start_test_time
-            print_message(f"[INFO] test execution took {test.duration:.2f} seconds.")
+            print_message(f"[INFO] Test execution took {test.duration:.2f} seconds.")
 
             print_message(f'************************** End {test.name} **********************************')
             print()
@@ -573,9 +571,9 @@ def main():
     print_message('=============================')
     for test in tests:
         if(test.fail_flag==True):
-            print_message(f'[ERROR] test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
+            print_message(f'[ERROR] Test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
         if(test.fail_flag==False):
-            print_message(f'[INFO] test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
+            print_message(f'[INFO] Test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
 
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')
