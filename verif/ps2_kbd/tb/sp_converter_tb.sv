@@ -1,3 +1,7 @@
+
+
+// systemverilog file to create the task needed for driving the PS2 interface of the Core DUT
+// will have a simple task that accepts a byte and sends it to the PS2 interface (clock and data lines)
 //-----------------------------------------------------------------------------
 // Title            : Serial to paraller PS2 data converter tb
 // Project          : PS2 keyboard
@@ -15,124 +19,94 @@
 
 module sp_converter_tb();
  
-    logic Rst, KbdClk, KbdSerialData, ParallelDataReady;
+    logic Rst;
+    logic ps2_clk, ps2_data; 
     logic [7:0]  ParallelData;
-    logic [10:0] packetW;
-    logic [10:0] packetRelease;
+    logic        ParallelDataReady;
     
-    assign packetW = 11'h23a;
-    assign packetRelease = 11'h7e0;
-    
-    // ========================
-    // clock gen
-    // ========================
-    initial begin: clock_gen
-    forever begin
-         #5 KbdClk = 1'b0;
-         #5 KbdClk = 1'b1;
-    end //forever
-    end//initial clock_gen
-
     // ========================
     // reset generation
     // ========================
     initial begin: reset_gen
-         Rst = 1'b1;
-    #50  Rst = 1'b0;
+          Rst = 1'b1;
+    #100  Rst = 1'b0;
     end: reset_gen
     
     sp_converter sp_converter(
         .Rst(Rst),
-        .KbdClk(KbdClk),
-        .KbdSerialData(KbdSerialData),
+        .KbdClk(ps2_clk),
+        .KbdSerialData(ps2_data),
         .ParallelData(ParallelData),
         .ParallelDataReady(ParallelDataReady)    
     );
-    
-    initial begin : main
-        
-        // transfering 0x23A 'w'
-        $display("The tranfered packet is %1h", packetW);
 
-        #50 KbdSerialData <= packetW[0];
-        
-        #10 KbdSerialData <= packetW[1];
-        
-        #10 KbdSerialData <= packetW[2];
-        
-        #10 KbdSerialData <= packetW[3];
-        
-        #10 KbdSerialData <= packetW[4];
+    initial begin: main 
+        #80
+        ps2_clk = 1'b0;
+        #5 ps2_clk = 1'b1;
+        #5 ps2_clk = 1'b0;
+        #5 ps2_clk = 1'b1;
+        send_byte_to_ps2(8'h1d);   // send 'w'
+        send_byte_to_ps2(11'hf0);  // send 'release'
+        $finish;
 
-        #10 KbdSerialData <= packetW[5];
-        
-        #10 KbdSerialData <= packetW[6];
- 
-        #10 KbdSerialData <= packetW[7];
+    end
 
-        #10 KbdSerialData <= packetW[8];
- 
-        #10 KbdSerialData <= packetW[9];
+    parameter V_TIMEOUT = 100000;
+    initial begin : time_out
+        #V_TIMEOUT
+        $display("finished with timeout");
+        $finish;
 
-        #10 KbdSerialData <= packetW[10];
+    end
 
-        wait(ParallelDataReady) begin
-            if(ParallelData == 8'h00011101)
-                $display("recieve w");
-            else 
-                $display("error is recieving w");
-            
-        end    
-        // transfering 0x7E0 'release key'
-        $display("The tranfered packet is %1h", packetRelease);
+task send_byte_to_ps2 (input logic [7:0] data);
+    // Clock for release
+    //Start bit
+    #4 ps2_data = 1'b0;// 4
+    #1 ps2_clk = 1'b0;// 5
+    #5 ps2_clk = 1'b1;// 10
+    // bit[0]
+    #4 ps2_data = data[0];//14  
+    #1 ps2_clk = 1'b0;// 15
+    #5 ps2_clk = 1'b1;// 20
+    // bit[1]
+    #4 ps2_data = data[1];// 24
+    #1 ps2_clk = 1'b0;// 25
+    #5 ps2_clk = 1'b1;// 30
+    // bit[2]
+    #4 ps2_data = data[2];// 34
+    #1 ps2_clk = 1'b0;// 35
+    #5 ps2_clk = 1'b1;// 40
+    // bit[3]
+    #4 ps2_data = data[3];// 44
+    #1 ps2_clk = 1'b0;// 45
+    #5 ps2_clk = 1'b1;// 50
+    // bit[4]
+    #4 ps2_data = data[4];//54
+    #1 ps2_clk = 1'b0;// 55
+    #5 ps2_clk = 1'b1;// 60
+    // bit[5]
+    #4 ps2_data = data[5];// 64
+    #1 ps2_clk = 1'b0;// 65
+    #5 ps2_clk = 1'b1;// 70
+    // bit[6]
+    #4 ps2_data = data[6];//74
+    #1 ps2_clk = 1'b0;// 75
+    #5 ps2_clk = 1'b1;// 80
+    // bit[7]
+    #4 ps2_data = data[7];//84
+    #1 ps2_clk = 1'b0;// 85
+    #5 ps2_clk = 1'b1;// 90
+    // Parity bit
+    #4 ps2_data = !(data[0] ^ data[1] ^ data[2] ^ data[3] ^ data[4] ^ data[5] ^ data[6] ^ data[7]);//94
+    #1 ps2_clk = 1'b0;// 95
+    #5 ps2_clk = 1'b1;// 100
+    // Stop bit
+    #4 ps2_data = 1'b1;//104
+    #1 ps2_clk = 1'b0;// 105
+    #5 ps2_clk = 1'b1;// 110
+    #10;
+endtask
 
-        #10 KbdSerialData <= packetRelease[0];
-        
-        #10 KbdSerialData <= packetRelease[1];
-
-        #10 KbdSerialData <= packetRelease[2];
-
-        #10 KbdSerialData <= packetRelease[3];
- 
-        #10 KbdSerialData <= packetRelease[4];
-   
-        #10 KbdSerialData <= packetRelease[5];
-        
-        #10 KbdSerialData <= packetRelease[6];
-    
-        #10 KbdSerialData <= packetRelease[7];
-      
-        #10 KbdSerialData <= packetRelease[8];
-        
-        #10 KbdSerialData <= packetRelease[9];
-    
-        #10 KbdSerialData <= packetRelease[10];
-
-        wait(ParallelDataReady) begin
-            if(ParallelData == 8'h11110000) begin
-                $display("recieve release Key");
-            end
-            else 
-                $display("error is recieving release Key");
-            
-        end 
-        $display("Test has finished");
-
-        $finish();
-    end    
-
-parameter V_TIMEOUT = 100000;
-initial begin: detect_timeout
-    //=======================================
-    // timeout
-    //=======================================
-    #V_TIMEOUT 
-    $error("test ended with timeout");
-    $display("ERROR: No data integrity running - try to increase the timeout value");
-    $finish;
-end 
 endmodule
-
-
-        
-                               
