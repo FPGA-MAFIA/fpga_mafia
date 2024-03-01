@@ -36,6 +36,7 @@ parser.add_argument('-all',       action='store_true',    default=False, help='r
 parser.add_argument('-full_run',  action='store_true',    help='compile SW, HW of the test and simulate it')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
+parser.add_argument('-v', '--verbose', action='store_true', help='Increase output verbosity')
 parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
 parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
 parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
@@ -93,8 +94,6 @@ class Test:
         self.top = args.top
         # the tests parameters
         self.params = params # FIXME ABD
-
-
         # Load configuration from JSON file or use defaults
         self.load_config()
 
@@ -241,6 +240,8 @@ class Test:
             else:
                 #run the script to override the parameters using the csv file
                 cmd_param_script = 'python ./scripts/ovrd_params.py -dut core_rrv -ovrd_file '+csv_param_file
+                if args.verbose:
+                    cmd_param_script += ' -v'
                 results = run_cmd_with_capture(cmd_param_script) 
                 print_message(results.stdout)
 
@@ -287,7 +288,7 @@ class Test:
                 self.fail_flag = True
                 print_message(results.stdout)
             else:
-                print_message('[INFO] hw simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                print_message('[INFO] HW simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
             print_message('=== Simulation results >>>>> target/'+self.dut+'/tests/'+self.name+'/'+self.name+'_transcript')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
             if not os.path.exists('../tests/'+self.name+'/'+self.name+'_transcript'):
@@ -388,21 +389,25 @@ def print_message(msg):
 
 
 def run_cmd(cmd):
-    print_message(f'[COMMAND] '+cmd)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] '+cmd)
     if(args.cmd == False):
         subprocess.check_output(cmd, shell=True)
 
 
 def mkdir(dir):
-    print_message(f'[COMMAND] mkdir '+dir)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] mkdir '+dir)
     os.makedirs(dir)
 
 def chdir(dir):
-    print_message(f'[COMMAND] cd '+dir)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] cd '+dir)
     os.chdir(dir)
 
 def run_cmd_with_capture(cmd):
-    print_message(f'[COMMAND] '+cmd)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] '+cmd)
     # default value for results so return value is not None
     results = subprocess.run("echo ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     if(args.cmd == False):
@@ -418,7 +423,7 @@ def main():
         exit(1)
     # if args.clean  clean target/dut/tests/ directory before starting running the build script
     if args.clean:
-        print_message('[INFO] cleaning target/'+args.dut+'/tests/ directory')
+        print_message('[INFO] Cleaning target/'+args.dut+'/tests/ directory')
         if os.path.exists('target/'+args.dut+'/tests/'):
             rm_target_cmd  = 'rm -rf target/'+args.dut+'/tests/'
             run_cmd(rm_target_cmd)
@@ -456,7 +461,7 @@ def main():
     if args.all:
         test_list = os.listdir(TESTS)
         for test in test_list:
-            if 'level' in test: continue
+            # if 'level' in test: continue
             tests.append(Test(test, parameter, args.dut))
     elif args.regress:
         try:
@@ -548,7 +553,7 @@ def main():
             # print the test execution time
             end_test_time = time.time()
             test.duration = end_test_time - start_test_time
-            print_message(f"[INFO] test execution took {test.duration:.2f} seconds.")
+            print_message(f"[INFO] Test execution took {test.duration:.2f} seconds.")
 
             print_message(f'************************** End {test.name} **********************************')
             print()
@@ -566,9 +571,9 @@ def main():
     print_message('=============================')
     for test in tests:
         if(test.fail_flag==True):
-            print_message(f'[ERROR] test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
+            print_message(f'[ERROR] Test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
         if(test.fail_flag==False):
-            print_message(f'[INFO] test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
+            print_message(f'[INFO] Test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
 
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')

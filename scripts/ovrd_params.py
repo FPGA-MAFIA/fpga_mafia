@@ -21,6 +21,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Override parameters in files.')
     parser.add_argument('-dut', required=True, help='DUT name')
     parser.add_argument('-ovrd_file', required=True, help='File with parameter overrides without .csv extension')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Increase output verbosity')
     return parser.parse_args()
 
 def search_and_replace_parameters(path, params):
@@ -112,20 +113,22 @@ def main():
 
 
     # Print the log of replacements in the specified format
-    if total_replacements_log:
-        print("\n     Parameter           |   Old value   |   New Value   |  Line  |   File path")
-        print("-" * 100)
-        for log in total_replacements_log:
-            param, old_value, new_value, line_num, file_path = log
-            print(f"{param:<24} | {old_value:<13} | {new_value:<13} | {line_num:<6} | {file_path}")
-        print("-" * 100)
+    
+    if args.verbose:
+        if total_replacements_log:
+            print("\n     Parameter           |   Old value   |   New Value   |  Line  |   File path")
+            print("-" * 100)
+            for log in total_replacements_log:
+                param, old_value, new_value, line_num, file_path = log
+                print(f"{param:<24} | {old_value:<13} | {new_value:<13} | {line_num:<6} | {file_path}")
+            print("-" * 100)
 
-    if total_not_found_parameters:
-        print("\nParameters not found (source OR verif):")
-        for param in total_not_found_parameters:
-            print(f"- {param}")            
-        print("\n")
-
+        if total_not_found_parameters:
+            print("\nParameters not found (source OR verif):")
+            for param in total_not_found_parameters:
+                print(f"- {param}")            
+            print("\n")
+    
     # Save the changes to files
     for file_path, new_content in total_changed_files:
         with open(file_path, 'w') as file:
