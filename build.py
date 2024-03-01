@@ -36,6 +36,7 @@ parser.add_argument('-all',       action='store_true',    default=False, help='r
 parser.add_argument('-full_run',  action='store_true',    help='compile SW, HW of the test and simulate it')
 parser.add_argument('-clean',     action='store_true',    help='clean target/dut/tests/ directory before starting running the build script')
 parser.add_argument('-cmd',       action='store_true',    help='dont run the script, just print the commands')
+parser.add_argument('-verbose', action='store_true', help='Print commands before execution')
 parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
 parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
 parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
@@ -388,21 +389,25 @@ def print_message(msg):
 
 
 def run_cmd(cmd):
-    print_message(f'[COMMAND] '+cmd)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] '+cmd)
     if(args.cmd == False):
         subprocess.check_output(cmd, shell=True)
 
 
 def mkdir(dir):
-    print_message(f'[COMMAND] mkdir '+dir)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] mkdir '+dir)
     os.makedirs(dir)
 
 def chdir(dir):
-    print_message(f'[COMMAND] cd '+dir)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] cd '+dir)
     os.chdir(dir)
 
 def run_cmd_with_capture(cmd):
-    print_message(f'[COMMAND] '+cmd)
+    if args.verbose:  # Check if the verbose flag is set
+        print_message(f'[COMMAND] '+cmd)
     # default value for results so return value is not None
     results = subprocess.run("echo ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     if(args.cmd == False):
@@ -456,7 +461,7 @@ def main():
     if args.all:
         test_list = os.listdir(TESTS)
         for test in test_list:
-            if 'level' in test: continue
+            # if 'level' in test: continue
             tests.append(Test(test, parameter, args.dut))
     elif args.regress:
         try:
