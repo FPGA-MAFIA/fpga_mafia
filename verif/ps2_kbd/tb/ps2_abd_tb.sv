@@ -1,55 +1,37 @@
-
-
-// systemverilog file to create the task needed for driving the PS2 interface of the Core DUT
-// will have a simple task that accepts a byte and sends it to the PS2 interface (clock and data lines)
-//-----------------------------------------------------------------------------
-// Title            : Serial to paraller PS2 data converter tb
-// Project          : PS2 keyboard
-//-----------------------------------------------------------------------------
-// File             : 
-// Original Author  : Amichai Ben-David
-// Created          : 2/2024
-//-----------------------------------------------------------------------------
-// Description :
-// Converts  serial data bits comes from PS2 into parallel 8 bits
-//------------------------------------------------------------------------------
-// Modification history :
-//------------------------------------------------------------------------------
-
-
-module sp_converter_tb;
+module ps2_abd_tb;
  
     logic Rst;
     logic ps2_clk, ps2_data; 
     logic [7:0]  ParallelData;
     logic        ParallelDataReady;
     
+
+logic core_clk;
+    // ===================
+    // Clock generation
+    // ===================
+    initial begin: clk_gen
+            core_clk = 1'b0;
+        forever #1 core_clk = ~core_clk;
+        
+    end: clk_gen
+
     // ========================
     // reset generation
     // ========================
     initial begin: reset_gen
           Rst = 1'b1;
-    #100  Rst = 1'b0;
+    #50  Rst = 1'b0;
     end: reset_gen
     
-    sp_converter sp_converter(
-        .Rst(Rst),
-        .KbdClk(ps2_clk),
-        .KbdSerialData(ps2_data),
-        .ParallelData(ParallelData),
-        .ParallelDataReady(ParallelDataReady)    
-    );
 
     initial begin: main 
+        ps2_clk = 1'b1;
         #80
-        ps2_clk = 1'b0;
-        #5 ps2_clk = 1'b1;
-        #5 ps2_clk = 1'b0;
-        #5 ps2_clk = 1'b1;
-        send_byte_to_ps2(8'h1d);   // send 'w'
-        send_byte_to_ps2(11'hf0);  // send 'release'
-        $finish;
-
+        send_byte_to_ps2(11'h1d); // send 'w'
+        send_byte_to_ps2(11'h3d); // 
+        send_byte_to_ps2(11'h5d); // 
+        send_byte_to_ps2(11'hf0); // send 'release'
     end
 
     parameter V_TIMEOUT = 100000;
@@ -106,7 +88,36 @@ task send_byte_to_ps2 (input logic [7:0] data);
     #4 ps2_data = 1'b1;//104
     #1 ps2_clk = 1'b0;// 105
     #5 ps2_clk = 1'b1;// 110
-    #10;
+    #100;
 endtask
 
+logic [7:0] data_out_cc; 
+logic       valid_cc; 
+logic data_ready;
+
+ps2_abd ps2_abd
+(
+    // PS2 interface
+    .kbd_clk     (ps2_clk ) , //input  logic       kbd_clk,
+    .data_in_kc  (ps2_data) , //input  logic       data_in_kc,
+    // Core interface
+    .core_clk      (core_clk   ) , //input  logic       core_clk,
+    .core_rst      (Rst        ) , //input  logic       core_rst, 
+    .core_read_en  (1'b0       ) , //input  logic       core_read_en,
+    .data_out_cc   (data_out_cc) , //output logic [7:0] data_out_cc, 
+    .valid_cc      (valid_cc   ) , //output logic       valid_cc, 
+    .error         (           ) , //output logic       error,
+    //CR - Control register & indications
+    .data_ready    (data_ready ) , //output logic       data_ready,
+    .scanf_en      (1'b1       )   //input  logic       scanf_en   
+);
+    
+// monitor every time the data_out_cc 
+always @(posedge core_clk) begin
+    if (valid_cc) begin
+        $display("data_out_cc = %h", data_out_cc);
+    end
+end
+
 endmodule
+

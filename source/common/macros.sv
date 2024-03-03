@@ -47,6 +47,12 @@
             if      (rst) q <= val;                    \
             else if (en)  q <= i;                      \
          end
+// a async reset val flop used for special cases
+`define MAFIA_ASYNC_RST_VAL_DFF(q,i,clk,rst,val)    \
+         always_ff @(posedge clk or posedge rst) begin \
+            if   (rst) q <= val;                       \
+            else       q <= i;                         \
+         end
 
 `define MAFIA_METAFLOP(out,i,clk)     \
    logic next``out;                   \
