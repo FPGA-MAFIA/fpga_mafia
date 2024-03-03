@@ -50,6 +50,10 @@ args = parser.parse_args()
 if args.top is None:
     args.top = args.dut + '_tb'
 
+# if the cmd is set, run with verbose
+if args.cmd:
+    args.verbose = True
+
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 VERIF     = './verif/'+args.dut+'/'
 TB        = './verif/'+args.dut+'/tb/'
