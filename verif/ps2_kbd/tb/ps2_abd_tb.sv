@@ -5,6 +5,7 @@ module ps2_abd_tb;
     logic [7:0]  ParallelData;
     logic        ParallelDataReady;
     
+logic [7:0] data_out_cc; 
 
 logic core_clk;
     // ===================
@@ -29,9 +30,13 @@ logic core_clk;
         ps2_clk = 1'b1;
         #80
         send_byte_to_ps2(11'h1d); // send 'w'
+        pop_data();
         send_byte_to_ps2(11'h3d); // 
+        pop_data();
         send_byte_to_ps2(11'h5d); // 
+        pop_data();
         send_byte_to_ps2(11'hf0); // send 'release'
+        pop_data();
     end
 
     parameter V_TIMEOUT = 100000;
@@ -41,6 +46,37 @@ logic core_clk;
         $finish;
 
     end
+
+
+
+logic       valid_cc; 
+logic data_ready;
+logic core_read_en;
+
+ps2_abd ps2_abd
+(
+    // PS2 interface
+    .kbd_clk     (ps2_clk ) , //input  logic       kbd_clk,
+    .data_in_kc  (ps2_data) , //input  logic       data_in_kc,
+    // Core interface
+    .core_clk      (core_clk   ) , //input  logic       core_clk,
+    .core_rst      (Rst        ) , //input  logic       core_rst, 
+    .core_read_en  (core_read_en       ) , //input  logic       core_read_en,
+    .data_out_cc   (data_out_cc) , //output logic [7:0] data_out_cc, 
+    .valid_cc      (valid_cc   ) , //output logic       valid_cc, 
+    .error         (           ) , //output logic       error,
+    //CR - Control register & indications
+    .data_ready    (data_ready ) , //output logic       data_ready,
+    .scanf_en      (1'b1       )   //input  logic       scanf_en   
+);
+    
+task pop_data ();
+    @(posedge core_clk);
+        core_read_en = 1'b1;
+    @(posedge core_clk);
+        core_read_en = 1'b0;
+    $display("data_out_cc = %h", data_out_cc);
+endtask
 
 task send_byte_to_ps2 (input logic [7:0] data);
     // Clock for release
@@ -90,34 +126,6 @@ task send_byte_to_ps2 (input logic [7:0] data);
     #5 ps2_clk = 1'b1;// 110
     #100;
 endtask
-
-logic [7:0] data_out_cc; 
-logic       valid_cc; 
-logic data_ready;
-
-ps2_abd ps2_abd
-(
-    // PS2 interface
-    .kbd_clk     (ps2_clk ) , //input  logic       kbd_clk,
-    .data_in_kc  (ps2_data) , //input  logic       data_in_kc,
-    // Core interface
-    .core_clk      (core_clk   ) , //input  logic       core_clk,
-    .core_rst      (Rst        ) , //input  logic       core_rst, 
-    .core_read_en  (1'b0       ) , //input  logic       core_read_en,
-    .data_out_cc   (data_out_cc) , //output logic [7:0] data_out_cc, 
-    .valid_cc      (valid_cc   ) , //output logic       valid_cc, 
-    .error         (           ) , //output logic       error,
-    //CR - Control register & indications
-    .data_ready    (data_ready ) , //output logic       data_ready,
-    .scanf_en      (1'b1       )   //input  logic       scanf_en   
-);
-    
-// monitor every time the data_out_cc 
-always @(posedge core_clk) begin
-    if (valid_cc) begin
-        $display("data_out_cc = %h", data_out_cc);
-    end
-end
 
 endmodule
 
