@@ -46,7 +46,7 @@ The diagram below provides a visual representation of the project's hardware arc
 
 
 ## Getting Started
-For best exporence we recomended using a windows machin running vscode + gitbash.  
+For best experience we recomended using a windows machin running vscode + gitbash.  
 To see the build and run options, use the following command:
 ```python build.py -h ```  
 For any issue please see here: [fpga_mafia/discussions](https://github.com/amichai-bd/fpga_mafia/discussions/101)  
