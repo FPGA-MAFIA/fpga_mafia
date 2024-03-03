@@ -17,7 +17,7 @@
 //------------------------------------------------------------------------------
 
 
-module sp_converter_tb();
+module ps2_kbd_sp_converter_tb();
  
     logic Rst;
     logic ps2_clk, ps2_data; 
@@ -32,7 +32,7 @@ module sp_converter_tb();
     #100  Rst = 1'b0;
     end: reset_gen
     
-    sp_converter sp_converter(
+    ps2_kbd_sp_converter ps2_kbd_sp_converter(
         .Rst(Rst),
         .KbdClk(ps2_clk),
         .KbdSerialData(ps2_data),
