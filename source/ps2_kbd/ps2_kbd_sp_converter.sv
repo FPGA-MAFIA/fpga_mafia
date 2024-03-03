@@ -14,7 +14,7 @@
 
 `include "macros.sv"
 
-module sp_converter(
+module ps2_kbd_sp_converter(
     input  logic       Rst,
     input  logic       KbdClk,
     input  logic       KbdSerialData,    
@@ -32,7 +32,7 @@ module sp_converter(
     assign NextBitCounter    = (BitCounter == 4'ha) ? 0 : BitCounter + 1;
     assign NextParallelData  = (DataBits) ? {KbdSerialData, ParallelData[7:1]} : ParallelData;    
          
-    assign ParallelDataReady = (BitCounter == 4'ha) ? 1'b1 :  1'b0; // parallel ready only when we finish recieving all 11 bits
+    assign ParallelDataReady = (BitCounter == 4'ha) ? 1'b1 :  1'b0; // parallel data ready only after 11th bit
         
     `MAFIA_RST_DFF(BitCounter, NextBitCounter, KbdClk,  Rst);
     `MAFIA_EN_RST_DFF(ParallelData, NextParallelData, KbdClk, DataBits, Rst);
