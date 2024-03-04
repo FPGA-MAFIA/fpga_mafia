@@ -56,7 +56,6 @@ assign full  = ({!write_ptr_msb, write_ptr[$clog2(DEPTH)-1:0]} == read_ptr);
 
 `MAFIA_EN_RST_DFF(write_ptr, write_ptr_next, kbd_clk, (write_en & !full), rst)
 `MAFIA_EN_RST_DFF(read_ptr, read_ptr_next, cc_clk, (read_en & !empty), rst)
-
 `MAFIA_EN_DFF(mem[write_ptr], data_in, kbd_clk, (write_en & !full))
 
 assign data_out = mem[read_ptr];
