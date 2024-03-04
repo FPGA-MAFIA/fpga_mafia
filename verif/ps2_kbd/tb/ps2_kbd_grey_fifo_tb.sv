@@ -21,7 +21,7 @@ logic cc_clk;
 logic rst;
 logic [7:0] data_in, data_out;
 logic write_en, read_en;
-logic empty, full;
+logic empty, empty_sync, full;
 
 logic [7:0] fifo_data[0:7];
 initial begin : data_init
@@ -73,6 +73,7 @@ ps2_kbd_grey_fifo #(.DEPTH(8), .WIDTH(8)) ps2_kbd_grey_fifo(
     .rst(rst),
     .data_out(data_out),
     .empty(empty),
+    .empty_sync(empty_sync),
     .full(full)
 );
 

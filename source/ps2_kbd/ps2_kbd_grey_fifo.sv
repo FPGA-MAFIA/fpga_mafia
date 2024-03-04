@@ -15,8 +15,10 @@
 //------------------------------------------------------------------------------
 
 `include "macros.sv"
-module ps2_kbd_grey_fifo #(parameter DEPTH = 16,
-                           parameter WIDTH = 8)
+module ps2_kbd_grey_fifo
+import ps2_kbd_pkg::*; 
+#(parameter DEPTH = FIFO_WIDTH,
+parameter WIDTH = FIFO_DEPTH)                          
 (
     input logic              kbd_clk, // kbd_clock
     input logic              cc_clk,  // core_clock 
@@ -26,6 +28,7 @@ module ps2_kbd_grey_fifo #(parameter DEPTH = 16,
     input logic              rst,
     output logic [WIDTH-1:0] data_out,
     output logic             empty,
+    output logic             empty_sync,
     output logic             full
 );
 
@@ -54,10 +57,19 @@ assign write_ptr_msb = write_ptr[$clog2(DEPTH)];
 assign empty = (write_ptr == read_ptr);
 assign full  = ({!write_ptr_msb, write_ptr[$clog2(DEPTH)-1:0]} == read_ptr);
 
+// asynchronous output
+assign data_out = mem[read_ptr];
+
+// we want to synchronize the empty signal the reads by cppu core clock domain
+`MAFIA_METAFLOP(empty_sync,empty,cc_clk)
+
+
 `MAFIA_EN_RST_DFF(write_ptr, write_ptr_next, kbd_clk, (write_en & !full), rst)
 `MAFIA_EN_RST_DFF(read_ptr, read_ptr_next, cc_clk, (read_en & !empty), rst)
 `MAFIA_EN_DFF(mem[write_ptr], data_in, kbd_clk, (write_en & !full))
 
-assign data_out = mem[read_ptr];
+
+
+
 
 endmodule

@@ -14,7 +14,9 @@
 
 `include "macros.sv"
 
-module ps2_kbd_sp_converter(
+module ps2_kbd_sp_converter
+import ps2_kbd_pkg::*;
+(
     input  logic       Rst,
     input  logic       KbdClk,
     input  logic       KbdSerialData,    
