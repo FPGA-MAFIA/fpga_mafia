@@ -98,6 +98,14 @@
 #define Z_TOP        0x10207E00                  
 #define Z_BOTTOM     0x007E0408
 
+#define LESS_THAN_TOP     0x08100000 //
+#define LESS_THAN_BOTTOM  0x00100804 //
+
+#define GREATER_THAN_TOP    0x10080000 //
+#define GREATER_THAN_BOTTOM 0x00081020 //
+
+#define QUESTION_MARK_TOP    0x20241800 //
+#define QUESTION_MARK_BOTTOM 0x00100010 //
 /* ANIME Values */
 #define WALK_MAN_TOP_0    0x7c381030
 #define WALK_MAN_BOTTOM_0 0x828448ba             
@@ -115,13 +123,13 @@
 /* ASCII tables */
 unsigned int ASCII_TOP[97]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,
                                 0,0,0,0,0,0,0,0,0,0,COMMA_TOP,DASH_TOP,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
-                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,0,0,0,0,0,A_TOP,
+                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,LESS_THAN_TOP,0,GREATER_THAN_TOP,QUESTION_MARK_TOP,0,A_TOP,
                                 B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
                                 N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP};
 unsigned int ASCII_BOTTOM[97] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 SPACE_BOTTOM,0,0,0,0,0,0,0,0,0,0,COMMA_BOTTOM,DASH_BOTTOM,POINT_BOTTOM,0,ZERO_BOTTOM,
                                 ONE_BOTTOM,TWO_BOTTOM,THREE_BOTTOM,FOUR_BOTTOM,FIVE_BOTTOM,SIX_BOTTOM,
-                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,0,0,0,0,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
+                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,LESS_THAN_BOTTOM,0,GREATER_THAN_BOTTOM,QUESTION_MARK_BOTTOM,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
                                 E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
                                 M_BOTTOM,N_BOTTOM,O_BOTTOM,P_BOTTOM,Q_BOTTOM,R_BOTTOM,S_BOTTOM,T_BOTTOM,
                                 U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM};
@@ -582,36 +590,86 @@ void draw_line(int x1, int y1, int x2, int y2, int value) {
 }
 
 
-#define ENTER_KEY_CODE 0x1C
+
+//This array will map the scancode to the ascii code
+char keymap[256] = {
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  ' ', '?', // 0x00 - 0x0F
+    '?', '?', '?', '?',  '?', 'q', '1', '?', '?', '?', 'z', 's', 'a', 'w',  '2', '?', // 0x10 - 0x1F
+    '?', 'c', 'x', 'd',  'e', '4', '3', '?', '?', 'v', 'f', 't', 'r', '5',  '?', '?', // 0x20 - 0x2F
+    '?', 'n', 'b', 'h',  'g', 'y', '6', '?', '?', '?', 'm', 'j', 'u', '7',  '8', '?', // 0x30 - 0x3F
+    '?', '?', ',', 'k',  'i', 'o', '0', '9', '?', '?', '.', '/', 'l', ';',  'p', '-', // 0x40 - 0x4F
+    '?', '?', '\'', '?', '[', '=', '?', '?', '?', '?', '\n', ']', '?', '\\','?', '?', // 0x50 - 0x5F
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '1', '?', '4', '7', '?',  '?', '?', // 0x60 - 0x6F
+    '0', '.', '2', '5',  '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',  '?', '?', // 0x70 - 0x7F
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0x80 - 0x8F
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0x90 - 0x9F
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xA0 - 0xAF
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xB0 - 0xBF
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xC0 - 0xCF
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xD0 - 0xDF
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xE0 - 0xEF
+    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?'  // 0xF0 - 0xFF
+};
+
+char keymap_shifted[256] = {
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '~', '?', // 0x00 - 0x0F
+    '?', '?', '?', '?', '?', 'Q', '!', '?', '?', '?', 'Z', 'S', 'A', 'W', '@', '?', // 0x10 - 0x1F
+    '?', 'C', 'X', 'D', 'E', '#', '$', '?', '?', 'V', 'F', 'T', 'R', '%', '?', '?', // 0x20 - 0x2F
+    '?', 'N', 'B', 'H', 'G', 'Y', '^', '?', '?', '?', 'M', 'J', 'U', '&', '*', '?', // 0x30 - 0x3F
+    '?', '?', '<', 'K', 'I', 'O', ')', '(', '?', '?', '>', '?', 'L', ':', 'P', '_', // 0x40 - 0x4F
+    '?', '?', '"', '?', '{', '+', '?', '?', '?', '?', '?', '}', '?', '|', '?', '?', // 0x50 - 0x5F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '1', '?', '4', '7', '?', '?', '?', // 0x60 - 0x6F
+    '0', '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9', '?', '?', // 0x70 - 0x7F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0x80 - 0x8F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0x90 - 0x9F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0xA0 - 0xAF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0xB0 - 0xBF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0xC0 - 0xCF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0xD0 - 0xDF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', // 0xE0 - 0xEF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?'  // 0xF0 - 0xFF
+};
+
+
+
+
+#define ENTER_KEY_CODE 0x5a
 int rvc_scanf(char* str, int size){
-    rvc_printf("\n");
-    // allow new data to push into kbd HW fifo
+    char char_arr[2];
+    char_arr[1] = '\0';
     WRITE_REG(CR_KBD_SCANF_EN, 0x1);
-    // polling on the Ready bit to see if there is kbd data
-    int ready=0;
+    int ready = 0;
     int i = 0;
-    char rd_code = 0;
+    int rd_code = 0;
     char rd_char = 0;
-    int temp;
-    while ((i<size) && (rd_code != ENTER_KEY_CODE)){
-        //Start polling
-        while (ready==0){
+    int ignore_next_code = 0; // Flag to ignore the next scan code following a release code
+
+    while ((i < size - 1) && (rd_code != ENTER_KEY_CODE)) { // Ensure space for '\0'
+        ready = 0;
+        while (!ready) {
             READ_REG(ready, CR_KBD_READY);
+            // Add timeout or break condition if needed
         }
-        // read the data from the kbd HW fifo
-        READ_REG(rd_code , CR_KBD_DATA);// pop -> will trigger in the HW FIFO to update ptr
-        //rd_char = CODE_TO_ASCII(rd_code);
-        rf_char = rd_code; // FIXME me remove this
-        str[i] = rd_char;
-        i++;
-        ready=0;
+        READ_REG(rd_code, CR_KBD_DATA);
+        
+        if (rd_code == 0xF0) { // If release code, set flag to ignore next code
+            ignore_next_code = 1;
+        } else if (ignore_next_code) {
+            // If the flag is set, reset it and ignore this scan code
+            ignore_next_code = 0;
+        } else if (rd_code != ENTER_KEY_CODE) { // Process normal key press
+            rd_char = keymap_shifted[rd_code]; // Using the shifted keymap
+            str[i++] = rd_char;
+            char_arr[0] = rd_char;
+            rvc_printf(char_arr);
+        }
+        // Reset ready flag for the next iteration
+        ready = 0;
     }
-    //FIXME -> must add a \0 at the end of the string
-    str[i-1] = "\0";
-    // stop new data to push into kbd HW fifo
+
+    str[i] = '\0'; // Correctly terminate the string
     WRITE_REG(CR_KBD_SCANF_EN, 0x0);
-    // return what is the number of chars read
-    return i;
+    return i; // Number of characters read, not including '\0'
 }
 
 #endif /* GRAPHIC_VGA_H */

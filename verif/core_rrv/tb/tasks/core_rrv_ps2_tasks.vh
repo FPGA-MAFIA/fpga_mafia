@@ -7,48 +7,48 @@ task send_byte_to_ps2 (input logic [7:0] data);
     #10;
     // Clock for release
     //Start bit
-    #4 ps2_data = 1'b0;// 4
-    #1 ps2_clk = 1'b0;// 5
-    #5 ps2_clk = 1'b1;// 10
+    #40 ps2_data = 1'b0;// 40
+    #10 ps2_clk = 1'b0;// 50
+    #50 ps2_clk = 1'b1;// 100
     // bit[0]
-    #4 ps2_data = data[0];//14  
-    #1 ps2_clk = 1'b0;// 15
-    #5 ps2_clk = 1'b1;// 20
+    #40 ps2_data = data[0];//140
+    #10 ps2_clk = 1'b0;// 150
+    #50 ps2_clk = 1'b1;// 200
     // bit[1]
-    #4 ps2_data = data[1];// 24
-    #1 ps2_clk = 1'b0;// 25
-    #5 ps2_clk = 1'b1;// 30
+    #40 ps2_data = data[1];// 240
+    #10 ps2_clk = 1'b0;// 250
+    #50 ps2_clk = 1'b1;// 300
     // bit[2]
-    #4 ps2_data = data[2];// 34
-    #1 ps2_clk = 1'b0;// 35
-    #5 ps2_clk = 1'b1;// 40
+    #40 ps2_data = data[2];// 340
+    #10 ps2_clk = 1'b0;// 350
+    #50 ps2_clk = 1'b1;// 400
     // bit[3]
-    #4 ps2_data = data[3];// 44
-    #1 ps2_clk = 1'b0;// 45
-    #5 ps2_clk = 1'b1;// 50
+    #40 ps2_data = data[3];// 440
+    #10 ps2_clk = 1'b0;// 450
+    #50 ps2_clk = 1'b1;// 500
     // bit[4]
-    #4 ps2_data = data[4];//54
-    #1 ps2_clk = 1'b0;// 55
-    #5 ps2_clk = 1'b1;// 60
+    #40 ps2_data = data[4];//540
+    #10 ps2_clk = 1'b0;// 550
+    #50 ps2_clk = 1'b1;// 600
     // bit[5]
-    #4 ps2_data = data[5];// 64
-    #1 ps2_clk = 1'b0;// 65
-    #5 ps2_clk = 1'b1;// 70
+    #40 ps2_data = data[5];// 640
+    #10 ps2_clk = 1'b0;// 650
+    #50 ps2_clk = 1'b1;// 700
     // bit[6]
-    #4 ps2_data = data[6];//74
-    #1 ps2_clk = 1'b0;// 75
-    #5 ps2_clk = 1'b1;// 80
+    #40 ps2_data = data[6];//740
+    #10 ps2_clk = 1'b0;// 750
+    #50 ps2_clk = 1'b1;// 800
     // bit[7]
-    #4 ps2_data = data[7];//84
-    #1 ps2_clk = 1'b0;// 85
-    #5 ps2_clk = 1'b1;// 90
+    #40 ps2_data = data[7];//840
+    #10 ps2_clk = 1'b0;// 850
+    #50 ps2_clk = 1'b1;// 900
     // Parity bit
-    #4 ps2_data = !(data[0] ^ data[1] ^ data[2] ^ data[3] ^ data[4] ^ data[5] ^ data[6] ^ data[7]);//94
-    #1 ps2_clk = 1'b0;// 95
-    #5 ps2_clk = 1'b1;// 100
+    #40 ps2_data = !(data[0] ^ data[1] ^ data[2] ^ data[3] ^ data[4] ^ data[5] ^ data[6] ^ data[7]);//940
+    #10 ps2_clk = 1'b0;// 950
+    #50 ps2_clk = 1'b1;// 1000
     // Stop bit
-    #4 ps2_data = 1'b1;//104
-    #1 ps2_clk = 1'b0;// 105
-    #5 ps2_clk = 1'b1;// 110
-    #10;
+    #40 ps2_data = 1'b1;//1040
+    #10 ps2_clk = 1'b0;// 1050
+    #50 ps2_clk = 1'b1;// 1100
+    #300;
 endtask
