@@ -45,10 +45,27 @@
 #define NINE_BOTTOM  0x003E407C
 #define COLON_TOP    0x00100000
 #define COLON_BOTTOM 0x00001000                 
-#define A_TOP        0x663C1800                  
+#define A_TOP        0x663C1800  
 #define A_BOTTOM     0x00667E66                  
+// 0x00 -> 00000000 -> ________
+// 0x18 -> 00011000 -> ___XX___
+// 0x3C -> 00111100 -> __XXXX__
+// 0x66 -> 01100110 -> _XX__XX_
+// 0x66 -> 01100110 -> _XX__XX_
+// 0x7E -> 01111110 -> _XXXXXX_
+// 0x66 -> 01100110 -> _XX__XX_
+// 0x00 -> 00000000 -> ________
 #define B_TOP        0x3E221E00                  
 #define B_BOTTOM     0x001E223E                  
+// 0x00 -> 00000000 -> ________
+// 0x1E -> 00011110 -> ___XXXX_
+// 0x22 -> 00100010 -> __X___X_
+// 0x3E -> 00111110 -> __XXXXX_
+// 0x3E -> 00111110 -> __XXXXX_
+// 0x22 -> 00100010 -> __X___X_
+// 0x1E -> 00011110 -> ___XXXX_
+// 0x00 -> 00000000 -> ________
+
 #define C_TOP        0x023E3C00                  
 #define C_BOTTOM     0x003C3E02                  
 #define D_TOP        0x223E1E00                  

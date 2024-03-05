@@ -1,6 +1,7 @@
 
 #include "big_core_defines.h"
 #include "graphic_vga.h"
+#include "interrupt_handler.h"
 int main(){
 
 char str[30];
