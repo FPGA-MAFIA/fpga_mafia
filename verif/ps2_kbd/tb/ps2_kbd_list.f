@@ -1,2 +1,0 @@
--f ../../../source/ps2_kbd/ps2_kbd_rtl_list.f
--f ../../../verif/ps2_kbd/tb/ps2_kbd_verif_list.f

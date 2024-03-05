@@ -20,7 +20,7 @@ assign push_en =  (kbd_scanf_en & parallel_data_ready);
 //============================================
 //       kbd_sp_converter interface             
 //============================================
-sp_converter sp_converter(
+ps2_kbd_sp_converter ps2_kbd_sp_converter(
     .Rst(rst),
     .KbdClk(kbd_clk),
     .KbdSerialData(kbd_data),

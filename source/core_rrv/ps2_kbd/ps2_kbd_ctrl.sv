@@ -1,7 +1,7 @@
 
 `include "macros.sv"
 
-module ps2_abd
+module ps2_kbd_ctrl
 (
     // PS2 interface
     input  logic       kbd_clk,
