@@ -608,7 +608,9 @@ void draw_line(int x1, int y1, int x2, int y2, int value) {
 
 
 
-//This array will map the scancode to the ascii code
+// Define a keymap array for 256 characters. This array represents the characters
+// that would appear if a key were pressed 
+// The '?' character is used to denote keys that do not have a ascii representation.
 char keymap[256] = {
     '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  ' ', '?', // 0x00 - 0x0F
     '?', '?', '?', '?',  '?', 'q', '1', '?', '?', '?', 'z', 's', 'a', 'w',  '2', '?', // 0x10 - 0x1F
@@ -650,43 +652,56 @@ char keymap_shifted[256] = {
 
 
 
-#define ENTER_KEY_CODE 0x5a
-int rvc_scanf(char* str, int size){
-    char char_arr[2];
-    char_arr[1] = '\0';
-    WRITE_REG(CR_KBD_SCANF_EN, 0x1);
-    int ready = 0;
-    int i = 0;
-    int rd_code = 0;
-    char rd_char = 0;
-    int ignore_next_code = 0; // Flag to ignore the next scan code following a release code
 
-    while ((i < size - 1) && (rd_code != ENTER_KEY_CODE)) { // Ensure space for '\0'
+// Define key codes for special keys
+#define ENTER_KEY_CODE 0x5a       // Key code for the Enter key
+#define RELEASE_KEY_CODE 0xF0     // Key code indicating that a key has been released
+
+// Function to read characters from the keyboard using a custom scanning method
+// and map them using the shifted keymap defined above.
+int rvc_scanf(char* str, int size){
+    char char_arr[2];            // Helper array for printing characters
+    char_arr[1] = '\0';          // Null-terminate for printing
+
+    WRITE_REG(CR_KBD_SCANF_EN, 0x1); // Enable keyboard scanning
+
+    int ready = 0;               // Flag to indicate data is ready
+    int i = 0;                   // Index for storing into 'str'
+    int rd_code = 0;             // Read code from keyboard
+    char rd_char = 0;            // Character corresponding to read code
+    int ignore_next_code = 0;    // Flag to ignore the next scan code following a release code
+
+    // Loop until the Enter key is pressed or the buffer size is reached
+    while ((i < size - 1) && (rd_code != ENTER_KEY_CODE)) {
         ready = 0;
+        // Wait until data is ready
         while (!ready) {
             READ_REG(ready, CR_KBD_READY);
-            // Add timeout or break condition if needed
+            // Implement timeout or break condition if needed
         }
-        READ_REG(rd_code, CR_KBD_DATA);
-        
-        if (rd_code == 0xF0) { // If release code, set flag to ignore next code
+        READ_REG(rd_code, CR_KBD_DATA); // Read the scan code
+
+        if (rd_code == RELEASE_KEY_CODE) {
+            // If release code, set flag to ignore the next code
             ignore_next_code = 1;
         } else if (ignore_next_code) {
             // If the flag is set, reset it and ignore this scan code
             ignore_next_code = 0;
-        } else if (rd_code != ENTER_KEY_CODE) { // Process normal key press
-            rd_char = keymap_shifted[rd_code]; // Using the shifted keymap
-            str[i++] = rd_char;
-            char_arr[0] = rd_char;
-            rvc_printf(char_arr);
+        } else if (rd_code != ENTER_KEY_CODE) {
+            // Process normal key press using the shifted keymap
+            rd_char = keymap_shifted[rd_code];
+            str[i++] = rd_char;      // Store character and increment index
+            char_arr[0] = rd_char;   // Set for printing
+            rvc_printf(char_arr);    // Print the character
         }
-        // Reset ready flag for the next iteration
-        ready = 0;
+        // Ready flag reset is optional here since it's reassigned in the loop
     }
 
-    str[i] = '\0'; // Correctly terminate the string
-    WRITE_REG(CR_KBD_SCANF_EN, 0x0);
-    return i; // Number of characters read, not including '\0'
+    str[i] = '\0'; // Ensure the string is null-terminated
+    WRITE_REG(CR_KBD_SCANF_EN, 0x0); // Disable keyboard scanning
+
+    return i; // Return the number of characters read, not including '\0'
 }
+
 
 #endif /* GRAPHIC_VGA_H */
