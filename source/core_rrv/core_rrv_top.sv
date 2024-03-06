@@ -121,7 +121,7 @@ core_rrv_mem_wrap core_rrv_mem_wrap(
  .fpga_out              (fpga_out)            // CR_MEM
 );
 
-core_rrv_kdb_controller core_rrv_kdb_controller  
+ps2_kbd_ctrl ps2_kbd_ctrl  
 (
     .kbd_clk       (kbd_clk    ), //input  logic       kbd_clk,
     .data_in_kc    (data_in_kc ), //input  logic       data_in_kc,
