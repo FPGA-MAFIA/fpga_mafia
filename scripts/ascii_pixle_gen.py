@@ -1,7 +1,7 @@
 import tkinter as tk
 
 def update_output():
-    binary_representation = ['0b' + ''.join(['1' if pixels[row][col].get() else '0' for col in range(8)]) for row in range(8)]
+    binary_representation = ['0b' + ''.join(['1' if pixels[row][7-col].get() else '0' for col in range(8)]) for row in range(8)]
     hex_representation = [hex(int(binary, 2))[2:].upper().zfill(2) for binary in binary_representation]
     
     for i, hex_val in enumerate(hex_representation):
