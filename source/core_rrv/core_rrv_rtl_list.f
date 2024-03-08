@@ -41,19 +41,7 @@
 
 // KBD FIles
 ../../../source/core_rrv/ps2_kbd/ps2_kbd_ctrl.sv
-//../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_controller.sv
-//../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_gray_fifo.sv
-//../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_odd_parity_checker.sv
-//../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_release_checker.sv
-//../../../source/core_rrv/core_rrv_kbd/core_rrv_kbd_struct_checker.sv
 
 
-// temp KBD files
-// packages 
-../../../source/core_rrv/ps2_kbd/ps2_kbd_pkg.sv
-// RTL files
-../../../source/core_rrv/ps2_kbd/ps2_kbd_sp_converter.sv
-../../../source/core_rrv/ps2_kbd/ps2_kbd_grey_fifo.sv
-../../../source/core_rrv/ps2_kbd/ps2_kbd_hw_top.sv
 
 
