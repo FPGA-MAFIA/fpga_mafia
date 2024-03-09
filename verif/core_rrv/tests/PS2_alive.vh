@@ -42,19 +42,19 @@ send_byte_to_ps2(.data(8'hF0)); //releasing
 send_byte_to_ps2(.data(8'h24)); //pressing the key "e"
 
 // sending "L"
-send_byte_to_ps2(.data(8'h4C)); //pressing the key "l"
+send_byte_to_ps2(.data(8'h4B)); //pressing the key "l"
 send_byte_to_ps2(.data(8'hF0)); //releasing
-send_byte_to_ps2(.data(8'h4C)); //pressing the key "l"
+send_byte_to_ps2(.data(8'h4B)); //pressing the key "l"
 
 // sending "L"
-send_byte_to_ps2(.data(8'h4C)); //pressing the key "l"
+send_byte_to_ps2(.data(8'h4B)); //pressing the key "l"
 send_byte_to_ps2(.data(8'hF0)); //releasing
-send_byte_to_ps2(.data(8'h4C)); //pressing the key "l"
+send_byte_to_ps2(.data(8'h4B)); //pressing the key "l"
 
 // sending "O"
-send_byte_to_ps2(.data(8'h45)); //pressing the key "o"
+send_byte_to_ps2(.data(8'h44)); //pressing the key "o"
 send_byte_to_ps2(.data(8'hF0)); //releasing
-send_byte_to_ps2(.data(8'h45)); //pressing the key "o"
+send_byte_to_ps2(.data(8'h44)); //pressing the key "o"
 
 
 // sending "ENTER"
