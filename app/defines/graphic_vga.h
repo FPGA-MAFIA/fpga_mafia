@@ -19,16 +19,6 @@
 #define SPACE_BOTTOM 0x0                         
 #define COMMA_TOP    0x00000000                  
 #define COMMA_BOTTOM 0x061E1818                  
-#define UNDER_SCORE_TOP    0x00000000
-#define UNDER_SCORE_BOTTOM 0x007E0000
-// 0x00 -> 00000000 -> ________
-// 0x00 -> 00000000 -> ________
-// 0x00 -> 00000000 -> ________
-// 0x00 -> 00000000 -> ________
-// 0x00 -> 00000000 -> ________
-// 0x00 -> 00000000 -> ________
-// 0x7E -> 01111110 -> _XXXXXX_
-// 0x00 -> 00000000 -> ________
 #define DASH_TOP     0x00000000 
 #define DASH_BOTTOM  0x0000003C
 #define POINT_TOP    0x00000000                  
@@ -124,6 +114,58 @@
 #define Y_BOTTOM     0x00181818                  
 #define Z_TOP        0x10207E00                  
 #define Z_BOTTOM     0x007E0408
+#define a_top        0x78403800
+#define a_bottom     0x0000B844
+#define b_top        0x00000000
+#define b_bottom     0x00000000
+#define c_top        0x00000000
+#define c_bottom     0x00000000
+#define d_top        0x00000000
+#define d_bottom     0x00000000
+#define e_top        0x00000000
+#define e_bottom     0x00000000
+#define f_top        0x00000000
+#define f_bottom     0x00000000
+#define g_top        0x00000000
+#define g_bottom     0x00000000
+#define h_top        0x00000000
+#define h_bottom     0x00000000
+#define i_top        0x00000000
+#define i_bottom     0x00000000
+#define j_top        0x00000000
+#define j_bottom     0x00000000
+#define k_top        0x14240404
+#define k_bottom     0x0000340C
+#define l_top        0x10101030
+#define l_bottom     0x00003810
+#define m_top        0xB64A0000
+#define m_bottom     0x00009292
+#define n_top        0x4C340000
+#define n_bottom     0x00004444
+#define o_top        0x423C0000
+#define o_bottom     0x00003C42
+#define p_top        0x4C340000
+#define p_bottom     0x0404344C
+#define q_top        0x64580000
+#define q_bottom     0x40C05864
+#define r_top        0x4C340000
+#define r_bottom     0x00000404
+#define s_top        0x08300000
+#define s_bottom     0x00182010
+#define t_top        0x38101000
+#define t_bottom     0x00305010
+#define u_top        0x44440000
+#define u_bottom     0x00005864
+#define v_top        0x42420000
+#define v_bottom     0x00001824
+#define w_top        0x81810000
+#define w_bottom     0x0000663A
+#define x_top        0x48840000
+#define x_bottom     0x0000CC30
+#define y_top        0x48480000
+#define y_bottom     0x38404070
+#define z_top        0x20780000
+#define z_bottom     0x00007810
 
 #define LESS_THAN_TOP     0x08100000 //
 #define LESS_THAN_BOTTOM  0x00100804 //
@@ -152,15 +194,19 @@ unsigned int ASCII_TOP[127]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
                                 0,0,0,0,0,0,0,0,0,0,COMMA_TOP,DASH_TOP,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
                                 THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,LESS_THAN_TOP,0,GREATER_THAN_TOP,QUESTION_MARK_TOP,0,A_TOP,
                                 B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
-                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,0,0,0,0,UNDER_SCORE_TOP};
-
+                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,0,0,0,0,0,0,
+                                a_top, b_top, c_top, d_top, e_top, f_top, g_top, h_top, i_top, j_top, k_top, l_top, m_top, n_top, o_top,
+                                p_top,q_top,r_top,s_top,t_top,u_top,v_top,w_top,x_top,y_top,z_top};
 unsigned int ASCII_BOTTOM[127] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 SPACE_BOTTOM,0,0,0,0,0,0,0,0,0,0,COMMA_BOTTOM,DASH_BOTTOM,POINT_BOTTOM,0,ZERO_BOTTOM,
                                 ONE_BOTTOM,TWO_BOTTOM,THREE_BOTTOM,FOUR_BOTTOM,FIVE_BOTTOM,SIX_BOTTOM,
                                 SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,LESS_THAN_BOTTOM,0,GREATER_THAN_BOTTOM,QUESTION_MARK_BOTTOM,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
                                 E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
                                 M_BOTTOM,N_BOTTOM,O_BOTTOM,P_BOTTOM,Q_BOTTOM,R_BOTTOM,S_BOTTOM,T_BOTTOM,
-                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,0,0,0,0,UNDER_SCORE_BOTTOM};
+                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,0,0,0,0,0,0,
+                                a_bottom,b_bottom,c_bottom,d_bottom,e_bottom,f_bottom,g_bottom,h_bottom,
+                                i_bottom,j_bottom,k_bottom,l_bottom,m_bottom,n_bottom,o_bottom,p_bottom,
+                                q_bottom,r_bottom,s_bottom,t_bottom,u_bottom,v_bottom,w_bottom,x_bottom,y_bottom,z_bottom};
 
 /* ANIME tables */
 unsigned int ANIME_TOP[6]    = {WALK_MAN_TOP_0,   WALK_MAN_TOP_1,   WALK_MAN_TOP_2,   WALK_MAN_TOP_3,   WALK_MAN_TOP_4,   CLEAR_TOP};
