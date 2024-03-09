@@ -19,6 +19,8 @@
 #define SPACE_BOTTOM 0x0                         
 #define COMMA_TOP    0x00000000                  
 #define COMMA_BOTTOM 0x061E1818                  
+#define UNDER_SCORE_TOP    0x00000000
+#define UNDER_SCORE_BOTTOM 0x007E0000
 #define DASH_TOP     0x00000000 
 #define DASH_BOTTOM  0x0000003C
 #define POINT_TOP    0x00000000                  
