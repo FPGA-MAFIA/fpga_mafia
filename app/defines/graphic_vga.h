@@ -19,6 +19,8 @@
 #define SPACE_BOTTOM 0x0                         
 #define COMMA_TOP    0x00000000                  
 #define COMMA_BOTTOM 0x061E1818                  
+#define UNDER_SCORE_TOP    0x00000000
+#define UNDER_SCORE_BOTTOM 0x007E0000
 #define DASH_TOP     0x00000000 
 #define DASH_BOTTOM  0x0000003C
 #define POINT_TOP    0x00000000                  
@@ -190,11 +192,11 @@
 #define CLEAR_BOTTOM      0x0           
 
 /* ASCII tables */
-unsigned int ASCII_TOP[127]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,
+unsigned int ASCII_TOP[127]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,0,
                                 0,0,0,0,0,0,0,0,0,0,COMMA_TOP,DASH_TOP,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
                                 THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,LESS_THAN_TOP,0,GREATER_THAN_TOP,QUESTION_MARK_TOP,0,A_TOP,
                                 B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
-                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,0,0,0,0,0,0,
+                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,0,0,0,0,UNDER_SCORE_TOP,0,
                                 a_top, b_top, c_top, d_top, e_top, f_top, g_top, h_top, i_top, j_top, k_top, l_top, m_top, n_top, o_top,
                                 p_top,q_top,r_top,s_top,t_top,u_top,v_top,w_top,x_top,y_top,z_top};
 unsigned int ASCII_BOTTOM[127] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -203,7 +205,7 @@ unsigned int ASCII_BOTTOM[127] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,LESS_THAN_BOTTOM,0,GREATER_THAN_BOTTOM,QUESTION_MARK_BOTTOM,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
                                 E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
                                 M_BOTTOM,N_BOTTOM,O_BOTTOM,P_BOTTOM,Q_BOTTOM,R_BOTTOM,S_BOTTOM,T_BOTTOM,
-                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,0,0,0,0,0,0,
+                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,0,0,0,0,UNDER_SCORE_BOTTOM,0,
                                 a_bottom,b_bottom,c_bottom,d_bottom,e_bottom,f_bottom,g_bottom,h_bottom,
                                 i_bottom,j_bottom,k_bottom,l_bottom,m_bottom,n_bottom,o_bottom,p_bottom,
                                 q_bottom,r_bottom,s_bottom,t_bottom,u_bottom,v_bottom,w_bottom,x_bottom,y_bottom,z_bottom};
@@ -663,36 +665,35 @@ void draw_line(int x1, int y1, int x2, int y2, int value) {
     }
 }
 
-
-
 // Define a keymap array for 256 characters. This array represents the characters
 // that would appear if a key were pressed 
 // The '?' character is used to denote keys that do not have a ascii representation.
-char keymap[256] = {
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  ' ', '?', // 0x00 - 0x0F
-    '?', '?', '?', '?',  '?', 'q', '1', '?', '?', '?', 'z', 's', 'a', 'w',  '2', '?', // 0x10 - 0x1F
-    '?', 'c', 'x', 'd',  'e', '4', '3', '?', '?', 'v', 'f', 't', 'r', '5',  '?', '?', // 0x20 - 0x2F
-    '?', 'n', 'b', 'h',  'g', 'y', '6', '?', '?', '?', 'm', 'j', 'u', '7',  '8', '?', // 0x30 - 0x3F
-    '?', '?', ',', 'k',  'i', 'o', '0', '9', '?', '?', '.', '/', 'l', ';',  'p', '-', // 0x40 - 0x4F
-    '?', '?', '\'', '?', '[', '=', '?', '?', '?', '?', '\n', ']', '?', '\\','?', '?', // 0x50 - 0x5F
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '1', '?', '4', '7', '?',  '?', '?', // 0x60 - 0x6F
-    '0', '.', '2', '5',  '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',  '?', '?', // 0x70 - 0x7F
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0x80 - 0x8F
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0x90 - 0x9F
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xA0 - 0xAF
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xB0 - 0xBF
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xC0 - 0xCF
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xD0 - 0xDF
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xE0 - 0xEF
-    '?', '?', '?', '?',  '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?'  // 0xF0 - 0xFF
+
+char keymap[256] = { 
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '`', '?', // 0x00 - 0x0F
+    '?', '?', '?', '?', '?', 'q', '1', '?', '?', '?', 'z', 's', 'a', 'w',  '2', '?', // 0x10 - 0x1F
+    '?', 'c', 'x', 'd', 'e', '4', '3', '?', '?', '?', 'v', 'f', 't', 'r', '5',  '?', // 0x20 - 0x2F
+    '?', 'n', 'b', 'h', 'g', 'y', '6', '?', '?', '?', 'm', 'j', 'u', '7',  '8', '?', // 0x30 - 0x3F
+    '?', ',', 'k', 'i', 'o', '0', '9', '?', '?', '.', '/', 'l', ';',  'p', '-', '?', // 0x40 - 0x4F
+    '?', '?', '\'', '?','[', '=', '?', '?', '?', '?', '\n', ']', '?', '\\','?', '?', // 0x50 - 0x5F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '1', '?', '4', '7', '?',  '?', '?', // 0x60 - 0x6F
+    '0', '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',  '?', '?', // 0x70 - 0x7F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0x80 - 0x8F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0x90 - 0x9F
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xA0 - 0xAF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xB0 - 0xBF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xC0 - 0xCF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xD0 - 0xDF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?', // 0xE0 - 0xEF
+    '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',  '?', '?'  // 0xF0 - 0xFF
 };
 
-char keymap_shifted[256] = {
+char keymap_shifted[256] = { 
     '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '~', '?', // 0x00 - 0x0F
     '?', '?', '?', '?', '?', 'Q', '!', '?', '?', '?', 'Z', 'S', 'A', 'W', '@', '?', // 0x10 - 0x1F
-    '?', 'C', 'X', 'D', 'E', '#', '$', '?', '?', 'V', 'F', 'T', 'R', '%', '?', '?', // 0x20 - 0x2F
+    '?', 'C', 'X', 'D', 'E', '$', '#', '?', '?', '?', 'V', 'F', 'T', 'R', '%', '?', // 0x20 - 0x2F
     '?', 'N', 'B', 'H', 'G', 'Y', '^', '?', '?', '?', 'M', 'J', 'U', '&', '*', '?', // 0x30 - 0x3F
-    '?', '?', '<', 'K', 'I', 'O', ')', '(', '?', '?', '>', '?', 'L', ':', 'P', '_', // 0x40 - 0x4F
+    '?', '<', 'K', 'I', 'O', ')', '(', '?', '?', '>', '\?', 'L', ':', 'P', '_', '?',// 0x40 - 0x4F
     '?', '?', '"', '?', '{', '+', '?', '?', '?', '?', '?', '}', '?', '|', '?', '?', // 0x50 - 0x5F
     '?', '?', '?', '?', '?', '?', '?', '?', '?', '1', '?', '4', '7', '?', '?', '?', // 0x60 - 0x6F
     '0', '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9', '?', '?', // 0x70 - 0x7F
@@ -706,13 +707,10 @@ char keymap_shifted[256] = {
     '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?'  // 0xF0 - 0xFF
 };
 
-
-
-
-
 // Define key codes for special keys
 #define ENTER_KEY_CODE 0x5a       // Key code for the Enter key
 #define RELEASE_KEY_CODE 0xF0     // Key code indicating that a key has been released
+#define LEFT_SHIFT_KEY_CODE 0x12  // Key code indicating the use of left shift
 
 // Function to read characters from the keyboard using a custom scanning method
 // and map them using the shifted keymap defined above.
@@ -727,6 +725,7 @@ int rvc_scanf(char* str, int size){
     int rd_code = 0;             // Read code from keyboard
     char rd_char = 0;            // Character corresponding to read code
     int ignore_next_code = 0;    // Flag to ignore the next scan code following a release code
+    int left_shift_pressed = 0;  // Flag indicated if left shift was pressed
 
     // Loop until the Enter key is pressed or the buffer size is reached
     while ((i < size - 1) && (rd_code != ENTER_KEY_CODE)) {
@@ -744,13 +743,27 @@ int rvc_scanf(char* str, int size){
         } else if (ignore_next_code) {
             // If the flag is set, reset it and ignore this scan code
             ignore_next_code = 0;
-        } else if (rd_code != ENTER_KEY_CODE) {
-            // Process normal key press using the shifted keymap
-            rd_char = keymap_shifted[rd_code];
-            str[i++] = rd_char;      // Store character and increment index
-            char_arr[0] = rd_char;   // Set for printing
-            rvc_printf(char_arr);    // Print the character
         }
+         else if (rd_code == LEFT_SHIFT_KEY_CODE ) { // The next key code will be taken from shifted map
+            left_shift_pressed = 1;
+        }
+        else if (rd_code != ENTER_KEY_CODE) {
+            if(left_shift_pressed = 1){
+                // Process normal key press using the shifted keymap
+                rd_char = keymap_shifted[rd_code];
+                str[i++] = rd_char;      // Store character and increment index
+                char_arr[0] = rd_char;   // Set for printing
+                rvc_printf(char_arr);    // Print the character
+                left_shift_pressed = 0; 
+            }
+                // Process normal key press using the shifted keymap  // FIXME - Process normal key press using the un-shifted keymap
+            else {
+                rd_char = keymap_shifted[rd_code]; //FIXME - should use the un-shifted keymap!!
+                str[i++] = rd_char;      // Store character and increment index
+                char_arr[0] = rd_char;   // Set for printing
+                rvc_printf(char_arr);    // Print the character
+            }
+        } 
         // Ready flag reset is optional here since it's reassigned in the loop
     }
 

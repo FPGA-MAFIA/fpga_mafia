@@ -52,3 +52,27 @@ task send_byte_to_ps2 (input logic [7:0] data);
     #50 ps2_clk = 1'b1;// 1100
     #300;
 endtask
+
+
+task send_symbol_unshifted(input var t_ascii_to_scan_code scan_code);
+    send_byte_to_ps2(.data(scan_code)); 
+    send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
+    send_byte_to_ps2(.data(scan_code)); 
+endtask
+
+// for example: consider we want to send the letter 'W' to the PS2 interface
+// LEFT_SHIFT - 0x12
+// 'W' - 0x1D
+// RELEASE_CODE - 0xF0
+// 'W' - 0x1D
+// RELEASE_CODE - 0xF0
+// LEFT_SHIFT - 0x12
+task send_symbol_shifted(input var t_ascii_to_scan_code scan_code);
+    send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
+    send_byte_to_ps2(.data(scan_code)); 
+    send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
+    send_byte_to_ps2(.data(scan_code));
+    send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
+    send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
+endtask
+

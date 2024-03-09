@@ -19,10 +19,12 @@ if(test_name == "PS2_alive")   begin
     `include "PS2_alive.vh"    
 end 
 
-//else if(test_name == "PS2_alive_2") begin  
-//    `include "PS2_alive_2.vh"  
-//end else begin 
-//    $display("=====\n Test has no HW driven logic\n ====\n"); 
-//end
+else if(test_name == "PS2_alive_2") begin
+    $display("=====\n PS2_alive_2 was included to the run\n ====\n");   
+    `include "PS2_alive_2.vh"  
+end
+else begin 
+    $display("=====\n No HW sequence logic were included to the run\n ====\n");
+end
 
 end
