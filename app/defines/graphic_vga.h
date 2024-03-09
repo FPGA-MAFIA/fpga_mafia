@@ -758,7 +758,7 @@ int rvc_scanf(char* str, int size){
             }
                 // Process normal key press using the shifted keymap  // FIXME - Process normal key press using the un-shifted keymap
             else {
-                rd_char = keymap_shifted[rd_code];
+                rd_char = keymap_shifted[rd_code]; //FIXME - should use the un-shifted keymap!!
                 str[i++] = rd_char;      // Store character and increment index
                 char_arr[0] = rd_char;   // Set for printing
                 rvc_printf(char_arr);    // Print the character
