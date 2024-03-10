@@ -46,8 +46,6 @@ assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 
 logic ps2_clk;
 logic ps2_data;
-logic [7:0] scan_code;
-logic [7:0] scan_code_kbd;
 
 `include "core_rrv_pmon_tasks.vh"
 `include "core_rrv_trk.vh"
