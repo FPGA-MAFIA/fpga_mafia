@@ -25,10 +25,10 @@ send_symbol_unshifted(.scan_code_kbd(scan_code));
 
 
 
-//send_symbol_shifted("H"); //H
-//send_symbol_shifted("E"); //E
-//send_symbol_shifted("L"); //L 
-//send_symbol_shifted("L"); //L
-//send_symbol_shifted("O"); //O
-//send_symbol_shifted("ENTER");
+send_symbol_shifted("H"); //H
+send_symbol_shifted("E"); //E
+send_symbol_shifted("L"); //L 
+send_symbol_shifted("L"); //L
+send_symbol_shifted("O"); //O
+send_symbol_shifted("ENTER");
 

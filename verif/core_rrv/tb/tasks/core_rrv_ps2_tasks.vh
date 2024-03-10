@@ -157,3 +157,26 @@ task get_scan_code(input string key);
 endtask
 
 
+
+task send_char(input char str);
+    begin
+        case(str)
+            // Unshifted characters
+            "a" : send_symbol_unshifted(8'h1C);
+            "b" : send_symbol_unshifted(8'h32);
+            "c" : send_symbol_unshifted(8'h21);
+            "d" : send_symbol_unshifted(8'h23);
+            //...
+            "z" : send_symbol_unshifted(8'h2A);
+            // Shifted characters
+            "A" : send_symbol_shifted(8'h1C);
+            "B" : send_symbol_shifted(8'h32);
+            "C" : send_symbol_shifted(8'h21);
+            "D" : send_symbol_shifted(8'h23);
+            //...
+            "Z" : send_symbol_shifted(8'h2A);
+            default: $display("Unsupported character");
+        endcase
+    end
+endtask
+
