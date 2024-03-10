@@ -46,9 +46,8 @@ assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 
 logic ps2_clk;
 logic ps2_data;
-parameter RELEASE_CODE    = 8'hF0;
-parameter LEFT_SHIFT_CODE = 8'h12;
-t_ascii_to_scan_code scan_code;
+logic [7:0] scan_code;
+logic [7:0] scan_code_kbd;
 
 `include "core_rrv_pmon_tasks.vh"
 `include "core_rrv_trk.vh"
