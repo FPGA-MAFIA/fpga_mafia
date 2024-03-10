@@ -1,4 +1,4 @@
-// wait until we see CR of the "scanf" ready for reading
+// wait until we see CR of the "scanf" ready for readingE
 
 delay(5);
 $display("TIME: %t,waiting for CR to be ready for reading", $time);
@@ -10,17 +10,25 @@ end
 $display("TIME: %t, CR is ready for reading", $time);
 
 
-send_symbol_unshifted(H); //h
-send_symbol_unshifted(E); //e
-send_symbol_unshifted(L); //l
-send_symbol_unshifted(L); //l
-send_symbol_unshifted(O); //o
-send_symbol_unshifted(ENTER);
+get_scan_code(.key("H"));
+send_symbol_unshifted(.scan_code_kbd(scan_code)); //h
+get_scan_code(.key("E")); 
+send_symbol_unshifted(.scan_code_kbd(scan_code)); //e
+get_scan_code(.key("L")); 
+send_symbol_unshifted(.scan_code_kbd(scan_code)); //l
+get_scan_code(.key("L")); 
+send_symbol_unshifted(.scan_code_kbd(scan_code)); //l
+get_scan_code(.key("O")); 
+send_symbol_unshifted(.scan_code_kbd(scan_code)); //o
+get_scan_code(.key("ENTER"));
+send_symbol_unshifted(.scan_code_kbd(scan_code));
 
-send_symbol_shifted(H); //H
-send_symbol_shifted(E); //E
-send_symbol_shifted(L); //L 
-send_symbol_shifted(L); //L
-send_symbol_shifted(O); //O
-send_symbol_shifted(ENTER);
+
+
+//send_symbol_shifted("H"); //H
+//send_symbol_shifted("E"); //E
+//send_symbol_shifted("L"); //L 
+//send_symbol_shifted("L"); //L
+//send_symbol_shifted("O"); //O
+//send_symbol_shifted("ENTER");
 
