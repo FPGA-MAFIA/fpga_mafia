@@ -4,7 +4,6 @@
 // will have a simple task that accepts a byte and sends it to the PS2 interface (clock and data lines)
 
 task send_byte_to_ps2 (input logic [7:0] data);
-    $display("code: %1h", data);
     #10;
     // Clock for release
     //Start bit
@@ -55,10 +54,10 @@ task send_byte_to_ps2 (input logic [7:0] data);
 endtask
 
 
-task send_symbol_unshifted(input logic [7:0] scan_code_kbd);
-    send_byte_to_ps2(.data(scan_code_kbd));
+task send_symbol_unshifted(input logic [7:0] scan_code);
+    send_byte_to_ps2(.data(scan_code));
     send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
-    send_byte_to_ps2(.data(scan_code_kbd)); 
+    send_byte_to_ps2(.data(scan_code));
 endtask
 
 // for example: consider we want to send the letter 'W' to the PS2 interface
@@ -68,97 +67,16 @@ endtask
 // 'W' - 0x1D
 // RELEASE_CODE - 0xF0
 // LEFT_SHIFT - 0x12
-task send_symbol_shifted(input logic [7:0] scan_code_kbd);
+task send_symbol_shifted(input logic [7:0] scan_code);
     send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
-    send_byte_to_ps2(.data(scan_code_kbd)); 
+    send_byte_to_ps2(.data(scan_code)); 
     send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
-    send_byte_to_ps2(.data(scan_code_kbd));
+    send_byte_to_ps2(.data(scan_code));
     send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
     send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
 endtask
 
-// Task to convert char to scan code
-task get_scan_code(input string key);
-    begin
-        case(key)
-            // Map each character to its corresponding scan code
-            "ESC"         :      scan_code = 8'h76;
-            "F1"          :      scan_code = 8'h05;
-            "F2"          :      scan_code = 8'h06;
-            "F3"          :      scan_code = 8'h04;
-            "F4"          :      scan_code = 8'h0C;
-            "F5"          :      scan_code = 8'h03;
-            "F6"          :      scan_code = 8'h0B;
-            "F7"          :      scan_code = 8'h83;
-            "F8"          :      scan_code = 8'h0A;
-            "F9"          :      scan_code = 8'h01;
-            "F10"         :      scan_code = 8'h09;
-            "F11"         :      scan_code = 8'h78;
-            "F12"         :      scan_code = 8'h07;
-            "TICK"        :      scan_code = 8'h0E; // `
-            "ONE"         :      scan_code = 8'h16; 
-            "TWO"         :      scan_code = 8'h1E;
-            "THREE"       :      scan_code = 8'h26;
-            "FOUR"        :      scan_code = 8'h25;
-            "FIVE"        :      scan_code = 8'h2E;
-            "SIX"         :      scan_code = 8'h36;
-            "SEVEN"       :      scan_code = 8'h3D;
-            "EIGHT"       :      scan_code = 8'h3E;
-            "NINE"        :      scan_code = 8'h46;
-            "ZERO"        :      scan_code = 8'h45;
-            "HYPHEN"      :      scan_code = 8'h4E; // -
-            "EQUAL"       :      scan_code = 8'h55;
-            "BACKSPACE"   :      scan_code = 8'h66; // =
-            "TAB"         :      scan_code = 8'h0D;
-            "Q"           :      scan_code = 8'h15;
-            "W"           :      scan_code = 8'h1D;
-            "E"           :      scan_code = 8'h24;
-            "R"           :      scan_code = 8'h2D;
-            "T"           :      scan_code = 8'h2C;
-            "Y"           :      scan_code = 8'h35;
-            "U"           :      scan_code = 8'h3C;
-            "I"           :      scan_code = 8'h43;
-            "O"           :      scan_code = 8'h44;
-            "P"           :      scan_code = 8'h4D;
-            "LSBR"        :      scan_code = 8'h54;  // left square bracket [
-            "RSBR"        :      scan_code = 8'h5B;  // right square bracket ]
-            "BACKSLASH"   :      scan_code = 8'h5D;   // \
-            "CAPSLOCK"    :      scan_code = 8'h58;
-            "A"           :      scan_code = 8'h1C;
-            "S"           :      scan_code = 8'h1B;
-            "D"           :      scan_code = 8'h23;
-            "F"           :      scan_code = 8'h2B;
-            "G"           :      scan_code = 8'h34;
-            "H"           :      scan_code = 8'h33;
-            "J"           :      scan_code = 8'h3B;
-            "K"           :      scan_code = 8'h42;
-            "L"           :      scan_code = 8'h4B;
-            "SEMICOLON"   :      scan_code = 8'h4C;  // ;
-            "APOSTROPHE"  :      scan_code = 8'h52;  // '
-            "ENTER"       :      scan_code = 8'h5A;
-            "LSHIFT"      :      scan_code = 8'h12;
-            "Z"           :      scan_code = 8'h1A;
-            "X"           :      scan_code = 8'h22;
-            "C"           :      scan_code = 8'h21;
-            "V"           :      scan_code = 8'h2A;
-            "B"           :      scan_code = 8'h32;
-            "N"           :      scan_code = 8'h31;
-            "M"           :      scan_code = 8'h3A;
-           "COMMA"        :      scan_code = 8'h41;  // ;
-           "DOT"          :      scan_code = 8'h49;  // .
-            "SLASH"       :      scan_code = 8'h4A;  // /
-            "RSHIFT"      :      scan_code = 8'h59;  // right shift
-            "LCTRL"       :      scan_code = 8'h14;  // left control
-            "LALT"        :      scan_code = 8'h11;  // left alt
-            "SPACE"       :      scan_code = 8'h29;
-            default       :      scan_code = 8'h00; // You might use a special value to indicate an unsupported character
-        endcase
-    end
-endtask
-
-
-
-task send_char(input char str);
+task send_char(input byte str);
     begin
         case(str)
             // Unshifted characters
@@ -166,17 +84,93 @@ task send_char(input char str);
             "b" : send_symbol_unshifted(8'h32);
             "c" : send_symbol_unshifted(8'h21);
             "d" : send_symbol_unshifted(8'h23);
-            //...
-            "z" : send_symbol_unshifted(8'h2A);
+            "e" : send_symbol_unshifted(8'h24);
+            "f" : send_symbol_unshifted(8'h2B);
+            "g" : send_symbol_unshifted(8'h34);
+            "h" : send_symbol_unshifted(8'h33);
+            "i" : send_symbol_unshifted(8'h43);
+            "j" : send_symbol_unshifted(8'h3B);
+            "k" : send_symbol_unshifted(8'h42);
+            "l" : send_symbol_unshifted(8'h4B);
+            "m" : send_symbol_unshifted(8'h3A);
+            "n" : send_symbol_unshifted(8'h31);
+            "o" : send_symbol_unshifted(8'h44);
+            "p" : send_symbol_unshifted(8'h4D);
+            "q" : send_symbol_unshifted(8'h15);
+            "r" : send_symbol_unshifted(8'h2D);
+            "s" : send_symbol_unshifted(8'h1B);
+            "t" : send_symbol_unshifted(8'h2C);
+            "u" : send_symbol_unshifted(8'h3C);
+            "v" : send_symbol_unshifted(8'h2A);
+            "w" : send_symbol_unshifted(8'h1D);
+            "x" : send_symbol_unshifted(8'h22);
+            "y" : send_symbol_unshifted(8'h35);
+            "z" : send_symbol_unshifted(8'h1A);
             // Shifted characters
             "A" : send_symbol_shifted(8'h1C);
             "B" : send_symbol_shifted(8'h32);
             "C" : send_symbol_shifted(8'h21);
             "D" : send_symbol_shifted(8'h23);
-            //...
-            "Z" : send_symbol_shifted(8'h2A);
+            "E" : send_symbol_shifted(8'h24);
+            "F" : send_symbol_shifted(8'h2B);
+            "G" : send_symbol_shifted(8'h34);
+            "H" : send_symbol_shifted(8'h33);
+            "I" : send_symbol_shifted(8'h43);
+            "J" : send_symbol_shifted(8'h3B);
+            "K" : send_symbol_shifted(8'h42);
+            "L" : send_symbol_shifted(8'h4B);
+            "M" : send_symbol_shifted(8'h3A);
+            "N" : send_symbol_shifted(8'h31);
+            "O" : send_symbol_shifted(8'h44);
+            "P" : send_symbol_shifted(8'h4D);
+            "Q" : send_symbol_shifted(8'h15);
+            "R" : send_symbol_shifted(8'h2D);
+            "S" : send_symbol_shifted(8'h1B);
+            "T" : send_symbol_shifted(8'h2C);
+            "U" : send_symbol_shifted(8'h3C);
+            "V" : send_symbol_shifted(8'h2A);
+            "W" : send_symbol_shifted(8'h1D);
+            "X" : send_symbol_shifted(8'h22);
+            "Y" : send_symbol_shifted(8'h35);
+            "Z" : send_symbol_shifted(8'h1A);
+            // numbers
+            "0" : send_symbol_unshifted(8'h45);
+            "1" : send_symbol_unshifted(8'h16);
+            "2" : send_symbol_unshifted(8'h1E);
+            "3" : send_symbol_unshifted(8'h26);
+            "4" : send_symbol_unshifted(8'h25);
+            "5" : send_symbol_unshifted(8'h2E);
+            "6" : send_symbol_unshifted(8'h36);
+            "7" : send_symbol_unshifted(8'h3D);
+            "8" : send_symbol_unshifted(8'h3E);
+            "9" : send_symbol_unshifted(8'h46);
+            // special characters
+            " " : send_symbol_unshifted(8'h29);
+            "." : send_symbol_unshifted(8'h49);
+            "," : send_symbol_unshifted(8'h41);
+            ";" : send_symbol_unshifted(8'h4C);
+            "!" : send_symbol_shifted(8'h16);
+            "@" : send_symbol_shifted(8'h1E);
+            "#" : send_symbol_shifted(8'h26);
+            "$" : send_symbol_shifted(8'h25);
+            "\%" : send_symbol_shifted(8'h2E);
+            "^" : send_symbol_shifted(8'h36);
+            "&" : send_symbol_shifted(8'h3D);
+            "*" : send_symbol_shifted(8'h3E);
+            "(" : send_symbol_shifted(8'h46);
+            ")" : send_symbol_shifted(8'h45);
+            "=" : send_symbol_unshifted(8'h55);            
+
             default: $display("Unsupported character");
         endcase
     end
 endtask
 
+task send_string(input string str);
+    begin
+        for(int i=0; i<str.len(); i++) begin
+            send_char(str[i]);
+        end
+        send_byte_to_ps2(.data(ENTER_CODE));
+    end
+endtask

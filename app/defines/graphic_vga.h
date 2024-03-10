@@ -740,15 +740,16 @@ int rvc_scanf(char* str, int size){
         if (rd_code == RELEASE_KEY_CODE) {
             // If release code, set flag to ignore the next code
             ignore_next_code = 1;
-        } else if (ignore_next_code) {
+        } 
+        else if (ignore_next_code) {
             // If the flag is set, reset it and ignore this scan code
             ignore_next_code = 0;
         }
-         else if (rd_code == LEFT_SHIFT_KEY_CODE ) { // The next key code will be taken from shifted map
+        else if (rd_code == LEFT_SHIFT_KEY_CODE ) { // The next key code will be taken from shifted map
             left_shift_pressed = 1;
         }
         else if (rd_code != ENTER_KEY_CODE) {
-            if(left_shift_pressed = 1){
+            if(left_shift_pressed == 1){
                 // Process normal key press using the shifted keymap
                 rd_char = keymap_shifted[rd_code];
                 str[i++] = rd_char;      // Store character and increment index
@@ -758,7 +759,7 @@ int rvc_scanf(char* str, int size){
             }
                 // Process normal key press using the shifted keymap  // FIXME - Process normal key press using the un-shifted keymap
             else {
-                rd_char = keymap_shifted[rd_code]; //FIXME - should use the un-shifted keymap!!
+                rd_char = keymap[rd_code]; 
                 str[i++] = rd_char;      // Store character and increment index
                 char_arr[0] = rd_char;   // Set for printing
                 rvc_printf(char_arr);    // Print the character

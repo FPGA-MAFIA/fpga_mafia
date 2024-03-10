@@ -14,6 +14,7 @@
 
 parameter RELEASE_CODE    = 8'hF0;
 parameter LEFT_SHIFT_CODE = 8'h12;
+parameter ENTER_CODE      = 8'h5A;
 
 //-----------------------------------
 //         vga structs 
