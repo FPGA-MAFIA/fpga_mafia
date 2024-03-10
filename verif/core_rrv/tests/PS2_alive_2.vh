@@ -10,5 +10,5 @@ end
 $display("TIME: %t, CR is ready for reading", $time);
 
 // sending string imitating the keyboard input
-send_string("01ROM");
+send_string("012RrXxYyZz");
 
