@@ -105,7 +105,7 @@ task send_char(input byte str);
             "w" : send_symbol_unshifted(8'h1D);
             "x" : send_symbol_unshifted(8'h22);
             "y" : send_symbol_unshifted(8'h35);
-            "z" : send_symbol_unshifted(8'h2A);
+            "z" : send_symbol_unshifted(8'h1A);
             // Shifted characters
             "A" : send_symbol_shifted(8'h1C);
             "B" : send_symbol_shifted(8'h32);
@@ -132,7 +132,7 @@ task send_char(input byte str);
             "W" : send_symbol_shifted(8'h1D);
             "X" : send_symbol_shifted(8'h22);
             "Y" : send_symbol_shifted(8'h35);
-            "Z" : send_symbol_shifted(8'h2A);
+            "Z" : send_symbol_shifted(8'h1A);
             // numbers
             "0" : send_symbol_unshifted(8'h45);
             "1" : send_symbol_unshifted(8'h16);
@@ -144,6 +144,23 @@ task send_char(input byte str);
             "7" : send_symbol_unshifted(8'h3D);
             "8" : send_symbol_unshifted(8'h3E);
             "9" : send_symbol_unshifted(8'h46);
+            // special characters
+            " " : send_symbol_unshifted(8'h29);
+            "." : send_symbol_unshifted(8'h49);
+            "," : send_symbol_unshifted(8'h41);
+            ";" : send_symbol_unshifted(8'h4C);
+            "!" : send_symbol_shifted(8'h16);
+            "@" : send_symbol_shifted(8'h1E);
+            "#" : send_symbol_shifted(8'h26);
+            "$" : send_symbol_shifted(8'h25);
+            "\%" : send_symbol_shifted(8'h2E);
+            "^" : send_symbol_shifted(8'h36);
+            "&" : send_symbol_shifted(8'h3D);
+            "*" : send_symbol_shifted(8'h3E);
+            "(" : send_symbol_shifted(8'h46);
+            ")" : send_symbol_shifted(8'h45);
+            "=" : send_symbol_unshifted(8'h55);            
+
             default: $display("Unsupported character");
         endcase
     end
