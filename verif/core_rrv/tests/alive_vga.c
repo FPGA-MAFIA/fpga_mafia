@@ -6,7 +6,7 @@ int main()  {
     rvc_printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
     rvc_printf("abcdefghijklmnopqrstuvwxyz\n");
     rvc_printf("/.,?><;:\\|[]{}=+-_()*&^\%$#@!\n");
-    rvc_print_int(1234567);
+    rvc_print_int(1234567890);
   
     return 0;
     
