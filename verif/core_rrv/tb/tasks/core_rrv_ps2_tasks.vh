@@ -188,3 +188,21 @@ task send_string(input string str);
         send_byte_to_ps2(.data(ENTER_CODE));
     end
 endtask
+
+
+
+task send_string_with_long_shift(input string str);
+    begin
+        //Send shift byte
+        send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
+        //Send the string (May be all lower case - but the Shift should be set)
+        for(int i=0; i<str.len(); i++) begin
+            send_char(str[i]);
+        end
+        //release the shift
+        send_byte_to_ps2(.data(RELEASE_CODE));
+        send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
+        //press enter
+        send_byte_to_ps2(.data(ENTER_CODE));
+    end
+endtask
