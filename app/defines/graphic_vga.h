@@ -717,33 +717,47 @@ char keymap_shifted[256] = {
 int rvc_scanf(char* str, int size){
     char char_arr[2];            // Helper array for printing characters
     char_arr[1] = '\0';          // Null-terminate for printing
-
-    WRITE_REG(CR_KBD_SCANF_EN, 0x1); // Enable keyboard scanning
-
     int ready = 0;               // Flag to indicate data is ready
     int i = 0;                   // Index for storing into 'str'
     int rd_code = 0;             // Read code from keyboard
     char rd_char = 0;            // Character corresponding to read code
-    int ignore_next_code = 0;    // Flag to ignore the next scan code following a release code
-    int left_shift_pressed = 0;  // Flag indicated if left shift was pressed
+    int release_pressed = 0; // Flag to ignore the next scan code following a release code
+    int left_shift_pressed  = 0; // Flag indicated if left shift was pressed
+    int unexpected_scan_code = 0; // Flag to indicate if an unexpected scan code was received
+    //Make sure the CR_KBD_DATA is empty before accepting new input
+    while (ready) {
+        READ_REG(rd_code, CR_KBD_DATA); // Read the HW FIFO which will pop the buffer and make it empty
+    }
 
+    // Enable keyboard scanning
+    WRITE_REG(CR_KBD_SCANF_EN, 0x1); // Enable keyboard scanning
     // Loop until the Enter key is pressed or the buffer size is reached
-    while ((i < size - 1) && (rd_code != ENTER_KEY_CODE)) {
+    while ((i < size - 1) && (rd_code != ENTER_KEY_CODE) && (!unexpected_scan_code)) {
         ready = 0;
-        // Wait until data is ready
+        // Wait until data is ready - the HW FIFO is not empty
         while (!ready) {
             READ_REG(ready, CR_KBD_READY);
-            // Implement timeout or break condition if needed
         }
         READ_REG(rd_code, CR_KBD_DATA); // Read the scan code
+        
+        //Make sure the rd_code is only utilizing the 8 LSB
+        // the keymap tables are 256 entries long
+        if(rd_code > 255){
+            rd_code = 0;
+            unexpected_scan_code = 1;
+        }
 
         if (rd_code == RELEASE_KEY_CODE) {
             // If release code, set flag to ignore the next code
-            ignore_next_code = 1;
+            release_pressed = 1;
         } 
-        else if (ignore_next_code) {
+        else if (release_pressed) {
             // If the flag is set, reset it and ignore this scan code
-            ignore_next_code = 0;
+            release_pressed = 0;
+            if (rd_code == LEFT_SHIFT_KEY_CODE) {
+                left_shift_pressed = 0;
+            }
+        
         }
         else if (rd_code == LEFT_SHIFT_KEY_CODE ) { // The next key code will be taken from shifted map
             left_shift_pressed = 1;
@@ -755,9 +769,8 @@ int rvc_scanf(char* str, int size){
                 str[i++] = rd_char;      // Store character and increment index
                 char_arr[0] = rd_char;   // Set for printing
                 rvc_printf(char_arr);    // Print the character
-                left_shift_pressed = 0; 
             }
-                // Process normal key press using the shifted keymap  // FIXME - Process normal key press using the un-shifted keymap
+                // Process normal key press using the shifted keymap
             else {
                 rd_char = keymap[rd_code]; 
                 str[i++] = rd_char;      // Store character and increment index
@@ -771,7 +784,11 @@ int rvc_scanf(char* str, int size){
     str[i] = '\0'; // Ensure the string is null-terminated
     WRITE_REG(CR_KBD_SCANF_EN, 0x0); // Disable keyboard scanning
 
+    if(unexpected_scan_code){
+        return -1;
+    }
     return i; // Return the number of characters read, not including '\0'
+
 }
 
 
