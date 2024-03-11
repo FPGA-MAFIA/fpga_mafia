@@ -18,13 +18,13 @@
 #define SPACE_TOP    0x0                         
 #define SPACE_BOTTOM 0x0                         
 #define COMMA_TOP    0x00000000                  
-#define COMMA_BOTTOM 0x061E1818                  
+#define COMMA_BOTTOM 0x08101000                  
 #define UNDER_SCORE_TOP    0x00000000
 #define UNDER_SCORE_BOTTOM 0x007E0000
 #define DASH_TOP     0x00000000 
-#define DASH_BOTTOM  0x0000003C
+#define DASH_BOTTOM  0x0000007C
 #define POINT_TOP    0x00000000                  
-#define POINT_BOTTOM 0x00181800                  
+#define POINT_BOTTOM 0x00100000                  
 #define ZERO_TOP     0x52623C00                  
 #define ZERO_BOTTOM  0x003C464A                  
 #define ONE_TOP      0x1A1C1800                  
@@ -116,26 +116,26 @@
 #define Y_BOTTOM     0x00181818                  
 #define Z_TOP        0x10207E00                  
 #define Z_BOTTOM     0x007E0408
-#define a_top        0x78403800
-#define a_bottom     0x0000B844
-#define b_top        0x00000000
-#define b_bottom     0x00000000
-#define c_top        0x00000000
-#define c_bottom     0x00000000
-#define d_top        0x00000000
-#define d_bottom     0x00000000
-#define e_top        0x00000000
-#define e_bottom     0x00000000
-#define f_top        0x00000000
-#define f_bottom     0x00000000
-#define g_top        0x00000000
-#define g_bottom     0x00000000
-#define h_top        0x00000000
-#define h_bottom     0x00000000
-#define i_top        0x00000000
-#define i_bottom     0x00000000
-#define j_top        0x00000000
-#define j_bottom     0x00000000
+#define a_top        0x24180000
+#define a_bottom     0x00005824
+#define b_top        0x241C0404
+#define b_bottom     0x00001C24
+#define c_top        0x04380000
+#define c_bottom     0x00003804
+#define d_top        0x24382020
+#define d_bottom     0x00003824
+#define e_top        0x24380000
+#define e_bottom     0x0000781c
+#define f_top        0x081C0830
+#define f_bottom     0x00000808
+#define g_top        0x24180000
+#define g_bottom     0x18203824
+#define h_top        0x241C0404
+#define h_bottom     0x00002424
+#define i_top        0x60002000
+#define i_bottom     0x00003020
+#define j_top        0x20002000
+#define j_bottom     0x30282020
 #define k_top        0x14240404
 #define k_bottom     0x0000340C
 #define l_top        0x10101030
@@ -177,6 +177,58 @@
 
 #define QUESTION_MARK_TOP    0x20241800 //
 #define QUESTION_MARK_BOTTOM 0x00100010 //
+
+#define Slash_TOP        0x10204000
+#define Slash_BOTTOM     0x00020408
+
+#define Semicolon_TOP        0x00100000
+#define Semicolon_BOTTOM     0x08101000
+
+#define Backslash_TOP        0x08040200
+#define Backslash_BOTTOM     0x00402010
+
+#define Exclamation_mark_TOP      0x08080800
+#define Exclamation_mark_BOTTOM   0x00000800
+#define Double_quotes_TOP         0x00181800
+#define Double_quotes_BOTTOM      0x00000000
+#define Number_sign_TOP           0x247E2400
+#define Number_sign_BOTTOM        0x00247E24
+#define Dollar_TOP                0x14781010
+#define Dollar_BOTTOM             0x103C5038
+#define Per_cent_sign_TOP         0x10244000
+#define Per_cent_sign_BOTTOM      0x00022408
+#define Ampersand_TOP             0x24241800
+#define Ampersand_BOTTOM          0x00582458
+#define Single_quote_TOP          0x00080800
+#define Single_quote_BOTTOM       0x00000000
+#define open_parenthesis_TOP      0x02020400
+#define open_parenthesis_BOTTOM   0x00040202
+#define close_parenthesis_TOP     0x40402000
+#define close_parenthesis_BOTTOM  0x00204040
+#define Asterisk_TOP              0x24181824
+#define Asterisk_BOTTOM           0x00000000
+#define Plus_TOP                  0x10000000
+#define Plus_BOTTOM               0x0000107C
+#define Equals_TOP                0x3C000000
+#define Equals_BOTTOM             0x00003C00
+#define At_sign_TOP               0xA599423C
+#define At_sign_BOTTOM            0x3C0259A5
+#define open_bracket_TOP          0x02020600
+#define open_bracket_BOTTOM       0x00060202
+#define close_bracket_TOP         0x40406000
+#define close_bracket_BOTTOM      0x00604040
+#define circumflex_TOP            0x00140800
+#define circumflex_BOTTOM         0x00000000
+#define Grave_accent_TOP          0x00100800
+#define Grave_accent_BOTTOM       0x00000000
+#define Opening_brace_TOP         0x04040800
+#define Opening_brace_BOTTOM      0x08040402
+#define Closing_brace_TOP         0x40402000
+#define Closing_brace_BOTTOM      0x20404080
+#define Vertical_bar_TOP          0x10101000
+#define Vertical_bar_BOTTOM       0x00101010
+#define tilde_TOP                 0x4C000000
+#define tilde_BOTTOM              0x00000032
 /* ANIME Values */
 #define WALK_MAN_TOP_0    0x7c381030
 #define WALK_MAN_BOTTOM_0 0x828448ba             
@@ -192,23 +244,23 @@
 #define CLEAR_BOTTOM      0x0           
 
 /* ASCII tables */
-unsigned int ASCII_TOP[127]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,0,
-                                0,0,0,0,0,0,0,0,0,0,COMMA_TOP,DASH_TOP,POINT_TOP,0,ZERO_TOP,ONE_TOP,TWO_TOP,
-                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,0,LESS_THAN_TOP,0,GREATER_THAN_TOP,QUESTION_MARK_TOP,0,A_TOP,
+unsigned int ASCII_TOP[127]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,Exclamation_mark_TOP,
+                                Double_quotes_TOP,Number_sign_TOP,Dollar_TOP,Per_cent_sign_TOP,Ampersand_TOP,Single_quote_TOP,open_parenthesis_TOP,close_parenthesis_TOP,Asterisk_TOP,Plus_TOP ,COMMA_TOP,DASH_TOP,POINT_TOP,Slash_TOP,ZERO_TOP,ONE_TOP,TWO_TOP,
+                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,Semicolon_TOP,LESS_THAN_TOP,Equals_TOP,GREATER_THAN_TOP,QUESTION_MARK_TOP,At_sign_TOP,A_TOP,
                                 B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
-                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,0,0,0,0,UNDER_SCORE_TOP,0,
+                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,open_bracket_TOP,Backslash_TOP,close_bracket_TOP,circumflex_TOP,UNDER_SCORE_TOP,Grave_accent_TOP,
                                 a_top, b_top, c_top, d_top, e_top, f_top, g_top, h_top, i_top, j_top, k_top, l_top, m_top, n_top, o_top,
-                                p_top,q_top,r_top,s_top,t_top,u_top,v_top,w_top,x_top,y_top,z_top};
-unsigned int ASCII_BOTTOM[127] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                SPACE_BOTTOM,0,0,0,0,0,0,0,0,0,0,COMMA_BOTTOM,DASH_BOTTOM,POINT_BOTTOM,0,ZERO_BOTTOM,
+                                p_top,q_top,r_top,s_top,t_top,u_top,v_top,w_top,x_top,y_top,z_top,Opening_brace_TOP,Vertical_bar_TOP,Closing_brace_TOP,tilde_TOP};
+unsigned int ASCII_BOTTOM[127] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                SPACE_BOTTOM,Exclamation_mark_BOTTOM,Double_quotes_BOTTOM,Number_sign_BOTTOM,Dollar_BOTTOM,Per_cent_sign_BOTTOM,Ampersand_BOTTOM,Single_quote_BOTTOM,open_parenthesis_BOTTOM,close_parenthesis_BOTTOM,Asterisk_BOTTOM,Plus_BOTTOM,COMMA_BOTTOM,DASH_BOTTOM,POINT_BOTTOM,Slash_BOTTOM,ZERO_BOTTOM,
                                 ONE_BOTTOM,TWO_BOTTOM,THREE_BOTTOM,FOUR_BOTTOM,FIVE_BOTTOM,SIX_BOTTOM,
-                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,0,LESS_THAN_BOTTOM,0,GREATER_THAN_BOTTOM,QUESTION_MARK_BOTTOM,0,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
+                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,Semicolon_BOTTOM,LESS_THAN_BOTTOM,Equals_BOTTOM,GREATER_THAN_BOTTOM,QUESTION_MARK_BOTTOM,At_sign_BOTTOM,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
                                 E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
                                 M_BOTTOM,N_BOTTOM,O_BOTTOM,P_BOTTOM,Q_BOTTOM,R_BOTTOM,S_BOTTOM,T_BOTTOM,
-                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,0,0,0,0,UNDER_SCORE_BOTTOM,0,
+                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,open_bracket_BOTTOM,Backslash_BOTTOM,close_bracket_BOTTOM,circumflex_BOTTOM,UNDER_SCORE_BOTTOM,Grave_accent_BOTTOM,
                                 a_bottom,b_bottom,c_bottom,d_bottom,e_bottom,f_bottom,g_bottom,h_bottom,
                                 i_bottom,j_bottom,k_bottom,l_bottom,m_bottom,n_bottom,o_bottom,p_bottom,
-                                q_bottom,r_bottom,s_bottom,t_bottom,u_bottom,v_bottom,w_bottom,x_bottom,y_bottom,z_bottom};
+                                q_bottom,r_bottom,s_bottom,t_bottom,u_bottom,v_bottom,w_bottom,x_bottom,y_bottom,z_bottom,Opening_brace_BOTTOM,Vertical_bar_BOTTOM,Closing_brace_BOTTOM,tilde_BOTTOM};
 
 /* ANIME tables */
 unsigned int ANIME_TOP[6]    = {WALK_MAN_TOP_0,   WALK_MAN_TOP_1,   WALK_MAN_TOP_2,   WALK_MAN_TOP_3,   WALK_MAN_TOP_4,   CLEAR_TOP};
