@@ -236,9 +236,9 @@ unsigned int ASCII_TOP[128] = {
     P_TOP       ,Q_TOP       ,R_TOP       ,S_TOP      ,T_TOP       ,U_TOP      ,V_TOP        ,W_TOP       , // 0x50 - 0x57
     X_TOP       ,Y_TOP       ,Z_TOP       ,OB_TOP     ,BSLASH_TOP  ,CB_TOP     ,CIR_TOP      ,UNDR_SCR_TOP, // 0x58 - 0x5F
     GRV_TOP     ,a_TOP       ,b_TOP       ,c_TOP       ,d_TOP      ,e_TOP      ,f_TOP        ,g_TOP       , // 0x60 - 0x67
-    h_TOP      ,i_TOP        ,j_TOP       ,k_TOP       ,l_TOP      ,m_TOP      ,n_TOP        ,o_TOP       , // 0x68 - 0x6F
-    p_TOP      ,q_TOP        ,r_TOP       ,s_TOP       ,t_TOP      ,u_TOP      ,v_TOP        ,w_TOP       , // 0x70 - 0x77
-    x_TOP      ,y_TOP        ,z_TOP       ,OBR_TOP     ,VBAR_TOP   ,CBR_TOP    ,TLD_TOP      ,0            
+    h_TOP       ,i_TOP       ,j_TOP       ,k_TOP       ,l_TOP      ,m_TOP      ,n_TOP        ,o_TOP       , // 0x68 - 0x6F
+    p_TOP       ,q_TOP       ,r_TOP       ,s_TOP       ,t_TOP      ,u_TOP      ,v_TOP        ,w_TOP       , // 0x70 - 0x77
+    x_TOP       ,y_TOP       ,z_TOP       ,OBR_TOP     ,VBAR_TOP   ,CBR_TOP    ,TLD_TOP      ,0            
 };
 
 
@@ -258,9 +258,9 @@ unsigned int ASCII_BTM[128] = {
     P_BTM       ,Q_BTM       ,R_BTM       ,S_BTM      ,T_BTM       ,U_BTM      ,V_BTM        ,W_BTM       , // 0x50 - 0x57
     X_BTM       ,Y_BTM       ,Z_BTM       ,OB_BTM     ,BSLASH_BTM  ,CB_BTM     ,CIR_BTM      ,UNDR_SCR_BTM, // 0x58 - 0x5F
     GRV_BTM     ,a_BTM       ,b_BTM       ,c_BTM       ,d_BTM      ,e_BTM      ,f_BTM        ,g_BTM       , // 0x60 - 0x67
-    h_BTM      ,i_BTM        ,j_BTM       ,k_BTM       ,l_BTM      ,m_BTM      ,n_BTM        ,o_BTM       , // 0x68 - 0x6F
-    p_BTM      ,q_BTM        ,r_BTM       ,s_BTM       ,t_BTM      ,u_BTM      ,v_BTM        ,w_BTM       , // 0x70 - 0x77
-    x_BTM      ,y_BTM        ,z_BTM       ,OBR_BTM     ,VBAR_BTM   ,CBR_BTM    ,TLD_BTM      ,0            
+    h_BTM       ,i_BTM       ,j_BTM       ,k_BTM       ,l_BTM      ,m_BTM      ,n_BTM        ,o_BTM       , // 0x68 - 0x6F
+    p_BTM       ,q_BTM       ,r_BTM       ,s_BTM       ,t_BTM      ,u_BTM      ,v_BTM        ,w_BTM       , // 0x70 - 0x77
+    x_BTM       ,y_BTM       ,z_BTM       ,OBR_BTM     ,VBAR_BTM   ,CBR_BTM    ,TLD_BTM      ,0            
 };
 
 
