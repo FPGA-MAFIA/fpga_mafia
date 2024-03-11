@@ -7,15 +7,16 @@ int main(){
 char str1[30];
 char str2[30];
 
-rvc_printf("ENTER A STRING1:\n>");
+rvc_printf("INPUT:\n> ");
 rvc_scanf(str1, 30);
-rvc_printf("\nYOU ENTERED: ");
+rvc_printf("\nYOUR INPUT: ");
 rvc_printf(str1);
 
 //rvc_printf("\nENTER A STRING2:\n> ");
-//rvc_scanf(str2, 30);
-//rvc_printf("\nYOU ENTERED: ");
-//rvc_printf(str2);
+rvc_printf("\nINPUT:\n> ");
+rvc_scanf(str2, 30);
+rvc_printf("\nYOUR INPUT: ");
+rvc_printf(str2);
 
 
 return 0;

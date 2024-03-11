@@ -12,7 +12,7 @@ Created : 22/08/2021
 // 0x400000 - 0x400200 - Thread 0
 
 #include "LOTR_defines.h"
-#include "graphic.h"
+#include "graphic_lotr.h"
 int main() {
     int ThreadId = CR_THREAD[0];
     int UniqeId = CR_WHO_AM_I[0];
