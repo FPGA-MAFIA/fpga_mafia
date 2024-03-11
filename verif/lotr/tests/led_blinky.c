@@ -6,7 +6,7 @@ Created : 16.6.2022
 */
 
 #include "LOTR_defines.h"
-#include "graphic.h"
+#include "graphic_lotr.h"
 int main() {
     int UniqeId = CR_WHO_AM_I[0];
     int counter = 1 , timer = 0, counter2 = 1023;
