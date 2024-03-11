@@ -1,4 +1,3 @@
-// wait until we see CR of the "scanf" ready for readingE
 
 delay(5);
 $display("TIME: %t,waiting for CR to be ready for reading", $time);
@@ -10,5 +9,5 @@ end
 $display("TIME: %t, CR is ready for reading", $time);
 
 // sending string imitating the keyboard input
-send_string("0123RrXxYyZz");
+send_string("3");
 
