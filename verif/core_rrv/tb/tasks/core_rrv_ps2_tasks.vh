@@ -144,22 +144,36 @@ task send_char(input byte str);
             "7" : send_symbol_unshifted(8'h3D);
             "8" : send_symbol_unshifted(8'h3E);
             "9" : send_symbol_unshifted(8'h46);
-            // special characters
+            // UnShifted special characters
             " " : send_symbol_unshifted(8'h29);
             "." : send_symbol_unshifted(8'h49);
             "," : send_symbol_unshifted(8'h41);
             ";" : send_symbol_unshifted(8'h4C);
+            "[" : send_symbol_unshifted(8'h54);
+            "]" : send_symbol_unshifted(8'h5B);
+            "=" : send_symbol_unshifted(8'h55);            
+            "-" : send_symbol_unshifted(8'h4E);
+            "\\": send_symbol_unshifted(8'h5D);
+            "'" : send_symbol_unshifted(8'h52);
+            "`" : send_symbol_unshifted(8'h0E);
+            // Shifted special characters
+            "\%": send_symbol_shifted(8'h2E);
             "!" : send_symbol_shifted(8'h16);
             "@" : send_symbol_shifted(8'h1E);
             "#" : send_symbol_shifted(8'h26);
             "$" : send_symbol_shifted(8'h25);
-            "\%" : send_symbol_shifted(8'h2E);
             "^" : send_symbol_shifted(8'h36);
             "&" : send_symbol_shifted(8'h3D);
             "*" : send_symbol_shifted(8'h3E);
             "(" : send_symbol_shifted(8'h46);
             ")" : send_symbol_shifted(8'h45);
-            "=" : send_symbol_unshifted(8'h55);            
+            "{" : send_symbol_shifted(8'h54);
+            "}" : send_symbol_shifted(8'h5B);
+            "+" : send_symbol_shifted(8'h55);
+            "_" : send_symbol_shifted(8'h4E);
+            "|" : send_symbol_shifted(8'h5D);
+            "\"": send_symbol_shifted(8'h52);
+
 
             default: $display("Unsupported character");
         endcase

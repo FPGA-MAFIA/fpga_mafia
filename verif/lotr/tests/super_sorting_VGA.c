@@ -6,7 +6,7 @@ Created : 01/08/2022
 
 // REGION == 2'b01;
 #include "LOTR_defines.h"
-#include "graphic.h"
+#include "graphic_lotr.h"
 
 #define BUBBLE
 #define INSERTION

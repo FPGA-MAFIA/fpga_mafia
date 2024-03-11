@@ -1,5 +1,5 @@
 #include "LOTR_defines.h"
-#include "graphic.h"
+#include "graphic_lotr.h"
 
 void print_fixed_point(int value, int precision) {
     int intPart = value / precision;

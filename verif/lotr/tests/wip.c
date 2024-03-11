@@ -1,5 +1,5 @@
 #include "LOTR_defines.h"
-#include "graphic.h"
+#include "graphic_lotr.h"
 
 int hex7seg(int number){
     int hex7seg;
