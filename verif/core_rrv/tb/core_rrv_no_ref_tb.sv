@@ -46,9 +46,6 @@ assign PcQ105H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.Pc;
 
 logic ps2_clk;
 logic ps2_data;
-parameter RELEASE_CODE    = 8'hF0;
-parameter LEFT_SHIFT_CODE = 8'h12;
-t_ascii_to_scan_code scan_code;
 
 `include "core_rrv_pmon_tasks.vh"
 `include "core_rrv_trk.vh"
@@ -119,7 +116,7 @@ initial begin: test_seq
    
 end // test_seq
 
-parameter V_TIMEOUT = 200000;
+parameter V_TIMEOUT = 250000;
 parameter RF_NUM_MSB = 31; // NOTE!!!: auto inserted from script ovrd_params.py
 initial begin: detect_timeout
     //=======================================

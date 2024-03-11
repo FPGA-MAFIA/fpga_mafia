@@ -54,10 +54,10 @@ task send_byte_to_ps2 (input logic [7:0] data);
 endtask
 
 
-task send_symbol_unshifted(input var t_ascii_to_scan_code scan_code);
-    send_byte_to_ps2(.data(scan_code)); 
+task send_symbol_unshifted(input logic [7:0] scan_code);
+    send_byte_to_ps2(.data(scan_code));
     send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
-    send_byte_to_ps2(.data(scan_code)); 
+    send_byte_to_ps2(.data(scan_code));
 endtask
 
 // for example: consider we want to send the letter 'W' to the PS2 interface
@@ -67,7 +67,7 @@ endtask
 // 'W' - 0x1D
 // RELEASE_CODE - 0xF0
 // LEFT_SHIFT - 0x12
-task send_symbol_shifted(input var t_ascii_to_scan_code scan_code);
+task send_symbol_shifted(input logic [7:0] scan_code);
     send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
     send_byte_to_ps2(.data(scan_code)); 
     send_byte_to_ps2(.data(RELEASE_CODE)); //releasing
@@ -76,3 +76,101 @@ task send_symbol_shifted(input var t_ascii_to_scan_code scan_code);
     send_byte_to_ps2(.data(LEFT_SHIFT_CODE));
 endtask
 
+task send_char(input byte str);
+    begin
+        case(str)
+            // Unshifted characters
+            "a" : send_symbol_unshifted(8'h1C);
+            "b" : send_symbol_unshifted(8'h32);
+            "c" : send_symbol_unshifted(8'h21);
+            "d" : send_symbol_unshifted(8'h23);
+            "e" : send_symbol_unshifted(8'h24);
+            "f" : send_symbol_unshifted(8'h2B);
+            "g" : send_symbol_unshifted(8'h34);
+            "h" : send_symbol_unshifted(8'h33);
+            "i" : send_symbol_unshifted(8'h43);
+            "j" : send_symbol_unshifted(8'h3B);
+            "k" : send_symbol_unshifted(8'h42);
+            "l" : send_symbol_unshifted(8'h4B);
+            "m" : send_symbol_unshifted(8'h3A);
+            "n" : send_symbol_unshifted(8'h31);
+            "o" : send_symbol_unshifted(8'h44);
+            "p" : send_symbol_unshifted(8'h4D);
+            "q" : send_symbol_unshifted(8'h15);
+            "r" : send_symbol_unshifted(8'h2D);
+            "s" : send_symbol_unshifted(8'h1B);
+            "t" : send_symbol_unshifted(8'h2C);
+            "u" : send_symbol_unshifted(8'h3C);
+            "v" : send_symbol_unshifted(8'h2A);
+            "w" : send_symbol_unshifted(8'h1D);
+            "x" : send_symbol_unshifted(8'h22);
+            "y" : send_symbol_unshifted(8'h35);
+            "z" : send_symbol_unshifted(8'h1A);
+            // Shifted characters
+            "A" : send_symbol_shifted(8'h1C);
+            "B" : send_symbol_shifted(8'h32);
+            "C" : send_symbol_shifted(8'h21);
+            "D" : send_symbol_shifted(8'h23);
+            "E" : send_symbol_shifted(8'h24);
+            "F" : send_symbol_shifted(8'h2B);
+            "G" : send_symbol_shifted(8'h34);
+            "H" : send_symbol_shifted(8'h33);
+            "I" : send_symbol_shifted(8'h43);
+            "J" : send_symbol_shifted(8'h3B);
+            "K" : send_symbol_shifted(8'h42);
+            "L" : send_symbol_shifted(8'h4B);
+            "M" : send_symbol_shifted(8'h3A);
+            "N" : send_symbol_shifted(8'h31);
+            "O" : send_symbol_shifted(8'h44);
+            "P" : send_symbol_shifted(8'h4D);
+            "Q" : send_symbol_shifted(8'h15);
+            "R" : send_symbol_shifted(8'h2D);
+            "S" : send_symbol_shifted(8'h1B);
+            "T" : send_symbol_shifted(8'h2C);
+            "U" : send_symbol_shifted(8'h3C);
+            "V" : send_symbol_shifted(8'h2A);
+            "W" : send_symbol_shifted(8'h1D);
+            "X" : send_symbol_shifted(8'h22);
+            "Y" : send_symbol_shifted(8'h35);
+            "Z" : send_symbol_shifted(8'h1A);
+            // numbers
+            "0" : send_symbol_unshifted(8'h45);
+            "1" : send_symbol_unshifted(8'h16);
+            "2" : send_symbol_unshifted(8'h1E);
+            "3" : send_symbol_unshifted(8'h26);
+            "4" : send_symbol_unshifted(8'h25);
+            "5" : send_symbol_unshifted(8'h2E);
+            "6" : send_symbol_unshifted(8'h36);
+            "7" : send_symbol_unshifted(8'h3D);
+            "8" : send_symbol_unshifted(8'h3E);
+            "9" : send_symbol_unshifted(8'h46);
+            // special characters
+            " " : send_symbol_unshifted(8'h29);
+            "." : send_symbol_unshifted(8'h49);
+            "," : send_symbol_unshifted(8'h41);
+            ";" : send_symbol_unshifted(8'h4C);
+            "!" : send_symbol_shifted(8'h16);
+            "@" : send_symbol_shifted(8'h1E);
+            "#" : send_symbol_shifted(8'h26);
+            "$" : send_symbol_shifted(8'h25);
+            "\%" : send_symbol_shifted(8'h2E);
+            "^" : send_symbol_shifted(8'h36);
+            "&" : send_symbol_shifted(8'h3D);
+            "*" : send_symbol_shifted(8'h3E);
+            "(" : send_symbol_shifted(8'h46);
+            ")" : send_symbol_shifted(8'h45);
+            "=" : send_symbol_unshifted(8'h55);            
+
+            default: $display("Unsupported character");
+        endcase
+    end
+endtask
+
+task send_string(input string str);
+    begin
+        for(int i=0; i<str.len(); i++) begin
+            send_char(str[i]);
+        end
+        send_byte_to_ps2(.data(ENTER_CODE));
+    end
+endtask
