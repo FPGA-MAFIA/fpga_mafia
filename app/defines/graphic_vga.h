@@ -15,256 +15,258 @@
 #define VGA_MEM ((volatile char *) (VGA_MEM_BASE))
 
 /* ASCII Values */
-#define SPACE_TOP    0x0                         
-#define SPACE_BOTTOM 0x0                         
-#define COMMA_TOP    0x00000000                  
-#define COMMA_BOTTOM 0x08101000                  
-#define UNDER_SCORE_TOP    0x00000000
-#define UNDER_SCORE_BOTTOM 0x007E0000
-#define DASH_TOP     0x00000000 
-#define DASH_BOTTOM  0x0000007C
-#define POINT_TOP    0x00000000                  
-#define POINT_BOTTOM 0x00100000                  
-#define ZERO_TOP     0x52623C00                  
-#define ZERO_BOTTOM  0x003C464A                  
-#define ONE_TOP      0x1A1C1800                  
-#define ONE_BOTTOM   0x007E1818                  
-#define TWO_TOP      0x40423C00                  
-#define TWO_BOTTOM   0x007E023C                  
-#define THREE_TOP    0x40423C00                  
-#define THREE_BOTTOM 0x003C4238                  
-#define FOUR_TOP     0x24283000                  
-#define FOUR_BOTTOM  0x0020207E                  
-#define FIVE_TOP     0x3E027E00                  
-#define FIVE_BOTTOM  0x003C4240                  
-#define SIX_TOP      0x02423C00                  
-#define SIX_BOTTOM   0x003C423E                  
-#define SEVEN_TOP    0x30407E00                  
-#define SEVEN_BOTTOM 0x00080808                  
-#define EIGHT_TOP    0x42423C00                  
-#define EIGHT_BOTTOM 0x003C423C                  
-#define NINE_TOP     0x42423C00                  
-#define NINE_BOTTOM  0x003E407C
-#define COLON_TOP    0x00100000
-#define COLON_BOTTOM 0x00001000                 
-#define A_TOP        0x663C1800  
-#define A_BOTTOM     0x00667E66                  
-// 0x00 -> 00000000 -> ________
-// 0x18 -> 00011000 -> ___XX___
-// 0x3C -> 00111100 -> __XXXX__
-// 0x66 -> 01100110 -> _XX__XX_
-// 0x66 -> 01100110 -> _XX__XX_
-// 0x7E -> 01111110 -> _XXXXXX_
-// 0x66 -> 01100110 -> _XX__XX_
-// 0x00 -> 00000000 -> ________
-#define B_TOP        0x3E221E00                  
-#define B_BOTTOM     0x001E223E                  
-// 0x00 -> 00000000 -> ________
-// 0x1E -> 00011110 -> ___XXXX_
-// 0x22 -> 00100010 -> __X___X_
-// 0x3E -> 00111110 -> __XXXXX_
-// 0x3E -> 00111110 -> __XXXXX_
-// 0x22 -> 00100010 -> __X___X_
-// 0x1E -> 00011110 -> ___XXXX_
-// 0x00 -> 00000000 -> ________
+#define SPACE_TOP 0x0                         
+#define SPACE_BTM 0x0                         
+#define COMMA_TOP 0x00000000                  
+#define COMMA_BTM 0x08101000                  
+#define DASH_TOP  0x00000000 
+#define DASH_BTM  0x0000007C
+#define POINT_TOP 0x00000000                  
+#define POINT_BTM 0x00100000                  
+#define ZERO_TOP  0x52623C00                  
+#define ZERO_BTM  0x003C464A                  
+#define ONE_TOP   0x1A1C1800                  
+#define ONE_BTM   0x007E1818                  
+#define TWO_TOP   0x40423C00                  
+#define TWO_BTM   0x007E023C                  
+#define THREE_TOP 0x40423C00                  
+#define THREE_BTM 0x003C4238                  
+#define FOUR_TOP  0x24283000                  
+#define FOUR_BTM  0x0020207E                  
+#define FIVE_TOP  0x3E027E00                  
+#define FIVE_BTM  0x003C4240                  
+#define SIX_TOP   0x02423C00                  
+#define SIX_BTM   0x003C423E                  
+#define SEVEN_TOP 0x30407E00                  
+#define SEVEN_BTM 0x00080808                  
+#define EIGHT_TOP 0x42423C00                  
+#define EIGHT_BTM 0x003C423C                  
+#define NINE_TOP  0x42423C00                  
+#define NINE_BTM  0x003E407C
+#define COLON_TOP 0x00100000
+#define COLON_BTM 0x00001000                 
+#define A_TOP     0x663C1800  
+#define A_BTM     0x00667E66                  
+#define B_TOP     0x3E221E00                  
+#define B_BTM     0x001E223E                  
+#define C_TOP     0x023E3C00                  
+#define C_BTM     0x003C3E02                  
+#define D_TOP     0x223E1E00                  
+#define D_BTM     0x001E3E22                  
+#define E_TOP     0x06067E00                  
+#define E_BTM     0x007E067E                  
+#define F_TOP     0x06067E00                  
+#define F_BTM     0x0006067E                  
+#define G_TOP     0x023E3C00                  
+#define G_BTM     0x003C223A                  
+#define H_TOP     0x66666600                  
+#define H_BTM     0x0066667E                  
+#define I_TOP     0x18187E00                  
+#define I_BTM     0x007E1818                  
+#define J_TOP     0x60606000                  
+#define J_BTM     0x007C6666                  
+#define K_TOP     0x3E664600                  
+#define K_BTM     0x0046663E                  
+#define L_TOP     0x06060600                  
+#define L_BTM     0x007E0606                  
+#define M_TOP     0x5A664200                  
+#define M_BTM     0x0042425A                  
+#define N_TOP     0x6E666200                  
+#define N_BTM     0x00466676                  
+#define O_TOP     0x66663C00                  
+#define O_BTM     0x003C6666                  
+#define P_TOP     0x66663E00                  
+#define P_BTM     0x0006063E                  
+#define Q_TOP     0x42423C00                  
+#define Q_BTM     0x007C6252                  
+#define R_TOP     0x66663E00                  
+#define R_BTM     0x0066663E                  
+#define S_TOP     0x1E067C00                  
+#define S_BTM     0x003E6078                  
+#define T_TOP     0x18187E00                  
+#define T_BTM     0x00181818                  
+#define U_TOP     0x66666600                  
+#define U_BTM     0x003C7E66                  
+#define V_TOP     0x66666600                  
+#define V_BTM     0x00183C66                  
+#define W_TOP     0x42424200                  
+#define W_BTM     0x00427E5A                  
+#define X_TOP     0x3C666600                  
+#define X_BTM     0x0066663C                  
+#define Y_TOP     0x3C666600                  
+#define Y_BTM     0x00181818                  
+#define Z_TOP     0x10207E00                  
+#define Z_BTM     0x007E0408
+#define a_TOP     0x24180000
+#define a_BTM     0x00005824
+#define b_TOP     0x241C0404
+#define b_BTM     0x00001C24
+#define c_TOP     0x04380000
+#define c_BTM     0x00003804
+#define d_TOP     0x24382020
+#define d_BTM     0x00003824
+#define e_TOP     0x24380000
+#define e_BTM     0x0000781c
+#define f_TOP     0x081C0830
+#define f_BTM     0x00000808
+#define g_TOP     0x24180000
+#define g_BTM     0x18203824
+#define h_TOP     0x241C0404
+#define h_BTM     0x00002424
+#define i_TOP     0x60002000
+#define i_BTM     0x00003020
+#define j_TOP     0x20002000
+#define j_BTM     0x30282020
+#define k_TOP     0x14240404
+#define k_BTM     0x0000340C
+#define l_TOP     0x10101030
+#define l_BTM     0x00003810
+#define m_TOP     0xB64A0000
+#define m_BTM     0x00009292
+#define n_TOP     0x4C340000
+#define n_BTM     0x00004444
+#define o_TOP     0x423C0000
+#define o_BTM     0x00003C42
+#define p_TOP     0x4C340000
+#define p_BTM     0x0404344C
+#define q_TOP     0x64580000
+#define q_BTM     0x40C05864
+#define r_TOP     0x4C340000
+#define r_BTM     0x00000404
+#define s_TOP     0x08300000
+#define s_BTM     0x00182010
+#define t_TOP     0x38101000
+#define t_BTM     0x00305010
+#define u_TOP     0x44440000
+#define u_BTM     0x00005864
+#define v_TOP     0x42420000
+#define v_BTM     0x00001824
+#define w_TOP     0x81810000
+#define w_BTM     0x0000663A
+#define x_TOP     0x48840000
+#define x_BTM     0x0000CC30
+#define y_TOP     0x48480000
+#define y_BTM     0x38404070
+#define z_TOP     0x20780000
+#define z_BTM     0x00007810
 
-#define C_TOP        0x023E3C00                  
-#define C_BOTTOM     0x003C3E02                  
-#define D_TOP        0x223E1E00                  
-#define D_BOTTOM     0x001E3E22                  
-#define E_TOP        0x06067E00                  
-#define E_BOTTOM     0x007E067E                  
-#define F_TOP        0x06067E00                  
-#define F_BOTTOM     0x0006067E                  
-#define G_TOP        0x023E3C00                  
-#define G_BOTTOM     0x003C223A                  
-#define H_TOP        0x66666600                  
-#define H_BOTTOM     0x0066667E                  
-#define I_TOP        0x18187E00                  
-#define I_BOTTOM     0x007E1818                  
-#define J_TOP        0x60606000                  
-#define J_BOTTOM     0x007C6666                  
-#define K_TOP        0x3E664600                  
-#define K_BOTTOM     0x0046663E                  
-#define L_TOP        0x06060600                  
-#define L_BOTTOM     0x007E0606                  
-#define M_TOP        0x5A664200                  
-#define M_BOTTOM     0x0042425A                  
-#define N_TOP        0x6E666200                  
-#define N_BOTTOM     0x00466676                  
-#define O_TOP        0x66663C00                  
-#define O_BOTTOM     0x003C6666                  
-#define P_TOP        0x66663E00                  
-#define P_BOTTOM     0x0006063E                  
-#define Q_TOP        0x42423C00                  
-#define Q_BOTTOM     0x007C6252                  
-#define R_TOP        0x66663E00                  
-#define R_BOTTOM     0x0066663E                  
-#define S_TOP        0x1E067C00                  
-#define S_BOTTOM     0x003E6078                  
-#define T_TOP        0x18187E00                  
-#define T_BOTTOM     0x00181818                  
-#define U_TOP        0x66666600                  
-#define U_BOTTOM     0x003C7E66                  
-#define V_TOP        0x66666600                  
-#define V_BOTTOM     0x00183C66                  
-#define W_TOP        0x42424200                  
-#define W_BOTTOM     0x00427E5A                  
-#define X_TOP        0x3C666600                  
-#define X_BOTTOM     0x0066663C                  
-#define Y_TOP        0x3C666600                  
-#define Y_BOTTOM     0x00181818                  
-#define Z_TOP        0x10207E00                  
-#define Z_BOTTOM     0x007E0408
-#define a_top        0x24180000
-#define a_bottom     0x00005824
-#define b_top        0x241C0404
-#define b_bottom     0x00001C24
-#define c_top        0x04380000
-#define c_bottom     0x00003804
-#define d_top        0x24382020
-#define d_bottom     0x00003824
-#define e_top        0x24380000
-#define e_bottom     0x0000781c
-#define f_top        0x081C0830
-#define f_bottom     0x00000808
-#define g_top        0x24180000
-#define g_bottom     0x18203824
-#define h_top        0x241C0404
-#define h_bottom     0x00002424
-#define i_top        0x60002000
-#define i_bottom     0x00003020
-#define j_top        0x20002000
-#define j_bottom     0x30282020
-#define k_top        0x14240404
-#define k_bottom     0x0000340C
-#define l_top        0x10101030
-#define l_bottom     0x00003810
-#define m_top        0xB64A0000
-#define m_bottom     0x00009292
-#define n_top        0x4C340000
-#define n_bottom     0x00004444
-#define o_top        0x423C0000
-#define o_bottom     0x00003C42
-#define p_top        0x4C340000
-#define p_bottom     0x0404344C
-#define q_top        0x64580000
-#define q_bottom     0x40C05864
-#define r_top        0x4C340000
-#define r_bottom     0x00000404
-#define s_top        0x08300000
-#define s_bottom     0x00182010
-#define t_top        0x38101000
-#define t_bottom     0x00305010
-#define u_top        0x44440000
-#define u_bottom     0x00005864
-#define v_top        0x42420000
-#define v_bottom     0x00001824
-#define w_top        0x81810000
-#define w_bottom     0x0000663A
-#define x_top        0x48840000
-#define x_bottom     0x0000CC30
-#define y_top        0x48480000
-#define y_bottom     0x38404070
-#define z_top        0x20780000
-#define z_bottom     0x00007810
+#define LT_TOP     0x08100000 // LESS_THAN_TOP          
+#define LT_BTM     0x00100804 // LESS_THAN_BTM          
+#define GT_TOP     0x10080000 // GREATER_THAN_TOP       
+#define GT_BTM     0x00081020 // GREATER_THAN_BTM       
+#define QMARK_TOP  0x20241800 // QUESTION_MARK_TOP      
+#define QMARK_BTM  0x00100010 // QUESTION_MARK_BTM      
+#define SLASH_TOP  0x10204000 // SLASH_TOP              
+#define SLASH_BTM  0x00020408 // SLASH_BTM              
+#define SCOLON_TOP 0x00100000 // SEMICOLON_TOP          
+#define SCOLON_BTM 0x08101000 // SEMICOLON_BTM          
+#define BSLASH_TOP 0x08040200 // BACKSLASH_TOP          
+#define BSLASH_BTM 0x00402010 // BACKSLASH_BTM          
+#define EXCLM_TOP  0x08080800 // EXCLAMATION_MARK_TOP   
+#define EXCLM_BTM  0x00000800 // EXCLAMATION_MARK_BTM   
+#define DQ_TOP     0x00181800 // DOUBLE_QUOTES_TOP      
+#define DQ_BTM     0x00000000 // DOUBLE_QUOTES_BTM      
+#define NUM_TOP    0x247E2400 // NUMBER_SIGN_TOP        
+#define NUM_BTM    0x00247E24 // NUMBER_SIGN_BTM        
+#define DOL_TOP    0x14781010 // DOLLAR_TOP             
+#define DOL_BTM    0x103C5038 // DOLLAR_BTM             
+#define PCNT_TOP   0x10244000 // PER_CENT_SIGN_TOP      
+#define PCNT_BTM   0x00022408 // PER_CENT_SIGN_BTM      
+#define AMP_TOP    0x24241800 // AMPERSAND_TOP          
+#define AMP_BTM    0x00582458 // AMPERSAND_BTM          
+#define SQ_TOP     0x00080800 // SINGLE_QUOTE_TOP       
+#define SQ_BTM     0x00000000 // SINGLE_QUOTE_BTM       
+#define OP_PRN_TOP 0x02020400 // OPN_PRNTS_TOP          
+#define OP_PRN_BTM 0x00040202 // OPN_PRNTS_BTM          
+#define CL_PRN_TOP 0x40402000 // CLS_PRNTS_TOP          
+#define CL_PRN_BTM 0x00204040 // CLS_PRNTS_BTM          
+#define AST_TOP    0x24181824 // ASTERISK_TOP           
+#define AST_BTM    0x00000000 // ASTERISK_BTM           
+#define PLUS_TOP   0x10000000 // PLUS_TOP               
+#define PLUS_BTM   0x0000107C // PLUS_BTM               
+#define EQL_TOP    0x3C000000 // EQUALS_TOP             
+#define EQL_BTM    0x00003C00 // EQUALS_BTM             
+#define AT_TOP     0xA599423C // AT_SIGN_TOP            
+#define AT_BTM     0x3C0259A5 // AT_SIGN_BTM            
+#define OB_TOP     0x02020600 // OPEN_BRACKET_TOP       
+#define OB_BTM     0x00060202 // OPEN_BRACKET_BTM       
+#define CB_TOP     0x40406000 // CLOSE_BRACKET_TOP      
+#define CB_BTM     0x00604040 // CLOSE_BRACKET_BTM      
+#define CIR_TOP    0x00140800 // CIRCUMFLEX_TOP         
+#define CIR_BTM    0x00000000 // CIRCUMFLEX_BTM         
+#define GRV_TOP    0x00100800 // GRAVE_ACCENT_TOP       
+#define GRV_BTM    0x00000000 // GRAVE_ACCENT_BTM       
+#define UNDR_SCR_TOP 0x00000000
+#define UNDR_SCR_BTM 0x007E0000
+#define OBR_TOP    0x04040800 // OPENING_BRACE_TOP      
+#define OBR_BTM    0x08040402 // OPENING_BRACE_BTM      
+#define CBR_TOP    0x40402000 // CLOSING_BRACE_TOP      
+#define CBR_BTM    0x20404080 // CLOSING_BRACE_BTM      
+#define VBAR_TOP   0x10101000 // VERTICAL_BAR_TOP       
+#define VBAR_BTM   0x00101010 // VERTICAL_BAR_BTM       
+#define TLD_TOP    0x4C000000 // TILDE_TOP              
+#define TLD_BTM    0x00000032 // TILDE_BTM              
 
-#define LESS_THAN_TOP     0x08100000 //
-#define LESS_THAN_BOTTOM  0x00100804 //
-
-#define GREATER_THAN_TOP    0x10080000 //
-#define GREATER_THAN_BOTTOM 0x00081020 //
-
-#define QUESTION_MARK_TOP    0x20241800 //
-#define QUESTION_MARK_BOTTOM 0x00100010 //
-
-#define Slash_TOP        0x10204000
-#define Slash_BOTTOM     0x00020408
-
-#define Semicolon_TOP        0x00100000
-#define Semicolon_BOTTOM     0x08101000
-
-#define Backslash_TOP        0x08040200
-#define Backslash_BOTTOM     0x00402010
-
-#define Exclamation_mark_TOP      0x08080800
-#define Exclamation_mark_BOTTOM   0x00000800
-#define Double_quotes_TOP         0x00181800
-#define Double_quotes_BOTTOM      0x00000000
-#define Number_sign_TOP           0x247E2400
-#define Number_sign_BOTTOM        0x00247E24
-#define Dollar_TOP                0x14781010
-#define Dollar_BOTTOM             0x103C5038
-#define Per_cent_sign_TOP         0x10244000
-#define Per_cent_sign_BOTTOM      0x00022408
-#define Ampersand_TOP             0x24241800
-#define Ampersand_BOTTOM          0x00582458
-#define Single_quote_TOP          0x00080800
-#define Single_quote_BOTTOM       0x00000000
-#define open_parenthesis_TOP      0x02020400
-#define open_parenthesis_BOTTOM   0x00040202
-#define close_parenthesis_TOP     0x40402000
-#define close_parenthesis_BOTTOM  0x00204040
-#define Asterisk_TOP              0x24181824
-#define Asterisk_BOTTOM           0x00000000
-#define Plus_TOP                  0x10000000
-#define Plus_BOTTOM               0x0000107C
-#define Equals_TOP                0x3C000000
-#define Equals_BOTTOM             0x00003C00
-#define At_sign_TOP               0xA599423C
-#define At_sign_BOTTOM            0x3C0259A5
-#define open_bracket_TOP          0x02020600
-#define open_bracket_BOTTOM       0x00060202
-#define close_bracket_TOP         0x40406000
-#define close_bracket_BOTTOM      0x00604040
-#define circumflex_TOP            0x00140800
-#define circumflex_BOTTOM         0x00000000
-#define Grave_accent_TOP          0x00100800
-#define Grave_accent_BOTTOM       0x00000000
-#define Opening_brace_TOP         0x04040800
-#define Opening_brace_BOTTOM      0x08040402
-#define Closing_brace_TOP         0x40402000
-#define Closing_brace_BOTTOM      0x20404080
-#define Vertical_bar_TOP          0x10101000
-#define Vertical_bar_BOTTOM       0x00101010
-#define tilde_TOP                 0x4C000000
-#define tilde_BOTTOM              0x00000032
 /* ANIME Values */
-#define WALK_MAN_TOP_0    0x7c381030
-#define WALK_MAN_BOTTOM_0 0x828448ba             
-#define WALK_MAN_TOP_1    0x38381030             
-#define WALK_MAN_BOTTOM_1 0x4448ac78             
-#define WALK_MAN_TOP_2    0x38381030             
-#define WALK_MAN_BOTTOM_2 0x10282878             
-#define WALK_MAN_TOP_3    0x7c381030             
-#define WALK_MAN_BOTTOM_3 0x281038ba             
-#define WALK_MAN_TOP_4    0x38381030             
-#define WALK_MAN_BOTTOM_4 0x4848387c    
-#define CLEAR_TOP         0x0             
-#define CLEAR_BOTTOM      0x0           
+#define WALK_MAN_TOP_0 0x7c381030
+#define WALK_MAN_BTM_0 0x828448ba             
+#define WALK_MAN_TOP_1 0x38381030             
+#define WALK_MAN_BTM_1 0x4448ac78             
+#define WALK_MAN_TOP_2 0x38381030             
+#define WALK_MAN_BTM_2 0x10282878             
+#define WALK_MAN_TOP_3 0x7c381030             
+#define WALK_MAN_BTM_3 0x281038ba             
+#define WALK_MAN_TOP_4 0x38381030             
+#define WALK_MAN_BTM_4 0x4848387c    
+#define CLEAR_TOP      0x0             
+#define CLEAR_BTM      0x0           
 
 /* ASCII tables */
-unsigned int ASCII_TOP[127]   = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,SPACE_TOP,Exclamation_mark_TOP,
-                                Double_quotes_TOP,Number_sign_TOP,Dollar_TOP,Per_cent_sign_TOP,Ampersand_TOP,Single_quote_TOP,open_parenthesis_TOP,close_parenthesis_TOP,Asterisk_TOP,Plus_TOP ,COMMA_TOP,DASH_TOP,POINT_TOP,Slash_TOP,ZERO_TOP,ONE_TOP,TWO_TOP,
-                                THREE_TOP,FOUR_TOP,FIVE_TOP,SIX_TOP,SEVEN_TOP,EIGHT_TOP,NINE_TOP,COLON_TOP,Semicolon_TOP,LESS_THAN_TOP,Equals_TOP,GREATER_THAN_TOP,QUESTION_MARK_TOP,At_sign_TOP,A_TOP,
-                                B_TOP,C_TOP,D_TOP,E_TOP,F_TOP,G_TOP,H_TOP,I_TOP,J_TOP,K_TOP,L_TOP,M_TOP,
-                                N_TOP,O_TOP,P_TOP,Q_TOP,R_TOP,S_TOP,T_TOP,U_TOP,V_TOP,W_TOP,X_TOP,Y_TOP,Z_TOP,open_bracket_TOP,Backslash_TOP,close_bracket_TOP,circumflex_TOP,UNDER_SCORE_TOP,Grave_accent_TOP,
-                                a_top, b_top, c_top, d_top, e_top, f_top, g_top, h_top, i_top, j_top, k_top, l_top, m_top, n_top, o_top,
-                                p_top,q_top,r_top,s_top,t_top,u_top,v_top,w_top,x_top,y_top,z_top,Opening_brace_TOP,Vertical_bar_TOP,Closing_brace_TOP,tilde_TOP};
-unsigned int ASCII_BOTTOM[127] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                SPACE_BOTTOM,Exclamation_mark_BOTTOM,Double_quotes_BOTTOM,Number_sign_BOTTOM,Dollar_BOTTOM,Per_cent_sign_BOTTOM,Ampersand_BOTTOM,Single_quote_BOTTOM,open_parenthesis_BOTTOM,close_parenthesis_BOTTOM,Asterisk_BOTTOM,Plus_BOTTOM,COMMA_BOTTOM,DASH_BOTTOM,POINT_BOTTOM,Slash_BOTTOM,ZERO_BOTTOM,
-                                ONE_BOTTOM,TWO_BOTTOM,THREE_BOTTOM,FOUR_BOTTOM,FIVE_BOTTOM,SIX_BOTTOM,
-                                SEVEN_BOTTOM,EIGHT_BOTTOM,NINE_BOTTOM,COLON_BOTTOM,Semicolon_BOTTOM,LESS_THAN_BOTTOM,Equals_BOTTOM,GREATER_THAN_BOTTOM,QUESTION_MARK_BOTTOM,At_sign_BOTTOM,A_BOTTOM,B_BOTTOM,C_BOTTOM,D_BOTTOM,
-                                E_BOTTOM,F_BOTTOM,G_BOTTOM,H_BOTTOM,I_BOTTOM,J_BOTTOM,K_BOTTOM,L_BOTTOM,
-                                M_BOTTOM,N_BOTTOM,O_BOTTOM,P_BOTTOM,Q_BOTTOM,R_BOTTOM,S_BOTTOM,T_BOTTOM,
-                                U_BOTTOM,V_BOTTOM,W_BOTTOM,X_BOTTOM,Y_BOTTOM,Z_BOTTOM,open_bracket_BOTTOM,Backslash_BOTTOM,close_bracket_BOTTOM,circumflex_BOTTOM,UNDER_SCORE_BOTTOM,Grave_accent_BOTTOM,
-                                a_bottom,b_bottom,c_bottom,d_bottom,e_bottom,f_bottom,g_bottom,h_bottom,
-                                i_bottom,j_bottom,k_bottom,l_bottom,m_bottom,n_bottom,o_bottom,p_bottom,
-                                q_bottom,r_bottom,s_bottom,t_bottom,u_bottom,v_bottom,w_bottom,x_bottom,y_bottom,z_bottom,Opening_brace_BOTTOM,Vertical_bar_BOTTOM,Closing_brace_BOTTOM,tilde_BOTTOM};
+unsigned int ASCII_TOP[128] = {
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x00 - 0x07
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x08 - 0x0F
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x10 - 0x17
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x18 - 0x1F
+    SPACE_TOP   ,EXCLM_TOP   ,DQ_TOP      ,NUM_TOP    ,DOL_TOP     ,PCNT_TOP   ,AMP_TOP      ,SQ_TOP      , // 0x20 - 0x27
+    OP_PRN_TOP  ,CL_PRN_TOP  ,AST_TOP     ,PLUS_TOP   ,COMMA_TOP   ,DASH_TOP   ,POINT_TOP    ,SLASH_TOP   , // 0x28 - 0x2F
+    ZERO_TOP    ,ONE_TOP     ,TWO_TOP     ,THREE_TOP  ,FOUR_TOP    ,FIVE_TOP   ,SIX_TOP      ,SEVEN_TOP   , // 0x30 - 0x37
+    EIGHT_TOP   ,NINE_TOP    ,COLON_TOP   ,SCOLON_TOP ,LT_TOP      ,EQL_TOP    ,GT_TOP       ,QMARK_TOP   , // 0x38 - 0x3F
+    AT_TOP      ,A_TOP       ,B_TOP       ,C_TOP      ,D_TOP       ,E_TOP      ,F_TOP        ,G_TOP       , // 0x40 - 0x47
+    H_TOP       ,I_TOP       ,J_TOP       ,K_TOP      ,L_TOP       ,M_TOP      ,N_TOP        ,O_TOP       , // 0x48 - 0x4F
+    P_TOP       ,Q_TOP       ,R_TOP       ,S_TOP      ,T_TOP       ,U_TOP      ,V_TOP        ,W_TOP       , // 0x50 - 0x57
+    X_TOP       ,Y_TOP       ,Z_TOP       ,OB_TOP     ,BSLASH_TOP  ,CB_TOP     ,CIR_TOP      ,UNDR_SCR_TOP, // 0x58 - 0x5F
+    GRV_TOP     ,a_TOP       ,b_TOP       ,c_TOP       ,d_TOP      ,e_TOP      ,f_TOP        ,g_TOP       , // 0x60 - 0x67
+    h_TOP      ,i_TOP        ,j_TOP       ,k_TOP       ,l_TOP      ,m_TOP      ,n_TOP        ,o_TOP       , // 0x68 - 0x6F
+    p_TOP      ,q_TOP        ,r_TOP       ,s_TOP       ,t_TOP      ,u_TOP      ,v_TOP        ,w_TOP       , // 0x70 - 0x77
+    x_TOP      ,y_TOP        ,z_TOP       ,OBR_TOP     ,VBAR_TOP   ,CBR_TOP    ,TLD_TOP      ,0            
+};
+
+
+
+/* ASCII tables */
+unsigned int ASCII_BTM[128] = {
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x00 - 0x07
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x08 - 0x0F
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x10 - 0x17
+    0           ,0           ,0           ,0          ,0           ,0          ,0            ,0           , // 0x18 - 0x1F
+    SPACE_BTM   ,EXCLM_BTM   ,DQ_BTM      ,NUM_BTM    ,DOL_BTM     ,PCNT_BTM   ,AMP_BTM      ,SQ_BTM      , // 0x20 - 0x27
+    OP_PRN_BTM  ,CL_PRN_BTM  ,AST_BTM     ,PLUS_BTM   ,COMMA_BTM   ,DASH_BTM   ,POINT_BTM    ,SLASH_BTM   , // 0x28 - 0x2F
+    ZERO_BTM    ,ONE_BTM     ,TWO_BTM     ,THREE_BTM  ,FOUR_BTM    ,FIVE_BTM   ,SIX_BTM      ,SEVEN_BTM   , // 0x30 - 0x37
+    EIGHT_BTM   ,NINE_BTM    ,COLON_BTM   ,SCOLON_BTM ,LT_BTM      ,EQL_BTM    ,GT_BTM       ,QMARK_BTM   , // 0x38 - 0x3F
+    AT_BTM      ,A_BTM       ,B_BTM       ,C_BTM      ,D_BTM       ,E_BTM      ,F_BTM        ,G_BTM       , // 0x40 - 0x47
+    H_BTM       ,I_BTM       ,J_BTM       ,K_BTM      ,L_BTM       ,M_BTM      ,N_BTM        ,O_BTM       , // 0x48 - 0x4F
+    P_BTM       ,Q_BTM       ,R_BTM       ,S_BTM      ,T_BTM       ,U_BTM      ,V_BTM        ,W_BTM       , // 0x50 - 0x57
+    X_BTM       ,Y_BTM       ,Z_BTM       ,OB_BTM     ,BSLASH_BTM  ,CB_BTM     ,CIR_BTM      ,UNDR_SCR_BTM, // 0x58 - 0x5F
+    GRV_BTM     ,a_BTM       ,b_BTM       ,c_BTM       ,d_BTM      ,e_BTM      ,f_BTM        ,g_BTM       , // 0x60 - 0x67
+    h_BTM      ,i_BTM        ,j_BTM       ,k_BTM       ,l_BTM      ,m_BTM      ,n_BTM        ,o_BTM       , // 0x68 - 0x6F
+    p_BTM      ,q_BTM        ,r_BTM       ,s_BTM       ,t_BTM      ,u_BTM      ,v_BTM        ,w_BTM       , // 0x70 - 0x77
+    x_BTM      ,y_BTM        ,z_BTM       ,OBR_BTM     ,VBAR_BTM   ,CBR_BTM    ,TLD_BTM      ,0            
+};
+
 
 /* ANIME tables */
 unsigned int ANIME_TOP[6]    = {WALK_MAN_TOP_0,   WALK_MAN_TOP_1,   WALK_MAN_TOP_2,   WALK_MAN_TOP_3,   WALK_MAN_TOP_4,   CLEAR_TOP};
-unsigned int ANIME_BOTTOM[6] = {WALK_MAN_BOTTOM_0,WALK_MAN_BOTTOM_1,WALK_MAN_BOTTOM_2,WALK_MAN_BOTTOM_3,WALK_MAN_BOTTOM_4,CLEAR_BOTTOM};
+unsigned int ANIME_BTM[6] = {WALK_MAN_BTM_0,WALK_MAN_BTM_1,WALK_MAN_BTM_2,WALK_MAN_BTM_3,WALK_MAN_BTM_4,CLEAR_BTM};
 
 /* Control registers addresses */
 unsigned int CR_CURSOR_H[1] = {0};
@@ -275,14 +277,14 @@ void draw_char(char note, int row, int col)
 {
     unsigned int vertical   = row * LINE;
     unsigned int horizontal = col * BYTES;
-    volatile int *ptr_top;
-    volatile int *ptr_bottom;
+    volatile int *ptr_TOP;
+    volatile int *ptr_BTM;
 
-    VGA_PTR(ptr_top    , horizontal + vertical);
-    VGA_PTR(ptr_bottom , horizontal + vertical + LINE);
+    VGA_PTR(ptr_TOP    , horizontal + vertical);
+    VGA_PTR(ptr_BTM , horizontal + vertical + LINE);
 
-    WRITE_REG(ptr_top    , ASCII_TOP[note]);
-    WRITE_REG(ptr_bottom , ASCII_BOTTOM[note]);
+    WRITE_REG(ptr_TOP    , ASCII_TOP[note]);
+    WRITE_REG(ptr_BTM , ASCII_BTM[note]);
 }
 
 /* Structure to represent a rectangle */
@@ -300,25 +302,25 @@ void draw_rectangle(Rectangle* rect, int value)
     int i, j;
     unsigned int vertical = rect->row * LINE;
     unsigned int horizontal = rect->col * BYTES;
-    volatile int *ptr_top;
-    volatile int *ptr_bottom;
+    volatile int *ptr_TOP;
+    volatile int *ptr_BTM;
 
     for (i = 0; i < rect->height; i++)
     {
         for (j = 0; j < rect->width; j++)
         {
-            VGA_PTR(ptr_top, horizontal + j * BYTES + vertical);
-            VGA_PTR(ptr_bottom, horizontal + j * BYTES + vertical + LINE);
+            VGA_PTR(ptr_TOP, horizontal + j * BYTES + vertical);
+            VGA_PTR(ptr_BTM, horizontal + j * BYTES + vertical + LINE);
 
             if (value == 0)
             {
-                WRITE_REG(ptr_top, 0x00000000);    // Turn off the pixel
-                WRITE_REG(ptr_bottom, 0x00000000); // Turn off the pixel
+                WRITE_REG(ptr_TOP, 0x00000000);    // Turn off the pixel
+                WRITE_REG(ptr_BTM, 0x00000000); // Turn off the pixel
             }
             else
             {
-                WRITE_REG(ptr_top, 0xFFFFFFFF);    // Draw the pixel
-                WRITE_REG(ptr_bottom, 0xFFFFFFFF); // Draw the pixel
+                WRITE_REG(ptr_TOP, 0xFFFFFFFF);    // Draw the pixel
+                WRITE_REG(ptr_BTM, 0xFFFFFFFF); // Draw the pixel
             }
         }
         vertical += LINE;
@@ -374,14 +376,14 @@ void draw_symbol(int symbol, int raw, int col)
 {
     unsigned int vertical   = raw * LINE;
     unsigned int horizontal = col * BYTES;
-    volatile int *ptr_top;
-    volatile int *ptr_bottom;
+    volatile int *ptr_TOP;
+    volatile int *ptr_BTM;
 
-    VGA_PTR(ptr_top    , horizontal + vertical);
-    VGA_PTR(ptr_bottom , horizontal + vertical + LINE);
+    VGA_PTR(ptr_TOP    , horizontal + vertical);
+    VGA_PTR(ptr_BTM , horizontal + vertical + LINE);
 
-    WRITE_REG(ptr_top    , ANIME_TOP[symbol]);
-    WRITE_REG(ptr_bottom , ANIME_BOTTOM[symbol]);
+    WRITE_REG(ptr_TOP    , ANIME_TOP[symbol]);
+    WRITE_REG(ptr_BTM , ANIME_BTM[symbol]);
 }
 
 void set_cursor(int raw, int col)
