@@ -29,6 +29,10 @@ else if(test_name == "PS2_long_shift") begin
     $display("=====\n PS2_long_shift was included to the run\n ====\n");   
     `include "PS2_long_shift.vh"  
 end
+else if(test_name == "PS2_compare") begin
+    $display("=====\n PS2_long_shift was included to the run\n ====\n");   
+    `include "PS2_compare.vh"  
+end
 
 else if(test_name == "PS2_fibbonacci") begin
     $display("=====\n PS2_fibbonacci was included to the run\n ====\n");   

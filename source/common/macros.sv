@@ -98,8 +98,7 @@ end
       if (en && expr) begin                                    \
          $error($sformatf("[MAFIA_ASSERT] %s: %s", name, msg));\
       end                                                      \
-   end          
-
+   end   
 
 `define MAFIA_BINARY_TO_GRAY(gray,binary)  \
    gray = binary ^ (binary >> 1);   
