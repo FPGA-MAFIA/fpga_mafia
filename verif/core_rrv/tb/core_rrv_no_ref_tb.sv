@@ -128,7 +128,7 @@ assign clk = Clk;
 assign MemAddressQ103H  = core_rrv_top.DMemAddressQ103H;
 assign MemWrEnQ103H     = core_rrv_top.DMemWrEnQ103H;
 assign MemRdEnQ103H     = core_rrv_top.DMemRdEnQ103H;
-assign CoreAddrRangeHit  = (MemAddressQ103H < VGA_MEM_REGION_ROOF & MemAddressQ103H > D_MEM_REGION_FLOOR);
+assign CoreAddrRangeHit  = (MemAddressQ103H > VGA_MEM_REGION_ROOF & MemAddressQ103H < D_MEM_REGION_FLOOR);
 assign MissAlignedWrite  = (MemWrEnQ103H) ? CoreAddrRangeHit : 1'b0;
 assign MissAlignedRead   = (MemRdEnQ103H) ? CoreAddrRangeHit : 1'b0;
 
