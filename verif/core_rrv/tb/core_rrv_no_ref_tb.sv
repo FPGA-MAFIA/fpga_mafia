@@ -132,8 +132,8 @@ assign CoreAddrRangeHit  = (MemAddressQ103H > VGA_MEM_REGION_ROOF & MemAddressQ1
 assign MissAlignedWrite  = (MemWrEnQ103H) ? CoreAddrRangeHit : 1'b0;
 assign MissAlignedRead   = (MemRdEnQ103H) ? CoreAddrRangeHit : 1'b0;
 
-`MAFIA_ASSERT($sformatf("access adder %h that out of range",MemAddressQ103H), CoreAddrRangeHit, MemWrEnQ103H, "write")
-`MAFIA_ASSERT($sformatf("access adder %h that out of range",MemAddressQ103H), CoreAddrRangeHit, MemRdEnQ103H, "read")
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",MemAddressQ103H), CoreAddrRangeHit, MemWrEnQ103H, "write")
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",MemAddressQ103H), CoreAddrRangeHit, MemRdEnQ103H, "read")
 
 parameter V_TIMEOUT = 250000;
 parameter RF_NUM_MSB = 31; // NOTE!!!: auto inserted from script ovrd_params.py
