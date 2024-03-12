@@ -125,5 +125,34 @@ always_ff @(posedge Clk ) begin
 end
 
 
+// memory access out of range detection tracker
+logic [31:0] MemAddressQ103H;
+logic        MemWrEnQ103H, MemRdEnQ103H;
+logic MissAlignedWrite, MissAlignedRead;
+logic CoreAddrRangeHit;
+assign MemAddressQ103H  = core_rrv_top.DMemAddressQ103H;
+assign MemWrEnQ103H     = core_rrv_top.DMemWrEnQ103H;
+assign MemRdEnQ103H     = core_rrv_top.DMemRdEnQ103H;
+assign CoreAddrRangeHit  = (MemAddressQ103H < VGA_MEM_REGION_ROOF & MemAddressQ103H > D_MEM_REGION_FLOOR);
+assign MissAlignedWrite  = (MemWrEnQ103H) ? CoreAddrRangeHit : 1'b0;
+assign MissAlignedRead   = (MemRdEnQ103H) ? CoreAddrRangeHit : 1'b0;
+
+integer miss_alligned_access;
+initial begin: trk_miss_alligned_access
+    #1
+    miss_alligned_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/miss_alligned_access.log"},"w");
+    $fwrite(miss_alligned_access,"----------------------------------------------\n");
+    $fwrite(miss_alligned_access," Time       | PC      |Read/Write |Address \n");
+    $fwrite(miss_alligned_access,"----------------------------------------------\n");  
+end
+
+//tracker on memory misaligned access
+always @(posedge Clk) begin
+    if (MissAlignedWrite)
+        $fwrite(miss_alligned_access,"%t       %h   Write     %h\n", $realtime, PcQ103H, MemAddressQ103H);
+    else if (MissAlignedRead)
+        $fwrite(miss_alligned_access,"%t       %h   Read      %h\n", $realtime, PcQ103H, MemAddressQ103H);        
+end
 
 // FIXME
+
