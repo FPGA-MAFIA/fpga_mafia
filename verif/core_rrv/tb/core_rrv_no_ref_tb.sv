@@ -116,6 +116,25 @@ initial begin: test_seq
    
 end // test_seq
 
+//================================
+// Memorry access assertion
+//===============================
+logic [31:0] MemAddressQ103H;
+logic        MemWrEnQ103H, MemRdEnQ103H;
+logic        MissAlignedWrite, MissAlignedRead;
+logic        CoreAddrRangeHit;
+logic  clk;        // FIXME - in MAFIA_ASSERT macro we use 'clk' instead of 'Clk'
+assign clk = Clk; 
+assign MemAddressQ103H  = core_rrv_top.DMemAddressQ103H;
+assign MemWrEnQ103H     = core_rrv_top.DMemWrEnQ103H;
+assign MemRdEnQ103H     = core_rrv_top.DMemRdEnQ103H;
+assign CoreAddrRangeHit  = (MemAddressQ103H > VGA_MEM_REGION_ROOF & MemAddressQ103H < D_MEM_REGION_FLOOR);
+assign MissAlignedWrite  = (MemWrEnQ103H) ? CoreAddrRangeHit : 1'b0;
+assign MissAlignedRead   = (MemRdEnQ103H) ? CoreAddrRangeHit : 1'b0;
+
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",MemAddressQ103H), CoreAddrRangeHit, MemWrEnQ103H, "write")
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",MemAddressQ103H), CoreAddrRangeHit, MemRdEnQ103H, "read")
+
 parameter V_TIMEOUT = 250000;
 parameter RF_NUM_MSB = 31; // NOTE!!!: auto inserted from script ovrd_params.py
 initial begin: detect_timeout
@@ -138,7 +157,6 @@ assign InFabricQ503H.opcode                = RD_RSP;
 assign InFabricQ503H.data                  = '0;
 assign InFabricQ503H.requestor_id          = '0;
 assign InFabricQ503H.next_tile_fifo_arb_id = NULL_CARDINAL;
-
 
 t_tile_id local_tile_id;
 assign  local_tile_id = 8'h2_2;

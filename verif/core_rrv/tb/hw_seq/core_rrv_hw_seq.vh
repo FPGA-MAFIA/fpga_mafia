@@ -29,6 +29,10 @@ else if(test_name == "PS2_long_shift") begin
     $display("=====\n PS2_long_shift was included to the run\n ====\n");   
     `include "PS2_long_shift.vh"  
 end
+else if(test_name == "PS2_compare") begin
+    $display("=====\n PS2_long_shift was included to the run\n ====\n");   
+    `include "PS2_compare.vh"  
+end
 
 else begin 
     $display("=====\n No HW sequence logic were included to the run\n ====\n");
