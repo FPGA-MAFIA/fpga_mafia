@@ -30,6 +30,11 @@ else if(test_name == "PS2_long_shift") begin
     `include "PS2_long_shift.vh"  
 end
 
+else if(test_name == "PS2_fibbonacci") begin
+    $display("=====\n PS2_fibbonacci was included to the run\n ====\n");   
+    `include "PS2_fibbonacci.vh"  
+end
+
 else begin 
     $display("=====\n No HW sequence logic were included to the run\n ====\n");
 end
