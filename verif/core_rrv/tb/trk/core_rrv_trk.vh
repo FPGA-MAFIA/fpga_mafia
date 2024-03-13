@@ -42,38 +42,93 @@ end
 //    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,PcQ100H, core_rrv.Funct3Q101H, core_rrv.Funct7Q101H, core_rrv.OpcodeQ101H);
 //end
 
-integer trk_memory_access;
-initial begin: trk_memory_access_gen
+
+//=============================
+// Memory Access tracking
+//=============================
+// delay writes to mem by two cycles
+// Region - can be from any region. Data/VGA/CR memory
+
+logic RegionMemWrEnQ104H, RegionMemWrEnQ105H;
+`MAFIA_DFF(RegionMemWrEnQ104H, core_rrv_top.core_rrv.core_rrv_mem_access1.Ctrl.DMemWrEnQ103H , Clk)
+`MAFIA_DFF(RegionMemWrEnQ105H, RegionMemWrEnQ104H , Clk)
+
+logic [31:0] RegionMemWrDataQ104H, RegionMemWrDataQ105H;
+`MAFIA_DFF(RegionMemWrDataQ104H, core_rrv_top.core_rrv.core_rrv_mem_access1.DMemWrDataQ103H , Clk)
+`MAFIA_DFF(RegionMemWrDataQ105H, RegionMemWrDataQ104H , Clk)
+
+logic [31:0] RegionMemAddrQ104H, RegionMemAddrQ105H;
+`MAFIA_DFF(RegionMemAddrQ104H, core_rrv_top.core_rrv.core_rrv_mem_access1.AluOutQ103H , Clk)
+`MAFIA_DFF(RegionMemAddrQ105H, RegionMemAddrQ104H , Clk)
+
+logic VGAHitQ104H, VGAHitQ105H;
+logic CRHitQ104H, CRHitQ105H;
+`MAFIA_DFF(VGAHitQ104H, core_rrv_top.core_rrv_mem_wrap.MatchVGAMemRegionQ103H , Clk)
+`MAFIA_DFF(VGAHitQ105H, VGAHitQ104H , Clk)
+`MAFIA_DFF(CRHitQ104H, core_rrv_top.core_rrv_mem_wrap.MatchCRMemRegionQ103H , Clk)
+`MAFIA_DFF(CRHitQ105H, CRHitQ104H , Clk)
+
+// read signals
+logic [31:0] RegionMemRdDataQ105H;
+logic [31:0] RegionMemRdEnQ104H, RegionMemRdEnQ105H;
+assign RegionMemRdDataQ105H  = core_rrv_top.core_rrv.core_rrv_wb.PostSxDMemRdDataQ105H;  // data read from memorry in case of MemRdEn
+`MAFIA_DFF(RegionMemRdEnQ104H, core_rrv_top.core_rrv.core_rrv_mem_access1.Ctrl.DMemRdEnQ103H , Clk)
+`MAFIA_DFF(RegionMemRdEnQ105H, RegionMemRdEnQ104H , Clk)
+
+
+integer trk_data_memory_access;
+initial begin: trk_data_memory_access_gen
     #1
-    trk_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_memory_access.log"},"w");
-    $fwrite(trk_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
-    $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
+    trk_data_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_data_memory_access.log"},"w");
+    $fwrite(trk_data_memory_access,"----------------------------------------------------\n");
+    $fwrite(trk_data_memory_access,"Time  |  PC   | Address  | Data  |\n");
+    $fwrite(trk_data_memory_access,"----------------------------------------------------\n");  
 end
 
-//
-assign PcQ100H = core_rrv_top.PcQ100H;
+integer trk_vga_memory_access;
+initial begin: trk_vga_memory_access_gen
+    #1
+    trk_vga_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_vga_memory_access.log"},"w");
+    $fwrite(trk_vga_memory_access,"----------------------------------------------------\n");
+    $fwrite(trk_vga_memory_access,"Time  |  PC   | Address  | Data  |\n");
+    $fwrite(trk_vga_memory_access,"----------------------------------------------------\n");  
+end
 
-logic DMemRdEnQ104H;
-logic DMemWrEnQ104H;
-logic [31:0] DMemAddressQ104H;
-logic [31:0] DMemWrDataQ104H;
-
-assign DMemWrEnQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.DMemWrEn;
-assign DMemRdEnQ104H = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ104H.DMemRdEn;
-`MAFIA_DFF(DMemAddressQ104H, core_rrv_top.core_rrv_mem_wrap.DMemAddressQ103H , Clk)
-`MAFIA_DFF(DMemWrDataQ104H,  core_rrv_top.core_rrv_mem_wrap.DMemWrDataQ103H  , Clk)
-
+integer trk_cr_data_memory_access;
+initial begin: trk_cr_memory_access_gen
+    #1
+    trk_cr_data_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_cr_data_memory_access.log"},"w");
+    $fwrite(trk_cr_data_memory_access,"----------------------------------------------------\n");
+    $fwrite(trk_cr_data_memory_access,"Time  |  PC   |  Address  | Data  |\n");
+    $fwrite(trk_cr_data_memory_access,"----------------------------------------------------\n");  
+end
 
 //tracker on memory_access operations
 always @(posedge Clk) begin : memory_access_print
-    if(DMemWrEnQ104H) begin
-        $fwrite(trk_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
+    if(RegionMemWrEnQ105H) begin
+        if(VGAHitQ105H) begin
+            $fwrite(trk_vga_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemWrDataQ105H);
+        end
+        else if(CRHitQ105H) begin
+            $fwrite(trk_cr_data_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemWrDataQ105H);
+        end
+        else begin
+            $fwrite(trk_data_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemWrDataQ105H);
+        end 
     end
-    if(DMemRdEnQ104H) begin
-        $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, core_rrv_top.core_rrv.core_rrv_rf.RegWrDataQ105H);
+    if(RegionMemRdEnQ105H) begin
+        if(VGAHitQ105H) begin
+            $fwrite(trk_vga_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemRdDataQ105H);
+        end
+        else if(CRHitQ105H) begin
+            $fwrite(trk_cr_data_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemRdDataQ105H);
+        end
+        else begin
+            $fwrite(trk_data_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemRdDataQ105H);
+        end
     end
 end
+
 
 integer trk_reg_write;
 initial begin: trk_reg_write_gen
