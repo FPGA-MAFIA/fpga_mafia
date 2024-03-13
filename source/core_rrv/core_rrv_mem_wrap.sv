@@ -162,11 +162,11 @@ assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ10
 //================================
 // Memorry access assertion
 //===============================
-`ifndef SIM_ONLY
+`ifdef SIM_ONLY
 logic  AddrRangeHit;
 logic  clk;        // FIXME - in MAFIA_ASSERT macro we use 'clk' instead of 'Clk'
 assign clk = Clock; 
-assign AddrRangeHit  = (DMemAddressQ103H > VGA_MEM_REGION_ROOF & DMemAddressQ103H < D_MEM_REGION_FLOOR);
+assign AddrRangeHit  = (DMemAddressQ103H > VGA_MEM_REGION_ROOF || DMemAddressQ103H < D_MEM_REGION_FLOOR);
 
 `MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeHit, DMemWrEnQ103H, "write")
 `MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeHit, DMemRdEnQ103H, "read")
