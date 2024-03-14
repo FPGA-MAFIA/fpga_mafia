@@ -188,9 +188,9 @@
 #define Backslash_BOTTOM     0x00402010
 
 #define Exclamation_mark_TOP      0x08080800
-#define Exclamation_mark_BOTTOM   0x00000800
+#define Exclamation_mark_BOTTOM   0x00000800 //
 #define Double_quotes_TOP         0x00181800
-#define Double_quotes_BOTTOM      0x00000000
+#define Double_quotes_BOTTOM      0x00000000 
 #define Number_sign_TOP           0x247E2400
 #define Number_sign_BOTTOM        0x00247E24
 #define Dollar_TOP                0x14781010
@@ -201,10 +201,10 @@
 #define Ampersand_BOTTOM          0x00582458
 #define Single_quote_TOP          0x00080800
 #define Single_quote_BOTTOM       0x00000000
-#define open_parenthesis_TOP      0x02020400
-#define open_parenthesis_BOTTOM   0x00040202
-#define close_parenthesis_TOP     0x40402000
-#define close_parenthesis_BOTTOM  0x00204040
+#define open_parenthesis_TOP      0x08081020 //(
+#define open_parenthesis_BOTTOM   0x20100808
+#define close_parenthesis_TOP     0x10100804 //)
+#define close_parenthesis_BOTTOM  0x04081010
 #define Asterisk_TOP              0x24181824
 #define Asterisk_BOTTOM           0x00000000
 #define Plus_TOP                  0x10000000
@@ -213,18 +213,18 @@
 #define Equals_BOTTOM             0x00003C00
 #define At_sign_TOP               0xA599423C
 #define At_sign_BOTTOM            0x3C0259A5
-#define open_bracket_TOP          0x02020600
-#define open_bracket_BOTTOM       0x00060202
-#define close_bracket_TOP         0x40406000
-#define close_bracket_BOTTOM      0x00604040
+#define open_bracket_TOP          0x08080838 //[
+#define open_bracket_BOTTOM       0x38080808
+#define close_bracket_TOP         0x1010101C //]
+#define close_bracket_BOTTOM      0x1C101010
 #define circumflex_TOP            0x00140800
 #define circumflex_BOTTOM         0x00000000
 #define Grave_accent_TOP          0x00100800
 #define Grave_accent_BOTTOM       0x00000000
-#define Opening_brace_TOP         0x04040800
-#define Opening_brace_BOTTOM      0x08040402
-#define Closing_brace_TOP         0x40402000
-#define Closing_brace_BOTTOM      0x20404080
+#define Opening_brace_TOP         0x0C080830 //{
+#define Opening_brace_BOTTOM      0x3008080C
+#define Closing_brace_TOP         0x3010100C //}
+#define Closing_brace_BOTTOM      0x0C101030
 #define Vertical_bar_TOP          0x10101000
 #define Vertical_bar_BOTTOM       0x00101010
 #define tilde_TOP                 0x4C000000
