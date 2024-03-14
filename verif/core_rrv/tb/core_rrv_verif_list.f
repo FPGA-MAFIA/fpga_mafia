@@ -8,7 +8,6 @@
 ../../../verif/rv32i_ref/tb/rv32i_ref.sv
 ../../../verif/core_rrv/tb/core_rrv_no_ref_tb.sv
 ../../../verif/core_rrv/tb/core_rrv_tb.sv
-../../../verif/core_rrv/tb/ps2_abd_tb.sv
 
 
 

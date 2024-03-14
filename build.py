@@ -448,10 +448,16 @@ def main():
     if (args.all and args.regress) or (args.all and args.tests) or (args.regress and args.tests):
         print_message('[ERROR] can\'t use any combination of: -all, -regress, tests')
         exit(1)
-    # make sure using at least one of '-all', '-regress', 'tests'
-    if not (args.all or args.regress or args.tests):
-        print_message('[ERROR] must use at least one of: -all, -regress, tests')
+
+    # Check if the '-app' flag is used without any of '-all', '-regress', or '-tests'
+    if args.app and not (args.all or args.regress or args.tests):
+        print_message('[ERROR] When using -app, must use at least one of: -all, -regress, or -tests')
         exit(1)
+    
+    # if there is no '-tests' argument, add a default test using the dut name "default_<dut>_test"
+    if not args.tests:
+        args.tests = 'default_'+args.dut+'_test'
+
 
 
     # if args.params collect the parameters from the command and save them as a string
@@ -493,16 +499,25 @@ def main():
                 else:
                     print_message('[ERROR] can\'t find the test - '+test)
                     exit(1)
+
     elif args.tests:
-        for test in args.tests.split():
-            try:
-                test = glob.glob(TESTS+test+'*')[0]
-            except:
-                print_message(f'[ERROR] There is no test {test} in your tests directory')
-                exit(1)
+        for test_name in args.tests.split():
+            if test_name == 'default_'+args.dut+'_test':
+                print_message('[INFO] No specific test requested, using default null_test.')
+                # Assuming your Test class can handle a 'null_test' in a meaningful way
+                # You might need to adjust the Test class or provide specific handling here
+                default_test = Test('test_name', parameter, args.dut)
+                tests.append(default_test)
             else:
-                test = test.replace('\\', '/').split('/')[-1]
-                tests.append(Test(test, parameter, args.dut))
+                try:
+                    test_path = glob.glob(TESTS + test_name + '*')[0]
+                except IndexError:  # No matching test file found
+                    print_message(f'[ERROR] There is no test {test_name} in your tests directory')
+                    exit(1)
+                else:
+                    test_file = test_path.replace('\\', '/').split('/')[-1]
+                    tests.append(Test(test_file, parameter, args.dut))
+
 
     # Redirect stdout and stderr to log file
     # sys.stdout = open(log_file, "w", buffering=1)

@@ -19,7 +19,7 @@ Created : 22/08/2021
 //#define CR_PC_EN     ((volatile int *) (0x00C00150))
 //#define CR_CORE_ID          ((volatile int *) (0x00C00008))
 #include "LOTR_defines.h"
-#include "graphic.h"
+#include "graphic_lotr.h"
 
 int main() {
     int ThreadId = CR_THREAD[0];

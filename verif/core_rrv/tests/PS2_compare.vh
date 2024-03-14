@@ -10,7 +10,7 @@ end
 $display("TIME: %t, CR is ready for reading", $time);
 
 // sending string imitating the keyboard input
-send_string("FIRST");
+send_string("5");
 
 // wait until we see CR of the "scanf" ready for reading
 while (!core_rrv_top.core_rrv_mem_wrap.core_rrv_cr_mem.kbd_cr.kbd_scanf_en) begin
@@ -20,5 +20,5 @@ end
 $display("TIME: %t, CR is ready for reading", $time);
 
 // sending string imitating the keyboard input
-send_string("SECOND");
+send_string("7");
 

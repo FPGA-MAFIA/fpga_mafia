@@ -139,7 +139,6 @@ assign InFabricQ503H.data                  = '0;
 assign InFabricQ503H.requestor_id          = '0;
 assign InFabricQ503H.next_tile_fifo_arb_id = NULL_CARDINAL;
 
-
 t_tile_id local_tile_id;
 assign  local_tile_id = 8'h2_2;
 logic RstPc;

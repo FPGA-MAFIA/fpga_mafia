@@ -64,4 +64,3 @@ send_byte_to_ps2(.data(8'h5a)); //the realesed key "ENTER"
 
 
 // NOTE we must send "enter" to the PS2 to make the "scanf" function to return
-// FIXME -> missing the code to send "enter" to the PS2 (\n)
