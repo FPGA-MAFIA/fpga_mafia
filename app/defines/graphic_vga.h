@@ -177,7 +177,7 @@
 #define SQ_TOP     0x00080800 // SINGLE_QUOTE_TOP       
 #define SQ_BTM     0x00000000 // SINGLE_QUOTE_BTM       
 #define OP_PRN_TOP 0x08081020 // OPN_PRNTS_TOP          
-#define OP_PRN_BTM 0x20100808 // OPN_PRNTS_BTM          
+#define OP_PRN_BTM 0x20100808 // OPN_PRNTS_BTM ()         
 #define CL_PRN_TOP 0x10100804 // CLS_PRNTS_TOP          
 #define CL_PRN_BTM 0x04081010 // CLS_PRNTS_BTM          
 #define AST_TOP    0x24181824 // ASTERISK_TOP           
