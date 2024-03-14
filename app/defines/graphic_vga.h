@@ -176,10 +176,10 @@
 #define AMP_BTM    0x00582458 // AMPERSAND_BTM          
 #define SQ_TOP     0x00080800 // SINGLE_QUOTE_TOP       
 #define SQ_BTM     0x00000000 // SINGLE_QUOTE_BTM       
-#define OP_PRN_TOP 0x02020400 // OPN_PRNTS_TOP          
-#define OP_PRN_BTM 0x00040202 // OPN_PRNTS_BTM          
-#define CL_PRN_TOP 0x40402000 // CLS_PRNTS_TOP          
-#define CL_PRN_BTM 0x00204040 // CLS_PRNTS_BTM          
+#define OP_PRN_TOP 0x08081020 // OPN_PRNTS_TOP          
+#define OP_PRN_BTM 0x20100808 // OPN_PRNTS_BTM          
+#define CL_PRN_TOP 0x10100804 // CLS_PRNTS_TOP          
+#define CL_PRN_BTM 0x04081010 // CLS_PRNTS_BTM          
 #define AST_TOP    0x24181824 // ASTERISK_TOP           
 #define AST_BTM    0x00000000 // ASTERISK_BTM           
 #define PLUS_TOP   0x10000000 // PLUS_TOP               
@@ -188,20 +188,20 @@
 #define EQL_BTM    0x00003C00 // EQUALS_BTM             
 #define AT_TOP     0xA599423C // AT_SIGN_TOP            
 #define AT_BTM     0x3C0259A5 // AT_SIGN_BTM            
-#define OB_TOP     0x02020600 // OPEN_BRACKET_TOP       
-#define OB_BTM     0x00060202 // OPEN_BRACKET_BTM       
-#define CB_TOP     0x40406000 // CLOSE_BRACKET_TOP      
-#define CB_BTM     0x00604040 // CLOSE_BRACKET_BTM      
+#define OB_TOP     0x08080838 // OPEN_BRACKET_TOP       
+#define OB_BTM     0x38080808 // OPEN_BRACKET_BTM       
+#define CB_TOP     0x1010101C // CLOSE_BRACKET_TOP      
+#define CB_BTM     0x1C101010 // CLOSE_BRACKET_BTM      
 #define CIR_TOP    0x00140800 // CIRCUMFLEX_TOP         
 #define CIR_BTM    0x00000000 // CIRCUMFLEX_BTM         
 #define GRV_TOP    0x00100800 // GRAVE_ACCENT_TOP       
 #define GRV_BTM    0x00000000 // GRAVE_ACCENT_BTM       
 #define UNDR_SCR_TOP 0x00000000
 #define UNDR_SCR_BTM 0x007E0000
-#define OBR_TOP    0x04040800 // OPENING_BRACE_TOP      
-#define OBR_BTM    0x08040402 // OPENING_BRACE_BTM      
-#define CBR_TOP    0x40402000 // CLOSING_BRACE_TOP      
-#define CBR_BTM    0x20404080 // CLOSING_BRACE_BTM      
+#define OBR_TOP    0x0C080830 // OPENING_BRACE_TOP      
+#define OBR_BTM    0x3008080C // OPENING_BRACE_BTM      
+#define CBR_TOP    0x3010100C // CLOSING_BRACE_TOP      
+#define CBR_BTM    0x0C101030 // CLOSING_BRACE_BTM      
 #define VBAR_TOP   0x10101000 // VERTICAL_BAR_TOP       
 #define VBAR_BTM   0x00101010 // VERTICAL_BAR_BTM       
 #define TLD_TOP    0x4C000000 // TILDE_TOP              
