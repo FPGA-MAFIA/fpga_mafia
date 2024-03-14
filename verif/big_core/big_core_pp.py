@@ -7,6 +7,7 @@ import sys
 
 parser = argparse.ArgumentParser(description= 'get test name from build')
 parser.add_argument('test_name', help='The name of the test to run pp on')
+parser.add_argument('-v', '--verbose', action='store_true', help='Increase output verbosity')
 args = parser.parse_args()
 
 def print_message(msg):
