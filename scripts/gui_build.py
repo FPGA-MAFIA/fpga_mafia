@@ -36,6 +36,7 @@ class CommandLineBuilder(tk.Tk):
         self.sim_var = tk.BooleanVar(self)
         self.gui_var = tk.BooleanVar(self)
         self.full_run_var = tk.BooleanVar(self)
+        self.v_var = tk.BooleanVar(self)
         self.pp_var = tk.BooleanVar(self)
         self.mif_var = tk.BooleanVar(self)
         self.fpga_var = tk.BooleanVar(self)
@@ -56,6 +57,7 @@ class CommandLineBuilder(tk.Tk):
             "-gui"      :"Execute this option with the '-sim' flag to open the ModelSim GUI.",
             "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
             "-params"   : "Specify the parameters for the DUT  Example: -gV_TIMEOUT=1000 -gV_NUM_REQ=20.",
+            "-v"        : "Run the simulation in verbose mode.",
             "-pp"       : "HW Post Processing - after simulation is done, run the post processing script ./verif/<dut>/<dut>_pp.py.",
             "-mif"      : "create the mif memory files for the FPGA load",
             "-keep_going": "Keep going even if there are errors in one of the tests",
@@ -112,6 +114,7 @@ class CommandLineBuilder(tk.Tk):
         self.add_checkbox_option("-sim", self.sim_var)
         self.add_checkbox_option("-gui", self.gui_var) 
         self.add_checkbox_option("-full_run", self.full_run_var)
+        self.add_checkbox_option("-v", self.v_var)
         self.add_checkbox_option("-pp", self.pp_var)
         self.add_checkbox_option("-clean", self.clean_var)
         self.add_checkbox_option("-mif", self.mif_var)
@@ -412,7 +415,9 @@ class CommandLineBuilder(tk.Tk):
         if self.sim_var.get():
             cmd += " -sim"
         if self.gui_var.get():
-            cmd += " -gui"    
+            cmd += " -gui" 
+        if self.v_var.get():
+            cmd += " -v"   
         if self.pp_var.get():
             cmd += " -pp"
         if self.full_run_var.get():
