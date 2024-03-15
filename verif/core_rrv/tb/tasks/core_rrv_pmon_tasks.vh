@@ -4,7 +4,7 @@ real cycle_high_low_real;
 real result_ipc, result_cpi;
 
  task track_performance();
- pmon_file =$fopen({"../../../target/core_rrv/tests/trk_cpi_ipc.log"}, "w");
+ pmon_file = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_cpi_ipc.log"},"w");
        $fdisplay(pmon_file,"===========================================");
        $fdisplay(pmon_file,"PMON tracker for ", test_name, " test");
        $fdisplay(pmon_file,"Monitoring IPC and CPI");

@@ -225,7 +225,8 @@ class Test:
                                     # Leave the inst_mem.sv as it is - there is no D_MEM_OFFSET in the inst_mem.sv
 
             if not self.fail_flag:
-                print_message('[INFO] SW compilation finished with no errors\n')
+                print_message('[INFO] SW compilation finished with no errors')
+                print_message('--------------------------------------------')
         else:
             print_message('[ERROR] Can\'t find the c files of '+self.name)
             self.fail_flag = True
@@ -273,6 +274,7 @@ class Test:
                         file.write(results.stdout)
                     print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
                     print_message('=== Compile results >>>>> target/'+self.dut+'/modelsim/hw_compile.log')
+                    print_message('--------------------------------------------')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         chdir(MODEL_ROOT)
@@ -294,10 +296,12 @@ class Test:
             else:
                 print_message('[INFO] HW simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
             print_message('=== Simulation results >>>>> target/'+self.dut+'/tests/'+self.name+'/'+self.name+'_transcript')
+            print_message('--------------------------------------------')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
             if not os.path.exists('../tests/'+self.name+'/'+self.name+'_transcript'):
-                mkdir('../tests/'+self.name+'/'+self.name)
-            shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
+                if not os.path.exists('../tests/'+self.name):
+                    mkdir('../tests/'+self.name)
+                shutil.copy('transcript', '../tests/'+self.name+'/'+self.name+'_transcript')
         chdir(MODEL_ROOT)
     def _gui(self):
         chdir(MODELSIM)
@@ -315,11 +319,14 @@ class Test:
         except:
             print_message('[ERROR] failed to remove /target/'+self.dut+'/tests/'+self.name+' directory')
     def _post_process(self):
+        print_message('[INFO] Starting post process ...')
         # Go to the verification directory
         chdir(VERIF)
         # Run the post process command
         try:
-            pp_cmd = 'python '+self.dut+'_pp.py ' +self.name
+            run_with_verbose = '-v' if args.verbose else ''
+            pp_cmd = 'python '+self.dut+'_pp.py ' +self.name + ' ' + run_with_verbose
+            print_message(f'[INFO] Running post process command: {pp_cmd}')
             return_val = run_cmd_with_capture(pp_cmd)
             print_message(colored(return_val.stdout,'yellow',attrs=['bold']))        
         except:
@@ -564,8 +571,10 @@ def main():
             if (args.gui):
                 test._gui()
             if (args.pp) and not test.fail_flag:
+                # print that we are running the post process
                 if (test._post_process()):# if return value is 0, then the post process is done successfully
                     test.fail_flag = True
+                print_message('--------------------------------------------')
             if args.no_debug:
                 test._no_debug()
 
