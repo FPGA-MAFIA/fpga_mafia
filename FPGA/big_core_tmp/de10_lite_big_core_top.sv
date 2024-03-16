@@ -60,7 +60,8 @@ module de10_lite_big_core_top(
 );
 
 
-import common_pkg::*;
+`include "common_pkg.vh"
+import big_core_pkg::*;
 
 //=======================================================
 //  REG/WIRE declarations

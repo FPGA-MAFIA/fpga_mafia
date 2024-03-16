@@ -492,6 +492,7 @@ set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/fiftyfiv
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/fiftyfivenm_adcblock_top_wrapper.v
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/mafia_adc_adc_mega_0.v
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/fabric/fabric_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_big_core_top.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_vga_sync_gen.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_vga_ctrl.sv
@@ -506,7 +507,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core//big_core_k
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core//big_core_kbd/big_core_kbd_release_checker.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core//big_core_kbd/big_core_kbd_struct_checker.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/mem.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/array.sv
 set_global_assignment -name VERILOG_FILE ../../source/uart/raminfr.v
 set_global_assignment -name VERILOG_FILE ../../source/uart/timescale.v
