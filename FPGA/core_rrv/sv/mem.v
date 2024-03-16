@@ -37,7 +37,9 @@
 // synopsys translate_off
 `timescale 1 ps / 1 ps
 // synopsys translate_on
-module mem #(parameter WORD_WIDTH, parameter ADRS_WIDTH)( 
+module mem #(parameter WORD_WIDTH,  
+			 parameter ADRS_WIDTH) 
+(
 	address_a,
 	address_b,
 	byteena_a,
@@ -250,10 +252,10 @@ endmodule
 // Retrieval info: CONNECT: @wren_b 0 0 0 0 wren_b 0 0 0 0
 // Retrieval info: CONNECT: q_a 0 0 32 0 @q_a 0 0 32 0
 // Retrieval info: CONNECT: q_b 0 0 32 0 @q_b 0 0 32 0
-// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.v TRUE
-// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.inc FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.cmp FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem.bsf FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem_inst.v FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL d_mem_bb.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL mem.v TRUE
+// Retrieval info: GEN_FILE: TYPE_NORMAL mem.inc FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL mem.cmp FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL mem.bsf FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL mem_inst.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL mem_bb.v TRUE
 // Retrieval info: LIB_FILE: altera_mf

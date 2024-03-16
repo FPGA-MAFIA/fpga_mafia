@@ -10,7 +10,6 @@ module de10_lite_core_rrv_top(
     input                           ADC_CLK_10,
     input                           MAX10_CLK1_50,
     input                           MAX10_CLK2_50,
-
     //////////// SDRAM //////////
     //output            [12:0]        DRAM_ADDR,
     //output             [1:0]        DRAM_BA,
@@ -35,6 +34,9 @@ module de10_lite_core_rrv_top(
     input              [1:0]        KEY,
     //////////// LED //////////
     output             [9:0]        LEDR,
+    /////////// keyboard //////
+    input                           KBD_CLK,
+    input                           DATA_IN_KC,
     //////////// SW //////////
     input logic      [9:0]        SW,
     //////////// VGA //////////
@@ -60,8 +62,8 @@ module de10_lite_core_rrv_top(
 );
 
 
-import common_pkg::*;
-
+//import common_pkg::*;
+import core_rrv_pkg::*;
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
@@ -99,6 +101,9 @@ core_rrv_top  (
 .OutFabricValidQ505H    (PreOutFabricValidQ505H),
 .OutFabricQ505H         (PreOutFabricQ505H),
 .fab_ready              (),
+// key board interface
+.kbd_clk                 (KBD_CLK),
+.data_in_kc              (DATA_IN_KC),  
 // Vga interface
 .inDisplayArea          (inDisplayArea),
 .vga_out                (vga_out),
@@ -106,6 +111,8 @@ core_rrv_top  (
 .fpga_in                (fpga_in),  
 .fpga_out               (fpga_out)
 );
+
+
 
 logic EnRstPc;
 assign EnRstPc = (InFabricQ503H.address == 32'hFFFF_FFFF) && (InFabricQ503H.opcode == WR) && InFabricValidQ503H;

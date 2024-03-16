@@ -1,0 +1,15 @@
+COM5
+W
+0xFFFFFFFF
+0x1
+WB
+0x00000000
+../../../target/core_rrv/tests/alive_vga/gcc_files/inst_mem.sv
+WB
+0x00000000
+../../../target/core_rrv/tests/alive_vga/gcc_files/data_mem.sv
+W
+0xFFFFFFFF
+0x0
+Q
+Q
