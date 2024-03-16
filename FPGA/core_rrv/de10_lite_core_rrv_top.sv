@@ -7,7 +7,7 @@
 module de10_lite_core_rrv_top(
 
     //////////// CLOCK //////////
-    input                           ADC_CLK_10,
+    //input                           ADC_CLK_10,
     input                           MAX10_CLK1_50,
     input                           MAX10_CLK2_50,
     //////////// SDRAM //////////
@@ -84,7 +84,8 @@ t_tile_trans OutFabricQ505H, PreOutFabricQ505H;
 logic RstPc;
 logic InFabricReqOpcodeQ500H;
 logic out_for_pd;
-logic kbd_clk_15Khz;
+logic KBD_CLK_15Khz;
+logic ADC_CLK_10Mhz;
 // =======================================================
 // core_rrv_top
 // =======================================================
@@ -102,7 +103,7 @@ core_rrv_top  (
 .OutFabricQ505H         (PreOutFabricQ505H),
 .fab_ready              (),
 // key board interface
-.kbd_clk                 (kbd_clk_15Khz),
+.kbd_clk                 (KBD_CLK_15Khz),
 .data_in_kc              (DATA_IN_KC),  
 // Vga interface
 .inDisplayArea          (inDisplayArea),
@@ -112,14 +113,15 @@ core_rrv_top  (
 .fpga_out               (fpga_out)
 );
 
+
 // keyboard 15Khz clock generator.
 // reminder: Kbd can work in freq range 10Khz - 16.6Khz
-kbd_clk_gen	kbd_clk_gen_inst (
-	.areset (),
+clk_gen	clk_gen_inst (
 	.inclk0 (MAX10_CLK1_50),
-	.c0 (kbd_clk_15Khz),
-	.locked ()  // indicates if the putput has locked. // TODO - we will assume that when scanf is reached the output is ready
-	);
+	.c0 (KBD_CLK_15Khz),  // 15Khz clock for kbd
+	.c1 (ADC_CLK_10Mhz),  // 10Mhz clock for ADC
+	.locked () // indicates if the putput has locked. // TODO - we will assume that when scanf is reached the output is ready
+);
 
 
 logic EnRstPc;
@@ -221,7 +223,7 @@ assign VGA_VS     = vga_out.VGA_VS;
 logic [11:0] adc_ch_0;
 logic [11:0] adc_ch_1;
         mafia_adc u0 (
-                .CLOCK (ADC_CLK_10),//clk.clk
+                .CLOCK (ADC_CLK_10Mhz),//clk.clk
                 .RESET (Rst),//reset.reset
                 .CH0   (adc_ch_0),//readings.CH0
                 .CH1   (adc_ch_1),//.CH1

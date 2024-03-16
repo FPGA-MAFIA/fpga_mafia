@@ -1,6 +1,6 @@
-kbd_clk_gen	kbd_clk_gen_inst (
-	.areset ( areset_sig ),
+clk_gen	clk_gen_inst (
 	.inclk0 ( inclk0_sig ),
 	.c0 ( c0_sig ),
+	.c1 ( c1_sig ),
 	.locked ( locked_sig )
 	);
