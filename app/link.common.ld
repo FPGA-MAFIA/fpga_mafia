@@ -23,8 +23,12 @@ SECTIONS {
     .data : {  
         . = ALIGN(4);  
         *(.data);  
+        LONG(0); /* Pad the last word to 32 bits if necessary*/
         *(.sdata);  
+        LONG(0); /* Pad the last word to 32 bits if necessary*/
         *(.sbss);  
+        LONG(0); /* Pad the last word to 32 bits if necessary*/
         *(.bss);  
+        LONG(0); /* Pad the last word to 32 bits if necessary*/
     } > global_data  
 }
