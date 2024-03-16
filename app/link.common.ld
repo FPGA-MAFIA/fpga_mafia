@@ -16,6 +16,8 @@ SECTIONS {
     .rodata : {
         . = ALIGN(4);
         *(.rodata);
+        . = ALIGN(4);
+        LONG(0); 
     } > global_data
 
     .data : {  
