@@ -9,7 +9,6 @@ import argparse
 import os.path
 import string
 import serial
-import subprocess
 import serial.tools.list_ports as list_ports
 
 ''' Own library '''
@@ -26,8 +25,7 @@ def parse_args():
 
     args=parser.parse_args()
     return args
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
-os.chdir(MODEL_ROOT)
+
 
 def open_serial_port(port_name):
     print('-I- Attempting to connect to port: "{}"'.format(port_name))
