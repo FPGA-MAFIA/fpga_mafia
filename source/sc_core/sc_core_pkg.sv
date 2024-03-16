@@ -17,6 +17,7 @@
 `define SC_CORE_PKG_SV
 package sc_core_pkg;
     
+`include "common_pkg.vh"
 
 
 parameter I_MEM_SIZE   = 'h1_0000; 

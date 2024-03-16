@@ -10,7 +10,7 @@
 // Description : 
 //
 //-----------------------------------------------------------------------------
-`include "macros.sv"
+`include "macros.vh"
 
 module array #(
     parameter WORD_WIDTH,   //no default value.

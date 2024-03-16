@@ -13,7 +13,7 @@
 // (2) load backdoor the I_MEM & D_MEM.
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
-`include "macros.sv"
+`include "macros.vh"
 
 module sc_core_tb ;
 import sc_core_pkg::*;

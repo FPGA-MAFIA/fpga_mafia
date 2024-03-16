@@ -1,8 +1,7 @@
 
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_kbd_release_checker
-import common_pkg::*;
 (
     input   logic       Clk,
     input   logic       Rst,

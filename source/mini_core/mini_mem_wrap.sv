@@ -12,11 +12,10 @@
 // Modification history :
 //------------------------------------------------------------------------------
 
-`include "macros.sv"
+`include "macros.vh"
 
 //---------------------------------------------------
 module mini_mem_wrap
-import common_pkg::*;
 import mini_core_pkg::*;
 (
                 input  logic        Clock  ,

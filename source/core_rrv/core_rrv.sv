@@ -24,7 +24,7 @@
 // Support Interrupts
 
 
-`include "macros.sv"
+`include "macros.vh"
 
 module core_rrv 
 import core_rrv_pkg::*;

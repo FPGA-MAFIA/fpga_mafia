@@ -15,10 +15,9 @@
 // Some CR are read only from Core and write from FPGA. (SWITCH, BUTTON) 
 // and some are read/write from core and READ only from FPGA (LED, SEG7)
 
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_cr_mem 
-import common_pkg::*;
 import big_core_pkg::*;
 (
     input  logic       Clk,

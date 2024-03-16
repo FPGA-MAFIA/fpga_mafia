@@ -1,4 +1,4 @@
-`include "macros.sv"
+`include "macros.vh"
 
 module cache_tb ;
 

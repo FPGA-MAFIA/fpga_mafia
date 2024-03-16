@@ -1,5 +1,5 @@
 
-`include "macros.sv"
+`include "macros.vh"
 
 module core_rrv_kbd_release_checker
 import core_rrv_pkg::*;

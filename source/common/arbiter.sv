@@ -14,7 +14,7 @@
 
 // File Name: arbiter.sv
 // Description: The arbiter module.
-`include "macros.sv"
+`include "macros.vh"
 
 module arbiter #(parameter int NUM_CLIENTS=4)
     (

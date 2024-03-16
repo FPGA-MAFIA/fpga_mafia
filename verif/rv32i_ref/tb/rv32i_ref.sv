@@ -1,7 +1,7 @@
 //=============================
 // this is a reference model for the RV32I mini_core DUT
 // Will be using a simple case statement to model the:
-`include "macros.sv"
+`include "macros.vh"
 module rv32i_ref 
 #(  
     parameter I_MEM_LSB = 'h0_0000,
@@ -194,7 +194,7 @@ always_comb begin
     next_imem           = imem;
     NextVGAMem          = VGAMem;
     csr_hit             = 1'b0;
-    instr_type          = NULL;
+    instr_type          = I_NULL;
     if(rst) NextVGAMem  = '{default: '0};
     //=================================================================
     // decode+execute+mem+write_back 
@@ -479,7 +479,7 @@ always_comb begin
     // default
     //=======================================================
     default: begin
-        instr_type       = NULL;
+        instr_type       = I_NULL;
         illegal_instruction = 1'b1 && ~rst;
         if(illegal_instruction) begin
             next_pc = csr.csr_mtvec;

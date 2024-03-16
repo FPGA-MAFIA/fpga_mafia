@@ -1,10 +1,10 @@
 
 //File Name: fifo_arbiter.sv
 //Description: The fifo_arbiter module.
-`include "macros.sv"
+`include "macros.vh"
 
 module fifo_arb
- import common_pkg::*;
+import fabric_pkg::*;
  #(parameter NUM_CLIENTS = 4,
    parameter FIFO_ARB_FIFO_DEPTH = 4)
 (

@@ -1,7 +1,6 @@
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_kbd_odd_parity_checker
-import common_pkg::*;
 (
     input   logic       Clk,
     input   logic [8:0] Data,

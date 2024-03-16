@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 
 
-`include "macros.sv"
+`include "macros.vh"
 
 module rv32i_ref_tb;
 import common_pkg::*;

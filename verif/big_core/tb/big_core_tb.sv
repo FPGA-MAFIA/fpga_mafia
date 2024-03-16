@@ -14,13 +14,12 @@
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
 
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_tb ;
-import common_pkg::*;
 import big_core_pkg::*;
 
-parameter MAX_TEST_DURATION = 100000;
+parameter MAX_TEST_DURATION = 1000000;
 logic        Clk;
 logic        Rst;
 logic [31:0] Instruction;

@@ -19,10 +19,9 @@
 // 4) Q103H Memory Access
 // 5) Q104H Write back data from Memory/ALU to Register file
 
-`include "macros.sv"
+`include "macros.vh"
 
 module mini_core 
-import common_pkg::*;
 import mini_core_pkg::*;
 #(parameter RF_NUM_MSB) 
 (

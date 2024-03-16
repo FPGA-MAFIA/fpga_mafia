@@ -13,6 +13,7 @@
 `define BIG_CORE_PKG_VS
 package big_core_pkg;
     
+`include "common_pkg.vh"
 parameter I_MEM_OFFSET = 'h0_0000;
 parameter I_MEM_SIZE   = 'h1_0000;
 parameter I_MEM_MSB    = I_MEM_SIZE-1;               

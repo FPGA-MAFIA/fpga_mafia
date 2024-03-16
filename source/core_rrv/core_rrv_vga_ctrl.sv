@@ -12,7 +12,7 @@
 // This module serves as the vga controller of the architecture.
 // This module include the vga memory and the logic necessary for its management.
 
-`include "macros.sv"
+`include "macros.vh"
 
 module core_rrv_vga_ctrl 
 import core_rrv_pkg::*;

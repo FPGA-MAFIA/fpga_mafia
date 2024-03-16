@@ -2,7 +2,7 @@
 // Title            : common param packag
 // Project          : many core project
 //-----------------------------------------------------------------------------
-// File             : common_pkg.sv
+// File             : common_pkg.vh
 // Original Author  : Amichai Ben-David
 // Code Owner       : 
 // Created          : 02/02/2023
@@ -15,12 +15,15 @@
 // 02/02/2023  Amichai     1.0        Initial version
 //-----------------------------------------------------------------------------
 
-package common_pkg;
+
+// Instead of making this as a package, we will include this in other packages
+//package common_pkg;
 
 //==============================
 //Fabric definitions
 //==============================
 typedef logic [7:0] t_tile_id;
+
 typedef enum logic[1:0] {  
  NULL =   2'b00 ,
  WR =     2'b01 ,
@@ -56,5 +59,4 @@ typedef struct packed {
 //`include "big_core_pkg.vh"
 //`include "mini_core_pkg.vh"
 
-
-endpackage
+//endpackage

@@ -10,10 +10,9 @@
 //-----------------------------------------------------------------------------
 // Description :
 // This module serves as the top module of the core, memory and FPGA.
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_top 
-import common_pkg::*;  
 import big_core_pkg::*;  
 (
     input  logic        Clk,

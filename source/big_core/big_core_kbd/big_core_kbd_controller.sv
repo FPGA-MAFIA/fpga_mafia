@@ -1,6 +1,5 @@
-`include "macros.sv"
+`include "macros.vh"
 module big_core_kdb_controller 
-import common_pkg::*;
 import big_core_pkg::*;
 (
     // PS2 interface

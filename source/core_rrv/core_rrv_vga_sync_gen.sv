@@ -11,7 +11,7 @@
 // Description :
 // This module serves as the sync generator of the vga controller.
 
-`include "macros.sv"
+`include "macros.vh"
 
 module core_rrv_vga_sync_gen
 import core_rrv_pkg::*;

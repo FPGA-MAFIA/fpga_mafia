@@ -11,7 +11,7 @@
 //
 //
 //-----------------------------------------------------------------------------
-`include "macros.sv"
+`include "macros.vh"
 
 module i_cache_pipe
     import i_cache_param_pkg::*;  

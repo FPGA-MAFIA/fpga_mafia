@@ -12,9 +12,8 @@
 // This module serves as the memory of the core. This module contains data memory,
 // instruction memory and control registers memory.
 // I_MEM, D_MEM and CR_MEM will support sync memory read.
-`include "macros.sv"
+`include "macros.vh"
 module big_core_mem_wrap 
-import common_pkg::*;
 import big_core_pkg::*;
 (   input  logic        Clk,
     input  logic        Rst,

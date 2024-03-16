@@ -1,4 +1,4 @@
-`include "macros.sv"
+`include "macros.vh"
 
 module mem_ss_tb;
 import mem_ss_param_pkg::*;  //FIXME: what about i_cache_param_pkg

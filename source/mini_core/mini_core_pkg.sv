@@ -12,6 +12,9 @@
 //-----------------------------------------------------------------------------
 
 package mini_core_pkg;
+
+`include "common_pkg.vh"
+
 parameter I_MEM_SIZE_MINI   = 'h1_0000; //FIXME - currently using same as BIG_CORE
 parameter I_MEM_OFFSET_MINI = 'h0_0000;
 parameter D_MEM_SIZE_MINI   = 'h1_0000;

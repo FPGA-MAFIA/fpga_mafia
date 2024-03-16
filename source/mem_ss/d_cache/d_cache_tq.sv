@@ -11,7 +11,7 @@
 //
 //
 //-----------------------------------------------------------------------------
-`include "macros.sv"
+`include "macros.vh"
 
 module d_cache_tq 
 import d_cache_param_pkg::*;  

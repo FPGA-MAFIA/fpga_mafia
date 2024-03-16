@@ -15,12 +15,15 @@
 //-----------------------------------------------------------------------------
 
 
-`include "macros.sv"
+`include "macros.vh"
 
 
-module mini_core_tb  ;
-import common_pkg::*;
+module mini_core_tb;
+
+
 import mini_core_pkg::*;
+//FIXME - dont know why need to include the common_pkg.. its already included in the the mini_core_pkg
+`include "common_pkg.vh"
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;
@@ -117,7 +120,7 @@ initial begin: detect_timeout
 end
 
 
-t_tile_id local_tile_id;
+t_tile_id    local_tile_id;
 logic        InFabricValidQ503H  ; 
 logic        OutFabricValidQ505H ;
 t_tile_trans InFabricQ503H ; 

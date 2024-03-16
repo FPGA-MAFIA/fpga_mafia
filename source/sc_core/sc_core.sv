@@ -14,7 +14,7 @@
 // Fetch, Decode, Execute, Memory, WriteBack all in one cycle.
 // The PC (program counter) is the synchronous element in the core 
 //-----------------------------------------------------------------------------
-`include "macros.sv"
+`include "macros.vh"
 
 module sc_core
 import sc_core_pkg::*;
