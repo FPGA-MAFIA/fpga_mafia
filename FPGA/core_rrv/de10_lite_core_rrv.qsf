@@ -500,6 +500,7 @@ set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/mafia_ad
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.vh
 set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_core_rrv_top.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/packages/core_rrv_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/fabric/fabric_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_cr_mem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_ctrl.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_exe.sv
