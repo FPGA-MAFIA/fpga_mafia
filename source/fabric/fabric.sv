@@ -2,11 +2,11 @@
 
 
 module fabric
-import common_pkg::*;
 (
     input logic clk,
     input logic rst
 );
+import fabric_pkg::*;
 //                          all north:           all east:           all west:           all south:
 logic           [3:1] [3:1] in_north_req_valid,  in_east_req_valid,  in_west_req_valid,  in_south_req_valid;
 t_tile_trans    [3:1] [3:1] in_north_req,        in_east_req,        in_west_req,        in_south_req;      

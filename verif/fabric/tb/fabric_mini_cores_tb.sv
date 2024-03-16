@@ -1,4 +1,4 @@
-`include "macros.sv"
+`include "macros.vh"
 `define MINI_CORE_TILE(col,row)           fabric.col``col``.row``row``.mini_core_tile_ins
 `define IN_LOCAL_REQ(col,row)             fabric.col``col``.row``row``.mini_core_tile_ins.in_local_req
 `define MINI_CORE_TILE_READY(m_col,m_row) fabric.col[m_col].row[m_row].mini_core_tile_ins.mini_core_ready
@@ -6,8 +6,12 @@
 
 
 module fabric_mini_cores_tb;
-import common_pkg::*;
+import fabric_pkg::*;
 import mini_core_pkg::*;
+
+
+//FIXME - dont know why need to include the common_pkg.. its already included in the the fabric_pkg
+`include "common_pkg.vh"
 typedef struct packed {
     t_tile_trans trans;
     t_tile_id    source;

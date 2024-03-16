@@ -13,6 +13,10 @@
 
 package core_rrv_pkg;
 
+`include "core_rrv_csr_pkg.vh"
+`include "core_rrv_ips_pkg.vh"
+`include "core_rrv_fab_pkg.vh"
+
 parameter I_MEM_SIZE   = 'h1_0000; 
 parameter I_MEM_OFFSET = 'h0_0000;
 parameter D_MEM_SIZE   = 'h1_0000;
@@ -217,8 +221,5 @@ typedef struct packed {
     logic [9:0] LED;
 } t_fpga_out;
 
-`include "core_rrv_csr_pkg.vh"
-`include "core_rrv_ips_pkg.vh"
-`include "core_rrv_fab_pkg.vh"
 
 endpackage

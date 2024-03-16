@@ -7,7 +7,7 @@
 // The full indicates that the fifo is full.
 // The empty indicates that the fifo is empty.
 
-`include "macros.sv"
+`include "macros.vh"
 module fifo #(parameter DATA_WIDTH = 8, 
               parameter FIFO_DEPTH = 4)
     (

@@ -1,8 +1,11 @@
 
 package rv32i_ref_pkg;
 
+`include "common_pkg.vh"
+
+
 typedef enum logic [5:0] {
-    NULL  = 6'd0,
+    I_NULL  = 6'd0,
     LUI   = 6'd1,
     AUIPC = 6'd2,
     JAL   = 6'd3,

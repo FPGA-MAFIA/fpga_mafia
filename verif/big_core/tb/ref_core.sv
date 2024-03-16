@@ -1,6 +1,6 @@
 
 
-`include "macros.sv"
+`include "macros.vh"
 
 module ref_core
 import common_pkg::*;

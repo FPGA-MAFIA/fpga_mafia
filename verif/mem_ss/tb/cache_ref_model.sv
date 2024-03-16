@@ -11,7 +11,7 @@
 //
 //
 //-----------------------------------------------------------------------------
-`include "macros.sv"
+`include "macros.vh"
 
 module cache_ref_model 
     import d_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg

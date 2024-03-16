@@ -1,10 +1,9 @@
 `timescale 1ns/1ns
 
 `include "uart_defines.v"
-`include "macros.sv"
+`include "macros.vh"
 
 module uart_io
-  import common_pkg::*;
   (
    input  logic            clk,
    input  logic            rstn,
@@ -24,6 +23,7 @@ module uart_io
    output  logic        uart_master_rx,
    output  logic        interrupt
    );
+  import fabric_pkg::*;
    
   logic uart_interrupt;
   logic write_resp_valid;

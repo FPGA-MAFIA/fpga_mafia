@@ -1,5 +1,5 @@
 
-`include "macros.sv"
+`include "macros.vh"
 
 module core_rrv_top
 import core_rrv_pkg::*;

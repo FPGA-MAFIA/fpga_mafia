@@ -1,7 +1,7 @@
-`include "macros.sv"
-//`include "uvm_macros.svh"
+`include "macros.vh"
+//`include "uvm_macros.vhh"
 module router_tb;
-import common_pkg::*;
+import fabric_pkg::*;
 parameter V_REQUESTS   = 10;
 parameter V_FIFO_DEPTH = 4; // currently this value causes failure in the test due to FIFO size must be grater than 3
 parameter V_NUM_FIFO   = 4;  // number of fifos to exercise in the test (HW is always 4, simulation may stimuli only some of them)

@@ -12,10 +12,9 @@
 // This module serves as the vga controller of the architecture.
 // This module include the vga memory and the logic necessary for its management.
 
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_vga_ctrl 
-import common_pkg::*;
 (
     input  logic        CLK_50,
     input  logic        Reset,

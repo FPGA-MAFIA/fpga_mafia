@@ -11,10 +11,9 @@
 // Description :
 // This module serves as the vga memory of the core.
 // VGA_MEM will support sync memory read.
-`include "macros.sv"
+`include "macros.vh"
 
 module vga_mem 
-import common_pkg::*;
 (
     input  logic        clock_a,
     input  logic        clock_b,

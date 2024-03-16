@@ -11,7 +11,7 @@
 // Description :
 // This module serves as the data memory of the core.
 // D_MEM will support sync memory read.
-`include "macros.sv"
+`include "macros.vh"
 
 module d_mem (
     input  logic        clock,
@@ -26,7 +26,6 @@ module d_mem (
     output logic [31:0] q_a,
     output logic [31:0] q_b
 );
-import common_pkg::*;
 import big_core_pkg::*;
 // Memory array (behavrial - not for FPGA/ASIC)
 logic [7:0]         DMem     [D_MEM_MSB:I_MEM_MSB+1];

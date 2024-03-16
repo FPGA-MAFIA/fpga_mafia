@@ -1,5 +1,5 @@
 
-`include "macros.sv"
+`include "macros.vh"
 
 module ps2_kbd_ctrl
 (

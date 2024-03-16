@@ -497,7 +497,7 @@ set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/DE10_Lit
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/fiftyfivenm_adcblock_primitive_wrapper.v
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/fiftyfivenm_adcblock_top_wrapper.v
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/mafia_adc_adc_mega_0.v
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.vh
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/common_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_core_rrv_top.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/packages/core_rrv_pkg.sv

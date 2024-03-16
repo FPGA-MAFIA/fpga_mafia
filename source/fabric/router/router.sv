@@ -10,9 +10,9 @@
 //-----------------------------------------------------------------------------
 
 
-`include "macros.sv"
+`include "macros.vh"
 module router
-import common_pkg::*;
+import fabric_pkg::*;
 (
     input   logic               clk,
     input   logic               rst,

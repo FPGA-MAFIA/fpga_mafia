@@ -9,7 +9,7 @@
 // Created          : 7/2023
 //-----------------------------------------------------------------------------
 
-`include "macros.sv"
+`include "macros.vh"
 
 module core_rrv_mem_acs1
 import core_rrv_pkg::*;

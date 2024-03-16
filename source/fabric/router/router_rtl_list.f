@@ -14,7 +14,7 @@
 +incdir+../../../source/big_core/
 +incdir+../../../source/mini_core/
 //RTL FIles
-../../../source/common/common_pkg.sv
+../../../source/fabric/fabric_pkg.sv
 ../../../source/common/fifo.sv
 ../../../source/common/arbiter.sv
 ../../../source/fabric/router/router.sv

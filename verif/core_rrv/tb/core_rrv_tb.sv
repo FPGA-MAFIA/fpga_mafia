@@ -15,12 +15,13 @@
 //-----------------------------------------------------------------------------
 
 
-`include "macros.sv"
+`include "macros.vh"
 
 
 module core_rrv_tb  ;
 import core_rrv_pkg::*;
 import rv32i_ref_pkg::*;
+`include "common_pkg.vh"
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;

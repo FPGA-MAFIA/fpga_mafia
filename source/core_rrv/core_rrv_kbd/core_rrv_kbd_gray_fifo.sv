@@ -1,4 +1,4 @@
-`include "macros.sv"
+`include "macros.vh"
 module core_rrv_kbd_gray_fifo
 import core_rrv_pkg::*;
 (

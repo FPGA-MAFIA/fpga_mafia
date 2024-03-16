@@ -1,4 +1,4 @@
-`include "macros.sv"
+`include "macros.vh"
 module core_rrv_kdb_controller 
 import core_rrv_pkg::*;
 (

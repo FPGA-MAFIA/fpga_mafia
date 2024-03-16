@@ -11,10 +11,9 @@
 // Description :
 // This module serves as the sync generator of the vga controller.
 
-`include "macros.sv"
+`include "macros.vh"
 
 module big_core_vga_sync_gen
-import common_pkg::*;
 (
         input  logic        CLK_25,
         input  logic        Reset,

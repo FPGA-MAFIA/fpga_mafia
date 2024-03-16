@@ -1,6 +1,5 @@
-`include "macros.sv"
+`include "macros.vh"
 module big_core_kbd_gray_fifo
-import common_pkg::*;
 (
     input  logic       kbd_clk_write,
     input  logic       core_clk_read,

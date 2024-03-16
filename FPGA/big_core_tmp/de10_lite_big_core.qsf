@@ -506,7 +506,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core//big_core_k
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core//big_core_kbd/big_core_kbd_release_checker.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core//big_core_kbd/big_core_kbd_struct_checker.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/mem.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.vh
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/array.sv
 set_global_assignment -name VERILOG_FILE ../../source/uart/raminfr.v
 set_global_assignment -name VERILOG_FILE ../../source/uart/timescale.v

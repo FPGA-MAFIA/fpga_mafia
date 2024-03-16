@@ -14,7 +14,7 @@
 // (3) End the test when the ebrake command is executed
 //-----------------------------------------------------------------------------
 
-`include "macros.sv"
+`include "macros.vh"
 module ps2_kbd_tb ;
 
 
