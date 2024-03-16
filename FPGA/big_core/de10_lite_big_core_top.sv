@@ -59,9 +59,8 @@ module de10_lite_big_core_top(
     //inout               [35:0]        GPIO
 );
 
-
-import common_pkg::*;
-
+import big_core_pkg::*;  
+`include "common_pkg.vh"
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================

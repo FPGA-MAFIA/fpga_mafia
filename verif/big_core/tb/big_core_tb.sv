@@ -17,7 +17,6 @@
 `include "macros.vh"
 
 module big_core_tb ;
-import common_pkg::*;
 import big_core_pkg::*;
 
 parameter MAX_TEST_DURATION = 1000000;

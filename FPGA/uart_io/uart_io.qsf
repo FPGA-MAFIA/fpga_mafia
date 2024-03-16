@@ -309,7 +309,6 @@ set_global_assignment -name VERILOG_FILE ../../source/uart/uart_tfifo.v
 set_global_assignment -name VERILOG_FILE ../../source/uart/uart_top.v
 set_global_assignment -name VERILOG_FILE ../../source/uart/uart_transmitter.v
 set_global_assignment -name VERILOG_FILE ../../source/uart/uart_wb.v
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/common_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/uart_wrapper.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/gateway/gateway.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/gateway/transfer_handler_engine/Counter.sv

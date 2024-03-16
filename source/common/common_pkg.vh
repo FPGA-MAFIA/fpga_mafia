@@ -2,7 +2,7 @@
 // Title            : common param packag
 // Project          : many core project
 //-----------------------------------------------------------------------------
-// File             : common_pkg.sv
+// File             : common_pkg.vh
 // Original Author  : Amichai Ben-David
 // Code Owner       : 
 // Created          : 02/02/2023

@@ -3,7 +3,6 @@
 `include "macros.vh"
 
 module ref_core
-import common_pkg::*;
 import big_core_pkg::*;
 (
     input logic Clk,
