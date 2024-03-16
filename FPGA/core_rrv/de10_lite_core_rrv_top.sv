@@ -10,7 +10,6 @@ module de10_lite_core_rrv_top(
     input                           ADC_CLK_10,
     input                           MAX10_CLK1_50,
     input                           MAX10_CLK2_50,
-
     //////////// SDRAM //////////
     //output            [12:0]        DRAM_ADDR,
     //output             [1:0]        DRAM_BA,
@@ -35,6 +34,8 @@ module de10_lite_core_rrv_top(
     input              [1:0]        KEY,
     //////////// LED //////////
     output             [9:0]        LEDR,
+    /////////// keyboard //////
+    input                           DATA_IN_KC,
     //////////// SW //////////
     input logic      [9:0]        SW,
     //////////// VGA //////////
@@ -60,8 +61,8 @@ module de10_lite_core_rrv_top(
 );
 
 
-import common_pkg::*;
-
+//import common_pkg::*;
+import core_rrv_pkg::*;
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
@@ -83,6 +84,7 @@ t_tile_trans OutFabricQ505H, PreOutFabricQ505H;
 logic RstPc;
 logic InFabricReqOpcodeQ500H;
 logic out_for_pd;
+logic kbd_clk_15Khz;
 // =======================================================
 // core_rrv_top
 // =======================================================
@@ -99,6 +101,9 @@ core_rrv_top  (
 .OutFabricValidQ505H    (PreOutFabricValidQ505H),
 .OutFabricQ505H         (PreOutFabricQ505H),
 .fab_ready              (),
+// key board interface
+.kbd_clk                 (kbd_clk_15Khz),
+.data_in_kc              (DATA_IN_KC),  
 // Vga interface
 .inDisplayArea          (inDisplayArea),
 .vga_out                (vga_out),
@@ -106,6 +111,16 @@ core_rrv_top  (
 .fpga_in                (fpga_in),  
 .fpga_out               (fpga_out)
 );
+
+// keyboard 15Khz clock generator.
+// reminder: Kbd can work in freq range 10Khz - 16.6Khz
+kbd_clk_gen	kbd_clk_gen_inst (
+	.areset (),
+	.inclk0 (MAX10_CLK1_50),
+	.c0 (kbd_clk_15Khz),
+	.locked ()  // indicates if the putput has locked. // TODO - we will assume that when scanf is reached the output is ready
+	);
+
 
 logic EnRstPc;
 assign EnRstPc = (InFabricQ503H.address == 32'hFFFF_FFFF) && (InFabricQ503H.opcode == WR) && InFabricValidQ503H;

@@ -35,14 +35,14 @@ assign async_rst = core_rst;
 logic [10:0] shift_valid_vec_kc;
 logic [10:0] next_shift_valid_vec_kc;
 assign next_shift_valid_vec_kc[10:0] = {shift_valid_vec_kc[9:0], shift_valid_vec_kc[10]};
-`MAFIA_ASYNC_RST_VAL_DFF(shift_valid_vec_kc, next_shift_valid_vec_kc, kbd_clk, async_rst, 11'h1);
+`MAFIA_ASYNC_RST_VAL_DFF(shift_valid_vec_kc, next_shift_valid_vec_kc, kbd_clk, async_rst, 11'h1)
 
 // - Shift register the data input
 logic [10:0] shift_data_vec_kc;
 logic [10:0] next_shift_data_vec_kc;
 
 assign next_shift_data_vec_kc[10:0] = {shift_data_vec_kc[9:0], data_in_kc};
-`MAFIA_ASYNC_RST_VAL_DFF(shift_data_vec_kc, next_shift_data_vec_kc, kbd_clk, async_rst, 11'h7FF);
+`MAFIA_ASYNC_RST_VAL_DFF(shift_data_vec_kc, next_shift_data_vec_kc, kbd_clk, async_rst, 11'h7FF)
 
 
 // Detect the stop bit an use it to sample the data in the fifo:

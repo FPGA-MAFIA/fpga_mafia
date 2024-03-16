@@ -18,8 +18,8 @@ t_funct3_store_type PreStoreTypeQ101H;
 t_funct3_load_type  PreLoadTypeQ101H;
 t_branch_type       PreBranchTypeQ101H;
 t_funct3_Rtype      PreRtypeQ101H;
-logic               JalrFunct3Q101H;
-logic               PreFunct7Q101H;  
+logic [2:0]         JalrFunct3Q101H;
+logic [6:0]         PreFunct7Q101H;  
 logic               PreIllegalInstructionQ101H;
 
 
