@@ -44,12 +44,16 @@ set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 #============================================================
 # CLOCK
 #============================================================
-#set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ADC_CLK_10
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ADC_CLK_10
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to MAX10_CLK1_50
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to MAX10_CLK2_50
-#set_location_assignment PIN_N5 -to ADC_CLK_10
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KBD_CLK
+set_location_assignment PIN_N5 -to ADC_CLK_10
 set_location_assignment PIN_P11 -to MAX10_CLK1_50
 set_location_assignment PIN_N14 -to MAX10_CLK2_50
+set_location_assignment PIN_AB3 -to KBD_CLK
+
+
 
 #============================================================
 # SDRAM
@@ -454,9 +458,11 @@ set_location_assignment PIN_N1 -to VGA_VS
 set_location_assignment PIN_AA15 -to UART_TXD
 set_location_assignment PIN_AA14 -to UART_RXD
 set_location_assignment PIN_AB2 -to INTERRUPT
+set_location_assignment PIN_Y3 -to DATA_IN_KC
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to UART_RXD
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to UART_TXD
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to INTERRUPT
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DATA_IN_KC
 
 #============================================================
 # End of pin assignments by Terasic System Builder
@@ -534,6 +540,5 @@ set_global_assignment -name SDC_FILE de10_lite_core_rrv_top.sdc
 set_global_assignment -name QIP_FILE sv/mem.qip
 set_global_assignment -name QIP_FILE sv/vga_mem.qip
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name QIP_FILE sv/clk_gen.qip
 
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
