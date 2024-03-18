@@ -36,14 +36,46 @@ def should_execute_step(step_command):
     # Execute step only if it contains the specific DUT
     return f" -dut '{args.dut}'" in step_command or f" -dut {args.dut} " in step_command
 
-# Run the YAML file
+
+import datetime
+import os
+import subprocess
+
+# Generate the timestamp and log file path
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+log_file_path = os.path.join(MODEL_ROOT, 'target', f'sanity_{args.file}_{timestamp}.log')
+os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+
+# Track if any task has failed
+any_task_failed = False
+
 if isinstance(data, dict) and 'jobs' in data and 'build' in data['jobs'] and 'steps' in data['jobs']['build']:
     steps = data['jobs']['build']['steps']
-    for step in steps:
-        if 'run' in step:
-            command = step['run']
-            if command.startswith("python build.py") and should_execute_step(command):
-                # Remove single quotes around the 'dut' argument
-                command = command.replace(" -dut '", " -dut ").replace("' ", " ")
-                print(f"Executing command: {command}")
-                subprocess.run(command, shell=True)
+    with open(log_file_path, 'w') as log_file:
+        for step in steps:
+            if 'run' in step:
+                command = step['run']
+                if should_execute_step(command):
+
+                    # Print task start message with the command
+                    print(f"Task Started: {command}")
+
+                    # Execute the command and redirect output to log file
+                    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    log_file.write(f"Executing command: {command}\n")
+                    log_file.write(result.stdout.decode())
+
+                    # Check the result and update the task failure tracker
+                    if result.returncode == 0:
+                        print("Task Finished Successfully")
+                    else:
+                        print("Task Finished with Error")
+                        any_task_failed = True
+
+# After all tasks have been executed, print the summary message
+print("\n^^^^^^^^^^^^^^^^^^^^^^^^^")
+if any_task_failed:
+    print("Some tasks finished with errors.")
+else:
+    print("All tasks finished successfully.")
+print(f"See log file here: {log_file_path}")

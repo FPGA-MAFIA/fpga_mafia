@@ -57,6 +57,7 @@ if args.cmd:
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 VERIF     = './verif/'+args.dut+'/'
 TB        = './verif/'+args.dut+'/tb/'
+FILE_LIST = '/verif/'+args.dut+'/file_list/'+args.dut+'_list.f'
 SOURCE    = './source/'+args.dut+'/'
 TARGET    = './target/'+args.dut+'/'
 MODELSIM  = './target/'+args.dut+'/modelsim/'
@@ -260,7 +261,7 @@ class Test:
         chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
-                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.dut+'_list.f'
+                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+FILE_LIST
                 results = run_cmd_with_capture(comp_sim_cmd) 
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -322,7 +323,7 @@ class Test:
     def _post_process(self):
         print_message('[INFO] Starting post process ...')
         # Go to the verification directory
-        chdir(VERIF)
+        chdir(VERIF+'/pp')
         # Run the post process command
         try:
             run_with_verbose = '-v' if args.verbose else ' '
