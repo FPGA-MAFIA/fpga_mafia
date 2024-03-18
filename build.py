@@ -142,6 +142,7 @@ class Test:
             self.load_json(json_file)              
 
     def _compile_sw(self):
+        print_message('--------------------------------------------')
         print_message('[INFO] Starting to compile SW ...')
         if self.path:
             cs_path =  self.name+'_'+Test.name+'.c.s' if not self.assembly else '../../../../../'+self.path
@@ -324,10 +325,13 @@ class Test:
         chdir(VERIF)
         # Run the post process command
         try:
-            run_with_verbose = '-v' if args.verbose else ''
+            run_with_verbose = '-v' if args.verbose else ' '
             pp_cmd = 'python '+self.dut+'_pp.py ' +self.name + ' ' + run_with_verbose
             print_message(f'[INFO] Running post process command: {pp_cmd}')
             return_val = run_cmd_with_capture(pp_cmd)
+            #remove \n from the end of the stdout (if it exists)
+            if return_val.stdout and return_val.stdout[-1] == '\n':
+                return_val.stdout = return_val.stdout[:-1]
             print_message(colored(return_val.stdout,'yellow',attrs=['bold']))        
         except:
             print_message('[ERROR] Failed to run post process ')
@@ -573,6 +577,7 @@ def main():
             if (args.pp) and not test.fail_flag:
                 # print that we are running the post process
                 if (test._post_process()):# if return value is 0, then the post process is done successfully
+                    print_message(f'[ERROR] Failed post process run on test {test.name}')
                     test.fail_flag = True
                 print_message('--------------------------------------------')
             if args.no_debug:
@@ -584,7 +589,6 @@ def main():
             print_message(f"[INFO] Test execution took {test.duration:.2f} seconds.")
 
             print_message(f'************************** End {test.name} **********************************')
-            print()
             if(test.fail_flag):
                 run_status = "FAILED"
     # sys.stdout.flush()
@@ -594,18 +598,15 @@ def main():
 #===================================================================================================
 #       EOT - End Of Test section
 #===================================================================================================
-    print_message('=============================')
-    print_message('[INFO] Tests Final Status:')
-    print_message('=============================')
+    print_message('\n=================================================================================')
+    print_message('[INFO] ====================== Tests Final Status: ===============================')
     for test in tests:
         if(test.fail_flag==True):
             print_message(f'[ERROR] Test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
         if(test.fail_flag==False):
             print_message(f'[INFO] Test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
 
-    print_message('=================================================================================')
-    print_message('---------------------------------------------------------------------------------')
-    print_message('=================================================================================')
+    print_message('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
     print_message(f'[INFO] Run final status: {run_status}')
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')
@@ -621,5 +622,7 @@ if __name__ == "__main__" :
     end_time = time.time()
     duration = end_time - start_time
     print_message(f"[INFO] Script execution took {duration:.2f} seconds.")
+    print_message('=================================================================================')
+    print_message('\n')
 
     sys.exit(exit_status)
