@@ -57,6 +57,7 @@ if args.cmd:
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 VERIF     = './verif/'+args.dut+'/'
 TB        = './verif/'+args.dut+'/tb/'
+FILE_LIST = '/verif/'+args.dut+'/file_list/'+args.dut+'_list.f'
 SOURCE    = './source/'+args.dut+'/'
 TARGET    = './target/'+args.dut+'/'
 MODELSIM  = './target/'+args.dut+'/modelsim/'
@@ -142,6 +143,7 @@ class Test:
             self.load_json(json_file)              
 
     def _compile_sw(self):
+        print_message('--------------------------------------------')
         print_message('[INFO] Starting to compile SW ...')
         if self.path:
             cs_path =  self.name+'_'+Test.name+'.c.s' if not self.assembly else '../../../../../'+self.path
@@ -259,7 +261,7 @@ class Test:
         chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
-                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+TB+'/'+self.dut+'_list.f'
+                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+FILE_LIST
                 results = run_cmd_with_capture(comp_sim_cmd) 
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -321,13 +323,16 @@ class Test:
     def _post_process(self):
         print_message('[INFO] Starting post process ...')
         # Go to the verification directory
-        chdir(VERIF)
+        chdir(VERIF+'/pp')
         # Run the post process command
         try:
-            run_with_verbose = '-v' if args.verbose else ''
+            run_with_verbose = '-v' if args.verbose else ' '
             pp_cmd = 'python '+self.dut+'_pp.py ' +self.name + ' ' + run_with_verbose
             print_message(f'[INFO] Running post process command: {pp_cmd}')
             return_val = run_cmd_with_capture(pp_cmd)
+            #remove \n from the end of the stdout (if it exists)
+            if return_val.stdout and return_val.stdout[-1] == '\n':
+                return_val.stdout = return_val.stdout[:-1]
             print_message(colored(return_val.stdout,'yellow',attrs=['bold']))        
         except:
             print_message('[ERROR] Failed to run post process ')
@@ -573,6 +578,7 @@ def main():
             if (args.pp) and not test.fail_flag:
                 # print that we are running the post process
                 if (test._post_process()):# if return value is 0, then the post process is done successfully
+                    print_message(f'[ERROR] Failed post process run on test {test.name}')
                     test.fail_flag = True
                 print_message('--------------------------------------------')
             if args.no_debug:
@@ -584,7 +590,6 @@ def main():
             print_message(f"[INFO] Test execution took {test.duration:.2f} seconds.")
 
             print_message(f'************************** End {test.name} **********************************')
-            print()
             if(test.fail_flag):
                 run_status = "FAILED"
     # sys.stdout.flush()
@@ -594,18 +599,15 @@ def main():
 #===================================================================================================
 #       EOT - End Of Test section
 #===================================================================================================
-    print_message('=============================')
-    print_message('[INFO] Tests Final Status:')
-    print_message('=============================')
+    print_message('\n=================================================================================')
+    print_message('[INFO] ====================== Tests Final Status: ===============================')
     for test in tests:
         if(test.fail_flag==True):
             print_message(f'[ERROR] Test failed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
         if(test.fail_flag==False):
             print_message(f'[INFO] Test Passed - {test.name} - target/{args.dut}/tests/{test.name}/ , execution time: {test.duration:.2f} seconds.')
 
-    print_message('=================================================================================')
-    print_message('---------------------------------------------------------------------------------')
-    print_message('=================================================================================')
+    print_message('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
     print_message(f'[INFO] Run final status: {run_status}')
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')
@@ -621,5 +623,7 @@ if __name__ == "__main__" :
     end_time = time.time()
     duration = end_time - start_time
     print_message(f"[INFO] Script execution took {duration:.2f} seconds.")
+    print_message('=================================================================================')
+    print_message('\n')
 
     sys.exit(exit_status)

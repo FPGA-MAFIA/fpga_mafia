@@ -18,14 +18,14 @@ def print_message(msg):
 
     # Split the message once and reuse the result
     msg_parts = msg.split()
-    msg_type = msg_parts[0] if msg_parts else '[INFO]'  # Default to '[INFO]' if msg is empty
+    msg_type = msg_parts[0] if msg_parts else '[VAG_PARSER_INFO]'  # Default to '[VAG_PARSER_INFO]' if msg is empty
     # Use a try-except block to handle KeyError when msg_type isn't found in the dictionary
     try:
         color = {
-            '[ERROR]'   : 'red',
-            '[WARNING]' : 'yellow',
-            '[INFO]'    : 'green',
-            '[COMMAND]' : 'cyan',
+            '[VAG_PARSER_ERROR]'   : 'red',
+            '[VAG_PARSER_WARNING]' : 'yellow',
+            '[VAG_PARSER_INFO]'    : 'green',
+            '[VAG_PARSER_COMMAND]' : 'cyan',
         }[msg_type]
     except KeyError:
         color = 'blue'  # Default color if msg_type isn't one of the predefined keys
@@ -37,7 +37,7 @@ def print_message(msg):
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 def chdir(dir):
     if args.verbose:  # Check if the verbose flag is set
-        print_message(f'[COMMAND] cd '+dir)
+        print_message(f'[VAG_PARSER_COMMAND] cd '+dir)
     os.chdir(dir)
 chdir(MODEL_ROOT)
 
@@ -161,7 +161,7 @@ def create_new_ascii_table_font(ascii_table_font, header_content):
             font_top, font_btm = name_to_font_data[font_name]
             new_ascii_table_font[ascii_val] = (char, name, font_top, font_btm)
         else:
-            print_message(f"[ERROR] No match found for: {char} ({name})")
+            print_message(f"[VAG_PARSER_ERROR] No match found for: {char} ({name})")
 
     return new_ascii_table_font
 
@@ -173,10 +173,10 @@ def read_header_content(file_path):
         with open(file_path, 'r') as file:
             return file.read()
     except FileNotFoundError:
-        print_message(f"[ERROR] File not found: {file_path}")
+        print_message(f"[VAG_PARSER_ERROR] File not found: {file_path}")
         return None
     except Exception as e:
-        print_message(f"[INFO] An error occurred while reading the file: {e}")
+        print_message(f"[VAG_PARSER_INFO] An error occurred while reading the file: {e}")
         return None
 
 # Path to the header file containing the ASCII table font
@@ -187,9 +187,9 @@ header_content = read_header_content(header_file_path)
 
 if header_content is not None:
     # Now you can proceed to use header_content with the rest of your script logic
-    print_message("[INFO] Header content read successfully.")
+    print_message("[VAG_PARSER_INFO] Header content read successfully.")
 else:
-    print_message("[ERROR] Failed to read header content.")
+    print_message("[VAG_PARSER_ERROR] Failed to read header content.")
 
 
 
