@@ -1,6 +1,6 @@
 # this is a github action that runs the python build
 
-name: mafia_sanity
+name: mafia_level0
 
 on:
   # push:
