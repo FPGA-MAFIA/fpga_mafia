@@ -39,6 +39,11 @@ else if(test_name == "PS2_fibbonacci") begin
     `include "PS2_fibbonacci.vh"  
 end
 
+else if(test_name == "PS2_GCD") begin
+    $display("=====\n PS2_GCD was included to the run\n ====\n");   
+    `include "PS2_GCD.vh"  
+end
+
 else begin 
     $display("=====\n No HW sequence logic were included to the run\n ====\n");
 end
