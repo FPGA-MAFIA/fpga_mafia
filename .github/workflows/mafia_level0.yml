@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted , windows, x64]
+    runs-on: [self-hosted , MAFIA, windows, x64]
     steps:
       - uses: actions/checkout@v2
       - name: BIG_CORE
