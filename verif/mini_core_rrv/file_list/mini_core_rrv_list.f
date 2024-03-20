@@ -1,0 +1,2 @@
+-f ../../../source/mini_core_rrv/mini_core_rrv_rtl_list.f
+-f ../../../verif/mini_core_rrv/file_list/mini_core_rrv_verif_list.f
