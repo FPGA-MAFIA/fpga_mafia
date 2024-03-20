@@ -31,7 +31,7 @@ def print_message(msg):
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 def chdir(dir):
     if args.verbose:  # Check if the verbose flag is set
-        print_message(f'[COMMAND] cd '+dir)
+        print_message(f'[PP_COMMAND] cd '+dir)
     os.chdir(dir)
 chdir(MODEL_ROOT)
 def run_cmd_with_capture(cmd):
@@ -58,11 +58,14 @@ if args.verbose:
     verbose_flag = '-v'
 vga_script_command = f'python {vga_script} {args.test_name} {verbose_flag}'
 results = run_cmd_with_capture(vga_script_command)
+# remove the \n from the end of the stdout (if it exists)
+if results.stdout and results.stdout[-1] == '\n':
+    results.stdout = results.stdout[:-1]
 
 if results:
     if(results.stdout):
         print_message(results.stdout)
-    print_message('[PP_INFO] Post-processing complete')
+    print_message('[PP_INFO] Post-processing completed successfully')
 else:
     print_message('[PP_ERROR] Post-processing failed')
     sys.exit(1)
