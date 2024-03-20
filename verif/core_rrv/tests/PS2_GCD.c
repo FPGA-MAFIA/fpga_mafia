@@ -4,7 +4,6 @@
 #include "graphic_vga.h"
 #include "string.h"
 
-
 int GCD(int a,int b);
 
 
