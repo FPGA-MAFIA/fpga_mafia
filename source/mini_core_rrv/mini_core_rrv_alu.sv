@@ -14,7 +14,6 @@ import mini_core_rrv_pkg::*;
 );
 
     always_comb begin : alu_op
-        AluOutQ101H = 0;  // FIXME possible not to be needed
         case(Ctrl.AluOpQ101H)
             ADD: AluOutQ101H = Ctrl.AluIn1Q101H + Ctrl.AluIn2Q101H;
             SUB: AluOutQ101H = Ctrl.AluIn1Q101H - Ctrl.AluIn2Q101H;
@@ -26,7 +25,7 @@ import mini_core_rrv_pkg::*;
             XOR: AluOutQ101H = Ctrl.AluIn1Q101H ^ Ctrl.AluIn2Q101H;
             OR: AluOutQ101H = Ctrl.AluIn1Q101H | Ctrl.AluIn2Q101H;
             AND: AluOutQ101H = Ctrl.AluIn1Q101H & Ctrl.AluIn2Q101H;
-            default: AluOutQ101H = 0;   
+            default: AluOutQ101H = Ctrl.AluIn1Q101H + Ctrl.AluIn2Q101H;   
         endcase
     end
 

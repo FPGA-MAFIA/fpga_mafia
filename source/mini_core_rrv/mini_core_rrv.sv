@@ -47,6 +47,8 @@ import mini_core_rrv_pkg::*;
     .Rst(Rst), 
     .PreInstructionQ101H(PreInstructionQ101H),
     .BranchCondMetQ101H(BranchCondMetQ101H),
+    .RegRdData1Q101H(RegRdData1Q101H),
+    .RegRdData2Q101H(RegRdData2Q101H),
     .CtrlIf(CtrlIf),
     .CtrlRf(CtrlRf),
     .CtrlAlu(CtrlAlu),

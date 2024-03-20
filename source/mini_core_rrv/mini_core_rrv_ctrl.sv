@@ -7,6 +7,8 @@ import mini_core_rrv_pkg::*;
     input logic           Rst, 
     input logic [31:0]    PreInstructionQ101H,
     input logic           BranchCondMetQ101H,
+    input logic [31:0]    RegRdData1Q101H,
+    input logic [31:0]    RegRdData2Q101H,
     output var t_ctrl_if  CtrlIf,
     output var t_ctrl_rf  CtrlRf,
     output var t_ctrl_alu CtrlAlu,
@@ -63,8 +65,8 @@ end
 
 always_comb begin: imm_generator
     case(OpcodeQ101H)
-        I_OP:    CtrlQ101H.ImmediateQ101H = {PreInstructionQ101H[31:12], 12'b0 } ;
-        default: CtrlQ101H.ImmediateQ101H = {PreInstructionQ101H[31:12], 12'b0 } ;   
+        I_OP:    CtrlQ101H.ImmediateQ101H = {{20{PreInstructionQ101H[31]}} ,PreInstructionQ101H[31:20]} ;
+        default: CtrlQ101H.ImmediateQ101H = {{20{PreInstructionQ101H[31]}} , PreInstructionQ101H[31:20]} ;   
     endcase
     end
 
@@ -73,14 +75,14 @@ assign CtrlIf.SelNextPcAluOutQ101H = BranchCondMetQ101H;
 
 // Register file control
 assign CtrlRf.RegSrc1Q101H = CtrlQ101H.RegSrc1;
-assign CtrlRf.RegSrc2Q101H = CtrlQ101H.RegSrc1;
+assign CtrlRf.RegSrc2Q101H = CtrlQ101H.RegSrc2;
 assign CtrlRf.RegDstQ102H  = CtrlQ102H.RegDst;
 assign CtrlRf.RegWrEnQ102H = CtrlQ102H.RegWrEn;
 
 // Alu control
 assign CtrlAlu.AluOpQ101H  = CtrlQ101H.AluOp;
-assign CtrlAlu.AluIn1Q101H = CtrlQ101H.RegSrc1;
-assign CtrlAlu.AluIn2Q101H = (OpcodeQ101H == I_OP) ? CtrlQ101H.ImmediateQ101H : CtrlQ101H.RegSrc2;
+assign CtrlAlu.AluIn1Q101H = RegRdData1Q101H;
+assign CtrlAlu.AluIn2Q101H = (OpcodeQ101H == I_OP) ? CtrlQ101H.ImmediateQ101H : RegRdData2Q101H;
 
 // Write back control
 
