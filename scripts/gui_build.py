@@ -383,7 +383,7 @@ class CommandLineBuilder(tk.Tk):
             return
         # make sure that the file "./verif/<dut>/<dut>_pp.py." exists
         if self.pp_var.get():
-            pp_path = f"./verif/{self.dut_var.get()}/{self.dut_var.get()}_pp.py"
+            pp_path = f"./verif/{self.dut_var.get()}/pp/{self.dut_var.get()}_pp.py"
             if not os.path.exists(pp_path):
                 messagebox.showerror("[Error]", f"Can't run pp - {pp_path} doesn't exist")
                 # uncheck the pp checkbox
