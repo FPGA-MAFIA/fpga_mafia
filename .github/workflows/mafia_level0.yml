@@ -27,7 +27,7 @@ jobs:
         run:  python build.py -dut core_rrv -cfg core_rrv_boot_trap -test alive_illegal -app -hw -sim -pp 
 
       - name: CORE_RRV - rv32i_level0_no_ref -> no reference model
-        run:  python build.py -dut core_rrv -top core_rrv_no_ref_tb  -test PS2_GCD -app -hw -sim -pp -keep_going
+        run:  python build.py -dut core_rrv -top core_rrv_no_ref_tb  -test PS2_GCD -app -hw -sim -pp
       
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut mini_core -test alive -cfg mini_rv32e -app -hw -sim 
