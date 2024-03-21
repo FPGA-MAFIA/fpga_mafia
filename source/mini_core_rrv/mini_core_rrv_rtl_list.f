@@ -16,6 +16,7 @@
 ../../../source/mini_core_rrv/mini_core_rrv.sv
 ../../../source/mini_core_rrv/mini_core_rrv_top.sv
 ../../../source/mini_core_rrv/mini_core_rrv_mem_wrap.sv
+../../../source/mini_core_rrv/mini_core_rrv_mem_acs.sv
 
 
 

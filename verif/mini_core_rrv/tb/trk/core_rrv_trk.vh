@@ -28,8 +28,8 @@ end
 always @(posedge Clock) begin : alu_file_gen_trk
         $fwrite(alu_file,"%8h    %8h   %8h\n",
         mini_core_rrv_top.mini_core_rrv.mini_core_rrv_alu.PcQ101H,
-        mini_core_rrv_top.mini_core_rrv.mini_core_rrv_alu.Ctrl.AluIn1Q101H,
-        mini_core_rrv_top.mini_core_rrv.mini_core_rrv_alu.Ctrl.AluIn2Q101H
+        mini_core_rrv_top.mini_core_rrv.mini_core_rrv_alu.AluIn1Q101H,
+        mini_core_rrv_top.mini_core_rrv.mini_core_rrv_alu.AluIn2Q101H
         
        );
 

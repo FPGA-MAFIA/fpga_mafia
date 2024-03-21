@@ -26,8 +26,8 @@ mem  #(
     //fabric interface
     .address_b  (),
     .data_b     (),              
-    .wren_b     (),                
-    .byteena_b  (), 
+    .wren_b     (1'b0),                
+    .byteena_b  (4'b0), 
     .q_b        ()              
     );
 

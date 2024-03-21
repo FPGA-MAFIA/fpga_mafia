@@ -7,15 +7,14 @@ import mini_core_rrv_pkg::*;
     input logic           Rst, 
     input logic [31:0]    PreInstructionQ101H,
     input logic           BranchCondMetQ101H,
-    input logic [31:0]    RegRdData1Q101H,
-    input logic [31:0]    RegRdData2Q101H,
     output var t_ctrl_if  CtrlIf,
     output var t_ctrl_rf  CtrlRf,
     output var t_ctrl_alu CtrlAlu,
-    output var t_ctrl_wb  CtrlWb
+    output var t_ctrl_mem CtrlDmem, 
+    output var t_ctrl_wb  CtrlWb,
+    output logic [31:0]   ImmediateQ101H
 
 );
-
 
 var t_opcode OpcodeQ101H;
 var t_mini_core_rrv_ctrl CtrlQ101H, CtrlQ102H;
@@ -32,8 +31,17 @@ assign CtrlQ101H.RegSrc1 = PreInstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2 = PreInstructionQ101H[24:20];
 assign CtrlQ101H.RegDst  = PreInstructionQ101H[11:7];
 
-assign CtrlQ101H.RegWrEn = (OpcodeQ101H == R_OP) || (OpcodeQ101H == I_OP); 
+assign CtrlQ101H.RegWrEn = (OpcodeQ101H == R_OP) || (OpcodeQ101H == I_OP) || (OpcodeQ101H == JALR) || (OpcodeQ101H == JAL) 
+                                                 || (OpcodeQ101H == AUIPC)|| (OpcodeQ101H == LUI); 
 
+assign CtrlQ101H.ImmInstr = !(OpcodeQ101H == R_OP);
+
+assign CtrlQ101H.DMemWrEn         = (OpcodeQ101H == STORE);
+assign CtrlQ101H.DMemRdEn         = (OpcodeQ101H == LOAD);
+assign CtrlQ101H.SignExt          = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); // Sign extend the LOAD from memory read.
+assign CtrlQ101H.DMemByteEn       = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
+                                    ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b01) ? 4'b0011 : // LH || SH
+                                    ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : '0; // LW || SW - TODO - check the default value
 
 
 always_comb begin: alu_op
@@ -65,8 +73,9 @@ end
 
 always_comb begin: imm_generator
     case(OpcodeQ101H)
-        I_OP:    CtrlQ101H.ImmediateQ101H = {{20{PreInstructionQ101H[31]}} ,PreInstructionQ101H[31:20]} ;
-        default: CtrlQ101H.ImmediateQ101H = {{20{PreInstructionQ101H[31]}} , PreInstructionQ101H[31:20]} ;   
+        I_OP   : ImmediateQ101H = {{20{PreInstructionQ101H[31]}} ,PreInstructionQ101H[31:20]} ;
+        STORE  : ImmediateQ101H = { {20{PreInstructionQ101H[31]}} , PreInstructionQ101H[31:25] , PreInstructionQ101H[11:7]  };
+        default: ImmediateQ101H = {{20{PreInstructionQ101H[31]}} , PreInstructionQ101H[31:20]} ;   
     endcase
     end
 
@@ -79,10 +88,18 @@ assign CtrlRf.RegSrc2Q101H = CtrlQ101H.RegSrc2;
 assign CtrlRf.RegDstQ102H  = CtrlQ102H.RegDst;
 assign CtrlRf.RegWrEnQ102H = CtrlQ102H.RegWrEn;
 
-// Alu control
-assign CtrlAlu.AluOpQ101H  = CtrlQ101H.AluOp;
-assign CtrlAlu.AluIn1Q101H = RegRdData1Q101H;
-assign CtrlAlu.AluIn2Q101H = (OpcodeQ101H == I_OP) ? CtrlQ101H.ImmediateQ101H : RegRdData2Q101H;
+// Alu control 
+assign CtrlAlu.AluOpQ101H     = CtrlQ101H.AluOp;
+assign CtrlAlu.ImmInstrQ101H  = CtrlQ101H.ImmInstr;
+assign CtrlAlu.RegSrc1Q101H   = CtrlQ101H.RegSrc1;
+assign CtrlAlu.RegSrc2Q101H   = CtrlQ101H.RegSrc2;
+assign CtrlAlu.RegDstQ102H    = CtrlQ102H.RegDst;
+assign CtrlAlu.RegWrEnQ102H   = CtrlQ102H.RegWrEn;
+
+// Dmem control
+assign CtrlDmem.DMemByteEnQ101H = CtrlQ101H.DMemByteEn;
+assign CtrlDmem.DMemWrEnQ101H   = CtrlQ101H.DMemWrEn ;
+assign CtrlDmem.DMemRdEnQ101H   = CtrlQ101H.DMemRdEn ;
 
 // Write back control
 

@@ -1,8 +1,8 @@
 `include "macros.vh"
 
-// ./build.py -dut mini_core_rrv -top mini_core_rrv_r_type_tb -hw -sim
+// ./build.py -dut mini_core_rrv -top mini_core_rrv_ri_type_tb -hw -sim
 
-module mini_core_rrv_r_type_tb;
+module mini_core_rrv_ri_type_tb;
 import mini_core_rrv_pkg::*;
 
 logic Clock;
@@ -56,6 +56,15 @@ initial begin: I_mem_init
     IMEM[40] = 8'h33; IMEM[41] = 8'he6; IMEM[42] = 8'h83; IMEM[43] = 8'h00;
     // xor x13,x8,x9
     IMEM[44] = 8'hb3; IMEM[45] = 8'h46; IMEM[46] = 8'h94; IMEM[47] = 8'h00;
+
+    // Checking forwarding
+     // add	x9,x3,x4
+    IMEM[48] = 8'hb3; IMEM[49] = 8'h84; IMEM[50] = 8'h41; IMEM[51] = 8'h00;
+    // add	x10,x9,x3
+    IMEM[52] = 8'h33; IMEM[53] = 8'h85; IMEM[54] = 8'h34; IMEM[55] = 8'h00;
+    // add x13,x8,x9
+    IMEM[56] = 8'hb3; IMEM[57] = 8'h06; IMEM[58] = 8'h94; IMEM[59] = 8'h00;
+
 end
 
 

@@ -39,26 +39,6 @@ typedef enum logic [2:0] {
    BGEU = 3'b111
 } t_branch_type;
 
-typedef struct packed{
-    t_alu_op      AluOpQ101H;
-    t_branch_type BranchOpQ101H;
-    logic  [31:0] AluIn1Q101H;
-    logic  [31:0] AluIn2Q101H;
-} t_ctrl_alu;
-
-typedef enum logic [1:0] {
-    WB_DMEM = 2'b00 , 
-    WB_ALU =  2'b01 ,  
-    WB_PC4 =  2'b10      
-} t_e_sel_wb;
-
-typedef struct packed {
-    logic [3:0] ByteEnQ105H;
-    logic [3:0] SignExtQ105H;
-    t_e_sel_wb  e_SelWrBackQ105H;
-} t_ctrl_wb;
-
-
 typedef enum logic [6:0] {
    LUI    = 7'b0110111 ,
    AUIPC  = 7'b0010111 ,
@@ -74,13 +54,55 @@ typedef enum logic [6:0] {
 } t_opcode ;
 
 typedef struct packed{
+    t_alu_op      AluOpQ101H;
+    t_branch_type BranchOpQ101H;
+    logic         ImmInstrQ101H;
+    logic  [4:0]  RegSrc1Q101H;
+    logic  [4:0]  RegSrc2Q101H;
+    logic  [4:0]  RegDstQ102H;
+    logic         RegWrEnQ102H;
+} t_ctrl_alu;
+
+typedef enum logic [1:0] {
+    WB_DMEM = 2'b00 , 
+    WB_ALU =  2'b01 ,  
+    WB_PC4 =  2'b10      
+} t_e_sel_wb;
+
+typedef struct packed {
+    logic [3:0] ByteEnQ105H;
+    logic [3:0] SignExtQ105H;
+    t_e_sel_wb  e_SelWrBackQ105H;
+} t_ctrl_wb;
+
+typedef struct packed{
     logic [4:0]    RegSrc1;
     logic [4:0]    RegSrc2;
     logic [4:0]    RegDst;
     logic          RegWrEn;
     t_alu_op       AluOp;
-    logic [31:0]   ImmediateQ101H; 
+    logic [31:0]   ImmediateQ101H;
+    logic          ImmInstr;
+    logic          DMemWrEn;
+    logic          DMemRdEn;
+    logic [3:0]    DMemByteEn;
+    logic          SignExt;
+
 
 } t_mini_core_rrv_ctrl;
+
+typedef struct packed{
+    logic [3:0] DMemByteEnQ101H;
+    logic       DMemWrEnQ101H;  
+    logic       DMemRdEnQ101H;  
+} t_ctrl_mem;
+
+typedef struct packed {
+    logic [31:0] WrData;
+    logic [31:0] Address; 
+    logic       WrEn;  
+    logic       RdEn;  
+    logic [3:0] ByteEn;
+} t_core2mem_req;
 
 endpackage
