@@ -2,7 +2,14 @@ package mini_core_rrv_pkg;
 
 parameter I_MEM_SIZE   = 'h1_0000; 
 parameter I_MEM_OFFSET = 'h0_0000;
+parameter D_MEM_SIZE   = 'h1_0000;
+parameter D_MEM_OFFSET = 'h1_0000;
+
+parameter I_MEM_MSB  = I_MEM_SIZE-1;               // I_MEM
+parameter D_MEM_MSB  = D_MEM_SIZE+D_MEM_OFFSET-1;  // D_MEM
+
 parameter I_MEM_ADRS_MSB = 15;
+parameter D_MEM_ADRS_MSB = 15;
 
 parameter RF_NUM_MSB = 31;
 

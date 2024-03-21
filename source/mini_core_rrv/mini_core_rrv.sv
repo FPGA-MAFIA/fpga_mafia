@@ -9,7 +9,8 @@ import mini_core_rrv_pkg::*;
     input logic [31:0] PreInstructionQ101H, // from I_MEM
     output logic [31:0] PcQ100H,
     // D_mem interface
-    output var t_core2mem_req Core2DmemReqQ101H  
+    output var t_core2mem_req Core2DmemReqQ101H,
+    input logic [31:0] DMemRdRspQ102H  
 );
 
     var t_ctrl_if   CtrlIf;
@@ -111,7 +112,8 @@ import mini_core_rrv_pkg::*;
     .AluOutQ102H(AluOutQ102H),
     .PcQ102H(PcQ102H), 
     .Ctrl(CtrlWb),
-    .RegWrDataQ102H(RegWrDataQ102H)
+    .RegWrDataQ102H(RegWrDataQ102H),
+    .DMemRdRspQ102H(DMemRdRspQ102H)
     );
 
 endmodule
