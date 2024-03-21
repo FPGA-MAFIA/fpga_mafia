@@ -51,12 +51,12 @@ import mini_core_rrv_pkg::*;
     always_comb begin : branch_comp
     // Check branch condition
     case ({Ctrl.BranchOpQ101H})
-        BEQ     : BranchCondMetQ101H =  (AluIn1Q101H == AluIn2Q101H);                  // BEQ
-        BNE     : BranchCondMetQ101H = !(AluIn1Q101H == AluIn2Q101H);                  // BNE
-        BLT     : BranchCondMetQ101H =  ($signed(AluIn1Q101H) < $signed(AluIn2Q101H)); // BLT
-        BGE     : BranchCondMetQ101H = !($signed(AluIn1Q101H) < $signed(AluIn2Q101H)); // BGE
-        BLTU    : BranchCondMetQ101H =  (AluIn1Q101H < AluIn2Q101H);                   // BLTU
-        BGEU    : BranchCondMetQ101H = !(AluIn1Q101H < AluIn2Q101H);                   // BGEU
+        BEQ     : BranchCondMetQ101H =  (RegRdData1Q101H == RegRdData2Q101H);                  // BEQ
+        BNE     : BranchCondMetQ101H = !(RegRdData1Q101H == RegRdData2Q101H);                  // BNE
+        BLT     : BranchCondMetQ101H =  ($signed(RegRdData1Q101H) < $signed(RegRdData2Q101H)); // BLT
+        BGE     : BranchCondMetQ101H = !($signed(RegRdData1Q101H) < $signed(RegRdData2Q101H)); // BGE
+        BLTU    : BranchCondMetQ101H =  (RegRdData1Q101H < RegRdData2Q101H);                   // BLTU
+        BGEU    : BranchCondMetQ101H = !(RegRdData1Q101H < RegRdData2Q101H);                   // BGEU
         default : BranchCondMetQ101H = 1'b0;
     endcase
     end
