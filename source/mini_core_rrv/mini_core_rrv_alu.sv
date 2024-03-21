@@ -14,7 +14,8 @@ import mini_core_rrv_pkg::*;
     output logic [31:0]  AluOutQ102H,
     output logic [31:0]  DMemWrDataQ101H,
     output logic         BranchCondMetQ101H,
-    output logic [31:0]  PcQ102H
+    output logic [31:0]  PcQ102H,
+    output logic [31:0]  PcPlus4Q102H
 );
 
      logic  DataHazard1Q101H, DataHazard2Q101H;
@@ -66,5 +67,7 @@ import mini_core_rrv_pkg::*;
     
     `MAFIA_DFF_RST(AluOutQ102H, AluOutQ101H, Clock, Rst)
     `MAFIA_DFF_RST(PcQ102H, PcQ101H, Clock, Rst)
+    `MAFIA_DFF_RST(PcPlus4Q102H, PcQ101H + 32'h4, Clock, Rst)
 
 endmodule
+

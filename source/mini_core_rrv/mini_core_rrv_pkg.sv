@@ -77,9 +77,9 @@ typedef enum logic [1:0] {
 } t_e_sel_wb;
 
 typedef struct packed {
-    logic [3:0] ByteEnQ105H;
-    logic [3:0] SignExtQ105H;
-    t_e_sel_wb  e_SelWrBackQ105H;
+    logic [3:0] ByteEnQ102H;
+    logic [3:0] SignExtQ102H;
+    t_e_sel_wb  e_SelWrBackQ102H;
 } t_ctrl_wb;
 
 typedef struct packed{
@@ -94,8 +94,7 @@ typedef struct packed{
     logic          DMemRdEn;
     logic [3:0]    DMemByteEn;
     logic          SignExt;
-
-
+    t_e_sel_wb  e_SelWrBack;
 } t_mini_core_rrv_ctrl;
 
 typedef struct packed{

@@ -20,11 +20,12 @@ import mini_core_rrv_pkg::*;
     var t_ctrl_wb   CtrlWb;
     logic           BranchCondMetQ101H;
     logic [31:0]    AluOutQ101H, AluOutQ102H; 
-    logic [31:0]    PcQ101H, PcQ102H; 
+    logic [31:0]    PcQ101H, PcQ102H, PcPlus4Q102H; 
     logic [31:0]    RegWrDataQ102H;
     logic [31:0]    RegRdData1Q101H, RegRdData2Q101H;
     logic [31:0]    ImmediateQ101H;
     logic [31:0]    DMemWrDataQ101H;
+    
     
     //================================
     //    Stage Q100H
@@ -87,7 +88,8 @@ import mini_core_rrv_pkg::*;
       .AluOutQ102H(AluOutQ102H),
       .DMemWrDataQ101H(DMemWrDataQ101H),
       .BranchCondMetQ101H(BranchCondMetQ101H),
-      .PcQ102H(PcQ102H)      
+      .PcQ102H(PcQ102H),
+      .PcPlus4Q102H(PcPlus4Q102H)      
     );
     
     // Date memory
@@ -110,7 +112,8 @@ import mini_core_rrv_pkg::*;
     .Clock(Clock),
     .Rst(Rst),
     .AluOutQ102H(AluOutQ102H),
-    .PcQ102H(PcQ102H), 
+    .PcQ102H(PcQ102H),
+    .PcPlus4Q102H(PcPlus4Q102H), 
     .Ctrl(CtrlWb),
     .RegWrDataQ102H(RegWrDataQ102H),
     .DMemRdRspQ102H(DMemRdRspQ102H)

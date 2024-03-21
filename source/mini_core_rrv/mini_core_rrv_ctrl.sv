@@ -31,6 +31,9 @@ assign CtrlQ101H.RegSrc1 = PreInstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2 = PreInstructionQ101H[24:20];
 assign CtrlQ101H.RegDst  = PreInstructionQ101H[11:7];
 
+assign CtrlQ101H.e_SelWrBack      = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR) ? WB_PC4  :
+                                    (OpcodeQ101H == LOAD)                         ? WB_DMEM :
+                                                                                    WB_ALU  ;
 assign CtrlQ101H.RegWrEn = (OpcodeQ101H == R_OP) || (OpcodeQ101H == I_OP) || (OpcodeQ101H == JALR) || (OpcodeQ101H == JAL) 
                                                  || (OpcodeQ101H == AUIPC)|| (OpcodeQ101H == LUI); 
 
@@ -102,7 +105,8 @@ assign CtrlDmem.DMemWrEnQ101H   = CtrlQ101H.DMemWrEn ;
 assign CtrlDmem.DMemRdEnQ101H   = CtrlQ101H.DMemRdEn ;
 
 // Write back control
-
+assign CtrlWb.e_SelWrBackQ102H = CtrlQ102H.e_SelWrBack;
+assign CtrlWb.ByteEnQ102H      = CtrlQ102H.DMemByteEn;
 `MAFIA_DFF_RST(CtrlQ102H, CtrlQ101H, Clock, Rst)
 
 
