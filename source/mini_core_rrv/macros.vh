@@ -15,3 +15,8 @@
     always_ff@(posedge clk)  begin   \
         if(en)   q <= i;             \
     end
+
+`define  MAFIA_EN_RST_DFF(q,i,clk,en,rst)\
+         always_ff @(posedge clk)        \
+            if (rst)    q <='0;          \
+            else if(en) q <= i;

@@ -2,6 +2,7 @@
 
 module mini_core_rrv_tb;
 import mini_core_rrv_pkg::*;
+import rv32i_ref_pkg::*;
 
 logic Clock;
 logic Rst;
@@ -29,6 +30,7 @@ end: reset_gen
 
 string test_name;
 `include "core_rrv_trk.vh"
+`include "mini_core_rrv_ref_tasks.vh"
 
 integer file;
 initial begin: test_seq
@@ -46,18 +48,26 @@ initial begin: test_seq
     end
     $readmemh({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force mini_core_rrv_top.mini_core_rrv_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 
     file = $fopen({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
         force mini_core_rrv_top.mini_core_rrv_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10
         release mini_core_rrv_top.mini_core_rrv_mem_wrap.d_mem.mem;
+        release rv32i_ref.dmem;
     end
+   fork
+    get_rf_write(); 
+    get_ref_rf_write();   
     begin wait(mini_core_rrv_top.mini_core_rrv.mini_core_rrv_ctrl.ebreak_was_calledQ101H == 1'b1);
-        $display("Ebreak was called");
+    $display("ebrak!!!!");
+        eot(.msg("ebreak was called"));
     end
+    join
 end
 
 mini_core_rrv_top mini_core_rrv_top
@@ -67,13 +77,26 @@ mini_core_rrv_top mini_core_rrv_top
 );
 
 
-parameter V_TIMEOUT = 10000;
+parameter V_TIMEOUT = 100000;
 
 initial begin: time_out
     #V_TIMEOUT
-    $display("time out reached");
+    $error("test ended with timeout");
     $finish;
 end
+
+
+rv32i_ref
+# (
+    .I_MEM_LSB (I_MEM_OFFSET),
+    .I_MEM_MSB (I_MEM_MSB),
+    .D_MEM_LSB (D_MEM_OFFSET),
+    .D_MEM_MSB (D_MEM_MSB)
+)  rv32i_ref (
+.clk    (Clock),
+.rst    (Rst),
+.run    (1'b1) 
+);
 
 
 
