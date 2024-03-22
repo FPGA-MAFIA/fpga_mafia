@@ -56,8 +56,11 @@ assign CtrlQ101H.BranchOp         = t_branch_type'(Funct3Q101H);
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'h00100073) ? 1 : 0;
 
 // flash unit
+logic IndirectBranchQ101H;
+assign IndirectBranchQ101H = (CtrlQ101H.SelNextPcAluOutB & BranchCondMetQ101H) || CtrlQ101H.SelNextPcAluOutJ;
+
 logic flashQ101H, flashQ102H;
-assign flashQ101H = (CtrlQ101H.SelNextPcAluOutB & BranchCondMetQ101H) || CtrlQ101H.SelNextPcAluOutJ;
+assign flashQ101H = IndirectBranchQ101H;
 `MAFIA_DFF_RST(flashQ102H,flashQ101H, Clock,Rst)
 assign InstructionQ101H = (flashQ102H) ? NOP : PreInstructionQ101H;
 
@@ -109,7 +112,7 @@ always_comb begin
 end
 
 // Instruction fetch control 
-assign CtrlIf.SelNextPcAluOutQ101H = BranchCondMetQ101H;
+assign CtrlIf.SelNextPcAluOutQ101H = IndirectBranchQ101H;
 
 // Register file control
 assign CtrlRf.RegSrc1Q101H = CtrlQ101H.RegSrc1;
@@ -137,11 +140,6 @@ assign CtrlDmem.DMemRdEnQ101H   = CtrlQ101H.DMemRdEn ;
 assign CtrlWb.e_SelWrBackQ102H = CtrlQ102H.e_SelWrBack;
 assign CtrlWb.ByteEnQ102H      = CtrlQ102H.DMemByteEn;
 `MAFIA_DFF_RST(CtrlQ102H, CtrlQ101H, Clock, Rst)
-
-
-
-
-
 
 
 
