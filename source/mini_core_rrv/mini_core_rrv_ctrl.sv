@@ -23,7 +23,7 @@ logic        [6:0] Funct7Q101H;
 logic        [2:0] Funct3Q101H;
 logic ValidInstQ101H;
 logic [31:0] InstructionQ101H;
-
+logic ebreak_was_calledQ101H;
 
 
 assign OpcodeQ101H       = t_opcode'(InstructionQ101H[6:0]);
@@ -51,12 +51,15 @@ assign CtrlQ101H.SelNextPcAluOutB = (OpcodeQ101H == BRANCH); // indicates BRANCH
 assign CtrlQ101H.SelNextPcAluOutJ = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR); // when occures enable flashQ101H
 assign CtrlQ101H.SelAluPc         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);  // effect on mux in alu stage to write pcQ101H + imm
 assign CtrlQ101H.Lui              = (OpcodeQ101H == LUI);  
+assign CtrlQ101H.BranchOp         = t_branch_type'(Funct3Q101H);
 
+assign ebreak_was_calledQ101H = (InstructionQ101H == 32'h00100073) ? 1 : 0;
 
 // flash unit
-logic flashQ101H;
+logic flashQ101H, flashQ102H;
 assign flashQ101H = (CtrlQ101H.SelNextPcAluOutB & BranchCondMetQ101H) || CtrlQ101H.SelNextPcAluOutJ;
-assign InstructionQ101H = flashQ101H ? NOP : PreInstructionQ101H;
+`MAFIA_DFF_RST(flashQ102H,flashQ101H, Clock,Rst)
+assign InstructionQ101H = (flashQ102H) ? NOP : PreInstructionQ101H;
 
 always_comb begin: alu_op
     case({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
@@ -123,6 +126,7 @@ assign CtrlAlu.RegDstQ102H    = CtrlQ102H.RegDst;
 assign CtrlAlu.RegWrEnQ102H   = CtrlQ102H.RegWrEn;
 assign CtrlAlu.SelAluPcQ101H  = CtrlQ101H.SelAluPc;
 assign CtrlAlu.LuiQ101H       = CtrlQ101H.Lui;
+assign CtrlAlu.BranchOpQ101H  = CtrlQ101H.BranchOp; 
 
 // Dmem control
 assign CtrlDmem.DMemByteEnQ101H = CtrlQ101H.DMemByteEn;
