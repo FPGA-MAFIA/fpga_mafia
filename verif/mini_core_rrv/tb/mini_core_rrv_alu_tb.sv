@@ -6,6 +6,7 @@ import mini_core_rrv_pkg::*;
     var t_ctrl_alu Ctrl;
     logic [31:0]  AluOutQ102H, AluOutQ101H;
     logic         BranchCondMetQ101H;
+    logic [31:0]  PreRegRdData1Q101H, PreRegRdData2Q101H;
 
 
     initial begin: clock_gen
@@ -21,15 +22,24 @@ import mini_core_rrv_pkg::*;
       .Rst(Rst),
       .PcQ101H    (),
       .Ctrl(Ctrl),
+      .PreRegRdData1Q101H(PreRegRdData1Q101H),
+      .PreRegRdData2Q101H(PreRegRdData2Q101H),
+      .ImmediateQ101H(),
       .AluOutQ101H(AluOutQ101H),
       .AluOutQ102H(AluOutQ102H),
+      .DMemWrDataQ101H(),
       .BranchCondMetQ101H(BranchCondMetQ101H),
-      .PcQ102H           ()      
+      .PcQ102H           (),
+      .PcPlus4Q102H()      
     );
 
     initial begin: main
-       Ctrl.AluIn1Q101H = 32'h5;
-       Ctrl.AluIn2Q101H = 32'h3;
+       PreRegRdData1Q101H = 32'h5;
+       PreRegRdData2Q101H = 32'h3;
+       Ctrl.SelAluPcQ101H = 1'b0;
+       Ctrl.ImmInstrQ101H = 1'b0;
+       mini_core_rrv_alu.DataHazard1Q101H = 1'b0;
+       mini_core_rrv_alu.DataHazard2Q101H = 1'b0;
        Ctrl.AluOpQ101H = ADD;
        #20
        $display("AluOutQ102H = %h", AluOutQ102H);
