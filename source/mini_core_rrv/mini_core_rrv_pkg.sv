@@ -71,6 +71,7 @@ typedef struct packed{
     logic  [4:0]  RegDstQ102H;
     logic         RegWrEnQ102H;
     logic         SelAluPcQ101H;
+    logic         LuiQ101H;
 } t_ctrl_alu;
 
 typedef enum logic [1:0] {
@@ -99,6 +100,9 @@ typedef struct packed{
     logic          SignExt;
     t_e_sel_wb     e_SelWrBack;
     logic          SelNextPcAluOutB;
+    logic          SelNextPcAluOutJ;
+    logic          SelAluPc;
+    logic          Lui;
 
 } t_mini_core_rrv_ctrl;
 

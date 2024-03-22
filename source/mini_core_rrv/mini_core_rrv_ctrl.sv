@@ -36,8 +36,8 @@ assign CtrlQ101H.RegDst  = InstructionQ101H[11:7];
 assign CtrlQ101H.e_SelWrBack      = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR) ? WB_PC4  :
                                     (OpcodeQ101H == LOAD)                         ? WB_DMEM :
                                                                                     WB_ALU  ;
-assign CtrlQ101H.RegWrEn = (OpcodeQ101H == R_OP) || (OpcodeQ101H == I_OP) || (OpcodeQ101H == JALR) || (OpcodeQ101H == JAL) 
-                                                 || (OpcodeQ101H == AUIPC)|| (OpcodeQ101H == LUI); 
+assign CtrlQ101H.RegWrEn = (OpcodeQ101H == R_OP) || (OpcodeQ101H == I_OP) || (OpcodeQ101H == JALR) || (OpcodeQ101H == JAL) ||
+                           (OpcodeQ101H == LOAD) || (OpcodeQ101H == AUIPC)|| (OpcodeQ101H == LUI); 
 
 assign CtrlQ101H.ImmInstr = !(OpcodeQ101H == R_OP);
 
@@ -47,11 +47,15 @@ assign CtrlQ101H.SignExt          = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); 
 assign CtrlQ101H.DMemByteEn       = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
                                     ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b01) ? 4'b0011 : // LH || SH
                                     ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : '0; // LW || SW - TODO - check the default value
-assign CtrlQ101H.SelNextPcAluOutB = (OpcodeQ101H == BRANCH);
+assign CtrlQ101H.SelNextPcAluOutB = (OpcodeQ101H == BRANCH); // indicates BRANCH and may cause flashQ101H
+assign CtrlQ101H.SelNextPcAluOutJ = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR); // when occures enable flashQ101H
+assign CtrlQ101H.SelAluPc         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);  // effect on mux in alu stage to write pcQ101H + imm
+assign CtrlQ101H.Lui              = (OpcodeQ101H == LUI);  
+
 
 // flash unit
 logic flashQ101H;
-assign flashQ101H = (CtrlQ101H.SelNextPcAluOutB & BranchCondMetQ101H);
+assign flashQ101H = (CtrlQ101H.SelNextPcAluOutB & BranchCondMetQ101H) || CtrlQ101H.SelNextPcAluOutJ;
 assign InstructionQ101H = flashQ101H ? NOP : PreInstructionQ101H;
 
 always_comb begin: alu_op
@@ -117,7 +121,8 @@ assign CtrlAlu.RegSrc1Q101H   = CtrlQ101H.RegSrc1;
 assign CtrlAlu.RegSrc2Q101H   = CtrlQ101H.RegSrc2;
 assign CtrlAlu.RegDstQ102H    = CtrlQ102H.RegDst;
 assign CtrlAlu.RegWrEnQ102H   = CtrlQ102H.RegWrEn;
-assign CtrlAlu.SelAluPcQ101H  = CtrlQ101H.SelNextPcAluOutB;
+assign CtrlAlu.SelAluPcQ101H  = CtrlQ101H.SelAluPc;
+assign CtrlAlu.LuiQ101H       = CtrlQ101H.Lui;
 
 // Dmem control
 assign CtrlDmem.DMemByteEnQ101H = CtrlQ101H.DMemByteEn;
