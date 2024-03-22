@@ -64,7 +64,7 @@ import mini_core_rrv_pkg::*;
 
     // register file
     mini_core_rrv_rf #(.RF_NUM_MSB(RF_NUM_MSB))
-    mini_core_rf
+    mini_core_rrv_rf
     (
     .Clock(Clock),
     .Rst(Rst),
