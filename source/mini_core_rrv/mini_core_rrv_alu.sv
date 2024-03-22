@@ -29,7 +29,7 @@ import mini_core_rrv_pkg::*;
     assign RegRdData1Q101H  = (DataHazard1Q101H) ? AluOutQ102H : PreRegRdData1Q101H;
     assign RegRdData2Q101H  = (DataHazard2Q101H) ? AluOutQ102H : PreRegRdData2Q101H;
 
-    assign AluIn1Q101H      = RegRdData1Q101H;
+    assign AluIn1Q101H      = (Ctrl.SelAluPcQ101H)  ? PcQ101H : RegRdData1Q101H;
     assign AluIn2Q101H      = (Ctrl.ImmInstrQ101H)  ? ImmediateQ101H  : RegRdData2Q101H;
                                                               
 

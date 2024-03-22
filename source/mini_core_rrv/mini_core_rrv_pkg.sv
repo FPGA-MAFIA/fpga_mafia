@@ -13,6 +13,8 @@ parameter D_MEM_ADRS_MSB = 15;
 
 parameter RF_NUM_MSB = 31;
 
+parameter NOP = 32'h00000013;  // addi x0, x0, 0
+
 typedef struct packed{
     logic SelNextPcAluOutQ101H;
 } t_ctrl_if;
@@ -68,6 +70,7 @@ typedef struct packed{
     logic  [4:0]  RegSrc2Q101H;
     logic  [4:0]  RegDstQ102H;
     logic         RegWrEnQ102H;
+    logic         SelAluPcQ101H;
 } t_ctrl_alu;
 
 typedef enum logic [1:0] {
@@ -94,7 +97,9 @@ typedef struct packed{
     logic          DMemRdEn;
     logic [3:0]    DMemByteEn;
     logic          SignExt;
-    t_e_sel_wb  e_SelWrBack;
+    t_e_sel_wb     e_SelWrBack;
+    logic          SelNextPcAluOutB;
+
 } t_mini_core_rrv_ctrl;
 
 typedef struct packed{
@@ -110,5 +115,14 @@ typedef struct packed {
     logic       RdEn;  
     logic [3:0] ByteEn;
 } t_core2mem_req;
+
+typedef enum logic [2:0] {
+    U_TYPE = 3'b000 , 
+    I_TYPE = 3'b001 ,  
+    S_TYPE = 3'b010 ,     
+    B_TYPE = 3'b011 , 
+    J_TYPE = 3'b100 
+} t_immediate ;
+
 
 endpackage

@@ -17,19 +17,21 @@ import mini_core_rrv_pkg::*;
 );
 
 var t_opcode OpcodeQ101H;
+var t_immediate  SelImmTypeQ101H;
 var t_mini_core_rrv_ctrl CtrlQ101H, CtrlQ102H;
 logic        [6:0] Funct7Q101H;
 logic        [2:0] Funct3Q101H;
 logic ValidInstQ101H;
+logic [31:0] InstructionQ101H;
 
 
 
-assign OpcodeQ101H       = t_opcode'(PreInstructionQ101H[6:0]);
-assign Funct7Q101H       = PreInstructionQ101H[31:25];
-assign Funct3Q101H       = PreInstructionQ101H[14:12];
-assign CtrlQ101H.RegSrc1 = PreInstructionQ101H[19:15];
-assign CtrlQ101H.RegSrc2 = PreInstructionQ101H[24:20];
-assign CtrlQ101H.RegDst  = PreInstructionQ101H[11:7];
+assign OpcodeQ101H       = t_opcode'(InstructionQ101H[6:0]);
+assign Funct7Q101H       = InstructionQ101H[31:25];
+assign Funct3Q101H       = InstructionQ101H[14:12];
+assign CtrlQ101H.RegSrc1 = InstructionQ101H[19:15];
+assign CtrlQ101H.RegSrc2 = InstructionQ101H[24:20];
+assign CtrlQ101H.RegDst  = InstructionQ101H[11:7];
 
 assign CtrlQ101H.e_SelWrBack      = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR) ? WB_PC4  :
                                     (OpcodeQ101H == LOAD)                         ? WB_DMEM :
@@ -45,7 +47,12 @@ assign CtrlQ101H.SignExt          = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); 
 assign CtrlQ101H.DMemByteEn       = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
                                     ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b01) ? 4'b0011 : // LH || SH
                                     ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : '0; // LW || SW - TODO - check the default value
+assign CtrlQ101H.SelNextPcAluOutB = (OpcodeQ101H == BRANCH);
 
+// flash unit
+logic flashQ101H;
+assign flashQ101H = (CtrlQ101H.SelNextPcAluOutB & BranchCondMetQ101H);
+assign InstructionQ101H = flashQ101H ? NOP : PreInstructionQ101H;
 
 always_comb begin: alu_op
     case({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
@@ -74,13 +81,25 @@ always_comb begin: alu_op
     endcase
 end
 
-always_comb begin: imm_generator
-    case(OpcodeQ101H)
-        I_OP   : ImmediateQ101H = {{20{PreInstructionQ101H[31]}} ,PreInstructionQ101H[31:20]} ;
-        STORE  : ImmediateQ101H = { {20{PreInstructionQ101H[31]}} , PreInstructionQ101H[31:25] , PreInstructionQ101H[11:7]  };
-        default: ImmediateQ101H = {{20{PreInstructionQ101H[31]}} , PreInstructionQ101H[31:20]} ;   
-    endcase
-    end
+// Immediate Generator
+always_comb begin
+  unique casez (OpcodeQ101H) // Mux
+    JALR, I_OP, LOAD : SelImmTypeQ101H = I_TYPE;
+    LUI, AUIPC       : SelImmTypeQ101H = U_TYPE;
+    JAL              : SelImmTypeQ101H = J_TYPE;
+    BRANCH           : SelImmTypeQ101H = B_TYPE;
+    STORE            : SelImmTypeQ101H = S_TYPE;
+    default          : SelImmTypeQ101H = I_TYPE;
+  endcase
+  unique casez (SelImmTypeQ101H) // Mux
+    U_TYPE : ImmediateQ101H = {     InstructionQ101H[31:12], 12'b0 } ;                                                                            // U_Immediate
+    I_TYPE : ImmediateQ101H = { {20{InstructionQ101H[31]}} , InstructionQ101H[31:20] };                                                           // I_Immediate
+    S_TYPE : ImmediateQ101H = { {20{InstructionQ101H[31]}} , InstructionQ101H[31:25] , InstructionQ101H[11:7]  };                                 // S_Immediate
+    B_TYPE : ImmediateQ101H = { {20{InstructionQ101H[31]}} , InstructionQ101H[7]     , InstructionQ101H[30:25] , InstructionQ101H[11:8]  , 1'b0}; // B_Immediate
+    J_TYPE : ImmediateQ101H = { {12{InstructionQ101H[31]}} , InstructionQ101H[19:12] , InstructionQ101H[20]    , InstructionQ101H[30:21] , 1'b0}; // J_Immediate
+    default: ImmediateQ101H = {     InstructionQ101H[31:12], 12'b0 };                                                                             // U_Immediate
+  endcase
+end
 
 // Instruction fetch control 
 assign CtrlIf.SelNextPcAluOutQ101H = BranchCondMetQ101H;
@@ -98,6 +117,7 @@ assign CtrlAlu.RegSrc1Q101H   = CtrlQ101H.RegSrc1;
 assign CtrlAlu.RegSrc2Q101H   = CtrlQ101H.RegSrc2;
 assign CtrlAlu.RegDstQ102H    = CtrlQ102H.RegDst;
 assign CtrlAlu.RegWrEnQ102H   = CtrlQ102H.RegWrEn;
+assign CtrlAlu.SelAluPcQ101H  = CtrlQ101H.SelNextPcAluOutB;
 
 // Dmem control
 assign CtrlDmem.DMemByteEnQ101H = CtrlQ101H.DMemByteEn;
