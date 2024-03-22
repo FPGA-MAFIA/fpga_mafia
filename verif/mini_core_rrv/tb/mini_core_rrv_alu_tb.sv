@@ -1,3 +1,4 @@
+// ./build.py -dut mini_core_rrv -top mini_core_rrv_alu_tb -hw -sim -clean
 module mini_core_rrv_alu_tb;
 import mini_core_rrv_pkg::*;
 
