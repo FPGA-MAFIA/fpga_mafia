@@ -6,6 +6,7 @@ import mini_core_rrv_pkg::*;
 logic Clock;
 logic Rst;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
+logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 
 // ========================
@@ -44,8 +45,20 @@ initial begin: test_seq
         $finish;
     end
     $readmemh({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_core_rrv_top.mini_core_rrv_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory  
-end // test_seq
+    force mini_core_rrv_top.mini_core_rrv_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    //load the data to the DUT & reference model 
+    file = $fopen({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    if (file) begin
+        $fclose(file);
+        $readmemh({"../../../target/core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        force mini_core_rrv_top.mini_core_rrv_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        #10
+        release mini_core_rrv_top.mini_core_rrv_mem_wrap.d_mem.mem;
+    end
+    begin wait(mini_core_rrv_top.mini_core_rrv.mini_core_rrv_ctrl.ebreak_was_calledQ101H == 1'b1);
+        $display("Ebreak was called");
+    end
+end
 
 mini_core_rrv_top mini_core_rrv_top
 (

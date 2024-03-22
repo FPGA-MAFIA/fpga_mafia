@@ -103,6 +103,7 @@ typedef struct packed{
     logic          SelNextPcAluOutJ;
     logic          SelAluPc;
     logic          Lui;
+    t_branch_type  BranchOp;
 
 } t_mini_core_rrv_ctrl;
 
