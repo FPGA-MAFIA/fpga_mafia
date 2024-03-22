@@ -6,7 +6,7 @@ import mini_core_rrv_pkg::*;
     input Clock,
     input Rst,
     input var t_ctrl_mem Ctrl,
-    input logic AluOutQ101H,
+    input logic [31:0] AluOutQ101H,
     input logic [31:0] DMemWrDataQ101H,
     output var t_core2mem_req Core2DmemReqQ101H
 
