@@ -10,12 +10,14 @@ import mini_core_rrv_pkg::*;
     input logic [31:0]   PreRegRdData1Q101H,
     input logic [31:0]   PreRegRdData2Q101H,
     input logic [31:0]   ImmediateQ101H,
+    input logic [31:0]   RegWrDataQ102H,
     output logic [31:0]  AluOutQ101H,
     output logic [31:0]  AluOutQ102H,
     output logic [31:0]  DMemWrDataQ101H,
     output logic         BranchCondMetQ101H,
     output logic [31:0]  PcQ102H,
     output logic [31:0]  PcPlus4Q102H
+    
 );
 
      logic  DataHazard1Q101H, DataHazard2Q101H;
@@ -27,8 +29,10 @@ import mini_core_rrv_pkg::*;
     assign DataHazard1Q101H = (Ctrl.RegSrc1Q101H == Ctrl.RegDstQ102H) & (Ctrl.RegWrEnQ102H) & (Ctrl.RegSrc1Q101H != 5'b0);
     assign DataHazard2Q101H = (Ctrl.RegSrc2Q101H == Ctrl.RegDstQ102H) & (Ctrl.RegWrEnQ102H) & (Ctrl.RegSrc2Q101H != 5'b0);
 
-    assign RegRdData1Q101H  = (DataHazard1Q101H) ? AluOutQ102H : PreRegRdData1Q101H;
-    assign RegRdData2Q101H  = (DataHazard2Q101H) ? AluOutQ102H : PreRegRdData2Q101H;
+    //assign RegRdData1Q101H  = (DataHazard1Q101H) ? AluOutQ102H : PreRegRdData1Q101H;
+    //assign RegRdData2Q101H  = (DataHazard2Q101H) ? AluOutQ102H : PreRegRdData2Q101H;
+    assign RegRdData1Q101H  = (DataHazard1Q101H) ? RegWrDataQ102H : PreRegRdData1Q101H;
+    assign RegRdData2Q101H  = (DataHazard2Q101H) ? RegWrDataQ102H : PreRegRdData2Q101H;
 
     assign AluIn1Q101H      = (Ctrl.SelAluPcQ101H)  ? PcQ101H : RegRdData1Q101H;
     assign AluIn2Q101H      = (Ctrl.ImmInstrQ101H)  ? ImmediateQ101H  : RegRdData2Q101H;

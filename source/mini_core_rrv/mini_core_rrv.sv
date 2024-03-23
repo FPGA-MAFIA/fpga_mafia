@@ -84,6 +84,7 @@ import mini_core_rrv_pkg::*;
       .PreRegRdData1Q101H(RegRdData1Q101H),
       .PreRegRdData2Q101H(RegRdData2Q101H),
       .ImmediateQ101H(ImmediateQ101H),
+      .RegWrDataQ102H(RegWrDataQ102H),
       .AluOutQ101H(AluOutQ101H),
       .AluOutQ102H(AluOutQ102H),
       .DMemWrDataQ101H(DMemWrDataQ101H),
