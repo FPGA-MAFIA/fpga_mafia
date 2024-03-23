@@ -54,7 +54,7 @@ initial begin: test_seq
     file = $fopen({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
-        $readmemh({"../../../target/core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
         force mini_core_rrv_top.mini_core_rrv_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10
