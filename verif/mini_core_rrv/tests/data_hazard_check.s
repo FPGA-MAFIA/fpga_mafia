@@ -32,6 +32,30 @@ main:
 
   add   x12,  x1,  x2
   addi  x13,  x12,  0x100
+
+
+   # no hazards
+  li  x31, 65536
+  sw	x1, 0(x31)
+  lw	x2, 0(x31)
+  sw	x1, 4(x31)
+  lw	x3, 4(x31)
+  sw	x1, 8(x31)
+  lw	x4, 8(x31)
+ 
+  # forwarding with load
+  lw	x5, 0(x31)
+  nop
+  addi  x1, x5, 1 
+
+  # forwarding with load
+  lw	x6, 0(x31)
+  addi  x1, x6, 1
+
+  # forwarding with load 
+  lw	x6, 0(x31)
+  addi  x1, x6, 1
+  addi  x2, x6, 1 
 eot:
     nop
     nop
