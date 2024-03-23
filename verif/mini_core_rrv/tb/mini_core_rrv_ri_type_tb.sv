@@ -73,7 +73,7 @@ integer file;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
-    #100    
+    #10    
     force mini_core_rrv_top.mini_core_rrv_mem_wrap.i_mem.mem = IMEM; //backdoor to actual memory  
 end // test_seq
 

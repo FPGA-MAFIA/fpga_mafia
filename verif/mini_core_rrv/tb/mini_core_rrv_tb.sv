@@ -40,6 +40,7 @@ initial begin: test_seq
     //load the program to the DUT & reference model
     //======================================
     // Make sure inst_mem.sv exists
+    #10
     file = $fopen({"../../../target/mini_core_rrv/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
     if (!file) begin
         $error("the file: ../../../target/mini_core_rrv/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
