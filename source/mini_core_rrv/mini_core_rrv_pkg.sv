@@ -64,6 +64,7 @@ typedef enum logic [6:0] {
 
 typedef struct packed{
     t_alu_op      AluOpQ101H;
+    t_opcode      OpCodeQ101H;
     t_branch_type BranchOpQ101H;
     logic         ImmInstrQ101H;
     logic  [4:0]  RegSrc1Q101H;

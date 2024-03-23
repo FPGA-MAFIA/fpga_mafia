@@ -122,6 +122,7 @@ assign CtrlRf.RegWrEnQ102H = CtrlQ102H.RegWrEn;
 
 // Alu control 
 assign CtrlAlu.AluOpQ101H     = CtrlQ101H.AluOp;
+assign CtrlAlu.OpCodeQ101H    = OpcodeQ101H;
 assign CtrlAlu.ImmInstrQ101H  = CtrlQ101H.ImmInstr;
 assign CtrlAlu.RegSrc1Q101H   = CtrlQ101H.RegSrc1;
 assign CtrlAlu.RegSrc2Q101H   = CtrlQ101H.RegSrc2;
