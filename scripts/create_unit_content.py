@@ -47,7 +47,7 @@ SOURCE_UNIT_CONTENT = '''
 `ifndef {unit}_SV
 `define {unit}_SV
 
-`include "macros.sv"
+`include "macros.vh"
 
 module {unit}
 import {unit}_pkg::*;
@@ -91,6 +91,37 @@ RTL_FILE_LIST_CONTENT = '''
 
 '''
 
+VERIF_FILE_LIST_CONTENT = '''
++incdir+../../../source/common/
++incdir+../../../verif/{unit}/tb/
++incdir+../../../verif/{unit}/tb/trk
++incdir+../../../verif/{unit}/tb/tasks
++incdir+../../../verif/{unit}/tb/hw_seq
++incdir+../../../verif/{unit}/tests
+../../../verif/{unit}/tb/{unit}_tb.sv
+
+'''
+
+FILE_LIST_CONTENT = '''
++define+SIM_ONLY
+-f ../../../source/{unit}/{unit}_rtl_list.f
+-f ../../../verif/{unit}/file_list/{unit}_verif_list.f
+
+'''
+VERIF_TASKS_CONTENT = '''
+// set ALU inputs
+task set_alu_inputs(
+    input logic [31:0] in1,
+    input logic [31:0] in2,
+    input t_opcode op
+);
+    @(posedge Clk);
+    alu_in1 = in1;
+    alu_in2 = in2;
+    opcode  = op;
+endtask
+'''
+
 
 TB_FILE_CONTENT = '''
 //-----------------------------------------------------------------------------
@@ -107,9 +138,9 @@ TB_FILE_CONTENT = '''
 `ifndef {unit}_TB_SV
 `define {unit}_TB_SV
 
-`include "macros.sv"
+`include "macros.vh"
 
-module {unit};
+module {unit}_tb;
 import {unit}_pkg::*;
 logic Clk;
 logic Rst;
@@ -135,6 +166,8 @@ logic [31:0] alu_in1;
 logic [31:0] alu_in2;
 t_opcode opcode;
 logic [31:0] alu_out;
+`include "{unit}_tasks.vh"
+
 
 // ========================
 string test_name;
@@ -144,9 +177,23 @@ initial begin: test_seq
     //======================================
     // EOT - end of test
     //======================================
+    //default DUT input values
+    alu_in1 = 32'h0;
+    alu_in2 = 32'h0;
+    opcode  = ADD;
+    #10;
+    set_alu_inputs(32'h1, 32'h2, ADD);
+    set_alu_inputs(32'h1, 32'h2, SUB);
+    set_alu_inputs(32'h1, 32'h2, AND);
+    set_alu_inputs(32'h1, 32'h2, OR);
+    set_alu_inputs(32'h1, 32'h2, XOR);
+
+
+
     #1000;
-    $error("ERROR: TIMEOUT");
-    eot("ERROR: TIMEOUT");
+    $finish;
+    //$error("ERROR: TIMEOUT");
+    //eot("ERROR: TIMEOUT");
 end // test_seq
 
 
@@ -162,9 +209,6 @@ end // test_seq
     .alu_out(alu_out)
 );
 
-initial begin
-forever begin
-    monitor("monitor", $time, Clk, Rst, alu_in1, alu_in2, opcode, alu_out);
 endmodule
 `endif
 '''

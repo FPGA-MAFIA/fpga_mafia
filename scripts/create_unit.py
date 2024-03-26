@@ -78,20 +78,22 @@ def print_message(msg):
 MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
 # Unit source directory
 SOURCE_DIR      = './source/'+args.unit+'/'
-SOURCE_PKG_DIR  = './source/'+args.unit+'/'+args.unit+'_pkg.sv'
+SOURCE_PKG      = './source/'+args.unit+'/'+args.unit+'_pkg.sv'
 SOURCE_UNIT     = './source/'+args.unit+'/'+args.unit+'.sv'
 RTL_FILE_LIST   = './source/'+args.unit+'/'+args.unit+'_rtl_list.f'
 # Unit Verif directory
 VERIF_DIR       = './verif/'+args.unit+'/'
 TB_DIR          = './verif/'+args.unit+'/tb/'
-REGRESS_DIR     = './verif/'+args.unit+'/regress/'
+TB_FILE         = './verif/'+args.unit+'/tb/'+args.unit+'_tb.sv'
 HW_SEQ_DIR      = './verif/'+args.unit+'/tb/hw_seq/'
 TASKS_DIR       = './verif/'+args.unit+'/tb/tasks/'
 TRK_DIR         = './verif/'+args.unit+'/tb/trk/'
+REGRESS_DIR     = './verif/'+args.unit+'/regress/'
 TEST_DIR        = './verif/'+args.unit+'/tests/'
-HW_SEQ_FILE     = './verif/'+args.unit+'/tb/hw_seq/'+args.unit+'_hw_seq.sv'
-TASKS_FILE      = './verif/'+args.unit+'/tb/tasks/'+args.unit+'_tasks.sv'
-TRK_FILE        = './verif/'+args.unit+'/tb/trk/'+args.unit+'_trk.sv'
+HW_SEQ_FILE     = './verif/'+args.unit+'/tb/hw_seq/'+args.unit+'_hw_seq.vh'
+TASKS_FILE      = './verif/'+args.unit+'/tb/tasks/'+args.unit+'_tasks.vh'
+TRK_FILE        = './verif/'+args.unit+'/tb/trk/'+args.unit+'_trk.vh'
+FILE_LIST_DIR   = './verif/'+args.unit+'/file_list/'
 FILE_LIST       = './verif/'+args.unit+'/file_list/'+args.unit+'_list.f'
 VERIF_FILE_LIST = './verif/'+args.unit+'/file_list/'+args.unit+'_verif_list.f'
 TEST_FILE       = './verif/'+args.unit+'/tests/alive.vh'
@@ -108,31 +110,41 @@ RTL_FILE_LIST_CONTENT   = create_unit_content.RTL_FILE_LIST_CONTENT.format(unit=
 # Create the source directory and it's its files
 def create_source():
     mkdir(SOURCE_DIR)
-    touch(SOURCE_PKG_DIR)
+    touch(SOURCE_PKG)
     touch(SOURCE_UNIT)
     touch(RTL_FILE_LIST)
-    write_to_file(SOURCE_PKG_DIR, SOURCE_PKG_CONTENT)
+    write_to_file(SOURCE_PKG    , SOURCE_PKG_CONTENT)
     write_to_file(SOURCE_UNIT   , SOURCE_UNIT_CONTENT)
     write_to_file(RTL_FILE_LIST , RTL_FILE_LIST_CONTENT)
 
 
-
+TB_FILE_CONTENT         = create_unit_content.TB_FILE_CONTENT.format(unit=args.unit)
+VERIF_FILE_LIST_CONTENT = create_unit_content.VERIF_FILE_LIST_CONTENT.format(unit=args.unit)
+FILE_LIST_CONTENT       = create_unit_content.FILE_LIST_CONTENT.format(unit=args.unit)
+VERIF_TASKS_CONTENT     = create_unit_content.VERIF_TASKS_CONTENT.format(unit=args.unit)
 #VERIF_HW_SEQ_CONTENT    = create_unit_content.VERIF_HW_SEQ_CONTENT.format(unit=args.unit)
-#VERIF_TASKS_CONTENT     = create_unit_content.VERIF_TASKS_CONTENT.format(unit=args.unit)
 #VERIF_TRK_CONTENT       = create_unit_content.VERIF_TRK_CONTENT.format(unit=args.unit)
-#VERIF_FILE_LIST_CONTENT = create_unit_content.VERIF_FILE_LIST_CONTENT.format(unit=args.unit)
 #VERIF_TEST_CONTENT      = create_unit_content.VERIF_TEST_CONTENT.format(unit=args.unit)
 #VERIF_LEVEL0_CONTENT    = create_unit_content.VERIF_LEVEL0_CONTENT.format(unit=args.unit)
 #VERIF_PP_CONTENT        = create_unit_content.VERIF_PP_CONTENT.format(unit=args.unit)
-#
-#def create_verif():
-#    mkdir(VERIF_DIR)
-#    mkdir(TB_DIR)
-#    mkdir(REGRESS_DIR)
-#    mkdir(HW_SEQ_DIR)
-#    mkdir(TASKS_DIR)
-#    mkdir(TRK_DIR)
-#    mkdir(TEST_DIR)
+
+def create_verif():
+    mkdir(VERIF_DIR)
+    mkdir(TB_DIR)
+    mkdir(REGRESS_DIR)
+    mkdir(HW_SEQ_DIR)
+    mkdir(TASKS_DIR)
+    mkdir(TRK_DIR)
+    mkdir(TEST_DIR)
+    mkdir(FILE_LIST_DIR)
+    touch(TB_FILE)
+    touch(VERIF_FILE_LIST)
+    touch(FILE_LIST)
+    touch(TASKS_FILE)
+    write_to_file(TB_FILE, TB_FILE_CONTENT)
+    write_to_file(VERIF_FILE_LIST, VERIF_FILE_LIST_CONTENT)
+    write_to_file(FILE_LIST, FILE_LIST_CONTENT)
+    write_to_file(TASKS_FILE, VERIF_TASKS_CONTENT)
 #    touch(HW_SEQ_FILE)
 #    touch(TASKS_FILE)
 #    touch(TRK_FILE)
@@ -144,3 +156,4 @@ def create_source():
 
 
 create_source()
+create_verif()
