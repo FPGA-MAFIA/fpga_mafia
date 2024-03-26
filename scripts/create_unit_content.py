@@ -187,10 +187,9 @@ initial begin: test_seq
     set_alu_inputs(32'h1, 32'h2, AND);
     set_alu_inputs(32'h1, 32'h2, OR);
     set_alu_inputs(32'h1, 32'h2, XOR);
-
-
-
-    #1000;
+    #10;
+    $display("ALU test sequence completed");
+    #10;
     $finish;
     //$error("ERROR: TIMEOUT");
     //eot("ERROR: TIMEOUT");

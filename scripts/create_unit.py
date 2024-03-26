@@ -109,6 +109,7 @@ RTL_FILE_LIST_CONTENT   = create_unit_content.RTL_FILE_LIST_CONTENT.format(unit=
 
 # Create the source directory and it's its files
 def create_source():
+    print_message(f'[INFO] Creating source directory and files for unit {args.unit}')
     mkdir(SOURCE_DIR)
     touch(SOURCE_PKG)
     touch(SOURCE_UNIT)
@@ -129,6 +130,7 @@ VERIF_TASKS_CONTENT     = create_unit_content.VERIF_TASKS_CONTENT.format(unit=ar
 #VERIF_PP_CONTENT        = create_unit_content.VERIF_PP_CONTENT.format(unit=args.unit)
 
 def create_verif():
+    print_message(f'[INFO] Creating verif directory and files for unit {args.unit}')
     mkdir(VERIF_DIR)
     mkdir(TB_DIR)
     mkdir(REGRESS_DIR)
