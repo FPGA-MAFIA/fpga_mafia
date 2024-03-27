@@ -80,7 +80,7 @@ wire [3:0]    wr_addr, rd_addr;
 //	SDRAM frame buffer
 Sdram_Control	u1	(	//	HOST Side
 						   .REF_CLK(MAX10_CLK1_50),
-					      . RESET_N(KEY[0]),
+					      . RESET_N(!KEY[0]),
 							//	FIFO Write Side 
 						   .WR_DATA(writedata),
 							.WR(write),
