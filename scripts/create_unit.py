@@ -4,6 +4,8 @@
 # It will get a Unit name from the user and create all the necessary files for getting started
 # The Place Holder unit is A simple ALU unit that support ADD,SUB,AND,OR,XOR operations
 
+# example: ./scripts/create_unit.py -unit template
+
 import os
 import sys
 import shutil

@@ -208,6 +208,17 @@ end // test_seq
     .alu_out(alu_out)
 );
 
+parameter V_TIMEOUT = 100000;
+initial begin: detect_timeout
+    //=======================================
+    // timeout
+    //=======================================
+    #V_TIMEOUT 
+    $error("test ended with timeout");
+    $display("ERROR: No data integrity running - try to increase the timeout value");
+    $finish;
+end
+
 endmodule
 `endif
 '''
