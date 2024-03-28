@@ -59,9 +59,9 @@ logic [15:0] DemoSdram    [63:0];       // that memory imitates small version of
 // Immitation of real SDRAM
     always_ff@(posedge Clock) begin
         if(WrRequest)
-            DemoSdram[WriteAddress[3:0]] <= WriteData; 
+            DemoSdram[WriteAddress[5:0]] <= WriteData; 
         else if(RdRequest)
-            ReadData <= DemoSdram[ReadAddress[3:0]]; 
+            ReadData <= DemoSdram[ReadAddress[5:0]]; 
     end
 endmodule
 
