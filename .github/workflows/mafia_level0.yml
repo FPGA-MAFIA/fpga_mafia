@@ -1,10 +1,9 @@
 # this is a github action that runs the python build
-
 name: mafia_level0
 
 on:
-  push:
-    branches: [ main ]
+  #push:
+  #  branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
