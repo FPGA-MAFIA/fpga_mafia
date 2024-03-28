@@ -70,16 +70,8 @@ wire  [15:0]  readdata;
 wire          write;
 wire          read;
 wire          clk_test;
-
-wire  test_software_reset_n;
-wire  test_global_reset_n;
-wire  test_start_n;
-
-wire  sdram_test_pass;
-wire  sdram_test_fail;
-wire  sdram_test_complete;
-
-
+wire [3:0]    c_state;
+wire [3:0]    wr_addr, rd_addr;
 
 //=======================================================
 //  Structural coding
@@ -88,22 +80,22 @@ wire  sdram_test_complete;
 //	SDRAM frame buffer
 Sdram_Control	u1	(	//	HOST Side
 						   .REF_CLK(MAX10_CLK1_50),
-					      .RESET_N(test_software_reset_n),
+					      . RESET_N(!KEY[0]),
 							//	FIFO Write Side 
 						   .WR_DATA(writedata),
 							.WR(write),
-							.WR_ADDR(0),
+							.WR_ADDR(wr_addr),
 							.WR_MAX_ADDR(25'h1ffffff),		//	
-							.WR_LENGTH(9'h80),
-							.WR_LOAD(!test_global_reset_n ),
+							.WR_LENGTH(9'h01),    
+							.WR_LOAD(!KEY[0]),
 							.WR_CLK(clk_test),
 							//	FIFO Read Side 
 						   .RD_DATA(readdata),
 				        	.RD(read),
-				        	.RD_ADDR(0),			//	Read odd field and bypess blanking
+				        	.RD_ADDR(rd_addr),			//	Read odd field and bypess blanking
 							.RD_MAX_ADDR(25'h1ffffff),
-							.RD_LENGTH(9'h80),
-				        	.RD_LOAD(!test_global_reset_n ),
+							.RD_LENGTH(9'h01),
+				        	.RD_LOAD(!KEY[0]),
 							.RD_CLK(clk_test),
                      //	SDRAM Side
 						   .SA(DRAM_ADDR),
@@ -111,11 +103,11 @@ Sdram_Control	u1	(	//	HOST Side
 						   .CS_N(DRAM_CS_N),
 						   .CKE(DRAM_CKE),
 						   .RAS_N(DRAM_RAS_N),
-				         .CAS_N(DRAM_CAS_N),
-				         .WE_N(DRAM_WE_N),
+				           .CAS_N(DRAM_CAS_N),
+				           .WE_N(DRAM_WE_N),
 						   .DQ(DRAM_DQ),
-				         .DQM({DRAM_UDQM,DRAM_LDQM}),
-							.SDR_CLK(DRAM_CLK)	);
+				           .DQM({DRAM_UDQM,DRAM_LDQM}),
+						   .SDR_CLK(DRAM_CLK)	);
 
 
 pll_test u2(
@@ -127,55 +119,17 @@ pll_test u2(
 	
 	
  RW_Test u3(
-      .iCLK(clk_test),
-		.iRST_n(test_software_reset_n),
-		.iBUTTON(test_start_n),
-      .write(write),
-		.writedata(writedata),
-	   .read(read),
-		.readdata(readdata),
-      .drv_status_pass(sdram_test_pass),
-		.drv_status_fail(sdram_test_fail),
-		.drv_status_test_complete(sdram_test_complete)
-		
+    .iCLK(clk_test),
+	.iRST_n(!KEY[0]),
+	.iBUTTON(KEY[1]),
+    .write(write),
+	.writedata(writedata),
+	.wr_addr(wr_addr),
+	.read(read),
+	.rd_addr(rd_addr)
 );			
 	
-// / //////////////////////////////////////////////
-// reset_n and start_n control
-reg [31:0]  cont;
-always@(posedge MAX10_CLK1_50)
-cont<=(cont==32'd4_000_001)?32'd0:cont+1'b1;
+	assign HEX0 = readdata[6:0];
 
-reg[4:0] sample;
-always@(posedge MAX10_CLK1_50)
-begin
-	if(cont==32'd4_000_000)
-		sample[4:0]={sample[3:0],KEY[0]};
-	else 
-		sample[4:0]=sample[4:0];
-end
-
-
-assign test_software_reset_n=(sample[1:0]==2'b10)?1'b0:1'b1;
-assign test_global_reset_n   =(sample[3:2]==2'b10)?1'b0:1'b1;
-assign test_start_n         =(sample[4:3]==2'b01)?1'b0:1'b1;
-
-wire [2:0] test_result;
-assign test_result[0] =  KEY[0];
-assign test_result[1] =  sdram_test_complete? sdram_test_pass : heart_beat[23];
-assign test_result[2] =  heart_beat[23];
-
-
-assign LEDR[2:0] = KEY[0]?test_result:4'b1111;
-
-reg [23:0] heart_beat;
-always @ (posedge MAX10_CLK1_50)
-begin
-	heart_beat <= heart_beat + 1;
-end
-
-	
-	
-	
 
 endmodule
