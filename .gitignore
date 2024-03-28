@@ -14,6 +14,7 @@ FPGA/*/*.done
 FPGA/*/*.pof
 FPGA/*/*.sof
 FPGA/*/*.smsg
+FPGA/*/*.qws
 *.bak
 !FPGA/big_core/de10_lite_big_core_top.sdc
 !FPGA/big_core/de10_lite_big_core_top.sv
