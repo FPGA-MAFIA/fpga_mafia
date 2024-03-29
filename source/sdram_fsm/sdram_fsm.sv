@@ -42,16 +42,16 @@ import sdram_fsm_pkg::*;
 
     // Initialization of WriteFromMeme with seven segment data (DE10 lite has a low active outputs)
     always_comb begin
-        WriteFromMem[0] = 7'b1000000;
-        WriteFromMem[1] = 7'b1111001;
-        WriteFromMem[2] = 7'b0100100;
-        WriteFromMem[3] = 7'b0110000;
-        WriteFromMem[4] = 7'b0011001;
-        WriteFromMem[5] = 7'b0010010;
-        WriteFromMem[6] = 7'b0000010;
-        WriteFromMem[7] = 7'b1111000;
-        WriteFromMem[8] = 7'b0000000;
-        WriteFromMem[9] = 7'b0010000;
+        WriteFromMem[0] = 7'b1000000;  // 0x40
+        WriteFromMem[1] = 7'b1111001;  // 0x79
+        WriteFromMem[2] = 7'b0100100;  // 0x24
+        WriteFromMem[3] = 7'b0110000;  // 0x30
+        WriteFromMem[4] = 7'b0011001;  // 0x19
+        WriteFromMem[5] = 7'b0010010;  // 0x12
+        WriteFromMem[6] = 7'b0000010;  // 0x02
+        WriteFromMem[7] = 7'b1111000;  // 0x78
+        WriteFromMem[8] = 7'b0000000;  // 0x00
+        WriteFromMem[9] = 7'b0010000;  // 0x10
     end
     
 
@@ -63,7 +63,9 @@ import sdram_fsm_pkg::*;
             Counter <= Next_counter;
     end
 
-    assign Next_counter    = (Counter == 4'ha) ? 4'h0 : Counter + 1;
+    logic IncCounterEn;
+    assign IncCounterEn = (state == WRITE & state != READ) || (state != WRITE & state == READ);
+    assign Next_counter    = (Counter == 4'ha || !IncCounterEn) ? 4'h0 : Counter + 1;
     assign OnProgress      = !(Counter == 4'ha);
 
     // state register
@@ -87,7 +89,7 @@ import sdram_fsm_pkg::*;
         case(state)
             IDLE : begin
                 if (StartWr) 
-                    next_state = READ;
+                    next_state = WRITE;
                 else
                     next_state = IDLE;
             end

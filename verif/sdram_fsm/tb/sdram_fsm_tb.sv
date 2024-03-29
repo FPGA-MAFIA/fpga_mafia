@@ -10,6 +10,8 @@
 //-----------------------------------------------------------------------------
 // Description :
 //-----------------------------------------------------------------------------
+
+// to run type in the terminal ./build.py -dut sdram_fsm -hw -sim
 `ifndef sdram_fsm_TB_SV
 `define sdram_fsm_TB_SV
 
@@ -46,8 +48,9 @@ string test_name;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
-    #40
+    #35
         $display("Test Start");
+        StartWr = 1'b1;
 
     wait(sdram_fsm_top.Done) begin
         $display("Test is finished");
@@ -57,7 +60,7 @@ initial begin: test_seq
 
 end // test_seq
 
-parameter V_TIMEOUT = 100000;
+parameter V_TIMEOUT = 1000;
 initial begin : time_out_detection
     #V_TIMEOUT
     $error("Time out reached");
