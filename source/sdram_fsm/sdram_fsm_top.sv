@@ -39,7 +39,7 @@ import sdram_fsm_pkg::*;
 sdram_fsm sdram_fsm 
 (
     .Clock(Clock),  
-    .nRst(!nRst),
+    .nRst(nRst),
     .StartWr(StartWr), // start writing to memory
     // write to sdram interface
     .WrRequest(WrRequest),    // write request - start writing to FIFO  
