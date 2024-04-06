@@ -9,7 +9,7 @@ module DE10_LITE_SDRAM_RTL_Test(
 	input 		          		ADC_CLK_10,
 	input 		          		MAX10_CLK1_50,
 	input 		          		MAX10_CLK2_50,
-
+	output                     clk_smp,
 	//////////// SDRAM //////////
 	output		    [12:0]		DRAM_ADDR,
 	output		     [1:0]		DRAM_BA,
@@ -80,7 +80,7 @@ wire [3:0]    wr_addr, rd_addr;
 //	SDRAM frame buffer
 Sdram_Control	u1	(	//	HOST Side
 						   .REF_CLK(MAX10_CLK1_50),
-					      . RESET_N(!KEY[0]),
+					      . RESET_N(KEY[0]),
 							//	FIFO Write Side 
 						   .WR_DATA(writedata),
 							.WR(write),
@@ -92,7 +92,7 @@ Sdram_Control	u1	(	//	HOST Side
 							//	FIFO Read Side 
 						   .RD_DATA(readdata),
 				        	.RD(read),
-				        	.RD_ADDR(rd_addr),			//	Read odd field and bypess blanking
+				        	.RD_ADDR(rd_addr),			//	Read address
 							.RD_MAX_ADDR(25'h1ffffff),
 							.RD_LENGTH(9'h01),
 				        	.RD_LOAD(!KEY[0]),
@@ -116,18 +116,27 @@ pll_test u2(
 	.c0(clk_test),
 	.locked());
 
+assign clk_smp = clk_test;
 	
-	
- RW_Test u3(
-    .iCLK(clk_test),
-	.iRST_n(!KEY[0]),
-	.iBUTTON(KEY[1]),
-    .write(write),
-	.writedata(writedata),
-	.wr_addr(wr_addr),
-	.read(read),
-	.rd_addr(rd_addr)
-);			
+wire Done;
+
+sdram_fsm sdram_fsm 
+(
+    .Clock(clk_test),  // 100Mhz from PLL
+	 .nRst(KEY[0]),    // 
+    .StartWr(!KEY[1]), // start writing to memory. key is active low then when pressed it becomes 0
+    // write to sdram interface
+    .WrRequest(write),    // write request - start writing to FIFO  
+    .WriteData(writedata),
+    .WriteAddress(wr_addr),
+    // read from  sdram interface
+    .RdRequest(read),   // read request - start reading from FIFO
+    .ReadData(readdata),
+    .ReadAddress(rd_addr),
+    .Done(Done)  // finish reading from memory
+    
+);
+		
 	
 	assign HEX0 = readdata[6:0];
 

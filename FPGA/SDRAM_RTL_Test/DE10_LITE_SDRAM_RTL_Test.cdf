@@ -3,8 +3,8 @@ JedecChain;
 	FileRevision(JESD32A);
 	DefaultMfr(6E);
 
-	P ActionCode(Cfg)
-		Device PartName(10M50DAF484) Path("C:/workspace/fpga_mafia/FPGA/SDRAM_RTL_Test/") File("DE10_LITE_SDRAM_RTL_Test.sof") MfrSpec(OpMask(1));
+	P ActionCode(Ign)
+		Device PartName(10M50DAF484) MfrSpec(OpMask(0) FullPath("C:/workspace/fpga_mafia/FPGA/SDRAM_RTL_Test/DE10_LITE_SDRAM_RTL_Test.sof"));
 
 ChainEnd;
 
