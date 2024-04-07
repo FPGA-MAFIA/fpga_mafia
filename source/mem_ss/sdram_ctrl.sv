@@ -11,6 +11,7 @@
 // For more infomation please refer to de10-lite cd and search for documentation
 //-----------------------------------------------------------------------------
 
+`include "macros.h"
 
 module sdram_ctrl
 import sdram_ctrl_pkg::*;
@@ -28,9 +29,9 @@ import sdram_ctrl_pkg::*;
 	output logic	     	DRAM_CLK,   // Clock: System clock signal for SDRAM
 	output logic     		DRAM_CS_N,  // Chip Select Negative: Enables the SDRAM chip when low
 	inout 		    [15:0]	DRAM_DQ,    // Data Bus: Bidirectional bus for data transfer to/from SDRAM
-	output logic		    DRAM_LDQM,  // Lower Byte Data Mask: Masks lower byte during read/write operations
+	output logic		    DRAM_DQML,  // Lower Byte Data Mask: Masks lower byte during read/write operations
 	output logic			DRAM_RAS_N, // Row Address Strobe (RAS) Negative: Initiates row access
-	output logic		    DRAM_UDQM,  // Upper Byte Data Mask: Masks upper byte during read/write operations
+	output logic		    DRAM_DQMH,  // Upper Byte Data Mask: Masks upper byte during read/write operations
 	output logic		    DRAM_WE_N   // Write Enable Negative: Determines if the operation is a read(high) or write(low)
 );
 
@@ -40,6 +41,9 @@ import sdram_ctrl_pkg::*;
     logic  [3:0]  tRCCounter, NexttRCCounter;
     logic  [6:0]  InitRefreshCounter, NextInitRefreshCounter;
     logic  [3:0]  tMRDCounter, NexttMRDCounter;
+
+    logic [1:0]  BankSelect;
+    logic [12:0] DramAddress;
 
     // Counters 
     always_ff@(posedge Clock) begin
@@ -115,57 +119,20 @@ import sdram_ctrl_pkg::*;
         endcase
     end
 
-    // outputs in each state
-    always_comb begin: output_logic
-        // Default values sets to NOP command
-        // for other values please refer to page.9 in the documentation
-        DRAM_ADDR   = 13'b0;
-        DRAM_BA     = 2'b00;
-        DRAM_CAS_N  = 1'b1;
-        DRAM_CS_N   = 1'b0;
-        DRAM_LDQM   = 1'b0;
-        DRAM_RAS_N  = 1'b1;
-        DRAM_UDQM   = 1'b0;
-        DRAM_WE_N   = 1'b1;
-        Busy        = 1'b0; 
-        case(State)   
-            INIT_PALL: begin
-                DRAM_ADDR[10] = 1'b1;
-                DRAM_CAS_N    = 1'b1;
-                DRAM_RAS_N    = 1'b0;
-                DRAM_WE_N     = 1'b0;
-                Busy          = 1'b1;
-            end
-            INIT_REFRESH: begin
-                DRAM_CAS_N  = 1'b0;
-                DRAM_RAS_N  = 1'b0;
-                DRAM_WE_N   = 1'b1;
-                Busy        = 1'b1;
-            end
-            MRS: begin
-                DRAM_CAS_N  = 1'b0;
-                DRAM_RAS_N  = 1'b0;
-                DRAM_WE_N   = 1'b0;
-                DRAM_ADDR   = ModeRegAddrBitsSetSingle; // for details plese refer to documantation Page.26
-                Busy        = 1'b1;
-            end
 
-            //other states TODO
+    // output logic 
+    assign DRAM_ADDR   =  (State == NOP || State == REFRESH) ? 1'b1 : DramAddress; 
+	assign DRAM_BA      = (State == NOP || State == PRECHARGE_ALL || State == REFRESH) ? 1'b1 : BankSelect; // When not bank select, '1' is dont care
+	assign DRAM_CAS_N   = (State == NOP || State == ACTIVATE || State == WRITE || State == PRECHERGE || State == PRECHARGE_ALL) ? 1'b1 : 1'b0;
+	assign DRAM_CKE     =  1'b1; // TODO in the future add logic to save power when not in work
+	assign DRAM_CLK     =  Clock;
+	assign DRAM_CS_N    =  1'b1; // We always select that chip  
+	assign DRAM_DQML    =  1'b0; // Always enable Low byte. TODO add mask option in the future
+	assign DRAM_RAS_N   = (State == NOP || State == READ || State == ACTIVATE || State == REFRESH) ? 1'b1 : 1'b0;
+	assign DRAM_DQMH    =  1'b0; // Always enable High byte. TODO add mask option in the future
+	assign DRAM_WE_N    = (State == NOP || State == READ || State == WRITE) ? 1'b1 : 1'b0;
+    assign Busy         = (State != IDLE) ? 1'b1 : 1'b0;
 
-            default: begin // NOP
-                DRAM_CAS_N  = 1'b1;
-                DRAM_RAS_N  = 1'b1;
-                DRAM_WE_N   = 1'b1;
-                Busy        = 1'b1;
-            end
-        endcase
-    end
-
-
-
-    //SDRAM interface
-    assign DRAM_CKE    = 1'b1;  // TODO clock enable is always set. In the future consider adding some logic to save power 
-    assign DRAM_CLK    = Clock;
 
 
 
