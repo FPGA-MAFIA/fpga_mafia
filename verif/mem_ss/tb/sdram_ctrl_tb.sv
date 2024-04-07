@@ -42,12 +42,17 @@ sdram_ctrl sdram_ctrl(
 	.DRAM_CLK(),   
 	.DRAM_CS_N(), 
 	.DRAM_DQ(),    
-	.DRAM_LDQM(),  
+	.DRAM_DQML(),  
 	.DRAM_RAS_N(), 
-	.DRAM_UDQM(),   
+	.DRAM_DQMH(),   
 	.DRAM_WE_N()   
 );
 
-
+parameter V_TIMEOUT = 1000;
+initial begin: time_out_detection
+    #V_TIMEOUT
+    $error("time out reached");
+    $finish;
+end
 
 endmodule
