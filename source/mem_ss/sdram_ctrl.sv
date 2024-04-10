@@ -11,7 +11,7 @@
 // For more infomation please refer to de10-lite cd and search for documentation
 //-----------------------------------------------------------------------------
 
-`include "macros.h"
+`include "macros.vh"
 
 module sdram_ctrl
 import sdram_ctrl_pkg::*;
@@ -36,108 +36,87 @@ import sdram_ctrl_pkg::*;
 );
 
     sdram_states State, NextState;
-    logic  [14:0] InitNopCounter, NextInitNopCounter;
-    logic  [1:0]  tRPCounter, NexttRPCounter;
-    logic  [3:0]  tRCCounter, NexttRCCounter;
-    logic  [6:0]  InitRefreshCounter, NextInitRefreshCounter;
-    logic  [3:0]  tMRDCounter, NexttMRDCounter;
+    var sdram_counters       SdramCounters;
+    var next_sdram_counters  NextSdramCounters;
+    logic PerformRefreshFlag;
 
-    logic [1:0]  BankSelect;
-    logic [12:0] DramAddress;
+     // State registers
+    `MAFIA_RST_VAL_DFF(State, NextState, Clock, Rst, INIT)
 
-    // Counters 
-    always_ff@(posedge Clock) begin
-        if(Rst) begin
-            InitNopCounter     <= 0;
-            tRPCounter         <= 0;
-            tRCCounter         <= 0;
-            InitRefreshCounter <= 0;
-            tMRDCounter        <= 0;
-        end
-        else begin
-            InitNopCounter     <= NextInitNopCounter;
-            tRPCounter         <= NexttRPCounter;
-            InitRefreshCounter <= NextInitRefreshCounter;
-            tMRDCounter        <= NexttMRDCounter;
-        end
-    end
+    // Counters
+    `MAFIA_RST_VAL_DFF(SdramCounters, NextSdramCounters, Clock, Rst, '0)
 
-    assign NextInitNopCounter     = (State != INIT_NOP)                        ? 0 : InitNopCounter + 1; 
-    assign NexttRPCounter         = (State == INIT_PALL || State == PRECHARGE) ? tRPCounter + 1  : 0;
-    assign NextInitRefreshCounter = (State != INIT_REFRESH)                    ? 0 : InitRefreshCounter + 1; 
-    assign NexttMRDCounter        = (State != MRS)                             ? 0 : tMRDCounter + 1;
 
-    // State registers
-    always_ff@(posedge Clock) begin : state_register
-        if(Rst) begin
-            State <= INIT_NOP;
-        end
-        else begin
-            State <= NextState;
-        end
-    end
 
-    // Next state logic
-    always_comb begin : next_state_logic
-        case(State)
-            INIT_NOP: begin
-                if(InitNopCounter <= InhibitMax) begin
-                    NextState = INIT_NOP;
-                end
-                else begin   
-                    NextState = INIT_PALL;
-                end
-            end
-            INIT_PALL: begin
-                if(tRPCounter <= tRPMax) begin
-                    NextState = INIT_PALL;
-                end
-                else begin
-                   NextState = INIT_REFRESH; 
-                end
-            end
-            INIT_REFRESH: begin
-                if(InitRefreshCounter <= InitRefreshMax) begin
-                    NextState = INIT_REFRESH;
-                end
-                else begin
-                    NextState = MRS; 
-                end
-            end
-            MRS: begin
-                 if(tMRDCounter <= tMRDMax) begin
-                    NextState = MRS;
-                end
-                else begin
-                    NextState = IDLE; 
-            end
-            // other states TODO
+    // State machine
+    always_comb begin :state_machine
+        DRAM_ADDR   = 0;
+        DRAM_BA     = 0;
+        DRAM_CAS_N  = 0;
+	    DRAM_CKE    = 1;
+	    DRAM_CS_N   = 0;
+	    DRAM_DQML   = 0;
+        DRAM_RAS_N  = 0;
+        DRAM_DQMH   = 0;
+        DRAM_WE_N   = 0; 
+        Busy        = 1;
+        NextSdramCounters  = SdramCounters;
+        PerformRefreshFlag = 1'b1;  
+            case(State)
+            INIT: begin
+                    // 100us of NOP
+                    if(SdramCounters.NopInitCounter < NopMaxDuration) begin  
+                        {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = NOP_CMD;
+                        NextSdramCounters.NextNopInitCounter = SdramCounters.NopInitCounter+1;   
+                    end
+                    // precharge all.
+                    else if(SdramCounters.PrechargeCounter == 0) begin
+                        {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = PRECHARGE_ALL_CMD;
+                         DRAM_ADDR[10]       = 1'b1;
+                        NextSdramCounters.NextPrechargeCounter = SdramCounters.PrechargeCounter+1;
+                    end
+                    else if(SdramCounters.PrechargeCounter < tRP) begin
+                        {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = NOP_CMD;
+                        NextSdramCounters.NextPrechargeCounter = SdramCounters.PrechargeCounter+1;
+                    end
+                    // refresh 8 times
+                    else if((SdramCounters.RefreshInitCounter < TimesToRefreshWhenInit & PerformRefreshFlag)) begin
+                        {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = AUTO_REFRESH_CMD;
+                        PerformRefreshFlag = 1'b0;
+                        NextSdramCounters.NextRefreshInitCounter = SdramCounters.RefreshInitCounter+1;
+                    end
+                    else if((SdramCounters.RefreshCounter < tRC) & (SdramCounters.RefreshInitCounter < TimesToRefreshWhenInit)) begin
+                           {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = NOP_CMD;
+                           if(SdramCounters.RefreshCounter == 8) begin   // FIXME - need to be refactored. in the eight cycle we make the last nop and goes back to auto refresh
+                                NextSdramCounters.NextRefreshCounter = 0;
+                                PerformRefreshFlag = 1'b1;
+                           end
+                           else begin
+                                NextSdramCounters.NextRefreshCounter = SdramCounters.RefreshCounter+1;
+                           end
+ 
+                    end
+                    // update mode register
+                    else if(SdramCounters.ModeRegisterSetCounter == 0) begin
+                        {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = MRS_CMD;
+                         DRAM_ADDR = Set2Burst;
+                        NextSdramCounters.NextModeRegisterSetCounter = SdramCounters.ModeRegisterSetCounter+1;
+                    end
+                    else if(SdramCounters.ModeRegisterSetCounter < tMRD) begin
+                        {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = NOP_CMD;
+                        NextSdramCounters.NextModeRegisterSetCounter = SdramCounters.ModeRegisterSetCounter+1;
+                    end
+                    else begin
+                        NextState = IDLE;
+                    end
 
-                
-            end
-
+            end  // end INIT 
+            default: NextState = IDLE;
         endcase
-    end
+    end :state_machine
 
-
-    // output logic 
-    assign DRAM_ADDR   =  (State == NOP || State == REFRESH) ? 1'b1 : DramAddress; 
-	assign DRAM_BA      = (State == NOP || State == PRECHARGE_ALL || State == REFRESH) ? 1'b1 : BankSelect; // When not bank select, '1' is dont care
-	assign DRAM_CAS_N   = (State == NOP || State == ACTIVATE || State == WRITE || State == PRECHERGE || State == PRECHARGE_ALL) ? 1'b1 : 1'b0;
-	assign DRAM_CKE     =  1'b1; // TODO in the future add logic to save power when not in work
-	assign DRAM_CLK     =  Clock;
-	assign DRAM_CS_N    =  1'b1; // We always select that chip  
-	assign DRAM_DQML    =  1'b0; // Always enable Low byte. TODO add mask option in the future
-	assign DRAM_RAS_N   = (State == NOP || State == READ || State == ACTIVATE || State == REFRESH) ? 1'b1 : 1'b0;
-	assign DRAM_DQMH    =  1'b0; // Always enable High byte. TODO add mask option in the future
-	assign DRAM_WE_N    = (State == NOP || State == READ || State == WRITE) ? 1'b1 : 1'b0;
-    assign Busy         = (State != IDLE) ? 1'b1 : 1'b0;
-
-
-
-
-
-
+  
+    assign DRAM_CLK = Clock;
 endmodule
 
 
