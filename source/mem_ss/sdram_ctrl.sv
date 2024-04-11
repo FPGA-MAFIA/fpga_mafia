@@ -16,12 +16,15 @@
 module sdram_ctrl
 import sdram_ctrl_pkg::*;
 (   
-    input logic Clock,  
-    input logic Rst,
-    output logic Busy,      // signal goes high in case of refresh or INIT states
-    input logic [31:0] Address,  // bank: bits (25,24), rows: bits (23-11), cols: bits (10-1)
-    input logic ReadReq,
-    input logic WriteReq,
+    input  logic        Clock,  
+    input  logic        Rst,
+    output logic        Busy,      // signal goes high in case of refresh or INIT states
+    input  logic [31:0] Address,  // bank: bits (25,24), rows: bits (23-11), cols: bits (10-1)
+    input  logic        ReadReq,
+    input  logic        WriteReq,
+    input  logic [15:0] DataIn,
+    output logic [15:0] DataOut,
+
 	//********************************
     //       SDRAM INTERFACE        
     //******************************** 
@@ -31,20 +34,18 @@ import sdram_ctrl_pkg::*;
 	output logic	      	DRAM_CKE,   // Clock Enable: Enables or disables the clock to save power
 	output logic	     	DRAM_CLK,   // Clock: System clock signal for SDRAM
 	output logic     		DRAM_CS_N,  // Chip Select Negative: Enables the SDRAM chip when low
-	inout 		    [15:0]	DRAM_DQ,    // Data Bus: Bidirectional bus for data transfer to/from SDRAM
+	inout          [15:0]	DRAM_DQ,    // Data Bus: Bidirectional bus for data transfer to/from SDRAM
 	output logic		    DRAM_DQML,  // Lower Byte Data Mask: Masks lower byte during read/write operations
 	output logic			DRAM_RAS_N, // Row Address Strobe (RAS) Negative: Initiates row access
 	output logic		    DRAM_DQMH,  // Upper Byte Data Mask: Masks upper byte during read/write operations
 	output logic		    DRAM_WE_N   // Write Enable Negative: Determines if the operation is a read(high) or write(low)
 );
 
-    sdram_states State, NextState;
+    sdram_states             State, NextState;
     var sdram_counters       SdramCounters;
     var next_sdram_counters  NextSdramCounters;
     logic [2:0]              Command;
-    logic                    StartAutoRefresh;
-    logic [10:0]             RefreshCounter, NextRefreshCounter;
-
+    
      // State registers
     `MAFIA_RST_VAL_DFF(State, NextState, Clock, Rst, RST)
 
@@ -52,7 +53,9 @@ import sdram_ctrl_pkg::*;
     `MAFIA_RST_DFF(SdramCounters, NextSdramCounters, Clock, Rst)
     
     // Refresh couter logic
-    logic ResertRefreshCounter;
+    logic        ResertRefreshCounter;
+    logic        StartAutoRefresh;
+    logic [10:0] RefreshCounter, NextRefreshCounter;
     // We dont want to trigger auto refresh when we in the initiale states
     assign ResertRefreshCounter = (RefreshCounter == RefreshRate || State == INIT_WAIT || State == INIT_PREA ||
                                   State == INIT_NOP || State == INIT_MODE_REG || INIT_REFRESH);  
@@ -60,12 +63,18 @@ import sdram_ctrl_pkg::*;
     assign StartAutoRefresh     = (RefreshCounter == RefreshRate);
     `MAFIA_RST_DFF(RefreshCounter, NextRefreshCounter, Clock, Rst)
 
+    assign Busy = (State == IDLE) ? 1'b0: 1'b1;
+
+   
+    assign DataOut = (State == READ)  ? DRAM_DQ : 16'bz;
+    assign DRAM_DQ = (State == WRITE) ? DataIn  : 16'bz;
+
+
     // State machine
     always_comb begin :state_machine
         DRAM_ADDR   = 0;
         DRAM_BA     = 0;
         Command     = NOP_CMD;  
-        Busy        = 1;
         NextSdramCounters  = SdramCounters;
         NextState          = State;
             case(State)
@@ -139,7 +148,6 @@ import sdram_ctrl_pkg::*;
                 end
             end
             IDLE: begin
-                Busy = 1'b0;
                 if(StartAutoRefresh)
                     NextState = REFRESH;
                 else if(ReadReq || WriteReq)
@@ -151,7 +159,7 @@ import sdram_ctrl_pkg::*;
                 if(SdramCounters.ActivationCounter == 0) begin
                     Command = ACTIVATE_CMD;
                     DRAM_ADDR = Address[23:11];
-                    DRAM_BA   = Address[25-24];
+                    DRAM_BA   = Address[25:24];
                     NextSdramCounters.ActivationCounter = SdramCounters.ActivationCounter + 1;
                 end
                 else if(SdramCounters.ActivationCounter < tRCD-1) begin
@@ -171,10 +179,10 @@ import sdram_ctrl_pkg::*;
                 if(SdramCounters.ReadCounter == 0) begin
                     Command = READ_CMD;
                     DRAM_ADDR = Address[10:1];
-                    DRAM_BA   = Address[25-24];
+                    DRAM_BA   = Address[25:24];
                     NextSdramCounters.ReadCounter = SdramCounters.ReadCounter + 1;
                 end
-                else if(SdramCounters.PrechargeCounter < tCAC) begin  // note we dont subtruct 1 here. we need two nops
+                else if(SdramCounters.ReadCounter < tCAC) begin  // note we dont subtruct 1 here. we need two nops
                     Command = NOP_CMD;
                     NextSdramCounters.ReadCounter = SdramCounters.ReadCounter + 1;
                 end    
@@ -190,7 +198,7 @@ import sdram_ctrl_pkg::*;
                     DRAM_BA   = Address[25-24];
                     NextSdramCounters.WriteNopCounter = SdramCounters.WriteNopCounter + 1;
                 end
-                else if(SdramCounters.PrechargeCounter < tDPL) begin  // note we dont subtruct 1 here. we need two nops
+                else if(SdramCounters.WriteNopCounter < tDPL) begin  // note we dont subtruct 1 here. we need two nops
                     Command = NOP_CMD;
                     NextSdramCounters.WriteNopCounter = SdramCounters.WriteNopCounter + 1;
                 end    
@@ -240,6 +248,7 @@ import sdram_ctrl_pkg::*;
 	assign  DRAM_CS_N   = 0;
 	assign  DRAM_DQML   = 0;
     assign  DRAM_DQMH   = 0;
+
 
 endmodule
 

@@ -1,10 +1,6 @@
 module sdram_ctrl_tb;
 import sdram_ctrl_pkg::*;
  
-// FIXME !!!!!!!!!!!
-// FIXME - Draft TB used only for checking error in compilation!!!!
-// FIXME !!!!!!!!!!!!
-
 // to run  ./build.py -dut mem_ss -top sdram_ctrl_tb -hw
 
 logic Clk;
@@ -27,10 +23,11 @@ initial begin: reset_gen
 #100 Rst = 1'b0;
 end: reset_gen
 
-    logic Busy;
-    logic Address;
-    logic ReadReq;
-    logic WriteReq;
+    logic        Busy;
+    logic [31:0] Address;
+    logic        ReadReq;
+    logic        WriteReq;
+	logic [15:0] DataIn, DataOut;
 
     logic  [12:0]   DRAM_ADDR;  
 	logic  [1:0]	DRAM_BA;   
@@ -48,9 +45,11 @@ sdram_ctrl sdram_ctrl(
     .Clock(Clk),  
     .Rst(Rst),
     .Busy(Busy), 
-    .Address(),
-    .ReadReq(),
-    .WriteReq(),
+    .Address(Address),
+    .ReadReq(ReadReq),
+    .WriteReq(WriteReq),
+	.DataIn(DataIn),
+	.DataOut(DataOut),
 	//********************************
     //       SDRAM INTERFACE        
     //******************************** 
@@ -66,6 +65,24 @@ sdram_ctrl sdram_ctrl(
 	.DRAM_DQMH(DRAM_DQMH),   
 	.DRAM_WE_N(DRAM_WE_N)   
 );
+
+initial begin: main
+	begin
+		wait(sdram_ctrl.State==IDLE);
+	end
+	#10
+	WriteReq = 1'b1;
+	DataIn   = 16'h1234;
+	Address  = 0;
+	#100
+	WriteReq = 1'b0;
+	ReadReq  = 1'b1;
+	Address  = 0;
+	#100
+
+	$finish;
+
+end
 
 parameter V_TIMEOUT = 10000; 
 initial begin: time_out_detection
