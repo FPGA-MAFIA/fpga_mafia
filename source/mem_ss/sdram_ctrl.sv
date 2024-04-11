@@ -63,7 +63,7 @@ import sdram_ctrl_pkg::*;
     assign StartAutoRefresh     = (RefreshCounter == RefreshRate);
     `MAFIA_RST_DFF(RefreshCounter, NextRefreshCounter, Clock, Rst)
 
-    assign Busy = (State == IDLE) ? 1'b0: 1'b1;
+    assign Busy = (State == IDLE) ? 1'b0: 1'b1; // TODO add logic 
 
    
     assign DataOut = (State == READ)  ? DRAM_DQ : 16'bz;
