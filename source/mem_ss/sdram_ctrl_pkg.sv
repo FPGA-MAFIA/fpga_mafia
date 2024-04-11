@@ -9,6 +9,7 @@ parameter  tRCD        = 2;     // Activate command to READ/WRITE.
 parameter  tCAC        = 2;     // CAS latency counter. Read latency. 
 parameter  tRAS        = 5;     // Activation to Precharge. 
 parameter  tRP         = 2;     // Precharge cycle consists of precharge_cmd + 1 nop 
+parameter  tDPL        = 2;     // number on nops after write 
 parameter  tRC         = 8;     // refresh cycle consists of refresh_cmd and 7 nops
 parameter  tMRD        = 2;     // Mode register program time consists of 1 mrs_cmd + 1 nop
 parameter  RefreshRate = 1560;  // Refresh time. tref = 64ms -> 64ms/8192 rows 
@@ -22,14 +23,20 @@ parameter SetSingleAccess = 10'b1_00_010_0_000;
 typedef struct packed {
     logic  [13:0] NopInitCounter;
     logic  [1:0]  PrechargeCounter;
+    logic  [1:0]  ActivationCounter;
+    logic  [1:0]  ReadCounter;
+    logic  [1:0]  WriteNopCounter;
     logic  [3:0]  RefreshTrcCounter;
-    logic  [3:0]  RefreshInitCounter;
-    logic         ModeRegisterSetCounter;  
+    logic  [3:0]  RefreshInitCounter; // Indicates the 8 refreshes that runs in initialization
+    logic         ModeRegisterSetCounter;
 } sdram_counters;
 
 typedef struct packed {
     logic  [13:0] NopInitCounter;
     logic  [1:0]  PrechargeCounter;
+    logic  [1:0]  ActivationCounter;
+    logic  [1:0]  ReadCounter;
+    logic  [1:0]  WriteNopCounter;
     logic  [3:0]  RefreshTrcCounter;
     logic  [3:0]  RefreshInitCounter;
     logic         ModeRegisterSetCounter;
