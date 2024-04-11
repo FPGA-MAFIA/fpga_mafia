@@ -66,7 +66,7 @@ import sdram_ctrl_pkg::*;
             RST: 
                 NextState = INIT_WAIT;
             // TODO - minus one was added to all counter to avoid extra muxes by adding some if's
-            // its possible to leave it without minus one but then 1 extra nop will be added. Its not that wrong, it "wastes" few clocks
+            // its possible to leave it without minus one but then 1 extra nop will be added. Its not a big issue, it "wastes" few clocks
             // at the initialization state
             // We also could dec the counters by 1 in the sdram_ctrl_pkg but we choose to leave it that way
             // for more readability of the code
@@ -92,7 +92,7 @@ import sdram_ctrl_pkg::*;
                     NextState = INIT_REFRESH;
             end
             INIT_REFRESH: begin
-                if(SdramCounters.RefreshTrcCounter < tRC-1) begin  // FIXME - in the 8th time only when it return to the state than for 1 cycle we have extra nop. I leave it to avoid extra muxes, its not error!  
+                if(SdramCounters.RefreshTrcCounter < tRC-1) begin  // FIXME - in the 8th time only when it return to the state than for 1 cycle we have extra nop. I leave it to avoid extra muxes by adding if's, its not a critical issue!  
                     Command = AUTO_REFRESH_CMD;
                     NextSdramCounters.RefreshTrcCounter =  SdramCounters.RefreshTrcCounter + 1;
                     NextState = INIT_NOP;
