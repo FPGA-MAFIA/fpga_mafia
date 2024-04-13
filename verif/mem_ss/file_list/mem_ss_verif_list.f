@@ -8,4 +8,5 @@
 ../../../verif/mem_ss/tb/cache_ref_model.sv
 ../../../verif/mem_ss/tb/cache_tb.sv
 ../../../verif/mem_ss/tb/sdram_ctrl_tb.sv
+../../../verif/mem_ss/tb/sdram_top_tb.sv
 
