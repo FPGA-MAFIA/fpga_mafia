@@ -67,6 +67,12 @@ typedef enum logic [2:0] {  // {RAS_N, CAS_N, WE_N}
     MRS_CMD           = 3'b000  
 } sdram_cmd;
 
+typedef enum {
+    IDLE_TOP, 
+    READ_TOP,
+    WRITE_TOP,
+    DONE_TOP
+} sdram_top_states;
 
 
 endpackage

@@ -15,3 +15,4 @@
 ../../../source/mem_ss/mc.sv
 ../../../source/mem_ss/mem_ss.sv
 ../../../source/mem_ss/sdram_ctrl.sv
+../../../source/mem_ss/sdram_top.sv

@@ -195,7 +195,7 @@ import sdram_ctrl_pkg::*;
                 if(SdramCounters.WriteNopCounter == 0) begin
                     Command = WRITE_CMD;
                     DRAM_ADDR = Address[10:1];
-                    DRAM_BA   = Address[25-24];
+                    DRAM_BA   = Address[25:24];
                     NextSdramCounters.WriteNopCounter = SdramCounters.WriteNopCounter + 1;
                 end
                 else if(SdramCounters.WriteNopCounter < tDPL) begin  // note we dont subtruct 1 here. we need two nops
