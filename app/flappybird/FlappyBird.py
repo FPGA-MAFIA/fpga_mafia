@@ -238,7 +238,7 @@ def play_game(num_birds):
         game.draw(screen)
 
         pygame.display.update()
-        clock.tick(1000)
+        clock.tick(5000)
 
         if game.state == IDLE:
             game.start_game()
