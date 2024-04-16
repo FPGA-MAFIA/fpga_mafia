@@ -5,10 +5,19 @@ transcript
 
 FPGA/big_core/*
 FPGA/*/incremental_db/*
+FPGA/*/simulation/*
+FPGA/*/greybox_tmp/*
 FPGA/*/output_files/*
+FPGA/*/.qsys_edit/*
 FPGA/*/db/*
 FPGA/*/*.rpt
 FPGA/*/*.summary
+FPGA/*/*.done
+FPGA/*/*.pof
+FPGA/*/*.sof
+FPGA/*/*.sld
+FPGA/*/*.smsg
+FPGA/*/*.qws
 *.bak
 !FPGA/big_core/de10_lite_big_core_top.sdc
 !FPGA/big_core/de10_lite_big_core_top.sv

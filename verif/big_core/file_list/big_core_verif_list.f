@@ -1,10 +1,14 @@
 +incdir+../../../source/common/
-+incdir+../../../source/big_core/
 +incdir+../../../verif/big_core/tb/
-+incdir+../../../verif/big_core/tests/
++incdir+../../../verif/big_core/tb/trk
++incdir+../../../verif/big_core/tb/tasks
++incdir+../../../verif/big_core/tb/hw_seq
++incdir+../../../verif/big_core/tests
+../../../verif/rv32i_ref/tb/rv32i_ref_pkg.sv
+../../../verif/rv32i_ref/tb/rv32i_ref.sv
+../../../verif/big_core/tb/big_core_no_ref_tb.sv
 ../../../verif/big_core/tb/big_core_tb.sv
-../../../verif/big_core/tb/ps2_kbd_tb.sv
 
-//This is used for the reference core model
--f ../../../source/sc_core/sc_core_rtl_list.f
-../../../verif/big_core/tb/ref_core.sv
+
+
+

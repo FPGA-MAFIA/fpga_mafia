@@ -7,9 +7,12 @@
 
 // === packages === 
 ../../../source/mem_ss/mem_ss_param_pkg.sv
+../../../source/mem_ss/sdram_ctrl_pkg.sv
 
 // === modules ===
 ../../../source/common/fifo.sv
 ../../../source/common/arbiter.sv
 ../../../source/mem_ss/mc.sv
 ../../../source/mem_ss/mem_ss.sv
+../../../source/mem_ss/sdram_ctrl.sv
+../../../source/mem_ss/sdram_top.sv

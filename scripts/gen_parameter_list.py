@@ -3,7 +3,7 @@
 This script generates a list of parameters of the DUT (Device Under Test) that is being tested.
 It reads the DUT name as an argument, searches for parameters in the source files, and outputs 
 a list of these parameters along with their values in a specified format.
-For example: ./gen_parameter_list.py core_rrv
+For example: ./gen_parameter_list.py big_core
 """
 
 import os

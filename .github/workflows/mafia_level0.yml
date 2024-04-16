@@ -1,10 +1,9 @@
 # this is a github action that runs the python build
-
 name: mafia_level0
 
 on:
-  push:
-    branches: [ main ]
+  #push:
+  #  branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -13,27 +12,27 @@ jobs:
   build:
     runs-on: [self-hosted, windows, x64]
     steps:
-      - uses: actions/checkout@v2
-      - name: BIG_CORE
-        run:  python build.py -dut big_core -test alive -app -hw -sim 
-
-      - name: CORE_RRV - rv32i
-        run:  python build.py -dut core_rrv -test alive -app -hw -sim -pp 
+      - uses: actions/checkout@v2 
+      - name: BIG_CORE - rv32i
+        run:  python build.py -dut big_core -test alive -app -hw -sim -pp 
       
-      - name: CORE_RRV - -cfg core_rrv_boot_trap no reference model
-        run:  python build.py -dut core_rrv -top core_rrv_no_ref_tb -cfg core_rrv_boot_trap -test PS2_alive  -app -hw -sim -pp 
+      - name: BIG_CORE - -cfg big_core_boot_trap no reference model
+        run:  python build.py -dut big_core -top big_core_no_ref_tb -cfg big_core_boot_trap -test PS2_alive  -app -hw -sim -pp 
       
-      - name: CORE_RRV -cfg core_rrv_boot_trap with reference model 
-        run:  python build.py -dut core_rrv -cfg core_rrv_boot_trap -test alive_illegal -app -hw -sim -pp 
+      - name: BIG_CORE -cfg big_core_boot_trap with reference model 
+        run:  python build.py -dut big_core -cfg big_core_boot_trap -test alive_illegal -app -hw -sim -pp 
 
-      - name: CORE_RRV - rv32i_level0_no_ref -> no reference model
-        run:  python build.py -dut core_rrv -top core_rrv_no_ref_tb  -test PS2_GCD -app -hw -sim -pp -keep_going
+      - name: BIG_CORE - rv32i_level0_no_ref -> no reference model
+        run:  python build.py -dut big_core -top big_core_no_ref_tb  -test PS2_GCD -app -hw -sim -pp
       
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut mini_core -test alive -cfg mini_rv32e -app -hw -sim 
 
       - name: MINI_CORE at rv32i mode
-        run:  python build.py -dut mini_core -test alive -app -hw -sim 
+        run:  python build.py -dut mini_core -test alive -app -hw -sim
+        
+      - name: MINI_CORE_RRV at rv32i mode
+        run:  python build.py -dut mini_core_rrv -test alive -app -hw -sim 
 
       - name: SC_CORE 
         run:  python build.py -dut sc_core -test alive -app -hw -sim 

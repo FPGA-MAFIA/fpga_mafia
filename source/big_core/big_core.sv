@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// Title            : Big Core 
-// Project          : fpga_mafia 
+// Title            : riscv as-fast-as-possible 
+// Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : big_core 
+// File             : mafia_asap_5pl 
 // Original Author  : Amichai Ben-David
 // Code Owner       : 
 // Adviser          : Amichai Ben-David
@@ -10,98 +10,72 @@
 //-----------------------------------------------------------------------------
 // Description :
 // This module will contain a complete RISCV Core supporting the RV32I
-// Will be implemented in a single cycle micro architecture.
-// The I_MEM & D_MEM will support async memory read. (This will allow the single-cycle arch)
-// ---- 5 Pipeline Stages -----
+// Will be implemented in a 6 stage pipeline micro-architecture.
+// ---- 6 Pipeline Stages -----
 // 1) Q100H Instruction Fetch
 // 2) Q101H Instruction Decode 
 // 3) Q102H Execute 
-// 4) Q103H Memory Access
-// 5) Q104H Write back data from Memory/ALU to Register file
+// 4) Q103H Memory Access1
+// 5) Q104H Memory Access2
+// 6) Q105H Write back data from Memory/ALU to Register file
+// ---- extentions ----
+// Support RV32IE
+// Support CSR 
+// Support Interrupts
+
 
 `include "macros.vh"
 
 module big_core 
 import big_core_pkg::*;
+#(parameter RF_NUM_MSB) 
 (
-    input  logic        Clk,
+    input  logic        Clock,
     input  logic        Rst,
     input  logic        RstPc,
-    output logic        out_for_pd,
     // Instruction Memory
+    output logic       ReadyQ101H,
     output logic [31:0] PcQ100H,             // To I_MEM
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
     // Data Memory
-    output logic [31:0] DMemWrDataQ103H,     // To D_MEM
-    output logic [31:0] DMemAddressQ103H,    // To D_MEM
-    output logic [3:0]  DMemByteEnQ103H,     // To D_MEM
-    output logic        DMemWrEnQ103H,       // To D_MEM
-    output logic        DMemRdEnQ103H,       // To D_MEM
-    input  logic [31:0] DMemRdRspQ104H       // From D_MEM
+    input  logic          DMemReady,    // From D_MEM
+    output t_core2mem_req Core2DmemReqQ103H,
+    input  logic [31:0]   DMemRdRspQ105H     // From D_MEM  
 );
-// ---- Data-Path signals ----
-// Program counter
-logic [31:0]        PcQ101H, PcQ102H;
-logic [31:0]        PcPlus4Q100H, PcPlus4Q101H, PcPlus4Q102H, PcPlus4Q103H, PcPlus4Q104H;
-logic [31:0]        NextPcQ10XH;
-logic [31:0]        InstructionQ101H;
-logic [31:0]        InstructionQ102H;
 
-logic [31:1][31:0]  Register; 
-logic [31:0]        ImmediateQ101H, ImmediateQ102H;
-logic [4:0]         ShamtQ102H;
-logic [31:0]        AluIn1Q102H;
-logic [31:0]        AluIn2Q102H;
-logic [31:0]        AluOutQ102H, AluOutQ103H, AluOutQ104H;
-logic [31:0]        RegRdData1Q101H, PreRegRdData1Q102H, RegRdData1Q102H;
-logic [31:0]        RegRdData2Q101H, PreRegRdData2Q102H, RegRdData2Q102H, RegRdData2Q103H;
-logic [31:0]        RegWrDataQ104H; 
-logic [31:0]        WrBackDataQ104H;
-logic [31:0]        PostSxDMemRdDataQ104H;
+// ---- Data-Path signals ----
+logic [31:0]  PcQ101H, PcQ102H;
+logic [31:0]  PcPlus4Q103H, PcPlus4Q104H, PcPlus4Q105H;
+logic [31:0]  ImmediateQ101H, ImmediateQ102H;
+logic [31:0]  AluOutQ102H, AluOutQ103H, AluOutQ104H, AluOutQ105H;
+logic [31:0]  PreRegRdData1Q102H, RegRdData1Q102H;
+logic [31:0]  PreRegRdData2Q102H, RegRdData2Q102H;
+logic [31:0]  RegWrDataQ104H; 
+logic [31:0]  RegWrDataQ105H; 
+logic [31:0]  DMemWrDataQ103H;
+logic [31:0]  CsrReadDataQ102H;      // data red from CSR
+logic [31:0]  CsrWriteDataQ102H;     // data writen to csr
+
 
 // Control bits
-logic               SelNextPcAluOutJQ101H, SelNextPcAluOutJQ102H;
-logic               SelNextPcAluOutBQ101H, SelNextPcAluOutBQ102H;
-logic               SelNextPcAluOutQ102H;
-logic               SelRegWrPcQ101H, SelRegWrPcQ102H, SelRegWrPcQ103H, SelRegWrPcQ104H;
-logic               BranchCondMetQ102H;
-logic               SelDMemWbQ101H, SelDMemWbQ102H, SelDMemWbQ103H, SelDMemWbQ104H;
-logic               SelCsrWbQ101H,  SelCsrWbQ102H;
-logic [2:0]         Funct3Q101H;
-logic [6:0]         Funct7Q101H;
-logic [4:0]         PreRegSrc1Q101H, RegSrc1Q101H, RegSrc1Q102H; 
-logic [4:0]         PreRegSrc2Q101H, RegSrc2Q101H, RegSrc2Q102H;
-logic [4:0]         RegDstQ101H, RegDstQ102H, RegDstQ103H, RegDstQ104H;
-logic [3:0]         CtrlDMemByteEnQ101H, CtrlDMemByteEnQ102H, CtrlDMemByteEnQ103H;
-logic               CtrlDMemWrEnQ101H, CtrlDMemWrEnQ102H, CtrlDMemWrEnQ103H;
-logic               CtrlSignExtQ101H, CtrlSignExtQ102H, CtrlSignExtQ103H, CtrlSignExtQ104H;
-logic               CtrlLuiQ101H, CtrlLuiQ102H;
-logic               CtrlRegWrEnQ101H, CtrlRegWrEnQ102H, CtrlRegWrEnQ103H, CtrlRegWrEnQ104H;
-logic               SelAluPcQ101H, SelAluPcQ102H;
-logic               SelAluImmQ101H, SelAluImmQ102H;
-logic [1:0]         ByteOffsetQ104H;
-logic [3:0]         ByteEnQ104H, ByteenaRestoreQ104H;
-// Hazard unit detection ctrl
-logic               PcEnQ101H;
-logic [31:0]        PreviousInstructionQ101H;
-logic               LoadHzrdDetectQ101H, LoadHzrdDetectQ102H;
-// End hazard unit detection ctrl
+logic                   BranchCondMetQ102H;
+logic                   ReadyQ100H;
+logic                   ReadyQ102H;
+logic                   ReadyQ103H;
+logic                   ReadyQ104H;
+logic                   ReadyQ105H;
+logic                   ValidInstQ105H;
+t_csr_exception_update  CsrExceptionUpdateQ102H;
+t_big_core_ctrl         Ctrl;
+t_ctrl_if               CtrlIf;
+t_ctrl_rf               CtrlRf;
+t_ctrl_exe              CtrlExe;
+t_ctrl_mem1             CtrlMem1;
+t_ctrl_wb               CtrlWb;
+t_csr_inst_rrv          CtrlCsr;
+t_csr_pc_update         CsrPcUpdateQ102H;
+logic                   TimerInterruptEnable;
 
-// For fetch and decode stages flush
-logic               flushQ102H, flushQ103H;
-
-t_immediate         SelImmTypeQ101H;
-t_alu_op            CtrlAluOpQ101H, CtrlAluOpQ102H;
-t_branch_type       CtrlBranchOpQ101H, CtrlBranchOpQ102H;
-t_opcode            OpcodeQ101H, OpcodeQ102H;
-t_csr_inst          CsrInstQ101H, CsrInstQ102H;
-
-logic Hazard1Data1Q102H;
-logic Hazard2Data1Q102H;
-logic Hazard1Data2Q102H;
-logic Hazard2Data2Q102H;
-logic MatchRd1AftrWrQ101H;
-logic MatchRd2AftrWrQ101H;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
 //  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \   / _ \  | |  | |
@@ -117,23 +91,18 @@ logic MatchRd2AftrWrQ101H;
 // 2. Calc/Set the NextPc
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-logic [31:0] interruptJumpAddrQ101H;
-logic [31:0] MePcQ101H;
-logic        InterruptJumpQ101H;
-logic        MretQ101H;
-assign PcPlus4Q100H  = PcQ100H + 3'h4;
-logic interrupt_counter_expired;
-assign InterruptJumpQ101H = interrupt_counter_expired;
-assign interruptJumpAddrQ101H = 32'h100; //FIXME - come from CSR?
-assign NextPcQ10XH   = InterruptJumpQ101H   ? interruptJumpAddrQ101H :
-                       MretQ101H            ? MePcQ101H   :
-                       SelNextPcAluOutQ102H ? AluOutQ102H :
-                                              PcPlus4Q100H;
-`MAFIA_EN_RST_DFF(PcQ100H, NextPcQ10XH, Clk, PcEnQ101H, Rst | RstPc )
-
-// Q100H to Q101H Flip Flops. 
-`MAFIA_EN_DFF(PcQ101H,      PcQ100H,      Clk, PcEnQ101H)
-`MAFIA_EN_DFF(PcPlus4Q101H, PcPlus4Q100H, Clk, PcEnQ101H)
+big_core_if big_core_if (
+  .Clock            (Clock       ), // input  logic        Clock,
+  .Rst              (Rst         ), // input  logic        Rst,
+  .RstPc            (RstPc       ), // input  logic        RstPc,
+  .ReadyQ100H       (ReadyQ100H  ), // input  logic        ReadyQ100H,
+  .ReadyQ101H       (ReadyQ101H  ), // input  logic        ReadyQ101H,
+  .Ctrl             (CtrlIf        ), // input  t_ctrl_if    Ctrl,
+  .CsrPcUpdateQ102H (CsrPcUpdateQ102H),//input t_csr_pc_update
+  .AluOutQ102H      (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  .PcQ100H          (PcQ100H     ), // output logic [31:0] PcQ100H,
+  .PcQ101H          (PcQ101H     ) // output logic [31:0] PcQ101H
+);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    __   _    _ 
@@ -147,151 +116,59 @@ assign NextPcQ10XH   = InterruptJumpQ101H   ? interruptJumpAddrQ101H :
 // Decode
 // -----------------
 // 1. Load hazard detection.
-// 2. Get the instruction from I_MEM and use the decoder to set the Ctrl Bits.
+// 2. Get the instruciton from I_MEM and use the decoder to set the Ctrl Bits.
 // 3. Use the rs1 & rs2 (RegSrc) to read the Register file data.
 // 4. construct the Immediate types.
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+big_core_ctrl big_core_ctrl (
+  .Rst                  (Rst    ), //input
+  .Clock                (Clock  ), //input
+  // input instruction 
+  .PreInstructionQ101H  (PreInstructionQ101H), //input
+  .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
+  .AluOutQ102H          (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  // input feedback from data path
+  .BranchCondMetQ102H   (BranchCondMetQ102H), //input
+  .DMemReady            (DMemReady), //input
+  .TimerInterruptEnable (TimerInterruptEnable),
+  // ready signals for "back-pressure" - use as the enable for the pipe stage sample
+  .ReadyQ100H           (ReadyQ100H), //  output 
+  .ReadyQ101H           (ReadyQ101H), //  output 
+  .ReadyQ102H           (ReadyQ102H), //  output 
+  .ReadyQ103H           (ReadyQ103H), //  output 
+  .ReadyQ104H           (ReadyQ104H), //  output 
+  .ReadyQ105H           (ReadyQ105H), //  output 
+  // output ctrl signals
+  .CtrlIf                   (CtrlIf                   ), //output
+  .CtrlRf                   (CtrlRf                   ), //output
+  .CtrlExe                  (CtrlExe                  ), //output
+  .CtrlCsr                  (CtrlCsr                  ), //output
+  .CtrlMem1                 (CtrlMem1                 ), //output
+  .CtrlWb                   (CtrlWb                   ), //output
+  // output data path signals
+  .ImmediateQ101H           (ImmediateQ101H           ), //output
+  .CsrExceptionUpdateQ102H  (CsrExceptionUpdateQ102H  ), //output
+  .ValidInstQ105H           (ValidInstQ105H           )
+);
 
-// Load and Ctrl hazard detection
-assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
-assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
-assign LoadHzrdDetectQ101H       = Rst ? 1'b0 : 
-                                 ((PreRegSrc1Q101H == RegDstQ102H) && (OpcodeQ102H == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == RegDstQ102H) && (OpcodeQ102H == LOAD)) ? 1'b1:
-                                                                                               1'b0;
-assign PcEnQ101H                = !LoadHzrdDetectQ101H;
-assign InstructionQ101H         = flushQ102H ? NOP :
-                                  flushQ103H ? NOP :
-                                  LoadHzrdDetectQ101H ? NOP: 
-                                  LoadHzrdDetectQ102H ? PreviousInstructionQ101H :
-                                                        PreInstructionQ101H;
-
-assign MretQ101H     = (Funct7Q101H == 7'b0011000) && (RegSrc2Q101H==5'b00010) && 
-                       (RegSrc1Q101H ==5'b00000)   && (Funct3Q101H == 3'b000)  && 
-                       (RegDstQ101H == 5'b00000)   && (OpcodeQ101H == SYSCAL) ;
-// End Load and Ctrl hazard detection
-assign OpcodeQ101H           = t_opcode'(InstructionQ101H[6:0]);
-assign RegDstQ101H           = InstructionQ101H[11:7];
-assign RegSrc1Q101H          = InstructionQ101H[19:15];
-assign RegSrc2Q101H          = InstructionQ101H[24:20];
-assign CsrInstQ101H.csr_wren = (OpcodeQ101H == SYSCAL) && !(((Funct3Q101H[1:0] == 2'b11) || (Funct3Q101H[1:0] == 2'b01)) && (RegSrc1Q101H=='0 ));
-assign CsrInstQ101H.csr_rden = (OpcodeQ101H == SYSCAL) && !((Funct3Q101H[1:0]==2'b01 ) && (RegDstQ101H=='0 ));
-assign CsrInstQ101H.csr_op   = InstructionQ101H[13:12];
-assign CsrInstQ101H.csr_rs1  = InstructionQ101H[19:15];
-assign CsrInstQ101H.csr_addr = InstructionQ101H[31:20];
-assign CsrInstQ101H.csr_data = InstructionQ101H[14] ? {27'h0, InstructionQ101H[19:15]} : RegRdData1Q101H;
-assign SelCsrWbQ101H         = CsrInstQ101H.csr_rden;
-assign Funct3Q101H           = InstructionQ101H[14:12];
-assign Funct7Q101H           = InstructionQ101H[31:25];
-assign SelNextPcAluOutJQ101H = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
-assign SelNextPcAluOutBQ101H = (OpcodeQ101H == BRANCH);
-assign SelRegWrPcQ101H       = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR);
-assign SelAluPcQ101H         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);
-assign SelAluImmQ101H        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
-assign SelDMemWbQ101H        = (OpcodeQ101H == LOAD);
-assign CtrlLuiQ101H          = (OpcodeQ101H == LUI);
-assign CtrlRegWrEnQ101H      = (OpcodeQ101H == LUI ) || (OpcodeQ101H == AUIPC) || (OpcodeQ101H == JAL)  || (OpcodeQ101H == JALR)  ||
-                               (OpcodeQ101H == LOAD) || (OpcodeQ101H == I_OP)  || (OpcodeQ101H == R_OP) || (OpcodeQ101H == FENCE) ||
-                               CsrInstQ101H.csr_wren;
-assign CtrlDMemWrEnQ101H     = (OpcodeQ101H == STORE);
-assign CtrlSignExtQ101H      = (OpcodeQ101H == LOAD) && (!Funct3Q101H[2]); // Sign extend the LOAD from memory read.
-assign CtrlDMemByteEnQ101H   = ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b00) ? 4'b0001 : // LB || SB
-                               ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b01) ? 4'b0011 : // LH || SH
-                               ((OpcodeQ101H == LOAD) || (OpcodeQ101H == STORE)) && (Funct3Q101H[1:0] == 2'b10) ? 4'b1111 : // LW || SW
-                                                                                              4'b0000 ;
-assign CtrlBranchOpQ101H     = t_branch_type'(Funct3Q101H);
-
-always_comb begin
-    unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
-    // ---- R type ----
-    {3'b000, 7'b0000000, R_OP} : CtrlAluOpQ101H = ADD;  // ADD
-    {3'b000, 7'b0100000, R_OP} : CtrlAluOpQ101H = SUB;  // SUB
-    {3'b001, 7'b0000000, R_OP} : CtrlAluOpQ101H = SLL;  // SLL
-    {3'b010, 7'b0000000, R_OP} : CtrlAluOpQ101H = SLT;  // SLT
-    {3'b011, 7'b0000000, R_OP} : CtrlAluOpQ101H = SLTU; // SLTU
-    {3'b100, 7'b0000000, R_OP} : CtrlAluOpQ101H = XOR;  // XOR
-    {3'b101, 7'b0000000, R_OP} : CtrlAluOpQ101H = SRL;  // SRL
-    {3'b101, 7'b0100000, R_OP} : CtrlAluOpQ101H = SRA;  // SRA
-    {3'b110, 7'b0000000, R_OP} : CtrlAluOpQ101H = OR;   // OR
-    {3'b111, 7'b0000000, R_OP} : CtrlAluOpQ101H = AND;  // AND
-    // ---- I type ----
-    {3'b000, 7'b???????, I_OP} : CtrlAluOpQ101H = ADD;  // ADDI
-    {3'b010, 7'b???????, I_OP} : CtrlAluOpQ101H = SLT;  // SLTI
-    {3'b011, 7'b???????, I_OP} : CtrlAluOpQ101H = SLTU; // SLTUI
-    {3'b100, 7'b???????, I_OP} : CtrlAluOpQ101H = XOR;  // XORI
-    {3'b110, 7'b???????, I_OP} : CtrlAluOpQ101H = OR;   // ORI
-    {3'b111, 7'b???????, I_OP} : CtrlAluOpQ101H = AND;  // ANDI
-    {3'b001, 7'b0000000, I_OP} : CtrlAluOpQ101H = SLL;  // SLLI
-    {3'b101, 7'b0000000, I_OP} : CtrlAluOpQ101H = SRL;  // SRLI
-    {3'b101, 7'b0100000, I_OP} : CtrlAluOpQ101H = SRA;  // SRAI
-    // ---- Other ----
-    default                    : CtrlAluOpQ101H = ADD;  // LUI || AUIPC || JAL || JALR || BRANCH || LOAD || STORE
-    endcase
-end
-// Immediate Generator
-always_comb begin
-  unique casez (OpcodeQ101H) // Mux
-    JALR, I_OP, LOAD : SelImmTypeQ101H = I_TYPE;
-    LUI, AUIPC       : SelImmTypeQ101H = U_TYPE;
-    JAL              : SelImmTypeQ101H = J_TYPE;
-    BRANCH           : SelImmTypeQ101H = B_TYPE;
-    STORE            : SelImmTypeQ101H = S_TYPE;
-    default          : SelImmTypeQ101H = I_TYPE;
-  endcase
-  unique casez (SelImmTypeQ101H) // Mux
-    U_TYPE : ImmediateQ101H = {     InstructionQ101H[31:12], 12'b0 } ;                                                                            // U_Immediate
-    I_TYPE : ImmediateQ101H = { {20{InstructionQ101H[31]}} , InstructionQ101H[31:20] };                                                           // I_Immediate
-    S_TYPE : ImmediateQ101H = { {20{InstructionQ101H[31]}} , InstructionQ101H[31:25] , InstructionQ101H[11:7]  };                                 // S_Immediate
-    B_TYPE : ImmediateQ101H = { {20{InstructionQ101H[31]}} , InstructionQ101H[7]     , InstructionQ101H[30:25] , InstructionQ101H[11:8]  , 1'b0}; // B_Immediate
-    J_TYPE : ImmediateQ101H = { {12{InstructionQ101H[31]}} , InstructionQ101H[19:12] , InstructionQ101H[20]    , InstructionQ101H[30:21] , 1'b0}; // J_Immediate
-    default: ImmediateQ101H = {     InstructionQ101H[31:12], 12'b0 };                                                                             // U_Immediate
-  endcase
-end
-//===================
-//  Register File
-//===================
-// ---- Read Register File ----
-assign MatchRd1AftrWrQ101H = (RegSrc1Q101H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q101H != 5'b0);
-
-assign RegRdData1Q101H = MatchRd1AftrWrQ101H    ? RegWrDataQ104H        : // forward WrDataQ104H -> RdDataQ101H
-                         (RegSrc1Q101H == 5'b0) ? 32'b0                 : // Reading from Register[0] should result in '0
-                                                  Register[RegSrc1Q101H]; // Common Case - reading from Register file
-
-assign MatchRd2AftrWrQ101H = (RegSrc2Q101H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc2Q101H != 5'b0);
-assign RegRdData2Q101H =  MatchRd2AftrWrQ101H   ? RegWrDataQ104H        : // forward WrDataQ104H -> RdDataQ101H
-                         (RegSrc2Q101H == 5'b0) ? 32'b0                 : // Reading from Register[0] should result in '0 
-                                                  Register[RegSrc2Q101H]; // Common Case - reading from Register file
-
-// Q101H to Q102H Flip Flops
-`MAFIA_DFF    (InstructionQ102H         , InstructionQ101H      , Clk)
-assign out_for_pd = |InstructionQ102H;
-`MAFIA_RST_DFF(PcQ102H                  , PcQ101H               , Clk, Rst)
-`MAFIA_RST_DFF(PcPlus4Q102H             , PcPlus4Q101H          , Clk, Rst)
-`MAFIA_RST_DFF(SelNextPcAluOutJQ102H    , SelNextPcAluOutJQ101H , Clk, Rst)
-`MAFIA_RST_DFF(SelNextPcAluOutBQ102H    , SelNextPcAluOutBQ101H , Clk, Rst)
-`MAFIA_RST_DFF(SelRegWrPcQ102H          , SelRegWrPcQ101H       , Clk, Rst)
-`MAFIA_RST_DFF(SelAluPcQ102H            , SelAluPcQ101H         , Clk, Rst)
-`MAFIA_RST_DFF(SelAluImmQ102H           , SelAluImmQ101H        , Clk, Rst)
-`MAFIA_RST_DFF(SelDMemWbQ102H           , SelDMemWbQ101H        , Clk, Rst)
-`MAFIA_RST_DFF(SelCsrWbQ102H           , SelCsrWbQ101H        , Clk, Rst)
-`MAFIA_RST_DFF(CtrlLuiQ102H             , CtrlLuiQ101H          , Clk, Rst)
-`MAFIA_RST_DFF(CtrlRegWrEnQ102H         , CtrlRegWrEnQ101H      , Clk, Rst)
-`MAFIA_RST_DFF(CtrlDMemWrEnQ102H        , CtrlDMemWrEnQ101H     , Clk, Rst)
-`MAFIA_RST_DFF(CtrlSignExtQ102H         , CtrlSignExtQ101H      , Clk, Rst)
-`MAFIA_RST_DFF(CtrlDMemByteEnQ102H      , CtrlDMemByteEnQ101H   , Clk, Rst)
-`MAFIA_RST_VAL_DFF(CtrlBranchOpQ102H    , CtrlBranchOpQ101H     , Clk, Rst, t_branch_type'('0))
-`MAFIA_RST_VAL_DFF(CtrlAluOpQ102H       , CtrlAluOpQ101H        , Clk, Rst, t_alu_op'('0))
-`MAFIA_RST_DFF(ImmediateQ102H           , ImmediateQ101H        , Clk, Rst)
-`MAFIA_RST_DFF(RegSrc1Q102H             , RegSrc1Q101H          , Clk, Rst)
-`MAFIA_RST_DFF(RegSrc2Q102H             , RegSrc2Q101H          , Clk, Rst)
-`MAFIA_RST_DFF(PreRegRdData1Q102H       , RegRdData1Q101H       , Clk, Rst)
-`MAFIA_RST_DFF(PreRegRdData2Q102H       , RegRdData2Q101H       , Clk, Rst)
-`MAFIA_RST_DFF(RegDstQ102H              , RegDstQ101H           , Clk, Rst)
-`MAFIA_RST_VAL_DFF(OpcodeQ102H          , OpcodeQ101H           , Clk, Rst, t_opcode'('0) )
-`MAFIA_RST_VAL_DFF(CsrInstQ102H         , CsrInstQ101H          , Clk, Rst, t_csr_inst'('0)    )
-`MAFIA_RST_DFF(PreviousInstructionQ101H , PreInstructionQ101H   , Clk, Rst)
-`MAFIA_RST_DFF(LoadHzrdDetectQ102H      , LoadHzrdDetectQ101H   , Clk, Rst)
+big_core_rf 
+#( .RF_NUM_MSB(RF_NUM_MSB) )    
+big_core_rf (
+  .Clock             (Clock),             // input
+  .Rst               (Rst),               // input 
+  .Ctrl              (CtrlRf),            // input
+  .ReadyQ102H        (ReadyQ102H),        // input
+  // input data path
+  .ImmediateQ101H    (ImmediateQ101H),    // input
+  .PcQ101H           (PcQ101H),           // input  
+  .RegWrDataQ105H    (RegWrDataQ105H),    // input 
+  // output data path 
+  .PcQ102H           (PcQ102H),           // output   
+  .ImmediateQ102H    (ImmediateQ102H),    // output
+  .RegRdData1Q102H   (RegRdData1Q102H),   // output
+  .RegRdData2Q102H   (RegRdData2Q102H)   // output
+);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    _____  __     __   _____   _        ______          ____    __    ___    ___    _    _ 
@@ -310,95 +187,49 @@ assign out_for_pd = |InstructionQ102H;
 //      c) Calculate branch/jump target.
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
-//---- The Register File ----
- `MAFIA_EN_DFF(Register[RegDstQ104H] , RegWrDataQ104H , Clk , (CtrlRegWrEnQ104H && (RegDstQ104H!=5'b0)))
-//===============================================================================================
-// CSR instantiating
-//===============================================================================================
-logic [31:0] CsrReadDataQ102H;
-big_core_csr big_core_csr (
- .Clk             (Clk),  
- .Rst             (Rst),  
- .PcQ102H         (PcQ102H),
- // Inputs from the core
- .CsrInstQ102H    (CsrInstQ102H), 
- .CsrHwUpdt       ('0),// FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
- .MePc            (MePcQ101H),
- .interrupt_counter_expired (interrupt_counter_expired),
- // Outputs to the core
- .CsrReadDataQ102H(CsrReadDataQ102H)
+big_core_exe big_core_exe (
+  .Clock               (Clock              ),  //  input 
+  .Rst                 (Rst                ),  //  input 
+  // Input Control Signals
+  .Ctrl                (CtrlExe            ),  //  input 
+  .CtrlCsr             (CtrlCsr            ),  //  input
+  .ReadyQ103H          (ReadyQ103H         ),  //  input
+  // Output Control Signals
+  .BranchCondMetQ102H  (BranchCondMetQ102H ),  //  output
+  // Input Data path
+  //Q102H
+  .PreRegRdData1Q102H  (RegRdData1Q102H    ),  //  input 
+  .PreRegRdData2Q102H  (RegRdData2Q102H    ),  //  input  
+  .PcQ102H             (PcQ102H            ),  //  input 
+  .ImmediateQ102H      (ImmediateQ102H     ),  //  input
+  .CsrReadDataQ102H    (CsrReadDataQ102H   ), 
+  //Q104H
+  .AluOutQ104H         (AluOutQ104H     ),     //  input 
+  //Q105H
+  .RegWrDataQ105H      (RegWrDataQ105H     ),  //  input 
+  // output data path
+  .AluOutQ102H         (AluOutQ102H        ),  //  output
+  .CsrWriteDataQ102H   (CsrWriteDataQ102H),    // output
+  .AluOutQ103H         (AluOutQ103H        ),  //  output
+  .PcPlus4Q103H        (PcPlus4Q103H       ),  //  output
+  .DMemWrDataQ103H     (DMemWrDataQ103H    )   //  output
 );
 
+big_core_csr big_core_csr (
+ .Clk                       (Clock                  ),  
+ .Rst                       (Rst                    ),  
+ .PcQ102H                   (PcQ102H                ), 
+ // Inputs from the core
+ .CsrInstQ102H              (CtrlCsr                ),
+ .CsrWriteDataQ102H         (CsrWriteDataQ102H      ),
+ .ValidInstQ105H            (ValidInstQ105H         ), 
+ .CsrExceptionUpdateQ102H   (CsrExceptionUpdateQ102H), // FIXME: support hardware update for CSR (example: mstatus, mcause, ...)
+ .CsrPcUpdateQ102H          (CsrPcUpdateQ102H       ), //output
+ .TimerInterruptEnable      (TimerInterruptEnable   ),
+ // Outputs to the core
+ .CsrReadDataQ102H          (CsrReadDataQ102H       )
+);
 
-// Hazard Detection
-assign Hazard1Data1Q102H = (RegSrc1Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc1Q102H != 5'b0);
-assign Hazard2Data1Q102H = (RegSrc1Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc1Q102H != 5'b0);
-assign Hazard1Data2Q102H = (RegSrc2Q102H == RegDstQ103H) && (CtrlRegWrEnQ103H) && (RegSrc2Q102H != 5'b0);
-assign Hazard2Data2Q102H = (RegSrc2Q102H == RegDstQ104H) && (CtrlRegWrEnQ104H) && (RegSrc2Q102H != 5'b0);
-// Forwarding unite
-assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
-                                             PreRegRdData1Q102H; // Common Case - No Hazard
-
-assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data2Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104 
-                                             PreRegRdData2Q102H; // Common Case - No Hazard
-
-// End Take care to data hazard
-assign AluIn1Q102H = SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
-assign AluIn2Q102H = SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
-
-always_comb begin : alu_logic
-  ShamtQ102H      = AluIn2Q102H[4:0];
-  unique casez (CtrlAluOpQ102H) 
-    // Adder
-    ADD     : AluOutQ102H = AluIn1Q102H +   AluIn2Q102H;                            // ADD/LW/SW/AUIOC/JAL/JALR/BRANCH/
-    SUB     : AluOutQ102H = AluIn1Q102H + (~AluIn2Q102H) + 1'b1;                    // SUB
-    SLT     : AluOutQ102H = {31'b0, ($signed(AluIn1Q102H) < $signed(AluIn2Q102H))}; // SLT
-    SLTU    : AluOutQ102H = {31'b0 , AluIn1Q102H < AluIn2Q102H};                    // SLTU
-    // Shifter
-    SLL     : AluOutQ102H = AluIn1Q102H << ShamtQ102H;                              // SLL
-    SRL     : AluOutQ102H = AluIn1Q102H >> ShamtQ102H;                              // SRL
-    SRA     : AluOutQ102H = $signed(AluIn1Q102H) >>> ShamtQ102H;                    // SRA
-    // Bit wise operations
-    XOR     : AluOutQ102H = AluIn1Q102H ^ AluIn2Q102H;                              // XOR
-    OR      : AluOutQ102H = AluIn1Q102H | AluIn2Q102H;                              // OR
-    AND     : AluOutQ102H = AluIn1Q102H & AluIn2Q102H;                              // AND
-    default : AluOutQ102H = AluIn1Q102H + AluIn2Q102H;
-  endcase
-  if (CtrlLuiQ102H) AluOutQ102H = AluIn2Q102H;                                      // LUI
-  if (SelCsrWbQ102H) AluOutQ102H = CsrReadDataQ102H;                                // CSR
-end
-
-always_comb begin : branch_comp
-  // Check branch condition
-  unique casez ({CtrlBranchOpQ102H})
-    BEQ     : BranchCondMetQ102H =  (RegRdData1Q102H == RegRdData2Q102H);                  // BEQ
-    BNE     : BranchCondMetQ102H = ~(RegRdData1Q102H == RegRdData2Q102H);                  // BNE
-    BLT     : BranchCondMetQ102H =  ($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BLT
-    BGE     : BranchCondMetQ102H = ~($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BGE
-    BLTU    : BranchCondMetQ102H =  (RegRdData1Q102H < RegRdData2Q102H);                   // BLTU
-    BGEU    : BranchCondMetQ102H = ~(RegRdData1Q102H < RegRdData2Q102H);                   // BGEU
-    default : BranchCondMetQ102H = 1'b0;
-  endcase
-end
-
-assign SelNextPcAluOutQ102H = (SelNextPcAluOutBQ102H && BranchCondMetQ102H) || (SelNextPcAluOutJQ102H);   
-assign flushQ102H = SelNextPcAluOutQ102H;
-
-// Q102H to Q103H Flip Flops
-`MAFIA_DFF(RegRdData2Q103H     , RegRdData2Q102H     , Clk)
-`MAFIA_DFF(AluOutQ103H         , AluOutQ102H         , Clk)
-`MAFIA_DFF(CtrlDMemByteEnQ103H , CtrlDMemByteEnQ102H , Clk)
-`MAFIA_DFF(CtrlDMemWrEnQ103H   , CtrlDMemWrEnQ102H   , Clk)
-`MAFIA_DFF(SelDMemWbQ103H      , SelDMemWbQ102H      , Clk)
-`MAFIA_DFF(CtrlSignExtQ103H    , CtrlSignExtQ102H    , Clk)
-`MAFIA_DFF(PcPlus4Q103H        , PcPlus4Q102H        , Clk)
-`MAFIA_DFF(SelRegWrPcQ103H     , SelRegWrPcQ102H     , Clk)
-`MAFIA_DFF(RegDstQ103H         , RegDstQ102H         , Clk)
-`MAFIA_DFF(CtrlRegWrEnQ103H    , CtrlRegWrEnQ102H    , Clk)
-`MAFIA_DFF(flushQ103H          , flushQ102H          , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 
@@ -409,26 +240,55 @@ assign flushQ102H = SelNextPcAluOutQ102H;
 //  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/  |____/  |_|  |_|
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Memory Access
+// Memory Access1
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
+// 2. In case of Reads (LOAD) send request to memory and wait for response in the next stage
 //////////////////////////////////////////////////////////////////////////////////////////////////
+big_core_mem_acs1 big_core_mem_access1 (
+  .Clock              (Clock),          //input 
+  .Rst                (Rst),            //input  
+  // Input Control Signals
+  .Ctrl               (CtrlMem1),       //input
+  .ReadyQ104H         (ReadyQ104H),     //input
+  // Input Data path
+  .PcPlus4Q103H       (PcPlus4Q103H),   //input
+  .AluOutQ103H        (AluOutQ103H),    //input
+  .DMemWrDataQ103H    (DMemWrDataQ103H),//input
+  // data path output 
+  .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
+  .PcPlus4Q104H       (PcPlus4Q104H),   //input
+  .AluOutQ104H        (AluOutQ104H)     //input
+);
 
-assign DMemAddressQ103H = AluOutQ103H;
-assign DMemWrDataQ103H  = RegRdData2Q103H;
-assign DMemByteEnQ103H  = CtrlDMemByteEnQ103H;
-assign DMemWrEnQ103H    = CtrlDMemWrEnQ103H;
-assign DMemRdEnQ103H    = SelDMemWbQ103H;
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO - fix that stage to 5
+//   ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
+//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  | || |   | |  | |
+// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | | | || |_  | |__| |
+// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | | |__   _| |  __  |
+// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |    | |   | |  | |
+//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/     |_|   |_|  |_|
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// Memory Access 2 
+// -----------------
+// 1. Respond to D_MEM for Reads (LOAD) 
+// 2. Pass data "as is" to the next stage in case of R, J, U and I (not include LOAD) instructions
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+big_core_mem_acs2 big_core_mem_access2 (
+  .Clock              (Clock),          //input 
+  .Rst                (Rst),            //input  
+  // Input Control Signals
+  .ReadyQ105H         (ReadyQ105H),     //input
+  // Input Data path
+  .PcPlus4Q104H       (PcPlus4Q104H),   //input
+  .AluOutQ104H        (AluOutQ104H),    //input
+  // data path output 
+  .PcPlus4Q105H       (PcPlus4Q105H),   //input
+  .AluOutQ105H        (AluOutQ105H)     //input
+);
 
-// Q103H to Q104H Flip Flops
-`MAFIA_DFF(AluOutQ104H         , AluOutQ103H         , Clk)
-`MAFIA_DFF(SelDMemWbQ104H      , SelDMemWbQ103H      , Clk)
-`MAFIA_DFF(PcPlus4Q104H        , PcPlus4Q103H        , Clk)
-`MAFIA_DFF(SelRegWrPcQ104H     , SelRegWrPcQ103H     , Clk)
-`MAFIA_DFF(RegDstQ104H         , RegDstQ103H         , Clk)
-`MAFIA_DFF(CtrlRegWrEnQ104H    , CtrlRegWrEnQ103H    , Clk)
-`MAFIA_DFF(CtrlSignExtQ104H    , CtrlSignExtQ103H    , Clk)
-`MAFIA_DFF(ByteEnQ104H         , CtrlDMemByteEnQ103H , Clk)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
@@ -443,19 +303,20 @@ assign DMemRdEnQ103H    = SelDMemWbQ103H;
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Sign extend taking care of
-assign PostSxDMemRdDataQ104H[7:0]   =  ByteEnQ104H[0]    ? DMemRdRspQ104H[7:0]            : 8'b0;
-assign PostSxDMemRdDataQ104H[15:8]  =  ByteEnQ104H[1]    ? DMemRdRspQ104H[15:8]           :
-                                       CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[7]}}  : 8'b0;
-assign PostSxDMemRdDataQ104H[23:16] =  ByteEnQ104H[2]    ? DMemRdRspQ104H[23:16]          :
-                                       CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[15]}} : 8'b0;
-assign PostSxDMemRdDataQ104H[31:24] =  ByteEnQ104H[3]    ? DMemRdRspQ104H[31:24]          :
-                                       CtrlSignExtQ104H  ? {8{PostSxDMemRdDataQ104H[23]}} : 8'b0;
+big_core_wb big_core_wb
+( 
+ .Clock     (Clock ), // input  logic           Clock,       //input 
+ .Rst       (Rst   ), // input  logic           Rst,         //input  
+ // Ctrl
+ .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
+ // Data path input
+ .DMemRdDataQ105H (DMemRdRspQ105H  ), // input  logic [31:0]    DMemRdDataQ105H, //input
+ .AluOutQ105H     (AluOutQ105H     ), // input  logic [31:0]    AluOutQ105H,     //input
+ .PcPlus4Q105H    (PcPlus4Q105H    ), // input  logic [31:0]    PcPlus4Q105H,    //input
+ // data path output
+ .RegWrDataQ105H  (RegWrDataQ105H  )  // output logic [31:0]    RegWrDataQ105H  //output
 
-// ---- Select what write to the register file ----
-assign WrBackDataQ104H = SelDMemWbQ104H  ? PostSxDMemRdDataQ104H : 
-                                           AluOutQ104H           ; //include the CSR write back
+);
 
-assign RegWrDataQ104H  = SelRegWrPcQ104H ? PcPlus4Q104H : 
-                                          WrBackDataQ104H;
-endmodule // Module big_core 
+
+endmodule // Module mafia_asap_5pl
