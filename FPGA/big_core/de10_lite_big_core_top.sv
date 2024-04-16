@@ -10,7 +10,6 @@ module de10_lite_big_core_top(
     input                           ADC_CLK_10,
     input                           MAX10_CLK1_50,
     input                           MAX10_CLK2_50,
-
     //////////// SDRAM //////////
     //output            [12:0]        DRAM_ADDR,
     //output             [1:0]        DRAM_BA,
@@ -35,6 +34,9 @@ module de10_lite_big_core_top(
     input              [1:0]        KEY,
     //////////// LED //////////
     output             [9:0]        LEDR,
+    /////////// keyboard //////
+    input                           KBD_CLK,
+    input                           DATA_IN_KC,
     //////////// SW //////////
     input logic      [9:0]        SW,
     //////////// VGA //////////
@@ -60,9 +62,8 @@ module de10_lite_big_core_top(
 );
 
 
-`include "common_pkg.vh"
+//import common_pkg::*;
 import big_core_pkg::*;
-
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
@@ -87,24 +88,31 @@ logic out_for_pd;
 // =======================================================
 // big_core_top
 // =======================================================
-big_core_top big_core_top (
-.Clk                    (MAX10_CLK1_50),    //input  logic        Clk,
-.Rst                    (Rst),              //input  logic        Rst,
-.RstPc                  (RstPc),            //input
-.out_for_pd             (out_for_pd),       //output t_fpga_out   out_for_pd,
+big_core_top #(.RF_NUM_MSB(31))
+big_core_top  (
+.Clock                  (MAX10_CLK1_50),
+.Rst                    (Rst),
+.local_tile_id          (),
+.RstPc                  (RstPc),
 // Fabric interface
-.InFabricValidQ503H     (InFabricValidQ503H),     //input  logic        ,
-.InFabricQ503H          (InFabricQ503H),          //input  t_tile_trans ,
-.OutFabricValidQ505H    (PreOutFabricValidQ505H), //output logic        ,
-.OutFabricQ505H         (PreOutFabricQ505H),      //output t_tile_trans ,
-// FPGA interface inputs              
-.fpga_in                (fpga_in),
-// FPGA interface outputs
-.fpga_out               (fpga_out),               //output logic [7:0] SEG7_0,   // CR_MEM
-// VGA output
-.inDisplayArea          (inDisplayArea),          //VGA_OUTPUT
-.vga_out                (vga_out)                 //output logic       v_sync,
+.InFabricValidQ503H     (InFabricValidQ503H),
+.InFabricQ503H          (InFabricQ503H),
+.big_core_ready        (),
+.OutFabricValidQ505H    (PreOutFabricValidQ505H),
+.OutFabricQ505H         (PreOutFabricQ505H),
+.fab_ready              (),
+// key board interface
+.kbd_clk                 (KBD_CLK),
+.data_in_kc              (DATA_IN_KC),  
+// Vga interface
+.inDisplayArea          (inDisplayArea),
+.vga_out                (vga_out),
+// FPGA interface            
+.fpga_in                (fpga_in),  
+.fpga_out               (fpga_out)
 );
+
+
 
 logic EnRstPc;
 assign EnRstPc = (InFabricQ503H.address == 32'hFFFF_FFFF) && (InFabricQ503H.opcode == WR) && InFabricValidQ503H;

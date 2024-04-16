@@ -4,7 +4,7 @@
 set_global_assignment -name FAMILY "MAX 10"
 #set_global_assignment -name DEVICE 10M50DAF484C6GES
 set_global_assignment -name DEVICE 10M50DAF484C7G
-set_global_assignment -name TOP_LEVEL_ENTITY de10_lite_core_rrv_top
+set_global_assignment -name TOP_LEVEL_ENTITY de10_lite_big_core_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 20.1.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:14:11  FEBRUARY 21, 2023"
 set_global_assignment -name LAST_QUARTUS_VERSION "20.1.1 Lite Edition"
@@ -14,9 +14,8 @@ set_global_assignment -name NUM_PARALLEL_PROCESSORS 2
 # SEARCH_PATH
 #============================================================
 set_global_assignment -name SEARCH_PATH ../../source/common/
-set_global_assignment -name SEARCH_PATH ../../source/core_rrv/
-set_global_assignment -name SEARCH_PATH ../../source/core_rrv/packages
-#set_global_assignment -name SEARCH_PATH ../../source/big_core/
+set_global_assignment -name SEARCH_PATH ../../source/big_core/
+set_global_assignment -name SEARCH_PATH ../../source/big_core/packages
 #set_global_assignment -name SEARCH_PATH ../../source/mini_core/
 set_global_assignment -name SEARCH_PATH ../../source/fabric/
 set_global_assignment -name SEARCH_PATH ../../source/uart/
@@ -498,24 +497,24 @@ set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/fiftyfiv
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/fiftyfivenm_adcblock_top_wrapper.v
 set_global_assignment -name VERILOG_FILE mafia_adc/synthesis/submodules/mafia_adc_adc_mega_0.v
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/macros.vh
-set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_core_rrv_top.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/packages/core_rrv_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE de10_lite_big_core_top.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/packages/big_core_pkg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/fabric/fabric_pkg.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_cr_mem.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_ctrl.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_exe.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_if.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_mem_acs1.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_mem_acs2.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_rf.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_top.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_vga_ctrl.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_vga_sync_gen.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_wb.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_csr.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/core_rrv_mem_wrap.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/core_rrv/ps2_kbd/ps2_kbd_ctrl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_cr_mem.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_ctrl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_exe.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_if.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_mem_acs1.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_mem_acs2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_rf.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_top.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_vga_ctrl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_vga_sync_gen.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_wb.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_csr.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/big_core_mem_wrap.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../source/big_core/ps2_kbd/ps2_kbd_ctrl.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/common/array.sv
 set_global_assignment -name VERILOG_FILE ../../source/uart/raminfr.v
 set_global_assignment -name VERILOG_FILE ../../source/uart/timescale.v
@@ -536,7 +535,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/gateway/uart_co
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/wishbone/wishbone.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/wishbone/wishbone_mux3to1.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../source/uart/uart_io.sv
-set_global_assignment -name SDC_FILE de10_lite_core_rrv_top.sdc
+set_global_assignment -name SDC_FILE de10_lite_big_core_top.sdc
 set_global_assignment -name QIP_FILE sv/mem.qip
 set_global_assignment -name QIP_FILE sv/vga_mem.qip
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
