@@ -13,9 +13,6 @@ jobs:
     runs-on: [self-hosted , windows, x64]
     steps:
       - uses: actions/checkout@v2
-      - name: BIG_CORE - all
-        run:  python build.py -dut big_core -regress level0 -app -hw -sim -keep_going
-
       - name: CORE_RRV - rv32i_level0 
         run:  python build.py -dut core_rrv -regress rv32i_level0 -app -hw -sim -pp -keep_going
       

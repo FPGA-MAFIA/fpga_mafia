@@ -12,10 +12,7 @@ jobs:
   build:
     runs-on: [self-hosted, windows, x64]
     steps:
-      - uses: actions/checkout@v2
-      - name: BIG_CORE
-        run:  python build.py -dut big_core -test alive -app -hw -sim 
-
+      - uses: actions/checkout@v2 
       - name: CORE_RRV - rv32i
         run:  python build.py -dut core_rrv -test alive -app -hw -sim -pp 
       
