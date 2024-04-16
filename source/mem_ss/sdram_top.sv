@@ -80,7 +80,7 @@ import sdram_ctrl_pkg::*;
 
     end
 
-logic DataFromSdram;
+logic [15:0] DataFromSdram;
 
 sdram_ctrl sdram_ctrl
 (   

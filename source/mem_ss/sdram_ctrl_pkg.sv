@@ -14,12 +14,11 @@ parameter  tRC         = 8;     // refresh cycle consists of refresh_cmd and 7 n
 parameter  tMRD        = 2;     // Mode register program time consists of 1 mrs_cmd + 1 nop
 parameter  RefreshRate = 1560;  // Refresh time. tref = 64ms -> 64ms/8192 rows 
 
-//parameter NopMaxDuration           = 13334;         // when power up no operation should be taken during that period (100us/7.5ns)
-parameter NopMaxDuration           = 20;
+parameter NopMaxDuration           = 13334;         // when power up no operation should be taken during that period (100us/7.5ns)
+//parameter NopMaxDuration           = 20;
 parameter TimesToRefreshWhenInit   = 8;    
 parameter Set2Burst       = 10'b0_00_010_0_011;   // set sequential burst of lenght 8. set CAS latency to 2 cycles(for 133Mhz op). 
 parameter SetSingleAccess = 10'b1_00_010_0_000;
-
 typedef struct packed {
     logic  [13:0] NopInitCounter;
     logic  [1:0]  PrechargeCounter;

@@ -53,23 +53,22 @@ import sdram_ctrl_pkg::*;
     `MAFIA_RST_DFF(SdramCounters, NextSdramCounters, Clock, Rst)
     
     // Refresh couter logic
-    logic        ResertRefreshCounter;
+    logic        ResetRefreshCounter;
     logic        StartAutoRefresh;
     logic [10:0] RefreshCounter, NextRefreshCounter;
     // We dont want to trigger auto refresh when we in the initiale states
-    assign ResertRefreshCounter = (RefreshCounter == RefreshRate || State == INIT_WAIT || State == INIT_PREA ||
+    assign ResetRefreshCounter  = (RefreshCounter == RefreshRate || State == INIT_WAIT || State == INIT_PREA ||
                                   State == INIT_NOP || State == INIT_MODE_REG || INIT_REFRESH);  
-    assign NextRefreshCounter   = (ResertRefreshCounter) ? 1'b0 : RefreshCounter + 1;
+    assign NextRefreshCounter   = (ResetRefreshCounter) ? 1'b0 : RefreshCounter + 1;
     assign StartAutoRefresh     = (RefreshCounter == RefreshRate);
     `MAFIA_RST_DFF(RefreshCounter, NextRefreshCounter, Clock, Rst)
 
     assign Busy = (State == IDLE) ? 1'b0: 1'b1; // TODO add logic 
 
    
-    assign DataOut = (State == READ)  ? DRAM_DQ : 16'bz;
-    assign DRAM_DQ = (State == WRITE) ? DataIn  : 16'bz;
-
-
+    assign DataOut = (State == READ)  ? DRAM_DQ : 16'hzzzz;
+    assign DRAM_DQ = (State == WRITE) ? DataIn  : 16'hzzzz;
+    
     // State machine
     always_comb begin :state_machine
         DRAM_ADDR   = 0;
@@ -135,7 +134,7 @@ import sdram_ctrl_pkg::*;
             INIT_MODE_REG: begin
                 if(SdramCounters.ModeRegisterSetCounter == 0) begin
                     Command = MRS_CMD;
-                    DRAM_ADDR = SetSingleAccess;
+                    DRAM_ADDR = {3'b0,SetSingleAccess};
                     NextSdramCounters.ModeRegisterSetCounter = SdramCounters.ModeRegisterSetCounter + 1;
                 end
                 else if(SdramCounters.ModeRegisterSetCounter < tMRD-1) begin
@@ -246,8 +245,8 @@ import sdram_ctrl_pkg::*;
     assign  {DRAM_RAS_N, DRAM_CAS_N, DRAM_WE_N} = Command;
     assign 	DRAM_CKE    = 1;
 	assign  DRAM_CS_N   = 0;
-	assign  DRAM_DQML   = 0;
-    assign  DRAM_DQMH   = 0;
+	assign  DRAM_DQML   = (State == INIT_WAIT || State == INIT_PREA || State == INIT_REFRESH || State == INIT_NOP || State == INIT_MODE_REG) ? 1'b1 : 0;
+    assign  DRAM_DQMH   = (State == INIT_WAIT || State == INIT_PREA || State == INIT_REFRESH || State == INIT_NOP || State == INIT_MODE_REG) ? 1'b1 : 0;
 
 
 endmodule
