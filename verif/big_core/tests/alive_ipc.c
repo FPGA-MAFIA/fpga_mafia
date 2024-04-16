@@ -1,6 +1,6 @@
 //------------------------------------------------------------
 // Title : alive_cpi
-// Project : big_core_rrv
+// Project : big_core
 //------------------------------------------------------------
 // Description :
 // basic program with printing CPI results on the screen 

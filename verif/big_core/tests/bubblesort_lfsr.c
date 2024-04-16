@@ -1,7 +1,7 @@
 
 //------------------------------------------------------------
 // Title : alive_lfsr
-// Project : core_rrv
+// Project : big_core
 //------------------------------------------------------------
 // Description :
 //generating LENGTH pseudo random numbers created using LFSR

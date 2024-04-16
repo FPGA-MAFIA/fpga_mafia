@@ -21,9 +21,9 @@ t_rf_write_history ref_rf_cur_write;
 logic RegWrEnQ105H;
 logic [4:0]  RegDstQ105H;
 logic [31:0] RegWrDataQ105H;
-assign RegWrEnQ105H   = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlRf.RegWrEnQ105H;
-assign RegDstQ105H    = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlRf.RegDstQ105H;
-assign RegWrDataQ105H = core_rrv_top.core_rrv.core_rrv_rf.RegWrDataQ105H;
+assign RegWrEnQ105H   = big_core_top.big_core.big_core_ctrl.CtrlRf.RegWrEnQ105H;
+assign RegDstQ105H    = big_core_top.big_core.big_core_ctrl.CtrlRf.RegDstQ105H;
+assign RegWrDataQ105H = big_core_top.big_core.big_core_rf.RegWrDataQ105H;
 task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 
@@ -106,14 +106,14 @@ task print_vga_screen ;
 // VGA memory snapshot - simulate a screen
     integer fd1;
     string draw;
-    fd1 = $fopen({"../../../target/core_rrv/tests/",test_name,"/screen.log"},"w");
+    fd1 = $fopen({"../../../target/big_core/tests/",test_name,"/screen.log"},"w");
     if (fd1) $display("File was open successfully : %0d", fd1);
     else $display("File was not open successfully : %0d", fd1);
     for (int i = 0 ; i < SIZE_VGA_MEM; i = i+320) begin // Lines
         for (int j = 0 ; j < 4; j = j+1) begin // Bytes
             for (int k = 0 ; k < 320; k = k+4) begin // Words
                 for (int l = 0 ; l < 8; l = l+1) begin // Bits  
-                    draw = (core_rrv_top.core_rrv_mem_wrap.core_rrv_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    draw = (big_core_top.big_core_mem_wrap.big_core_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
                     $fwrite(fd1,"%s",draw);
                 end        
             end 

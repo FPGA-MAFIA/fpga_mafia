@@ -1,6 +1,6 @@
 //------------------------------------------------------------
 // Title   : hw_sw_lfsr_perf
-// Project : core_rrv
+// Project : big_core
 //------------------------------------------------------------
 // Description :
 // Testing performance of random.h LFSR functions HW vs SW

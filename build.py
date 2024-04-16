@@ -246,7 +246,7 @@ class Test:
                 exit(1)
             else:
                 #run the script to override the parameters using the csv file
-                cmd_param_script = 'python ./scripts/ovrd_params.py -dut core_rrv -ovrd_file '+csv_param_file
+                cmd_param_script = 'python ./scripts/ovrd_params.py -dut big_core -ovrd_file '+csv_param_file
                 if args.verbose:
                     cmd_param_script += ' -v'
                 results = run_cmd_with_capture(cmd_param_script) 

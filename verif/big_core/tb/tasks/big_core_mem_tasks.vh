@@ -28,18 +28,18 @@ t_mem_load_history ref_cur_mem_load;
 logic DMemWrEnQ103H;
 logic [31:0] DMemWrDataQ103H;
 logic [31:0] AluOutQ103H;
-assign DMemWrEnQ103H   = core_rrv_top.core_rrv.core_rrv_mem_access1.Ctrl.DMemWrEnQ103H;
-assign DMemWrDataQ103H = core_rrv_top.core_rrv.core_rrv_mem_access1.DMemWrDataQ103H;
-assign AluOutQ103H     = core_rrv_top.core_rrv.core_rrv_mem_access1.AluOutQ103H;   // store address
+assign DMemWrEnQ103H   = big_core_top.big_core.big_core_mem_access1.Ctrl.DMemWrEnQ103H;
+assign DMemWrDataQ103H = big_core_top.big_core.big_core_mem_access1.DMemWrDataQ103H;
+assign AluOutQ103H     = big_core_top.big_core.big_core_mem_access1.AluOutQ103H;   // store address
 
 // signals for load
 logic DMemRdEnQ105H;
 logic [31:0] PostSxDMemRdDataQ105H;
 logic [31:0] AluOutQ105H;
 logic [31:0] l_data;
-assign DMemRdEnQ105H         = core_rrv_top.core_rrv.core_rrv_ctrl.CtrlQ105H.DMemRdEn;
-assign PostSxDMemRdDataQ105H = core_rrv_top.core_rrv.core_rrv_wb.PostSxDMemRdDataQ105H;
-assign AluOutQ105H           = core_rrv_top.core_rrv.core_rrv_wb.AluOutQ105H;   // load address
+assign DMemRdEnQ105H         = big_core_top.big_core.big_core_ctrl.CtrlQ105H.DMemRdEn;
+assign PostSxDMemRdDataQ105H = big_core_top.big_core.big_core_wb.PostSxDMemRdDataQ105H;
+assign AluOutQ105H           = big_core_top.big_core.big_core_wb.AluOutQ105H;   // load address
 assign l_data = (rv32i_ref.instr_type == LB)  ?  rv32i_ref.lb_data :
                 (rv32i_ref.instr_type == LH)  ?  rv32i_ref.lh_data :
                 (rv32i_ref.instr_type == LW)  ?  rv32i_ref.lw_data :

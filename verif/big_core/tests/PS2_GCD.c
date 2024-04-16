@@ -31,7 +31,7 @@ int main() {
         
 
 
-    rvc_printf("The G.C.D of ("); //plot to the screen.log in fpga_mafia\target\core_rrv\tests\PS2_GCD\screen.log
+    rvc_printf("The G.C.D of ("); //plot to the screen.log in fpga_mafia\target\big_core\tests\PS2_GCD\screen.log
     rvc_print_int(a);
     rvc_printf(",");
     rvc_print_int(b);

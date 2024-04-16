@@ -4,18 +4,18 @@ real cycle_high_low_real;
 real result_ipc, result_cpi;
 
  task track_performance();
- pmon_file = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_cpi_ipc.log"},"w");
+ pmon_file = $fopen({"../../../target/big_core/tests/",test_name,"/trk_cpi_ipc.log"},"w");
        $fdisplay(pmon_file,"===========================================");
        $fdisplay(pmon_file,"PMON tracker for ", test_name, " test");
        $fdisplay(pmon_file,"Monitoring IPC and CPI");
        $fdisplay(pmon_file,"==========================================");
        $fdisplay(pmon_file,"\nSummary report");
        $fdisplay(pmon_file,"---------------------");
-       $fdisplay(pmon_file, "Number of cycles: %1d\nNumber of valid instructions: %1d",core_rrv_top.core_rrv.core_rrv_csr.csr_mcycle_high_low, core_rrv_top.core_rrv.core_rrv_csr.csr_minstret_high_low);
+       $fdisplay(pmon_file, "Number of cycles: %1d\nNumber of valid instructions: %1d",big_core_top.big_core.big_core_csr.csr_mcycle_high_low, big_core_top.big_core.big_core_csr.csr_minstret_high_low);
        
        // calculatin IPC and CPI
-       instret_high_low_real = core_rrv_top.core_rrv.core_rrv_csr.csr_minstret_high_low;
-       cycle_high_low_real = core_rrv_top.core_rrv.core_rrv_csr.csr_mcycle_high_low;
+       instret_high_low_real = big_core_top.big_core.big_core_csr.csr_minstret_high_low;
+       cycle_high_low_real = big_core_top.big_core.big_core_csr.csr_mcycle_high_low;
        result_ipc = instret_high_low_real / cycle_high_low_real;
        result_cpi = cycle_high_low_real / instret_high_low_real;
        $fdisplay(pmon_file, "IPC(instruction per cycles) =  %f", $sformatf("%.3f", result_ipc));

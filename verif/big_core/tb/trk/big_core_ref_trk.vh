@@ -1,7 +1,7 @@
 integer trk_ref_memory_access;
 initial begin: trk_rf_memory_access_gen
     #1
-    trk_ref_memory_access = $fopen({"../../../target/core_rrv/tests/",test_name,"/trk_ref_memory_access.log"},"w");
+    trk_ref_memory_access = $fopen({"../../../target/big_core/tests/",test_name,"/trk_ref_memory_access.log"},"w");
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_ref_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  

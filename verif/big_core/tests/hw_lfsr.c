@@ -1,6 +1,6 @@
 //------------------------------------------------------------
 // Title   : hw_lfsr
-// Project : core_rrv
+// Project : big_core
 //------------------------------------------------------------
 // Description :
 // Testing random.h LFSR functions. 

@@ -2,8 +2,8 @@
 
 delay(5);
 $display("TIME: %t,waiting for CR to be ready for reading", $time);
-$display("core_rrv_top.core_rrv_mem_wrap.core_rrv_cr_mem.kbd_cr.kbd_scanf_en = %d", core_rrv_top.core_rrv_mem_wrap.core_rrv_cr_mem.kbd_cr.kbd_scanf_en);
-while (!core_rrv_top.core_rrv_mem_wrap.core_rrv_cr_mem.kbd_cr.kbd_scanf_en) begin
+$display("big_core_top.big_core_mem_wrap.big_core_cr_mem.kbd_cr.kbd_scanf_en = %d", big_core_top.big_core_mem_wrap.big_core_cr_mem.kbd_cr.kbd_scanf_en);
+while (!big_core_top.big_core_mem_wrap.big_core_cr_mem.kbd_cr.kbd_scanf_en) begin
     $display("not ready");
     delay(5); 
 end
