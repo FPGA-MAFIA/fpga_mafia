@@ -1,34 +1,47 @@
 //-----------------------------------------------------------------------------
-// Title            : 7 stages pipline design
-// Project          : big_core
+// Title            : simple core  design
+// Project          : simple_core
 //-----------------------------------------------------------------------------
 // File             : core
-// Original Author  : Daniel Kaufman
+// Original Author  : Amichai Ben-David
 // Code Owner       : 
-// Created          : 11/2022
+// Created          : 9/2022
 //-----------------------------------------------------------------------------
 // Description :
 //-----------------------------------------------------------------------------
 
-+incdir+../../../source/common/
 +incdir+../../../source/big_core/
-+incdir+../../../source/mini_core/
++incdir+../../../source/fabric/
++incdir+../../../source/common/
+
+// param packages
+../../../source/big_core/packages/big_core_pkg.sv
+
+// Common
+../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
+../../../source/common/mem.sv
+
 //RTL FIles
-../../../source/big_core/big_core_pkg.sv
-../../../source/big_core/big_core.sv
-../../../source/big_core/big_core_top.sv
-../../../source/big_core/big_core_mem_wrap.sv
+../../../source/big_core/big_core_if.sv
+../../../source/big_core/big_core_ctrl.sv
+../../../source/big_core/big_core_rf.sv
 ../../../source/big_core/big_core_cr_mem.sv
+../../../source/big_core/big_core_exe.sv
+../../../source/big_core/big_core_csr.sv
 ../../../source/big_core/big_core_vga_ctrl.sv
 ../../../source/big_core/big_core_vga_sync_gen.sv
 ../../../source/big_core/vga_mem.sv
-../../../source/big_core/d_mem.sv
-../../../source/big_core/i_mem.sv
-../../../source/big_core/big_core_csr.sv
+../../../source/big_core/big_core_mem_acs1.sv
+../../../source/big_core/big_core_mem_acs2.sv
+../../../source/big_core/big_core_wb.sv
+../../../source/big_core/big_core.sv
+../../../source/big_core/big_core_top.sv
+../../../source/big_core/big_core_mem_wrap.sv
 
 // KBD FIles
-../../../source/big_core/big_core_kbd/big_core_kbd_controller.sv
-../../../source/big_core/big_core_kbd/big_core_kbd_gray_fifo.sv
-../../../source/big_core/big_core_kbd/big_core_kbd_odd_parity_checker.sv
-../../../source/big_core/big_core_kbd/big_core_kbd_release_checker.sv
-../../../source/big_core/big_core_kbd/big_core_kbd_struct_checker.sv
+../../../source/big_core/ps2_kbd/ps2_kbd_ctrl.sv
+
+
+
+

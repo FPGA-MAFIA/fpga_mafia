@@ -2,16 +2,18 @@
 module big_core_csr
 import big_core_pkg::*;
 (
-    input logic Clk,
-    input logic Rst,
-    input logic [31:0] PcQ102H,
+    input logic                       Clk,
+    input logic                       Rst,
+    input logic [31:0]                PcQ102H,
     // Inputs from the core
-    input var t_csr_inst CsrInstQ102H,
-    input var t_csr_hw_updt CsrHwUpdt, // 32-bit data to be written into the CSR
+    input var t_csr_inst_rrv          CsrInstQ102H,
+    input logic [31:0]                CsrWriteDataQ102H,
+    input var t_csr_exception_update  CsrExceptionUpdateQ102H, // 32-bit data to be written into the CSR
+    input                             ValidInstQ105H,
     // Outputs to the core
-    output logic [31:0] MePc, // 32-bit data read from the CSR
-    output logic        interrupt_counter_expired,
-    output logic [31:0] CsrReadDataQ102H // 32-bit data read from the CSR
+    output var t_csr_pc_update        CsrPcUpdateQ102H,
+    output logic                      TimerInterruptEnable,
+    output logic [31:0]               CsrReadDataQ102H // 32-bit data read from the CSR
 );
 
     // Define the CSR registers
@@ -24,24 +26,114 @@ logic        csr_wren;
 logic        csr_rden;
 logic [1:0]  csr_op;
 logic [11:0] csr_addr;
-logic [31:0] csr_data;
-assign csr_wren = CsrInstQ102H.csr_wren;
-assign csr_rden = CsrInstQ102H.csr_rden;
-assign csr_addr = CsrInstQ102H.csr_addr;
-assign csr_data = CsrInstQ102H.csr_data;
-assign csr_op   = CsrInstQ102H.csr_op;
+logic [31:0] csr_data_imm;
+logic        csr_imm_bit;
+assign csr_wren     = CsrInstQ102H.csr_wren;
+assign csr_rden     = CsrInstQ102H.csr_rden;
+assign csr_addr     = CsrInstQ102H.csr_addr;
+assign csr_data_imm = CsrInstQ102H.csr_data_imm;
+assign csr_op       = CsrInstQ102H.csr_op;
+assign csr_imm_bit  = CsrInstQ102H.csr_imm_bit; 
 
-logic csr_cycle_low_overflow;
+logic [31:0] csr_data;
+assign csr_data = (csr_imm_bit) ? csr_data_imm : CsrWriteDataQ102H;
+logic [63:0] csr_minstret_high_low;
+logic [63:0] csr_mcycle_high_low;
+logic left_lfsr_bit;
+
+
+
+// ==============================================================================
+// mtime and mtimecmp
+// ==============================================================================
+//The condition for taking the timer interrupt is: 
+assign TimerInterruptEnable =  csr.csr_mip[CSR_MIP_MTIP]          && // 1) mtime >= mtimecmp : MTIP - Machine Timer Interrupt Pending
+                               csr.csr_mstatus[CSR_MSTATUS_MIE]   && // 2) in mstatus register MIE bit is set
+                               csr.csr_mie[CSR_MIE_MTIE];            // 3) in mie register MTIE bit is set
+
+
+//========================================================================================
+//  LFSR: Linear Feedback Shift Register - used for random number generation (custom CSR)
+// 32bit lfsr. Polynom: x^32 + x^22 + x^2 + x^1 + 1
+//========================================================================================
+assign left_lfsr_bit =  (csr.csr_custom_lfsr[31]) ^ (csr.csr_custom_lfsr[21]) ^ (csr.csr_custom_lfsr[1]) ^ (csr.csr_custom_lfsr[0]);
+
+// RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
+// RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
+// RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
+// RW   - read/write from SW. Example: csr_scratch
 always_comb begin
-    next_csr = csr;
+    //==========================================================================
+    // default values - no change
+    //==========================================================================
+    next_csr              = csr;
+    //==========================================================================
+    // RW/V -> HW updates (may be overwritten by SW writes)
+    //==========================================================================
+    // FYI - the mcycle and minstret will allow the SW to calculate the IPC (instructions per cycle)
+    // count clock cycles
+    {next_csr.csr_mcycleh , next_csr.csr_mcycle}  = {csr.csr_mcycleh,csr.csr_mcycle}  + 1'b1;
+    // count instructions that have retired
+    if(ValidInstQ105H)  {next_csr.csr_minstreth , next_csr.csr_minstret}  = {csr.csr_minstreth,csr.csr_minstret} + 1'b1;
+
+    //==========================================================================   
+    //The MTIP - Machine Timer Interrupt Pending bit in the mip register is set when the mtime >= mtimecmp 
+    next_csr.csr_mip[CSR_MIP_MTIP]  = (csr.csr_custom_mtime >= csr.csr_custom_mtimecmp); // set the MTIP bit in the mip register -     
+    //==========================================================================   
+
+    //==========================================================================   
+    if(CsrExceptionUpdateQ102H.timer_interrupt_taken) begin
+        next_csr.csr_mcause    = 32'h80000007;
+        next_csr.csr_mepc      = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
+    if(CsrExceptionUpdateQ102H.illegal_instruction) begin
+        next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
+    if(CsrExceptionUpdateQ102H.misaligned_access) begin
+        next_csr.csr_mcause = 32'h00000004;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;  //FIXME - need to enter the misaligned address - not the instruction!
+        next_csr.csr_mstatus[7] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
+    if(CsrExceptionUpdateQ102H.illegal_csr_access) begin
+        next_csr.csr_mcause = 32'h0000000B;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                             // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
+
+    if(CsrExceptionUpdateQ102H.breakpoint) begin
+        next_csr.csr_mcause = 32'h00000003;
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
+
+    // ==================================================
+    // Return from exception
+    // ==================================================
+    if(CsrExceptionUpdateQ102H.Mret) begin //FIXME
+            next_csr.csr_mstatus[CSR_MSTATUS_MIE] = csr.csr_mstatus[CSR_MSTATUS_MPIE];  // FIXME - mstatus should be restored using the "p" (prior) bits according to the current state. 
+                                                                                       // FIXME - review what other mstatus bits should be restored
+    end
+    
+    if(csr_addr == CSR_CUSTOM_LFSR & csr_rden)
+        next_csr.csr_custom_lfsr = {left_lfsr_bit, csr.csr_custom_lfsr[31:1]};
+    //==========================================================================
+    // SW writes
+    //==========================================================================
     if(csr_wren) begin
         unique casez ({csr_op,csr_addr}) // address holds the offset
             // ---- RW CSR ----
-
-            // CSR_SCRATCH
-            {2'b01,CSR_SCRATCH}       : next_csr.csr_scratch = csr_data;
-            {2'b10,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch |  csr_data;
-            {2'b11,CSR_SCRATCH}       : next_csr.csr_scratch = csr.csr_scratch & ~csr_data;
             // CSR_MCYCLE
             {2'b01, CSR_MCYCLE}       : next_csr.csr_mcycle = csr_data;
             {2'b10, CSR_MCYCLE}       : next_csr.csr_mcycle = csr.csr_mcycle | csr_data;
@@ -126,7 +218,7 @@ always_comb begin
             {2'b01, CSR_MEPC}    : next_csr.csr_mepc = csr_data;
             {2'b10, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc | csr_data;
             {2'b11, CSR_MEPC}    : next_csr.csr_mepc = csr.csr_mepc & ~csr_data;
-            // CSR_MCAUSE
+            // CSR_MCAUSE 
             {2'b01, CSR_MCAUSE}    : next_csr.csr_mcause = csr_data;
             {2'b10, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause | csr_data;
             {2'b11, CSR_MCAUSE}    : next_csr.csr_mcause = csr.csr_mcause & ~csr_data;
@@ -146,17 +238,36 @@ always_comb begin
             {2'b01, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr_data;
             {2'b10, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 | csr_data;
             {2'b11, CSR_MTVAL2}    : next_csr.csr_mtval2 = csr.csr_mtval2 & ~csr_data;
+            // CSR_CUSTOM_MTIMECMP
+            {2'b01, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr_data;
+            {2'b10, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp | csr_data;
+            {2'b11, CSR_CUSTOM_MTIMECMP}    : next_csr.csr_custom_mtimecmp = csr.csr_custom_mtimecmp & ~csr_data;
+            // CSR_CUSTOM_LFSR
+            {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
+            {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
+            {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
+            // CSR_DCSR
+            {2'b01, CSR_DCSR}        : next_csr.csr_dcsr = csr_data;
+            {2'b10, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  | csr_data;
+            {2'b11, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  & ~csr_data;
+            // CSR_DPC
+            {2'b01, CSR_DPC}        : next_csr.csr_dpc = csr_data;
+            {2'b10, CSR_DPC}        : next_csr.csr_dpc = csr.csr_dpc  | csr_data;
+            {2'b11, CSR_DPC}        : next_csr.csr_dpc = csr.csr_dpc  & ~csr_data;
+            // CSR_DSCRATCH0
+            {2'b01, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr_data;
+            {2'b10, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr.csr_dscratch0  | csr_data;
+            {2'b11, CSR_DSCRATCH0}  : next_csr.csr_dscratch0 = csr.csr_dscratch0  & ~csr_data;
+            // CSR_DSCRATCH1
+            {2'b01, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr_data;
+            {2'b10, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr.csr_dscratch1  | csr_data;
+            {2'b11, CSR_DSCRATCH1}  : next_csr.csr_dscratch1 = csr.csr_dscratch1  & ~csr_data;
 
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
-    end
-    //==========================================================================
-    // TODO - see what is the RISCV termology for the following:
-    // RO/V - read only from SW  , and may be updated from HW. Example: csr_cycle (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
-    // RW/V - read/write from SW , and may be updated from HW. Example: csr_mcause (HW updates when exception occurs, then SW can read it and clear it)
-    // RO   - read only from SW/HW , there is no write access. Example: csr_mvendorid
-    // RW   - read/write from SW. Example: csr_scratch
+    end // if(csr_wren)
+
     //==========================================================================
     // handle HW exceptions:
     //==========================================================================
@@ -164,35 +275,28 @@ always_comb begin
     // 2. misaligned access
     // 3. illegal CSR access
     // 4. breakpoint
-    //FIXME - please review the values of the exceptions - read the spec
-    if(CsrHwUpdt.illegal_instruction) next_csr.csr_mcause = 32'h00000002;
-    if(CsrHwUpdt.misaligned_access)   next_csr.csr_mcause = 32'h00000004;
-    if(CsrHwUpdt.illegal_csr_access)  next_csr.csr_mcause = 32'h0000000B;
-    if(CsrHwUpdt.breakpoint)          next_csr.csr_mcause = 32'h00000003;
-    // handle HW interrupts:
-    // 1. timer interrupt
-    // 2. external interrupt
-    if(interrupt_counter_expired)     begin
-        next_csr.csr_mepc   = PcQ102H;
-    end
-    if(CsrHwUpdt.external_interrupt)  next_csr.csr_mcause = 32'h0000000B;
-
+    // ==========================================================================
     //==========================================================================
     // ---- RO/V CSR - writes from RTL ----
+    // RO/V - read only from SW  , and may be updated from HW. Example: csr_custom_mtime (HW updates it, SW can read it - NOTE: the mcycle is RW/V)
     //==========================================================================
-    // FIXME - please remove this and add the correct CSR for counting cycles.
-    // FIXME - need to figure out how to caount the "retired instructions" (excluding the ones that were flushed, machine nop, etc.)
-    // the cycle counter is incremented on every clock cycle
-        {csr_cycle_low_overflow , next_csr.csr_cycle_low}  = csr.csr_cycle_low  + 1'b1;
-        next_csr.csr_cycle_high = csr.csr_cycle_high + csr_cycle_low_overflow;
+    next_csr.csr_custom_mtime = csr.csr_custom_mtime + 1'b1;
+    // the cycle & instret are accessable to read only -> only the mcycle & minstret are updated by the SW/HW
+    next_csr.csr_cycle    = next_csr.csr_mcycle;
+    next_csr.csr_cycleh   = next_csr.csr_mcycleh;
+    next_csr.csr_instret  = next_csr.csr_minstret;
+    next_csr.csr_instreth = next_csr.csr_minstreth;
     //==========================================================================
     // Reset values for CSR
     //==========================================================================
     if(Rst) begin
         next_csr = '0;
-        //May override the reset values
-        //FIXME - No need to override the reset values of the scratch registers
-        next_csr.csr_scratch   = 32'h1001;
+        // ==================================================
+        // May override the reset values - add the values here
+        // ==================================================
+        // FIXME - add the reset values of the MISA CSR (Machine ISA Register)
+        // next_csr.csr_misa = 32'h40001104;
+        next_csr.csr_custom_lfsr = 32'h1; //seed initialization. Avoid form initialize to zero!
     end // if(Rst)
     //==========================================================================
     // READ ONLY - constant values
@@ -200,8 +304,9 @@ always_comb begin
     next_csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
     next_csr.csr_marchid       = 32'b0; // CSR_MARCHID
     next_csr.csr_mimpid        = 32'b0; // CSR_MIMPID
+    next_csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR TODO - what is the value?
+    //FIXME - using the "tile id" for the hart id
     next_csr.csr_mhartid       = 32'b0; // CSR_MHARTID
-    next_csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
 end//always_comb
 
 `MAFIA_DFF(csr, next_csr, Clk)
@@ -214,17 +319,16 @@ always_comb begin
     if(csr_rden) begin
         unique casez (csr_addr) // address holds the offset
             // ---- RO CSR ----
-            CSR_CYCLE_LOW  : CsrReadDataQ102H = csr.csr_cycle_low;
-            CSR_CYCLE_HIGH : CsrReadDataQ102H = csr.csr_cycle_high;
-            
+            CSR_CYCLE          : CsrReadDataQ102H = csr.csr_cycle; 
+            CSR_CYCLEH         : CsrReadDataQ102H = csr.csr_cycleh; 
+            CSR_INSTRET        : CsrReadDataQ102H = csr.csr_instret; 
+            CSR_INSTRETH       : CsrReadDataQ102H = csr.csr_instreth; 
             CSR_MVENDORID      : CsrReadDataQ102H = csr.csr_mvendorid;
             CSR_MARCHID        : CsrReadDataQ102H = csr.csr_marchid;
             CSR_MIMPID         : CsrReadDataQ102H = csr.csr_mimpid;
             CSR_MHARTID        : CsrReadDataQ102H = csr.csr_mhartid;
             CSR_MCONFIGPTR     : CsrReadDataQ102H = csr.csr_mconfigptr;
             // ---- RW CSR ----
-
-            CSR_SCRATCH        : CsrReadDataQ102H = csr.csr_scratch;
             CSR_MCYCLE         : CsrReadDataQ102H = csr.csr_mcycle;
             CSR_MCYCLEH        : CsrReadDataQ102H = csr.csr_mcycleh;
             CSR_MINSTRET       : CsrReadDataQ102H = csr.csr_minstret;
@@ -251,22 +355,37 @@ always_comb begin
             CSR_MIP            : CsrReadDataQ102H = csr.csr_mip;
             CSR_MTINST         : CsrReadDataQ102H = csr.csr_mtinst;
             CSR_MTVAL2         : CsrReadDataQ102H = csr.csr_mtval2;
+            CSR_CUSTOM_MTIME   : CsrReadDataQ102H = csr.csr_custom_mtime;
+            CSR_CUSTOM_MTIMECMP: CsrReadDataQ102H = csr.csr_custom_mtimecmp;
+            CSR_CUSTOM_LFSR    : CsrReadDataQ102H = next_csr.csr_custom_lfsr; // reading next avoids from returning the seed at the fisrt read
+            CSR_DCSR           : CsrReadDataQ102H = csr.csr_dcsr;
+            CSR_DPC            : CsrReadDataQ102H = csr.csr_dpc;
+            CSR_DSCRATCH0      : CsrReadDataQ102H = csr.csr_dscratch0;
+            CSR_DSCRATCH1      : CsrReadDataQ102H = csr.csr_dscratch1;
 
             default        : CsrReadDataQ102H = 32'b0 ;
         endcase
     end
 end
 
-assign MePc = csr.csr_mepc;
-// assign csr.csr_mvendorid     = 32'b0; // CSR_MVENDORID
-// assign csr.csr_marchid       = 32'b0; // CSR_MARCHID
-// assign csr.csr_mimpid        = 32'b0; // CSR_MIMPID
-// assign csr.csr_mhartid       = 32'b0; // CSR_MHARTID
-// assign csr.csr_mconfigptr    = 32'b0; // CSR_MCONFIGPTR
+// Update program counter
+logic  BeginInterrupt;
+assign BeginInterrupt = (CsrExceptionUpdateQ102H.illegal_instruction || CsrExceptionUpdateQ102H.misaligned_access 
+                       || CsrExceptionUpdateQ102H.illegal_csr_access || CsrExceptionUpdateQ102H.breakpoint 
+                       || CsrExceptionUpdateQ102H.external_interrupt || CsrExceptionUpdateQ102H.timer_interrupt_taken);
+
+assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
+assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
+assign CsrPcUpdateQ102H.InteruptReturnEnQ102H      = CsrExceptionUpdateQ102H.Mret;
+assign CsrPcUpdateQ102H.InteruptReturnAddressQ102H = csr.csr_mepc;
 
 
-always_comb begin
-    //create an interrupt if the cycle counter is equal to the compare value
-    interrupt_counter_expired = '0;// csr.csr_cycle_low == csr.csr_scratch;
-end
+
+// unloaded - used only for debug and waves review
+assign csr_mcycle_high_low    = {csr.csr_mcycleh,   csr.csr_mcycle}; //csr_mcycle_high_low is not part of the spec
+assign csr_minstret_high_low  = {csr.csr_minstreth, csr.csr_minstret}; //csr_minstret_high_low is not part of the spec
+
+  
 endmodule
+
+   

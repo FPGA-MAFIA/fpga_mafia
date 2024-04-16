@@ -6,6 +6,10 @@ import subprocess
 import datetime
 import time
 
+# examples
+# python ./scripts/sanity_check.py -yml mafia_level0
+# python ./scripts/sanity_check.py -yml mafia_level0 -dut big_core
+
 # Class for color-coding the output in the terminal
 class Colors:
     HEADER = '\033[95m'

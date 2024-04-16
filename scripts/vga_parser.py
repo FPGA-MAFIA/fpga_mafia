@@ -247,7 +247,7 @@ def parse_vga_log_to_text(log_lines):
 
 
 # Construct the path to the log file and the output file based on the test name argument
-TESTS_PATH = f'target/core_rrv/tests/{args.test}/'
+TESTS_PATH = f'target/big_core/tests/{args.test}/'
 log_file_path = f'{TESTS_PATH}trk_vga_memory_access.log'
 output_file_path = f'{TESTS_PATH}vga_output.txt'
 

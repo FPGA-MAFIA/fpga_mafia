@@ -14,8 +14,9 @@
 `include "macros.vh"
 
 module big_core_vga_sync_gen
+import big_core_pkg::*;
 (
-        input  logic        CLK_25,
+        input  logic        Clk_25,
         input  logic        Reset,
         output logic        vga_h_sync,
         output logic        vga_v_sync,
@@ -35,18 +36,18 @@ assign CounterXmaxed = (CounterX == 800) || Reset; // 16 + 48 + 96 + 640
 assign CounterYmaxed = (CounterY == 525) || Reset; // 10 + 2 + 33 + 480
 
 // x and y counters
-`MAFIA_RST_DFF   (CounterX, (CounterX+1'b1), CLK_25, CounterXmaxed)
-`MAFIA_EN_RST_DFF(CounterY, (CounterY+1'b1), CLK_25, CounterXmaxed, (CounterXmaxed && CounterYmaxed) )
+`MAFIA_RST_DFF   (CounterX, (CounterX+1'b1), Clk_25, CounterXmaxed)
+`MAFIA_EN_RST_DFF(CounterY, (CounterY+1'b1), Clk_25, CounterXmaxed, (CounterXmaxed && CounterYmaxed) )
 
 assign next_h_sync = (CounterX >= (640 + 16) && (CounterX < (640 + 16 + 96)));  // active for 96 clocks
 assign next_v_sync = (CounterY >= (480 + 10) && (CounterY < (480 + 10 + 2)));   // active for 2 clocks
 
-`MAFIA_DFF(h_sync, next_h_sync, CLK_25)
-`MAFIA_DFF(v_sync, next_v_sync, CLK_25)
+`MAFIA_DFF(h_sync, next_h_sync, Clk_25)
+`MAFIA_DFF(v_sync, next_v_sync, Clk_25)
 
 // Indication that we must not send Data in VGA RGB
 assign NextinDisplayArea = ((CounterX < 640) && (CounterY < 480));
-`MAFIA_DFF(inDisplayArea, NextinDisplayArea, CLK_25)
+`MAFIA_DFF(inDisplayArea, NextinDisplayArea, Clk_25)
 
 assign vga_h_sync = ~h_sync;
 assign vga_v_sync = ~v_sync;
