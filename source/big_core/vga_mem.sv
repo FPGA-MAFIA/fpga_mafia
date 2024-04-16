@@ -14,7 +14,7 @@
 `include "macros.vh"
 
 module vga_mem 
-import core_rrv_pkg::*;
+import big_core_pkg::*;
 (
     input  logic        clock_a,
     input  logic        clock_b,

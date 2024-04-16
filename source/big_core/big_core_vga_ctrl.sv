@@ -14,8 +14,8 @@
 
 `include "macros.vh"
 
-module core_rrv_vga_ctrl 
-import core_rrv_pkg::*;
+module big_core_vga_ctrl 
+import big_core_pkg::*;
 (
     input  logic        Clk_50,
     input  logic        Reset,
@@ -75,7 +75,7 @@ assign SampleReset[0] = Reset;
 //=========================
 // VGA sync Machine
 //=========================
-core_rrv_vga_sync_gen vga_sync_inst (
+big_core_vga_sync_gen vga_sync_inst (
     .Clk_25         (Clk_25),          // input
     .Reset          (SampleReset[4]),  // input
     .vga_h_sync     (next_h_sync),     // output

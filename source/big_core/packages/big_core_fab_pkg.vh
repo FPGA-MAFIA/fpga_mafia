@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// Title            : core_rrv_fab_pkg 
+// Title            : big_core_fab_pkg 
 // Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : core_rrv_fab_pkg.sv
+// File             : big_core_fab_pkg.sv
 // Original Author  :  
 // Code Owner       : Amichai Ben-David
 // Created          : 12/2023

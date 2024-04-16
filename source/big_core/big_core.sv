@@ -26,8 +26,8 @@
 
 `include "macros.vh"
 
-module core_rrv 
-import core_rrv_pkg::*;
+module big_core 
+import big_core_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input  logic        Clock,
@@ -66,7 +66,7 @@ logic                   ReadyQ104H;
 logic                   ReadyQ105H;
 logic                   ValidInstQ105H;
 t_csr_exception_update  CsrExceptionUpdateQ102H;
-t_core_rrv_ctrl         Ctrl;
+t_big_core_ctrl         Ctrl;
 t_ctrl_if               CtrlIf;
 t_ctrl_rf               CtrlRf;
 t_ctrl_exe              CtrlExe;
@@ -91,7 +91,7 @@ logic                   TimerInterruptEnable;
 // 2. Calc/Set the NextPc
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-core_rrv_if core_rrv_if (
+big_core_if big_core_if (
   .Clock            (Clock       ), // input  logic        Clock,
   .Rst              (Rst         ), // input  logic        Rst,
   .RstPc            (RstPc       ), // input  logic        RstPc,
@@ -121,7 +121,7 @@ core_rrv_if core_rrv_if (
 // 4. construct the Immediate types.
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-core_rrv_ctrl core_rrv_ctrl (
+big_core_ctrl big_core_ctrl (
   .Rst                  (Rst    ), //input
   .Clock                (Clock  ), //input
   // input instruction 
@@ -152,9 +152,9 @@ core_rrv_ctrl core_rrv_ctrl (
   .ValidInstQ105H           (ValidInstQ105H           )
 );
 
-core_rrv_rf 
+big_core_rf 
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
-core_rrv_rf (
+big_core_rf (
   .Clock             (Clock),             // input
   .Rst               (Rst),               // input 
   .Ctrl              (CtrlRf),            // input
@@ -187,7 +187,7 @@ core_rrv_rf (
 //      c) Calculate branch/jump target.
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-core_rrv_exe core_rrv_exe (
+big_core_exe big_core_exe (
   .Clock               (Clock              ),  //  input 
   .Rst                 (Rst                ),  //  input 
   // Input Control Signals
@@ -215,7 +215,7 @@ core_rrv_exe core_rrv_exe (
   .DMemWrDataQ103H     (DMemWrDataQ103H    )   //  output
 );
 
-core_rrv_csr core_rrv_csr (
+big_core_csr big_core_csr (
  .Clk                       (Clock                  ),  
  .Rst                       (Rst                    ),  
  .PcQ102H                   (PcQ102H                ), 
@@ -245,7 +245,7 @@ core_rrv_csr core_rrv_csr (
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 // 2. In case of Reads (LOAD) send request to memory and wait for response in the next stage
 //////////////////////////////////////////////////////////////////////////////////////////////////
-core_rrv_mem_acs1 core_rrv_mem_access1 (
+big_core_mem_acs1 big_core_mem_access1 (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -276,7 +276,7 @@ core_rrv_mem_acs1 core_rrv_mem_access1 (
 // 1. Respond to D_MEM for Reads (LOAD) 
 // 2. Pass data "as is" to the next stage in case of R, J, U and I (not include LOAD) instructions
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-core_rrv_mem_acs2 core_rrv_mem_access2 (
+big_core_mem_acs2 big_core_mem_access2 (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -303,7 +303,7 @@ core_rrv_mem_acs2 core_rrv_mem_access2 (
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-core_rrv_wb core_rrv_wb
+big_core_wb big_core_wb
 ( 
  .Clock     (Clock ), // input  logic           Clock,       //input 
  .Rst       (Rst   ), // input  logic           Rst,         //input  

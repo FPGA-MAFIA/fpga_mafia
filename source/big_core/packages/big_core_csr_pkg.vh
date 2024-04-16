@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// Title            : core_rrv_csr_pkg 
+// Title            : big_core_csr_pkg 
 // Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : core_rrv_csr_pkg.sv
+// File             : big_core_csr_pkg.sv
 // Original Author  :  
 // Code Owner       : Amichai Ben-David
 // Created          : 12/2023

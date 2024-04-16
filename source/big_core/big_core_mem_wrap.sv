@@ -2,7 +2,7 @@
 // Title            : data memory - Behavioral
 // Project          : gpc_4t
 //-----------------------------------------------------------------------------
-// File             : core_rrv_mem_wrap.sv
+// File             : big_core_mem_wrap.sv
 // Original Author  : Amichai Ben-David
 // Created          : 1/2020
 //-----------------------------------------------------------------------------
@@ -15,8 +15,8 @@
 `include "macros.vh"
 
 //---------------------------------------------------
-module core_rrv_mem_wrap
-import core_rrv_pkg::*;
+module big_core_mem_wrap
+import big_core_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
@@ -44,7 +44,7 @@ import core_rrv_pkg::*;
                 //============================================
                 input  logic            InFabricValidQ503H  ,
                 input  var t_tile_trans InFabricQ503H       ,
-                output logic            core_rrv_ready     ,
+                output logic            big_core_ready     ,
                 //
                 output logic            OutFabricValidQ505H ,
                 output var t_tile_trans OutFabricQ505H      ,
@@ -269,7 +269,7 @@ mem
  //==================================
  // CR mem instantiation
  //==================================
- core_rrv_cr_mem core_rrv_cr_mem (
+ big_core_cr_mem big_core_cr_mem (
     .Clk              (Clock),
     .Rst              (Rst),
     .data             (DMemWrDataQ103H),
@@ -304,7 +304,7 @@ assign VgaAdrsReq   = VgaAddressWithOffsetQ103H;
 assign VgaWrByteEn  = ShiftDMemByteEnQ103H;
 assign VgaWrEn      = DMemWrEnQ103H && MatchVGAMemRegionQ103H;
 
-core_rrv_vga_ctrl core_rrv_vga_ctrl (
+big_core_vga_ctrl big_core_vga_ctrl (
    .Clk_50            (Clock),
    .Reset             (Rst),
    // Core interface
@@ -428,5 +428,5 @@ assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
                               C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
                                                         '0;                 
                                                         
-assign core_rrv_ready = (!F2C_AlmostFull); // add back pressure to the fabric
+assign big_core_ready = (!F2C_AlmostFull); // add back pressure to the fabric
 endmodule

@@ -11,8 +11,8 @@
 
 `include "macros.vh"
 
-module core_rrv_if 
-import core_rrv_pkg::*;
+module big_core_if 
+import big_core_pkg::*;
 (
     input  logic                Clock,
     input  logic                Rst,

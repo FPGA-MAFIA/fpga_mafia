@@ -11,8 +11,8 @@
 
 `include "macros.vh"
 
-module core_rrv_wb
-import core_rrv_pkg::*;
+module big_core_wb
+import big_core_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
   // Ctrl

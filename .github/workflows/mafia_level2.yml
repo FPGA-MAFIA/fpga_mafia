@@ -13,17 +13,17 @@ jobs:
     runs-on: [self-hosted , windows, x64]
     steps:
       - uses: actions/checkout@v2
-      - name: CORE_RRV - rv32i_level0 
-        run:  python build.py -dut core_rrv -regress rv32i_level0 -app -hw -sim -pp -keep_going
+      - name: BIG_CORE - rv32i_level0 
+        run:  python build.py -dut big_core -regress rv32i_level0 -app -hw -sim -pp -keep_going
       
-      - name: CORE_RRV - rv32i_level0_cfg_intrpt -cfg core_rrv_boot_trap no reference model
-        run:  python build.py -dut core_rrv -top core_rrv_no_ref_tb -cfg core_rrv_boot_trap -regress rv32i_level0_cfg_intrpt_no_ref -app -hw -sim -pp -keep_going
+      - name: BIG_CORE - rv32i_level0_cfg_intrpt -cfg big_core_boot_trap no reference model
+        run:  python build.py -dut big_core -top big_core_no_ref_tb -cfg big_core_boot_trap -regress rv32i_level0_cfg_intrpt_no_ref -app -hw -sim -pp -keep_going
       
-      - name: CORE_RRV - rv32i_level0_no_ref -> no reference model
-        run:  python build.py -dut core_rrv -top core_rrv_no_ref_tb  -regress rv32i_level0_no_ref -app -hw -sim -pp -keep_going
+      - name: BIG_CORE - rv32i_level0_no_ref -> no reference model
+        run:  python build.py -dut big_core -top big_core_no_ref_tb  -regress rv32i_level0_no_ref -app -hw -sim -pp -keep_going
       
-      - name: CORE_RRV - rv32i_level0_cfg_intrpt -cfg core_rrv_boot_trap with reference model
-        run:  python build.py -dut core_rrv -cfg core_rrv_boot_trap -regress rv32i_level0_cfg_intrpt -app -hw -sim -pp -keep_going
+      - name: BIG_CORE - rv32i_level0_cfg_intrpt -cfg big_core_boot_trap with reference model
+        run:  python build.py -dut big_core -cfg big_core_boot_trap -regress rv32i_level0_cfg_intrpt -app -hw -sim -pp -keep_going
 
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut mini_core -regress rv32e_level0 -cfg mini_rv32e -app -hw -sim -keep_going

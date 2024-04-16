@@ -13,8 +13,8 @@
 
 `include "macros.vh"
 
-module core_rrv_vga_sync_gen
-import core_rrv_pkg::*;
+module big_core_vga_sync_gen
+import big_core_pkg::*;
 (
         input  logic        Clk_25,
         input  logic        Reset,

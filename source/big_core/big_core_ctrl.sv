@@ -11,8 +11,8 @@
 
 `include "macros.vh"
 
-module core_rrv_ctrl
-import core_rrv_pkg::*;
+module big_core_ctrl
+import big_core_pkg::*;
 (
     input   logic        Clock,
     input   logic        Rst,
@@ -78,7 +78,7 @@ logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 logic PreValidInstQ105H;
 
-t_core_rrv_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
+t_big_core_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H, CtrlQ105H;
 t_csr_inst_rrv CsrInstQ101H, CsrInstQ102H;  
 t_csr_exception_update  CsrExceptionUpdateQ101H;
 logic CoreFreeze;

@@ -11,8 +11,8 @@
 
 `include "macros.vh"
 
-module core_rrv_rf 
-import core_rrv_pkg::*;
+module big_core_rf 
+import big_core_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input logic Clock,

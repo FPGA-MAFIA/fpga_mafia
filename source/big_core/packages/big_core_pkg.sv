@@ -1,21 +1,21 @@
 //-----------------------------------------------------------------------------
-// Title            : core_rrv_pkg 
+// Title            : big_core_pkg 
 // Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : core_rrv_pkg.sv
+// File             : big_core_pkg.sv
 // Original Author  :  
 // Code Owner       : Amichai Ben-David
 // Created          : 12/2023
 //-----------------------------------------------------------------------------
 // Description :
-// enum & parameters for the MAFIA core_rrv
+// enum & parameters for the MAFIA big_core
 //-----------------------------------------------------------------------------
 
-package core_rrv_pkg;
+package big_core_pkg;
 
-`include "core_rrv_csr_pkg.vh"
-`include "core_rrv_ips_pkg.vh"
-`include "core_rrv_fab_pkg.vh"
+`include "big_core_csr_pkg.vh"
+`include "big_core_ips_pkg.vh"
+`include "big_core_fab_pkg.vh"
 
 parameter I_MEM_SIZE   = 'h1_0000; 
 parameter I_MEM_OFFSET = 'h0_0000;
@@ -153,7 +153,7 @@ typedef struct packed {
     t_e_sel_wb  e_SelWrBack;
     logic [31:0] Pc;            //Used for debug - not really a control signal
     logic [31:0] Instruction;   //Used for debug - not really a control signal
-} t_core_rrv_ctrl;
+} t_big_core_ctrl;
 
 typedef struct packed {
     logic [4:0] RegSrc1Q102H;

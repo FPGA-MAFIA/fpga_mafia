@@ -1,6 +1,6 @@
 `include "macros.vh"
-module core_rrv_csr
-import core_rrv_pkg::*;
+module big_core_csr
+import big_core_pkg::*;
 (
     input logic                       Clk,
     input logic                       Rst,

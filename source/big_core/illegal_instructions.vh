@@ -13,7 +13,7 @@
 t_illegal_instruction illegal_instructionsQ101H;
 
 t_opcode            PreOpcodeQ101H;
-t_core_rrv_ctrl     PreCtrlQ101H;
+t_big_core_ctrl     PreCtrlQ101H;
 t_funct3_store_type PreStoreTypeQ101H;
 t_funct3_load_type  PreLoadTypeQ101H;
 t_branch_type       PreBranchTypeQ101H;

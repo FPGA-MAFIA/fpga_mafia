@@ -11,8 +11,8 @@
 
 `include "macros.vh"
 
-module core_rrv_mem_acs1
-import core_rrv_pkg::*;
+module big_core_mem_acs1
+import big_core_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
   // ctrl

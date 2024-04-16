@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
-// Title            : core_rrv_ips_pkg 
+// Title            : big_core_ips_pkg 
 // Project          : mafia_asap
 //-----------------------------------------------------------------------------
-// File             : core_rrv_ips_pkg.sv
+// File             : big_core_ips_pkg.sv
 // Original Author  :  
 // Code Owner       : Amichai Ben-David
 // Created          : 12/2023
