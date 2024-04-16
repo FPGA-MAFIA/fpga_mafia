@@ -31,8 +31,8 @@ jobs:
       - name: MINI_CORE at rv32i mode
         run:  python build.py -dut mini_core -test alive -app -hw -sim
         
-      - name: MINI_big_core at rv32i mode
-        run:  python build.py -dut mini_big_core -test alive -app -hw -sim 
+      - name: MINI_CORE_RRV at rv32i mode
+        run:  python build.py -dut mini_core_rrv -test alive -app -hw -sim 
 
       - name: SC_CORE 
         run:  python build.py -dut sc_core -test alive -app -hw -sim 
