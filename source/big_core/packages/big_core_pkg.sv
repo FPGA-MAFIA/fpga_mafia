@@ -66,6 +66,10 @@ parameter CR_SWITCH      = CR_MEM_OFFSET + 'h24 ; // RO 10 bit
 parameter CR_JOYSTICK_X  = CR_MEM_OFFSET + 'h28 ; // RO 10 bit
 parameter CR_JOYSTICK_Y  = CR_MEM_OFFSET + 'h2C ; // RO 10 bit
 
+// VGA contreol Address Offsets
+parameter CR_VGA_CounterX= CR_MEM_OFFSET + 'h50 ; // RO 10 bit
+parameter CR_VGA_CounterY= CR_MEM_OFFSET + 'h54 ; // RO 10 bit
+
 // Keyboard control & data Address Offsets
 parameter CR_KBD_DATA     = CR_MEM_OFFSET + 'h100 ; // RO 8 bit
 parameter CR_KBD_READY    = CR_MEM_OFFSET + 'h104 ; // RO 1 bit
@@ -221,5 +225,9 @@ typedef struct packed {
     logic [9:0] LED;
 } t_fpga_out;
 
+typedef struct packed {
+    logic [9:0]  VGA_CounterX;
+    logic [9:0]  VGA_CounterY;
+} t_cr;
 
 endpackage
