@@ -44,6 +44,7 @@ import big_core_pkg::*;
 `endif
 
 logic [9:0]  pixel_x;
+logic [9:0]  pixel_x;
 logic [9:0]  pixel_y;
 logic        Clk_25;
 //logic        inDisplayArea;
