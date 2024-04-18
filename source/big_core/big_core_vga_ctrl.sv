@@ -28,8 +28,13 @@ import big_core_pkg::*;
     input  logic        CtrlVgaMemRdEnQ503,
     output logic [31:0] VgaRspDataQ504H,
     // VGA output
+<<<<<<< HEAD
     output logic [9:0]  VGA_CounterX,    // output
     output logic [9:0]  VGA_CounterY,    // output
+=======
+    output logic [9:0]  CounterX           (VGA_CounterX),    // output
+    output logic [9:0]  CounterY           (VGA_CounterY),    // output
+>>>>>>> c9c43a28bad49d83ffd590fda452e66e76664170
     output logic        inDisplayArea,
     output logic [3:0]  RED,
     output logic [3:0]  GREEN,
