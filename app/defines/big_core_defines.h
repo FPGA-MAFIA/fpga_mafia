@@ -68,6 +68,8 @@
 #define CR_Button_1    ((volatile int *) (CR_MEM_BASE + 0x20))
 #define CR_SWITCH      ((volatile int *) (CR_MEM_BASE + 0x24))
 #define CR_JOYSTICK_X  ((volatile int *) (CR_MEM_BASE + 0x28))
+#define CR_VGA_COUNTER_X ((volatile int *) (CR_MEM_BASE + 0x50))
+#define CR_VGA_COUNTER_Y ((volatile int *) (CR_MEM_BASE + 0x54))
 #define CR_JOYSTICK_Y  ((volatile int *) (CR_MEM_BASE + 0x2C))
 #define CR_KBD_DATA    ((volatile int *) (CR_MEM_BASE + 0x100))
 #define CR_KBD_READY   ((volatile int *) (CR_MEM_BASE + 0x104))
