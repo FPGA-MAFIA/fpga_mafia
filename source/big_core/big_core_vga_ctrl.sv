@@ -28,6 +28,8 @@ import big_core_pkg::*;
     input  logic        CtrlVgaMemRdEnQ503,
     output logic [31:0] VgaRspDataQ504H,
     // VGA output
+    output logic [9:0]  VGA_CounterX,    // output
+    output logic [9:0]  VGA_CounterY,    // output
     output logic        inDisplayArea,
     output logic [3:0]  RED,
     output logic [3:0]  GREEN,
@@ -41,6 +43,7 @@ import big_core_pkg::*;
     `define FPGA_ON    
 `endif
 
+logic [9:0]  pixel_x;
 logic [9:0]  pixel_y;
 logic        Clk_25;
 //logic        inDisplayArea;
@@ -80,10 +83,13 @@ big_core_vga_sync_gen vga_sync_inst (
     .Reset          (SampleReset[4]),  // input
     .vga_h_sync     (next_h_sync),     // output
     .vga_v_sync     (next_v_sync),     // output
-    .CounterX       (),                // output
-    .CounterY       (pixel_y),         // output
+    .CounterX       (VGA_CounterX),    // output
+    .CounterY       (VGA_CounterY),    // output
     .inDisplayArea  (inDisplayArea)    // output
 );
+
+assign pixel_x = VGA_CounterX;
+assign pixel_y = VGA_CounterY;
 
 //=========================
 // VGA Display Line #

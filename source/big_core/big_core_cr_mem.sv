@@ -30,6 +30,10 @@ import big_core_pkg::*;
     input  logic        rden,
     output logic [31:0] q,
 
+    // VGA info
+    input  logic [9:0]  VGA_CounterX,
+    input  logic [9:0]  VGA_CounterY,
+
     // FPGA interface inputs
     input  var t_fpga_in    fpga_in,
     
@@ -51,12 +55,19 @@ import big_core_pkg::*;
 t_fpga_in  fpga_in_1, fpga_in_2;    // fpga_in     -> fpga_in_1  -> fpga_in_2
 t_fpga_out fpga_out_1, fpga_out_2;  // fpga_out_2  -> fpga_out_1 -> fpga_out
 
+t_cr cr;
+t_cr next_cr;
+
 // Data-Path signals
 logic [31:0] pre_q;
 logic [31:0] pre_q_b;
 
 t_kbd_cr kbd_cr_next;
 t_kbd_cr kbd_cr;
+
+assign next_cr.VGA_CounterX = VGA_CounterX;
+assign next_cr.VGA_CounterY = VGA_CounterY;
+`MAFIA_DFF(cr, next_cr, Clk)
 //==============================
 // Memory Access
 //------------------------------
@@ -119,14 +130,16 @@ always_comb begin
             CR_LED          : pre_q = {22'b0 , fpga_out.LED}        ;
             CR_KBD_SCANF_EN : pre_q = {31'b0 , kbd_cr.kbd_scanf_en} ;
             // ---- RO memory ----
-            CR_Button_0   : pre_q = {31'b0 , fpga_in_2.Button_0}  ;
-            CR_Button_1   : pre_q = {31'b0 , fpga_in_2.Button_1}  ;
-            CR_SWITCH     : pre_q = {22'b0 , fpga_in_2.Switch}    ;
-            CR_JOYSTICK_X : pre_q = {20'b0 , fpga_in_2.Joystick_x};
-            CR_JOYSTICK_Y : pre_q = {20'b0 , fpga_in_2.Joystick_y};
-            CR_KBD_READY  : pre_q = {31'b0 , kbd_cr.kbd_ready}  ;
-            CR_KBD_DATA   : pre_q = {24'b0 , kbd_cr.kbd_data}   ;
-            default       : pre_q = 32'b0                         ;
+            CR_Button_0    : pre_q = {31'b0 , fpga_in_2.Button_0}    ;
+            CR_Button_1    : pre_q = {31'b0 , fpga_in_2.Button_1}    ;
+            CR_SWITCH      : pre_q = {22'b0 , fpga_in_2.Switch}      ;
+            CR_JOYSTICK_X  : pre_q = {20'b0 , fpga_in_2.Joystick_x}  ;
+            CR_JOYSTICK_Y  : pre_q = {20'b0 , fpga_in_2.Joystick_y}  ;
+            CR_KBD_READY   : pre_q = {31'b0 , kbd_cr.kbd_ready}      ;
+            CR_KBD_DATA    : pre_q = {24'b0 , kbd_cr.kbd_data}       ;
+            CR_VGA_CounterX: pre_q = {22'b0 , cr.VGA_CounterX}       ;
+            CR_VGA_CounterY: pre_q = {22'b0 , cr.VGA_CounterY}       ;
+            default        : pre_q = 32'b0                           ;
         endcase
     end
     
@@ -142,14 +155,16 @@ always_comb begin
         CR_LED        : pre_q_b = {22'b0 , fpga_out.LED}      ;
         CR_KBD_SCANF_EN: pre_q_b = {31'b0 , kbd_cr.kbd_scanf_en} ;
         // ---- RO memory ----
-        CR_Button_0   : pre_q_b = {31'b0 , fpga_in_2.Button_0} ;
-        CR_Button_1   : pre_q_b = {31'b0 , fpga_in_2.Button_1} ;
-        CR_SWITCH     : pre_q_b = {22'b0 , fpga_in_2.Switch}   ;
-        CR_JOYSTICK_X : pre_q_b = {20'b0 , fpga_in_2.Joystick_x};
-        CR_JOYSTICK_Y : pre_q_b = {20'b0 , fpga_in_2.Joystick_y};
-        CR_KBD_READY  : pre_q_b = {31'b0 , kbd_cr.kbd_ready}  ;
-        CR_KBD_DATA   : pre_q_b = {24'b0 , kbd_cr.kbd_data}   ;
-        default       : pre_q_b = 32'b0                         ;
+        CR_Button_0    : pre_q_b = {31'b0 , fpga_in_2.Button_0}  ;
+        CR_Button_1    : pre_q_b = {31'b0 , fpga_in_2.Button_1}  ;
+        CR_SWITCH      : pre_q_b = {22'b0 , fpga_in_2.Switch}    ;
+        CR_JOYSTICK_X  : pre_q_b = {20'b0 , fpga_in_2.Joystick_x};
+        CR_JOYSTICK_Y  : pre_q_b = {20'b0 , fpga_in_2.Joystick_y};
+        CR_KBD_READY   : pre_q_b = {31'b0 , kbd_cr.kbd_ready}    ;
+        CR_KBD_DATA    : pre_q_b = {24'b0 , kbd_cr.kbd_data}     ;
+        CR_VGA_CounterX: pre_q_b = {22'b0 , cr.VGA_CounterX}     ;
+        CR_VGA_CounterY: pre_q_b = {22'b0 , cr.VGA_CounterY}     ;
+        default        : pre_q_b = 32'b0                         ;
     endcase
 
 end

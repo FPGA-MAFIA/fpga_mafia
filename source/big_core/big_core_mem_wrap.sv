@@ -68,6 +68,8 @@ import big_core_pkg::*;
            
 );
 
+logic [9:0] VGA_CounterX;
+logic [9:0] VGA_CounterY;
 logic        F2C_IMemHitQ503H;
 logic        F2C_IMemWrEnQ503H;
 logic [31:0] F2C_IMemRspDataQ504H;
@@ -282,6 +284,9 @@ mem
     .address_b        (InFabricQ503H.address),
     .wren_b           (F2C_CrMemWrEnQ503H),
     .q_b              (F2C_CrMemRspDataQ504H),
+    // VGA info
+    .VGA_CounterX     (VGA_CounterX), //input  logic [9:0] VGA_CounterX,
+    .VGA_CounterY     (VGA_CounterY), //input  logic [9:0] VGA_CounterY,
     // Keyboard interface
     .kbd_data_rd      (kbd_data_rd), //input  t_kbd_data_rd kbd_data_rd,
     .kbd_ctrl         (kbd_ctrl   ), //output t_kbd_ctrl    kbd_ctrl,
@@ -317,10 +322,12 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .CtrlVgaMemRdEnQ503 (VgaWrEn),
    .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),
    // VGA output
-   .inDisplayArea     (inDisplayArea),
-   .RED               (vga_out.VGA_R),
-   .GREEN             (vga_out.VGA_G),
-   .BLUE              (vga_out.VGA_B),
+   .VGA_CounterX      (VGA_CounterX)  , // output  logic [9:0] VGA_CounterX,
+   .VGA_CounterY      (VGA_CounterY)  , // output  logic [9:0] VGA_CounterY,
+   .inDisplayArea     (inDisplayArea) ,
+   .RED               (vga_out.VGA_R) ,
+   .GREEN             (vga_out.VGA_G) ,
+   .BLUE              (vga_out.VGA_B) ,
    .h_sync            (vga_out.VGA_HS),
    .v_sync            (vga_out.VGA_VS)
 );
