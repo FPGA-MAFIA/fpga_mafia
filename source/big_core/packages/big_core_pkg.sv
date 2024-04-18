@@ -67,8 +67,8 @@ parameter CR_JOYSTICK_X  = CR_MEM_OFFSET + 'h28 ; // RO 10 bit
 parameter CR_JOYSTICK_Y  = CR_MEM_OFFSET + 'h2C ; // RO 10 bit
 
 // VGA contreol Address Offsets
-parameter CR_VGA_CounterX= CR_MEM_OFFSET + 'h30 ; // RO 10 bit
-parameter CR_VGA_CounterY= CR_MEM_OFFSET + 'h34 ; // RO 10 bit
+parameter CR_VGA_CounterX= CR_MEM_OFFSET + 'h50 ; // RO 10 bit
+parameter CR_VGA_CounterY= CR_MEM_OFFSET + 'h54 ; // RO 10 bit
 
 // Keyboard control & data Address Offsets
 parameter CR_KBD_DATA     = CR_MEM_OFFSET + 'h100 ; // RO 8 bit
