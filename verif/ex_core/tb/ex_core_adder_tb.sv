@@ -19,6 +19,7 @@ module ex_core_adder_tb;
         if (sum !== 4'b0100) // 4
             $display("Adder test failed!");
         else
+            $display("the result of %h + %h is %h", a, b, sum);
             $display("Adder test passed!");
 
         $finish; // End the simulation
