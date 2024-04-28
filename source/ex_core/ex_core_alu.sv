@@ -1,4 +1,4 @@
-module ALU(input logic [31:0] operand1,
+module ex_core_alu(input logic [31:0] operand1,
            input logic [31:0] operand2,
            input logic [2:0] op,
            output logic [31:0] result,
