@@ -17,6 +17,7 @@ module ex_core_alu_tb();
       operand2 = 5;
       op = 3'b000; // ADD
       #10; // Delay for combinational logic to settle
+      $display("The result of %1h ADD %1h is %1h", operand1, operand2, result);
       // Verify result
       //assert (result === 15) else $error("ADD test failed!");
 
@@ -25,13 +26,16 @@ module ex_core_alu_tb();
    
    // Random stimulus
    initial begin
-      repeat (100) begin
-         operand1 = $random;
-         operand2 = $random;
-         op = $random % 8; // Generate a random operation code
+      #10
+      repeat (10) begin
+         operand1 = $urandom_range(0, 10);
+         operand2 = $urandom_range(0, 10);
+         op = $urandom_range(0, 7); // Generate a random operation code
          #10;
+         $display("The result of %1h and %1h with op %1h is %1h", operand1, operand2, op, result);
          // Check result (this will depend on the operation)
       end
+      $finish;
    end
 
    parameter V_TIMEOUT = 10000;
