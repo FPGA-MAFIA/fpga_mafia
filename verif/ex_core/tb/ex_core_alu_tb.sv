@@ -18,10 +18,20 @@ module ALU_TB();
       op = 3'b000; // ADD
       #10; // Delay for combinational logic to settle
       // Verify result
-      if (result !== 15) $display("ADD test failed!");
-      else $display("ADD test passed!");
+      assert (result === 15) else $error("ADD test failed!");
+
+      // Other test cases...
    end
    
-   // Other test cases...
-   
+   // Random stimulus
+   initial begin
+      repeat (100) begin
+         operand1 = $random;
+         operand2 = $random;
+         op = $random % 8; // Generate a random operation code
+         #10;
+         // Check result (this will depend on the operation)
+      end
+   end
+
 endmodule
