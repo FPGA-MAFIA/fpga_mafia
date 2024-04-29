@@ -21,11 +21,11 @@ FPGA/*/*.qws
 *.bak
 !FPGA/big_core/de10_lite_big_core_top.sdc
 !FPGA/big_core/de10_lite_big_core_top.sv
-!FPGA/big_core/sv/*
-!FPGA/big_core/mif/*
-!FPGA/big_core/mafia_adc/*
+!FPGA/big_core/sv/
+!FPGA/big_core/mif/
+!FPGA/big_core/mafia_adc/
 !FPGA/big_core/mafia_adc.qsys
-!FPGA/big_core/scripts/*
+!FPGA/big_core/scripts/
 !FPGA/big_core/de10_lite_big_core.qpf
 !FPGA/big_core/de10_lite_big_core.qsf
 verif/*/__pycache__
