@@ -6,7 +6,7 @@ int main(){
 
 char str[30];
 
-clear_screen();
+//clear_screen();  // uncomment that line when running only with -app for clean screen in FPGA
 
 rvc_printf("ENTER A STRING:\n> ");
 rvc_scanf(str, 30);
