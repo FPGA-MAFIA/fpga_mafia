@@ -1,3 +1,4 @@
+// ./build.py -sim -dut ex_core -top ex_core_adder_tb -hw -clean
 // This is a testbench for the 4-bit adder module
 module ex_core_adder_tb;
     reg [3:0] a;
