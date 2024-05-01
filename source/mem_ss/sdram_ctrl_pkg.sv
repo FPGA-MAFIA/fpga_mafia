@@ -23,8 +23,10 @@ typedef struct packed {
     logic  [13:0] NopInitCounter;
     logic  [1:0]  PrechargeCounter;
     logic  [1:0]  ActivationCounter;
-    logic  [1:0]  ReadCounter;
-    logic  [1:0]  WriteNopCounter;
+    //logic  [1:0]  ReadCounter;
+    //logic  [1:0]  WriteNopCounter;
+    logic  [3:0]  ReadCounter;
+    logic  [3:0]  WriteNopCounter;
     logic  [3:0]  RefreshTrcCounter;
     logic  [3:0]  RefreshInitCounter; // Indicates the 8 refreshes that runs in initialization
     logic         ModeRegisterSetCounter;
@@ -34,8 +36,10 @@ typedef struct packed {
     logic  [13:0] NopInitCounter;
     logic  [1:0]  PrechargeCounter;
     logic  [1:0]  ActivationCounter;
-    logic  [1:0]  ReadCounter;
-    logic  [1:0]  WriteNopCounter;
+    //logic  [1:0]  ReadCounter;
+    //logic  [1:0]  WriteNopCounter;
+    logic  [3:0]  ReadCounter;
+    logic  [3:0]  WriteNopCounter;
     logic  [3:0]  RefreshTrcCounter;
     logic  [3:0]  RefreshInitCounter;
     logic         ModeRegisterSetCounter;
