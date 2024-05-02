@@ -14,6 +14,10 @@ parameter  tRC         = 8;     // refresh cycle consists of refresh_cmd and 7 n
 parameter  tMRD        = 2;     // Mode register program time consists of 1 mrs_cmd + 1 nop
 parameter  RefreshRate = 1560;  // Refresh time. tref = 64ms -> 64ms/8192 rows 
 
+//Parameters for burst with length of 8 
+parameter tNopWaitRead  = 9;
+parameter tNopWaitWrite = 8;
+
 parameter NopMaxDuration           = 13334;         // when power up no operation should be taken during that period (100us/7.5ns)
 //parameter NopMaxDuration           = 20;
 parameter TimesToRefreshWhenInit   = 8;    
