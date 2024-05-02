@@ -20,7 +20,7 @@ import sdram_ctrl_pkg::*;
     input  logic        Clock,  
     input  logic        Rst,
     output logic        Busy,      // signal goes high in case of refresh or INIT states
-    input  logic [31:0] Address,  // bank: bits (25,24), rows: bits (23-11), cols: bits (10-1)
+    input  logic [31:0] Address,  // bank: bits (24,23), rows: bits (22-10), cols: bits (9-0)
     input  logic        ReadReq,
     input  logic        WriteReq,
     input  logic [15:0] DataIn,
@@ -158,8 +158,10 @@ import sdram_ctrl_pkg::*;
             ACTIVATE: begin
                 if(SdramCounters.ActivationCounter == 0) begin
                     Command = ACTIVATE_CMD;
-                    DRAM_ADDR = Address[23:11];
-                    DRAM_BA   = Address[25:24];
+                    //DRAM_ADDR = Address[23:11];
+                    //DRAM_BA   = Address[25:24];
+                    DRAM_ADDR = Address[22:10];
+                    DRAM_BA   = Address[24:23];
                     NextSdramCounters.ActivationCounter = SdramCounters.ActivationCounter + 1;
                 end
                 else if(SdramCounters.ActivationCounter < tRCD-1) begin
@@ -178,11 +180,13 @@ import sdram_ctrl_pkg::*;
             READ: begin
                 if(SdramCounters.ReadCounter == 0) begin
                     Command = READ_CMD;
-                    DRAM_ADDR = Address[10:1];
-                    DRAM_BA   = Address[25:24];
+                    //DRAM_ADDR = Address[10:1];
+                    //DRAM_BA   = Address[25:24];
+                    DRAM_ADDR = Address[9:0];
+                    DRAM_BA   = Address[24:23];
                     NextSdramCounters.ReadCounter = SdramCounters.ReadCounter + 1;
                 end
-                else if(SdramCounters.ReadCounter < tCAC + 7) begin  // note we dont subtruct 1 here. we need two nops
+                else if(SdramCounters.ReadCounter < tNopWaitRead) begin  // note we dont subtruct 1 here. we need two nops
                     Command = NOP_CMD;
                     NextSdramCounters.ReadCounter = SdramCounters.ReadCounter + 1;
                 end    
@@ -194,11 +198,13 @@ import sdram_ctrl_pkg::*;
             WRITE: begin
                 if(SdramCounters.WriteNopCounter == 0) begin
                     Command = WRITE_CMD;
-                    DRAM_ADDR = Address[10:1];
-                    DRAM_BA   = Address[25:24];
+                    //DRAM_ADDR = Address[10:1];
+                    //DRAM_BA   = Address[25:24];
+                    DRAM_ADDR = Address[9:0];
+                    DRAM_BA   = Address[24:23];
                     NextSdramCounters.WriteNopCounter = SdramCounters.WriteNopCounter + 1;
                 end
-                else if(SdramCounters.WriteNopCounter < tDPL + 6) begin  // note we dont subtruct 1 here. we need two nops
+                else if(SdramCounters.WriteNopCounter < tNopWaitWrite) begin  // note we dont subtruct 1 here. we need two nops
                     Command = NOP_CMD;
                     NextSdramCounters.WriteNopCounter = SdramCounters.WriteNopCounter + 1;
                 end    
