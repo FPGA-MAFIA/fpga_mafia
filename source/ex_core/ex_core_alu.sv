@@ -15,8 +15,8 @@ module ex_core_alu(input logic [31:0] operand1,
          4'b0101: result = operand1 << operand2; // SLL
          4'b0110: result = operand1 >> operand2; // SRL
          4'b0111: result = operand1 >>> operand2; // SRA
-         4'b1000: result = (operand1 < operand2) ? 1 : 0; // SLT
-         4'b1001: result = (operand1 < operand2) ? 1 : 0; // SLTU
+         4'b1000: result = ($signed(operand1) < $signed(operand2)) ? 1 : 0; // SLT
+         4'b1001: result = ($unsigned(operand1) < $unsigned(operand2)) ? 1 : 0; // SLTU
          default: result = 0; // Default case
       endcase
       zero = (result == 0);
