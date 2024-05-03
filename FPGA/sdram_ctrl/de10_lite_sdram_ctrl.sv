@@ -79,7 +79,7 @@ import sdram_ctrl_pkg::*;
     end
 
 logic [15:0] DataFromSdram;
-logic  Clock133;
+logic Clock133;
 logic Busy;
 
 sdram_ctrl sdram_ctrl
