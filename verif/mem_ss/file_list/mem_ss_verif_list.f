@@ -10,5 +10,6 @@
 ../../../verif/mem_ss/tb/sdram_ctrl_tb.sv
 ../../../verif/mem_ss/tb/sdram_ctrl_bursts_tb.sv
 ../../../verif/mem_ss/tb/sdram_top_tb.sv
+../../../verif/mem_ss/tb/sdram_top_rand_bursts_tb.sv
 
 

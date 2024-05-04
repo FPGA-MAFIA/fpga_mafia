@@ -56,7 +56,7 @@ import sdram_ctrl_pkg::*;
             end
             WRITE_TOP: begin
                 if(WriteCounter <= 3) begin
-                    Address            = 8*WriteCounter;  // each write must be multipkication of 8
+                    Address            = 8*WriteCounter;  // each write must be multiplication of 8
                     WriteReq           = 1;
                     DataOutToSdramCtrl = WriteCounter;
                     NextState          = WRITE_TOP;

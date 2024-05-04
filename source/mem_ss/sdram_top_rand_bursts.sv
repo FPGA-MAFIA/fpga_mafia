@@ -5,7 +5,7 @@
 
 `include "macros.vh"
 
-module sdram_top_bursts
+module sdram_top_rand_bursts
 import sdram_ctrl_pkg::*; 
 (
     input logic         Clock133,
@@ -29,10 +29,9 @@ import sdram_ctrl_pkg::*;
 );
 
     logic [127:0] WriteData [0:7];  // write 128bit to 8 random places
-    logic [7:0]   BankAddr  [0:1];  // strores bank addreses
     logic [7:0]   Addr      [0:31]; // strores addreses
 
-    typedef enum {IDLE, SET_READ, READ,  SET_WRITE, WRITE, DONE} States;
+    typedef enum {IDLE, ACTIVATION, SET_READ, READ,  SET_WRITE, WRITE, DONE} States;
 
     always_comb begin: fill_data 
         WriteData[0] = 128'h1111_2222_3333_4444_5555_6666_7777_8888;
@@ -45,73 +44,111 @@ import sdram_ctrl_pkg::*;
         WriteData[7] = 128'h2323_4534_4543_8798_6854_ab1d_ab2d_abcd;
     end 
 
-    always_comb begin: bank_addr
-        BankAddr[0] = 2'b00;
-        BankAddr[1] = 2'b00;
-        BankAddr[2] = 2'b00;
-        BankAddr[3] = 2'b01;
-        BankAddr[4] = 2'b01;
-        BankAddr[5] = 2'b10;
-        BankAddr[6] = 2'b11;
-        BankAddr[7] = 2'b11;
-    end
-
-    always_comb begin: address
-        Addr[0] = 32'd0;
-        Addr[1] = 32'd8;
-        Addr[2] = 32'd24;
-        Addr[3] = 32'd8;
-        Addr[4] = 32'd40;
-        Addr[5] = 32'd80;
-        Addr[6] = 32'd32;
-        Addr[7] = 32'd0;
+    always_comb begin: address_bank_row_col
+        Addr[0] = 32'b0000000_00_0000000000000_0000000000;  // Bank = 0, row = 0, col = 0
+        Addr[1] = 32'b0000000_00_0000000000000_0000001000;  // Bank = 0, row = 0, col = 8
+        Addr[2] = 32'b0000000_00_0000000000000_0000011000;  // Bank = 0, row = 0, col = 24
+        Addr[3] = 32'b0000000_00_0000000000001_0000101000;  // Bank = 0, row = 1, col = 40
+        Addr[4] = 32'b0000000_01_0000000000001_0000101000;  // Bank = 1, row = 1, col = 40
+        Addr[5] = 32'b0000000_10_0000000000001_0000001000;  // Bank = 2, row = 1, col = 8
+        Addr[6] = 32'b0000000_10_0000000000001_0000010000;  // Bank = 2, row = 1, col = 16
+        Addr[7] = 32'b0000000_11_0000000000001_0000010000;  // Bank = 3, row = 1, col = 16;
     end
     
-    logic        Busy;
     logic [31:0] Address;
     logic        ReadReq, WriteReq;
     logic [15:0] DataOutToSdramCtrl;
     States       State, NextState; 
     
     // Read/Write index Counter
-    // increments by 1 every read/write operation
-    logic [3:0] IndexCounter, NextIndexCounter;
-    assign NextIndexCounter = (State == WRITE || State == READ) ? IndexCounter + 1 : IndexCounter;
+    // increments by 1 every read/write new operation
+    logic [4:0] IndexCounter, NextIndexCounter;
+    // increments by 1 evrey read/write to count 8 packets of 16bits
+    logic [3:0] PacketCounter, NextPacketCounter; 
+    // When read wait 3 cycles for activation
+    logic [1:0]  WaitActivation, NextWaitActivation;
+
     `MAFIA_RST_DFF(IndexCounter, NextIndexCounter, Clock133, !Rst_N);
+    `MAFIA_RST_DFF(PacketCounter, NextPacketCounter, Clock133, !Rst_N);
+    `MAFIA_RST_DFF(WaitActivation, NextWaitActivation, Clock133, !Rst_N); 
 
-
-    // counts the 16 bit data in each burst part(half word counter)
-    logic [3:0] HBCounter, NextHBCounter;
-    assign NextHBCounter = (HBCounter == 4'h8) ? 4'h0 :  
-                                                       (State == WRITE || State == READ || State == SET_WRITE || State == SET_READ) ?
-                                                                                                          HBCounter + 1 : HBCounter;
-    `MAFIA_RST_DFF(HBCounter, NextHBCounter, Clock133, !Rst_N);  
-     
-                                                                   
     // state macro
     `MAFIA_RST_VAL_DFF(State, NextState, Clock133, !Rst_N, IDLE)
 
     always_comb begin :next_state_logic
-        Address  = 0;
-        ReadReq  = 0;
-        WriteReq = 0;
+        Address            = 0;
+        ReadReq            = 0;
+        WriteReq           = 0;
         DataOutToSdramCtrl = 0;
+        NextState          = State;
+        NextIndexCounter   = IndexCounter;
+        NextWaitActivation = WaitActivation;
+        NextPacketCounter  = PacketCounter;
         case(State)
             IDLE: begin
                 if(Busy)
                     NextState = IDLE;
                 else
-                    NextState = WRITE;
+                    NextState = ACTIVATION;
             end // idle
+            ACTIVATION: begin
+                Address  = Addr[IndexCounter];
+                NextWaitActivation = WaitActivation + 1;
+                if(WaitActivation < 2)
+                    NextState = ACTIVATION;
+                else begin
+                    if(IndexCounter < 8) begin
+                        WriteReq  = 1;
+                        NextState = SET_WRITE;
+                    end
+                    else if(IndexCounter < 16) begin
+                        ReadReq   = 1;
+                        NextState = SET_READ;
+                    end
+                    else 
+                        NextState = DONE;
+                end
+            end
+            SET_WRITE: begin
+                Address             = Addr[IndexCounter];
+                DataOutToSdramCtrl  = WriteData[IndexCounter][16*PacketCounter +: 16];
+                NextPacketCounter   = PacketCounter + 1;
+                NextState           = WRITE;
+            end
             WRITE: begin
-                WriteReq = 1;
-                Address =  Addr[IndexCounter];
-                
-
-            end // write
-                
-
-
+                if(PacketCounter < 8) begin
+                    Address             = Addr[IndexCounter];
+                    DataOutToSdramCtrl  = WriteData[IndexCounter][16*PacketCounter +: 16];
+                    NextPacketCounter   = PacketCounter + 1;
+                    NextState           = WRITE;
+                end
+                else begin
+                    NextIndexCounter  = IndexCounter + 1;
+                    NextPacketCounter = 0;
+                    NextState         = IDLE;
+                end
+            end
+            SET_READ: begin
+                Address             = Addr[IndexCounter[2:0]];
+                DataOutToSdramCtrl  = WriteData[IndexCounter[2:0]][16*PacketCounter +: 16];
+                NextPacketCounter   = PacketCounter + 1;
+                NextState           = READ; 
+            end
+            READ: begin
+                if(PacketCounter < 8) begin
+                    Address             = Addr[IndexCounter[2:0]];
+                    DataOutToSdramCtrl  = WriteData[IndexCounter[2:0]][16*PacketCounter +: 16];
+                    NextPacketCounter   = PacketCounter + 1;
+                    NextState           = READ;
+                end
+                else begin
+                    NextIndexCounter  = IndexCounter + 1;
+                    NextPacketCounter = 0;
+                    NextState         = IDLE;
+                end
+            end
+            DONE    : NextState = DONE;
+            default : NextState = IDLE;
         endcase
     end
 
@@ -140,7 +177,7 @@ import sdram_ctrl_pkg::*;
 	.DRAM_RAS_N(DRAM_RAS_N), 
 	.DRAM_DQMH(DRAM_DQMH),  
 	.DRAM_WE_N(DRAM_WE_N)   
-)
+);
 
 
 endmodule
