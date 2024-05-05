@@ -29,7 +29,7 @@ import sdram_ctrl_pkg::*;
 );
 
     logic [127:0] WriteData [0:7];  // write 128bit to 8 random places
-    logic [7:0]   Addr      [0:31]; // strores addreses
+    logic [31:0]   Addr     [0:7]; // strores addreses
 
     typedef enum {IDLE, ACTIVATION, SET_READ, READ,  SET_WRITE, WRITE, DONE} States;
 
@@ -92,7 +92,7 @@ import sdram_ctrl_pkg::*;
                     NextState = ACTIVATION;
             end // idle
             ACTIVATION: begin
-                Address  = Addr[IndexCounter];
+                Address  = Addr[IndexCounter[2:0]];
                 NextWaitActivation = WaitActivation + 1;
                 if(WaitActivation < 2)
                     NextState = ACTIVATION;
@@ -130,14 +130,12 @@ import sdram_ctrl_pkg::*;
             end
             SET_READ: begin
                 Address             = Addr[IndexCounter[2:0]];
-                DataOutToSdramCtrl  = WriteData[IndexCounter[2:0]][16*PacketCounter +: 16];
                 NextPacketCounter   = PacketCounter + 1;
                 NextState           = READ; 
             end
             READ: begin
                 if(PacketCounter < 8) begin
                     Address             = Addr[IndexCounter[2:0]];
-                    DataOutToSdramCtrl  = WriteData[IndexCounter[2:0]][16*PacketCounter +: 16];
                     NextPacketCounter   = PacketCounter + 1;
                     NextState           = READ;
                 end

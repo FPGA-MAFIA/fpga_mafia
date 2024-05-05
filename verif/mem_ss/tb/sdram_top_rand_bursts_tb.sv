@@ -5,6 +5,9 @@ logic Clk;
 logic Rst;
 logic Busy;
 
+// to run type: 
+// ./build.py -dut mem_ss -hw -top sdram_top_rand_bursts_tb -sim
+
 // ========================
 // clock gen
 // ========================
@@ -51,7 +54,7 @@ end
 	logic		    DRAM_WE_N;   
 sdram_top_rand_bursts sdram_top_rand_bursts(
     .Clock133(Clk),
-    .Rst_N(!Rst),
+    .Rst_N(Rst),
     .Busy(Busy),
     // DRAM INTERFACE
     .DRAM_ADDR(DRAM_ADDR),  
