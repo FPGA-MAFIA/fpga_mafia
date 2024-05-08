@@ -82,22 +82,34 @@ import sdram_ctrl_pkg::*;
             IDLE: begin
                 if(Busy)
                     NextState = IDLE;
-                else
-                    NextState = ACTIVATION;
+                else begin
+                    if(IndexCounter < 8) begin
+                        WriteReq  = 1;
+                        NextState = ACTIVATION;
+                    end
+                    else if(IndexCounter < 16) begin
+                        ReadReq   = 1;
+                        NextState = ACTIVATION;
+                    end
+                    else
+                        NextState = DONE;
+                end
             end // idle
             ACTIVATION: begin
                 Address  = Addr[IndexCounter[2:0]];
                 NextWaitActivation = WaitActivation + 1;
-                if(WaitActivation < 2) 
+                if(WaitActivation < 1) 
                     NextState = ACTIVATION;
                 else begin
                     if(IndexCounter < 8) begin
-                        WriteReq  = 1;
-                        NextState = SET_WRITE;
+                        NextWaitActivation = 0;
+                        WriteReq           = 1;
+                        NextState          = SET_WRITE;
                     end
                     else if(IndexCounter < 16) begin
-                        ReadReq   = 1;
-                        NextState = SET_READ;
+                        NextWaitActivation = 0;
+                        ReadReq            = 1;
+                        NextState          = SET_READ;
                     end
                     else 
                         NextState = DONE;
