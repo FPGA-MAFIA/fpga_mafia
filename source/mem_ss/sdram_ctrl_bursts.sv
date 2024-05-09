@@ -58,10 +58,15 @@ import sdram_ctrl_pkg::*;
     logic        StartAutoRefresh;
     logic [10:0] RefreshCounter, NextRefreshCounter;
     // We dont want to trigger auto refresh when we in the initiale states
-    assign ResetRefreshCounter  = (RefreshCounter == RefreshRate || State == INIT_WAIT || State == INIT_PREA ||
-                                  State == INIT_NOP || State == INIT_MODE_REG || INIT_REFRESH);  
+    assign ResetRefreshCounter  = (State == REFRESH || State == INIT_WAIT || State == INIT_PREA ||
+                                   State == INIT_NOP || State == INIT_MODE_REG || INIT_REFRESH);  
     assign NextRefreshCounter   = (ResetRefreshCounter) ? 1'b0 : RefreshCounter + 1;
-    assign StartAutoRefresh     = (RefreshCounter == RefreshRate);
+    // Auto-refresh is required every 1560 cycles. In an 8-bit burst configuration,
+    // transitioning from Idle to Idle (post read/write operation) takes approximately 10-15 cycles, which is deterministic.
+    // To simplify the design, auto-refresh is initiated 20 cycles before reaching the maximum allowed limit.
+    // This approach sacrifices some cycles to reduce complexity.
+    assign StartAutoRefresh     = (RefreshCounter > RefreshRate - 20); 
+    //assign StartAutoRefresh     = (RefreshCounter == RefreshRate);
     `MAFIA_RST_DFF(RefreshCounter, NextRefreshCounter, Clock, Rst)
 
     assign Busy = (State == IDLE) ? 1'b0: 1'b1; // TODO add logic 
