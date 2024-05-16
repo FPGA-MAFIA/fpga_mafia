@@ -1,0 +1,11 @@
+{
+    "I_MEM_OFFSET": 0,
+    "I_MEM_LENGTH": 65536,
+    "D_MEM_OFFSET": 65536,
+    "D_MEM_LENGTH": 61440,
+    "crt0_file"   : "crt0_default.S",
+    "rv32_gcc"    : "rv32im",
+    "name"        : "rv32im",
+    "gcc_optimize": "-O0",
+    "ovrd_params" : "override_rrv_rv32i"
+}
