@@ -8,7 +8,7 @@
 // Code Owner       : Amichai Ben-David
 // Adviser          : Amichai Ben-David
 // Created          : 12/2023
-// Description      : List of possible illigal instructions scenarios in RV32I/E
+// Description      : List of possible illigal instructions scenarios in RV32IM/EM
 //------------------------------------------------------------------------------
 t_illegal_instruction illegal_instructionsQ101H;
 
@@ -33,16 +33,18 @@ assign PreFunct7Q101H     = PreInstructionQ101H[31:25];
 
 
 // Covers R_type instructions where bits [31:25] must always be zero in Base ISA //TODO - some extentions may have differente options 
-assign illegal_instructionsQ101H.RopFunct7NotMatchZero = (PreOpcodeQ101H == R_OP) && 
-                                                                                (  PreRtypeQ101H  == SLL_ 
-                                                                                || PreRtypeQ101H  == SLT_  
-                                                                                || PreRtypeQ101H  == SLTU_   
-                                                                                || PreRtypeQ101H  == XOR_  
-                                                                                || PreRtypeQ101H  == OR_   
-                                                                                || PreRtypeQ101H  == AND_) && (PreFunct7Q101H != '0);       
-                                                                                                                 
+// PreFunct7Q101H equals 0x1 in M extension thus not causing illegal instruction
+assign illegal_instructionsQ101H.RopFunct7NotMatchZero = (PreOpcodeQ101H == R_OP && PreFunct7Q101H == 20'h1)    ? 1'b0 : (PreOpcodeQ101H == R_OP) ?
+                                                                                                                         (  PreRtypeQ101H  == SLL_ 
+                                                                                                                         || PreRtypeQ101H  == SLT_  
+                                                                                                                         || PreRtypeQ101H  == SLTU_   
+                                                                                                                         || PreRtypeQ101H  == XOR_  
+                                                                                                                         || PreRtypeQ101H  == OR_   
+                                                                                                                         || PreRtypeQ101H  == AND_) && (PreFunct7Q101H != '0)  : 1'b0;      
+                                                                                                                                                        
 // Covers R_type instructions where bits [31:25] must always be 7'b0100000 = 0x20 or zero in Base ISA //TODO - some extentions may have differente options 
-assign illegal_instructionsQ101H.RopFunct7NotMatch20OrZero = (PreOpcodeQ101H == R_OP) && (PreRtypeQ101H == ADD_ || PreRtypeQ101H  == SRL_) && !(PreFunct7Q101H == 8'h20 || PreFunct7Q101H == '0);
+assign illegal_instructionsQ101H.RopFunct7NotMatch20OrZero = (PreOpcodeQ101H == R_OP && PreFunct7Q101H == 20'h1) ? 1'b0 : (PreOpcodeQ101H == R_OP) ?
+                                                                            (PreRtypeQ101H == ADD_ || PreRtypeQ101H  == SRL_) && !(PreFunct7Q101H == 8'h20 || PreFunct7Q101H == '0) :1'b0;
 
 // Covers I_type instructions where bits [31:25] must always be 7'b0100000 = 0x20 or zero in Base ISA //TODO - some extentions may have differente options 
 assign illegal_instructionsQ101H.IopFunct7NotMatch20OrZero = (PreOpcodeQ101H == I_OP) && (PreRtypeQ101H == SLL_ || PreRtypeQ101H  == SRL_) && !(PreFunct7Q101H == 8'h20 || PreFunct7Q101H == '0);

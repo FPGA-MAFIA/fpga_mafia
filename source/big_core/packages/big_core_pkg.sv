@@ -102,6 +102,17 @@ typedef enum logic [3:0] {
 } t_alu_op ;
 
 typedef enum logic [2:0] {
+    MUL    = 3'b000,
+    MULH   = 3'b001,
+    MULHSU = 3'b010,
+    MULHU  = 3'b011,
+    DIV    = 3'b100,
+    DIVU   = 3'b101,
+    REM    = 3'b110,
+    REMU   = 3'b111
+} t_alu_op_m_extension ;
+
+typedef enum logic [2:0] {
    BEQ  = 3'b000 ,
    BNE  = 3'b001 ,
    BLT  = 3'b100 ,
@@ -136,43 +147,47 @@ typedef struct packed {
 } t_ctrl_rf;
 
 typedef struct packed {
-    logic       SelNextPcAluOutJ;
-    logic       SelNextPcAluOutB;
-    logic       SelRegWrPc;
-    logic       SelAluPc;
-    logic       SelAluImm;
-    logic       SelDMemWb;
-    logic       Lui;
-    logic       RegWrEn;
-    logic       DMemWrEn;
-    logic       DMemRdEn;
-    logic       SignExt;
-    logic [3:0] DMemByteEn;
+    logic         SelNextPcAluOutJ;
+    logic         SelNextPcAluOutB;
+    logic         SelRegWrPc;
+    logic         SelAluPc;
+    logic         SelAluImm;
+    logic         SelDMemWb;
+    logic         Lui;
+    logic         RegWrEn;
+    logic         DMemWrEn;
+    logic         DMemRdEn;
+    logic         SignExt;
+    logic [3:0]   DMemByteEn;
     t_branch_type BranchOp;
-    logic [4:0] RegDst;
-    logic [4:0] RegSrc1;
-    logic [4:0] RegSrc2;
-    t_alu_op    AluOp;
-    t_opcode    Opcode;
-    t_e_sel_wb  e_SelWrBack;
-    logic [31:0] Pc;            //Used for debug - not really a control signal
-    logic [31:0] Instruction;   //Used for debug - not really a control signal
+    logic [4:0]   RegDst;
+    logic [4:0]   RegSrc1;
+    logic [4:0]   RegSrc2;
+    t_alu_op      AluOp;
+    t_opcode      Opcode;
+    t_e_sel_wb    e_SelWrBack;
+    logic [31:0]  Pc;            //Used for debug - not really a control signal
+    logic [31:0]  Instruction;   //Used for debug - not really a control signal
+    t_alu_op_m_extension AluOpMulDiv;
+    logic                MExtension;  // m extension instruction
 } t_big_core_ctrl;
 
 typedef struct packed {
-    logic [4:0] RegSrc1Q102H;
-    logic [4:0] RegSrc2Q102H;
-    t_alu_op    AluOpQ102H;
-    logic       LuiQ102H;
-    t_branch_type BranchOpQ102H;
-    logic [4:0] RegDstQ103H;
-    logic [4:0] RegDstQ104H;
-    logic [4:0] RegDstQ105H;
-    logic       RegWrEnQ103H;
-    logic       RegWrEnQ104H;
-    logic       RegWrEnQ105H;
-    logic       SelAluPcQ102H;
-    logic       SelAluImmQ102H;
+    logic [4:0]          RegSrc1Q102H;
+    logic [4:0]          RegSrc2Q102H;
+    t_alu_op             AluOpQ102H;
+    logic                LuiQ102H;
+    t_branch_type        BranchOpQ102H;
+    logic [4:0]          RegDstQ103H;
+    logic [4:0]          RegDstQ104H;
+    logic [4:0]          RegDstQ105H;
+    logic                RegWrEnQ103H;
+    logic                RegWrEnQ104H;
+    logic                RegWrEnQ105H;
+    logic                SelAluPcQ102H;
+    logic                SelAluImmQ102H;
+    t_alu_op_m_extension AluOpMulDivQ102H;
+    logic                MExtensionQ102H;  // m extension instruction
 } t_ctrl_exe;
 
 typedef struct packed {
@@ -185,7 +200,7 @@ typedef struct packed {
 typedef struct packed {
     logic [3:0] ByteEnQ105H;
     logic [3:0] SignExtQ105H;
-    t_e_sel_wb    e_SelWrBackQ105H;
+    t_e_sel_wb  e_SelWrBackQ105H;
 } t_ctrl_wb;
 
 typedef struct packed {
