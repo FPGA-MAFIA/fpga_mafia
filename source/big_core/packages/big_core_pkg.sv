@@ -101,7 +101,7 @@ typedef enum logic [3:0] {
     IN_2 = 4'b1111
 } t_alu_op ;
 
-// TODO remove division and perform it using trap mechanism
+// TODO - consider in the future implement div instructions in dedicated hardware and not by trap 
 typedef enum logic [2:0] {
     MUL    = 3'b000,
     MULH   = 3'b001,

@@ -52,7 +52,15 @@ typedef enum logic [5:0] {
     CSRRC = 6'd44,
     CSRRWI= 6'd45,
     CSRRSI= 6'd46,
-    CSRRCI= 6'd47
+    CSRRCI= 6'd47,
+    MUL   = 6'd48,
+    MULH  = 6'd49,
+    MULHSU= 6'd50,
+    MULHU = 6'd51,
+    DIV   = 6'd52,
+    DIVU  = 6'd53,
+    REM   = 6'd54,
+    REMU  = 6'd55   
   } t_rv32i_instr;
 
 // csr registers

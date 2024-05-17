@@ -231,7 +231,7 @@ always_comb begin
     {3'b101, 7'b0100000, I_OP} : CtrlQ101H.AluOp = SRA;  // SRAI
     // ---- R type for M extention ----
     {3'b000, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MUL;    // MUL
-    {3'b001, 7'b0100001, R_OP} : CtrlQ101H.AluOpMulDiv = MULH;   // MULH
+    {3'b001, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MULH;   // MULH
     {3'b010, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MULHSU; // MULHSU
     {3'b011, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MULHU;  // MULHU
     {3'b100, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = DIV;    // DIV
