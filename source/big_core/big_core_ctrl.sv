@@ -96,8 +96,8 @@ assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H |
 t_alu_op_m_extension DivPreFunct3Q101H;
 logic                PreDIVInstructionsQ101H;
 assign DivPreFunct3Q101H       = t_alu_op_m_extension'(PreInstructionQ101H[14:12]);
-assign PreDIVInstructionsQ101H = (PreFunct7Q101H == 20'h1 && DivPreFunct3Q101H == DIV) || (PreFunct7Q101H == 20'h1 && DivPreFunct3Q101H == DIVU) ||
-                                 (PreFunct7Q101H == 20'h1 && DivPreFunct3Q101H == REM) || (PreFunct7Q101H == 20'h1 && DivPreFunct3Q101H == REMU);
+assign PreDIVInstructionsQ101H = (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == DIV && PreOpcodeQ101H == R_OP) || (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == DIVU && PreOpcodeQ101H == R_OP) ||
+                                 (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == REM && PreOpcodeQ101H == R_OP) || (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == REMU && PreOpcodeQ101H == R_OP);
 
 logic DIVInstructionsQ101H;
 assign DIVInstructionsQ101H = (PreDIVInstructionsQ101H) && ! (flushQ102H || flushQ103H);
@@ -211,11 +211,11 @@ assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000
     assign CsrExceptionUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
     assign CsrExceptionUpdateQ101H.div_custom_trap          = DIVInstructionsQ101H;
     assign CsrExceptionUpdateQ101H.Mret                     = mret_was_calledQ101H;
-    assign CsrExceptionUpdateQ101H.mtval_instruction        = (IllegalInstructionQ101H || DIVInstructionsQ101H) ? PreInstructionQ101H : 1'b0;
+    assign CsrExceptionUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H :
+                                                              DIVInstructionsQ101H    ? PreInstructionQ101H : 1'b0;
 
-    assign CsrExceptionUpdateQ101H.Pc = IllegalInstructionQ101H || DIVInstructionsQ101H  ? PcQ101H :   
-                                        CsrExceptionUpdateQ101H.timer_interrupt_taken    ? PcQ101H :
-                                                                                        32'h0;
+    assign CsrExceptionUpdateQ101H.Pc = IllegalInstructionQ101H ? PcQ101H : DIVInstructionsQ101H ?
+                                        PcQ101H : CsrExceptionUpdateQ101H.timer_interrupt_taken  ? PcQ101H : 32'h0;
   
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
