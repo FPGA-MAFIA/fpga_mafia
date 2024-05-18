@@ -1,32 +1,18 @@
+
+// ------------------------------------------------------------------------------------------------
+// In that test we check multiply instructions
 // for software compilation : ./build.py -dut big_core -test m_extension -app  -cfg big_core_rv32im
-// for simulation run:        ./build.py -dut big_core -test m_extension -app -hw -sim -cfg big_core_rv32im
+// for simulation run       : ./build.py -dut big_core -test m_extension -app -hw -sim -cfg big_core_rv32im
+// ------------------------------------------------------------------------------------------------
+#include "interrupt_handler.h"
 
 int main() {
 
     //int a = 200000;  // 32'h30d40
     //int b = 300000;  // 32'h493e0
-
-    // -------------------------------------------------------------------------------------
-    // in case of a,b both positive than all the results will be the same.
-    // for example: in case if a = 32'd200000 and b = 32'd300000. mul_res = 32'hf8475800
-    // and all other variables will be equal to 32'h0000000d
-    // --------------------------------------------------------------------------------------
-    
+ 
     int a = 200000;  
     int b = -300000; 
-
-    // ----------------------------------------------------------------------------------------------------------
-    // in case of a positive and b negative for example. a = 32'd200000 and b = -300000
-    // the full result will be 0xFFFFFF207B8A800.
-    // mul_res  = 0x07b8a800.
-    // mulh_res = 0xffffff2
-    // mulhsu -> will treat positive number with or without $signed as 200000, b will be treated as
-    // positive number. The result is 32'h00030d32.
-    // lets make simple example: assume b = -3 and we use 4 bit width. b in signed equals 1101
-    // and in unsigned it will be treated as 13.
-    // mulhsu - we will get the same result because positive number are treated the same in signed or unsigned
-    // -----------------------------------------------------------------------------------------------------------
-
 
     int mul_res;
     long long mulh_res;
@@ -44,6 +30,26 @@ int main() {
     // Multiply and store the high part of the mixed signed-unsigned result
     __asm__ volatile ("mulhsu %0, %1, %2" : "=r"(mulhsu_res) : "r"(a), "r"(b));
 
+
+    int dividend = 7;
+    int divisor  = 3;
+
+    int div_res;
+    unsigned int divu_res;
+    int rem_res;
+    unsigned int remu_res;
+
+    // Performe signed division and sore the results
+    //__asm__ volatile ("div %0, %1, %2" : "=r"(div_res) : "r"(dividend), "r"(divisor));
+
+    // Performe unsigned division and sore the results
+    //__asm__ volatile ("divu %0, %1, %2" : "=r"(divu_res) : "r"(dividend), "r"(divisor));
+
+    // Performe signed reminder and sore the results
+    //__asm__ volatile ("rem %0, %1, %2" : "=r"(rem_res) : "r"(dividend), "r"(divisor));
+
+    // Performe signed reminder and sore the results
+    //__asm__ volatile ("remu %0, %1, %2" : "=r"(remu_res) : "r"(dividend), "r"(divisor));
 
     return 0;
 }
