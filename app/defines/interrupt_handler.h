@@ -28,18 +28,18 @@ void interrupt_handler() {
         funct3    = extract_funct3(csr_mtval);
         if(funct7 == 0x1 && funct3 == 0x4) {   // DIV
                  rvc_printf("DIV\n"); // TODO handle DIV
-                 rvc_printf("MTVAL:");
-                 rvc_print_unsigned_int_hex(csr_mtval);
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
         }
         else if(funct7 == 0x1 && funct3 == 0x5) {  // DIVU
                  rvc_printf("DIVU\n"); // TODO handle DIVU
-                 rvc_printf("MTVAL:");
-                 rvc_print_unsigned_int_hex(csr_mtval);
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
         }
         else if(funct7 == 0x1 && funct3 == 0x6) {  // REM
                  rvc_printf("REM\n"); // TODO handle DIVU
-                 rvc_printf("MTVAL:");
-                 rvc_print_unsigned_int_hex(csr_mtval);
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
         }
         else if(funct7 == 0x1 && funct3 == 0x7) {  // REMU
                  rvc_printf("RIM\n"); // TODO handle REMU
