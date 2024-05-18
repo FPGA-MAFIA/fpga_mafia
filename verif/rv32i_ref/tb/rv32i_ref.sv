@@ -43,6 +43,7 @@ logic [31:0] data_rd1, data_rd2;
 logic [31:0] mem_rd_addr;
 logic [31:0] mem_wr_addr;
 logic        illegal_instruction;
+logic        div_custom_trap;
 logic        ebreak_was_called;
 logic        ecall_was_called;
 logic        en_end_of_simulation;
@@ -188,6 +189,7 @@ always_comb begin
     next_regfile        = regfile;
     reg_wr_en           = 1'b0;
     illegal_instruction = 1'b0;
+    div_custom_trap     = 1'b0;
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
     next_dmem           = dmem;
@@ -451,6 +453,26 @@ always_comb begin
         next_regfile[rd] = full_mult_res[63:32];
         reg_wr_en        = 1'b1;
     end
+    32'b0000001_?????_?????_100_?????_0110011: begin
+        instr_type       = DIV;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    32'b0000001_?????_?????_101_?????_0110011: begin
+        instr_type       = DIVU;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    32'b0000001_?????_?????_110_?????_0110011: begin
+        instr_type       = REM;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    32'b0000001_?????_?????_111_?????_0110011: begin
+        instr_type       = REMU;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
     //=======================================================
     //  FENCE
     //=======================================================
@@ -542,6 +564,11 @@ always_comb begin
 
     if(illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mepc   = pc;
+        next_csr.csr_mtval  = instruction;
+    end
+    if(div_custom_trap) begin
+        next_csr.csr_mcause = 32'h0000000a;
         next_csr.csr_mepc   = pc;
         next_csr.csr_mtval  = instruction;
     end
