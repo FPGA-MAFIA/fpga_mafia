@@ -8,6 +8,8 @@
 #define TIMER_INTERRUPT_INTERVAL          0x0000100 
 
 unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
+unsigned int funct7, funct3;
+unsigned int rs1, rs2, rd;
 
 void mtime_routine_handler() {
         COUNT_MACHINE_TIMER_INTRPT[0]++;
@@ -19,9 +21,32 @@ void interrupt_handler() {
     unsigned int csr_mepc, csr_mtval;
 
     // For RISC-V, this value is 0x2 for illegal instruction
-    if ((mcause & 0xFFF) == ILLEGAL_INSTRUCTION_EXCEPTION) { 
-        csr_mepc = read_mepc();
+    if ((mcause & 0xFFF) == ILLEGAL_INSTRUCTION_EXCEPTION) {
+        csr_mepc  = read_mepc();
         csr_mtval = read_mtval();
+        funct7    = extract_funct7(csr_mtval);
+        funct3    = extract_funct3(csr_mtval);
+        if(funct7 == 0x1 && funct3 == 0x4) {   // DIV
+                 rvc_printf("DIV\n"); // TODO handle DIV
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
+        }
+        else if(funct7 == 0x1 && funct3 == 0x5) {  // DIVU
+                 rvc_printf("DIVU\n"); // TODO handle DIVU
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
+        }
+        else if(funct7 == 0x1 && funct3 == 0x6) {  // REM
+                 rvc_printf("REM\n"); // TODO handle DIVU
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
+        }
+        else if(funct7 == 0x1 && funct3 == 0x7) {  // REMU
+                 rvc_printf("RIM\n"); // TODO handle REMU
+                 //rvc_printf("MTVAL:");
+                 //rvc_print_unsigned_int_hex(csr_mtval);
+        }
+        else { // general illegal instruction 
         rvc_printf("ILGL INST\n");
         rvc_printf("MEPC:");
         rvc_print_unsigned_int_hex(csr_mepc);
@@ -29,7 +54,8 @@ void interrupt_handler() {
         rvc_printf("MTVAL:");
         rvc_print_unsigned_int_hex(csr_mtval);
         rvc_printf("\n");
-       }
+        }
+    }
 
     // For RISC-V, this value is 0x80000007 for machine timer interrupt
     if (mcause == MACHINE_TIMER_INTERRUPT) {

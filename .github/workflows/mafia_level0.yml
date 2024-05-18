@@ -22,6 +22,9 @@ jobs:
       - name: BIG_CORE -cfg big_core_boot_trap with reference model 
         run:  python build.py -dut big_core -cfg big_core_boot_trap -test alive_illegal -app -hw -sim -pp 
 
+      - name: BIG_CORE -cfg big_core_rv32im with reference model 
+        run:  python build.py -dut big_core -cfg big_core_rv32im -test m_extension -app -hw -sim -pp 
+
       - name: BIG_CORE - rv32i_level0_no_ref -> no reference model
         run:  python build.py -dut big_core -top big_core_no_ref_tb  -test PS2_GCD -app -hw -sim -pp
       

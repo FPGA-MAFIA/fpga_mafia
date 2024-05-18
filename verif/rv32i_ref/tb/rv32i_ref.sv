@@ -55,6 +55,7 @@ logic        hit_vga_mem_rd;
 logic        hit_vga_mem_wr;
 logic [31:0] reg_wr_data;
 logic        reg_wr_en;
+logic [63:0] full_mult_res;
 // csr definition and signals
 t_csr        csr, next_csr;
 logic [11:0] csr_addr;
@@ -422,6 +423,32 @@ always_comb begin
     32'b0000000_?????_?????_111_?????_0110011: begin
         instr_type       = AND;
         next_regfile[rd] = data_rd1 & data_rd2;//AND
+        reg_wr_en        = 1'b1;
+    end
+    //=======================================================
+    // MUL/MULH/MULHSU/MULHU/DIV/DIVU/REM/REMU
+    //=======================================================
+    32'b0000001_?????_?????_000_?????_0110011: begin
+        instr_type       = MUL;
+        next_regfile[rd] = data_rd1 * data_rd2; //MUL
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_001_?????_0110011: begin
+        instr_type       = MULH;
+        full_mult_res    = $signed(data_rd1) * $signed(data_rd2); //MULH
+        next_regfile[rd] = full_mult_res[63:32];
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_010_?????_0110011: begin
+        instr_type       = MULHSU;
+        full_mult_res    = $signed(data_rd1) *data_rd2; //MULHSU
+        next_regfile[rd] = full_mult_res[63:32];
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_011_?????_0110011: begin
+        instr_type       = MULHU;
+        full_mult_res    = data_rd1 * data_rd2; //MULHU
+        next_regfile[rd] = full_mult_res[63:32];
         reg_wr_en        = 1'b1;
     end
     //=======================================================
