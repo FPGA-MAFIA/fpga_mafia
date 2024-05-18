@@ -40,16 +40,16 @@ int main() {
     unsigned int remu_res;
 
     // Performe signed division and sore the results
-    //__asm__ volatile ("div %0, %1, %2" : "=r"(div_res) : "r"(dividend), "r"(divisor));
+    __asm__ volatile ("div %0, %1, %2" : "=r"(div_res) : "r"(dividend), "r"(divisor));
 
     // Performe unsigned division and sore the results
-    //__asm__ volatile ("divu %0, %1, %2" : "=r"(divu_res) : "r"(dividend), "r"(divisor));
+    __asm__ volatile ("divu %0, %1, %2" : "=r"(divu_res) : "r"(dividend), "r"(divisor));
 
     // Performe signed reminder and sore the results
-    //__asm__ volatile ("rem %0, %1, %2" : "=r"(rem_res) : "r"(dividend), "r"(divisor));
+    __asm__ volatile ("rem %0, %1, %2" : "=r"(rem_res) : "r"(dividend), "r"(divisor));
 
     // Performe signed reminder and sore the results
-    //__asm__ volatile ("remu %0, %1, %2" : "=r"(remu_res) : "r"(dividend), "r"(divisor));
+    __asm__ volatile ("remu %0, %1, %2" : "=r"(remu_res) : "r"(dividend), "r"(divisor));
 
     return 0;
 }

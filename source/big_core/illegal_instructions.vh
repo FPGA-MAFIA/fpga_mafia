@@ -12,29 +12,36 @@
 //------------------------------------------------------------------------------
 t_illegal_instruction illegal_instructionsQ101H;
 
-t_opcode            PreOpcodeQ101H;
-t_big_core_ctrl     PreCtrlQ101H;
-t_funct3_store_type PreStoreTypeQ101H;
-t_funct3_load_type  PreLoadTypeQ101H;
-t_branch_type       PreBranchTypeQ101H;
-t_funct3_Rtype      PreRtypeQ101H;
-logic [2:0]         JalrFunct3Q101H;
-logic [6:0]         PreFunct7Q101H;  
-logic               PreIllegalInstructionQ101H;
-
+t_opcode             PreOpcodeQ101H;
+t_big_core_ctrl      PreCtrlQ101H;
+t_funct3_store_type  PreStoreTypeQ101H;
+t_funct3_load_type   PreLoadTypeQ101H;
+t_branch_type        PreBranchTypeQ101H;
+t_funct3_Rtype       PreRtypeQ101H;
+t_alu_op_m_extension MExtPreFunct3Q101H;
+logic [2:0]          JalrFunct3Q101H;
+logic [6:0]          PreFunct7Q101H;  
+logic                PreIllegalInstructionQ101H;
+logic                MultiplyInstructionsQ101H;
 
 assign PreOpcodeQ101H     = t_opcode'(PreInstructionQ101H[6:0]);
 assign PreStoreTypeQ101H  = t_funct3_store_type'(PreInstructionQ101H[14:12]);
 assign PreLoadTypeQ101H   = t_funct3_load_type'(PreInstructionQ101H[14:12]); 
 assign PreBranchTypeQ101H = t_branch_type'(PreInstructionQ101H[14:12]);
 assign PreRtypeQ101H      = t_funct3_Rtype'(PreInstructionQ101H[14:12]); 
+assign MExtPreFunct3Q101H        = t_alu_op_m_extension'(PreInstructionQ101H[14:12]);
 assign JalrFunct3Q101H    = PreInstructionQ101H[14:12];        
 assign PreFunct7Q101H     = PreInstructionQ101H[31:25];
 
+// division instructions of M extension are considered to be illegal instruction and will be treated in interupt handler
+// when Zmmul extention instructions (mul, mulh, mulhsu, mulhu) occures they will be treated in hardware only 
+assign MultiplyInstructionsQ101H = (PreFunct7Q101H == 20'h1 && MExtPreFunct3Q101H == MUL)    || (PreFunct7Q101H == 20'h1 && MExtPreFunct3Q101H == MULH) ||
+                                   (PreFunct7Q101H == 20'h1 && MExtPreFunct3Q101H == MULHSU) || (PreFunct7Q101H == 20'h1 && MExtPreFunct3Q101H == MULHU);
 
 // Covers R_type instructions where bits [31:25] must always be zero in Base ISA //TODO - some extentions may have differente options 
-// PreFunct7Q101H equals 0x1 in M extension thus not causing illegal instruction
-assign illegal_instructionsQ101H.RopFunct7NotMatchZero = (PreOpcodeQ101H == R_OP && PreFunct7Q101H == 20'h1)    ? 1'b0 : (PreOpcodeQ101H == R_OP) ?
+// M extension also has op code of r_type with funct7 = 0x1. In that case we have to check if we recieve multiply instructions
+// we dont raise any illegal instruction exception
+assign illegal_instructionsQ101H.RopFunct7NotMatchZero = (PreOpcodeQ101H == R_OP &&  MultiplyInstructionsQ101H)   ? 1'b0 : (PreOpcodeQ101H == R_OP) ?
                                                                                                                          (  PreRtypeQ101H  == SLL_ 
                                                                                                                          || PreRtypeQ101H  == SLT_  
                                                                                                                          || PreRtypeQ101H  == SLTU_   
@@ -43,7 +50,7 @@ assign illegal_instructionsQ101H.RopFunct7NotMatchZero = (PreOpcodeQ101H == R_OP
                                                                                                                          || PreRtypeQ101H  == AND_) && (PreFunct7Q101H != '0)  : 1'b0;      
                                                                                                                                                         
 // Covers R_type instructions where bits [31:25] must always be 7'b0100000 = 0x20 or zero in Base ISA //TODO - some extentions may have differente options 
-assign illegal_instructionsQ101H.RopFunct7NotMatch20OrZero = (PreOpcodeQ101H == R_OP && PreFunct7Q101H == 20'h1) ? 1'b0 : (PreOpcodeQ101H == R_OP) ?
+assign illegal_instructionsQ101H.RopFunct7NotMatch20OrZero = (PreOpcodeQ101H == R_OP && MultiplyInstructionsQ101H) ? 1'b0 : (PreOpcodeQ101H == R_OP) ?
                                                                             (PreRtypeQ101H == ADD_ || PreRtypeQ101H  == SRL_) && !(PreFunct7Q101H == 8'h20 || PreFunct7Q101H == '0) :1'b0;
 
 // Covers I_type instructions where bits [31:25] must always be 7'b0100000 = 0x20 or zero in Base ISA //TODO - some extentions may have differente options 
