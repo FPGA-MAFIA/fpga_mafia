@@ -4,6 +4,7 @@
 
 // RISCV mcause exceptions defines for detection: 
 #define ILLEGAL_INSTRUCTION_EXCEPTION     0x2
+#define CUSTOM_MCAUSE_DIV_OPERATION       0xa 
 #define MACHINE_TIMER_INTERRUPT           0x80000007
 #define TIMER_INTERRUPT_INTERVAL          0x0000100 
 
@@ -24,6 +25,19 @@ void interrupt_handler() {
     if ((mcause & 0xFFF) == ILLEGAL_INSTRUCTION_EXCEPTION) {
         csr_mepc  = read_mepc();
         csr_mtval = read_mtval();
+        rvc_printf("ILGL INST\n");
+        rvc_printf("MEPC:");
+        rvc_print_unsigned_int_hex(csr_mepc);
+        rvc_printf("\n");
+        rvc_printf("MTVAL:");
+        rvc_print_unsigned_int_hex(csr_mtval);
+        rvc_printf("\n");
+        }
+
+    // execution of DIV, DIVU, REM, REMU
+    // The mcause gots reserved value from the spec
+    if (mcause == CUSTOM_MCAUSE_DIV_OPERATION){
+        csr_mtval = read_mtval();
         funct7    = extract_funct7(csr_mtval);
         funct3    = extract_funct3(csr_mtval);
         if(funct7 == 0x1 && funct3 == 0x4) {   // DIV
@@ -42,18 +56,9 @@ void interrupt_handler() {
                  //rvc_print_unsigned_int_hex(csr_mtval);
         }
         else if(funct7 == 0x1 && funct3 == 0x7) {  // REMU
-                 rvc_printf("RIM\n"); // TODO handle REMU
+                 rvc_printf("RIMU\n"); // TODO handle REMU
                  //rvc_printf("MTVAL:");
                  //rvc_print_unsigned_int_hex(csr_mtval);
-        }
-        else { // general illegal instruction 
-        rvc_printf("ILGL INST\n");
-        rvc_printf("MEPC:");
-        rvc_print_unsigned_int_hex(csr_mepc);
-        rvc_printf("\n");
-        rvc_printf("MTVAL:");
-        rvc_print_unsigned_int_hex(csr_mtval);
-        rvc_printf("\n");
         }
     }
 

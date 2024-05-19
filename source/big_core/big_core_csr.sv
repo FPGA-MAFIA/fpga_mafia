@@ -88,6 +88,13 @@ always_comb begin
         next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
+    if(CsrExceptionUpdateQ102H.div_custom_trap) begin
+        next_csr.csr_mcause = 32'h0000000a;  // reserved value
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
     if(CsrExceptionUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
         next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
@@ -371,8 +378,9 @@ end
 // Update program counter
 logic  BeginInterrupt;
 assign BeginInterrupt = (CsrExceptionUpdateQ102H.illegal_instruction || CsrExceptionUpdateQ102H.misaligned_access 
-                       || CsrExceptionUpdateQ102H.illegal_csr_access || CsrExceptionUpdateQ102H.breakpoint 
-                       || CsrExceptionUpdateQ102H.external_interrupt || CsrExceptionUpdateQ102H.timer_interrupt_taken);
+                       || CsrExceptionUpdateQ102H.illegal_csr_access || CsrExceptionUpdateQ102H.breakpoint
+                       || CsrExceptionUpdateQ102H.external_interrupt || CsrExceptionUpdateQ102H.timer_interrupt_taken 
+                       || CsrExceptionUpdateQ102H.div_custom_trap);
 
 assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;
