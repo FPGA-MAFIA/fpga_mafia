@@ -211,11 +211,10 @@ assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000
     assign CsrExceptionUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
     assign CsrExceptionUpdateQ101H.div_custom_trap          = DIVInstructionsQ101H;
     assign CsrExceptionUpdateQ101H.Mret                     = mret_was_calledQ101H;
-    assign CsrExceptionUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H :
-                                                              DIVInstructionsQ101H    ? PreInstructionQ101H : 1'b0;
+    assign CsrExceptionUpdateQ101H.mtval_instruction        = (IllegalInstructionQ101H || DIVInstructionsQ101H)  ? PreInstructionQ101H : 1'b0;
 
-    assign CsrExceptionUpdateQ101H.Pc = IllegalInstructionQ101H ? PcQ101H : DIVInstructionsQ101H ?
-                                        PcQ101H : CsrExceptionUpdateQ101H.timer_interrupt_taken  ? PcQ101H : 32'h0;
+    assign CsrExceptionUpdateQ101H.Pc = (IllegalInstructionQ101H || DIVInstructionsQ101H) ? PcQ101H : 
+                                        CsrExceptionUpdateQ101H.timer_interrupt_taken     ? PcQ101H : 32'h0;
   
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
