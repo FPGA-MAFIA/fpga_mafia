@@ -39,7 +39,7 @@
 #define extract_opcode(instruction) ((instruction) & 0x7F)
 #define extract_rs1(instruction) (((instruction) >> 15) & 0x1F)
 #define extract_rs2(instruction) (((instruction) >> 20) & 0x1F)
-#define extract_rrd(instruction) (((instruction) >> 7) & 0x1F)
+#define extract_rd(instruction) (((instruction) >> 7) & 0x1F)
 
 
 // sample relevant csr's for pmon
