@@ -31,8 +31,8 @@ int main() {
     __asm__ volatile ("mulhsu %0, %1, %2" : "=r"(mulhsu_res) : "r"(a), "r"(b));
 
 
-    int dividend = 7;
-    int divisor  = 3;
+    int dividend = 34;
+    int divisor  = 7;
 
     int div_res;
     unsigned int divu_res;
@@ -41,15 +41,23 @@ int main() {
 
     // Performe signed division and sore the results
     __asm__ volatile ("div %0, %1, %2" : "=r"(div_res) : "r"(dividend), "r"(divisor));
+    rvc_print_int(div_res);
+    rvc_printf("\n");
 
+    
     // Performe unsigned division and sore the results
     __asm__ volatile ("divu %0, %1, %2" : "=r"(divu_res) : "r"(dividend), "r"(divisor));
+    rvc_print_int(divu_res);
+    rvc_printf("\n");
 
     // Performe signed reminder and sore the results
     __asm__ volatile ("rem %0, %1, %2" : "=r"(rem_res) : "r"(dividend), "r"(divisor));
+    rvc_print_int(rem_res); 
+    rvc_printf("\n");
 
     // Performe signed reminder and sore the results
     __asm__ volatile ("remu %0, %1, %2" : "=r"(remu_res) : "r"(dividend), "r"(divisor));
+    rvc_print_int(remu_res);
 
     return 0;
 }
