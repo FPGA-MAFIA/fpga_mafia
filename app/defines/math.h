@@ -35,7 +35,6 @@ int pow(int base, int exp) {
 //------------------------------------------------
 
 // Function implementing DIV, DIVU, REM and REMU 
-
 // Helper function to safely compute the absolute value of an integer
 int safe_abs(int x) {
     if (x < 0) {
@@ -44,73 +43,83 @@ int safe_abs(int x) {
     return x;
 }
 
-// Signed Division
+// Signed Division using bitwise long division
 int div(int rs1, int rs2) {
     if (rs2 == 0) {
-        return INT_MAX; // Division by zero, return max int value
+        return INT_MAX;  // Handle division by zero
     } else if (rs1 == INT_MIN && rs2 == -1) {
-        return INT_MIN; // Overflow case
+        return INT_MAX;  // Handle overflow when rs1 is INT_MIN and rs2 is -1
     }
 
     int sign = ((rs1 < 0) ^ (rs2 < 0)) ? -1 : 1;
     unsigned int num = safe_abs(rs1);
     unsigned int den = safe_abs(rs2);
-    unsigned int res = 0;
+    unsigned int quotient = 0;
+    unsigned int shift = 0;
 
-    while (num >= den) {
-        num -= den;
-        res++;
+    while (den <= num && den < 0x80000000) {  // prevent den from being shifted beyond the bounds of unsigned int
+        den <<= 1;
+        shift++;
     }
 
-    return sign * res;
+    while (shift-- > 0) {
+        den >>= 1;
+        quotient <<= 1;
+        if (num >= den) {
+            num -= den;
+            quotient |= 1;
+        }
+    }
+
+    return sign * quotient;
 }
 
-// Unsigned Division
+// Unsigned Division using bitwise long division
 unsigned divu(unsigned rs1, unsigned rs2) {
     if (rs2 == 0) {
-        return UINT_MAX; // Division by zero, return max unsigned int value
+        return UINT_MAX;  // Handle division by zero
     }
 
-    unsigned res = 0;
-    while (rs1 >= rs2) {
-        rs1 -= rs2;
-        res++;
+    unsigned quotient = 0, shift = 0;
+    while (rs2 <= rs1 && rs2 < 0x80000000) {  // prevent rs2 from being shifted beyond the bounds of unsigned int
+        rs2 <<= 1;
+        shift++;
     }
 
-    return res;
+    while (shift-- > 0) {
+        rs2 >>= 1;
+        quotient <<= 1;
+        if (rs1 >= rs2) {
+            rs1 -= rs2;
+            quotient |= 1;
+        }
+    }
+
+    return quotient;
 }
 
-// Signed Remainder
+// Signed Remainder using the result from div
 int rem(int rs1, int rs2) {
     if (rs2 == 0) {
-        return rs1; // Remainder by zero equals the dividend
+        return rs1;  // Remainder by zero equals the dividend
     } else if (rs1 == INT_MIN && rs2 == -1) {
-        return 0; // Overflow case
+        return 0;  // Handle special overflow case
     }
 
-    int sign = (rs1 < 0) ? -1 : 1;
-    unsigned int num = safe_abs(rs1);
-    unsigned int den = safe_abs(rs2);
-
-    while (num >= den) {
-        num -= den;
-    }
-
-    return sign * num;
+    int quotient = div(rs1, rs2);
+    return rs1 - quotient * rs2;
 }
 
-// Unsigned Remainder
+// Unsigned Remainder using the result from divu
 unsigned remu(unsigned rs1, unsigned rs2) {
     if (rs2 == 0) {
-        return rs1; // Remainder by zero equals the dividend
+        return rs1;  // Remainder by zero equals the dividend
     }
 
-    while (rs1 >= rs2) {
-        rs1 -= rs2;
-    }
-
-    return rs1;
+    unsigned quotient = divu(rs1, rs2);
+    return rs1 - quotient * rs2;
 }
+
 
 
 // TODO - check the proper functionality of the function is special cases

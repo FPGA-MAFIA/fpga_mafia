@@ -12,7 +12,7 @@
 unsigned int COUNT_MACHINE_TIMER_INTRPT[1] = {0};
 unsigned int funct7, funct3;
 unsigned int rs1_addr, rs2_addr, rd_addr;
-unsigned int rs1_value, rs2_value;
+int rs1_value, rs2_value;
 unsigned int* stack_pointer;
 int rd_value;
 
