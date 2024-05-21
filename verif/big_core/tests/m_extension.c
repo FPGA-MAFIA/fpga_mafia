@@ -3,6 +3,7 @@
 // In that test we check multiply instructions
 // for software compilation : ./build.py -dut big_core -test m_extension -app  -cfg big_core_rv32im
 // for simulation run       : ./build.py -dut big_core -test m_extension -app -hw -sim -cfg big_core_rv32im
+// TO REDUCE RUN TIME OR AVOID INCREASING V_TIMEOUT CONSIDER REMOVING PRINT FUNCTIONS!!!
 // ------------------------------------------------------------------------------------------------
 #include "interrupt_handler.h"
 
@@ -30,7 +31,7 @@ int main() {
     // Multiply and store the high part of the mixed signed-unsigned result
     __asm__ volatile ("mulhsu %0, %1, %2" : "=r"(mulhsu_res) : "r"(a), "r"(b));
 
-
+    
     int dividend = 34;
     int divisor  = 7;
 
@@ -51,13 +52,24 @@ int main() {
     rvc_printf("\n");
 
     // Performe signed reminder and sore the results
-    __asm__ volatile ("rem %0, %1, %2" : "=r"(rem_res) : "r"(dividend), "r"(divisor));
+   __asm__ volatile ("rem %0, %1, %2" : "=r"(rem_res) : "r"(dividend), "r"(divisor));
     rvc_print_int(rem_res); 
     rvc_printf("\n");
 
     // Performe signed reminder and sore the results
     __asm__ volatile ("remu %0, %1, %2" : "=r"(remu_res) : "r"(dividend), "r"(divisor));
     rvc_print_int(remu_res);
+    rvc_printf("\n");
+    
+    int x = 12;
+    int y = 7;
+
+    int quo = x/y;
+    int rem = x%y;
+    
+    rvc_print_int(quo);
+    rvc_printf("\n");
+    rvc_print_int(rem);
 
     return 0;
 }
