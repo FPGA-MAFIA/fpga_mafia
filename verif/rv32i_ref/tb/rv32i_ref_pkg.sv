@@ -107,6 +107,8 @@ typedef enum logic [11:0] {
  CSR_CUSTOM_MTIMECMP = 12'hBC0,
  //Custom csr used for LFSR 
  CSR_CUSTOM_LFSR     = 12'hBC1,
+ // Custom CSR used for store Stack Pointer register
+ CSR_CUSTOM_SP      = 12'hBC2,
  //debug csr's
  CSR_DCSR            = 12'h7B0,
  CSR_DPC             = 12'h7B1,
@@ -153,6 +155,7 @@ typedef struct packed {
     logic [31:0] csr_custom_mtime;
     logic [31:0] csr_custom_mtimecmp;
     logic [31:0] csr_custom_lfsr;
+    logic [31:0] csr_custom_sp;
     logic [31:0] csr_dcsr;
     logic [31:0] csr_dpc;
     logic [31:0] csr_dscratch0;

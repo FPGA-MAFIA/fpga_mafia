@@ -691,6 +691,10 @@ always_comb begin
             {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
             {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
             {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
+            // CSR_CUSTOM_SP
+            {2'b01, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr_data;
+            {2'b10, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr.csr_custom_sp  | csr_data;
+            {2'b11, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr.csr_custom_sp  & ~csr_data;
             // CSR_DCSR
             {2'b01, CSR_DCSR}        : next_csr.csr_dcsr = csr_data;
             {2'b10, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  | csr_data;
@@ -755,6 +759,7 @@ always_comb begin
             CSR_CUSTOM_MTIME   : csr_read_data = csr.csr_custom_mtime;
             CSR_CUSTOM_MTIMECMP: csr_read_data = csr.csr_custom_mtimecmp;
             CSR_CUSTOM_LFSR    : csr_read_data = next_csr.csr_custom_lfsr; // reading next avoids from returning the seed at the fisrt read
+            CSR_CUSTOM_SP      : csr_read_data = next_csr.csr_custom_sp;
             CSR_DCSR           : csr_read_data = csr.csr_dcsr;
             CSR_DPC            : csr_read_data = csr.csr_dpc;
             CSR_DSCRATCH0      : csr_read_data = csr.csr_dscratch0;
