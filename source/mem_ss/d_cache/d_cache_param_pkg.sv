@@ -24,7 +24,7 @@ parameter NUM_TQ_ENTRY    = 2**TQ_ID_WIDTH;
 
 parameter WORD_WIDTH            = 32;                        // 4 Bytes - integer
 parameter NUM_WORDS_IN_CL       = 4;                         // 
-parameter NUM_BYTES_IN_CL       = 8;
+parameter NUM_BYTES_IN_CL       = 16;
  
 //Address break-down: 
 parameter ADDRESS_WIDTH         = 20;                        // OFFSET+SET+TAG -> 1MB

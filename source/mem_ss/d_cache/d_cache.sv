@@ -28,8 +28,11 @@ module d_cache
 );
 
 // FIXME - default values - remove ASAP
-assign core2cache_req.byte_en     = 4'hf;
-assign core2cache_req.sign_extend = 0;
+always_comb begin
+    force core2cache_req.byte_en      = 4'hf;
+    force core2cache_req.sign_extend  = 0;
+end
+
 
 t_lu_req        pipe_lu_req_q1;
 t_early_lu_rsp  pipe_early_lu_rsp_q2;
