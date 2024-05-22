@@ -106,7 +106,8 @@ always_comb begin
   cache_pipe_lu_q1.fill_modified    = pipe_lu_req_q1.wr_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.fill_rd          = pipe_lu_req_q1.rd_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.rd_indication    = pipe_lu_req_q1.rd_indication;
-
+  cache_pipe_lu_q1.byte_en          = pipe_lu_req_q1.byte_en;
+  cache_pipe_lu_q1.sign_extend      = pipe_lu_req_q1.sign_extend;
 end //always_comb
 
 //==================================================================
@@ -285,7 +286,6 @@ always_comb begin
   cache_pipe_lu_q2.data_array_address   =   (cache_pipe_lu_q2.lu_op == FILL_LU) ? {cache_pipe_lu_q2.lu_set , set_ways_enc_victim_q2} :
                                                                                   {cache_pipe_lu_q2.lu_set , way_tag_enc_match_q2}   ;
   cache_pipe_lu_q2.dirty_evict          =  dirty_evict_q2;
-
 end //always_comb
 
 //data array read
@@ -344,6 +344,9 @@ assign wr_match_in_pipe_q1_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_se
                                 ( cache_pipe_lu_q3.lu_valid        && cache_pipe_lu_q1.lu_valid)             && //Both valid q3 and q1
                                 ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q1.lu_op == WR_LU);        //Both write q3 and q1
 assign pipe_lu_rsp_q3.wr_match_in_pipe = wr_match_in_pipe_q1_q3 || wr_match_in_pipe_q2_q3;
+
+assign pipe_lu_rsp_q3.byte_en     = cache_pipe_lu_q3.byte_en;
+assign pipe_lu_rsp_q3.sign_extend = cache_pipe_lu_q3.sign_extend;
 
 `MAFIA_DFF(og_set_ways_tags_q3,    og_set_ways_tags_q2,    clk)
 `MAFIA_DFF(set_ways_enc_victim_q3, set_ways_enc_victim_q2, clk)
