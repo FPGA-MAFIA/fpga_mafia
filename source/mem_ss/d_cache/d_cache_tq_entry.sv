@@ -108,10 +108,31 @@ always_comb begin
                     if(core2cache_req.opcode == WR_OP) begin
                         //write the data to the correct word offset in the merge buffer
                         // FIXME - need to take into account the byte enable logic
-                        next_tq_entry.merge_buffer_data[31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data : '0;
-                        next_tq_entry.merge_buffer_data[63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data : '0;
-                        next_tq_entry.merge_buffer_data[95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data : '0;
-                        next_tq_entry.merge_buffer_data[127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data : '0;
+                        next_tq_entry.merge_buffer_data[7:0]      = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[0]) ? core2cache_req.data[7:0]   : '0;
+                        next_tq_entry.merge_buffer_data[15:8]     = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[1]) ? core2cache_req.data[15:8]  : '0;
+                        next_tq_entry.merge_buffer_data[23:16]    = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[2]) ? core2cache_req.data[23:16] : '0;
+                        next_tq_entry.merge_buffer_data[31:24]    = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[3]) ? core2cache_req.data[31:24] : '0;
+
+                        next_tq_entry.merge_buffer_data[39:32]    = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[0]) ? core2cache_req.data[7:0]   : '0;
+                        next_tq_entry.merge_buffer_data[47:40]    = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[1]) ? core2cache_req.data[15:8]  : '0;
+                        next_tq_entry.merge_buffer_data[55:48]    = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[2]) ? core2cache_req.data[23:16] : '0;
+                        next_tq_entry.merge_buffer_data[63:56]    = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[3]) ? core2cache_req.data[31:24] : '0;
+
+                        next_tq_entry.merge_buffer_data[71:64]    = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[0]) ? core2cache_req.data[7:0]   : '0;
+                        next_tq_entry.merge_buffer_data[79:72]    = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[1]) ? core2cache_req.data[15:8]  : '0;
+                        next_tq_entry.merge_buffer_data[87:80]    = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[2]) ? core2cache_req.data[23:16] : '0;
+                        next_tq_entry.merge_buffer_data[95:88]    = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[3]) ? core2cache_req.data[31:24] : '0;
+
+                        next_tq_entry.merge_buffer_data[103:96]   = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[0]) ? core2cache_req.data[7:0]   : '0;
+                        next_tq_entry.merge_buffer_data[111:104]  = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[1]) ? core2cache_req.data[15:8]  : '0;
+                        next_tq_entry.merge_buffer_data[119:112]  = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[2]) ? core2cache_req.data[23:16] : '0;
+                        next_tq_entry.merge_buffer_data[127:120]  = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[3]) ? core2cache_req.data[31:24] : '0;
+
+                        //next_tq_entry.merge_buffer_data[31:0]   = (new_alloc_word_offset == 2'd0) ? core2cache_req.data : '0;
+                        //next_tq_entry.merge_buffer_data[63:32]  = (new_alloc_word_offset == 2'd1) ? core2cache_req.data : '0;
+                        //next_tq_entry.merge_buffer_data[95:64]  = (new_alloc_word_offset == 2'd2) ? core2cache_req.data : '0;
+                        //next_tq_entry.merge_buffer_data[127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data : '0;
+                        
                         //set the corresponding bit in the e_modified vector
                         next_tq_entry.merge_buffer_e_modified[new_alloc_word_offset] = 1'b1;
                     end
@@ -145,10 +166,26 @@ always_comb begin
                     en_tq_merge_buffer_data   = 1'b1;
                     // If the tq_entry.merge_buffer_e_modified[x] is set, then the data in the merge buffer already has the correct data - we don't want to override it with the fill data
                     // FIXME - This logic needs to take into account the Byte Enable logic that we have not coded yet
-                    next_tq_entry.merge_buffer_data[31:0]   = tq_entry.merge_buffer_e_modified[0] ? tq_entry.merge_buffer_data[31:0]   : fm2cache_rd_rsp.data[31:0];
-                    next_tq_entry.merge_buffer_data[63:32]  = tq_entry.merge_buffer_e_modified[1] ? tq_entry.merge_buffer_data[63:32]  : fm2cache_rd_rsp.data[63:32];
-                    next_tq_entry.merge_buffer_data[95:64]  = tq_entry.merge_buffer_e_modified[2] ? tq_entry.merge_buffer_data[95:64]  : fm2cache_rd_rsp.data[95:64];
-                    next_tq_entry.merge_buffer_data[127:96] = tq_entry.merge_buffer_e_modified[3] ? tq_entry.merge_buffer_data[127:96] : fm2cache_rd_rsp.data[127:96];
+                    next_tq_entry.merge_buffer_data[7:0]     = tq_entry.merge_buffer_e_modified[0] ? tq_entry.merge_buffer_data[7:0]     : fm2cache_rd_rsp.data[7:0];
+                    next_tq_entry.merge_buffer_data[15:8]    = tq_entry.merge_buffer_e_modified[1] ? tq_entry.merge_buffer_data[15:8]    : fm2cache_rd_rsp.data[15:8];
+                    next_tq_entry.merge_buffer_data[23:16]   = tq_entry.merge_buffer_e_modified[2] ? tq_entry.merge_buffer_data[23:16]   : fm2cache_rd_rsp.data[23:16];
+                    next_tq_entry.merge_buffer_data[31:24]   = tq_entry.merge_buffer_e_modified[3] ? tq_entry.merge_buffer_data[31:24]   : fm2cache_rd_rsp.data[31:24];
+                    next_tq_entry.merge_buffer_data[39:32]   = tq_entry.merge_buffer_e_modified[0] ? tq_entry.merge_buffer_data[39:32]   : fm2cache_rd_rsp.data[39:32];
+                    next_tq_entry.merge_buffer_data[47:40]   = tq_entry.merge_buffer_e_modified[1] ? tq_entry.merge_buffer_data[47:40]   : fm2cache_rd_rsp.data[47:40];
+                    next_tq_entry.merge_buffer_data[55:48]   = tq_entry.merge_buffer_e_modified[2] ? tq_entry.merge_buffer_data[55:48]   : fm2cache_rd_rsp.data[55:48];
+                    next_tq_entry.merge_buffer_data[63:56]   = tq_entry.merge_buffer_e_modified[3] ? tq_entry.merge_buffer_data[63:56]   : fm2cache_rd_rsp.data[63:56];
+                    next_tq_entry.merge_buffer_data[71:64]   = tq_entry.merge_buffer_e_modified[0] ? tq_entry.merge_buffer_data[71:64]   : fm2cache_rd_rsp.data[71:64];
+                    next_tq_entry.merge_buffer_data[79:72]   = tq_entry.merge_buffer_e_modified[1] ? tq_entry.merge_buffer_data[79:72]   : fm2cache_rd_rsp.data[79:72];
+                    next_tq_entry.merge_buffer_data[87:80]   = tq_entry.merge_buffer_e_modified[2] ? tq_entry.merge_buffer_data[87:80]   : fm2cache_rd_rsp.data[87:80];
+                    next_tq_entry.merge_buffer_data[95:88]   = tq_entry.merge_buffer_e_modified[3] ? tq_entry.merge_buffer_data[95:88]   : fm2cache_rd_rsp.data[95:88];
+                    next_tq_entry.merge_buffer_data[103:96]  = tq_entry.merge_buffer_e_modified[0] ? tq_entry.merge_buffer_data[103:96]  : fm2cache_rd_rsp.data[103:96];
+                    next_tq_entry.merge_buffer_data[111:104] = tq_entry.merge_buffer_e_modified[1] ? tq_entry.merge_buffer_data[111:104] : fm2cache_rd_rsp.data[111:104];
+                    next_tq_entry.merge_buffer_data[119:112] = tq_entry.merge_buffer_e_modified[2] ? tq_entry.merge_buffer_data[119:112] : fm2cache_rd_rsp.data[119:112];
+                    next_tq_entry.merge_buffer_data[127:120] = tq_entry.merge_buffer_e_modified[3] ? tq_entry.merge_buffer_data[127:120] : fm2cache_rd_rsp.data[127:120];
+                    //next_tq_entry.merge_buffer_data[31:0]   = tq_entry.merge_buffer_e_modified[0] ? tq_entry.merge_buffer_data[31:0]   : fm2cache_rd_rsp.data[31:0];
+                    //next_tq_entry.merge_buffer_data[63:32]  = tq_entry.merge_buffer_e_modified[1] ? tq_entry.merge_buffer_data[63:32]  : fm2cache_rd_rsp.data[63:32];
+                    //next_tq_entry.merge_buffer_data[95:64]  = tq_entry.merge_buffer_e_modified[2] ? tq_entry.merge_buffer_data[95:64]  : fm2cache_rd_rsp.data[95:64];
+                    //next_tq_entry.merge_buffer_data[127:96] = tq_entry.merge_buffer_e_modified[3] ? tq_entry.merge_buffer_data[127:96] : fm2cache_rd_rsp.data[127:96];
                 end
             end //S_MB_WAIT_FILL
             S_MB_FILL_READY               : begin
