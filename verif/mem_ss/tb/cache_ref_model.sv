@@ -23,12 +23,6 @@ module cache_ref_model
     output  t_rd_rsp        cache2core_rsp  //RD Response
 );
 
-// FIXME - delete this when finish updating the TB's
-always_comb begin
-    force core2cache_req.byte_en     = 4'b1111;
-    force core2cache_req.sign_extend = 1'b0;
-end
-
 localparam NUM_FM_CL = 2**(CL_ADRS_WIDTH);
 t_cl    mem       [NUM_FM_CL-1:0];
 t_cl    next_mem  [NUM_FM_CL-1:0];
