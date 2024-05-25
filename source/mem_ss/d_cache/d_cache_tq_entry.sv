@@ -275,26 +275,25 @@ always_comb begin
                     //next_tq_entry.merge_buffer_data[127:96] = (new_alloc_word_offset == 2'd3) ? core2cache_req.data :  tq_entry.merge_buffer_data[127:96];
                     
                     //set the corresponding bit in the e_modified vector
-                    next_tq_entry.merge_buffer_e_modified                        = tq_entry.merge_buffer_e_modified;
-                    next_tq_entry.merge_buffer_e_modified[0]  = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[0]);
-                    next_tq_entry.merge_buffer_e_modified[1]  = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[1]);
-                    next_tq_entry.merge_buffer_e_modified[2]  = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[2]);
-                    next_tq_entry.merge_buffer_e_modified[3]  = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[3]);
-
-                    next_tq_entry.merge_buffer_e_modified[4]  = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[0]);
-                    next_tq_entry.merge_buffer_e_modified[5]  = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[1]);
-                    next_tq_entry.merge_buffer_e_modified[6]  = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[2]);
-                    next_tq_entry.merge_buffer_e_modified[7]  = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[3]);
-
-                    next_tq_entry.merge_buffer_e_modified[8]  = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[0]);
-                    next_tq_entry.merge_buffer_e_modified[9]  = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[1]);
-                    next_tq_entry.merge_buffer_e_modified[10] = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[2]);
-                    next_tq_entry.merge_buffer_e_modified[11] = (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[3]);
-
-                    next_tq_entry.merge_buffer_e_modified[12] = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[0]);
-                    next_tq_entry.merge_buffer_e_modified[13] = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[1]);
-                    next_tq_entry.merge_buffer_e_modified[14] = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[2]);
-                    next_tq_entry.merge_buffer_e_modified[15] = (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[3]);
+                    next_tq_entry.merge_buffer_e_modified[0]  = tq_entry.merge_buffer_e_modified[0]   || (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[0]);
+                    next_tq_entry.merge_buffer_e_modified[1]  = tq_entry.merge_buffer_e_modified[1]   || (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[1]);
+                    next_tq_entry.merge_buffer_e_modified[2]  = tq_entry.merge_buffer_e_modified[2]   || (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[2]);
+                    next_tq_entry.merge_buffer_e_modified[3]  = tq_entry.merge_buffer_e_modified[3]   || (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[3]);
+                                                                
+                    next_tq_entry.merge_buffer_e_modified[4]  = tq_entry.merge_buffer_e_modified[4]   || (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[0]);
+                    next_tq_entry.merge_buffer_e_modified[5]  = tq_entry.merge_buffer_e_modified[5]   || (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[1]);
+                    next_tq_entry.merge_buffer_e_modified[6]  = tq_entry.merge_buffer_e_modified[6]   || (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[2]);
+                    next_tq_entry.merge_buffer_e_modified[7]  = tq_entry.merge_buffer_e_modified[7]   || (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[3]);
+                                                                
+                    next_tq_entry.merge_buffer_e_modified[8]  = tq_entry.merge_buffer_e_modified[8]   || (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[0]);
+                    next_tq_entry.merge_buffer_e_modified[9]  = tq_entry.merge_buffer_e_modified[9]   || (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[1]);
+                    next_tq_entry.merge_buffer_e_modified[10] = tq_entry.merge_buffer_e_modified[10]  || (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[2]);
+                    next_tq_entry.merge_buffer_e_modified[11] = tq_entry.merge_buffer_e_modified[11]  || (new_alloc_word_offset == 2'd2 && core2cache_req.byte_en[3]);
+                                                                
+                    next_tq_entry.merge_buffer_e_modified[12] = tq_entry.merge_buffer_e_modified[12]  || (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[0]);
+                    next_tq_entry.merge_buffer_e_modified[13] = tq_entry.merge_buffer_e_modified[13]  || (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[1]);
+                    next_tq_entry.merge_buffer_e_modified[14] = tq_entry.merge_buffer_e_modified[14]  || (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[2]);
+                    next_tq_entry.merge_buffer_e_modified[15] = tq_entry.merge_buffer_e_modified[15]  || (new_alloc_word_offset == 2'd3 && core2cache_req.byte_en[3]);
                     //next_tq_entry.merge_buffer_e_modified[new_alloc_word_offset] = 1'b1;
 
                     // This is to fix a corner case where we have a fill & a write in the same cycle!!
