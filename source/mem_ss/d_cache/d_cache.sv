@@ -27,12 +27,6 @@ module d_cache
     input   var t_fm_rd_rsp fm2cache_rd_rsp
 );
 
-// FIXME - default values - remove ASAP
-always_comb begin
-    force core2cache_req.byte_en      = 4'hf;
-    force core2cache_req.sign_extend  = 0;
-end
-
 
 t_lu_req        pipe_lu_req_q1;
 t_early_lu_rsp  pipe_early_lu_rsp_q2;

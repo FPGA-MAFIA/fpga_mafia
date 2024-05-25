@@ -30,11 +30,53 @@ task wr_req( input logic [19:0]  address,
       delay(1); $display("-> not ready! cant send write: %h ", address );
     end
 $display("wr_req: %h , address %h:", id, address);
-    core2cache_req.valid   =  1'b1;
-    core2cache_req.opcode  =  WR_OP;
-    core2cache_req.address =  address;
-    core2cache_req.data    =  data;
-    core2cache_req.reg_id  =  id;
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  WR_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.data        =  data;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b1111;  // default value for wr_req task. To change them better use the wr_req_b_en task
+    core2cache_req.sign_extend =  1'b0;     // default value  for wr_req task
+    delay(1); 
+    core2cache_req     = '0;
+endtask
+
+//=======================================================
+//=======================================================
+task wr_req_sb( input logic [19:0]  address, 
+                input logic [31:0]  data ,
+                input logic [4:0]   id);
+    while (~ready) begin
+      delay(1); $display("-> not ready! cant send write: %h ", address );
+    end
+$display("wr_req_sb: %h , address %h:", id, address);
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  WR_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.data        =  data;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b0001;  
+    core2cache_req.sign_extend =  1'b0;     
+    delay(1); 
+    core2cache_req     = '0;
+endtask
+
+//=======================================================
+//=======================================================
+task wr_req_sh( input logic [19:0]  address, 
+                input logic [31:0]  data ,
+                input logic [4:0]   id);
+    while (~ready) begin
+      delay(1); $display("-> not ready! cant send write: %h ", address );
+    end
+$display("wr_req_store_half_byte: %h , address %h:", id, address);
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  WR_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.data        =  data;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b0011;  
+    core2cache_req.sign_extend =  1'b0;     
     delay(1); 
     core2cache_req     = '0;
 endtask
@@ -47,14 +89,87 @@ task rd_req( input logic [19:0] address,
     delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
 $display("rd_req: %h , address %h:", id, address);
-    core2cache_req.valid   =  1'b1;
-    core2cache_req.opcode  =  RD_OP;
-    core2cache_req.address =  address;
-    core2cache_req.reg_id  =  id;
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  RD_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b1111;  // default value for rd_req task
+    core2cache_req.sign_extend =  1'b0;     // default value for rd_req task
     delay(1);
     core2cache_req     = '0;
 endtask
 
+//=======================================================
+//=======================================================
+task rd_req_lb( input logic [19:0] address,
+                input logic [4:0]  id); 
+    while (~ready) begin 
+    delay(1);  $display("-> Not ready! cant send read: %h ", address);
+    end
+$display("rd_req_lb: %h , address %h:", id, address);
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  RD_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b0001;  
+    core2cache_req.sign_extend =  1'b1;   
+    delay(1);
+    core2cache_req     = '0;
+endtask
+
+//=======================================================
+//=======================================================
+task rd_req_lh( input logic [19:0] address,
+                input logic [4:0]  id); 
+    while (~ready) begin 
+    delay(1);  $display("-> Not ready! cant send read: %h ", address);
+    end
+$display("rd_req_lh: %h , address %h:", id, address);
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  RD_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b0011;  
+    core2cache_req.sign_extend =  1'b1;   
+    delay(1);
+    core2cache_req     = '0;
+endtask
+
+//=======================================================
+//=======================================================
+task rd_req_lbu( input logic [19:0] address,
+                 input logic [4:0]  id); 
+    while (~ready) begin 
+    delay(1);  $display("-> Not ready! cant send read: %h ", address);
+    end
+$display("rd_req_lbu: %h , address %h:", id, address);
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  RD_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b0001;  
+    core2cache_req.sign_extend =  1'b0;   
+    delay(1);
+    core2cache_req     = '0;
+endtask
+
+//=======================================================
+//=======================================================
+task rd_req_lhu( input logic [19:0] address,
+                 input logic [4:0]  id); 
+    while (~ready) begin 
+    delay(1);  $display("-> Not ready! cant send read: %h ", address);
+    end
+$display("rd_req_lhu: %h , address %h:", id, address);
+    core2cache_req.valid       =  1'b1;
+    core2cache_req.opcode      =  RD_OP;
+    core2cache_req.address     =  address;
+    core2cache_req.reg_id      =  id;
+    core2cache_req.byte_en     =  4'b0011;  
+    core2cache_req.sign_extend =  1'b0;   
+    delay(1);
+    core2cache_req     = '0;
+endtask
 
 //=======================================================
 //=======================================================
