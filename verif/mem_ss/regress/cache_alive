@@ -8,3 +8,4 @@ rand_set_stress
 read_miss_stall_handle
 b2b_rd_miss_reissue
 fill_8_tq_entries
+write_read_partial_words
