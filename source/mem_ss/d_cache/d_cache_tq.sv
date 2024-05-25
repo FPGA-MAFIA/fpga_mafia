@@ -60,7 +60,7 @@ logic tq_full;
 logic rd_hit_pipe_rsp_q3;
 logic fill_with_rd_indication_q3;
 
-logic [WORD_WIDTH-1:0] pre_cache2core_rsp;
+t_word pre_cache2core_rsp;
 
 t_tq_id      rd_miss_tq_id;
 t_cl_address rd_miss_cl_address;
