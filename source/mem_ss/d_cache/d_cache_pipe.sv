@@ -391,8 +391,11 @@ assign rd_data_cl_rsp_q3  = hazard_detected_q3 ? hazard_rd_data_cl_rsp_q4  : pre
 assign lu_word_offset_q3 = cache_pipe_lu_q3.lu_offset[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
 
 always_comb begin
-    data_array_data_q3                   =   rd_data_cl_rsp_q3; //the current CL in data array
-    data_array_data_q3[lu_word_offset_q3]=   cache_pipe_lu_q3.data; //override the specific word
+    data_array_data_q3                           =   rd_data_cl_rsp_q3; //the current CL in data array
+    data_array_data_q3[lu_word_offset_q3][7:0]   =  cache_pipe_lu_q3.byte_en[0] ? cache_pipe_lu_q3.data[7:0]   : data_array_data_q3[lu_word_offset_q3][7:0]  ; //override the specific word
+    data_array_data_q3[lu_word_offset_q3][15:8]  =  cache_pipe_lu_q3.byte_en[1] ? cache_pipe_lu_q3.data[15:8]  : data_array_data_q3[lu_word_offset_q3][15:8] ; //override the specific word
+    data_array_data_q3[lu_word_offset_q3][23:16] =  cache_pipe_lu_q3.byte_en[2] ? cache_pipe_lu_q3.data[23:16] : data_array_data_q3[lu_word_offset_q3][23:16]; //override the specific word
+    data_array_data_q3[lu_word_offset_q3][31:24] =  cache_pipe_lu_q3.byte_en[3] ? cache_pipe_lu_q3.data[31:24] : data_array_data_q3[lu_word_offset_q3][31:24]; //override the specific word
     wr_data_cl_q3                        =   '0;
     wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                              (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 
