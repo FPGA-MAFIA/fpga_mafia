@@ -107,6 +107,8 @@ end else  if(test_name == "b2b_rd_miss_reissue") begin
 `include "b2b_rd_miss_reissue.sv"
 end else  if(test_name == "abd_test") begin
 `include "abd_test.sv"
+end else if (test_name == "write_read_partial_words") begin
+`include "write_read_partial_words.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);

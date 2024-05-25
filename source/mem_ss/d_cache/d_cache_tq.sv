@@ -60,6 +60,8 @@ logic tq_full;
 logic rd_hit_pipe_rsp_q3;
 logic fill_with_rd_indication_q3;
 
+t_word pre_cache2core_rsp;
+
 t_tq_id      rd_miss_tq_id;
 t_cl_address rd_miss_cl_address;
 
@@ -143,10 +145,19 @@ assign fill_with_rd_indication_q3 = pipe_lu_rsp_q3.valid              &&
 assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication_q3;
 //take the relevant word from cache line
 //FIXME - need to support byte enable -> make sure to shift the "word data" according to the byte enable in the response, and sign extend/zero extend
-assign cache2core_rsp.data    = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
+assign pre_cache2core_rsp     = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
                                 pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
                                 pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.cl_data[95:64] :
                                                                                                     pipe_lu_rsp_q3.cl_data[127:96];
+
+assign cache2core_rsp.data[7:0]    = pipe_lu_rsp_q3.byte_en[0]  ? pre_cache2core_rsp[7:0]        : 8'h0;
+assign cache2core_rsp.data[15:8]   = pipe_lu_rsp_q3.byte_en[1]  ? pre_cache2core_rsp[15:8]       :
+                                     pipe_lu_rsp_q3.sign_extend ? {8{cache2core_rsp.data[7]}}    : 8'h0;
+assign cache2core_rsp.data[23:16]  = pipe_lu_rsp_q3.byte_en[2]  ? pre_cache2core_rsp[23:16]      :
+                                     pipe_lu_rsp_q3.sign_extend ? {8{cache2core_rsp.data[15]}}   : 8'h0; 
+assign cache2core_rsp.data[31:24]  = pipe_lu_rsp_q3.byte_en[3]  ? pre_cache2core_rsp[31:24]      :
+                                     pipe_lu_rsp_q3.sign_extend ? {8{cache2core_rsp.data[23]}}   : 8'h0;                                                                        
+
 assign cache2core_rsp.address = pipe_lu_rsp_q3.address;
 assign cache2core_rsp.reg_id  = pipe_lu_rsp_q3.reg_id;
 
@@ -282,6 +293,8 @@ always_comb begin
             pipe_lu_req_q1.mb_hit_cancel = any_rd_hit_mb || any_wr_hit_mb;
             pipe_lu_req_q1.rd_indication = (core2cache_req.opcode == RD_OP);
             pipe_lu_req_q1.wr_indication = (core2cache_req.opcode == WR_OP);
+            pipe_lu_req_q1.byte_en       = (core2cache_req.byte_en); 
+            pipe_lu_req_q1.sign_extend   = (core2cache_req.sign_extend);
         end // pipe_early_lu_rsp_q2.rd_miss
     // There is no valid "core2cache_req.valid" we will check if there is a fill request
     // if so, we can send a fill to the PIPE
@@ -295,6 +308,8 @@ always_comb begin
         pipe_lu_req_q1.rd_indication =  tq_entry[enc_first_fill].rd_indication;
         pipe_lu_req_q1.wr_indication =  tq_entry[enc_first_fill].wr_indication;
         pipe_lu_req_q1.reg_id        =  tq_entry[enc_first_fill].reg_id;
+        pipe_lu_req_q1.byte_en       =  4'b1111;// FIXME - temp - having need to set correctly also for fill! (core2cache_req.byte_en);      // FIXME - not sure its the right place
+        pipe_lu_req_q1.sign_extend   =  4'b1111;// FIXME - temp - having need to set correctly also for fill! (core2cache_req.sign_extend);  // FIXME - not sure its the right place
     end //else if
 
     //incase of a read miss, we need to cancel the request and re-issue it later from the re-issue buffer
