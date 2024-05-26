@@ -2,8 +2,7 @@
 
 module cache_tb ;
 
-import d_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
-//import i_cache_param_pkg::*;  //FIXME: what about i_cache_param_pkg
+import d_cache_param_pkg::*;  
 logic             clk;
 logic             rst;
 t_req             core2cache_req;
@@ -15,7 +14,6 @@ t_fm_rd_rsp       fm2cache_rd_rsp;
 
 
 parameter V_D_CACHE_TEST=1; // default is D cache test
-parameter V_I_CACHE_TEST=0; // Can be overridden by test
 
 int LOCAL_NUM_TAG_PULL; // used for setting the number of tag pulls from test itself
 int LOCAL_NUM_SET_PULL; // used for setting the number of tag pulls from test itself
@@ -148,42 +146,12 @@ d_cache d_cache ( //DUT
    .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
 );
 
-//==================
-// I_CACHE DUT
-//==================
-logic      imem_ready;
-t_rd_rsp   imem_cache2core_rsp;
-t_fm_req   imem_cache2fm_req_q3;
-t_req      imem_core2cache_req;
-generate if(V_I_CACHE_TEST == 1) begin
-`include "i_cache_trk.vh"
-end endgenerate
-i_cache i_cache ( //DUT
-   .clk                (clk),            //input   logic
-   .rst                (rst),            //input   logic
-    //Agent Interface                      
-   .core2cache_req     (imem_core2cache_req), //input   
-   .ready              (imem_ready),          //output  logic
-   .cache2core_rsp     (imem_cache2core_rsp), //output  t_rd_rsp
-    // FM Interface                   
-   .cache2fm_req_q3    (imem_cache2fm_req_q3),//output  t_fm_req
-   .fm2cache_rd_rsp    (fm2cache_rd_rsp) //input   var t_fm_rd_rsp
-);
-    
-assign ready           = V_D_CACHE_TEST ? dmem_ready : 
-                         V_I_CACHE_TEST ? imem_ready : 1'b0;
-assign cache2core_rsp  = V_D_CACHE_TEST ? dmem_cache2core_rsp : 
-                         V_I_CACHE_TEST ? imem_cache2core_rsp : '0;
-assign cache2fm_req_q3 = V_D_CACHE_TEST ? dmem_cache2fm_req_q3 : 
-                         V_I_CACHE_TEST ? imem_cache2fm_req_q3 : '0;
 
-assign dmem_core2cache_req = V_D_CACHE_TEST ? core2cache_req :  t_req'('0);
-assign imem_core2cache_req = V_I_CACHE_TEST ? core2cache_req :  t_req'('0);
+assign ready           = dmem_ready ; 
+assign cache2core_rsp  = dmem_cache2core_rsp ; 
+assign cache2fm_req_q3 = dmem_cache2fm_req_q3 ; 
+assign dmem_core2cache_req = core2cache_req;
 
-`MAFIA_ASSERT("single_test_enabled",                             //name
-        ( (V_D_CACHE_TEST == 1) && (V_I_CACHE_TEST == 1) ),//expression
-        1'b1,                                              //enabled
-        "Only one cache test can be enabled at a time - please review the TB parameters overrides");//message
 //============================
 //          Far Memory ARRAY
 //============================
