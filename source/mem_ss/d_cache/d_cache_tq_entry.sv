@@ -252,7 +252,7 @@ always_comb begin
                     //write the data to the correct word offset in the merge buffer
                     next_tq_entry.merge_buffer_data[7:0]   = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[0]) ? core2cache_req.data[7:0]   :  tq_entry.merge_buffer_data[7:0]  ;
                     next_tq_entry.merge_buffer_data[15:8]  = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[1]) ? core2cache_req.data[15:8]  :  tq_entry.merge_buffer_data[15:8] ;
-                    next_tq_entry.merge_buffer_data[23:16] = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[2]) ? core2cache_req.data[23:15] :  tq_entry.merge_buffer_data[23:16];
+                    next_tq_entry.merge_buffer_data[23:16] = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[2]) ? core2cache_req.data[23:16] :  tq_entry.merge_buffer_data[23:16];
                     next_tq_entry.merge_buffer_data[31:24] = (new_alloc_word_offset == 2'd0 && core2cache_req.byte_en[3]) ? core2cache_req.data[31:24] :  tq_entry.merge_buffer_data[32:24];
 
                     next_tq_entry.merge_buffer_data[39:32] = (new_alloc_word_offset == 2'd1 && core2cache_req.byte_en[0]) ? core2cache_req.data[7:0]   :  tq_entry.merge_buffer_data[39:32];
