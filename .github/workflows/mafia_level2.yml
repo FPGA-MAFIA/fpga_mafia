@@ -25,6 +25,9 @@ jobs:
       - name: BIG_CORE - rv32i_level0_cfg_intrpt -cfg big_core_boot_trap with reference model
         run:  python build.py -dut big_core -cfg big_core_boot_trap -regress rv32i_level0_cfg_intrpt -app -hw -sim -pp -keep_going
 
+      - name: BIG_CORE - rv32i_level0_cfg_rv32im -cfg rv32im with reference model
+        run:  python build.py -dut big_core -cfg big_core_rv32im -regress rv32i_level0_cfg_rv32im -app -hw -sim -pp -keep_going
+
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut mini_core -regress rv32e_level0 -cfg mini_rv32e -app -hw -sim -keep_going
 
@@ -37,11 +40,11 @@ jobs:
       - name: SC_CORE - rv32i_level0 
         run:  python build.py -dut sc_core -regress rv32i_level0 -app -hw -sim -keep_going
 
-      - name: D_CACHE level0_d_cache
-        run: python build.py -dut mem_ss -top cache_tb -regress cache_alive -hw -sim -pp -keep_going
+      - name: D_CACHE level0_d_cache 
+        run: python build.py -dut mem_ss -top cache_tb -regress level0_d_cache -hw -sim -pp -keep_going
 
-      - name: I_CACHE -regress level0_i_cache
-        run:  python build.py -dut mem_ss -top cache_tb -regress level0_i_cache -hw -sim -pp -keep_going
+      - name: D_CACHE cache_alive
+        run: python build.py -dut mem_ss -top cache_tb -regress cache_alive -hw -sim -pp -keep_going
 
       - name: ROUTER -regress level0
         run:  python build.py -dut fabric -top router_tb -regress router_level0 -hw -sim -keep_going

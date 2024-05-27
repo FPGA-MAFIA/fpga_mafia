@@ -34,6 +34,14 @@
 #define read_custom_lfsr() READ_CUSTOM_CSR(0xBC1)
 #define write_custom_lfsr(val) WRITE_CUSTOM_CSR(0xBC1, val)
 
+#define extract_funct7(instruction) (((instruction) >> 25) & 0x7F)
+#define extract_funct3(instruction) (((instruction) >> 12) & 0x07)
+#define extract_opcode(instruction) ((instruction) & 0x7F)
+#define extract_rs1(instruction) (((instruction) >> 15) & 0x1F)
+#define extract_rs2(instruction) (((instruction) >> 20) & 0x1F)
+#define extract_rd(instruction) (((instruction) >> 7) & 0x1F)
+
+
 // sample relevant csr's for pmon
 void rvc_sample_csr(int *cycle_low, int *instret_low){
 
