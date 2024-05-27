@@ -20,12 +20,13 @@ import ex_core_pkg::*;
     );
 
     // Aplly Random stimulus
+    t_alu_op alu_ops[10] = '{ADD, SUB, AND, OR, XOR, SLL, SRL, SRA, SLT, SLTU};
     initial begin
         #10
         repeat (15) begin
             operand1 = $urandom_range(0, 10);
             operand2 = $urandom_range(0, 10);
-            Ctrl.AluOp = t_alu_op'($urandom_range(0, 9)); // Generate a random operation code
+            Ctrl.AluOp = alu_ops[$urandom_range(0, 9)]; // Generate a random operation code
             #10;
             $display("The result of %4b and %4b with operation %s is %4b", operand1, operand2, Ctrl.AluOp, result);
             // Check result (this will depend on the operation)
