@@ -92,6 +92,16 @@ assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
 logic IllegalInstructionQ101H;
 assign IllegalInstructionQ101H = (PreIllegalInstructionQ101H) && ! (flushQ102H || flushQ103H);
 
+// detect reserved trap for division operations. DIV, DIVU, REM, REMU
+t_alu_op_m_extension DivPreFunct3Q101H;
+logic                PreDIVInstructionsQ101H;
+assign DivPreFunct3Q101H       = t_alu_op_m_extension'(PreInstructionQ101H[14:12]);
+assign PreDIVInstructionsQ101H = (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == DIV && PreOpcodeQ101H == R_OP) || (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == DIVU && PreOpcodeQ101H == R_OP) ||
+                                 (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == REM && PreOpcodeQ101H == R_OP) || (PreFunct7Q101H == 7'h1 && DivPreFunct3Q101H == REMU && PreOpcodeQ101H == R_OP);
+
+logic DIVInstructionsQ101H;
+assign DIVInstructionsQ101H = (PreDIVInstructionsQ101H) && ! (flushQ102H || flushQ103H);
+
 //decide whether to take timer interrupt
 // Timer interrupt is taken only when the instruction is a valid for example: not HW nops
 // and the instruction is not Branch or Jump
@@ -103,9 +113,9 @@ logic TimerInterruptTakenQ101H, TimerInterruptTakenQ102H;
 //      This is why we don't take the timer interrupt when we are in the middle of a branch or jump. (next instruction is not PC+4)
 //Note: We don't take the timer interrupt when we don't have a valid instruction.
 //      This is to solve the issue that the current PC must be a valid value so we can return to pc+4 after the interrupt.
-assign TimerInterruptTakenQ101H = (TimerInterruptEnable) & (PreValidInstQ101H) & !(JumpOrBranch) & !(IllegalInstructionQ101H);
+assign TimerInterruptTakenQ101H = (TimerInterruptEnable) & (PreValidInstQ101H) & !(JumpOrBranch) & !(IllegalInstructionQ101H) & !(DIVInstructionsQ101H);
 `MAFIA_EN_RST_DFF(TimerInterruptTakenQ102H, TimerInterruptTakenQ101H, Clock, ReadyQ102H, Rst )
-
+                              
 logic LoadHazardValidRegSrc2Q101H;
 logic RegDstQ102MatchRegSrc1Q101H;
 logic RegDstQ102MatchRegSrc2Q101H;
@@ -131,15 +141,15 @@ assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) 
 // in the case of Mret we jump to the address in the mepc CSR
 
 
-assign flushQ102H = IndirectBranchQ102H || CsrExceptionUpdateQ102H.illegal_instruction ||
+assign flushQ102H = IndirectBranchQ102H || CsrExceptionUpdateQ102H.illegal_instruction || CsrExceptionUpdateQ102H.div_custom_trap ||
                     CsrExceptionUpdateQ102H.timer_interrupt_taken || CsrExceptionUpdateQ102H.Mret;
 
 `MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 
 logic InsertNopQ101H;
-assign InsertNopQ101H = flushQ102H                 || flushQ103H               || 
-                        PreIllegalInstructionQ101H || LoadHzrd1DetectQ101H     || 
-                        LoadHzrd2DetectQ101H;
+assign InsertNopQ101H = flushQ102H                 || flushQ103H              || 
+                        PreIllegalInstructionQ101H || PreDIVInstructionsQ101H || 
+                        LoadHzrd1DetectQ101H       || LoadHzrd2DetectQ101H;
 
 assign InstructionQ101H  = InsertNopQ101H  ? NOP  :  PreInstructionQ101H;
 assign PreValidInstQ101H = InsertNopQ101H  ? 1'b0 :  1'b1 ;
@@ -199,12 +209,12 @@ assign mret_was_calledQ101H   = (InstructionQ101H == 32'b0011000_00010_00000_000
     assign CsrExceptionUpdateQ101H.timer_interrupt_taken    = TimerInterruptTakenQ101H; 
     assign CsrExceptionUpdateQ101H.external_interrupt       = '0; // FIXME - assign correct value
     assign CsrExceptionUpdateQ101H.illegal_instruction      = IllegalInstructionQ101H;
+    assign CsrExceptionUpdateQ101H.div_custom_trap          = DIVInstructionsQ101H;
     assign CsrExceptionUpdateQ101H.Mret                     = mret_was_calledQ101H;
-    assign CsrExceptionUpdateQ101H.mtval_instruction        = IllegalInstructionQ101H ? PreInstructionQ101H : 1'b0;
+    assign CsrExceptionUpdateQ101H.mtval_instruction        = (IllegalInstructionQ101H || DIVInstructionsQ101H)  ? PreInstructionQ101H : 1'b0;
 
-    assign CsrExceptionUpdateQ101H.Pc = IllegalInstructionQ101H                       ? PcQ101H :   
-                                        CsrExceptionUpdateQ101H.timer_interrupt_taken ? PcQ101H :
-                                                                                        32'h0;
+    assign CsrExceptionUpdateQ101H.Pc = (IllegalInstructionQ101H || DIVInstructionsQ101H) ? PcQ101H : 
+                                        CsrExceptionUpdateQ101H.timer_interrupt_taken     ? PcQ101H : 32'h0;
   
 always_comb begin
     unique casez ({Funct3Q101H, Funct7Q101H, OpcodeQ101H})
@@ -229,6 +239,15 @@ always_comb begin
     {3'b001, 7'b0000000, I_OP} : CtrlQ101H.AluOp = SLL;  // SLLI
     {3'b101, 7'b0000000, I_OP} : CtrlQ101H.AluOp = SRL;  // SRLI
     {3'b101, 7'b0100000, I_OP} : CtrlQ101H.AluOp = SRA;  // SRAI
+    // ---- R type for M extention ----
+    {3'b000, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MUL;    // MUL
+    {3'b001, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MULH;   // MULH
+    {3'b010, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MULHSU; // MULHSU
+    {3'b011, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = MULHU;  // MULHU
+    {3'b100, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = DIV;    // DIV
+    {3'b101, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = DIVU;   // DIVU
+    {3'b110, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = REM;    // REM
+    {3'b111, 7'b0000001, R_OP} : CtrlQ101H.AluOpMulDiv = REMU;   // REMU
     // ---- Other ----
     default                    : CtrlQ101H.AluOp = ADD;  // LUI || AUIPC || JAL || JALR || BRANCH || LOAD || STORE
     endcase
@@ -252,6 +271,8 @@ always_comb begin
     default: ImmediateQ101H = {     InstructionQ101H[31:12], 12'b0 };                                                                             // U_Immediate
   endcase
 end
+
+assign CtrlQ101H.MExtension = (Funct7Q101H == 7'b0000001 && OpcodeQ101H == R_OP) ? 1'b1 : 1'b0;
 
 //FIXME - there are various reasons for back-pressure. Need to code it here
 assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
@@ -292,19 +313,21 @@ assign CtrlRf.RegDstQ105H   = CtrlQ105H.RegDst;
 assign CtrlRf.RegWrEnQ105H  = ValidInstQ105H ? CtrlQ105H.RegWrEn : 1'b0;
 
 //Execute Control Signals
-assign CtrlExe.RegSrc1Q102H  = CtrlQ102H.RegSrc1;
-assign CtrlExe.RegSrc2Q102H  = CtrlQ102H.RegSrc2;
-assign CtrlExe.AluOpQ102H    = CtrlQ102H.AluOp;
-assign CtrlExe.LuiQ102H      = CtrlQ102H.Lui;
-assign CtrlExe.BranchOpQ102H = CtrlQ102H.BranchOp;
-assign CtrlExe.RegDstQ103H   = CtrlQ103H.RegDst;
-assign CtrlExe.RegWrEnQ103H  = CtrlQ103H.RegWrEn;
-assign CtrlExe.RegWrEnQ104H  = CtrlQ104H.RegWrEn;
-assign CtrlExe.RegDstQ104H   = CtrlQ104H.RegDst;
-assign CtrlExe.RegWrEnQ105H  = CtrlQ105H.RegWrEn;
-assign CtrlExe.RegDstQ105H   = CtrlQ105H.RegDst;
-assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
-assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
+assign CtrlExe.RegSrc1Q102H      = CtrlQ102H.RegSrc1;
+assign CtrlExe.RegSrc2Q102H      = CtrlQ102H.RegSrc2;
+assign CtrlExe.AluOpQ102H        = CtrlQ102H.AluOp;
+assign CtrlExe.LuiQ102H          = CtrlQ102H.Lui;
+assign CtrlExe.BranchOpQ102H     = CtrlQ102H.BranchOp;
+assign CtrlExe.RegDstQ103H       = CtrlQ103H.RegDst;
+assign CtrlExe.RegWrEnQ103H      = CtrlQ103H.RegWrEn;
+assign CtrlExe.RegWrEnQ104H      = CtrlQ104H.RegWrEn;
+assign CtrlExe.RegDstQ104H       = CtrlQ104H.RegDst;
+assign CtrlExe.RegWrEnQ105H      = CtrlQ105H.RegWrEn;
+assign CtrlExe.RegDstQ105H       = CtrlQ105H.RegDst;
+assign CtrlExe.SelAluPcQ102H     = CtrlQ102H.SelAluPc;
+assign CtrlExe.SelAluImmQ102H    = CtrlQ102H.SelAluImm;
+assign CtrlExe.AluOpMulDivQ102H  = CtrlQ102H.AluOpMulDiv;
+assign CtrlExe.MExtensionQ102H   = CtrlQ102H.MExtension;
 
 // Execute Control Signals for Csr
 assign CtrlCsr = CsrInstQ102H;

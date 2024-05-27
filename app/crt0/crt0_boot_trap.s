@@ -73,6 +73,8 @@ jump_to_main:
 ###############################################
 trap_handler:
   .org 0x100
+    # save sp into csr_custom_sp for special needs
+    csrw 0xBC2, sp
     # Save registers on the stack
     addi sp, sp, -128     # Allocate stack space for 31 registers
     sw ra, 124(sp)        

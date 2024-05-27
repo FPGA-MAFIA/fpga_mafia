@@ -24,6 +24,7 @@ parameter NUM_TQ_ENTRY    = 2**TQ_ID_WIDTH;
 
 parameter WORD_WIDTH            = 32;                        // 4 Bytes - integer
 parameter NUM_WORDS_IN_CL       = 4;                         // 
+parameter NUM_BYTES_IN_CL       = 16;
  
 //Address break-down: 
 parameter ADDRESS_WIDTH         = 20;                        // OFFSET+SET+TAG -> 1MB
@@ -105,8 +106,6 @@ typedef enum logic [1:0] {
     FILL_REQ_OP    = 2'b11
 } t_fm_req_op ;
 
-
-
 typedef struct packed {
     logic         valid;
     logic         reject;
@@ -136,7 +135,9 @@ typedef struct packed {
     t_reg_id     reg_id;
     t_opcode     opcode;
     t_address    address;
-    t_word       data;    
+    t_word       data; 
+    logic [3:0]  byte_en;
+    logic        sign_extend;
 } t_req ;
 
 // Cache -> Core response
@@ -144,7 +145,7 @@ typedef struct packed {
     logic        valid;
     t_address    address;
     t_word       data;
-   t_reg_id      reg_id;
+    t_reg_id     reg_id;
 } t_rd_rsp ;
 
 typedef struct packed {
@@ -157,7 +158,9 @@ typedef struct packed {
     logic        mb_hit_cancel;
     logic        rd_indication;
     logic        wr_indication;
-    t_reg_id      reg_id;
+    t_reg_id     reg_id;
+    logic [3:0]  byte_en;
+    logic        sign_extend;
 } t_lu_req ;
 
 typedef struct packed {
@@ -166,11 +169,13 @@ typedef struct packed {
     t_lu_opcode  lu_op;
     t_tq_id      tq_id;
     t_cl         cl_data;
-    t_reg_id      reg_id;
+    t_reg_id     reg_id;
     // t_offset     offset;
     t_address    address;
     logic        rd_indication;
     logic        wr_match_in_pipe;
+    logic [3:0]  byte_en;
+    logic        sign_extend;
 } t_lu_rsp ;
 
 
@@ -235,6 +240,8 @@ typedef struct packed {
     logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
     logic                                   rd_indication;
+    logic [3:0]                             byte_en;
+    logic                                   sign_extend;
 } t_pipe_bus; 
 
 
@@ -246,11 +253,9 @@ typedef struct packed {
 } t_early_lu_rsp;
 
 
-
-
 typedef struct packed {
 t_tq_state                         state;
-logic        [NUM_WORDS_IN_CL-1:0] merge_buffer_e_modified; 
+logic        [NUM_BYTES_IN_CL-1:0] merge_buffer_e_modified; 
 t_cl                               merge_buffer_data; 
 t_cl_address                       cl_address;
 t_word_offset                      cl_word_offset; 

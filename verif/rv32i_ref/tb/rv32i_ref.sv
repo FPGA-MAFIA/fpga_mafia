@@ -43,6 +43,7 @@ logic [31:0] data_rd1, data_rd2;
 logic [31:0] mem_rd_addr;
 logic [31:0] mem_wr_addr;
 logic        illegal_instruction;
+logic        div_custom_trap;
 logic        ebreak_was_called;
 logic        ecall_was_called;
 logic        en_end_of_simulation;
@@ -55,6 +56,7 @@ logic        hit_vga_mem_rd;
 logic        hit_vga_mem_wr;
 logic [31:0] reg_wr_data;
 logic        reg_wr_en;
+logic [63:0] full_mult_res;
 // csr definition and signals
 t_csr        csr, next_csr;
 logic [11:0] csr_addr;
@@ -187,6 +189,7 @@ always_comb begin
     next_regfile        = regfile;
     reg_wr_en           = 1'b0;
     illegal_instruction = 1'b0;
+    div_custom_trap     = 1'b0;
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
     next_dmem           = dmem;
@@ -425,6 +428,52 @@ always_comb begin
         reg_wr_en        = 1'b1;
     end
     //=======================================================
+    // MUL/MULH/MULHSU/MULHU/DIV/DIVU/REM/REMU
+    //=======================================================
+    32'b0000001_?????_?????_000_?????_0110011: begin
+        instr_type       = MUL;
+        next_regfile[rd] = data_rd1 * data_rd2; //MUL
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_001_?????_0110011: begin
+        instr_type       = MULH;
+        full_mult_res    = $signed(data_rd1) * $signed(data_rd2); //MULH
+        next_regfile[rd] = full_mult_res[63:32];
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_010_?????_0110011: begin
+        instr_type       = MULHSU;
+        full_mult_res    = $signed(data_rd1) *data_rd2; //MULHSU
+        next_regfile[rd] = full_mult_res[63:32];
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_011_?????_0110011: begin
+        instr_type       = MULHU;
+        full_mult_res    = data_rd1 * data_rd2; //MULHU
+        next_regfile[rd] = full_mult_res[63:32];
+        reg_wr_en        = 1'b1;
+    end
+    32'b0000001_?????_?????_100_?????_0110011: begin
+        instr_type       = DIV;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    32'b0000001_?????_?????_101_?????_0110011: begin
+        instr_type       = DIVU;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    32'b0000001_?????_?????_110_?????_0110011: begin
+        instr_type       = REM;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    32'b0000001_?????_?????_111_?????_0110011: begin
+        instr_type       = REMU;
+        div_custom_trap  = 1'b1;
+        next_pc = csr.csr_mtvec;
+    end
+    //=======================================================
     //  FENCE
     //=======================================================
     32'b????????????_?????_???_?????_0001111: begin
@@ -515,6 +564,11 @@ always_comb begin
 
     if(illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
+        next_csr.csr_mepc   = pc;
+        next_csr.csr_mtval  = instruction;
+    end
+    if(div_custom_trap) begin
+        next_csr.csr_mcause = 32'h0000000a;
         next_csr.csr_mepc   = pc;
         next_csr.csr_mtval  = instruction;
     end
@@ -637,6 +691,10 @@ always_comb begin
             {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
             {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
             {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
+            // CSR_CUSTOM_SP
+            {2'b01, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr_data;
+            {2'b10, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr.csr_custom_sp  | csr_data;
+            {2'b11, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr.csr_custom_sp  & ~csr_data;
             // CSR_DCSR
             {2'b01, CSR_DCSR}        : next_csr.csr_dcsr = csr_data;
             {2'b10, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  | csr_data;
@@ -701,6 +759,7 @@ always_comb begin
             CSR_CUSTOM_MTIME   : csr_read_data = csr.csr_custom_mtime;
             CSR_CUSTOM_MTIMECMP: csr_read_data = csr.csr_custom_mtimecmp;
             CSR_CUSTOM_LFSR    : csr_read_data = next_csr.csr_custom_lfsr; // reading next avoids from returning the seed at the fisrt read
+            CSR_CUSTOM_SP      : csr_read_data = next_csr.csr_custom_sp;
             CSR_DCSR           : csr_read_data = csr.csr_dcsr;
             CSR_DPC            : csr_read_data = csr.csr_dpc;
             CSR_DSCRATCH0      : csr_read_data = csr.csr_dscratch0;

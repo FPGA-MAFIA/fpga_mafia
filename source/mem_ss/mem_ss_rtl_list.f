@@ -15,4 +15,7 @@
 ../../../source/mem_ss/mc.sv
 ../../../source/mem_ss/mem_ss.sv
 ../../../source/mem_ss/sdram_ctrl.sv
+../../../source/mem_ss/sdram_ctrl_bursts.sv
 ../../../source/mem_ss/sdram_top.sv
+../../../source/mem_ss/sdram_top_bursts.sv
+../../../source/mem_ss/sdram_top_rand_bursts.sv
