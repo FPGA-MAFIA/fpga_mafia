@@ -1,16 +1,16 @@
 package ex_core_pkg;
 
-typedef enum logic [3:0] {
-    ADD  = 4'b0000,
-    SUB  = 4'b0001,
-    AND  = 4'b0010,
-    OR   = 4'b0011,
-    XOR  = 4'b0100,
-    SLL  = 4'b0101,
-    SRL  = 4'b0110,
-    SRA  = 4'b0111,
-    SLT  = 4'b1000,
-    SLTU = 4'b1001
+typedef enum logic [5:0] {
+    ADD  = 6'b100000,
+    SUB  = 6'b100010,
+    AND  = 6'b100100,
+    OR   = 6'b100101,
+    XOR  = 6'b100110,
+    SLL  = 6'b000000,
+    SRL  = 6'b000010,
+    SRA  = 6'b000011,
+    SLT  = 6'b101010,
+    SLTU = 6'b101011
 } t_alu_op;
 
 typedef struct packed {
@@ -27,5 +27,23 @@ typedef struct packed {
     logic [4:0] RegDst;
     logic       RegWrEn;
 } t_ctrl_rf;
+
+typedef enum logic [5:0] {
+    R_TYPE = 6'b000000,  // R-type instructions
+    J      = 6'b000010,  // Jump
+    JAL    = 6'b000011,  // Jump and Link
+    JALR   = 6'b110011,  // Jump and Link Register
+    BEQ    = 6'b000100,  // Branch if Equal
+    BNE    = 6'b000101,  // Branch if Not Equal
+    ADDI   = 6'b001000,  // Add Immediate
+    ANDI   = 6'b001100,  // AND Immediate
+    ORI    = 6'b001101,  // OR Immediate
+    XORI   = 6'b001110,  // XOR Immediate
+    SLTI   = 6'b001010,  // Set on Less Than Immediate
+    SLTIU  = 6'b001011,  // Set on Less Than Immediate Unsigned
+    LW     = 6'b100011,  // Load Word
+    SW     = 6'b101011   // Store Word
+} t_opcode;
+
 
 endpackage
