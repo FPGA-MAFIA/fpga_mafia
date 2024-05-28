@@ -306,6 +306,10 @@ task random_partial_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // defau
                  );
     data = $urandom_range(0, 32'hFFFFFFFF);
     id = $urandom_range(0, 5'd31);
+    //FIXME - check the LSB - if 0: choos wr/wr_h/wr_b
+    //                        if 1/2: choose: wr_h/wr_b
+    //                        if 3: choose wr_b
+
     wr_req(addr, data, id);
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
@@ -327,6 +331,9 @@ task random_partial_rd(
                  .addr(addr)
                  );
     id = $urandom_range(0, 5'd31);
+    //FIXME - check the LSB - if 0: choos rd/rd_h/rd_b/rd_hu/rd_bu
+    //                        if 1/2: choose: rd_h/rd_b/rd_hu/rd_bu
+    //                        if 3: choose rd_b/ rd_bu
     rd_req(addr, id);
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
