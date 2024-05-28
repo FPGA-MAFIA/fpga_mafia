@@ -306,11 +306,24 @@ task random_partial_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // defau
                  );
     data = $urandom_range(0, 32'hFFFFFFFF);
     id = $urandom_range(0, 5'd31);
-    //FIXME - check the LSB - if 0: choos wr/wr_h/wr_b
-    //                        if 1/2: choose: wr_h/wr_b
-    //                        if 3: choose wr_b
+    
+    if (addr[1:0] == 2'b00) begin
+      case($urandom_range(0, 3))
+        0: wr_req(addr, data, id);
+        1: wr_req_sh(addr, data, id);
+        2: wr_req_sb(addr, data, id);
+        endcase
+    end
+    else if (addr[1:0] == 2'b01 || addr[1:0] == 2'b10) begin
+      case($urandom_range(0, 2))
+        0: wr_req_sh(addr, data, id);
+        1: wr_req_sb(addr, data, id);
+        endcase
+    end
+    else begin
+      wr_req_sb(addr, data, id);
+    end
 
-    wr_req(addr, data, id);
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
 endtask
@@ -331,10 +344,31 @@ task random_partial_rd(
                  .addr(addr)
                  );
     id = $urandom_range(0, 5'd31);
-    //FIXME - check the LSB - if 0: choos rd/rd_h/rd_b/rd_hu/rd_bu
-    //                        if 1/2: choose: rd_h/rd_b/rd_hu/rd_bu
-    //                        if 3: choose rd_b/ rd_bu
-    rd_req(addr, id);
+ 
+    if (addr[1:0] == 2'b00) begin
+      case($urandom_range(0, 5))
+        0: rd_req(addr, id);
+        1: rd_req_lh(addr, id);
+        2: rd_req_lb(addr, id);
+        3: rd_req_lhu(addr, id);
+        4: rd_req_lbu(addr, id);
+        endcase
+    end
+    else if (addr[1:0] == 2'b01 || addr[1:0] == 2'b10) begin
+      case($urandom_range(0, 4))
+        0: rd_req_lh(addr, id);
+        1: rd_req_lb(addr, id);
+        2: rd_req_lhu(addr, id);
+        3: rd_req_lbu(addr, id);
+        endcase
+    end
+    else begin
+      case($urandom_range(0, 2))
+        0: rd_req_lb(addr, id);
+        1: rd_req_lbu(addr, id);
+        endcase
+    end
+
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
 endtask
