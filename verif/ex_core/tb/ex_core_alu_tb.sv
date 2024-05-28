@@ -1,7 +1,5 @@
-// ./build.py -sim -dut ex_core -top ex_core_alu_tb -hw -clean
-`include "ex_core_pkg.sv"
 
-module ex_core_alu_tb();
+module ex_core_alu_tb;
 import ex_core_pkg::*;
 
     // Define signals

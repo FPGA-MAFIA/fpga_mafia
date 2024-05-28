@@ -1,4 +1,7 @@
 
+`ifndef MAFIA_MACROS_VH
+`define MAFIA_MACROS_VH
+
 `define MAFIA_DFF(q, i, clk)        \
     always_ff@(posedge clk) begin   \
         q <= i;                     \
@@ -20,3 +23,6 @@
          always_ff @(posedge clk)        \
             if (rst)    q <='0;          \
             else if(en) q <= i;
+
+
+`endif // MAFIA_MACROS_VH

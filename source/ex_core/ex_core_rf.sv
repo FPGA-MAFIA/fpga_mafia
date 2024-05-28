@@ -1,6 +1,5 @@
 // ./build.py -sim -dut ex_core -top ex_core_rf_tb -hw -clean
 `include "macros.vh"
-`include "ex_core_pkg.sv"
 
 module ex_core_rf
 import ex_core_pkg::*;
@@ -11,7 +10,7 @@ import ex_core_pkg::*;
     *  RegSrc2
     *  RegDst
     *  RegWrEn */
-    input  t_ctrl_rf    Ctrl,         // Corrected type name here
+    input  var t_ctrl_rf Ctrl,         // Corrected type name here
     input  logic [31:0] RegWrData,    // Data to write to the register
     output logic [31:0] RegRdData1,   // Data from the first read register
     output logic [31:0] RegRdData2    // Data from the second read register

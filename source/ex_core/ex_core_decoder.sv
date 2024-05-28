@@ -1,5 +1,4 @@
 `include "macros.vh"
-`include "ex_core_pkg.sv"
 
 module ex_core_decoder
 import ex_core_pkg::*;

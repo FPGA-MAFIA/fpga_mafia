@@ -1,5 +1,4 @@
-// ./build.py -sim -dut ex_core -top ex_core_alu_tb -hw -clean
-`include "ex_core_pkg.sv"
+`include "macros.vh"
 
 module ex_core_alu
 import ex_core_pkg::*;
