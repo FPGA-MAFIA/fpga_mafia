@@ -111,6 +111,8 @@ end else if(test_name == "wr_rd_offset_bytes") begin
 `include "wr_rd_offset_bytes.sv"
 end else if(test_name == "wr_rd_be_se_fill") begin
 `include "wr_rd_be_se_fill.sv"
+end else if(test_name == "rand_partial") begin
+`include "rand_partial.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);

@@ -228,7 +228,24 @@ task create_addrs(input int local_num_tag_pull,
     addr[3:2] = $urandom_range(0, 3);
     addr[1:0] = 2'b0;
 endtask
+//=======================================================
+//=======================================================
 
+task create_addrs_with_offset(input int local_num_tag_pull, 
+                              input int local_num_set_pull, 
+                              output logic [19:0] addr);
+    // assign the tag bits to the addr[19:12]
+    // choose random tag from the tag_pull
+    logic [7:0] rand_num;
+    rand_num = $urandom_range(0, local_num_tag_pull - 1);
+    addr[19:12] = tag_pull[rand_num];
+    // assign the set bits for the addr[11:4]
+    // choose random set from the set_pull
+    rand_num = $urandom_range(0, local_num_set_pull - 1);
+    addr[11:4] = set_pull[rand_num];
+    // assign random offset bits for the addr[3:0]
+    addr[3:0] = $urandom_range(0, 15);
+endtask
 //=======================================================
 //=======================================================
 task random_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // default values
@@ -263,6 +280,49 @@ task random_rd(
     logic [4:0]  id;
     int i;
     create_addrs(.local_num_tag_pull(local_num_tag_pull), 
+                 .local_num_set_pull(local_num_set_pull), 
+                 .addr(addr)
+                 );
+    id = $urandom_range(0, 5'd31);
+    rd_req(addr, id);
+    i = $urandom_range(local_min_req_delay, local_max_req_delay);
+    delay(i);
+endtask
+
+//=======================================================
+//=======================================================
+task random_partial_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // default values
+               input int local_max_req_delay = V_MAX_REQ_DELAY, // default values
+               input int local_num_tag_pull  = V_NUM_TAG_PULL, // default values
+               input int local_num_set_pull  = V_NUM_SET_PULL  // default values
+              ); 
+    logic [19:0] addr;
+    logic [31:0] data;
+    logic [4:0]  id;
+    int i;
+    create_addrs_with_offset(.local_num_tag_pull(local_num_tag_pull), 
+                 .local_num_set_pull(local_num_set_pull), 
+                 .addr(addr)
+                 );
+    data = $urandom_range(0, 32'hFFFFFFFF);
+    id = $urandom_range(0, 5'd31);
+    wr_req(addr, data, id);
+    i = $urandom_range(local_min_req_delay, local_max_req_delay);
+    delay(i);
+endtask
+
+//=======================================================
+//=======================================================
+task random_partial_rd(
+                input int local_min_req_delay = V_MIN_REQ_DELAY, // default values
+                input int local_max_req_delay = V_MAX_REQ_DELAY, // default values
+                input int local_num_tag_pull  = V_NUM_TAG_PULL, // default values
+                input int local_num_set_pull  = V_NUM_SET_PULL  // default values
+              ); 
+    logic [19:0] addr;
+    logic [4:0]  id;
+    int i;
+    create_addrs_with_offset(.local_num_tag_pull(local_num_tag_pull), 
                  .local_num_set_pull(local_num_set_pull), 
                  .addr(addr)
                  );
