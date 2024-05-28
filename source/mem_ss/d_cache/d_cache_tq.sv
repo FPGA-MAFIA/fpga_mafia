@@ -334,8 +334,8 @@ always_comb begin
         pipe_lu_req_q1.rd_indication =  tq_entry[enc_first_fill].rd_indication;
         pipe_lu_req_q1.wr_indication =  tq_entry[enc_first_fill].wr_indication;
         pipe_lu_req_q1.reg_id        =  tq_entry[enc_first_fill].reg_id;
-        pipe_lu_req_q1.byte_en       =  4'b1111;// FIXME - temp - having need to set correctly also for fill! (core2cache_req.byte_en);      // FIXME - not sure its the right place
-        pipe_lu_req_q1.sign_extend   =  4'b1111;// FIXME - temp - having need to set correctly also for fill! (core2cache_req.sign_extend);  // FIXME - not sure its the right place
+        pipe_lu_req_q1.byte_en       =  4'b1111;//tq_entry[enc_first_fill].byte_en;
+        pipe_lu_req_q1.sign_extend   =  1'b0;//tq_entry[enc_first_fill].sign_extend;
     end //else if
 
     //incase of a read miss, we need to cancel the request and re-issue it later from the re-issue buffer
