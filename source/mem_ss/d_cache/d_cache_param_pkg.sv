@@ -35,7 +35,9 @@ parameter CL_WIDTH              = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 B
 parameter LSB_OFFSET            = 0;                         // 16-byte offset
 parameter MSB_OFFSET            = 3;                          
 parameter LSB_WORD_OFFSET       = 2;                    // 4-byte Word offset
-parameter MSB_WORD_OFFSET       = 3;                        
+parameter MSB_WORD_OFFSET       = 3;  
+parameter LSB_BYTE_OFFSET       = 0;                    // byte offset in a word
+parameter MSB_BYTE_OFFSET       = 1;                       
 
 parameter LSB_SET               = 4;                         // CL address is 16 bites (TAG_SET)
 parameter MSB_SET               = 11;                        // 

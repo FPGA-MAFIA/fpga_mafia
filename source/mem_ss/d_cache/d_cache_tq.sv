@@ -43,7 +43,7 @@ logic [NUM_TQ_ENTRY-1:0] first_free;
 logic [NUM_TQ_ENTRY-1:0] fill_entries;
 logic [NUM_TQ_ENTRY-1:0] first_fill;
 
-
+t_req pre_shift_core2cache_req; 
 t_tq_entry [NUM_TQ_ENTRY-1:0] tq_entry;
 t_tq_entry [NUM_TQ_ENTRY-1:0] next_tq_entry;
 
@@ -61,6 +61,7 @@ logic rd_hit_pipe_rsp_q3;
 logic fill_with_rd_indication_q3;
 
 t_word pre_cache2core_rsp;
+t_word pre_shifted_cache2core_rsp;
 
 t_tq_id      rd_miss_tq_id;
 t_cl_address rd_miss_cl_address;
@@ -79,6 +80,25 @@ logic rd_miss_was_filled;
 logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 
 logic cancel_core_req;
+
+//================================
+// Data and Byte En shifter
+//===============================
+// When writing to cache, the byte enable and the data must be shifted to fit proper alignment.
+always_comb begin
+pre_shift_core2cache_req = pre_core2cache_req;  
+    if(pre_core2cache_req.opcode == WR_OP) begin
+        pre_shift_core2cache_req.data    = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b01 ) ? { pre_core2cache_req.data[23:0],8'b0  } :
+                                           (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b10 ) ? { pre_core2cache_req.data[15:0],16'b0 } :
+                                           (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b11 ) ? { pre_core2cache_req.data[7:0] ,24'b0 } :
+                                                                                           pre_core2cache_req.data;
+        pre_shift_core2cache_req.byte_en = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b01 ) ? { pre_core2cache_req.byte_en[2:0],1'b0 } :
+                                           (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b10 ) ? { pre_core2cache_req.byte_en[1:0],2'b0 } :
+                                           (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b11 ) ? { pre_core2cache_req.byte_en[0]  ,3'b0 } :
+                                                                                           pre_core2cache_req.byte_en;
+    end
+end 
+
 //================================
 // REISSUE BUFFER
 //================================
@@ -91,7 +111,7 @@ logic cancel_core_req;
 // FIXME need to allow read hit from the TQ, and when that happens, there is no need to cancel the Q1 request
 assign en_reissue_req   = pipe_early_lu_rsp_q2.rd_miss;
 assign cancel_core_req  = pipe_early_lu_rsp_q2.rd_miss; // rename for clarity
-`MAFIA_EN_DFF(reissue_req, pre_core2cache_req, clk, en_reissue_req)
+`MAFIA_EN_DFF(reissue_req, pre_shift_core2cache_req, clk, en_reissue_req)
 
 // Remember what request read missed - used to determine if the read miss was served by the fill
 `MAFIA_EN_DFF(rd_miss_tq_id,      pipe_early_lu_rsp_q2.lu_tq_id,   clk, en_reissue_req)
@@ -116,7 +136,7 @@ assign set_rd_miss_was_filled = stall_rd_miss_q                                 
 assign sel_reissue = rd_miss_was_filled  && (!fill_exists);
 // This is the mux that selects the request to be sent to the cache - either the re-issue or the request from the core
 assign core2cache_req = sel_reissue  ? reissue_req       : // Send the re-issue request
-                                       pre_core2cache_req; // else, send the request from core
+                                       pre_shift_core2cache_req; // else, send the request from core
 
 
 //================================
@@ -145,10 +165,16 @@ assign fill_with_rd_indication_q3 = pipe_lu_rsp_q3.valid              &&
 assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication_q3;
 //take the relevant word from cache line
 //FIXME - need to support byte enable -> make sure to shift the "word data" according to the byte enable in the response, and sign extend/zero extend
-assign pre_cache2core_rsp     = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
-                                pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
-                                pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.cl_data[95:64] :
-                                                                                                    pipe_lu_rsp_q3.cl_data[127:96];
+
+assign pre_shifted_cache2core_rsp     = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
+                                        pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
+                                        pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b10 ?  pipe_lu_rsp_q3.cl_data[95:64] :
+                                                                                                            pipe_lu_rsp_q3.cl_data[127:96];
+
+assign pre_cache2core_rsp = pipe_lu_rsp_q3.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b01 ? {8'b0,  pre_shifted_cache2core_rsp[31:8]}  :
+                            pipe_lu_rsp_q3.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b10 ? {16'b0, pre_shifted_cache2core_rsp[31:16]} :
+                            pipe_lu_rsp_q3.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b11 ? {24'b0, pre_shifted_cache2core_rsp[31:24]} :
+                                                                                                       pre_shifted_cache2core_rsp         ;
 
 assign cache2core_rsp.data[7:0]    = pipe_lu_rsp_q3.byte_en[0]  ? pre_cache2core_rsp[7:0]        : 8'h0;
 assign cache2core_rsp.data[15:8]   = pipe_lu_rsp_q3.byte_en[1]  ? pre_cache2core_rsp[15:8]       :
@@ -319,7 +345,7 @@ always_comb begin
 end
 
 // FIXME - Add assertion that We are allowing a single outstanding request per CL address!!!
-// FIXME - Add assertion that a there is no pre_core2cache_req.valid when stall is asserted
+// FIXME - Add assertion that a there is no pre_shift_core2cache_req.valid when stall is asserted
 // FIXME - Add assertion that no 2 tq entries have the same tq_cl_address && are in S_MB_WAIT_FILL
 // FIXME - Add assertion that every pipe response HIT/MISS have a matching valid TQ entry
 //logic rsp_hit_or_miss_entry_q3;
