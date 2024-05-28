@@ -264,5 +264,7 @@ t_word_offset                      cl_word_offset;
 logic                              rd_indication; 
 logic                              wr_indication; 
 t_reg_id                           reg_id; 
+logic [3:0]                        byte_en;     
+logic                              sign_extend;
 } t_tq_entry ;
 endpackage
