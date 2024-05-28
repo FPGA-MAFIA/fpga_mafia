@@ -109,6 +109,8 @@ end else if (test_name == "wr_rd_partial_words") begin
 `include "wr_rd_partial_words.sv"
 end else if(test_name == "wr_rd_offset_bytes") begin
 `include "wr_rd_offset_bytes.sv"
+end else if(test_name == "wr_rd_be_se_fill") begin
+`include "wr_rd_be_se_fill.sv"
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);
