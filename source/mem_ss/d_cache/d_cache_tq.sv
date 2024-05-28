@@ -85,6 +85,8 @@ logic cancel_core_req;
 // Data and Byte En shifter
 //===============================
 // When writing to cache, the byte enable and the data must be shifted to fit proper alignment.
+// the internal logic is CL aligned, and the request are always word aligned with byte enable
+// This means dont nativly support non word aligned requests - so we add this shift on the data and byte enable
 always_comb begin
 pre_shift_core2cache_req = pre_core2cache_req;  
     if(pre_core2cache_req.opcode == WR_OP) begin
@@ -163,8 +165,9 @@ assign fill_with_rd_indication_q3 = pipe_lu_rsp_q3.valid              &&
 // setting the CACHE2CORE response
 //================================
 assign cache2core_rsp.valid =   rd_hit_pipe_rsp_q3 || fill_with_rd_indication_q3;
-//take the relevant word from cache line
-//FIXME - need to support byte enable -> make sure to shift the "word data" according to the byte enable in the response, and sign extend/zero extend
+//Take the relevant word from cache line
+//Make sure to shift the "word data" according to the byte enable in the response, and sign extend/zero extend
+//This is undoing the shift that was done in the core2cache_req
 
 assign pre_shifted_cache2core_rsp     = pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b00 ?  pipe_lu_rsp_q3.cl_data[31:0]  : 
                                         pipe_lu_rsp_q3.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET] == 2'b01 ?  pipe_lu_rsp_q3.cl_data[63:32] : 
@@ -249,14 +252,14 @@ always_comb begin
         rd_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == RD_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_entry[i].cl_address) &&
-                           (!tq_entry[i].rd_indication)           && // if the entry is already set as read indication, then we don't merge to the same entry
+                           (!tq_entry[i].rd_indication)     && // if the entry is already set as read indication, then we don't merge to the same entry
                            (!(cancel_core_req))             && // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_entry[i].state == S_MB_WAIT_FILL) || (tq_entry[i].state == S_MB_FILL_READY) || (tq_entry[i].state == S_LU_CORE));
     
         wr_req_hit_mb[i] = core2cache_req.valid             && 
                            (core2cache_req.opcode == WR_OP) &&
                            (core2cache_req.address[MSB_TAG:LSB_SET] == tq_entry[i].cl_address) &&
-                           (!tq_entry[i].rd_indication)           && //if the entry is already set as read indication, then we don't merge to the same entry
+                           (!tq_entry[i].rd_indication)     && //if the entry is already set as read indication, then we don't merge to the same entry
                            (!(cancel_core_req))             && // the request will be reissued later. we don't want to merge it to the same entry
                            ((tq_entry[i].state == S_MB_WAIT_FILL) || (tq_entry[i].state == S_MB_FILL_READY) || (tq_entry[i].state == S_LU_CORE));
     
@@ -287,7 +290,7 @@ assign any_wr_hit_mb = |wr_req_hit_mb;
 `MAFIA_FIND_FIRST(first_free, free_entries)
 //suppress the first free entry if there is a read hit in the merge buffer
 
-//FIXME - need to replace with round robin
+//FIXME - need to replace with round robin or Age Matrix
 `MAFIA_FIND_FIRST(first_fill, fill_entries)
 
 `MAFIA_ENCODER(enc_first_free, free_exists, first_free)
@@ -329,7 +332,8 @@ always_comb begin
         pipe_lu_req_q1.lu_op         = FILL_LU;
         pipe_lu_req_q1.tq_id         = enc_first_fill;
         pipe_lu_req_q1.address       = {tq_entry[enc_first_fill].cl_address,
-                                        tq_entry[enc_first_fill].cl_word_offset,2'b00} ;//FIXME support byte offset 
+                                        tq_entry[enc_first_fill].cl_word_offset,
+                                        tq_entry[enc_first_fill].cl_byte_offset};
         pipe_lu_req_q1.cl_data       =  tq_entry[enc_first_fill].merge_buffer_data;
         pipe_lu_req_q1.rd_indication =  tq_entry[enc_first_fill].rd_indication;
         pipe_lu_req_q1.wr_indication =  tq_entry[enc_first_fill].wr_indication;

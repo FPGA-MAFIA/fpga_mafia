@@ -64,6 +64,7 @@ typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
 typedef logic [WORD_WIDTH -1:0]     t_word;
 typedef logic [MSB_OFFSET     :0]   t_offset;
 typedef logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET]   t_word_offset;
+typedef logic [MSB_BYTE_OFFSET:LSB_BYTE_OFFSET]   t_byte_offset;
 
 
 
@@ -261,6 +262,7 @@ logic        [NUM_BYTES_IN_CL-1:0] merge_buffer_e_modified;
 t_cl                               merge_buffer_data; 
 t_cl_address                       cl_address;
 t_word_offset                      cl_word_offset; 
+t_byte_offset                      cl_byte_offset; 
 logic                              rd_indication; 
 logic                              wr_indication; 
 t_reg_id                           reg_id; 

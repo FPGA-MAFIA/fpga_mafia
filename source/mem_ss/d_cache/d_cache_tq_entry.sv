@@ -43,6 +43,7 @@ logic  en_tq_merge_buffer_e_modified;
 logic  en_tq_merge_buffer_data; 
 logic  en_tq_cl_address; 
 logic  en_tq_cl_word_offset; 
+logic  en_tq_cl_byte_offset; 
 logic  en_tq_rd_indication; 
 logic  en_tq_wr_indication; 
 logic  en_tq_reg_id; 
@@ -58,6 +59,7 @@ logic  en_tq_sign_extend;
 `MAFIA_EN_DFF     (tq_entry.merge_buffer_data      , next_tq_entry.merge_buffer_data      , clk, en_tq_merge_buffer_data      ) 
 `MAFIA_EN_DFF     (tq_entry.cl_address             , next_tq_entry.cl_address             , clk, en_tq_cl_address             ) 
 `MAFIA_EN_DFF     (tq_entry.cl_word_offset         , next_tq_entry.cl_word_offset         , clk, en_tq_cl_word_offset         ) 
+`MAFIA_EN_DFF     (tq_entry.cl_byte_offset         , next_tq_entry.cl_byte_offset         , clk, en_tq_cl_byte_offset         ) 
 `MAFIA_EN_DFF     (tq_entry.reg_id                 , next_tq_entry.reg_id                 , clk, en_tq_reg_id                 )
 `MAFIA_EN_DFF     (tq_entry.byte_en                , next_tq_entry.byte_en                , clk, en_tq_byte_en                ) 
 `MAFIA_EN_DFF     (tq_entry.sign_extend            , next_tq_entry.sign_extend            , clk, en_tq_sign_extend            )
@@ -86,6 +88,7 @@ always_comb begin
         en_tq_rd_indication             = '0;
         en_tq_wr_indication             = '0;
         en_tq_cl_word_offset            = '0;
+        en_tq_cl_byte_offset            = '0;
         en_tq_reg_id                    = '0;
         en_tq_cl_address                = '0;
         en_tq_merge_buffer_e_modified   = '0;
@@ -104,6 +107,7 @@ always_comb begin
                     en_tq_rd_indication              = 1'b1;
                     en_tq_wr_indication              = 1'b1;
                     en_tq_cl_word_offset             = 1'b1;
+                    en_tq_cl_byte_offset             = 1'b1;
                     en_tq_reg_id                     = 1'b1;
                     en_tq_cl_address                 = 1'b1;
                     en_tq_merge_buffer_e_modified    = 1'b1;
@@ -117,6 +121,7 @@ always_comb begin
                     next_tq_entry.reg_id             = core2cache_req.reg_id;
                     next_tq_entry.cl_address         = core2cache_req.address[MSB_TAG:LSB_SET];
                     next_tq_entry.cl_word_offset     = core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+                    next_tq_entry.cl_byte_offset     = core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET];
                     if(core2cache_req.opcode == WR_OP) begin
                         //write the data to the correct word offset in the merge buffer
                         // Write the data to the correct word offset in the merge buffer
@@ -240,6 +245,7 @@ always_comb begin
         if(rd_req_hit_mb) begin
             en_tq_rd_indication    = 1'b1;
             en_tq_cl_word_offset   = 1'b1;
+            en_tq_cl_byte_offset   = 1'b1;
             en_tq_reg_id           = 1'b1;
             en_tq_byte_en          = 1'b1;
             en_tq_sign_extend      = 1'b1;
@@ -247,6 +253,7 @@ always_comb begin
             next_tq_entry.byte_en       = core2cache_req.byte_en;
             next_tq_entry.sign_extend   = core2cache_req.sign_extend;
             next_tq_entry.cl_word_offset= core2cache_req.address[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
+            next_tq_entry.cl_byte_offset= core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET];
             next_tq_entry.reg_id        = core2cache_req.reg_id;
         end //if
         
