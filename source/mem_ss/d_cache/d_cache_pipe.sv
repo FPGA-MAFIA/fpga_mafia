@@ -273,9 +273,9 @@ end
 //======================
 
 always_comb begin
-  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2;     //this is the default value
-  cache_pipe_lu_q2.set_ways_valid       =   set_ways_valid_q2; //FIXME - need to update valid bits incase of fill
-  cache_pipe_lu_q2.set_ways_tags        =   set_ways_tags_q2;  //FIXME - need to update tag incase of fill
+  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2;//this is the default value
+  cache_pipe_lu_q2.set_ways_valid       =   set_ways_valid_q2;
+  cache_pipe_lu_q2.set_ways_tags        =   set_ways_tags_q2;
   cache_pipe_lu_q2.set_ways_mru         =   set_ways_mru_q2;
   cache_pipe_lu_q2.set_ways_hit         =   way_tag_match_q2;
   cache_pipe_lu_q2.set_ways_enc_hit     =   way_tag_enc_match_q2;
