@@ -1,0 +1,1 @@
+Warning (10273): Verilog HDL warning at de10_lite_sdram_ctrl.sv(46): extended using "x" or "z" File: C:/workspace/fpga_mafia/FPGA/sdram_ctrl/de10_lite_sdram_ctrl.sv Line: 46
