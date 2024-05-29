@@ -88,8 +88,10 @@ logic cancel_core_req;
 // We also can write a half byte only when address lsb is equal to 01, 10
 // We can write a byte to any address lsb.
 `ifdef SIM_ONLY
+logic en_assert;
+assign en_assert = 1'b1; // default value is 1'b1 and set to enable assertion
+
 string error_msg;
-logic correct_aligned_access;
 always_comb begin
     if(core2cache_req.opcode == RD_OP)
         error_msg = "miss aligned access while reading";
@@ -99,6 +101,7 @@ always_comb begin
        error_msg = "miss aligned access while writing(possibly debug is needed)"; 
 end
 
+logic correct_aligned_access;
 assign correct_aligned_access = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b00 && pre_core2cache_req.byte_en == 4'b1111) ||  // word correct alignment 
                                 (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b01 && pre_core2cache_req.byte_en == 4'b0011) ||  // half word correct alignment
                                 (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b10 && pre_core2cache_req.byte_en == 4'b0011) ||  // half word correct alignment
@@ -106,7 +109,7 @@ assign correct_aligned_access = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_
                                 (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b00 && pre_core2cache_req.byte_en == 4'b0000);
 
 
-`MAFIA_ASSERT("error", !correct_aligned_access, 1'b1, error_msg)                      
+`MAFIA_ASSERT("error", !correct_aligned_access, en_assert, error_msg)                      
 `endif
 
 // Data and Byte En shifter
