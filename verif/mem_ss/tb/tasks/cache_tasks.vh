@@ -299,6 +299,7 @@ task random_partial_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // defau
     logic [19:0] addr;
     logic [31:0] data;
     logic [4:0]  id;
+    logic [1:0] rand_opcode;
     int i;
     create_addrs_with_offset(.local_num_tag_pull(local_num_tag_pull), 
                  .local_num_set_pull(local_num_set_pull), 
@@ -307,22 +308,23 @@ task random_partial_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // defau
     data = $urandom_range(0, 32'hFFFFFFFF);
     id = $urandom_range(0, 5'd31);
     
-    if (addr[1:0] == 2'b00) begin
-      case($urandom_range(0, 3))
-        0: wr_req(addr, data, id);
-        1: wr_req_sh(addr, data, id);
-        2: wr_req_sb(addr, data, id);
-        endcase
-    end
-    else if (addr[1:0] == 2'b01 || addr[1:0] == 2'b10) begin
-      case($urandom_range(0, 2))
-        0: wr_req_sh(addr, data, id);
-        1: wr_req_sb(addr, data, id);
-        endcase
-    end
-    else begin
-      wr_req_sb(addr, data, id);
-    end
+    rand_opcode = $urandom_range(0,2);
+    // sb: 2'b00
+    // sh: 2'b01
+    // sw: 2'b10
+    priority casez ({addr[1:0],rand_opcode})
+      //any offset can write a byte
+      // if its 2'b11 it must write a byte
+      {2'b??,2'b00} : wr_req    (addr, data, id);
+      {2'b11,2'b??} : wr_req    (addr, data, id);
+      // only 00,01 can write a half word
+      {2'b00,2'b01} : wr_req_sh (addr, data, id);
+      {2'b01,2'b01} : wr_req_sh (addr, data, id);
+      // only 00 can write a word
+      {2'b00,2'b10} : wr_req_sb (addr, data, id);
+      // default: any offset can write a byte
+      default       : wr_req    (addr, data, id);
+    endcase 
 
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
@@ -338,37 +340,42 @@ task random_partial_rd(
               ); 
     logic [19:0] addr;
     logic [4:0]  id;
+    logic [2:0] rand_opcode;
     int i;
     create_addrs_with_offset(.local_num_tag_pull(local_num_tag_pull), 
                  .local_num_set_pull(local_num_set_pull), 
                  .addr(addr)
                  );
     id = $urandom_range(0, 5'd31);
- 
-    if (addr[1:0] == 2'b00) begin
-      case($urandom_range(0, 5))
-        0: rd_req(addr, id);
-        1: rd_req_lh(addr, id);
-        2: rd_req_lb(addr, id);
-        3: rd_req_lhu(addr, id);
-        4: rd_req_lbu(addr, id);
-        endcase
-    end
-    else if (addr[1:0] == 2'b01 || addr[1:0] == 2'b10) begin
-      case($urandom_range(0, 4))
-        0: rd_req_lh(addr, id);
-        1: rd_req_lb(addr, id);
-        2: rd_req_lhu(addr, id);
-        3: rd_req_lbu(addr, id);
-        endcase
-    end
-    else begin
-      case($urandom_range(0, 2))
-        0: rd_req_lb(addr, id);
-        1: rd_req_lbu(addr, id);
-        endcase
-    end
-
+    rand_opcode = $urandom_range(0,5);
+    // lb: 3'b000
+    // lbu:3'b001
+    // lh: 3'b010
+    // lhu:3'b011
+    // lw: 3'b100
+    // default: lb
+    priority casez ({addr[1:0],rand_opcode})
+      //any offset can read a byte
+      // if its 2'b11 it must read a byte
+      {2'b??,3'b000} : rd_req_lb (addr,id);
+      {2'b??,3'b001} : rd_req_lbu(addr,id);
+      {2'b??,3'b000} : rd_req_lb (addr,id);
+      {2'b??,3'b001} : rd_req_lbu(addr,id);
+      {2'b11,3'b??0} : rd_req_lb (addr,id);
+      {2'b11,3'b??1} : rd_req_lbu(addr,id);
+      // only 00,01,10 can read a half word
+      // by setting the MSB of the rand_opcode to "?" it will match here instead of the lw case
+      {2'b00,3'b010} : rd_req_lh (addr,id);
+      {2'b01,3'b010} : rd_req_lh (addr,id);
+      {2'b10,3'b010} : rd_req_lh (addr,id);
+      {2'b00,3'b011} : rd_req_lhu(addr,id);
+      {2'b01,3'b011} : rd_req_lhu(addr,id);
+      {2'b10,3'b011} : rd_req_lhu(addr,id);
+      // only 00 can read a word
+      {2'b00,3'b100} : rd_req    (addr,id);
+      // default: any offset can read a byte
+      default        : rd_req_lb (addr,id);
+    endcase 
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
     delay(i);
 endtask
