@@ -8,6 +8,8 @@ FPGA/*/incremental_db/*
 FPGA/*/simulation/*
 FPGA/*/greybox_tmp/*
 FPGA/*/output_files/*
+FPGA/*/*/output_files/*
+FPGA/*/*/db/*
 FPGA/*/.qsys_edit/*
 FPGA/*/db/*
 FPGA/*/*.rpt
