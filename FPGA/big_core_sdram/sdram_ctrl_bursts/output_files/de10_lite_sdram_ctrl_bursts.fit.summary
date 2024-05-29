@@ -1,0 +1,18 @@
+Fitter Status : Successful - Thu May 02 15:37:46 2024
+Quartus Prime Version : 20.1.1 Build 720 11/11/2020 SJ Lite Edition
+Revision Name : de10_lite_sdram_ctrl_bursts
+Top-level Entity Name : de10_lite_sdram_ctrl_bursts
+Family : MAX 10
+Device : 10M50DAF484C7G
+Timing Models : Final
+Total logic elements : 1,214 / 49,760 ( 2 % )
+    Total combinational functions : 769 / 49,760 ( 2 % )
+    Dedicated logic registers : 936 / 49,760 ( 2 % )
+Total registers : 936
+Total pins : 41 / 360 ( 11 % )
+Total virtual pins : 0
+Total memory bits : 5,504 / 1,677,312 ( < 1 % )
+Embedded Multiplier 9-bit elements : 0 / 288 ( 0 % )
+Total PLLs : 1 / 4 ( 25 % )
+UFM blocks : 0 / 1 ( 0 % )
+ADC blocks : 0 / 2 ( 0 % )
