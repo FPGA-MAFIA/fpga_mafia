@@ -81,6 +81,7 @@ logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET ] new_alloc_word_offset;
 
 logic cancel_core_req;
 
+//================================
 //===============================
 // miss aligned address check
 //===============================
@@ -91,25 +92,28 @@ logic cancel_core_req;
 logic en_assert;
 assign en_assert = 1'b1; // default value is 1'b1 and set to enable assertion
 
-string error_msg;
-always_comb begin
-    if(core2cache_req.opcode == RD_OP)
-        error_msg = "miss aligned access while reading";
-    else if(core2cache_req.opcode == WR_OP)
-         error_msg = "miss aligned access while writing";
-    else
-       error_msg = "miss aligned access while writing(possibly debug is needed)"; 
-end
-
 logic correct_aligned_access;
-assign correct_aligned_access = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b00 && pre_core2cache_req.byte_en == 4'b1111) ||  // word correct alignment 
+
+assign correct_aligned_access = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b00)                                          ||  // its possible to write any alignment to adreess that ends with lsb's of 00.
+                                (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b01 && pre_core2cache_req.byte_en == 4'b0001) ||  // byte correct alignment
                                 (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b01 && pre_core2cache_req.byte_en == 4'b0011) ||  // half word correct alignment
+                                (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b10 && pre_core2cache_req.byte_en == 4'b0001) ||  // byte correct alignment
                                 (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b10 && pre_core2cache_req.byte_en == 4'b0011) ||  // half word correct alignment
-                                (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b11 && pre_core2cache_req.byte_en == 4'b0001) ||  // byte correct alignment
-                                (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b00 && pre_core2cache_req.byte_en == 4'b0000);
+                                (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET] == 2'b11 && pre_core2cache_req.byte_en == 4'b0001);    // byte correct alignment
 
 
-`MAFIA_ASSERT("error", !correct_aligned_access, en_assert, error_msg)                      
+// Assertion for read operations
+string read_error_msg = "miss aligned access while reading";
+`MAFIA_ASSERT("read_error", !correct_aligned_access && core2cache_req.opcode == RD_OP, en_assert, read_error_msg)
+
+// Assertion for write operations
+string write_error_msg = "miss aligned access while writing";
+`MAFIA_ASSERT("write_error", !correct_aligned_access && core2cache_req.opcode == WR_OP, en_assert, write_error_msg)
+
+// Assertion for other operations
+string other_error_msg = "miss aligned access while writing(possibly debug is needed)";
+`MAFIA_ASSERT("other_error", !correct_aligned_access && core2cache_req.opcode != RD_OP && core2cache_req.opcode != WR_OP, en_assert, other_error_msg)
+
 `endif
 
 // Data and Byte En shifter
