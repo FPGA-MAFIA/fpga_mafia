@@ -318,12 +318,12 @@ task random_partial_wr(input int local_min_req_delay = V_MIN_REQ_DELAY, // defau
       {2'b??,2'b00} : wr_req_sb    (addr, data, id);
       {2'b11,2'b??} : wr_req_sb    (addr, data, id);
       // only 00,01 can write a half word
-      {2'b00,2'b01} : wr_req_sh (addr, data, id);
-      {2'b01,2'b01} : wr_req_sh (addr, data, id);
+      {2'b00,2'b01} : wr_req_sh    (addr, data, id);
+      {2'b01,2'b01} : wr_req_sh    (addr, data, id);
       // only 00 can write a word
-      {2'b00,2'b10} : wr_req (addr, data, id);
+      {2'b00,2'b10} : wr_req       (addr, data, id);
       // default: any offset can write a byte
-      default       : wr_req    (addr, data, id);
+      default       : wr_req_sb    (addr, data, id);
     endcase 
 
     i = $urandom_range(local_min_req_delay, local_max_req_delay);
