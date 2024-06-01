@@ -106,7 +106,8 @@ always_comb begin
   cache_pipe_lu_q1.fill_modified    = pipe_lu_req_q1.wr_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.fill_rd          = pipe_lu_req_q1.rd_indication && pipe_lu_req_q1.lu_op == FILL_LU;
   cache_pipe_lu_q1.rd_indication    = pipe_lu_req_q1.rd_indication;
-
+  cache_pipe_lu_q1.byte_en          = pipe_lu_req_q1.byte_en;
+  cache_pipe_lu_q1.sign_extend      = pipe_lu_req_q1.sign_extend;
 end //always_comb
 
 //==================================================================
@@ -272,9 +273,9 @@ end
 //======================
 
 always_comb begin
-  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2;     //this is the default value
-  cache_pipe_lu_q2.set_ways_valid       =   set_ways_valid_q2; //FIXME - need to update valid bits incase of fill
-  cache_pipe_lu_q2.set_ways_tags        =   set_ways_tags_q2;  //FIXME - need to update tag incase of fill
+  cache_pipe_lu_q2                      =   pre_cache_pipe_lu_q2;//this is the default value
+  cache_pipe_lu_q2.set_ways_valid       =   set_ways_valid_q2;
+  cache_pipe_lu_q2.set_ways_tags        =   set_ways_tags_q2;
   cache_pipe_lu_q2.set_ways_mru         =   set_ways_mru_q2;
   cache_pipe_lu_q2.set_ways_hit         =   way_tag_match_q2;
   cache_pipe_lu_q2.set_ways_enc_hit     =   way_tag_enc_match_q2;
@@ -285,7 +286,6 @@ always_comb begin
   cache_pipe_lu_q2.data_array_address   =   (cache_pipe_lu_q2.lu_op == FILL_LU) ? {cache_pipe_lu_q2.lu_set , set_ways_enc_victim_q2} :
                                                                                   {cache_pipe_lu_q2.lu_set , way_tag_enc_match_q2}   ;
   cache_pipe_lu_q2.dirty_evict          =  dirty_evict_q2;
-
 end //always_comb
 
 //data array read
@@ -345,6 +345,9 @@ assign wr_match_in_pipe_q1_q3 = ({cache_pipe_lu_q3.lu_tag,cache_pipe_lu_q3.lu_se
                                 ( cache_pipe_lu_q3.lu_op == WR_LU) && (cache_pipe_lu_q1.lu_op == WR_LU);        //Both write q3 and q1
 assign pipe_lu_rsp_q3.wr_match_in_pipe = wr_match_in_pipe_q1_q3 || wr_match_in_pipe_q2_q3;
 
+assign pipe_lu_rsp_q3.byte_en     = cache_pipe_lu_q3.byte_en;
+assign pipe_lu_rsp_q3.sign_extend = cache_pipe_lu_q3.sign_extend;
+
 `MAFIA_DFF(og_set_ways_tags_q3,    og_set_ways_tags_q2,    clk)
 `MAFIA_DFF(set_ways_enc_victim_q3, set_ways_enc_victim_q2, clk)
 always_comb begin
@@ -388,8 +391,11 @@ assign rd_data_cl_rsp_q3  = hazard_detected_q3 ? hazard_rd_data_cl_rsp_q4  : pre
 assign lu_word_offset_q3 = cache_pipe_lu_q3.lu_offset[MSB_WORD_OFFSET:LSB_WORD_OFFSET];
 
 always_comb begin
-    data_array_data_q3                   =   rd_data_cl_rsp_q3; //the current CL in data array
-    data_array_data_q3[lu_word_offset_q3]=   cache_pipe_lu_q3.data; //override the specific word
+    data_array_data_q3                           =   rd_data_cl_rsp_q3; //the current CL in data array
+    data_array_data_q3[lu_word_offset_q3][7:0]   =  cache_pipe_lu_q3.byte_en[0] ? cache_pipe_lu_q3.data[7:0]   : data_array_data_q3[lu_word_offset_q3][7:0]  ; //override the specific word
+    data_array_data_q3[lu_word_offset_q3][15:8]  =  cache_pipe_lu_q3.byte_en[1] ? cache_pipe_lu_q3.data[15:8]  : data_array_data_q3[lu_word_offset_q3][15:8] ; //override the specific word
+    data_array_data_q3[lu_word_offset_q3][23:16] =  cache_pipe_lu_q3.byte_en[2] ? cache_pipe_lu_q3.data[23:16] : data_array_data_q3[lu_word_offset_q3][23:16]; //override the specific word
+    data_array_data_q3[lu_word_offset_q3][31:24] =  cache_pipe_lu_q3.byte_en[3] ? cache_pipe_lu_q3.data[31:24] : data_array_data_q3[lu_word_offset_q3][31:24]; //override the specific word
     wr_data_cl_q3                        =   '0;
     wr_data_cl_q3.data                   =   (cache_pipe_lu_q3.lu_op == FILL_LU)                             ? cache_pipe_lu_q3.cl_data  :
                                              (cache_pipe_lu_q3.lu_op == WR_LU)   && (cache_pipe_lu_q3.hit)   ? data_array_data_q3        : 

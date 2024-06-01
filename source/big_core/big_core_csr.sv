@@ -88,6 +88,13 @@ always_comb begin
         next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[CSR_MSTATUS_MIE];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
         next_csr.csr_mstatus[CSR_MSTATUS_MIE]  = 1'b0;                              // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
     end
+    if(CsrExceptionUpdateQ102H.div_custom_trap) begin
+        next_csr.csr_mcause = 32'h0000000a;  // reserved value
+        next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
+        next_csr.csr_mtval  = CsrExceptionUpdateQ102H.mtval_instruction;
+        next_csr.csr_mstatus[CSR_MSTATUS_MPIE] = csr.csr_mstatus[3];  // set the CSR_MSTATUS[MPIE] to the current value of CSR_MSTATUS[MIE]
+        next_csr.csr_mstatus[3]  = 1'b0;               // Disable CSR_MSTATUS[MIE] when taking an exception to avoid nested interrupts
+    end
     if(CsrExceptionUpdateQ102H.illegal_instruction) begin
         next_csr.csr_mcause = 32'h00000002;
         next_csr.csr_mepc   = CsrExceptionUpdateQ102H.Pc;
@@ -246,6 +253,10 @@ always_comb begin
             {2'b01, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr_data;
             {2'b10, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  | csr_data;
             {2'b11, CSR_CUSTOM_LFSR}        : next_csr.csr_custom_lfsr = csr.csr_custom_lfsr  & ~csr_data;
+            // CSR_CUSTOM_SP
+            {2'b01, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr_data;
+            {2'b10, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr.csr_custom_sp  | csr_data;
+            {2'b11, CSR_CUSTOM_SP}        : next_csr.csr_custom_sp = csr.csr_custom_sp  & ~csr_data;
             // CSR_DCSR
             {2'b01, CSR_DCSR}        : next_csr.csr_dcsr = csr_data;
             {2'b10, CSR_DCSR}        : next_csr.csr_dcsr = csr.csr_dcsr  | csr_data;
@@ -358,6 +369,7 @@ always_comb begin
             CSR_CUSTOM_MTIME   : CsrReadDataQ102H = csr.csr_custom_mtime;
             CSR_CUSTOM_MTIMECMP: CsrReadDataQ102H = csr.csr_custom_mtimecmp;
             CSR_CUSTOM_LFSR    : CsrReadDataQ102H = next_csr.csr_custom_lfsr; // reading next avoids from returning the seed at the fisrt read
+            CSR_CUSTOM_SP      : CsrReadDataQ102H = next_csr.csr_custom_sp;
             CSR_DCSR           : CsrReadDataQ102H = csr.csr_dcsr;
             CSR_DPC            : CsrReadDataQ102H = csr.csr_dpc;
             CSR_DSCRATCH0      : CsrReadDataQ102H = csr.csr_dscratch0;
@@ -371,8 +383,9 @@ end
 // Update program counter
 logic  BeginInterrupt;
 assign BeginInterrupt = (CsrExceptionUpdateQ102H.illegal_instruction || CsrExceptionUpdateQ102H.misaligned_access 
-                       || CsrExceptionUpdateQ102H.illegal_csr_access || CsrExceptionUpdateQ102H.breakpoint 
-                       || CsrExceptionUpdateQ102H.external_interrupt || CsrExceptionUpdateQ102H.timer_interrupt_taken);
+                       || CsrExceptionUpdateQ102H.illegal_csr_access || CsrExceptionUpdateQ102H.breakpoint
+                       || CsrExceptionUpdateQ102H.external_interrupt || CsrExceptionUpdateQ102H.timer_interrupt_taken 
+                       || CsrExceptionUpdateQ102H.div_custom_trap);
 
 assign CsrPcUpdateQ102H.InterruptJumpEnQ102H       = BeginInterrupt;
 assign CsrPcUpdateQ102H.InterruptJumpAddressQ102H  = csr.csr_mtvec;

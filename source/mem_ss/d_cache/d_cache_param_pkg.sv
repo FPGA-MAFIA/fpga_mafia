@@ -24,6 +24,7 @@ parameter NUM_TQ_ENTRY    = 2**TQ_ID_WIDTH;
 
 parameter WORD_WIDTH            = 32;                        // 4 Bytes - integer
 parameter NUM_WORDS_IN_CL       = 4;                         // 
+parameter NUM_BYTES_IN_CL       = 16;
  
 //Address break-down: 
 parameter ADDRESS_WIDTH         = 20;                        // OFFSET+SET+TAG -> 1MB
@@ -34,7 +35,9 @@ parameter CL_WIDTH              = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 B
 parameter LSB_OFFSET            = 0;                         // 16-byte offset
 parameter MSB_OFFSET            = 3;                          
 parameter LSB_WORD_OFFSET       = 2;                    // 4-byte Word offset
-parameter MSB_WORD_OFFSET       = 3;                        
+parameter MSB_WORD_OFFSET       = 3;  
+parameter LSB_BYTE_OFFSET       = 0;                    // byte offset in a word
+parameter MSB_BYTE_OFFSET       = 1;                       
 
 parameter LSB_SET               = 4;                         // CL address is 16 bites (TAG_SET)
 parameter MSB_SET               = 11;                        // 
@@ -61,6 +64,7 @@ typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
 typedef logic [WORD_WIDTH -1:0]     t_word;
 typedef logic [MSB_OFFSET     :0]   t_offset;
 typedef logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET]   t_word_offset;
+typedef logic [MSB_BYTE_OFFSET:LSB_BYTE_OFFSET]   t_byte_offset;
 
 
 
@@ -105,8 +109,6 @@ typedef enum logic [1:0] {
     FILL_REQ_OP    = 2'b11
 } t_fm_req_op ;
 
-
-
 typedef struct packed {
     logic         valid;
     logic         reject;
@@ -136,7 +138,9 @@ typedef struct packed {
     t_reg_id     reg_id;
     t_opcode     opcode;
     t_address    address;
-    t_word       data;    
+    t_word       data; 
+    logic [3:0]  byte_en;
+    logic        sign_extend;
 } t_req ;
 
 // Cache -> Core response
@@ -144,7 +148,7 @@ typedef struct packed {
     logic        valid;
     t_address    address;
     t_word       data;
-   t_reg_id      reg_id;
+    t_reg_id     reg_id;
 } t_rd_rsp ;
 
 typedef struct packed {
@@ -157,7 +161,9 @@ typedef struct packed {
     logic        mb_hit_cancel;
     logic        rd_indication;
     logic        wr_indication;
-    t_reg_id      reg_id;
+    t_reg_id     reg_id;
+    logic [3:0]  byte_en;
+    logic        sign_extend;
 } t_lu_req ;
 
 typedef struct packed {
@@ -166,11 +172,13 @@ typedef struct packed {
     t_lu_opcode  lu_op;
     t_tq_id      tq_id;
     t_cl         cl_data;
-    t_reg_id      reg_id;
+    t_reg_id     reg_id;
     // t_offset     offset;
     t_address    address;
     logic        rd_indication;
     logic        wr_match_in_pipe;
+    logic [3:0]  byte_en;
+    logic        sign_extend;
 } t_lu_rsp ;
 
 
@@ -235,6 +243,8 @@ typedef struct packed {
     logic                                   dirty_evict;
     logic [SET_ADRS_WIDTH + WAY_WIDTH-1:0]  data_array_address;
     logic                                   rd_indication;
+    logic [3:0]                             byte_en;
+    logic                                   sign_extend;
 } t_pipe_bus; 
 
 
@@ -246,16 +256,17 @@ typedef struct packed {
 } t_early_lu_rsp;
 
 
-
-
 typedef struct packed {
 t_tq_state                         state;
-logic        [NUM_WORDS_IN_CL-1:0] merge_buffer_e_modified; 
+logic        [NUM_BYTES_IN_CL-1:0] merge_buffer_e_modified; 
 t_cl                               merge_buffer_data; 
 t_cl_address                       cl_address;
 t_word_offset                      cl_word_offset; 
+t_byte_offset                      cl_byte_offset; 
 logic                              rd_indication; 
 logic                              wr_indication; 
 t_reg_id                           reg_id; 
+logic [3:0]                        byte_en;     
+logic                              sign_extend;
 } t_tq_entry ;
 endpackage
