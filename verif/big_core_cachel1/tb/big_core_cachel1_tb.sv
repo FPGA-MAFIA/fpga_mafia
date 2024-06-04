@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : core tb
-// Project          : big_core_cachel1. 6 stage pipeline
+// Project          : big_core. 6 stage pipeline
 //-----------------------------------------------------------------------------
 // File             : core_tb.sv
 // Original Author  : Amichai Ben-David
@@ -19,7 +19,7 @@
 
 
 module big_core_cachel1_tb  ;
-import big_core_cachel1_pkg::*;
+import big_core_pkg::*;
 import rv32i_ref_pkg::*;
 `include "common_pkg.vh"
 logic        Clk;
@@ -42,11 +42,11 @@ string test_name;
 logic [31:0] PcQ101H;
 logic [31:0] PcQ102H;
 logic [31:0] PcQ103H, PcQ104H, PcQ105H;
-assign PcQ101H = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlQ101H.Pc;
-assign PcQ102H = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlQ102H.Pc;
-assign PcQ103H = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlQ103H.Pc;
-assign PcQ104H = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlQ104H.Pc;
-assign PcQ105H = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlQ105H.Pc;
+assign PcQ101H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ101H.Pc;
+assign PcQ102H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ102H.Pc;
+assign PcQ103H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ103H.Pc;
+assign PcQ104H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ104H.Pc;
+assign PcQ105H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ105H.Pc;
 
 
 `include "big_core_cachel1_tasks.vh"
@@ -96,30 +96,20 @@ initial begin: test_seq
         $finish;
     end
     $readmemh({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force big_core_cachel1_top.big_core_cachel1_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force big_core_cachel1_top.big_core_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 
     file = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        force big_core_cachel1_top.big_core_cachel1_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force big_core_cachel1_top.big_core_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10
-        release big_core_cachel1_top.big_core_cachel1_mem_wrap.d_mem.mem;
+        release big_core_cachel1_top.big_core_mem_wrap.d_mem.mem;
         release rv32i_ref.dmem;
     end
     
-    //=======================================
-    // enable the checker data collection (monitor)
-    //=======================================
-    //fork
-    //get_rf_write();
-    //get_ref_rf_write();
-    //begin wait(big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.ebreak_was_calledQ101H == 1'b1);
-    //    eot(.msg("ebreak was called"));
-    //end
-    //join
 
     //=======================================
     // enable the checker data collection (monitor)
@@ -131,7 +121,7 @@ initial begin: test_seq
     get_ref_mem_store();
     get_mem_load();
     get_ref_mem_load();
-    begin wait(big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.ebreak_was_calledQ101H == 1'b1);
+    begin wait(big_core_cachel1_top.big_core.big_core_ctrl.ebreak_was_calledQ101H == 1'b1);
     track_performance();     // monitoring CPI and IPC
     print_vga_screen();
     eot(.msg("ebreak was called"));
@@ -219,7 +209,7 @@ big_core_cachel1_top (
 //============================================
  .InFabricValidQ503H    (InFabricValidQ503H),// input  logic        F2C_ReqValidQ503H     ,
  .InFabricQ503H         (InFabricQ503H),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .big_core_cachel1_ready       (),  // output  logic  big_core_cachel1_ready       ,
+ .big_core_ready       (),  // output  logic  big_core_ready       ,
  //
  .OutFabricQ505H        (OutFabricQ505H),  // output t_rdata      F2C_RspDataQ504H      ,
  .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
@@ -251,10 +241,10 @@ rv32i_ref
 )  rv32i_ref (
 .clk    (Clk),
 .rst    (Rst),
-.run    (1'b1) // FIXME - set the RUN only when the big_core_cachel1 DUT is retiring the instruction.
+.run    (1'b1) // FIXME - set the RUN only when the big_core DUT is retiring the instruction.
                // every time the run is set, the next instruction is executed
 );
 
 
-endmodule //big_core_cachel1_tb
+endmodule //big_core_tb
 

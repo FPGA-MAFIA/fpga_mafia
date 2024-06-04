@@ -21,9 +21,9 @@ t_rf_write_history ref_rf_cur_write;
 logic RegWrEnQ105H;
 logic [4:0]  RegDstQ105H;
 logic [31:0] RegWrDataQ105H;
-assign RegWrEnQ105H   = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlRf.RegWrEnQ105H;
-assign RegDstQ105H    = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_ctrl.CtrlRf.RegDstQ105H;
-assign RegWrDataQ105H = big_core_cachel1_top.big_core_cachel1.big_core_cachel1_rf.RegWrDataQ105H;
+assign RegWrEnQ105H   = big_core_cachel1_top.big_core.big_core_ctrl.CtrlRf.RegWrEnQ105H;
+assign RegDstQ105H    = big_core_cachel1_top.big_core.big_core_ctrl.CtrlRf.RegDstQ105H;
+assign RegWrDataQ105H = big_core_cachel1_top.big_core.big_core_rf.RegWrDataQ105H;
 task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 
@@ -113,7 +113,7 @@ task print_vga_screen ;
         for (int j = 0 ; j < 4; j = j+1) begin // Bytes
             for (int k = 0 ; k < 320; k = k+4) begin // Words
                 for (int l = 0 ; l < 8; l = l+1) begin // Bits  
-                    draw = (big_core_cachel1_top.big_core_cachel1_mem_wrap.big_core_cachel1_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    draw = (big_core_cachel1_top.big_core_mem_wrap.big_core_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
                     $fwrite(fd1,"%s",draw);
                 end        
             end 

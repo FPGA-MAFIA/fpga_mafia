@@ -6,7 +6,6 @@
 +incdir+../../../verif/big_core_cachel1/tests
 ../../../verif/rv32i_ref/tb/rv32i_ref_pkg.sv
 ../../../verif/rv32i_ref/tb/rv32i_ref.sv
-../../../verif/big_core_cachel1/tb/big_core_cachel1_no_ref_tb.sv
 ../../../verif/big_core_cachel1/tb/big_core_cachel1_tb.sv
 
 

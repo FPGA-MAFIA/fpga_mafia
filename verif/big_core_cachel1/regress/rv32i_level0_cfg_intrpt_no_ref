@@ -1,5 +1,0 @@
-PS2_alive.c             -gRF_NUM_MSB=31
-bubblesort_with_timer.c -gRF_NUM_MSB=31
-bubblesort_lfsr.c       -gRF_NUM_MSB=31
-trap_and_interrupt.c    -gRF_NUM_MSB=31  
-hw_sw_lfsr_perf.c       -gRF_NUM_MSB=31
