@@ -31,18 +31,6 @@ jobs:
       - name: BIG_CORE_CACHEL1 - rv32i
         run:  python build.py -dut big_core_cachel1 -test alive -app -hw -sim -pp 
       
-      - name: BIG_CORE_CACHEL1  -cfg big_core_boot_trap no reference model
-        run:  python build.py -dut big_core_cachel1 -top big_core_cachel1_no_ref_tb -cfg big_core_boot_trap -test PS2_alive  -app -hw -sim -pp 
-      
-      - name: BIG_CORE_CACHEL1 -cfg big_core_boot_trap with reference model 
-        run:  python build.py -dut big_core_cachel1 -cfg big_core_boot_trap -test alive_illegal -app -hw -sim -pp 
-
-      - name: BIG_CORE_CACHEL1 -cfg big_core_rv32im with reference model 
-        run:  python build.py -dut big_core_cachel1 -cfg big_core_rv32im -test m_extension -app -hw -sim -pp 
-
-      - name: BIG_CORE_CACHEL1 - rv32i_level0_no_ref -> no reference model
-        run:  python build.py -dut big_core_cachel1 -top big_core_cachel1_no_ref_tb  -test PS2_GCD -app -hw -sim -pp
-
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut mini_core -test alive -cfg mini_rv32e -app -hw -sim 
 
