@@ -16,11 +16,23 @@
 
 // param packages
 ../../../source/big_core_cachel1/packages/big_core_cachel1_pkg.sv
+../../../source/mem_ss/d_cache/d_cache_param_pkg.sv
+
 
 // Common
 ../../../source/common/fifo.sv
 ../../../source/common/arbiter.sv
 ../../../source/common/mem.sv
+
+// d_cache
+../../../source/mem_ss/d_cache/d_cache_pipe_wrap.sv
+../../../source/mem_ss/d_cache/d_cache_pipe.sv
+../../../source/mem_ss/d_cache/d_cache_tq_entry.sv
+../../../source/mem_ss/d_cache/d_cache_tq.sv
+../../../source/mem_ss/d_cache/d_cache.sv
+
+
+
 
 //RTL FIles
 ../../../source/big_core_cachel1/big_core_cachel1_if.sv
