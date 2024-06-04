@@ -10,3 +10,4 @@
 ../../../source/ex_core/ex_core_alu.sv
 ../../../source/ex_core/ex_core_rf.sv
 ../../../source/ex_core/ex_core_decoder.sv
+../../../source/ex_core/ex_core.sv
