@@ -45,5 +45,4 @@ typedef enum logic [5:0] {
     SW     = 6'b101011   // Store Word
 } t_opcode;
 
-
 endpackage

@@ -67,7 +67,4 @@ ex_core_i_mem i_mem (
 //  WRITE BACK: Mux the result of the ALU operation with the data read from memory + write to RegFile
 //==============================================================================
 
-
-
-
 endmodule
