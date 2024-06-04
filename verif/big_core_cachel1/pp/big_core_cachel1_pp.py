@@ -56,7 +56,7 @@ if not os.path.exists(vga_script):
 verbose_flag = ' '
 if args.verbose:
     verbose_flag = '-v'
-vga_script_command = f'python {vga_script} {args.test_name} big_core {verbose_flag}'
+vga_script_command = f'python {vga_script} {args.test_name} big_core_cachel1 {verbose_flag}'
 results = run_cmd_with_capture(vga_script_command)
 # remove the \n from the end of the stdout (if it exists)
 if results.stdout and results.stdout[-1] == '\n':
