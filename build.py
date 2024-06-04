@@ -88,10 +88,10 @@ class Test:
     def __init__(self, name, params, dut):
         self.name = name.split('.')[0]
         self.file_name = name
-        self.assembly = True if self.file_name[-1] == 's' else False
+        self.assembly = True if self.file_name.endswith('s') else False
         self.dut = dut 
         self.target = TARGET+'tests/'+self.name+'/'
-        self.path = TESTS+self.file_name
+        self.path = TESTS + self.name + '.' + ('s' if self.file_name.endswith('s') else 'c')
         self.fail_flag = False
         self.app_flag = False
         self.mif_flag = False
@@ -154,14 +154,13 @@ class Test:
             search_path  = '-I ../../../../../app/defines '
             cs_interrupt_handler_name = ' interrupt_handler_rv32i.c.s'
             self.gcc_dir = TARGET+'tests/'+self.name+'/gcc_files'
-
+            test_resources_path = '-I ../../../../../' + TESTS + self.name + '/'
             if not os.path.exists(self.gcc_dir):
                 mkdir(self.gcc_dir)
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd  = 'riscv-none-embed-gcc.exe '+Test.gcc_optimize+' -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
-                    #first_cmd  = 'riscv-none-embed-gcc.exe -S -ffreestanding -march='+Test.rv32_gcc+' '+search_path+'../../../../../'+self.path+' -o '+cs_path
+                    first_cmd = 'riscv-none-embed-gcc.exe ' + Test.gcc_optimize + ' -S -ffreestanding -march=' + Test.rv32_gcc + ' ' + search_path + test_resources_path + ' ' + '../../../../../' + self.path + ' -o ' + cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -177,7 +176,7 @@ class Test:
                     crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
+                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + test_resources_path +' ' +  mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
