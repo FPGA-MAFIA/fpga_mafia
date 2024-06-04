@@ -35,7 +35,9 @@ parameter CL_WIDTH              = WORD_WIDTH*NUM_WORDS_IN_CL;// (4Byte)*4 = 16 B
 parameter LSB_OFFSET            = 0;                         // 16-byte offset
 parameter MSB_OFFSET            = 3;                          
 parameter LSB_WORD_OFFSET       = 2;                    // 4-byte Word offset
-parameter MSB_WORD_OFFSET       = 3;                        
+parameter MSB_WORD_OFFSET       = 3;  
+parameter LSB_BYTE_OFFSET       = 0;                    // byte offset in a word
+parameter MSB_BYTE_OFFSET       = 1;                       
 
 parameter LSB_SET               = 4;                         // CL address is 16 bites (TAG_SET)
 parameter MSB_SET               = 11;                        // 
@@ -62,6 +64,7 @@ typedef logic [TQ_ID_WIDTH   -1:0]  t_tq_id;
 typedef logic [WORD_WIDTH -1:0]     t_word;
 typedef logic [MSB_OFFSET     :0]   t_offset;
 typedef logic [MSB_WORD_OFFSET:LSB_WORD_OFFSET]   t_word_offset;
+typedef logic [MSB_BYTE_OFFSET:LSB_BYTE_OFFSET]   t_byte_offset;
 
 
 
@@ -259,8 +262,11 @@ logic        [NUM_BYTES_IN_CL-1:0] merge_buffer_e_modified;
 t_cl                               merge_buffer_data; 
 t_cl_address                       cl_address;
 t_word_offset                      cl_word_offset; 
+t_byte_offset                      cl_byte_offset; 
 logic                              rd_indication; 
 logic                              wr_indication; 
 t_reg_id                           reg_id; 
+logic [3:0]                        byte_en;     
+logic                              sign_extend;
 } t_tq_entry ;
 endpackage

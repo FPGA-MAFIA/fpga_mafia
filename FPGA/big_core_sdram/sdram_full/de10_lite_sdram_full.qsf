@@ -48,7 +48,7 @@ set_global_assignment -name LAST_QUARTUS_VERSION "20.1.1 Lite Edition"
 #============================================================
 # SEARCH_PATH
 #============================================================
-set_global_assignment -name SEARCH_PATH ../../source/common/
+set_global_assignment -name SEARCH_PATH ../../../source/common/
 
 
 #============================================================
@@ -165,8 +165,8 @@ set_location_assignment PIN_B8 -to Rst_N
 #============================================================
 # End of pin assignments by Terasic System Builder
 #============================================================
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/mem_ss/sdram_ctrl_pkg.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ../../source/mem_ss/sdram_ctrl_bursts.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../../source/mem_ss/sdram_ctrl/sdram_ctrl_pkg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../../source/mem_ss/sdram_ctrl/sdram_ctrl_bursts.sv
 
 
 set_global_assignment -name SDC_FILE de10_lite_sdram_full.sdc
