@@ -7,6 +7,7 @@ from termcolor import colored
 # Setup argument parsing
 parser = argparse.ArgumentParser(description="Parse VGA memory access log and convert it to text.")
 parser.add_argument("test", help="The name of the test to process")
+parser.add_argument("dut",  help="The name of the DUT")
 parser.add_argument('-v', '--verbose', action='store_true', help='Increase output verbosity')
 args = parser.parse_args()
 found_error = False
@@ -247,7 +248,7 @@ def parse_vga_log_to_text(log_lines):
 
 
 # Construct the path to the log file and the output file based on the test name argument
-TESTS_PATH = f'target/big_core/tests/{args.test}/'
+TESTS_PATH = f'target/{args.dut}/tests/{args.test}/'
 log_file_path = f'{TESTS_PATH}trk_vga_memory_access.log'
 output_file_path = f'{TESTS_PATH}vga_output.txt'
 
