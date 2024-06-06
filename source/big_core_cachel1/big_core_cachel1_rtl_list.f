@@ -16,6 +16,8 @@
 
 // param packages
 ../../../source/big_core/packages/big_core_pkg.sv
+../../../source/mem_ss/d_cache/d_cache_param_pkg.sv
+../../../source/mem_ss/sdram_ctrl/sdram_ctrl_pkg.sv
 
 // Common
 ../../../source/common/fifo.sv
@@ -40,6 +42,16 @@
 
 // modifies big_core_cachel1_files
 ../../../source/big_core_cachel1/big_core_cachel1_top.sv
+
+// cache files
+../../../source/mem_ss/d_cache/d_cache_pipe_wrap.sv
+../../../source/mem_ss/d_cache/d_cache_pipe.sv
+../../../source/mem_ss/d_cache/d_cache_tq_entry.sv
+../../../source/mem_ss/d_cache/d_cache_tq.sv
+../../../source/mem_ss/d_cache/d_cache.sv
+
+// sdram controller files
+../../../source/mem_ss/sdram_ctrl/sdram_ctrl.sv
 
 
 // KBD FIles
