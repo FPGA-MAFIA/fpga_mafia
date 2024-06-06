@@ -39,28 +39,6 @@ assign req_byte_offset = core2cache_req.address[MSB_BYTE_OFFSET:LSB_BYTE_OFFSET]
 
 always_comb begin
     next_mem = mem;
-<<<<<<< HEAD
-    if(core2cache_req.valid && (core2cache_req.opcode == WR_OP))
-        if(req_word_offset == 2'b00 && core2cache_req.byte_en[0])  next_mem[req_cl_address][7:0]     = core2cache_req.data[7:0];   //8'b
-        if(req_word_offset == 2'b00 && core2cache_req.byte_en[1])  next_mem[req_cl_address][15:8]    = core2cache_req.data[15:8];  //8'b
-        if(req_word_offset == 2'b00 && core2cache_req.byte_en[2])  next_mem[req_cl_address][23:16]   = core2cache_req.data[23:16]; //8'b
-        if(req_word_offset == 2'b00 && core2cache_req.byte_en[3])  next_mem[req_cl_address][31:24]   = core2cache_req.data[31:24]; //8'b
-
-        if(req_word_offset == 2'b01 && core2cache_req.byte_en[0])  next_mem[req_cl_address][39:32]   = core2cache_req.data[7:0];   //8'b
-        if(req_word_offset == 2'b01 && core2cache_req.byte_en[1])  next_mem[req_cl_address][47:40]   = core2cache_req.data[15:8];  //8'b
-        if(req_word_offset == 2'b01 && core2cache_req.byte_en[2])  next_mem[req_cl_address][55:48]   = core2cache_req.data[23:16]; //8'b
-        if(req_word_offset == 2'b01 && core2cache_req.byte_en[3])  next_mem[req_cl_address][63:56]   = core2cache_req.data[31:24]; //8'b
-        
-        if(req_word_offset == 2'b10 && core2cache_req.byte_en[0])  next_mem[req_cl_address][71:64]   = core2cache_req.data[7:0];   //8'b
-        if(req_word_offset == 2'b10 && core2cache_req.byte_en[1])  next_mem[req_cl_address][79:72]   = core2cache_req.data[15:8];  //8'b
-        if(req_word_offset == 2'b10 && core2cache_req.byte_en[2])  next_mem[req_cl_address][87:80]   = core2cache_req.data[23:16]; //8'b
-        if(req_word_offset == 2'b10 && core2cache_req.byte_en[3])  next_mem[req_cl_address][95:88]   = core2cache_req.data[31:24]; //8'b
-
-        if(req_word_offset == 2'b11 && core2cache_req.byte_en[0])  next_mem[req_cl_address][103:96]  = core2cache_req.data[7:0];   //8'b
-        if(req_word_offset == 2'b11 && core2cache_req.byte_en[1])  next_mem[req_cl_address][111:104] = core2cache_req.data[15:8];  //8'b
-        if(req_word_offset == 2'b11 && core2cache_req.byte_en[2])  next_mem[req_cl_address][119:112] = core2cache_req.data[23:16]; //8'b
-        if(req_word_offset == 2'b11 && core2cache_req.byte_en[3])  next_mem[req_cl_address][127:120] = core2cache_req.data[31:24]; //8'b
-=======
 
     shifted_core2cache_req = core2cache_req;
     if(req_byte_offset == 2'b01) begin
@@ -100,7 +78,6 @@ always_comb begin
         if(req_word_offset == 2'b11 && shifted_core2cache_req.byte_en[1])  next_mem[req_cl_address][111:104] = shifted_core2cache_req.data[15:8];  //8'b
         if(req_word_offset == 2'b11 && shifted_core2cache_req.byte_en[2])  next_mem[req_cl_address][119:112] = shifted_core2cache_req.data[23:16]; //8'b
         if(req_word_offset == 2'b11 && shifted_core2cache_req.byte_en[3])  next_mem[req_cl_address][127:120] = shifted_core2cache_req.data[31:24]; //8'b
->>>>>>> main
         
         //if(req_word_offset == 2'b00)  next_mem[req_cl_address][31:0]   = core2cache_req.data; //32'b
         //if(req_word_offset == 2'b01)  next_mem[req_cl_address][63:32]  = core2cache_req.data; //32'b
@@ -123,24 +100,13 @@ end endgenerate
 //          reading the memory
 //=======================================
 t_rd_rsp        pre_cache2core_rsp;
-<<<<<<< HEAD
-t_word          pre_rd_rsp_data, rd_rsp_data;
-=======
 t_word          pre_rd_rsp_data, pre_shifted_rd_rsp_data, rd_rsp_data;
->>>>>>> main
 
 assign pre_cache2core_rsp.valid     = core2cache_req.valid && (core2cache_req.opcode == RD_OP);
 assign pre_cache2core_rsp.address   = core2cache_req.address;
 assign pre_cache2core_rsp.reg_id    = core2cache_req.reg_id;
 
 //The data:
-<<<<<<< HEAD
-assign pre_rd_rsp_data = (req_word_offset == 2'b00) ? mem[req_cl_address][31:0]   :
-                         (req_word_offset == 2'b01) ? mem[req_cl_address][63:32]  :
-                         (req_word_offset == 2'b10) ? mem[req_cl_address][95:64]  :
-                         (req_word_offset == 2'b11) ? mem[req_cl_address][127:96] : 32'hDEAD_BEAF;
-
-=======
 assign pre_shifted_rd_rsp_data = (req_word_offset == 2'b00) ? mem[req_cl_address][31:0]   :
                                  (req_word_offset == 2'b01) ? mem[req_cl_address][63:32]  :
                                  (req_word_offset == 2'b10) ? mem[req_cl_address][95:64]  :
@@ -151,7 +117,6 @@ assign pre_rd_rsp_data = (req_byte_offset == 2'b01) ? {8'b0,  pre_shifted_rd_rsp
                          (req_byte_offset == 2'b11) ? {24'b0, pre_shifted_rd_rsp_data[31:24]} :
                                                               pre_shifted_rd_rsp_data         ;
                                                               
->>>>>>> main
 assign rd_rsp_data[7:0]   = core2cache_req.byte_en[0]  ? pre_rd_rsp_data[7:0]        : 8'h0;
 assign rd_rsp_data[15:8]  = core2cache_req.byte_en[1]  ? pre_rd_rsp_data[15:8]       :
                             core2cache_req.sign_extend ? {8{rd_rsp_data[7]}}         : 8'h0;

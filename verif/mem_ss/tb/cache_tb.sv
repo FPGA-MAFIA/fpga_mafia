@@ -105,10 +105,6 @@ end else  if(test_name == "b2b_rd_miss_reissue") begin
 `include "b2b_rd_miss_reissue.sv"
 end else  if(test_name == "abd_test") begin
 `include "abd_test.sv"
-<<<<<<< HEAD
-end else if (test_name == "write_read_partial_words") begin
-`include "write_read_partial_words.sv"
-=======
 end else if (test_name == "wr_rd_partial_words") begin
 `include "wr_rd_partial_words.sv"
 end else if(test_name == "wr_rd_offset_bytes") begin
@@ -117,7 +113,6 @@ end else if(test_name == "wr_rd_be_se_fill") begin
 `include "wr_rd_be_se_fill.sv"
 end else if(test_name == "rand_partial") begin
 `include "rand_partial.sv"
->>>>>>> main
 end else begin
     $display("\n\n=============================================");
     $display("ERROR: Test \'%s\' not found", test_name);
