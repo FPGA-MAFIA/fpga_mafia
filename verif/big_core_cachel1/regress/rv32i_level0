@@ -1,0 +1,3 @@
+alive.c             -gRF_NUM_MSB=31
+data_hazard_check.s -gRF_NUM_MSB=31
+store_load_check.s  -gRF_NUM_MSB=31

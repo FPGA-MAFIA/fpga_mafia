@@ -326,6 +326,7 @@ class Test:
         # Run the post process command
         try:
             run_with_verbose = '-v' if args.verbose else ' '
+            ##pp_cmd = 'python '+self.dut+'_pp.py ' +self.name + ' ' +self.dut + ' ' + run_with_verbose
             pp_cmd = 'python '+self.dut+'_pp.py ' +self.name + ' ' + run_with_verbose
             print_message(f'[INFO] Running post process command: {pp_cmd}')
             return_val = run_cmd_with_capture(pp_cmd)
