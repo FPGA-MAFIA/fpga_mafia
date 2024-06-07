@@ -43,7 +43,10 @@ else if(test_name == "PS2_GCD") begin
     $display("=====\n PS2_GCD was included to the run\n ====\n");   
     `include "PS2_GCD.vh"  
 end
-
+else if(test_name == "bubblesort_back_pressure")begin
+    $display("=====\n bubble_sort_back_pressure was included to the run\n ====\n");   
+    `include "bubblesort_back_pressure.vh" 
+end
 else begin 
     $display("=====\n No HW sequence logic were included to the run\n ====\n");
 end

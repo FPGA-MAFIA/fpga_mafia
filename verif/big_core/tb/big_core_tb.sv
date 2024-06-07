@@ -38,6 +38,8 @@ logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic ps2_clk;
 logic ps2_data;
 
+integer random;
+
 string test_name;
 logic [31:0] PcQ101H;
 logic [31:0] PcQ102H;
@@ -54,6 +56,8 @@ assign PcQ105H = big_core_top.big_core.big_core_ctrl.CtrlQ105H.Pc;
 `include "big_core_pmon_tasks.vh"
 `include "big_core_trk.vh"
 `include "big_core_ref_trk.vh"
+`include "big_core_ps2_tasks.vh"
+`include "big_core_hw_seq.vh"
 
 //VGA interface outputs
 t_vga_out   vga_out;
