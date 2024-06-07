@@ -4,7 +4,6 @@ delay(30);
 random = $urandom_range(1, 10);
 
 $display("Back pressure will be activated :%1d times", random);
-$display("Back pressure will be activated :%1d times", random);
 for(int i=0; i <random; i++) begin
     #(50*random)  // deactivate back pressure time
     $display("Back presure activated at: %t", $time);
