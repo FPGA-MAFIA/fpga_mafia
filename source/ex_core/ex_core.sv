@@ -12,7 +12,8 @@ import ex_core_pkg::*;
     logic [31:0] PcQ100H, NextPcQ101H, instructionQ101H;
     logic [31:0] RegRdData1, RegRdData2, AluOut, MemRdData, RegWrData;
     logic [31:0] immQ102H, instrQ102H;
-    logic [6:0] opcodeQ102H, funct3Q102H;
+    t_opcode opcodeQ102H;
+    logic [2:0] funct3Q102H;
     logic [6:0] funct7Q102H;
     t_ctrl_alu CtrlAluQ102H;
     t_ctrl_rf CtrlRfQ102H;
@@ -33,9 +34,9 @@ import ex_core_pkg::*;
     `MAFIA_DFF_RST(PcQ100H, NextPcQ101H, Clk, Rst)
 
     // Instantiate the instruction memory (I_MEM)
-    mem #(32, 10) i_mem (
+    mem #(32, 8) i_mem (
         .clock(Clk),
-        .address_a(PcQ100H[11:2]), // Using bits [11:2] for addressing to match 10-bit address space
+        .address_a(PcQ100H[9:2]), // Using bits [9:2] for addressing to match 8-bit address space
         .wren_a(1'b0),
         .byteena_a(4'b1111),
         .data_a(32'b0),
@@ -99,9 +100,9 @@ import ex_core_pkg::*;
     `MAFIA_DFF(RegWrEnQ103H, CtrlRfQ102H.RegWrEn, Clk)
 
     // Instantiate the data memory (D_MEM)
-    mem #(32, 10) d_mem (
+    mem #(32, 8) d_mem (
         .clock(Clk),
-        .address_a(AluOutQ103H[11:2]), // Using bits [11:2] for addressing to match 10-bit address space
+        .address_a(AluOutQ103H[9:2]), // Using bits [9:2] for addressing to match 8-bit address space
         .wren_a(CtrlRfQ102H.RegWrEn),
         .byteena_a(4'b1111),
         .data_a(RegRdData2),
