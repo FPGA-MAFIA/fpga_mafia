@@ -37,6 +37,7 @@ logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET- 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
+integer random;
 string test_name;
 logic [31:0] PcQ101H;
 logic [31:0] PcQ102H;
