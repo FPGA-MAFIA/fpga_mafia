@@ -9,8 +9,7 @@ module ex_core_decoder_tb;
     // Declare testbench signals
     logic clk;
     logic [31:0] instruction;
-    logic [31:0] instr;
-    logic [6:0] opcode;
+    t_opcode opcode;
     t_ctrl_alu CtrlAlu;
     t_ctrl_rf CtrlRf;
     logic [2:0] funct3;
@@ -21,7 +20,6 @@ module ex_core_decoder_tb;
     ex_core_decoder uut (
         .clk(clk),
         .instruction(instruction),
-        .instr(instr),
         .opcode(opcode),
         .CtrlAlu(CtrlAlu),
         .CtrlRf(CtrlRf),
@@ -38,7 +36,7 @@ module ex_core_decoder_tb;
     // Helper task to apply test vectors and print results
     task apply_test_vector(input logic [31:0] test_instr, input string instr_type);
         begin
-            instr = test_instr;
+            instruction = test_instr;
             #10;
             $display("-----------------------------------------------------");
             $display("Instruction Type: %s", instr_type);
@@ -49,8 +47,8 @@ module ex_core_decoder_tb;
             $display("Immediate: 0x%h", imm);
             $display("CtrlAlu: AluOp=%b, RegSrc1=%d, RegSrc2=%d, RegDst=%d, RegWrEn=%b",
                      CtrlAlu.AluOp, CtrlAlu.RegSrc1, CtrlAlu.RegSrc2, CtrlAlu.RegDst, CtrlAlu.RegWrEn);
-            $display("CtrlRf: RegSrc1=%d, RegSrc2=%d, RegDst=%d, RegWrEn=%b",
-                     CtrlRf.RegSrc1, CtrlRf.RegSrc2, CtrlRf.RegDst, CtrlRf.RegWrEn);
+            $display("CtrlRf: RegDst=%d, RegWrEn=%b",
+                     CtrlRf.RegDst, CtrlRf.RegWrEn);
             $display("-----------------------------------------------------");
         end
     endtask
@@ -60,7 +58,6 @@ module ex_core_decoder_tb;
         // Initialize signals
         clk = 0;
         instruction = 32'h00000000;
-        instr = 32'h00000000;
 
         // Apply test vectors
         apply_test_vector(32'b0000000_00011_00010_000_00001_0110011, "R-type (ADD x1, x2, x3)");
@@ -76,8 +73,8 @@ module ex_core_decoder_tb;
 
     // Monitor procedure
     initial begin
-        $monitor("At time %t, instruction = %h, instr = %h, opcode = %b, CtrlAlu = %p, CtrlRf = %p, funct3 = %b, funct7 = %b, imm = %h",
-                 $time, instruction, instr, opcode, CtrlAlu, CtrlRf, funct3, funct7, imm);
+        $monitor("At time %t, instruction = %h, opcode = %b, CtrlAlu = %p, CtrlRf = %p, funct3 = %b, funct7 = %b, imm = %h",
+                 $time, instruction, opcode, CtrlAlu, CtrlRf, funct3, funct7, imm);
     end
 
 endmodule
