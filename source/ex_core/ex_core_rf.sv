@@ -12,15 +12,17 @@ import ex_core_pkg::*;
     *  RegWrEn */
     input  var t_ctrl_rf Ctrl,         // Corrected type name here
     input  logic [31:0] RegWrData,    // Data to write to the register
+    input  logic        RegWrEn,   
+    input  logic [4:0]  RegDst,    
     output logic [31:0] RegRdData1,   // Data from the first read register
     output logic [31:0] RegRdData2    // Data from the second read register
 );
 
     // Register file with 32 registers, each 32 bits wide
-    logic [31:0] registers [31:0];  
+    logic [31:0] [31:0] registers ;  
     
     // Write operation (register 0 is hardwired to 0)
-    `MAFIA_EN_DFF(registers[Ctrl.RegDst], RegWrData, clk, Ctrl.RegWrEn & (Ctrl.RegDst != 5'h0));
+    `MAFIA_EN_DFF(registers[RegDst], RegWrData, clk, RegWrEn);
     
     // Read operation
     assign RegRdData1 = (Ctrl.RegSrc1 != 0) ? registers[Ctrl.RegSrc1] : 32'b0; //(register 0 is hardwired to 0)

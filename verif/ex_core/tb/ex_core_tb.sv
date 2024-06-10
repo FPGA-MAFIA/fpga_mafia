@@ -1,12 +1,10 @@
-`timescale 1ns / 1ps
-
 module ex_core_tb;
     // Clock and reset signals
     logic Clk;
     logic Rst;
 
     // Instantiate the DUT (Device Under Test)
-    ex_core dut (
+    ex_core ex_core (
         .Clk(Clk),
         .Rst(Rst)
     );
@@ -28,6 +26,26 @@ module ex_core_tb;
         // Finish simulation
         $finish;
     end
+
+string test_name;
+logic  [7:0] IMem   [1023:0];
+integer file;
+initial begin: test_seq
+    if ($value$plusargs ("STRING=%s", test_name))
+        $display("STRING value %s", test_name);
+    //======================================
+    //load the program to the DUT & reference model
+    //======================================
+    // Make sure inst_mem.sv exists
+    file = $fopen({"../../../target/ex_core/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    if (!file) begin
+        $error("the file: ../../../target/ex_core/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
+        $display("ERROR: inst_mem.sv file does not exist");
+        $finish;
+    end
+    $readmemh({"../../../target/ex_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    force ex_core.i_mem.mem = IMem; //backdoor to actual memory
+end // test_seq
 
     // Memory Initialization with R-Type instructions
     initial begin

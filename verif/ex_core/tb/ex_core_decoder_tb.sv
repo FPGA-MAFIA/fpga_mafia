@@ -45,8 +45,8 @@ module ex_core_decoder_tb;
             $display("Funct3: %b", funct3);
             $display("Funct7: %b", funct7);
             $display("Immediate: 0x%h", imm);
-            $display("CtrlAlu: AluOp=%b, RegSrc1=%d, RegSrc2=%d, RegDst=%d, RegWrEn=%b",
-                     CtrlAlu.AluOp, CtrlAlu.RegSrc1, CtrlAlu.RegSrc2, CtrlAlu.RegDst, CtrlAlu.RegWrEn);
+            $display("CtrlAlu: AluOp=%b",
+                     CtrlAlu.AluOp);
             $display("CtrlRf: RegDst=%d, RegWrEn=%b",
                      CtrlRf.RegDst, CtrlRf.RegWrEn);
             $display("-----------------------------------------------------");

@@ -15,10 +15,6 @@ typedef enum logic [5:0] {
 
 typedef struct packed {
     t_alu_op AluOp;
-    logic [4:0] RegSrc1;
-    logic [4:0] RegSrc2;
-    logic [4:0] RegDst;
-    logic       RegWrEn;
 } t_ctrl_alu;
 
 typedef struct packed {
@@ -28,21 +24,18 @@ typedef struct packed {
     logic       RegWrEn;
 } t_ctrl_rf;
 
-typedef enum logic [5:0] {
-    R_TYPE = 6'b000000,  // R-type instructions
-    J      = 6'b000010,  // Jump
-    JAL    = 6'b000011,  // Jump and Link
-    JALR   = 6'b110011,  // Jump and Link Register
-    BEQ    = 6'b000100,  // Branch if Equal
-    BNE    = 6'b000101,  // Branch if Not Equal
-    ADDI   = 6'b001000,  // Add Immediate
-    ANDI   = 6'b001100,  // AND Immediate
-    ORI    = 6'b001101,  // OR Immediate
-    XORI   = 6'b001110,  // XOR Immediate
-    SLTI   = 6'b001010,  // Set on Less Than Immediate
-    SLTIU  = 6'b001011,  // Set on Less Than Immediate Unsigned
-    LW     = 6'b100011,  // Load Word
-    SW     = 6'b101011   // Store Word
-} t_opcode;
+typedef enum logic [6:0] {
+   LUI    = 7'b0110111 ,
+   AUIPC  = 7'b0010111 ,
+   JAL    = 7'b1101111 ,
+   JALR   = 7'b1100111 ,
+   BRANCH = 7'b1100011 ,
+   LOAD   = 7'b0000011 ,
+   STORE  = 7'b0100011 ,
+   I_OP   = 7'b0010011 ,
+   R_OP   = 7'b0110011 ,
+   FENCE  = 7'b0001111 ,
+   SYSCAL = 7'b1110011
+} t_opcode ;
 
 endpackage

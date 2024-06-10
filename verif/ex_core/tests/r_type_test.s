@@ -5,18 +5,20 @@
     .type   main, @function
 
 main:
-    # Example R-Type Instructions (binary format):
-    ADD x1, x2, x3    # -> 0000000 00101 00010 000 00001 0110011
-    SUB x4, x5, x6    # -> 0100000 00110 00101 000 00100 0110011
-    AND x7, x8, x9    # -> 0000000 01001 01000 111 00111 0110011
-    OR  x10, x11, x12 # -> 0000000 01100 01011 110 01010 0110011
-    XOR x13, x14, x15 # -> 0000000 01111 01110 100 01101 0110011
-    
     # Initialize registers with values
-    ADDI x1, x0, 10      # x1 = 10
-    ADDI x2, x0, 20      # x2 = 20
-    ADDI x3, x0, 30      # x3 = 30
-    ADDI x4, x0, 40      # x4 = 40
+    ADDI x1, x0, 1      # x1 = 1
+    ADDI x2, x0, 2      # x2 = 2
+    ADDI x3, x0, 3      # x3 = 3
+    ADDI x4, x0, 4      # x4 = 4
+
+    # Example R-Type Instructions (binary format):
+    ADD x7, x2, x1    # -> 0000000 00101 00010 000 00001 0110011
+    SUB x8, x3, x2    # -> 0100000 00110 00101 000 00100 0110011
+    AND x9, x4, x3    # -> 0000000 01001 01000 111 00111 0110011
+    OR  x10, x7, x7 # -> 0000000 01100 01011 110 01010 0110011
+    XOR x13, x8, x7 # -> 0000000 01111 01110 100 01101 0110011
+    
+
 
     # Arithmetic Operations
     ADD x5, x1, x2       # x5 = x1 + x2 = 10 + 20 = 30

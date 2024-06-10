@@ -26,7 +26,7 @@ import ex_core_pkg::*;
             operand2 = $urandom_range(0, 10);
             Ctrl.AluOp = alu_ops[$urandom_range(0, 9)]; // Generate a random operation code
             #10;
-            $display("The result of %4b and %4b with operation %s is %4b", operand1, operand2, Ctrl.AluOp, result);
+            $display("The result of %4b and %4b with operation %s is %b", operand1, operand2, Ctrl.AluOp, result);
             // Check result (this will depend on the operation)
         end
         $finish;
