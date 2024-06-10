@@ -278,12 +278,11 @@ assign CtrlQ101H.MExtension = (Funct7Q101H == 7'b0000001 && OpcodeQ101H == R_OP)
 assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
-assign ReadyQ102H = (!CoreFreeze);//
-assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H || flushQ103H; // FIXME - review that line 
+assign ReadyQ102H = (!CoreFreeze);
+assign ReadyQ101H = (CoreFreeze) ? 1'b0 : (flushQ102H || flushQ103H) ? 1'b1 : (LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H) ? 1'b0 : 1'b1;  
+assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;
+//assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H || flushQ103H; // FIXME - review that line 
 
-//assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H; //
-//assign ReadyQ101H = flushQ102H ? 1'b1 : (!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H);
-assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CsrInstQ102H, CsrInstQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_RST_DFF(CsrExceptionUpdateQ102H, CsrExceptionUpdateQ101H, Clock, ReadyQ102H, Rst )

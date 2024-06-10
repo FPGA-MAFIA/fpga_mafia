@@ -1,4 +1,5 @@
 #include "big_core_defines.h"
+#include "graphic_vga.h"
 
 void bubbleSort(int arr[], int n) {
     int i, j;
@@ -24,6 +25,13 @@ int main() {
 
     bubbleSort(arr, n);
     eot(arr);
+
+    // print sorted arr for testing re issue of vga mem
+    for(int i=0; i<n; i++){
+        rvc_print_int(arr[i]);
+        rvc_printf(" ");
+    }
+
     // printf("Sorted array: \n");
     // for (int i=0; i < n; i++)
     //     printf("%d ", arr[i]);

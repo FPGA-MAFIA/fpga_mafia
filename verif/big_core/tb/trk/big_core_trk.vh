@@ -29,6 +29,22 @@ always @(posedge Clk) begin : inst_print
         big_core_top.big_core.big_core_ctrl.CtrlQ105H.Pc, 
         big_core_top.big_core.big_core_ctrl.CtrlQ105H.Instruction);
 end
+
+integer trk_inst_ref;
+initial begin: trk_inst_ref_gen
+    #1
+    trk_inst_ref = $fopen({"../../../target/big_core/tests/",test_name,"/trk_inst_ref.log"},"w");
+    $fwrite(trk_inst_ref,"---------------------------------------------------------\n");
+    $fwrite(trk_inst_ref,"PC \t | Instruction\t|\n");
+    $fwrite(trk_inst_ref,"---------------------------------------------------------\n");  
+
+end
+
+/*
+always @(posedge Clk) begin : inst_ref_print   
+        $fwrite(trk_inst_ref,"%8h \t |%8h | \n", rv32i_ref.pc, rv32i_ref.instruction);
+end
+
 integer trk_fetch;
 initial begin: trk_fetch_gen
     #1
@@ -38,10 +54,7 @@ initial begin: trk_fetch_gen
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
 
 end
-//always @(posedge Clk) begin : fetch_print
-//    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,PcQ100H, big_core.Funct3Q101H, big_core.Funct7Q101H, big_core.OpcodeQ101H);
-//end
-
+*/
 
 //=============================
 // Memory Access tracking
