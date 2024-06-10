@@ -39,6 +39,7 @@ logic ps2_clk;
 logic ps2_data;
 
 integer random;
+integer i;
 
 string test_name;
 logic [31:0] PcQ101H;

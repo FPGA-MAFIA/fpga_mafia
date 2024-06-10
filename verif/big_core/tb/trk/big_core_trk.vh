@@ -29,6 +29,21 @@ always @(posedge Clk) begin : inst_print
         big_core_top.big_core.big_core_ctrl.CtrlQ105H.Pc, 
         big_core_top.big_core.big_core_ctrl.CtrlQ105H.Instruction);
 end
+
+integer trk_inst_ref;
+initial begin: trk_inst_ref_gen
+    #1
+    trk_inst_ref = $fopen({"../../../target/big_core/tests/",test_name,"/trk_inst_ref.log"},"w");
+    $fwrite(trk_inst_ref,"---------------------------------------------------------\n");
+    $fwrite(trk_inst_ref,"PC \t | Instruction\t|\n");
+    $fwrite(trk_inst_ref,"---------------------------------------------------------\n");  
+
+end
+
+always @(posedge Clk) begin : inst_ref_print   
+        $fwrite(trk_inst_ref,"%8h \t |%8h | \n", rv32i_ref.pc, rv32i_ref.instruction);
+end
+
 integer trk_fetch;
 initial begin: trk_fetch_gen
     #1
