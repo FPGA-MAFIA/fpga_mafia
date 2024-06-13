@@ -43,7 +43,7 @@ d_mem_ss d_mem_ss (
 //================================================================
 logic [31:0] InstructionQ101H;
 
-i_mem_stall_bp i_mem_stall_bp
+i_mem_re_issue_bp i_mem_re_issue_bp
 (
     .Clock(Clock), 
     .ReadyQ101H(ReadyQ101H),

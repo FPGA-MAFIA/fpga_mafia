@@ -1,7 +1,7 @@
 
 `include "macros.vh"
 
-// The goal of that model is to prevent from accepting new instruction on case of stall or back pressure
+// The goal of that model is to ,ake naive re-issue once we have back pressure or stall from the core
 module i_mem_stall_bp
 (
     input               Clock, 
@@ -20,5 +20,3 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 `MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , SampleReadyQ101H)
 
 endmodule
-
-// the following lines are responsible to keep the previous instruction when back pressure or stall is detected // FIXME - condider to add into specific module

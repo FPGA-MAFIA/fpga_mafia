@@ -9,38 +9,73 @@ import big_core_pkg::*;
     output logic [31:0]      DMemRdRspQ105H,  // data from d_mem regions(cache, vga or csr)
     output logic             DMemReady,       // data from d_mem region is ready (back pressure)
     output logic             inDisplayArea,
-    output t_vga_out         vga_out
+    output t_vga_out         vga_out,
+    //=====================================
+    //      fpga interface
+    //=====================================
+    // FPGA interface inputs              
+    input  var t_fpga_in   fpga_in,     
+    output t_fpga_out      fpga_out         
+);
+
+//================================================================
+//                   Memory region detection     
+//====================================    ========================
+logic MatchCRMemRegionQ103H;
+logic MatchVGAMemRegionQ103H;
+logic MatchCacheMemRegionQ103H;
+
+d_mem_region_detect d_mem_region_detect
+(
+    .Clock                      (Clock),
+    .Rst                        (Rst),
+    .DMemAddressQ103H           (Core2DmemReqQ103H.address),
+    .MatchCRMemRegionQ103H      (MatchCRMemRegionQ103H),
+    .MatchVGAMemRegionQ103H     (MatchVGAMemRegionQ103H),
+    .MatchCacheMemRegionQ103H   (MatchCacheMemRegionQ103H)
 );
 
 
 //================================================================
 //                          D_CACHE     
-//====================================    ============================
+//================================================================
+t_req core2cache_reqQ103H;
+assign core2cache_reqQ103H.valid       = 1'b1;
+assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - change that to support OOR in the future
+assign core2cache_reqQ103H.opcode      = Core2DmemReqQ103H.WrEN ? WR_OP : RD_OP;
+assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.address;
+assign core2cache_reqQ103H.data        = Core2DmemReqQ103H.data;
+assign core2cache_reqQ103H.byte_en     = Core2DmemReqQ103H.ByteEn;
+assign core2cache_reqQ103H.sign_extend = 1'b1; // FIXME add support to sign_extend
+
+
 d_cache d_cache
 (
-    .clk(Clock),
-    .rst(Rst),
+    .clk            (Clock),
+    .rst            (Rst),
     //Core Interface
-    input   var t_req       core2cache_req,
-    output  logic           ready,
-    output  t_rd_rsp        cache2core_rsp, //RD Response
+    .core2cache_req (core2cache_reqQ103H),
+    .ready          (DMemReady),  // FIXME - consider how manage that in 6 stage pipeline when we have cache hit
+    output  t_rd_rsp        cache2core_rsp, 
     // FM Interface
-    output  t_fm_req        cache2fm_req_q3, 
-    input   var t_fm_rd_rsp fm2cache_rd_rsp
+    .cache2fm_req_q3(),   // FIXME
+    .fm2cache_rd_rsp()    // FIXME
 );
-
-
 
 //================================================================
 //                          CR module     
 //================================================================
+
+logic [9:0] VGA_CounterX;
+logic [9:0] VGA_CounterY;
+
  big_core_cr_mem big_core_cr_mem (
     .Clk              (Clock),
     .Rst              (Rst),
-    .data             (DMemWrDataQ103H),
-    .address          (DMemAddressQ103H),
-    .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
-    .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
+    .data             (Core2DmemReqQ103H.data),
+    .address          (Core2DmemReqQ103H.address),
+    .wren             (Core2DmemReqQ103H.WrEN && MatchCRMemRegionQ103H),
+    .rden             (Core2DmemReqQ103H.RdEN && MatchCRMemRegionQ103H),
     .q                (PreCRMemRdDataQ104H),
     //Fabric access interface
     .data_b           (),
@@ -51,8 +86,8 @@ d_cache d_cache
     .VGA_CounterX     (VGA_CounterX), //input  logic [9:0] VGA_CounterX,
     .VGA_CounterY     (VGA_CounterY), //input  logic [9:0] VGA_CounterY,
     // Keyboard interface
-    .kbd_data_rd      (kbd_data_rd), //input  t_kbd_data_rd kbd_data_rd,
-    .kbd_ctrl         (kbd_ctrl   ), //output t_kbd_ctrl    kbd_ctrl,
+    .kbd_data_rd      (),  // FIXME - add keyboard support 
+    .kbd_ctrl         (),  // FIXME - add keyboard support
     // FPGA interface
     .fpga_in          (fpga_in),  
     .fpga_out         (fpga_out)
@@ -66,10 +101,10 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .Reset             (Rst),
    // Core interface
    // write
-   .ReqDataQ503H       (VgaWrData),
-   .ReqAddressQ503H    (VgaAdrsReq),
-   .CtrlVGAMemByteEn   (VgaWrByteEn),
-   .CtrlVgaMemWrEnQ503 (VgaWrEn),
+   .ReqDataQ503H       (VgaWrData),   // FIXME
+   .ReqAddressQ503H    (VgaAdrsReq),  // FIXME
+   .CtrlVGAMemByteEn   (VgaWrByteEn), // FIXME
+   .CtrlVgaMemWrEnQ503 (VgaWrEn),     // FIXME
    // read
    .CtrlVgaMemRdEnQ503 (VgaWrEn),
    .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),

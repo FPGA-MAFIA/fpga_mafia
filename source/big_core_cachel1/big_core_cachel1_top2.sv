@@ -10,11 +10,6 @@ input  logic        Rst    ,
 input  t_tile_id    local_tile_id,
 input  logic        RstPc,
 //============================================
-//      keyboard interface
-//============================================
-input logic             kbd_clk,       // Clock from keyboard
-input logic             data_in_kc,    // Data from keyboard
-//============================================
 //      vga interface
 //============================================
 output logic        inDisplayArea,
@@ -81,27 +76,12 @@ mem_ss mem_ss
 //     vga interface
 //=========================================
  .inDisplayArea         (inDisplayArea),
- .vga_out               (vga_out)              
-);
-
-
-
-ps2_kbd_ctrl ps2_kbd_ctrl  
-(
-    .kbd_clk       (kbd_clk    ), //input  logic       kbd_clk,
-    .data_in_kc    (data_in_kc ), //input  logic       data_in_kc,
-
-    .core_clk      (Clock    ), //input  logic       core_clk,
-    .core_rst      (Rst    ), //input  logic       core_rst, 
-    // Pop when the kbd_pop signal is high -> automatically set when core reads the kbd cr data
-    .core_read_en  (kbd_ctrl.kbd_pop     ), //input  logic       core_read_en,
-    // the pop signals from the fifo:
-    .data_out_cc   (kbd_data_rd.kbd_data ), //output logic [7:0] data_out_cc, 
-    .data_ready    (kbd_data_rd.kbd_ready), //output logic       data_ready,
-    .valid_cc      (                     ), //output logic       valid_cc, 
-    .error         (                     ), //output logic       error,
-    // disable keyboard inputs when scanf is disabled
-    .scanf_en      (kbd_ctrl.kbd_scanf_en)  //input  logic       scanf_en   
+ .vga_out               (vga_out),
+//============================================
+//      fpga interface
+//============================================             
+.fpga_in(fpga_in),      
+.fpga_out(fpga_in)                 
 );
 
 
