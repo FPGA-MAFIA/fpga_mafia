@@ -5,17 +5,27 @@ import big_core_pkg::*;
 (
     input logic              Clock,
     input logic              Rst,
+    //============================================
+    //      Dmem interface
+    //============================================ 
     input var t_core2mem_req Core2DmemReqQ103H
     output logic [31:0]      DMemRdRspQ105H,  // data from d_mem regions(cache, vga or csr)
     output logic             DMemReady,       // data from d_mem region is ready (back pressure)
+    //============================================
+    //      vga interface
+    //============================================  
     output logic             inDisplayArea,
     output t_vga_out         vga_out,
-    //=====================================
+    //============================================
+    //      keyboard interface
+    //============================================  
+    input  var t_kbd_data_rd kbd_data_rd,
+    output t_kbd_ctrl        kbd_ctrl,
+    //============================================
     //      fpga interface
-    //=====================================
-    // FPGA interface inputs              
-    input  var t_fpga_in   fpga_in,     
-    output t_fpga_out      fpga_out         
+    //============================================             
+    input  var t_fpga_in   fpga_in,  // CR_MEM
+    output t_fpga_out      fpga_out      // CR_MEM       
 );
 
 //================================================================
@@ -40,7 +50,7 @@ d_mem_region_detect d_mem_region_detect
 //                          D_CACHE     
 //================================================================
 t_req core2cache_reqQ103H;
-assign core2cache_reqQ103H.valid       = 1'b1;
+assign core2cache_reqQ103H.valid       = Core2DmemReqQ103H.WrEN || Core2DmemReqQ103H.RdEN; 
 assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - change that to support OOR in the future
 assign core2cache_reqQ103H.opcode      = Core2DmemReqQ103H.WrEN ? WR_OP : RD_OP;
 assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.address;
@@ -86,8 +96,8 @@ logic [9:0] VGA_CounterY;
     .VGA_CounterX     (VGA_CounterX), //input  logic [9:0] VGA_CounterX,
     .VGA_CounterY     (VGA_CounterY), //input  logic [9:0] VGA_CounterY,
     // Keyboard interface
-    .kbd_data_rd      (),  // FIXME - add keyboard support 
-    .kbd_ctrl         (),  // FIXME - add keyboard support
+    .kbd_data_rd      (kbd_data_rd),  
+    .kbd_ctrl         (kbd_ctrl), 
     // FPGA interface
     .fpga_in          (fpga_in),  
     .fpga_out         (fpga_out)
