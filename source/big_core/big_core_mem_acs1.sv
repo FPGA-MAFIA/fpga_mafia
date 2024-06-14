@@ -34,6 +34,8 @@ assign Core2DmemReqQ103H.Address = AluOutQ103H;
 assign Core2DmemReqQ103H.WrEn    = Ctrl.DMemWrEnQ103H;
 assign Core2DmemReqQ103H.RdEn    = Ctrl.DMemRdEnQ103H;
 assign Core2DmemReqQ103H.ByteEn  = Ctrl.DMemByteEnQ103H;
+assign Core2DmemReqQ103H.SignExt = Ctrl.SignExtQ103H;
+
 
 `MAFIA_EN_DFF(PcPlus4Q104H, PcPlus4Q103H, Clock, ReadyQ104H)
 `MAFIA_EN_DFF(AluOutQ104H,  AluOutQ103H , Clock, ReadyQ104H)

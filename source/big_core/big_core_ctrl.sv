@@ -338,6 +338,8 @@ assign CtrlCsr = CsrInstQ102H;
 assign CtrlMem1.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
 assign CtrlMem1.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
 assign CtrlMem1.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
+assign CtrlMem1.SignExtQ103H    = CtrlQ103H.SignExt;
+
 
 // Write Back Control Signals
 assign CtrlWb.ByteEnQ105H      = CtrlQ105H.DMemByteEn;
