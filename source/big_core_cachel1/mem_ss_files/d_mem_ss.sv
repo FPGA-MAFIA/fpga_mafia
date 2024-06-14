@@ -2,13 +2,14 @@
 
 module d_mem_ss 
 import big_core_pkg::*;
+import d_cache_param_pkg::*;
 (
     input logic              Clock,
     input logic              Rst,
     //============================================
     //      Dmem interface
     //============================================ 
-    input var t_core2mem_req Core2DmemReqQ103H
+    input var t_core2mem_req Core2DmemReqQ103H,
     output logic [31:0]      DMemRdRspQ105H,  // data from d_mem regions(cache, vga or csr)
     output logic             DMemReady,       // data from d_mem region is ready (back pressure)
     //============================================
@@ -30,34 +31,66 @@ import big_core_pkg::*;
 
 //================================================================
 //                   Memory region detection     
-//====================================    ========================
-logic MatchCRMemRegionQ103H;
-logic MatchVGAMemRegionQ103H;
-logic MatchCacheMemRegionQ103H;
+//================================================================
+t_dmem_region MatchDmemRegionQ103H;
 
 d_mem_region_detect d_mem_region_detect
 (
     .Clock                      (Clock),
     .Rst                        (Rst),
-    .DMemAddressQ103H           (Core2DmemReqQ103H.address),
-    .MatchCRMemRegionQ103H      (MatchCRMemRegionQ103H),
-    .MatchVGAMemRegionQ103H     (MatchVGAMemRegionQ103H),
-    .MatchCacheMemRegionQ103H   (MatchCacheMemRegionQ103H)
+    .Core2DmemReqQ103H          (Core2DmemReqQ103H),
+    .MatchDmemRegionQ103H       (MatchDmemRegionQ103H)
 );
 
 
 //================================================================
+//              dmem re-issue and dmem2core data     
+//================================================================
+
+logic [31:0] ShiftVgaDMemWrDataQ103H;
+logic [3:0]  ShiftVgaDMemByteEnQ103H; 
+logic [31:0] CRMemRdDataQ104H;
+logic [31:0] PreShiftVGAMemRdDataQ104H;
+logic        Cache2coreRespDataQ105;
+
+d_mem_reissue d_mem_reissue
+(
+    .Clock                              (Clock),
+    .Rst                                (Rst),
+    .DMemReady                          (DMemReady),
+    .MatchDmemRegionQ103H               (MatchDmemRegionQ103H),
+    .Core2DmemReqQ103H                  (Core2DmemReqQ103H),  
+    // cr interface
+    .CRMemRdDataQ104H                   (CRMemRdDataQ104H),
+    // vga interface
+    .ShiftVgaDMemWrDataQ103H            (ShiftVgaDMemWrDataQ103H),
+    .ShiftVgaDMemByteEnQ103H            (ShiftVgaDMemByteEnQ103H),
+    .PreShiftVGAMemRdDataQ104H          (PreShiftVGAMemRdDataQ104H),
+    // cache interface
+    .Cache2coreRespDataQ105             (Cache2coreRespDataQ105),
+    // read response to core
+    .DMemRdRspQ105H                     (DMemRdRspQ105H)
+);
+
+//================================================================
 //                          D_CACHE     
 //================================================================
-t_req core2cache_reqQ103H;
-assign core2cache_reqQ103H.valid       = Core2DmemReqQ103H.WrEN || Core2DmemReqQ103H.RdEN; 
-assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - change that to support OOR in the future
-assign core2cache_reqQ103H.opcode      = Core2DmemReqQ103H.WrEN ? WR_OP : RD_OP;
-assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.address;
-assign core2cache_reqQ103H.data        = Core2DmemReqQ103H.data;
-assign core2cache_reqQ103H.byte_en     = Core2DmemReqQ103H.ByteEn;
-assign core2cache_reqQ103H.sign_extend = 1'b1; // FIXME add support to sign_extend
+t_req    core2cache_reqQ103H;
+t_rd_rsp cache2core_reqQ105H;
 
+// core to cache request
+assign core2cache_reqQ103H.valid       = Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn; 
+assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - add logic to cache to support oor exevution
+assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.Address;
+assign core2cache_reqQ103H.data        = Core2DmemReqQ103H.WrData;
+assign core2cache_reqQ103H.byte_en     = Core2DmemReqQ103H.ByteEn;
+assign core2cache_reqQ103H.sign_extend = Core2DmemReqQ103H.SignExt;
+
+assign core2cache_reqQ103H.opcode      =  (Core2DmemReqQ103H.WrEn) ? WR_OP : 
+                                          (Core2DmemReqQ103H.RdEn) ? RD_OP : RD_OP;
+
+// cache to core response
+assign Cache2coreRespDataQ105 = cache2core_reqQ105H.data;
 
 d_cache d_cache
 (
@@ -65,8 +98,8 @@ d_cache d_cache
     .rst            (Rst),
     //Core Interface
     .core2cache_req (core2cache_reqQ103H),
-    .ready          (DMemReady),  // FIXME - consider how manage that in 6 stage pipeline when we have cache hit
-    output  t_rd_rsp        cache2core_rsp, 
+    .ready          (DMemReady),  
+    .t_rd_rsp       (cache2core_reqQ105H), 
     // FM Interface
     .cache2fm_req_q3(),   // FIXME
     .fm2cache_rd_rsp()    // FIXME
@@ -79,14 +112,15 @@ d_cache d_cache
 logic [9:0] VGA_CounterX;
 logic [9:0] VGA_CounterY;
 
+
  big_core_cr_mem big_core_cr_mem (
     .Clk              (Clock),
     .Rst              (Rst),
-    .data             (Core2DmemReqQ103H.data),
-    .address          (Core2DmemReqQ103H.address),
-    .wren             (Core2DmemReqQ103H.WrEN && MatchCRMemRegionQ103H),
-    .rden             (Core2DmemReqQ103H.RdEN && MatchCRMemRegionQ103H),
-    .q                (PreCRMemRdDataQ104H),
+    .data             (Core2DmemReqQ103H.WrData),
+    .address          (Core2DmemReqQ103H.Address),
+    .wren             (Core2DmemReqQ103H.WrEn && MatchDmemRegionQ103H.MatchCrRegion),
+    .rden             (Core2DmemReqQ103H.RdEn && MatchDmemRegionQ103H.MatchCrRegion),
+    .q                (CRMemRdDataQ104H),
     //Fabric access interface
     .data_b           (),
     .address_b        (),
@@ -106,15 +140,21 @@ logic [9:0] VGA_CounterY;
 //================================================================
 //                          VGA controller     
 //================================================================
+logic VgaWrEn;
+logic [31:0] VgaAddressWithOffsetQ103H;
+
+assign VgaWrEn = Core2DmemReqQ103H.WrEn && MatchDmemRegionQ103H.MatchVgaRegion;
+assign VgaAddressWithOffsetQ103H = Core2DmemReqQ103H.Address - VGA_MEM_REGION_FLOOR;
+
 big_core_vga_ctrl big_core_vga_ctrl (
    .Clk_50            (Clock),
    .Reset             (Rst),
    // Core interface
    // write
-   .ReqDataQ503H       (VgaWrData),   // FIXME
-   .ReqAddressQ503H    (VgaAdrsReq),  // FIXME
-   .CtrlVGAMemByteEn   (VgaWrByteEn), // FIXME
-   .CtrlVgaMemWrEnQ503 (VgaWrEn),     // FIXME
+   .ReqDataQ503H       (ShiftVgaDMemWrDataQ103H),   
+   .ReqAddressQ503H    (VgaAddressWithOffsetQ103H),  
+   .CtrlVGAMemByteEn   (ShiftVgaDMemByteEnQ103H), 
+   .CtrlVgaMemWrEnQ503 (VgaWrEn),     
    // read
    .CtrlVgaMemRdEnQ503 (VgaWrEn),
    .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),

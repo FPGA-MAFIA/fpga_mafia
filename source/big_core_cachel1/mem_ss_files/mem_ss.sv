@@ -4,7 +4,7 @@ module mem_ss
 import big_core_pkg::*;
 (
     input logic Clock,
-    input logic Rst
+    input logic Rst,
     //============================================
     //     i_mem
     //============================================
@@ -14,8 +14,8 @@ import big_core_pkg::*;
     //============================================
     //     d_mem_ss components: cache, vga, CR
     //============================================
-    input var t_core2mem_req Core2DmemReqQ103H
-    output logic [31:0]      DMemRdRspQ105H  , // From D_MEM
+    input var t_core2mem_req Core2DmemReqQ103H,
+    output logic [31:0]      DMemRdRspQ105H, // From D_MEM
     output logic             DMemReady  , // From D_MEM
     //============================================
     //      keyboard interface
@@ -57,7 +57,7 @@ d_mem_ss d_mem_ss (
 //================================================================
 logic [31:0] InstructionQ101H;
 
-i_mem_re_issue_bp i_mem_re_issue_bp
+i_mem_reissue i_mem_reissue
 (
     .Clock(Clock), 
     .ReadyQ101H(ReadyQ101H),

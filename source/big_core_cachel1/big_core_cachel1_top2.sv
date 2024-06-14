@@ -1,7 +1,7 @@
 
 `include "macros.vh"
 
-module big_core_cachel1_top
+module big_core_cachel1_top2   // FIXME - that module will be refactored and replaced with the original
 import big_core_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
@@ -42,9 +42,13 @@ output logic		      DRAM_WE_N   // Write Enable Negative: Determines if the oper
 
 );
 
-logic DMemReady;
-logic ReadyQ101H;
+logic          DMemReady;
+logic          ReadyQ101H;
+logic [31:0]   PcQ100H;
+logic [31:0]   PreInstructionQ101H; 
 t_core2mem_req Core2DmemReqQ103H;
+logic [31:0]   DMemRdRspQ105H;     
+
 
 big_core 
 #( .RF_NUM_MSB(RF_NUM_MSB) )    

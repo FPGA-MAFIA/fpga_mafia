@@ -14,6 +14,7 @@
 +incdir+../../../source/fabric/
 +incdir+../../../source/common/
 
+
 // param packages
 ../../../source/big_core/packages/big_core_pkg.sv
 ../../../source/mem_ss/d_cache/d_cache_param_pkg.sv
@@ -42,6 +43,13 @@
 
 // modifies big_core_cachel1_files
 ../../../source/big_core_cachel1/big_core_cachel1_top.sv
+../../../source/big_core_cachel1/big_core_cachel1_top2.sv
+../../../source/big_core_cachel1/mem_ss_files/d_mem_region_detect.sv
+../../../source/big_core_cachel1/mem_ss_files/mem_ss.sv
+../../../source/big_core_cachel1/mem_ss_files/d_mem_ss.sv
+../../../source/big_core_cachel1/mem_ss_files/d_mem_reissue.sv
+../../../source/big_core_cachel1/mem_ss_files/i_mem_reissue.sv
+
 
 // cache files
 ../../../source/mem_ss/d_cache/d_cache_pipe_wrap.sv
