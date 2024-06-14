@@ -230,7 +230,7 @@ ShiftDMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemByteEnQ103H[2:0
 end               
 
 
-`MAFIA_EN_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock, DMemReady)
+`MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
 
 // Half & Byte READ
 logic [31:0] DMemRdRspQ104H;
