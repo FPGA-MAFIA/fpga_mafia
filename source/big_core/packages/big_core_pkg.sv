@@ -195,6 +195,7 @@ typedef struct packed {
     logic       DMemWrEnQ103H;  
     logic       DMemRdEnQ103H;  
     logic [3:0] DMemByteEnQ103H;
+    logic       SignExtQ103H;
 } t_ctrl_mem1;
 
 
@@ -210,6 +211,7 @@ typedef struct packed {
     logic       WrEn;  
     logic       RdEn;  
     logic [3:0] ByteEn;
+    logic       SignExt;
 } t_core2mem_req;
 
 typedef enum logic [2:0] {
@@ -219,6 +221,12 @@ typedef enum logic [2:0] {
     B_TYPE = 3'b011 , 
     J_TYPE = 3'b100 
 } t_immediate ;
+
+typedef struct packed {
+    logic MatchCrRegion;
+    logic MatchVgaRegion;
+    logic MathcDcacheRegion;
+} t_dmem_region;
 
 //-----------------------------------
 //         fpga structs 

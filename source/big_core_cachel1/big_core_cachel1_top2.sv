@@ -1,7 +1,7 @@
 
 `include "macros.vh"
 
-module big_core_cachel1_top
+module big_core_cachel1_top2   // FIXME - that module will be refactored and replaced with the original
 import big_core_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
@@ -22,28 +22,33 @@ output t_vga_out    vga_out,         // VGA_OUTPUT
 //============================================
 //      fpga interface
 //============================================             
-input  var t_fpga_in   fpga_in,  // CR_MEM
+input  var t_fpga_in   fpga_in,        // CR_MEM
 output t_fpga_out      fpga_out,      // CR_MEM
+
 //============================================
 //      sdram controller interface
 //============================================             
-output logic    [12:0]  DRAM_ADDR,  // Address Bus: Multiplexed row/column address for accessing SDRAM
-output logic	[1:0]	DRAM_BA,    // Bank Address: Selects one of the internal banks within the SDRAM 
+output logic   [12:0]   DRAM_ADDR,  // Address Bus: Multiplexed row/column address for accessing SDRAM
+output logic	[1:0]	   DRAM_BA,    // Bank Address: Selects one of the internal banks within the SDRAM 
 output logic		   	DRAM_CAS_N, // Column Address Strobe (CAS) Negative: Initiates column access
 output logic	      	DRAM_CKE,   // Clock Enable: Enables or disables the clock to save power
-output logic	     	DRAM_CLK,   // Clock: System clock signal for SDRAM
-output logic     		DRAM_CS_N,  // Chip Select Negative: Enables the SDRAM chip when low
+output logic	     	   DRAM_CLK,   // Clock: System clock signal for SDRAM
+output logic     		   DRAM_CS_N,  // Chip Select Negative: Enables the SDRAM chip when low
 inout          [15:0]	DRAM_DQ,    // Data Bus: Bidirectional bus for data transfer to/from SDRAM
-output logic		    DRAM_DQML,  // Lower Byte Data Mask: Masks lower byte during read/write operations
-output logic			DRAM_RAS_N, // Row Address Strobe (RAS) Negative: Initiates row access
-output logic		    DRAM_DQMH,  // Upper Byte Data Mask: Masks upper byte during read/write operations
-output logic		    DRAM_WE_N   // Write Enable Negative: Determines if the operation is a read(high) or write(low)
+output logic		      DRAM_DQML,  // Lower Byte Data Mask: Masks lower byte during read/write operations
+output logic			   DRAM_RAS_N, // Row Address Strobe (RAS) Negative: Initiates row access
+output logic		      DRAM_DQMH,  // Upper Byte Data Mask: Masks upper byte during read/write operations
+output logic		      DRAM_WE_N   // Write Enable Negative: Determines if the operation is a read(high) or write(low)
 
 );
 
-logic DMemReady;
-logic ReadyQ101H;
+logic          DMemReady;
+logic          ReadyQ101H;
+logic [31:0]   PcQ100H;
+logic [31:0]   PreInstructionQ101H; 
 t_core2mem_req Core2DmemReqQ103H;
+logic [31:0]   DMemRdRspQ105H;     
+
 
 big_core 
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
@@ -62,6 +67,9 @@ big_core (
 );
 
 
+t_kbd_ctrl      kbd_ctrl;
+t_kbd_data_rd   kbd_data_rd;
+
 mem_ss mem_ss
 (
  .Clock                 (Clock)  ,              
@@ -76,14 +84,24 @@ mem_ss mem_ss
 // d_mem_ss (cache, vga, csr)
  .Core2DmemReqQ103H     (Core2DmemReqQ103H),      
  .DMemRdRspQ105H        (DMemRdRspQ105H),      
- .DMemReady             (DMemReady),      
+ .DMemReady             (DMemReady), 
+//============================================
+//      keyboard interface
+//============================================
+ .kbd_data_rd          (kbd_data_rd ),
+ .kbd_ctrl             (kbd_ctrl    ), 
 //=========================================
 //     vga interface
 //=========================================
  .inDisplayArea         (inDisplayArea),
- .vga_out               (vga_out)              
-);
+ .vga_out               (vga_out),
+ //============================================
+ //      fpga interface
+ //============================================             
+  .fpga_in              (fpga_in),  
+  .fpga_out             (fpga_out) 
 
+);
 
 
 ps2_kbd_ctrl ps2_kbd_ctrl  
@@ -103,8 +121,6 @@ ps2_kbd_ctrl ps2_kbd_ctrl
     // disable keyboard inputs when scanf is disabled
     .scanf_en      (kbd_ctrl.kbd_scanf_en)  //input  logic       scanf_en   
 );
-
-
 
 
 endmodule

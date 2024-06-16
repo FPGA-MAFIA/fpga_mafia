@@ -4,7 +4,7 @@ module mem_ss
 import big_core_pkg::*;
 (
     input logic Clock,
-    input logic Rst
+    input logic Rst,
     //============================================
     //     i_mem
     //============================================
@@ -14,14 +14,24 @@ import big_core_pkg::*;
     //============================================
     //     d_mem_ss components: cache, vga, CR
     //============================================
-    input var t_core2mem_req Core2DmemReqQ103H
-    output logic [31:0]      DMemRdRspQ105H  , // From D_MEM
+    input var t_core2mem_req Core2DmemReqQ103H,
+    output logic [31:0]      DMemRdRspQ105H, // From D_MEM
     output logic             DMemReady  , // From D_MEM
+    //============================================
+    //      keyboard interface
+    //============================================
+    input  var t_kbd_data_rd kbd_data_rd,
+    output t_kbd_ctrl        kbd_ctrl,
     //============================================
     //      vga interface
     //============================================
     output logic        inDisplayArea,
-    output t_vga_out    vga_out         // VGA_OUTPUT 
+    output t_vga_out    vga_out,         // VGA_OUTPUT
+    //============================================
+    //      fpga interface
+    //============================================             
+    input  var t_fpga_in   fpga_in,  // CR_MEM
+    output t_fpga_out      fpga_out      // CR_MEM 
 );
 
 //================================================================
@@ -33,9 +43,13 @@ d_mem_ss d_mem_ss (
     .Rst                (Rst),
     .Core2DmemReqQ103H  (Core2DmemReqQ103H),
     .DMemRdRspQ105H     (DMemRdRspQ105H),
-    .DMemReady          (DMemReady),          // back pressure indicator 
+    .DMemReady          (DMemReady),          // back pressure  
     .inDisplayArea      (inDisplayArea),
-    .vga_out            (vga_out)
+    .vga_out            (vga_out),
+    .kbd_data_rd        (kbd_data_rd),
+    .kbd_ctrl           (kbd_ctrl),
+    .fpga_in            (fpga_in),
+    .fpga_out           (fpga_out)
 );
 
 //================================================================
@@ -43,7 +57,7 @@ d_mem_ss d_mem_ss (
 //================================================================
 logic [31:0] InstructionQ101H;
 
-i_mem_stall_bp i_mem_stall_bp
+i_mem_reissue i_mem_reissue
 (
     .Clock(Clock), 
     .ReadyQ101H(ReadyQ101H),
