@@ -26,7 +26,10 @@ parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 - 1;
 // VGA Memory array 
 logic [7:0]  VGAMem     [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR]; 
 logic [7:0]  NextVGAMem [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR];
-// CR Memorry array
+// CR Memorry array 
+//FIXME - make CR registers behave exctactly in ref model as in the HW
+// In ref model we can write any data to CR, but in HW the data in many cass
+// truncated with zeros
 logic [7:0]  CRMem     [CR_MEM_REGION_ROOF:CR_MEM_REGION_FLOOR]; 
 logic [7:0]  NextCRMem [CR_MEM_REGION_ROOF:CR_MEM_REGION_FLOOR];
 t_rv32i_instr instr_type;
