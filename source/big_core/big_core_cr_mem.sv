@@ -80,13 +80,13 @@ always_comb begin
             default   : /* Do nothing */;
         endcase
     end
-    // ---- RO memory - writes from FPGA ----
+    // ---- RO memory - VGA logic
     next_cr.VGA_CounterX = VGA_CounterX;
     next_cr.VGA_CounterY = VGA_CounterY;
     // ---- RO memory - Keyboard
     next_cr.kbd_data     = kbd_data_rd.kbd_data;
     next_cr.kbd_ready    = kbd_data_rd.kbd_ready;
-    // ---- RO memory - FPGA input
+    // ---- RO memory - writes from FPGA ----
     next_cr.Button_0     = fpga_in.Button_0;
     next_cr.Button_1     = fpga_in.Button_1;
     next_cr.Switch       = fpga_in.Switch;
