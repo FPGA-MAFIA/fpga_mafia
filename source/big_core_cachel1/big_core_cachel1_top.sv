@@ -3,6 +3,7 @@
 
 module big_core_cachel1_top   // FIXME - that module will be refactored and replaced with the original
 import big_core_pkg::*;
+import d_cache_param_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
 input  logic        Clock  ,
@@ -24,7 +25,11 @@ output t_vga_out    vga_out,         // VGA_OUTPUT
 //============================================             
 input  var t_fpga_in   fpga_in,        // CR_MEM
 output t_fpga_out      fpga_out,      // CR_MEM
-
+//============================================
+// FM interface
+//============================================
+output  t_fm_req        cache2fm_req_q3, 
+input   var t_fm_rd_rsp fm2cache_rd_rsp,
 //============================================
 //      sdram controller interface
 //============================================             
@@ -99,7 +104,12 @@ mem_ss mem_ss
  //      fpga interface
  //============================================             
   .fpga_in              (fpga_in),  
-  .fpga_out             (fpga_out) 
+  .fpga_out             (fpga_out),
+  //============================================
+  // FM interface
+  //============================================
+  .cache2fm_req_q3      (cache2fm_req_q3),
+  .fm2cache_rd_rsp      (fm2cache_rd_rsp)  
 
 );
 

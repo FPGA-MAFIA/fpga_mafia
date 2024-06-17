@@ -23,6 +23,11 @@ import d_cache_param_pkg::*;
     input  var t_kbd_data_rd kbd_data_rd,
     output t_kbd_ctrl        kbd_ctrl,
     //============================================
+    // FM interface
+    //============================================
+    output  t_fm_req        cache2fm_req_q3, 
+    input   var t_fm_rd_rsp fm2cache_rd_rsp,
+    //============================================
     //      fpga interface
     //============================================             
     input  var t_fpga_in   fpga_in,  // CR_MEM
@@ -79,7 +84,7 @@ t_req    core2cache_reqQ103H;
 t_rd_rsp cache2core_rspQ105H;
 
 // core to cache request
-assign core2cache_reqQ103H.valid       = Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn; 
+assign core2cache_reqQ103H.valid       = MatchDmemRegionQ103H.MathcDcacheRegion && (Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn); 
 assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - add logic to cache to support oor exevution
 assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.Address;
 assign core2cache_reqQ103H.data        = Core2DmemReqQ103H.WrData;
@@ -101,8 +106,8 @@ d_cache d_cache
     .ready            (DMemReady),  
     .cache2core_rsp   (cache2core_rspQ105H), 
     // FM Interface
-    .cache2fm_req_q3(),   // FIXME
-    .fm2cache_rd_rsp()    // FIXME
+    .cache2fm_req_q3(cache2fm_req_q3),
+    .fm2cache_rd_rsp(fm2cache_rd_rsp)  
 );
 
 //================================================================
