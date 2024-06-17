@@ -9,15 +9,10 @@ main:
   li  x31, 0x00FE0000  #CR region
   
   sw	x1, 0(x31)     # store to CR with zero offset CR_SEG7_0
-  nop 
   lw	x4, 0(x31)
-  
   sw	x2, 4(x31)
-  nop
   lw	x5, 4(x31)
-  
   sw	x3, 8(x31)
-  nop
   lw	x6, 8(x31)
  
 

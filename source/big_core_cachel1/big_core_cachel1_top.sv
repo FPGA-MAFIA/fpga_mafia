@@ -1,7 +1,7 @@
 
 `include "macros.vh"
 
-module big_core_cachel1_top
+module big_core_cachel1_top   // FIXME - that module will be refactored and replaced with the original
 import big_core_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
@@ -9,16 +9,6 @@ input  logic        Clock  ,
 input  logic        Rst    ,
 input  t_tile_id    local_tile_id,
 input  logic        RstPc,
-//============================================
-//      fabric interface
-//============================================
-input  logic            InFabricValidQ503H  ,
-input  var t_tile_trans InFabricQ503H       ,
-output logic            big_core_ready     ,
-//
-output logic            OutFabricValidQ505H ,
-output var t_tile_trans OutFabricQ505H      ,
-input  var t_fab_ready  fab_ready,
 //============================================
 //      keyboard interface
 //============================================
@@ -32,25 +22,33 @@ output t_vga_out    vga_out,         // VGA_OUTPUT
 //============================================
 //      fpga interface
 //============================================             
-input  var t_fpga_in   fpga_in,  // CR_MEM
-output t_fpga_out      fpga_out      // CR_MEM
+input  var t_fpga_in   fpga_in,        // CR_MEM
+output t_fpga_out      fpga_out,      // CR_MEM
+
+//============================================
+//      sdram controller interface
+//============================================             
+output logic   [12:0]   DRAM_ADDR,  // Address Bus: Multiplexed row/column address for accessing SDRAM
+output logic	[1:0]	   DRAM_BA,    // Bank Address: Selects one of the internal banks within the SDRAM 
+output logic		   	DRAM_CAS_N, // Column Address Strobe (CAS) Negative: Initiates column access
+output logic	      	DRAM_CKE,   // Clock Enable: Enables or disables the clock to save power
+output logic	     	   DRAM_CLK,   // Clock: System clock signal for SDRAM
+output logic     		   DRAM_CS_N,  // Chip Select Negative: Enables the SDRAM chip when low
+inout          [15:0]	DRAM_DQ,    // Data Bus: Bidirectional bus for data transfer to/from SDRAM
+output logic		      DRAM_DQML,  // Lower Byte Data Mask: Masks lower byte during read/write operations
+output logic			   DRAM_RAS_N, // Row Address Strobe (RAS) Negative: Initiates row access
+output logic		      DRAM_DQMH,  // Upper Byte Data Mask: Masks upper byte during read/write operations
+output logic		      DRAM_WE_N   // Write Enable Negative: Determines if the operation is a read(high) or write(low)
+
 );
 
-t_kbd_ctrl      kbd_ctrl;
-t_kbd_data_rd   kbd_data_rd;
-
-logic [31:0] PcQ100H;             // To I_MEM
-logic [31:0] PreInstructionQ101H; // From I_MEM
-logic [31:0] DMemWrDataQ103H;     // To D_MEM
-logic [31:0] DMemAddressQ103H;    // To D_MEM
-logic [3:0]  DMemByteEnQ103H;     // To D_MEM
-logic        DMemWrEnQ103H;       // To D_MEM
-logic        DMemRdEnQ103H;       // To D_MEM
-logic [31:0] DMemRdRspQ105H;      // From D_MEM
-
-logic DMemReady;
-logic ReadyQ101H;
+logic          DMemReady;
+logic          ReadyQ101H;
+logic [31:0]   PcQ100H;
+logic [31:0]   PreInstructionQ101H; 
 t_core2mem_req Core2DmemReqQ103H;
+logic [31:0]   DMemRdRspQ105H;     
+
 
 big_core 
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
@@ -68,58 +66,43 @@ big_core (
    .DMemRdRspQ105H      ( DMemRdRspQ105H     )  // input  logic [31:0] DMemRdRspQ105H       // From D_MEM
 );
 
-assign DMemWrDataQ103H = Core2DmemReqQ103H.WrData;
-assign DMemAddressQ103H = Core2DmemReqQ103H.Address;
-assign DMemByteEnQ103H = Core2DmemReqQ103H.ByteEn;
-assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
-assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
 
-//---------------------------------------------------
-big_core_mem_wrap big_core_mem_wrap(
- .Clock                 (Clock)  ,              // input  logic        Clock  ,
- .Rst                   (Rst)    ,              // input  logic        Rst    ,
- .local_tile_id         (local_tile_id)       , //input  t_tile_id    local_tile_id,
-// //============================================
-// //      core interface
-// //============================================
+t_kbd_ctrl      kbd_ctrl;
+t_kbd_data_rd   kbd_data_rd;
+
+mem_ss mem_ss
+(
+ .Clock                 (Clock)  ,              
+ .Rst                   (Rst)    ,              
+//============================================
+//      core interface
+//============================================
 // i_mem
- .ReadyQ101H            (ReadyQ101H), // input logic        ReadyQ101H,          // To I_MEM
- .PcQ100H               (PcQ100H),             //input  logic [31:0] PcQ100H,        //curr_pc    ,
- .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction,
-// d_mem
- .DMemWrDataQ103H       (DMemWrDataQ103H),     // input  logic [31:0] DMemWrDataQ103H,     // To D_MEM
- .DMemAddressQ103H      (DMemAddressQ103H),    // input  logic [31:0] DMemAddressQ103H,    // To D_MEM
- .DMemByteEnQ103H       (DMemByteEnQ103H),     // input  logic [3:0]  DMemByteEnQ103H,     // To D_MEM
- .DMemWrEnQ103H         (DMemWrEnQ103H),       // input  logic        DMemWrEnQ103H,       // To D_MEM
- .DMemRdEnQ103H         (DMemRdEnQ103H),       // input  logic        DMemRdEnQ103H,       // To D_MEM
- .DMemRdRspQ105H        (DMemRdRspQ105H),      // output logic [31:0] DMemRdRspQ105H       // From D_MEM
- .DMemReady        (DMemReady),      // output logic        DMemReady  , // From D_MEM
+ .ReadyQ101H            (ReadyQ101H),          // input :to imem
+ .PcQ100H               (PcQ100H),             // input :current pc    ,
+ .PreInstructionQ101H   (PreInstructionQ101H), // output from i_mem : instruction,
+// d_mem_ss (cache, vga, csr)
+ .Core2DmemReqQ103H     (Core2DmemReqQ103H),      
+ .DMemRdRspQ105H        (DMemRdRspQ105H),      
+ .DMemReady             (DMemReady), 
 //============================================
-//      fabric interface
+//      keyboard interface
 //============================================
- .InFabricValidQ503H    (InFabricValidQ503H),   // input  logic        F2C_ReqValidQ503H     ,
- .InFabricQ503H         (InFabricQ503H),        // input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .big_core_ready       (big_core_ready),      // output logic ready for arbiter
- //
- .OutFabricQ505H        (OutFabricQ505H),       // output t_rdata      F2C_RspDataQ504H      ,
- .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
- .fab_ready             (fab_ready),             // input
-//========================================
-//     keyboard interface
-//=========================================
- .kbd_data_rd  (kbd_data_rd ), //input  t_kbd_data_rd kbd_data_rd,
- .kbd_ctrl     (kbd_ctrl    ), //output t_kbd_ctrl    kbd_ctrl,
+ .kbd_data_rd          (kbd_data_rd ),
+ .kbd_ctrl             (kbd_ctrl    ), 
 //=========================================
 //     vga interface
 //=========================================
  .inDisplayArea         (inDisplayArea),
- .vga_out               (vga_out),               // VGA_OUTPUT 
-//=========================================
-//     fpga interface
-//=========================================
- .fpga_in               (fpga_in),            // CR_MEM
- .fpga_out              (fpga_out)            // CR_MEM
+ .vga_out               (vga_out),
+ //============================================
+ //      fpga interface
+ //============================================             
+  .fpga_in              (fpga_in),  
+  .fpga_out             (fpga_out) 
+
 );
+
 
 ps2_kbd_ctrl ps2_kbd_ctrl  
 (
@@ -138,5 +121,6 @@ ps2_kbd_ctrl ps2_kbd_ctrl
     // disable keyboard inputs when scanf is disabled
     .scanf_en      (kbd_ctrl.kbd_scanf_en)  //input  logic       scanf_en   
 );
+
 
 endmodule
