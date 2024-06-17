@@ -1,5 +1,5 @@
 # build hardware, application, and run the simulation: 
-# ./build.py -hw -app -sim -dut ex_core -test r_type_test -clean
+# ./build.py -hw -app -sim -dut ex_core -test r_type_test -cfg ex_core -gui
     .text
     .globl  main
     .type   main, @function
