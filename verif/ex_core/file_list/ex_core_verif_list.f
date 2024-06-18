@@ -2,6 +2,7 @@
 +incdir+../../../source/common/
 
 // include trackers and tasks files
++incdir+../../../verif/ex_core/tb/trk
 
 // include TB's
 ../../../verif/ex_core/tb/ex_core_alu_tb.sv

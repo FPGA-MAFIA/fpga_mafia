@@ -28,6 +28,8 @@ module ex_core_tb;
     end
 
 string test_name;
+`include "ex_core_trk.vh"
+
 logic  [7:0] IMem   [1023:0];
 integer file;
 initial begin: test_seq
