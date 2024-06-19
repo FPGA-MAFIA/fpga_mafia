@@ -11,3 +11,5 @@
 ../../../source/ex_core/ex_core_rf.sv
 ../../../source/ex_core/ex_core_decoder.sv
 ../../../source/ex_core/ex_core.sv
+../../../source/ex_core/ex_core_hazard_detection.sv
+../../../source/ex_core/ex_core_forwarding_unit.sv
