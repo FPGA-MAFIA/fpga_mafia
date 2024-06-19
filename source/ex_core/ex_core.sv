@@ -24,10 +24,6 @@ import ex_core_pkg::*;
     logic zero;
     logic jmp_or_brnch_Q101H;
 
-    // Hazard detection and forwarding signals
-    logic HazardDetected;
-    logic [1:0] FwdA, FwdB;
-
     assign jmp_or_brnch_Q101H = (opcodeQ101H == JAL) || (opcodeQ101H == JALR) || (opcodeQ101H == BRANCH);
 
     //==============================================================================
@@ -72,12 +68,10 @@ import ex_core_pkg::*;
         .funct7(funct7Q101H),
         .imm(immQ101H)
     );
-
-    logic RegWrEnQ102H;
-    logic [4:0] RegDstQ102H;
-    `MAFIA_DFF_RST(RegWrEnQ102H, CtrlRfQ101H.RegWrEn, Clk, Rst)
-    `MAFIA_DFF_RST(RegDstQ102H, CtrlRfQ101H.RegDst, Clk, Rst)
-
+logic RegWrEnQ102H;
+logic [4:0] RegDstQ102H;
+`MAFIA_DFF_RST(RegWrEnQ102H, CtrlRfQ101H.RegWrEn, Clk, Rst)
+`MAFIA_DFF_RST(RegDstQ102H, CtrlRfQ101H.RegDst, Clk, Rst)
     ex_core_rf rf (
         .clk(Clk),
         .Ctrl(CtrlRfQ101H),
@@ -87,57 +81,20 @@ import ex_core_pkg::*;
         .RegRdData1(RegRdData1Q101H),
         .RegRdData2(RegRdData2Q101H)
     );
+    //the ALU input may need an "immediate" value, which is the 12-bit immediate value from the instruction
 
-    // The ALU input may need an "immediate" value, which is the 12-bit immediate value from the instruction
     logic [31:0] AluIn1Q101H, AluIn2Q101H;
-    
-    if (RegDstQ102H == RegSrc1Q101H)
-    
     assign AluIn1Q101H = RegRdData1Q101H;
     assign AluIn2Q101H = (opcodeQ101H == I_OP) ? immQ101H : RegRdData2Q101H;
-/*    
-    always_comb begin
-        case (FwdA)
-            2'b00: AluIn1Q101H = RegRdData1Q101H;
-            2'b01: AluIn1Q101H = AluOutQ101H;
-            2'b10: AluIn1Q101H = RegWrDataQ102H;
-            2'b11: AluIn1Q101H = 32'b0;
-        endcase
-
-        case (FwdB)
-            2'b00: AluIn2Q101H = (opcodeQ101H == I_OP) ? immQ101H : RegRdData2Q101H;
-            2'b01: AluIn2Q101H = AluOutQ101H;
-            2'b10: AluIn2Q101H = RegWrDataQ102H;
-            2'b11: AluIn2Q101H = 32'b0;
-        endcase
-    end
-*/
-    ex_core_alu alu (
+    
+    ex_core_alu alu(
         .operand1(AluIn1Q101H),
         .operand2(AluIn2Q101H),
         .Ctrl(CtrlAluQ101H),
         .result(AluOutQ101H),
         .zero(zero)
     );
-/*
-    // Hazard detection unit
-    ex_core_hazard_detection hazard_detection (
-        .RegSrc1Q101H(CtrlRfQ101H.RegSrc1),
-        .RegSrc2Q101H(CtrlRfQ101H.RegSrc2),
-        .RegDstQ102H(RegDstQ102H),
-        .HazardDetected(HazardDetected)
-    );
 
-    // Forwarding unit
-    ex_core_forwarding_unit forwarding_unit (
-        .RegSrc1Q101H(CtrlRfQ101H.RegSrc1),
-        .RegSrc2Q101H(CtrlRfQ101H.RegSrc2),
-        .RegDstQ102H(RegDstQ102H),  // Corrected port name
-        .HazardDetected(HazardDetected),
-        .FwdA(FwdA),
-        .FwdB(FwdB)
-    );
-*/
     //==============================================================================
     // Cycle 102 -> the memory access + write back
     //==============================================================================
@@ -147,6 +104,7 @@ import ex_core_pkg::*;
 
     `MAFIA_DFF(AluOutQ102H, AluOutQ101H, Clk)
     `MAFIA_DFF(immQ102H, immQ101H, Clk)
+
 
     // Instantiate the data memory (D_MEM)
     mem #(32, 10) d_mem (
@@ -173,8 +131,9 @@ import ex_core_pkg::*;
     // Determine the source for the next PC value (for branching/jump instructions)
     always_comb begin
         sel_pc = (opcodeQ101H == BRANCH && zero) ? 1'b0:
-                 (opcodeQ101H == JAL)            ? 1'b0:
-                 (opcodeQ101H == JALR)           ? 1'b0:
+                 (opcodeQ101H == JAL)         ? 1'b0:   
+                 (opcodeQ101H == JALR)        ? 1'b0:   
+                                                1'b1;
     end
 
 endmodule
