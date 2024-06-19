@@ -1,15 +1,31 @@
+// fetch_file tracking
+integer fetch_file;
+initial begin: fetch_file_gen
+    fetch_file = $fopen({"../../../target/ex_core/tests/", test_name, "/fetch_file.log"}, "w");
+    $fwrite(fetch_file, "-------------------------------------\n");
+    $fwrite(fetch_file, "Time         |PC       |Instruction |\n");
+    $fwrite(fetch_file, "-------------------------------------\n");
+end
+
+always @(posedge Clk) begin: fetch_file_gen_trk
+    $fwrite(fetch_file, "%-12d |%-8h |%-12s|\n",
+            $time,
+            ex_core.PcQ100H,
+            get_instruction_name(ex_core.instructionQ101H));
+end
+
 // reg_file tracking
 integer reg_file;
 initial begin: reg_file_gen
     reg_file = $fopen({"../../../target/ex_core/tests/", test_name, "/reg_file.log"}, "w");
-    $fwrite(reg_file, "-----------------------------------------\n");
-    $fwrite(reg_file, "Pc|         |RegDst|    |RegWrData| \t \n");
-    $fwrite(reg_file, "-----------------------------------------\n");
+    $fwrite(reg_file, "------------------------------------------\n");
+    $fwrite(reg_file, "PC          |RegDst    |RegWrData      |\n");
+    $fwrite(reg_file, "------------------------------------------\n");
 end
 
 always @(posedge Clk) begin: reg_file_gen_trk
     if (ex_core.RegWrEnQ102H) begin
-        $fwrite(reg_file, "%8h    %8h   %8h\n",
+        $fwrite(reg_file, "%-12h|%-10h|%-14h\n",
                 ex_core.PcQ100H,
                 ex_core.RegDstQ102H,
                 ex_core.RegWrDataQ102H);
@@ -20,15 +36,108 @@ end
 integer alu_file;
 initial begin: alu_file_gen
     alu_file = $fopen({"../../../target/ex_core/tests/", test_name, "/alu_file.log"}, "w");
-    $fwrite(alu_file, "--------------------------------------------\n");
-    $fwrite(alu_file, "Pc|         |AluIn1|    |AluIn2|    |AluOut| \t \n");
-    $fwrite(alu_file, "---------------------------------------------\n");
+    $fwrite(alu_file, "--------------------------------------------------------------------------------\n");
+    $fwrite(alu_file, "Time          |PC        |Instruction  |AluOp    |AluIn1   |AluIn2   |AluOut   |\n");
+    $fwrite(alu_file, "--------------------------------------------------------------------------------\n");
 end
 
 always @(posedge Clk) begin: alu_file_gen_trk
-    $fwrite(alu_file, "%8h    %8h   %8h   %8h\n",
+    $fwrite(alu_file, "%-14t|%-10h|%-13s|%-9h|%-9h|%-9h|%-9h\n",
+            $time,
             ex_core.PcQ100H,
+            get_instruction_name(ex_core.instructionQ101H),
+            ex_core.CtrlAluQ101H,
             ex_core.AluIn1Q101H,
             ex_core.AluIn2Q101H,
             ex_core.AluOutQ102H);
 end
+
+// mem_access_file tracking
+integer mem_access_file;
+initial begin: mem_access_file_gen
+    mem_access_file = $fopen({"../../../target/ex_core/tests/", test_name, "/mem_access_file.log"}, "w");
+    $fwrite(mem_access_file, "--------------------------------------------------------\n");
+    $fwrite(mem_access_file, "Time          |PC        |RD/WR  |Address   |Data      |\n");
+    $fwrite(mem_access_file, "--------------------------------------------------------\n");
+end
+
+always @(posedge Clk) begin: mem_access_file_gen_trk
+    $fwrite(mem_access_file, "%-14t|%-10h|%-7s|%-10h|%-8h\n",
+            $time,
+            ex_core.PcQ100H,
+            ex_core.CtrlRfQ101H.RegWrEn ? "WRITE" : "READ",
+            ex_core.AluOutQ102H,
+            ex_core.CtrlRfQ101H.RegWrEn ? ex_core.RegRdData1Q101H : ex_core.MemRdDataQ102H);
+end
+
+// write_back_file tracking
+integer write_back_file;
+initial begin: write_back_file_gen
+    write_back_file = $fopen({"../../../target/ex_core/tests/", test_name, "/write_back_file.log"}, "w");
+    $fwrite(write_back_file, "---------------------------------------------\n");
+    $fwrite(write_back_file, "Time          |PC        |RegDst    |Data      |\n");
+    $fwrite(write_back_file, "---------------------------------------------\n");
+end
+
+always @(posedge Clk) begin: write_back_file_gen_trk
+    if (ex_core.RegWrEnQ102H) begin
+        $fwrite(write_back_file, "%-14t|%-10h|%-10h|%-8h\n",
+                $time,
+                ex_core.PcQ100H,
+                ex_core.RegDstQ102H,
+                ex_core.RegWrDataQ102H);
+    end
+end
+
+function [8*20:1] get_instruction_name;
+    input [31:0] instruction;
+    begin
+        casez (instruction)
+            // R-type instructions
+            32'b0000000_?????_?????_000_?????_0110011: get_instruction_name = "ADD";
+            32'b0100000_?????_?????_000_?????_0110011: get_instruction_name = "SUB";
+            32'b0000000_?????_?????_001_?????_0110011: get_instruction_name = "SLL";
+            32'b0000000_?????_?????_010_?????_0110011: get_instruction_name = "SLT";
+            32'b0000000_?????_?????_011_?????_0110011: get_instruction_name = "SLTU";
+            32'b0000000_?????_?????_100_?????_0110011: get_instruction_name = "XOR";
+            32'b0000000_?????_?????_101_?????_0110011: get_instruction_name = "SRL";
+            32'b0100000_?????_?????_101_?????_0110011: get_instruction_name = "SRA";
+            32'b0000000_?????_?????_110_?????_0110011: get_instruction_name = "OR";
+            32'b0000000_?????_?????_111_?????_0110011: get_instruction_name = "AND";
+
+            // I-type instructions
+            32'b???????_?????_?????_000_?????_0010011: get_instruction_name = "ADDI";
+            32'b???????_?????_?????_010_?????_0010011: get_instruction_name = "SLTI";
+            32'b???????_?????_?????_011_?????_0010011: get_instruction_name = "SLTIU";
+            32'b???????_?????_?????_100_?????_0010011: get_instruction_name = "XORI";
+            32'b???????_?????_?????_110_?????_0010011: get_instruction_name = "ORI";
+            32'b???????_?????_?????_111_?????_0010011: get_instruction_name = "ANDI";
+            32'b0000000_?????_?????_001_?????_0010011: get_instruction_name = "SLLI";
+            32'b0000000_?????_?????_101_?????_0010011: get_instruction_name = "SRLI";
+            32'b0100000_?????_?????_101_?????_0010011: get_instruction_name = "SRAI";
+
+            // Other instructions
+            32'b????????????????????????_0110111: get_instruction_name = "LUI";
+            32'b????????????????????????_0010111: get_instruction_name = "AUIPC";
+            32'b????????????????????????_1101111: get_instruction_name = "JAL";
+            32'b???????_?????_?????_000_?????_1100111: get_instruction_name = "JALR";
+            32'b???????_?????_?????_000_?????_1100011: get_instruction_name = "BEQ";
+            32'b???????_?????_?????_001_?????_1100011: get_instruction_name = "BNE";
+            32'b???????_?????_?????_100_?????_1100011: get_instruction_name = "BLT";
+            32'b???????_?????_?????_101_?????_1100011: get_instruction_name = "BGE";
+            32'b???????_?????_?????_110_?????_1100011: get_instruction_name = "BLTU";
+            32'b???????_?????_?????_111_?????_1100011: get_instruction_name = "BGEU";
+            32'b???????_?????_?????_000_?????_0000011: get_instruction_name = "LB";
+            32'b???????_?????_?????_001_?????_0000011: get_instruction_name = "LH";
+            32'b???????_?????_?????_010_?????_0000011: get_instruction_name = "LW";
+            32'b???????_?????_?????_100_?????_0000011: get_instruction_name = "LBU";
+            32'b???????_?????_?????_101_?????_0000011: get_instruction_name = "LHU";
+            32'b???????_?????_?????_000_?????_0100011: get_instruction_name = "SB";
+            32'b???????_?????_?????_001_?????_0100011: get_instruction_name = "SH";
+            32'b???????_?????_?????_010_?????_0100011: get_instruction_name = "SW";
+
+            // Default case
+            default: get_instruction_name = "UNKNOWN";
+        endcase
+    end
+endfunction
