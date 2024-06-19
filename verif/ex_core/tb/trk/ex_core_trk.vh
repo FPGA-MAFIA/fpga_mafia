@@ -18,9 +18,9 @@ end
 integer reg_file;
 initial begin: reg_file_gen
     reg_file = $fopen({"../../../target/ex_core/tests/", test_name, "/reg_file.log"}, "w");
-    $fwrite(reg_file, "------------------------------------------\n");
+    $fwrite(reg_file, "----------------------------------------\n");
     $fwrite(reg_file, "PC          |RegDst    |RegWrData      |\n");
-    $fwrite(reg_file, "------------------------------------------\n");
+    $fwrite(reg_file, "----------------------------------------\n");
 end
 
 always @(posedge Clk) begin: reg_file_gen_trk
