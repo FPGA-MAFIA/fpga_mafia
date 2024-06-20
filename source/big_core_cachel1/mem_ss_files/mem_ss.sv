@@ -2,6 +2,7 @@
 
 module mem_ss
 import big_core_pkg::*;
+import d_cache_param_pkg::*;
 (
     input logic Clock,
     input logic Rst,
@@ -28,6 +29,11 @@ import big_core_pkg::*;
     output logic        inDisplayArea,
     output t_vga_out    vga_out,         // VGA_OUTPUT
     //============================================
+    // FM interface
+    //============================================
+    output  t_fm_req        cache2fm_req_q3, 
+    input   var t_fm_rd_rsp fm2cache_rd_rsp,
+    //============================================
     //      fpga interface
     //============================================             
     input  var t_fpga_in   fpga_in,  // CR_MEM
@@ -49,7 +55,9 @@ d_mem_ss d_mem_ss (
     .kbd_data_rd        (kbd_data_rd),
     .kbd_ctrl           (kbd_ctrl),
     .fpga_in            (fpga_in),
-    .fpga_out           (fpga_out)
+    .fpga_out           (fpga_out),
+    .cache2fm_req_q3(cache2fm_req_q3),
+    .fm2cache_rd_rsp(fm2cache_rd_rsp)  
 );
 
 //================================================================

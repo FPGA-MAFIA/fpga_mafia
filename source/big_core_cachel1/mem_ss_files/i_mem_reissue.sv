@@ -2,7 +2,7 @@
 `include "macros.vh"
 
 // The goal of that model is to ,ake naive re-issue once we have back pressure or stall from the core
-module i_mem_stall_bp
+module i_mem_reissue
 (
     input               Clock, 
     input logic         ReadyQ101H,

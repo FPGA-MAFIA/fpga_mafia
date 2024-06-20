@@ -59,9 +59,9 @@ logic [31:0] RegionMemAddrQ104H, RegionMemAddrQ105H;
 
 logic VGAHitQ104H, VGAHitQ105H;
 logic CRHitQ104H, CRHitQ105H;
-`MAFIA_DFF(VGAHitQ104H, big_core_cachel1_top.big_core_mem_wrap.MatchVGAMemRegionQ103H , Clk)
+`MAFIA_DFF(VGAHitQ104H, big_core_cachel1_top.mem_ss.d_mem_ss.d_mem_region_detect.MatchDmemRegionQ103H.MatchVgaRegion , Clk)
 `MAFIA_DFF(VGAHitQ105H, VGAHitQ104H , Clk)
-`MAFIA_DFF(CRHitQ104H, big_core_cachel1_top.big_core_mem_wrap.MatchCRMemRegionQ103H , Clk)
+`MAFIA_DFF(CRHitQ104H, big_core_cachel1_top.mem_ss.d_mem_ss.d_mem_region_detect.MatchDmemRegionQ103H.MatchCrRegion , Clk)
 `MAFIA_DFF(CRHitQ105H, CRHitQ104H , Clk)
 
 // read signals
@@ -99,6 +99,7 @@ initial begin: trk_cr_memory_access_gen
     $fwrite(trk_cr_data_memory_access,"----------------------------------------------------\n");  
 end
 
+
 //tracker on memory_access operations
 always @(posedge Clk) begin : memory_access_print
     if(RegionMemWrEnQ105H) begin
@@ -125,6 +126,21 @@ always @(posedge Clk) begin : memory_access_print
     end
 end
 
+
+integer trk_back_pressure;
+initial begin: trk_back_pressure_gen
+    #1
+    trk_back_pressure = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/trk_back_pressure.log"},"w");
+    $fwrite(trk_back_pressure,"-----------\n");
+    $fwrite(trk_back_pressure,"Time \n");
+    $fwrite(trk_back_pressure,"-----------\n");  
+end
+
+// back pressure tracker
+always @(posedge Clk) begin : back_pressure_tracker
+    if(!big_core_cachel1_top.mem_ss.DMemReady)
+        $fwrite(trk_back_pressure,"%t |\n", $realtime);
+end
 
 integer trk_reg_write;
 initial begin: trk_reg_write_gen

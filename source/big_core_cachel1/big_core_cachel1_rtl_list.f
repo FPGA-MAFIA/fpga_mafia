@@ -43,7 +43,6 @@
 
 // modifies big_core_cachel1_files
 ../../../source/big_core_cachel1/big_core_cachel1_top.sv
-../../../source/big_core_cachel1/big_core_cachel1_top2.sv
 ../../../source/big_core_cachel1/mem_ss_files/d_mem_region_detect.sv
 ../../../source/big_core_cachel1/mem_ss_files/mem_ss.sv
 ../../../source/big_core_cachel1/mem_ss_files/d_mem_ss.sv
@@ -57,6 +56,8 @@
 ../../../source/mem_ss/d_cache/d_cache_tq_entry.sv
 ../../../source/mem_ss/d_cache/d_cache_tq.sv
 ../../../source/mem_ss/d_cache/d_cache.sv
+../../../source/common/array.sv
+
 
 // sdram controller files
 ../../../source/mem_ss/sdram_ctrl/sdram_ctrl.sv

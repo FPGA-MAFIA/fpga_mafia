@@ -104,15 +104,21 @@ assign correct_aligned_access = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_
 
 // Assertion for read operations
 string read_error_msg = "miss aligned access while reading";
-`MAFIA_ASSERT("read_error", !correct_aligned_access && core2cache_req.opcode == RD_OP, en_assert, read_error_msg)
+logic read_error_align;
+assign read_error_align = pre_core2cache_req.valid && !correct_aligned_access && (core2cache_req.opcode == RD_OP);
+`MAFIA_ASSERT("read_error", read_error_align, en_assert, read_error_msg)
 
 // Assertion for write operations
 string write_error_msg = "miss aligned access while writing";
-`MAFIA_ASSERT("write_error", !correct_aligned_access && core2cache_req.opcode == WR_OP, en_assert, write_error_msg)
+logic write_error_align;
+assign write_error_align = pre_core2cache_req.valid && !correct_aligned_access && (core2cache_req.opcode == WR_OP);
+`MAFIA_ASSERT("write_error", write_error_align, en_assert, write_error_msg)
 
 // Assertion for other operations
 string other_error_msg = "miss aligned access while writing(possibly debug is needed)";
-`MAFIA_ASSERT("other_error", !correct_aligned_access && core2cache_req.opcode != RD_OP && core2cache_req.opcode != WR_OP, en_assert, other_error_msg)
+logic other_error_align;
+assign other_error_align = pre_core2cache_req.valid && !correct_aligned_access && core2cache_req.opcode != RD_OP && core2cache_req.opcode != WR_OP;
+`MAFIA_ASSERT("other_error", other_error_align, en_assert, other_error_msg)
 
 `endif
 

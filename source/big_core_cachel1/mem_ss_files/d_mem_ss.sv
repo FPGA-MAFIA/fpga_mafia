@@ -23,6 +23,11 @@ import d_cache_param_pkg::*;
     input  var t_kbd_data_rd kbd_data_rd,
     output t_kbd_ctrl        kbd_ctrl,
     //============================================
+    // FM interface
+    //============================================
+    output  t_fm_req        cache2fm_req_q3, 
+    input   var t_fm_rd_rsp fm2cache_rd_rsp,
+    //============================================
     //      fpga interface
     //============================================             
     input  var t_fpga_in   fpga_in,  // CR_MEM
@@ -47,11 +52,11 @@ d_mem_region_detect d_mem_region_detect
 //              dmem re-issue and dmem2core data     
 //================================================================
 
-logic [31:0] ShiftVgaDMemWrDataQ103H;
-logic [3:0]  ShiftVgaDMemByteEnQ103H; 
-logic [31:0] CRMemRdDataQ104H;
-logic [31:0] PreShiftVGAMemRdDataQ104H;
-logic        Cache2coreRespDataQ105;
+logic [31:0]  ShiftVgaDMemWrDataQ103H;
+logic [3:0]   ShiftVgaDMemByteEnQ103H; 
+logic [31:0]  CRMemRdDataQ104H;
+logic [31:0]  PreShiftVGAMemRdDataQ104H;
+logic [31:0]  Cache2coreRespDataQ105;
 
 d_mem_reissue d_mem_reissue
 (
@@ -76,10 +81,10 @@ d_mem_reissue d_mem_reissue
 //                          D_CACHE     
 //================================================================
 t_req    core2cache_reqQ103H;
-t_rd_rsp cache2core_reqQ105H;
+t_rd_rsp cache2core_rspQ105H;
 
 // core to cache request
-assign core2cache_reqQ103H.valid       = Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn; 
+assign core2cache_reqQ103H.valid       = MatchDmemRegionQ103H.MathcDcacheRegion && (Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn); 
 assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - add logic to cache to support oor exevution
 assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.Address;
 assign core2cache_reqQ103H.data        = Core2DmemReqQ103H.WrData;
@@ -90,19 +95,19 @@ assign core2cache_reqQ103H.opcode      =  (Core2DmemReqQ103H.WrEn) ? WR_OP :
                                           (Core2DmemReqQ103H.RdEn) ? RD_OP : RD_OP;
 
 // cache to core response
-assign Cache2coreRespDataQ105 = cache2core_reqQ105H.data;
+assign Cache2coreRespDataQ105 = cache2core_rspQ105H.data;
 
 d_cache d_cache
 (
-    .clk            (Clock),
-    .rst            (Rst),
+    .clk              (Clock),
+    .rst              (Rst),
     //Core Interface
-    .core2cache_req (core2cache_reqQ103H),
-    .ready          (DMemReady),  
-    .t_rd_rsp       (cache2core_reqQ105H), 
+    .core2cache_req   (core2cache_reqQ103H),
+    .ready            (DMemReady),  
+    .cache2core_rsp   (cache2core_rspQ105H), 
     // FM Interface
-    .cache2fm_req_q3(),   // FIXME
-    .fm2cache_rd_rsp()    // FIXME
+    .cache2fm_req_q3(cache2fm_req_q3),
+    .fm2cache_rd_rsp(fm2cache_rd_rsp)  
 );
 
 //================================================================
@@ -122,9 +127,9 @@ logic [9:0] VGA_CounterY;
     .rden             (Core2DmemReqQ103H.RdEn && MatchDmemRegionQ103H.MatchCrRegion),
     .q                (CRMemRdDataQ104H),
     //Fabric access interface
-    .data_b           (),
-    .address_b        (),
-    .wren_b           (),
+    .data_b           ('0),  
+    .address_b        ('0),
+    .wren_b           ('0),
     .q_b              (),
     // VGA info
     .VGA_CounterX     (VGA_CounterX), //input  logic [9:0] VGA_CounterX,
