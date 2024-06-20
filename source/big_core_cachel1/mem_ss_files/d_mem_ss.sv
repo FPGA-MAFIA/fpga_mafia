@@ -56,7 +56,7 @@ logic [31:0]  ShiftVgaDMemWrDataQ103H;
 logic [3:0]   ShiftVgaDMemByteEnQ103H; 
 logic [31:0]  CRMemRdDataQ104H;
 logic [31:0]  PreShiftVGAMemRdDataQ104H;
-logic [31:0]  Cache2coreRespDataQ105;
+logic [31:0]  Cache2coreRespDataQ105H;
 
 d_mem_reissue d_mem_reissue
 (
@@ -72,7 +72,7 @@ d_mem_reissue d_mem_reissue
     .ShiftVgaDMemByteEnQ103H            (ShiftVgaDMemByteEnQ103H),
     .PreShiftVGAMemRdDataQ104H          (PreShiftVGAMemRdDataQ104H),
     // cache interface
-    .Cache2coreRespDataQ105             (Cache2coreRespDataQ105),
+    .Cache2coreRespDataQ105H            (Cache2coreRespDataQ105H),
     // read response to core
     .DMemRdRspQ105H                     (DMemRdRspQ105H)
 );
@@ -84,7 +84,7 @@ t_req    core2cache_reqQ103H;
 t_rd_rsp cache2core_rspQ105H;
 
 // core to cache request
-assign core2cache_reqQ103H.valid       = MatchDmemRegionQ103H.MathcDcacheRegion && (Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn); 
+assign core2cache_reqQ103H.valid       = MatchDmemRegionQ103H.MathcDcacheRegion && (Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn) && DMemReady; 
 assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - add logic to cache to support oor exevution
 assign core2cache_reqQ103H.address     = Core2DmemReqQ103H.Address;
 assign core2cache_reqQ103H.data        = Core2DmemReqQ103H.WrData;
@@ -95,7 +95,7 @@ assign core2cache_reqQ103H.opcode      =  (Core2DmemReqQ103H.WrEn) ? WR_OP :
                                           (Core2DmemReqQ103H.RdEn) ? RD_OP : RD_OP;
 
 // cache to core response
-assign Cache2coreRespDataQ105 = cache2core_rspQ105H.data;
+assign Cache2coreRespDataQ105H = cache2core_rspQ105H.data;
 
 d_cache d_cache
 (

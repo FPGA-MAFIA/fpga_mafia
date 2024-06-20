@@ -131,15 +131,16 @@ integer trk_back_pressure;
 initial begin: trk_back_pressure_gen
     #1
     trk_back_pressure = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/trk_back_pressure.log"},"w");
-    $fwrite(trk_back_pressure,"-----------\n");
-    $fwrite(trk_back_pressure,"Time \n");
-    $fwrite(trk_back_pressure,"-----------\n");  
+    $fwrite(trk_back_pressure,"-------------------------------------\n");
+    $fwrite(trk_back_pressure,"      Back Pressure Tracker    \n\n");
+    $fwrite(trk_back_pressure,"  Time |  PcQ104H  | Instruction\n");
+    $fwrite(trk_back_pressure,"-------------------------------------\n");  
 end
 
 // back pressure tracker
 always @(posedge Clk) begin : back_pressure_tracker
     if(!big_core_cachel1_top.mem_ss.DMemReady)
-        $fwrite(trk_back_pressure,"%t |\n", $realtime);
+        $fwrite(trk_back_pressure,"%t | %h  | %h \n", $realtime, PcQ104H, big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ104H.Instruction);
 end
 
 integer trk_reg_write;

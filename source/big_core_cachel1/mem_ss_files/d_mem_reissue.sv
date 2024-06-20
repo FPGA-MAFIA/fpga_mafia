@@ -20,7 +20,7 @@ import big_core_pkg::*;
     output logic [3:0]       ShiftVgaDMemByteEnQ103H,
     input  logic [31:0]      PreShiftVGAMemRdDataQ104H,
     // cache interface
-    input logic  [31:0]      Cache2coreRespDataQ105,
+    input logic  [31:0]      Cache2coreRespDataQ105H,
     // response to core 
     output logic [31:0]      DMemRdRspQ105H
 );
@@ -111,7 +111,7 @@ t_dmem_region MatchDmemRegionQ104H, MatchDmemRegionQ105H;
 
 assign DMemRdRspQ105H = MatchDmemRegionQ105H.MatchVgaRegion ? ReIssueShiftVGAMemRdDataQ105H :
                         MatchDmemRegionQ105H.MatchCrRegion  ? ReIssuedCrMemRdDataQ105H      :
-                                                              Cache2coreRespDataQ105        ; 
+                                                              Cache2coreRespDataQ105H       ; 
 
 
 
