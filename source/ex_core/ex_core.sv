@@ -94,8 +94,8 @@ import ex_core_pkg::*;
 
     // Forwarding Logic to Handle Hazards
     logic [31:0] ForwardedRegRdData1Q101H, ForwardedRegRdData2Q101H;
-    assign ForwardedRegRdData1Q101H = (CtrlRfQ101H.RegSrc1 == RegDstQ102H && RegWrEnQ102H) ? RegWrDataQ102H : RegRdData1Q101H;
-    assign ForwardedRegRdData2Q101H = (CtrlRfQ101H.RegSrc2 == RegDstQ102H && RegWrEnQ102H) ? RegWrDataQ102H : RegRdData2Q101H;
+    assign ForwardedRegRdData1Q101H = (CtrlRfQ101H.RegSrc1 != 5'b00000 && CtrlRfQ101H.RegSrc1 == RegDstQ102H && RegWrEnQ102H) ? RegWrDataQ102H : RegRdData1Q101H;
+    assign ForwardedRegRdData2Q101H = (CtrlRfQ101H.RegSrc2 != 5'b00000 && CtrlRfQ101H.RegSrc2 == RegDstQ102H && RegWrEnQ102H) ? RegWrDataQ102H : RegRdData2Q101H;
 
     // ALU Inputs
     logic [31:0] AluIn1Q101H, AluIn2Q101H;
