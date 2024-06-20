@@ -2,33 +2,20 @@
      .globl     main
      .type     main, @function
 main:
-  li    x1,  100   
-  li    x2,  200
+  li    x1,  0x10   
+  li    x2,  0x20
+  li    x3,  0x30
 
-  
+
   # no hazards
   li  x31, 65536
   sw	x1, 0(x31)
-  lw	x2, 0(x31)
-  sw	x1, 4(x31)
-  lw	x3, 4(x31)
-  sw	x1, 8(x31)
-  lw	x4, 8(x31)
- 
-  # hazards (insert 1 nop and stall 1 cycle)
-  lw	x5, 0(x31)
-  nop
-  addi  x1, x5, 1 
-
-  # hazards (insert 2 nops and stall 2 cycles)
-  lw	x6, 0(x31)
-  addi  x1, x6, 1
-
-   # hazards 
-  lw	x6, 0(x31)
-  addi  x1, x6, 1
-  addi  x2, x6, 1 
-     
+  lw  x4, 0(x31)
+  sw	x2, 4(x31)
+  lw  x5, 4(x31)
+  sw	x3, 8(x31)
+  lw  x6, 8(x31)
+      
 eot:
     nop
     nop

@@ -34,7 +34,7 @@ logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
-logic  [7:0] NextDMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
 logic ps2_clk;
 logic ps2_data;
@@ -99,9 +99,17 @@ initial begin: test_seq
     $readmemh({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
     force big_core_cachel1_top.mem_ss.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
-    
-    // TODO - add ability to load Dmem
-
+    // loading dmem 
+    file = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    if (file) begin
+        $fclose(file);
+        $readmemh({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        //force array.mem      = DMem; //backdoor to actual memory
+        force rv32i_ref.dmem = DMem; //backdoor to reference model memory
+        #10
+        //release array.mem;
+        release rv32i_ref.dmem;
+    end
  
     
 
@@ -186,10 +194,13 @@ big_core_cachel1_top (
 );      
 
 //============================
-//          Far Memory ARRAY
+//     Far Memory ARRAY
 //============================
 t_fm_rd_rsp [9:0] samp_fm2cache_rd_rsp;
+logic  wr_enable_fm;
+assign wr_enable_fm = cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP);
 
+/*
 array  #(
     .WORD_WIDTH     (CL_WIDTH),
     .ADRS_WIDTH     (SET_ADRS_WIDTH + TAG_WIDTH)
@@ -204,10 +215,11 @@ array  #(
     .rd_address     (cache2fm_req_q3.address[MSB_TAG:LSB_SET]),//input
     .q              (samp_fm2cache_rd_rsp[0].data)                //output
 );
-logic  wr_enable_fm;
-assign wr_enable_fm = cache2fm_req_q3.valid && (cache2fm_req_q3.opcode == DIRTY_EVICT_OP);
+*/
 
-//reading from D_MEM:
+
+
+//reading from D_MEM(Acts as FM):
 always_comb begin
     samp_fm2cache_rd_rsp[0].data[7:0]     = DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}];
     samp_fm2cache_rd_rsp[0].data[15:8]    = DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}];
@@ -227,24 +239,24 @@ always_comb begin
     samp_fm2cache_rd_rsp[0].data[127:120] = DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hF}];
 end
 
-//writing to D_MEM:
+//writing to D_MEM(Acts as FM):
 always_comb begin
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}] = wr_enable_fm ? cache2fm_req_q3.data[7:0]     : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}] = wr_enable_fm ? cache2fm_req_q3.data[15:8]    : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h2}] = wr_enable_fm ? cache2fm_req_q3.data[23:16]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h2}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h3}] = wr_enable_fm ? cache2fm_req_q3.data[31:24]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h3}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h4}] = wr_enable_fm ? cache2fm_req_q3.data[39:32]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h4}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h5}] = wr_enable_fm ? cache2fm_req_q3.data[47:40]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h5}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h6}] = wr_enable_fm ? cache2fm_req_q3.data[55:48]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h6}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h7}] = wr_enable_fm ? cache2fm_req_q3.data[63:56]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h7}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h8}] = wr_enable_fm ? cache2fm_req_q3.data[71:64]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h8}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h9}] = wr_enable_fm ? cache2fm_req_q3.data[79:72]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h9}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hA}] = wr_enable_fm ? cache2fm_req_q3.data[87:80]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hA}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hB}] = wr_enable_fm ? cache2fm_req_q3.data[95:88]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hB}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hC}] = wr_enable_fm ? cache2fm_req_q3.data[103:96]  : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hC}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hD}] = wr_enable_fm ? cache2fm_req_q3.data[111:104] : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hD}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hE}] = wr_enable_fm ? cache2fm_req_q3.data[119:112] : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hE}];
- NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hF}] = wr_enable_fm ? cache2fm_req_q3.data[127:120] : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hF}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}] = wr_enable_fm ? cache2fm_req_q3.data[7:0]     : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}] = wr_enable_fm ? cache2fm_req_q3.data[15:8]    : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h2}] = wr_enable_fm ? cache2fm_req_q3.data[23:16]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h2}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h3}] = wr_enable_fm ? cache2fm_req_q3.data[31:24]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h3}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h4}] = wr_enable_fm ? cache2fm_req_q3.data[39:32]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h4}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h5}] = wr_enable_fm ? cache2fm_req_q3.data[47:40]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h5}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h6}] = wr_enable_fm ? cache2fm_req_q3.data[55:48]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h6}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h7}] = wr_enable_fm ? cache2fm_req_q3.data[63:56]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h7}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h8}] = wr_enable_fm ? cache2fm_req_q3.data[71:64]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h8}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h9}] = wr_enable_fm ? cache2fm_req_q3.data[79:72]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h9}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hA}] = wr_enable_fm ? cache2fm_req_q3.data[87:80]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hA}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hB}] = wr_enable_fm ? cache2fm_req_q3.data[95:88]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hB}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hC}] = wr_enable_fm ? cache2fm_req_q3.data[103:96]  : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hC}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hD}] = wr_enable_fm ? cache2fm_req_q3.data[111:104] : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hD}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hE}] = wr_enable_fm ? cache2fm_req_q3.data[119:112] : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hE}];
+    NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hF}] = wr_enable_fm ? cache2fm_req_q3.data[127:120] : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'hF}];
 end
 //============================================
 
