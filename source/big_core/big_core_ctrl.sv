@@ -274,14 +274,17 @@ end
 
 assign CtrlQ101H.MExtension = (Funct7Q101H == 7'b0000001 && OpcodeQ101H == R_OP) ? 1'b1 : 1'b0;
 
-//FIXME - there are various reasons for back-pressure. Need to code it here
 assign ReadyQ105H = (!CoreFreeze); // FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ104H = (!CoreFreeze);
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);
-assign ReadyQ101H = (CoreFreeze) ? 1'b0 : (flushQ102H || flushQ103H) ? 1'b1 : (LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H) ? 1'b0 : 1'b1;  
+assign ReadyQ101H = (CoreFreeze)                                   ? 1'b0 : 
+                    (flushQ102H || flushQ103H)                     ? 1'b1 : 
+                    (LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H) ? 1'b0 : 
+                                                                     1'b1 ;  
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;
-//assign ReadyQ101H = ((!CoreFreeze) && !(LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H)) || flushQ102H || flushQ103H; // FIXME - review that line 
+//assign ReadyQ101H = (CoreFreeze) ? 1'b0 : (flushQ102H || flushQ103H) ? 1'b1 : (LoadHzrd1DetectQ101H || LoadHzrd2DetectQ101H) ? 1'b0 : 1'b1;  
+
 
 // Sample the Ctrl bits through the pipe
 `MAFIA_EN_RST_DFF(CsrInstQ102H, CsrInstQ101H, Clock, ReadyQ102H, Rst )
@@ -335,6 +338,8 @@ assign CtrlCsr = CsrInstQ102H;
 assign CtrlMem1.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
 assign CtrlMem1.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
 assign CtrlMem1.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
+assign CtrlMem1.SignExtQ103H    = CtrlQ103H.SignExt;
+
 
 // Write Back Control Signals
 assign CtrlWb.ByteEnQ105H      = CtrlQ105H.DMemByteEn;

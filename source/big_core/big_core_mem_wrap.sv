@@ -155,10 +155,10 @@ logic        MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H;
 //The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
 //assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
 assign MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
-`MAFIA_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock)
+`MAFIA_EN_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock, DMemReady)
 
 assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= CR_MEM_REGION_ROOF));
-`MAFIA_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock)
+`MAFIA_EN_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock, DMemReady)
 
 
 //================================

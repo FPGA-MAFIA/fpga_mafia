@@ -113,7 +113,7 @@ task print_vga_screen ;
         for (int j = 0 ; j < 4; j = j+1) begin // Bytes
             for (int k = 0 ; k < 320; k = k+4) begin // Words
                 for (int l = 0 ; l < 8; l = l+1) begin // Bits  
-                    draw = (big_core_cachel1_top.big_core_mem_wrap.big_core_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    draw = (big_core_cachel1_top.mem_ss.d_mem_ss.big_core_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
                     $fwrite(fd1,"%s",draw);
                 end        
             end 
