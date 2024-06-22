@@ -8,7 +8,7 @@ main:
   
   li  x31, 0x00FF0000   #VGA region
   
-  sw	x1, 0(x31)     # store to CR with zero offset CR_SEG7_0
+  sw	x1, 0(x31)     
   lw	x4, 0(x31)
   sw	x2, 4(x31)
   lw	x5, 4(x31)
