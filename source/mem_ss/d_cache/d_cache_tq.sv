@@ -177,8 +177,9 @@ assign set_rd_miss_was_filled = stall_rd_miss_q                                 
 //        Maybe we should prioritize the re-issue over the fills that are not set for rd miss
 assign sel_reissue = rd_miss_was_filled  && (!fill_exists);
 // This is the mux that selects the request to be sent to the cache - either the re-issue or the request from the core
-assign core2cache_req = sel_reissue  ? reissue_req       : // Send the re-issue request
-                                       pre_shift_core2cache_req; // else, send the request from core
+assign core2cache_req = pre_shift_core2cache_req; // FIXME - fix reissue mechanism. The original is the two comented lines below
+//assign core2cache_req = sel_reissue  ? reissue_req       : // Send the re-issue request
+//                                       pre_shift_core2cache_req; // else, send the request from core
 
 
 //================================
@@ -319,8 +320,11 @@ assign rst_rd_miss_stall = sel_reissue;
                   (rst_rd_miss_stall || rst) ) // reset condition
 
 //Stall if there is a read miss in pipe q2 or tq full.
-assign stall = tq_full || stall_rd_miss_q || set_rd_miss_stall;
+// FIXME - test from mafia_level0 fails
+assign stall = (tq_full || stall_rd_miss_q || set_rd_miss_stall) && (!(set_rd_miss_was_filled || rd_miss_was_filled));
 assign ready = ~stall;
+//assign stall = (tq_full || stall_rd_miss_q || set_rd_miss_stall);
+//assign ready = ~stall  || set_rd_miss_was_filled || rd_miss_was_filled;
 
 
 assign any_rd_hit_mb = |rd_req_hit_mb;
