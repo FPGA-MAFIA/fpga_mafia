@@ -18,13 +18,12 @@ module big_core_kbd_test(
     assign KbdDataOut  = (Rst) ? KbdDataIn  : 1'b0;
 
 // we use pll to create slower clock to capture keyboard signals in signal tapping
- pll	pll_inst (
+pll	pll_inst (
 	.areset (),
-	.inclk0 (MAX10_CLK1_50),
-	.c0 (Clock25Khz),
+	.inclk0 ( MAX10_CLK1_50 ),
+	.c0 ( Clock25Khz ),
 	.locked ()
 	);
-
 
 
 endmodule
