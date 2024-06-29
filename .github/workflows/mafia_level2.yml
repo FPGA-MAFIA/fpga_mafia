@@ -27,7 +27,7 @@ jobs:
 
       - name: BIG_CORE - rv32i_level0_cfg_rv32im -cfg rv32im with reference model
         run:  python build.py -dut big_core -cfg big_core_rv32im -regress rv32i_level0_cfg_rv32im -app -hw -sim -pp -keep_going
-
+      
       - name: MINI_CORE at rv32e mode
         run:  python build.py -dut mini_core -regress rv32e_level0 -cfg mini_rv32e -app -hw -sim -keep_going
 

@@ -1,10 +1,12 @@
-alive.c             -gRF_NUM_MSB=31
-basic.c             -gRF_NUM_MSB=31
-alive_csr.c         -gRF_NUM_MSB=31
-alive_vga.c         -gRF_NUM_MSB=31 -gV_TIMEOUT=250000
-bubblesort.c        -gRF_NUM_MSB=31
-sw_lfsr.c           -gRF_NUM_MSB=31
-hw_lfsr.c           -gRF_NUM_MSB=31
-hw_sw_lfsr.c        -gRF_NUM_MSB=31 -gV_TIMEOUT=250000
-data_hazard_check.s -gRF_NUM_MSB=31
-store_load_check.s  -gRF_NUM_MSB=31
+alive.c                    -gRF_NUM_MSB=31
+basic.c                    -gRF_NUM_MSB=31
+alive_csr.c                -gRF_NUM_MSB=31
+alive_vga.c                -gRF_NUM_MSB=31 -gV_TIMEOUT=250000
+bubblesort.c               -gRF_NUM_MSB=31
+sw_lfsr.c                  -gRF_NUM_MSB=31
+hw_lfsr.c                  -gRF_NUM_MSB=31
+hw_sw_lfsr.c               -gRF_NUM_MSB=31 -gV_TIMEOUT=250000
+data_hazard_check.s        -gRF_NUM_MSB=31
+store_load_check.s         -gRF_NUM_MSB=31
+ext_f_test.c               -gRF_NUM_MSB=31
+bubblesort_back_pressure.c -gRF_NUM_MSB=31

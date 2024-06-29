@@ -155,10 +155,10 @@ logic        MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H;
 //The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
 //assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
 assign MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
-`MAFIA_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock)
+`MAFIA_EN_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock, DMemReady)
 
 assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= CR_MEM_REGION_ROOF));
-`MAFIA_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock)
+`MAFIA_EN_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock, DMemReady)
 
 
 //================================
@@ -235,19 +235,22 @@ end
 // Half & Byte READ
 logic [31:0] DMemRdRspQ104H;
 logic [31:0] PreShiftDMemRdDataQ104H;
+logic [31:0] ReIssuedPreShiftDMemRdDataQ104H;
+logic [31:0] ReIssuedPreCrMemRdDataQ104H;
+logic [31:0] ReIssuePreShiftVGAMemRdDataQ104H;
 logic [31:0] PreShiftVGAMemRdDataQ104H;
 logic [31:0] PreShiftCRMemRdDataQ104H;
-assign PreShiftRdDataQ104H = MatchVGAMemRegionQ104H ? PreShiftVGAMemRdDataQ104H : PreShiftDMemRdDataQ104H; 
+assign PreShiftRdDataQ104H = MatchVGAMemRegionQ104H ? ReIssuePreShiftVGAMemRdDataQ104H : ReIssuedPreShiftDMemRdDataQ104H; 
 assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                 ://Fabric response to an older core request
                         (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}              ://Special case - WhoAmI respond the "hard coded" local tile id
-                         MatchCRMemRegionQ104H           ? PreCRMemRdDataQ104H                :
+                         MatchCRMemRegionQ104H           ? ReIssuedPreCrMemRdDataQ104H        :
                         (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftRdDataQ104H[31:16]} : 
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftRdDataQ104H[31:24]} : 
                                                                   PreShiftRdDataQ104H         ; 
 
  // increase read latency from 1 to 2 cycle latency 
-`MAFIA_DFF(DMemRdRspQ105H ,DMemRdRspQ104H, Clock)    
+`MAFIA_EN_DFF(DMemRdRspQ105H ,DMemRdRspQ104H, Clock, DMemReady)
 
 mem   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
@@ -268,6 +271,15 @@ mem
     .q_b        (F2C_DMemRspDataQ504H)              
     );
 
+
+// re-issue mechanism of d_mem region
+// When DmemReady = 1'b0. We have to pass the last data from Dmem untill back pressure is deactivated  
+logic [31:0] LastDataFromDmemQ104H;
+logic        SampleDmemReadyQ104H;
+`MAFIA_DFF   (SampleDmemReadyQ104H, DMemReady      , Clock)
+`MAFIA_EN_DFF(LastDataFromDmemQ104H, PreShiftDMemRdDataQ104H, Clock , SampleDmemReadyQ104H)
+assign ReIssuedPreShiftDMemRdDataQ104H = SampleDmemReadyQ104H ? PreShiftDMemRdDataQ104H : LastDataFromDmemQ104H;
+ 
  //==================================
  // CR mem instantiation
  //==================================
@@ -294,6 +306,15 @@ mem
     .fpga_in          (fpga_in),  
     .fpga_out         (fpga_out)
 );
+ 
+// re-issue mechanism of cr region
+// When DmemReady = 1'b0. We have to pass the last data from CR untill back pressure is deactivated  
+logic [31:0] LastDataFromCRmemQ104H;
+logic        SampleCrmemReadyQ104H;
+`MAFIA_DFF   (SampleCrmemReadyQ104H, DMemReady      , Clock)
+`MAFIA_EN_DFF(LastDataFromCRmemQ104H, PreCRMemRdDataQ104H, Clock , SampleCrmemReadyQ104H)
+assign ReIssuedPreCrMemRdDataQ104H = SampleCrmemReadyQ104H ? PreCRMemRdDataQ104H : LastDataFromCRmemQ104H;
+
  //==================================
  // VGA cntroller instantiation
  //==================================
@@ -332,6 +353,13 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .v_sync            (vga_out.VGA_VS)
 );
 
+// re-issue mechanism of vga region
+// When DmemReady = 1'b0. We have to pass the last data from VGA untill back pressure is deactivated  
+logic [31:0] LastDataFromVgamemQ104H;
+logic        SampleVgamemReadyQ104H;
+`MAFIA_DFF   (SampleVgamemReadyQ104H, DMemReady      , Clock)
+`MAFIA_EN_DFF(LastDataFromVgamemQ104H, PreShiftVGAMemRdDataQ104H, Clock , SampleVgamemReadyQ104H)
+assign ReIssuePreShiftVGAMemRdDataQ104H = SampleVgamemReadyQ104H ? PreShiftVGAMemRdDataQ104H : LastDataFromVgamemQ104H;
 //==================================
 // F2C response 504 ( D_MEM/I_MEM )
 //==================================

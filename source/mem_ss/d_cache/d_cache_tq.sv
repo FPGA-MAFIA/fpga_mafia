@@ -104,15 +104,21 @@ assign correct_aligned_access = (pre_core2cache_req.address[MSB_BYTE_OFFSET:LSB_
 
 // Assertion for read operations
 string read_error_msg = "miss aligned access while reading";
-`MAFIA_ASSERT("read_error", !correct_aligned_access && core2cache_req.opcode == RD_OP, en_assert, read_error_msg)
+logic read_error_align;
+assign read_error_align = pre_core2cache_req.valid && !correct_aligned_access && (core2cache_req.opcode == RD_OP);
+`MAFIA_ASSERT("read_error", read_error_align, en_assert, read_error_msg)
 
 // Assertion for write operations
 string write_error_msg = "miss aligned access while writing";
-`MAFIA_ASSERT("write_error", !correct_aligned_access && core2cache_req.opcode == WR_OP, en_assert, write_error_msg)
+logic write_error_align;
+assign write_error_align = pre_core2cache_req.valid && !correct_aligned_access && (core2cache_req.opcode == WR_OP);
+`MAFIA_ASSERT("write_error", write_error_align, en_assert, write_error_msg)
 
 // Assertion for other operations
 string other_error_msg = "miss aligned access while writing(possibly debug is needed)";
-`MAFIA_ASSERT("other_error", !correct_aligned_access && core2cache_req.opcode != RD_OP && core2cache_req.opcode != WR_OP, en_assert, other_error_msg)
+logic other_error_align;
+assign other_error_align = pre_core2cache_req.valid && !correct_aligned_access && core2cache_req.opcode != RD_OP && core2cache_req.opcode != WR_OP;
+`MAFIA_ASSERT("other_error", other_error_align, en_assert, other_error_msg)
 
 `endif
 
@@ -171,8 +177,9 @@ assign set_rd_miss_was_filled = stall_rd_miss_q                                 
 //        Maybe we should prioritize the re-issue over the fills that are not set for rd miss
 assign sel_reissue = rd_miss_was_filled  && (!fill_exists);
 // This is the mux that selects the request to be sent to the cache - either the re-issue or the request from the core
-assign core2cache_req = sel_reissue  ? reissue_req       : // Send the re-issue request
-                                       pre_shift_core2cache_req; // else, send the request from core
+assign core2cache_req = pre_shift_core2cache_req; // FIXME - fix reissue mechanism. The original is the two comented lines below
+//assign core2cache_req = sel_reissue  ? reissue_req       : // Send the re-issue request
+//                                       pre_shift_core2cache_req; // else, send the request from core
 
 
 //================================
@@ -313,8 +320,11 @@ assign rst_rd_miss_stall = sel_reissue;
                   (rst_rd_miss_stall || rst) ) // reset condition
 
 //Stall if there is a read miss in pipe q2 or tq full.
-assign stall = tq_full || stall_rd_miss_q || set_rd_miss_stall;
+// FIXME - test from mafia_level0 fails
+assign stall = (tq_full || stall_rd_miss_q || set_rd_miss_stall) && (!(set_rd_miss_was_filled || rd_miss_was_filled));
 assign ready = ~stall;
+//assign stall = (tq_full || stall_rd_miss_q || set_rd_miss_stall);
+//assign ready = ~stall  || set_rd_miss_was_filled || rd_miss_was_filled;
 
 
 assign any_rd_hit_mb = |rd_req_hit_mb;
