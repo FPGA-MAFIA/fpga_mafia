@@ -10,9 +10,8 @@ module mini_ex_core_alu
     input logic          Clock,
     input logic          Rst,
     input var t_alu_in   AluInputs,
-    output logic [31:0]  AluOutQ102H
+    output logic [31:0]  AluOutQ101H
 );
-    logic [31:0] AluOutQ101H;
 
     always_comb begin: main_alu_mux
         case (AluInputs.AluOp)
@@ -30,6 +29,5 @@ module mini_ex_core_alu
         endcase
     end
 
-    `MAFIA_DFF(AluOutQ102H, AluOutQ101H, Clock);
 
 endmodule
