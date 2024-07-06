@@ -165,13 +165,15 @@ assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ10
 // Memorry access assertion
 //===============================
 `ifdef SIM_ONLY
-logic  AddrRangeHit;
+logic  AddrRangeMiss;
+logic  NonLocalScratchAccessQ103H;
 logic  clk;        // FIXME - in MAFIA_ASSERT macro we use 'clk' instead of 'Clk'
-assign clk = Clock; 
-assign AddrRangeHit  = (DMemAddressQ103H > VGA_MEM_REGION_ROOF || DMemAddressQ103H < D_MEM_REGION_FLOOR) & !NonLocalDMemReqQ103H; //FIXME - still have error in access fabric
+assign clk                        = Clock; 
+assign NonLocalScratchAccessQ103H = (DMemAddressQ103H[31:24] != 8'h0); // FIXME - possibly not correct when access non local scratch
+assign AddrRangeMiss              = (DMemAddressQ103H > VGA_MEM_REGION_ROOF || DMemAddressQ103H < D_MEM_REGION_FLOOR) & !NonLocalScratchAccessQ103H;
 
-`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeHit, DMemWrEnQ103H, "write")
-`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeHit, DMemRdEnQ103H, "read")
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeMiss, DMemWrEnQ103H, "write")
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeMiss, DMemRdEnQ103H, "read")
 `endif
 
 

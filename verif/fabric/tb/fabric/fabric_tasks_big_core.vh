@@ -20,13 +20,13 @@ task run_fabric_test(input string test);
 endtask
 
 `define ASSIGN_IN_LOCAL_REQ(m_col,m_row,m_target_id, m_opcode)                                                  \
-  assign fabric.col[m_col].row[m_row].big_core_tile_ins.in_local_req_valid            = 1'b1;                  \
-  assign fabric.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.data         = $urandom_range(0,1024);\
-  assign fabric.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.address      = {m_target_id, 24'h0};  \
-  assign fabric.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.opcode       = m_opcode;              \
-  assign fabric.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.requestor_id = {m_col,m_row};         \
+  assign fabric_big_cores.col[m_col].row[m_row].big_core_tile_ins.in_local_req_valid            = 1'b1;                  \
+  assign fabric_big_cores.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.data         = $urandom_range(0,1024);\
+  assign fabric_big_cores.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.address      = {m_target_id, 24'h0};  \
+  assign fabric_big_cores.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.opcode       = m_opcode;              \
+  assign fabric_big_cores.col[m_col].row[m_row].big_core_tile_ins.pre_in_local_req.requestor_id = {m_col,m_row};         \
   delay(1);                                                                                                     \
-  assign fabric.col[m_col].row[m_row].big_core_tile_ins.in_local_req_valid        = 1'b0;
+  assign fabric_big_cores.col[m_col].row[m_row].big_core_tile_ins.in_local_req_valid        = 1'b0;
 
 // XMR to drive a request from one local core in the fabric to another
 task send_req(input t_tile_id source_id, input t_tile_id target_id, input t_tile_opcode opcode);
