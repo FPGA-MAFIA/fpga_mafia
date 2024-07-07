@@ -48,3 +48,6 @@ jobs:
 
       - name: FABRIC 
         run:  python build.py -dut fabric -test fabric_alive -hw -sim 
+
+      - name: FABRIC 3x3 big_cores tiles 
+        run:  python build.py -dut fabric -test non_local_wr -app -sim -hw  -top fabric_big_cores_tb
