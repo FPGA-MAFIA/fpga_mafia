@@ -196,7 +196,7 @@ end
 endfunction
 
 initial begin : timeout_monitor
-  #20ns;
+  #30ns;
   //$fatal(1, "Timeout");
   $error("timeout test");
   $finish();
@@ -243,7 +243,7 @@ initial begin
   //end else begin
   //  $error("[ERROR] : this is not a valid test name");
   //end
-  #10ns;
+  #20ns;
   $display("TEST DONE");
   $finish();
 end
