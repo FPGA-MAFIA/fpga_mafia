@@ -60,7 +60,19 @@ assign ReIssuePreShiftVGAMemRdDataQ104H = SampleVgamemReadyQ104H ? PreShiftVGAMe
 // pass data as is to next stage no enable signal is needed
 `MAFIA_DFF(ReIssuePreShiftVGAMemRdDataQ105H, ReIssuePreShiftVGAMemRdDataQ104H, Clock)
 
+//===============================================
+// re-issue mechanism of Cache2coreRespDataQ105H
+//==============================================
 
+logic [31:0] LastCache2coreRespDataQ105H;
+logic        SampleCache2coreRespDataQ105H;
+logic [31:0] ReissueCache2coreRespDataQ105H;
+
+// re issue flops
+`MAFIA_DFF   (SampleCache2coreRespDataQ105H, DMemReady      , Clock)
+`MAFIA_EN_DFF(LastCache2coreRespDataQ105H, Cache2coreRespDataQ105H, Clock , SampleCache2coreRespDataQ105H)
+
+assign ReissueCache2coreRespDataQ105H = SampleCache2coreRespDataQ105H ? Cache2coreRespDataQ105H : LastCache2coreRespDataQ105H;
 
 //====================================
 // Shifting Vga Data and ByteEn
@@ -97,6 +109,7 @@ always_comb begin: shift_read_data
     end                       
 end
 
+
 //====================================
 // Read Response to the core
 //====================================
@@ -111,7 +124,7 @@ t_dmem_region MatchDmemRegionQ104H, MatchDmemRegionQ105H;
 
 assign DMemRdRspQ105H = MatchDmemRegionQ105H.MatchVgaRegion ? ReIssueShiftVGAMemRdDataQ105H :
                         MatchDmemRegionQ105H.MatchCrRegion  ? ReIssuedCrMemRdDataQ105H      :
-                                                              Cache2coreRespDataQ105H       ; 
+                                                              ReissueCache2coreRespDataQ105H ; 
 
 
 
