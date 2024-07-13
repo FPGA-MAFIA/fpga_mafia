@@ -18,6 +18,7 @@
 
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv
+../../../source/mini_core_accel/mini_core_accel_pkg.sv
 
 // Common
 ../../../source/common/fifo.sv
@@ -34,3 +35,6 @@
 ../../../source/mini_core/mini_core.sv
 ../../../source/mini_core/mini_core_top.sv
 ../../../source/mini_core/mini_mem_wrap.sv
+
+// Accelerator farm files
+../../../source/mini_core_accel/booth_multiplier.sv
