@@ -15,60 +15,55 @@ module booth_multiplier
 import mini_core_accel_pkg::*;
 import mini_core_pkg::*;
 (
-    input logic                     Clock,
-    input logic                     Rst,
-    input var t_booth_mul_req       InputReq,
-    output var t_booth_output       OutputRsp
+    input logic                     clock,
+    input logic                     rst,
+    input var t_booth_mul_req       input_req,
+    output var t_booth_output       output_rsp,
+    output logic                    busy
 
 );
 
-t_booth_states State, NextState;
-logic [2*NUM_WIDTH:0]  AccMultiplierLsb, NextAccMultiplierLsb; 
-logic [$clog2(NUM_WIDTH):0] ItrNum, NextItrNum;
-logic [NUM_WIDTH-1:0] Multiplicand, NextMultiplicand;
+t_booth_states              state, next_state;
+logic [2*NUM_WIDTH:0]       acc_multiplier_lsb, next_acc_multiplier_lsb; 
+logic [$clog2(NUM_WIDTH):0] itr_num, next_itr_num;
+int8                        multiplicand, next_multiplicand;
 
-`MAFIA_DFF(Multiplicand, NextMultiplicand, Clock)
-`MAFIA_RST_VAL_DFF(State, NextState, Clock, Rst, IDLE)
-`MAFIA_RST_VAL_DFF(ItrNum,NextItrNum, Clock, Rst || (State == IDLE), NUM_WIDTH) 
-`MAFIA_RST_DFF(AccMultiplierLsb, NextAccMultiplierLsb, Clock, Rst)
 
-assign OutputRsp.Valid  = ((State == ARITHMETIC_SHIFT_RIGHT) && (ItrNum == 0)) ? 1'b1                                : 1'b0;
-assign OutputRsp.Result = ((State == ARITHMETIC_SHIFT_RIGHT) && (ItrNum == 0)) ? NextAccMultiplierLsb[2*NUM_WIDTH:1] : 0;   // FIXME refactor to AccMultiplierLsb
-
+// state machine logic and state transitions
 always_comb begin: state_machine
-    NextState            = State;
-    NextItrNum           = ItrNum;
-    NextAccMultiplierLsb = AccMultiplierLsb;
-    NextMultiplicand     = Multiplicand;
-    case(State) 
+    next_state              = state;
+    next_itr_num            = itr_num;
+    next_acc_multiplier_lsb = acc_multiplier_lsb;
+    next_multiplicand       = multiplicand;
+    case(state) 
         IDLE: begin
-            if(InputReq.Valid) begin
-                NextState            = SUB_OR_ADD_AM;
-                NextMultiplicand     = InputReq.Multiplicand;  // store multiplicand
-                NextAccMultiplierLsb = {{(NUM_WIDTH){1'b0}}, InputReq.Multiplier, 1'b0}; 
+            if(input_req.valid) begin
+                next_state              = SUB_OR_ADD_AM;
+                next_multiplicand       = input_req.multiplicand;  // store multiplicand
+                next_acc_multiplier_lsb = {{(NUM_WIDTH){1'b0}}, input_req.multiplier, 1'b0}; 
             end
             else begin
-                NextState = IDLE;
+                next_state = IDLE;
             end
         end
         SUB_OR_ADD_AM: begin
-            if(AccMultiplierLsb[1:0] == 2'b01) begin
-                NextAccMultiplierLsb[2*NUM_WIDTH:NUM_WIDTH+1] = AccMultiplierLsb[2*NUM_WIDTH:NUM_WIDTH+1] + Multiplicand;
+            if(acc_multiplier_lsb[1:0] == 2'b01) begin
+                next_acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] = acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] + multiplicand;
             end
-            else if(AccMultiplierLsb[1:0] == 2'b10) begin
-                NextAccMultiplierLsb[2*NUM_WIDTH:NUM_WIDTH+1] = AccMultiplierLsb[2*NUM_WIDTH:NUM_WIDTH+1] + ~Multiplicand + 1'b1;
+            else if(acc_multiplier_lsb[1:0] == 2'b10) begin
+                next_acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] = acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] + ~multiplicand + 1'b1;
             end
             // in any case we go to the next atate
-            NextState  = ARITHMETIC_SHIFT_RIGHT;
-            NextItrNum = NextItrNum - 1;
+            next_state   = ARITHMETIC_SHIFT_RIGHT;
+            next_itr_num = itr_num - 1;
         end
         ARITHMETIC_SHIFT_RIGHT: begin
-            NextAccMultiplierLsb = $signed(AccMultiplierLsb) >>> 1; 
-            if(ItrNum != 0) begin
-                    NextState = SUB_OR_ADD_AM;
+            next_acc_multiplier_lsb = $signed(acc_multiplier_lsb) >>> 1; 
+            if(itr_num != 0) begin
+                    next_state = SUB_OR_ADD_AM;
             end
             else begin
-                NextState = IDLE;
+                next_state = IDLE;
             end
         end
 
@@ -76,5 +71,17 @@ always_comb begin: state_machine
 
 end
 
+// output logic
+assign output_rsp.valid  = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0)) ? 1'b1                                   : 1'b0;
+assign output_rsp.result = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0)) ? next_acc_multiplier_lsb[2*NUM_WIDTH:1] : 0;   // FIXME refactor the acc_multiplier_lsb
+assign busy = (state == IDLE) ? 1'b0 : 1'b1;
+
+logic rst_itr_num_en;
+assign rst_itr_num_en = rst || (state == IDLE);
+
+`MAFIA_DFF(multiplicand, next_multiplicand, clock)
+`MAFIA_RST_VAL_DFF(state, next_state, clock, rst, IDLE)
+`MAFIA_RST_VAL_DFF(itr_num, next_itr_num, clock, rst_itr_num_en, NUM_WIDTH) 
+`MAFIA_RST_DFF(acc_multiplier_lsb, next_acc_multiplier_lsb, clock, rst)
 
 endmodule

@@ -8,10 +8,10 @@ import mini_core_accel_pkg::*;
 
 
 
-logic Clk;
-logic Rst;
-t_booth_mul_req       InputReq;
-t_booth_output        OutputRsp;
+logic clk;
+logic rst;
+t_booth_mul_req   input_req;
+t_booth_output    output_rsp;
 
 
 
@@ -20,43 +20,40 @@ t_booth_output        OutputRsp;
 // ========================
 initial begin: clock_gen
     forever begin
-        #5 Clk = 1'b0;
-        #5 Clk = 1'b1;
+        #5 clk = 1'b0;
+        #5 clk = 1'b1;
     end //forever
 end//initial clock_gen
 
 booth_multiplier booth_multiplier (
-    .Clock(Clk),
-    .Rst(Rst),
-    .InputReq(InputReq),
-    .OutputRsp(OutputRsp)
+    .clock(clk),
+    .rst(rst),
+    .input_req(input_req),
+    .output_rsp(output_rsp),
+    .busy()
 );
 
 initial begin: main_tb
     // reset
-    Rst = 1'b1;
+    rst = 1'b1;
     #20
 
     // test -7x3 = -21
-    InputReq.Valid        = 1'b1;
-    InputReq.Multiplicand =  -8'h7;
-    InputReq.Multiplier   =  8'h3;
-    Rst = 1'b0;
-    #200
+    input_req.valid        = 1'b1;
+    input_req.multiplicand = -8'h7;
+    input_req.multiplier   =  8'h3;
+    rst = 1'b0;
+    #300
 
     // test 7x7 = 49
-    InputReq.Valid        = 1'b1;
-    InputReq.Multiplicand =  8'h7;
-    InputReq.Multiplier   =  8'h7;
-    Rst = 1'b0;
-    #200
+    input_req.multiplicand = 8'h7;
+    input_req.multiplier   = 8'h7;
+    #300
 
      // test -8x-8 = 64
-    InputReq.Valid        = 1'b1;
-    InputReq.Multiplicand =  -8'h8;
-    InputReq.Multiplier   =  -8'h8;
-    Rst = 1'b0;
-    #200
+    input_req.multiplicand = -8'h8;
+    input_req.multiplier   = -8'h8;
+    #300
 
     $finish();
 
