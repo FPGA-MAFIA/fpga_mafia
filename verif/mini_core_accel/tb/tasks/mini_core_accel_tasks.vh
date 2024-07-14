@@ -15,16 +15,16 @@ t_rf_write_history ref_rf_cur_write;
 logic [31:0] PcQ101H;             // To I_MEM
 logic [31:0] PcQ102H;             // To I_MEM
 logic [31:0] PcQ103H, PcQ104H;
-assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
-assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
-assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
-assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
+assign PcQ101H = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
+assign PcQ102H = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
+assign PcQ103H = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
+assign PcQ104H = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
 logic RegWrEnQ104H;
 logic [4:0]  RegDstQ104H;
 logic [31:0] RegWrDataQ104H;
-assign RegWrEnQ104H   = mini_core_top.mini_core.mini_core_ctrl.CtrlRf.RegWrEnQ104H;
-assign RegDstQ104H    = mini_core_top.mini_core.mini_core_ctrl.CtrlRf.RegDstQ104H;
-assign RegWrDataQ104H = mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H;
+assign RegWrEnQ104H   = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlRf.RegWrEnQ104H;
+assign RegDstQ104H    = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlRf.RegDstQ104H;
+assign RegWrDataQ104H = mini_core_accel_top.mini_core.mini_core_rf.RegWrDataQ104H;
 task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 

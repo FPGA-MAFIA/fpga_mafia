@@ -33,8 +33,8 @@
 ../../../source/mini_core/mini_core_mem_acs.sv
 ../../../source/mini_core/mini_core_wb.sv
 ../../../source/mini_core/mini_core.sv
-../../../source/mini_core/mini_core_top.sv
-../../../source/mini_core/mini_mem_wrap.sv
+../../../source/mini_core_accel/mini_core_accel_top.sv
+../../../source/mini_core_accel/mini_core_accel_mem_wrap.sv
 
 // Accelerator farm files
 ../../../source/mini_core_accel/booth_multiplier.sv

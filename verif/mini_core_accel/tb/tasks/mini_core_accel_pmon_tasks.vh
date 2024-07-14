@@ -14,7 +14,7 @@ always_ff @(posedge Clk) begin : trk_performance_gen_calc
         ClockCounter          <= 32'b0;
         ValidInstQ104HCounter <= 32'b0;
     end
-    else if (mini_core_top.mini_core.mini_core_ctrl.ValidInstQ104H == 1'b1) begin
+    else if (mini_core_accel_top.mini_core.mini_core_ctrl.ValidInstQ104H == 1'b1) begin
             ValidInstQ104HCounter <= ValidInstQ104HCounter + 32'b1;
             ClockCounter <= ClockCounter + 32'b1;
     end
