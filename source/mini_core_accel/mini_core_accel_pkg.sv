@@ -4,7 +4,7 @@
 
 package mini_core_accel_pkg;
 
-parameter NUM_WIDTH = 8;
+parameter NUM_WIDTH = 4;
 
 typedef enum {
     IDLE,  
