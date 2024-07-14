@@ -73,7 +73,12 @@ end
 
 // output logic
 assign output_rsp.valid  = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0)) ? 1'b1                                   : 1'b0;
-assign output_rsp.result = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0)) ? next_acc_multiplier_lsb[2*NUM_WIDTH:1] : 0;   // FIXME refactor the acc_multiplier_lsb
+// in our implementation the accumulator has NUM_WIDTH bits. When the multiplicand equals -128 it causes overflow and the result is incorrect.
+// I have added a fix by multiplying it by 1.
+// FIXME - consider implementing in differente implementation to avoid that 
+assign output_rsp.result = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0) && (multiplicand == -8'd128)) ? ~next_acc_multiplier_lsb[2*NUM_WIDTH:1] + 1 :
+                           ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0))                              ?  next_acc_multiplier_lsb[2*NUM_WIDTH:1]     :
+                                                                                                                                                        1'b0;      // FIXME refactor the acc_multiplier_lsb
 assign busy = (state == IDLE) ? 1'b0 : 1'b1;
 
 logic rst_itr_num_en;
