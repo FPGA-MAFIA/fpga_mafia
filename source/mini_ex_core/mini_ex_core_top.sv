@@ -54,6 +54,7 @@ mini_core_pc mini_core_pc (
   .Rst          (Rst         ), // input  logic        Rst,
   .JmpEnableQ100H   (Ctrl.JmpEnableQ100H  ), // input  logic       ,
   .JmpAddressQ100H (AluOutQ102H), //placeholder
+  //
   .PcPlus4Q100H(PcPlus4Q100H),
   .PcCurrQ100H(PcCurrQ100H)
 );
@@ -114,10 +115,11 @@ mini_ex_core_rg  mini_ex_core_register_file (
     .Rst(Rst),
     .RgRead(RgRead),
     .RgWrite(RgWrite),
+    //
     .ValRegsQ101H(ValRegsQ101H)
 );
 
- mini_ex_core_alu u_mini_ex_core_alu (
+mini_ex_core_alu u_mini_ex_core_alu (
         .Clock(Clock),
         .Rst(Rst),
         .AluInputs(AluInputs),
@@ -134,7 +136,7 @@ mem
     //Core interface (instruction fitch)
     .address_a  (AluOutQ101H[D_MEM_ADRS_MSB_MINI:2]),
     .data_a     (ValRegsQ101H.Reg2Val),
-    .wren_a     (),
+    .wren_a     (CntrlOut.MemWrEnableQ101H),
     .byteena_a  ('0),
     .q_a        (DMemOutQ102H),
     //fabric interface
@@ -163,85 +165,7 @@ mem
 //      c) Calculate branch/jump target.
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_exe mini_core_exe (
-  .Clock               (Clock              ), //  input 
-  .Rst                 (Rst                ), //  input 
-  // Input Control Signals
-  .Ctrl                (CtrlExe            ), //  input 
-  .ReadyQ103H          (ReadyQ103H         ), //  input
-  // Output Control Signals
-  .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
-  // Input Data path
-  //Q102H
-  .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
-  .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input 
-  .PcQ102H             (PcQ102H            ), //  input 
-  .ImmediateQ102H      (ImmediateQ102H     ), //  input 
-  //Q104H
-  .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
-  // output data path
-  .AluOutQ102H         (AluOutQ102H        ), //  output
-  .AluOutQ103H         (AluOutQ103H        ), //  output
-  .PcPlus4Q103H        (PcPlus4Q103H       ), //  output
-  .DMemWrDataQ103H     (DMemWrDataQ103H    )  //  output
-);
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 
-//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  |___ \  | |  | |
-// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | |   __) | | |__| |
-// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | |  |__ <  |  __  |
-// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |  ___) | | |  | |
-//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/  |____/  |_|  |_|
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// Memory Access
-// -----------------
-// 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
-//////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_mem_acs mini_core_mem_access (
-  .Clock              (Clock),          //input 
-  .Rst                (Rst),            //input  
-  // Input Control Signals
-  .Ctrl               (CtrlMem),        //input
-  .ReadyQ104H         (ReadyQ104H),     //input
-  // Input Data path
-  .PcPlus4Q103H       (PcPlus4Q103H),   //input
-  .AluOutQ103H        (AluOutQ103H),    //input
-  .DMemWrDataQ103H    (DMemWrDataQ103H),//input
-  // data path output
-  .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
-  .PcPlus4Q104H       (PcPlus4Q104H),   //input
-  .AluOutQ104H        (AluOutQ104H)     //input
-);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
-//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  | || |   | |  | |
-// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | | | || |_  | |__| |
-// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | | |__   _| |  __  |
-// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |    | |   | |  | |
-//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/     |_|   |_|  |_|
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// Write-Back
-// -----------------
-// 1. Select which data should be written back to the register file AluOut or DMemRdData.
-//////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_wb mini_core_wb
-( 
- .Clock     (Clock ), // input  logic           Clock,       //input 
- .Rst       (Rst   ), // input  logic           Rst,         //input  
- // Ctrl
- .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
- // Data path input
- .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ104H, //input
- .AluOutQ104H     (AluOutQ104H     ), // input  logic [31:0]    AluOutQ104H,     //input
- .PcPlus4Q104H    (PcPlus4Q104H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
- // data path output
- .RegWrDataQ104H  (RegWrDataQ104H  )  // output logic [31:0]    RegWrDataQ104H  //output
 
-);
-
-endmodule // Module mafia_asap_5pl
+/////////////////////////////////////////////////////////////////////////////////////////////////
