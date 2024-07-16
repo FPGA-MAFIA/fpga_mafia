@@ -83,7 +83,7 @@ int main() {
     int output = score_calc(L2 , NUM_OF_NEURONS_L2 , weights_output , bias_output , sra_val );
     
     //printf("output is: %d" , output);
-    rvc_printf("zain logog");
+    rvc_printf(" logog");
     //rvc_print_int(output);
 
     return 0;
