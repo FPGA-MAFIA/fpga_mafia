@@ -17,6 +17,7 @@
 //---------------------------------------------------
 module mini_core_accel_mem_wrap
 import mini_core_pkg::*;
+import mini_core_accel_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
@@ -129,12 +130,11 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 //==================================
 logic LocalDMemWrEnQ103H;
 logic NonLocalDMemReqQ103H;
-logic VgaSpaceQ103H;
-//The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
-assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
+logic CrRegionMemHitQ103H;
+assign CrRegionMemHitQ103H  = ((DMemAddressQ103H >= CR_MEM_REGION_FLOOR ) && (DMemAddressQ103H <= CR_MEM_REGION_ROOF));
 assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
                               ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
-                              (!VgaSpaceQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
+                              (!CrRegionMemHitQ103H);//FIXME - the CR Space needs to be with a unique Tile ID
 // FIXME - need to "freeze" the core PC when reading a non local address
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
@@ -177,6 +177,7 @@ logic [31:0] ShiftDMemWrDataQ103H;
 logic [3:0]  ShiftDMemByteEnQ103H;
 logic [31:0] PreShiftDMemRdDataQ104H;
 logic [1:0]  DMemAddressQ104H;
+logic [31:0] CrMemRdDataQ104H;
 always_comb begin
 ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
                        (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
@@ -188,11 +189,11 @@ ShiftDMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemByteEnQ103H[2:0
                                                              DMemByteEnQ103H;
 end               
 
-
 `MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
 // Half & Byte READ
 assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
                         (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
+                        (CrRegionMemHitQ103H)            ? CrMemRdDataQ104H                       :
                         (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
@@ -217,6 +218,33 @@ mem
     .byteena_b  (4'b1111),//FIXME - should accept the byte enable from the fabric
     .q_b        (F2C_DMemRspDataQ504H)              
     );
+
+//==================================
+// CR memory
+//==================================
+logic           CrMemWrEnQ103H;
+logic           CrMemRdEnQ103H;
+t_core2mul_req  Core2MulReq;
+t_mul2core_rsp  Mul2CoreRsp;
+assign CrMemWrEnQ103H = (CrRegionMemHitQ103H & DMemWrEnQ103H);
+assign CrMemRdEnQ103H = (CrRegionMemHitQ103H & DMemRdEnQ103H);
+mini_core_accell_cr_mem mini_core_accell_cr_mem 
+(
+    .Clk      (Clock),
+    .Rst      (Rst),
+
+    // Core interface
+    .data    (DMemWrDataQ103H),
+    .address (DMemAddressQ103H),
+    .wren    (CrMemWrEnQ103H),
+    .rden    (DMemRdEnQ103H),
+    .q       (CrMemRdDataQ104H),
+
+    // Accelerators interface
+    .mul2core_rsp(Mul2CoreRsp),
+    .core2mul_req(Core2MulReq) 
+);
+
 
 //==================================
 // F2C response 504 ( D_MEM/I_MEM )

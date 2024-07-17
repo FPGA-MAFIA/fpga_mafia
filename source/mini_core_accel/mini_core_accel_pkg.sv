@@ -35,7 +35,7 @@ typedef struct packed {
     t_mul_input_req mul5;
     t_mul_input_req mul6;
     t_mul_input_req mul7;
-}t_core_mul_req;
+}t_core2mul_req;
 
 // response from multiplier 
 typedef struct packed {
@@ -47,7 +47,7 @@ typedef struct packed {
     t_mul_output_rsp mul5;
     t_mul_output_rsp mul6;
     t_mul_output_rsp mul7;
-}t_mul_core_rsp;
+}t_mul2core_rsp;
 
 typedef struct packed {
     logic [31:0] cr_mul_0;
