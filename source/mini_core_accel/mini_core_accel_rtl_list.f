@@ -39,3 +39,5 @@
 
 // Accelerator farm files
 ../../../source/mini_core_accel/accelerators/booth_multiplier.sv
+../../../source/mini_core_accel/accelerators/mini_core_accel_farm.sv
+

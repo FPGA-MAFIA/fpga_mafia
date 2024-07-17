@@ -46,83 +46,109 @@ always_comb begin :wr_to_accel_cr
     next_accel_cr = Rst ? '0 : accel_cr;
     if(wren) begin // writing data from core to accelerators. 
         unique casez (address)
-        // all mul cr's will be initialized with multiplier and multiplicant with int8 size
-          CR_MUL_0      : next_accel_cr.cr_mul_0[15:0] = data[15:0]; 
-          CR_MUL_1      : next_accel_cr.cr_mul_1[15:0] = data[15:0];
-          CR_MUL_2      : next_accel_cr.cr_mul_2[15:0] = data[15:0];
-          CR_MUL_3      : next_accel_cr.cr_mul_3[15:0] = data[15:0];
-          CR_MUL_4      : next_accel_cr.cr_mul_4[15:0] = data[15:0];
-          CR_MUL_5      : next_accel_cr.cr_mul_5[15:0] = data[15:0];
-          CR_MUL_6      : next_accel_cr.cr_mul_6[15:0] = data[15:0];
-          CR_MUL_7      : next_accel_cr.cr_mul_7[15:0] = data[15:0];
-          //in cr_mul_ctrl reg the even index is the data valid(start) from core to multipliers
-          CR_MUL_CTRL   : next_accel_cr.cr_mul_ctrl    = data;
-          default       : next_accel_cr.cr_mul_ctrl    = 32'b0;
+        // each CR_CORE2MUL_I concantinated with {start, multiplicand, multiplier}
+          CR_CORE2MUL_0      : next_accel_cr.cr_core2mul_0   = data[16:0]; 
+          CR_CORE2MUL_1      : next_accel_cr.cr_core2mul_1   = data[16:0];
+          CR_CORE2MUL_2      : next_accel_cr.cr_core2mul_2   = data[16:0];
+          CR_CORE2MUL_3      : next_accel_cr.cr_core2mul_3   = data[16:0];
+          CR_CORE2MUL_4      : next_accel_cr.cr_core2mul_4   = data[16:0];
+          CR_CORE2MUL_5      : next_accel_cr.cr_core2mul_5   = data[16:0];
+          CR_CORE2MUL_6      : next_accel_cr.cr_core2mul_6   = data[16:0];
+          CR_CORE2MUL_7      : next_accel_cr.cr_core2mul_7   = data[16:0];
+          default            : ; // do nothing
         endcase
-        // data comming from the multipliers with the result and valid of the result
-        next_accel_cr.cr_mul_0[31:16] = mul2core_rsp.mul0.result;
-        next_accel_cr.cr_mul_1[31:16] = mul2core_rsp.mul1.result;
-        next_accel_cr.cr_mul_2[31:16] = mul2core_rsp.mul2.result;
-        next_accel_cr.cr_mul_3[31:16] = mul2core_rsp.mul3.result;
-        next_accel_cr.cr_mul_4[31:16] = mul2core_rsp.mul4.result;
-        next_accel_cr.cr_mul_5[31:16] = mul2core_rsp.mul5.result;
-        next_accel_cr.cr_mul_6[31:16] = mul2core_rsp.mul6.result;
-        next_accel_cr.cr_mul_7[31:16] = mul2core_rsp.mul7.result;
-        // update when result is ready
-        next_accel_cr.cr_mul_ctrl[1]   = mul2core_rsp.mul0.valid;
-        next_accel_cr.cr_mul_ctrl[3]   = mul2core_rsp.mul1.valid;
-        next_accel_cr.cr_mul_ctrl[5]   = mul2core_rsp.mul2.valid;
-        next_accel_cr.cr_mul_ctrl[7]   = mul2core_rsp.mul3.valid;
-        next_accel_cr.cr_mul_ctrl[9]   = mul2core_rsp.mul4.valid;
-        next_accel_cr.cr_mul_ctrl[11]  = mul2core_rsp.mul5.valid;
-        next_accel_cr.cr_mul_ctrl[13]  = mul2core_rsp.mul6.valid;
-        next_accel_cr.cr_mul_ctrl[15]  = mul2core_rsp.mul7.valid;
-    end
+        // hard wired 
+        next_accel_cr.cr_mul2core_0 = {mul2core_rsp.mul2core0.busy, mul2core_rsp.mul2core0.valid, mul2core_rsp.mul2core0.result};
+        next_accel_cr.cr_mul2core_1 = {mul2core_rsp.mul2core1.busy, mul2core_rsp.mul2core1.valid, mul2core_rsp.mul2core1.result};
+        next_accel_cr.cr_mul2core_2 = {mul2core_rsp.mul2core2.busy, mul2core_rsp.mul2core2.valid, mul2core_rsp.mul2core2.result};
+        next_accel_cr.cr_mul2core_3 = {mul2core_rsp.mul2core3.busy, mul2core_rsp.mul2core3.valid, mul2core_rsp.mul2core3.result};
+        next_accel_cr.cr_mul2core_4 = {mul2core_rsp.mul2core4.busy, mul2core_rsp.mul2core4.valid, mul2core_rsp.mul2core4.result};
+        next_accel_cr.cr_mul2core_5 = {mul2core_rsp.mul2core5.busy, mul2core_rsp.mul2core5.valid, mul2core_rsp.mul2core5.result};
+        next_accel_cr.cr_mul2core_6 = {mul2core_rsp.mul2core6.busy, mul2core_rsp.mul2core6.valid, mul2core_rsp.mul2core6.result};
+        next_accel_cr.cr_mul2core_7 = {mul2core_rsp.mul2core7.busy, mul2core_rsp.mul2core7.valid, mul2core_rsp.mul2core7.result};
 
+    end
 end
 
 // reading data
 always_comb begin : read_from_accel_cr
+    pre_q = 0;
     if(rden) begin
         unique casez(address)
-            CR_MUL_0    : pre_q = accel_cr.cr_mul_0;
-            CR_MUL_1    : pre_q = accel_cr.cr_mul_1;
-            CR_MUL_2    : pre_q = accel_cr.cr_mul_2;
-            CR_MUL_3    : pre_q = accel_cr.cr_mul_3;
-            CR_MUL_4    : pre_q = accel_cr.cr_mul_4;
-            CR_MUL_5    : pre_q = accel_cr.cr_mul_5;
-            CR_MUL_6    : pre_q = accel_cr.cr_mul_6;
-            CR_MUL_7    : pre_q = accel_cr.cr_mul_7;
-            CR_MUL_CTRL : pre_q = accel_cr.cr_mul_ctrl;
-            default     : ; // do nothing 
+            CR_MUL2CORE_0     : pre_q = accel_cr.cr_mul2core_0;
+            CR_MUL2CORE_1     : pre_q = accel_cr.cr_mul2core_1;
+            CR_MUL2CORE_2     : pre_q = accel_cr.cr_mul2core_2;
+            CR_MUL2CORE_3     : pre_q = accel_cr.cr_mul2core_3;
+            CR_MUL2CORE_4     : pre_q = accel_cr.cr_mul2core_4;
+            CR_MUL2CORE_5     : pre_q = accel_cr.cr_mul2core_5;
+            CR_MUL2CORE_6     : pre_q = accel_cr.cr_mul2core_6;
+            CR_MUL2CORE_7     : pre_q = accel_cr.cr_mul2core_7;
+            default      : ; // do nothing 
         endcase
-        //the odd index is the start bit of the multiplier
-        core2mul_req.mul0.valid = accel_cr.cr_mul_ctrl[0];
-        core2mul_req.mul1.valid = accel_cr.cr_mul_ctrl[2];
-        core2mul_req.mul2.valid = accel_cr.cr_mul_ctrl[4];
-        core2mul_req.mul3.valid = accel_cr.cr_mul_ctrl[6];
-        core2mul_req.mul4.valid = accel_cr.cr_mul_ctrl[8];
-        core2mul_req.mul5.valid = accel_cr.cr_mul_ctrl[10];
-        core2mul_req.mul6.valid = accel_cr.cr_mul_ctrl[12];
-        core2mul_req.mul7.valid = accel_cr.cr_mul_ctrl[14];
-        // multiplier is reading the multiplicand
-        core2mul_req.mul0.multiplicand = accel_cr.cr_mul_0[7:0];
-        core2mul_req.mul1.multiplicand = accel_cr.cr_mul_1[7:0];
-        core2mul_req.mul2.multiplicand = accel_cr.cr_mul_2[7:0];
-        core2mul_req.mul3.multiplicand = accel_cr.cr_mul_3[7:0];
-        core2mul_req.mul4.multiplicand = accel_cr.cr_mul_4[7:0];
-        core2mul_req.mul5.multiplicand = accel_cr.cr_mul_5[7:0];
-        core2mul_req.mul6.multiplicand = accel_cr.cr_mul_6[7:0];
-        core2mul_req.mul7.multiplicand = accel_cr.cr_mul_7[7:0];
-        // multiplier is reading the multiplier
-        core2mul_req.mul0.multiplier = accel_cr.cr_mul_0[15:8];
-        core2mul_req.mul1.multiplier = accel_cr.cr_mul_1[15:8];
-        core2mul_req.mul2.multiplier = accel_cr.cr_mul_2[15:8];
-        core2mul_req.mul3.multiplier = accel_cr.cr_mul_3[15:8];
-        core2mul_req.mul4.multiplier = accel_cr.cr_mul_4[15:8];
-        core2mul_req.mul5.multiplier = accel_cr.cr_mul_5[15:8];
-        core2mul_req.mul6.multiplier = accel_cr.cr_mul_6[15:8];
-        core2mul_req.mul7.multiplier = accel_cr.cr_mul_7[15:8];
+
+        // hard wired from cr to multipliers
+        {core2mul_req.core2mul0.valid, core2mul_req.core2mul0.multiplier, core2mul_req.core2mul0.multiplicand}  = {accel_cr.cr_core2mul_0[16], 
+                                                                                                                   accel_cr.cr_core2mul_0[7:0],
+                                                                                                                   accel_cr.cr_core2mul_0[15:8]};
+
+
+        {core2mul_req.core2mul1.valid, core2mul_req.core2mul1.multiplier, core2mul_req.core2mul1.multiplicand}  = {accel_cr.cr_core2mul_1[16], 
+                                                                                                                   accel_cr.cr_core2mul_1[7:0],
+                                                                                                                   accel_cr.cr_core2mul_1[15:8]};
+
+        {core2mul_req.core2mul2.valid, core2mul_req.core2mul2.multiplier, core2mul_req.core2mul2.multiplicand}  = {accel_cr.cr_core2mul_2[16], 
+                                                                                                                   accel_cr.cr_core2mul_2[7:0],
+                                                                                                                   accel_cr.cr_core2mul_2[15:8]};
+
+        {core2mul_req.core2mul3.valid, core2mul_req.core2mul3.multiplier, core2mul_req.core2mul3.multiplicand}  = {accel_cr.cr_core2mul_3[16], 
+                                                                                                                   accel_cr.cr_core2mul_3[7:0],
+                                                                                                                   accel_cr.cr_core2mul_3[15:8]};                                                                                                                                                                                                                                                                                                                                 
+        
+        {core2mul_req.core2mul4.valid, core2mul_req.core2mul4.multiplier, core2mul_req.core2mul4.multiplicand}  = {accel_cr.cr_core2mul_4[16], 
+                                                                                                                   accel_cr.cr_core2mul_4[7:0],
+                                                                                                                   accel_cr.cr_core2mul_4[15:8]};
+        
+        {core2mul_req.core2mul5.valid, core2mul_req.core2mul5.multiplier, core2mul_req.core2mul5.multiplicand}  = {accel_cr.cr_core2mul_5[16], 
+                                                                                                                   accel_cr.cr_core2mul_5[7:0],
+                                                                                                                   accel_cr.cr_core2mul_5[15:8]};
+        
+        {core2mul_req.core2mul6.valid, core2mul_req.core2mul6.multiplier, core2mul_req.core2mul6.multiplicand}  = {accel_cr.cr_core2mul_6[16], 
+                                                                                                                   accel_cr.cr_core2mul_6[7:0],
+                                                                                                                   accel_cr.cr_core2mul_6[15:8]};
+        
+        {core2mul_req.core2mul7.valid, core2mul_req.core2mul7.multiplier, core2mul_req.core2mul7.multiplicand}  = {accel_cr.cr_core2mul_7[16], 
+                                                                                                                   accel_cr.cr_core2mul_7[7:0],
+                                                                                                                   accel_cr.cr_core2mul_7[15:8]};
+        /*
+        // TODO possible refactor is needed to use less lines
+        core2mul_req.core2mul0.valid = accel_cr.cr_core2mul_0[16];
+        core2mul_req.core2mul1.valid = accel_cr.cr_core2mul_1[16];
+        core2mul_req.core2mul2.valid = accel_cr.cr_core2mul_2[16];
+        core2mul_req.core2mul3.valid = accel_cr.cr_core2mul_3[16];
+        core2mul_req.core2mul4.valid = accel_cr.cr_core2mul_4[16];
+        core2mul_req.core2mul5.valid = accel_cr.cr_core2mul_5[16];
+        core2mul_req.core2mul6.valid = accel_cr.cr_core2mul_6[16];
+        core2mul_req.core2mul7.valid = accel_cr.cr_core2mul_7[16];
+        // multiplier is recieving the multiplier
+        core2mul_req.core2mul0.multiplier = accel_cr.cr_core2mul_0[7:0];
+        core2mul_req.core2mul1.multiplier = accel_cr.cr_core2mul_1[7:0];
+        core2mul_req.core2mul2.multiplier = accel_cr.cr_core2mul_2[7:0];
+        core2mul_req.core2mul3.multiplier = accel_cr.cr_core2mul_3[7:0];
+        core2mul_req.core2mul4.multiplier = accel_cr.cr_core2mul_4[7:0];
+        core2mul_req.core2mul5.multiplier = accel_cr.cr_core2mul_5[7:0];
+        core2mul_req.core2mul6.multiplier = accel_cr.cr_core2mul_6[7:0];
+        core2mul_req.core2mul7.multiplier = accel_cr.cr_core2mul_7[7:0];
+        // multiplier is recieving the multiplicand
+        core2mul_req.core2mul0.multiplicand = accel_cr.cr_core2mul_0[15:8];
+        core2mul_req.core2mul1.multiplicand = accel_cr.cr_core2mul_1[15:8];
+        core2mul_req.core2mul2.multiplicand = accel_cr.cr_core2mul_2[15:8];
+        core2mul_req.core2mul3.multiplicand = accel_cr.cr_core2mul_3[15:8];
+        core2mul_req.core2mul4.multiplicand = accel_cr.cr_core2mul_4[15:8];
+        core2mul_req.core2mul5.multiplicand = accel_cr.cr_core2mul_5[15:8];
+        core2mul_req.core2mul6.multiplicand = accel_cr.cr_core2mul_6[15:8];
+        core2mul_req.core2mul7.multiplicand = accel_cr.cr_core2mul_7[15:8];
+        */
+        
     end
 end
 

@@ -41,6 +41,11 @@ import mini_core_accel_pkg::*;
                 output logic [31:0] DMemRdRspQ104H  , // From D_MEM
                 output logic        DMemReady  , // From D_MEM
                 //============================================
+                //     cr_mem (accelerators)
+                //============================================
+                 input  var t_mul2core_rsp  mul2core_rsp,
+                 output var t_core2mul_req  core2mul_req, 
+                //============================================
                 //      fabric interface
                 //============================================
                 input  logic            InFabricValidQ503H  ,
@@ -224,8 +229,6 @@ mem
 //==================================
 logic           CrMemWrEnQ103H;
 logic           CrMemRdEnQ103H;
-t_core2mul_req  Core2MulReq;
-t_mul2core_rsp  Mul2CoreRsp;
 assign CrMemWrEnQ103H = (CrRegionMemHitQ103H & DMemWrEnQ103H);
 assign CrMemRdEnQ103H = (CrRegionMemHitQ103H & DMemRdEnQ103H);
 mini_core_accell_cr_mem mini_core_accell_cr_mem 
@@ -241,8 +244,8 @@ mini_core_accell_cr_mem mini_core_accell_cr_mem
     .q       (CrMemRdDataQ104H),
 
     // Accelerators interface
-    .mul2core_rsp(Mul2CoreRsp),
-    .core2mul_req(Core2MulReq) 
+    .mul2core_rsp(mul2core_rsp),
+    .core2mul_req(core2mul_req) 
 );
 
 

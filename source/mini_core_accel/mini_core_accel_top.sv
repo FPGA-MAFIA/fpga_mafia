@@ -56,34 +56,39 @@ assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
 
 //---------------------------------------------------
 mini_core_accel_mem_wrap mini_core_accel_mem_wrap(
- .Clock                 (Clock)  ,              // input  logic        Clock  ,
- .Rst                   (Rst)    ,              // input  logic        Rst    ,
- .local_tile_id         (local_tile_id)       , //input  t_tile_id    local_tile_id,
+ .Clock                 (Clock)  ,             
+ .Rst                   (Rst)    ,             
+ .local_tile_id         (local_tile_id)       , 
 // //============================================
 // //      core interface
 // //============================================
 // i_mem
- .ReadyQ101H            (ReadyQ101H), // input logic        ReadyQ101H,          // To I_MEM
- .PcQ100H               (PcQ100H),             //input  logic [31:0] PcQ100H,        //curr_pc    ,
- .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction,
+ .ReadyQ101H            (ReadyQ101H), 
+ .PcQ100H               (PcQ100H),             
+ .PreInstructionQ101H   (PreInstructionQ101H),
 // d_mem
- .DMemWrDataQ103H       (DMemWrDataQ103H),     // input  logic [31:0] DMemWrDataQ103H,     // To D_MEM
- .DMemAddressQ103H      (DMemAddressQ103H),    // input  logic [31:0] DMemAddressQ103H,    // To D_MEM
- .DMemByteEnQ103H       (DMemByteEnQ103H),     // input  logic [3:0]  DMemByteEnQ103H,     // To D_MEM
- .DMemWrEnQ103H         (DMemWrEnQ103H),       // input  logic        DMemWrEnQ103H,       // To D_MEM
- .DMemRdEnQ103H         (DMemRdEnQ103H),       // input  logic        DMemRdEnQ103H,       // To D_MEM
- .DMemRdRspQ104H        (DMemRdRspQ104H),      // output logic [31:0] DMemRdRspQ104H       // From D_MEM
- .DMemReady        (DMemReady),      // output logic        DMemReady  , // From D_MEM
+ .DMemWrDataQ103H       (DMemWrDataQ103H),     
+ .DMemAddressQ103H      (DMemAddressQ103H),    
+ .DMemByteEnQ103H       (DMemByteEnQ103H),     
+ .DMemWrEnQ103H         (DMemWrEnQ103H),      
+ .DMemRdEnQ103H         (DMemRdEnQ103H),       
+ .DMemRdRspQ104H        (DMemRdRspQ104H),      
+ .DMemReady             (DMemReady),      
+ //============================================
+ //     cr_mem (accelerators)
+//============================================
+  .mul2core_rsp(),
+  .core2mul_req(), 
 //============================================
 //      fabric interface
 //============================================
- .InFabricValidQ503H    (InFabricValidQ503H),   // input  logic        F2C_ReqValidQ503H     ,
- .InFabricQ503H         (InFabricQ503H),        // input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .mini_core_ready       (mini_core_ready),      // output logic ready for arbiter
+ .InFabricValidQ503H    (InFabricValidQ503H),  
+ .InFabricQ503H         (InFabricQ503H),       
+ .mini_core_ready       (mini_core_ready),      
  //
- .OutFabricQ505H        (OutFabricQ505H),       // output t_rdata      F2C_RspDataQ504H      ,
- .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
- .fab_ready             (fab_ready)             // input
+ .OutFabricQ505H        (OutFabricQ505H),       
+ .OutFabricValidQ505H   (OutFabricValidQ505H),  
+ .fab_ready             (fab_ready)            
 );
 
 
