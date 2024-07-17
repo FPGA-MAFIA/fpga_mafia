@@ -62,8 +62,17 @@ always_comb begin: state_machine
                     next_state = SUB_OR_ADD_AM;
             end
             else begin
+                next_state = DONE;
+            end
+        end
+        DONE: begin
+            if(input_req.valid) begin
                 next_state = IDLE;
             end
+            else begin
+                next_state = DONE;
+            end
+
         end
         default: next_state = IDLE;
     endcase
@@ -71,14 +80,14 @@ always_comb begin: state_machine
 end
 
 // output logic
-assign output_rsp.valid  = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0)) ? 1'b1                                   : 1'b0;
+assign output_rsp.valid  = (state == DONE) ? 1'b1 : 1'b0;
 // in our implementation the accumulator has NUM_WIDTH bits. When the multiplicand equals -128 it causes overflow and the result is incorrect.
 // I have added a fix by multiplying it by 1.
 // FIXME - consider implementing in differente implementation to avoid that 
-assign output_rsp.result = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0) && (multiplicand == -8'd128)) ? ~next_acc_multiplier_lsb[2*NUM_WIDTH:1] + 1 :
-                           ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0))                              ?  next_acc_multiplier_lsb[2*NUM_WIDTH:1]     :
-                                                                                                                                                        1'b0;      // FIXME refactor the acc_multiplier_lsb
-assign output_rsp.busy = (state == IDLE) ? 1'b0 : 1'b1;
+assign output_rsp.result = ((state == DONE) && (multiplicand == -8'd128)) ? ~acc_multiplier_lsb[2*NUM_WIDTH:1] + 1 :
+                           (state == DONE)                                ?  acc_multiplier_lsb[2*NUM_WIDTH:1]     :
+                                                                                                                1'b0;      
+assign output_rsp.busy = (state == IDLE || state == DONE) ? 1'b0 : 1'b1;
 
 logic rst_itr_num_en;
 assign rst_itr_num_en = rst || (state == IDLE);

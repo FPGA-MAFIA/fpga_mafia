@@ -45,6 +45,9 @@ task check_result;
         // Wait for output_rsp.valid to go high indicating operation complete
         wait (output_rsp.valid == 1'b1);
         #1
+        input_req.valid = 1'b0;
+        #50
+        input_req.valid = 1'b0;
         // Compare the results
         if (output_rsp.result == expected) begin
             $display("Test passed: %0d * %0d = %0d", multiplicand, multiplier, expected);
@@ -180,7 +183,7 @@ initial begin: main_tb
     $finish();
 end
 
-parameter V_TIMEOUT = 20000;
+parameter V_TIMEOUT = 30000;
 initial begin : time_out
     #V_TIMEOUT
     $error("Time out reached");

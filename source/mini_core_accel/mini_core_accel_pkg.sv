@@ -10,7 +10,8 @@ typedef   logic [NUM_WIDTH-1:0] int8;
 typedef enum {
     IDLE,  
     SUB_OR_ADD_AM,             // subtract or add accumulator with multiplicand
-    ARITHMETIC_SHIFT_RIGHT            
+    ARITHMETIC_SHIFT_RIGHT,
+    DONE            
 } t_booth_states;
 
 typedef struct packed {
