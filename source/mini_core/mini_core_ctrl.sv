@@ -75,12 +75,19 @@ t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
-assign PreRegSrc1Q101H           = PreInstructionQ101H[19:15];
-assign PreRegSrc2Q101H           = PreInstructionQ101H[24:20];
-assign LoadHzrdDetectQ101H       = Rst ? 1'b0 : 
-                                 ((PreRegSrc1Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                 ((PreRegSrc2Q101H == CtrlQ102H.RegDst) && (CtrlQ102H.Opcode == LOAD)) ? 1'b1:
-                                                                                                         1'b0;
+t_opcode    PreOpcodeQ101H;
+logic LoadHazardValidRegSrc2Q101H;
+logic RegDstQ102MatchRegSrc1Q101H;
+logic RegDstQ102MatchRegSrc2Q101H;
+assign PreRegSrc1Q101H   = PreInstructionQ101H[19:15];
+assign PreRegSrc2Q101H   = PreInstructionQ101H[24:20];
+assign PreOpcodeQ101H    = t_opcode'(PreInstructionQ101H[6:0]);
+assign  LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH;
+assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD);
+assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
+assign LoadHzrdDetectQ101H          = (Rst)                                                        ? 1'b0 : 
+                                      (RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H) ? 1'b1 :
+                                                                                                     1'b0 ;
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
 assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);

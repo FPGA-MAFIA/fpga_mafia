@@ -160,24 +160,12 @@ assign MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >=
 assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= CR_MEM_REGION_ROOF));
 `MAFIA_EN_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock, DMemReady)
 
-
-//================================
-// Memorry access assertion
-//===============================
-`ifdef SIM_ONLY
-logic  AddrRangeHit;
-logic  clk;        // FIXME - in MAFIA_ASSERT macro we use 'clk' instead of 'Clk'
-assign clk = Clock; 
-assign AddrRangeHit  = (DMemAddressQ103H > VGA_MEM_REGION_ROOF || DMemAddressQ103H < D_MEM_REGION_FLOOR);
-
-`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeHit, DMemWrEnQ103H, "write")
-`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeHit, DMemRdEnQ103H, "read")
-`endif
-
+// accessing the local tile or writing to other  local d_mem region
 assign LocalDMemWrEnQ103H     = (DMemWrEnQ103H) && 
                                 ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
                                 (!MatchVGAMemRegionQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
 // FIXME - need to "freeze" the core PC when reading a non local address
+// accessing DMem not from local_tile but other one
 assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
                               (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 logic OutstandingReadReq;
@@ -464,4 +452,21 @@ assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
                                                         '0;                 
                                                         
 assign big_core_ready = (!F2C_AlmostFull); // add back pressure to the fabric
+
+
+//================================
+// Memorry access assertion
+//===============================
+`ifdef SIM_ONLY
+logic  AddrRangeMiss;
+logic  FabricAccessQ103H;
+logic  clk;        // FIXME - in MAFIA_ASSERT macro we use 'clk' instead of 'Clk'
+assign clk               = Clock; 
+assign FabricAccessQ103H = (DMemAddressQ103H[31:24] != 8'h0) || WhoAmIReqQ103H; // FIXME - possibly need to be refactored. The address is bigger than VGA_MEM_REGION_ROOF when acces tiles
+assign AddrRangeMiss     = (DMemAddressQ103H > VGA_MEM_REGION_ROOF || DMemAddressQ103H < D_MEM_REGION_FLOOR) & !FabricAccessQ103H;
+
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeMiss, DMemWrEnQ103H, "write")
+`MAFIA_ASSERT($sformatf("access adder %h is out of range",DMemAddressQ103H), AddrRangeMiss, DMemRdEnQ103H, "read")
+`endif
+
 endmodule
