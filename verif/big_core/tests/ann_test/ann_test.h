@@ -23,7 +23,7 @@ int sigmoid_func_scaled32(int x);
  */
 int neuron_calc(int* prevL , int prevL_len , int weights[][6] , int bias[] , int out_neuro_idx);
 
-int score_calc(int* prevL , int prevL_len , int *weights , int bias , int SRA);
+int score_calc(int* prevL , int prevL_len , int *weights , int bias);
 
 
 void layer_calc (int* prevL , int prevL_len , int *nextL , int nextL_len , int weights[][6] , int *bias);

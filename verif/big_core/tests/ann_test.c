@@ -3,7 +3,7 @@
 #include "big_core_defines.h"
 #include "graphic_vga.h"
 
-#define WEIGHTS_SLL_VAL 8
+#define WEIGHTS_SLL_VAL 6 
 #define NUM_OF_LAYERS 2 
 #define NUM_OF_INPUTS 12
 #define NUM_OF_NEURONS_L1 6
@@ -15,76 +15,67 @@
 /*matrixes*/
 
 int weights_L1[NUM_OF_INPUTS][NUM_OF_NEURONS_L1] = {
-    {-8, -50, 108, 76, 38, 62},
-    {-159, -48, 118, 179, 45, 53},
-    {20, -23, 54, -89, -253, 27},
-    {7, 31, -15, -31, -3, 2},
-    {70, 8, 11, -5, -9, -17},
-    {-217, -127, 205, 145, -237, 34},
-    {17, -2, 11, -28, -12, -8},
-    {84, -30, 46, 17, 36, 129},
-    {50, 308, 66, -158, -26, 407},
-    {-5, -1, 25, 2, 1, 0},
-    {-65, 150, 272, 54, -96, 72},
-    {-7, -9, 30, 63, 10, 14}
+    {4, -10, 18, 2, 8, 31},
+    {-3, 10, 10, -1, -54, 27},
+    {5, 0, 16, 23, 54, -66},
+    {-4, -3, 2, -2, 2, 1},
+    {20, 13, 29, 3, 1, 2},
+    {50, 11, -46, 23, -48, -41},
+    {5, -4, -4, 8, 6, 3},
+    {-25, -42, -20, 0, -27, -7},
+    {-10, -79, -29, 81, -38, -17},
+    {5, -5, -4, 0, -4, -2},
+    {72, -18, -3, 29, 4, 4},
+    {4, 7, 15, -6, -18, -5}
 };
 
-int biases_L1[NUM_OF_NEURONS_L1] = {
-    180,
-    261,
-    3,
-    186,
-    142,
-    -85
-};
+int biases_L1[NUM_OF_NEURONS_L1] = {4, 5, 55, 29, 18, 36};
 
 int weights_L2[NUM_OF_NEURONS_L1][NUM_OF_NEURONS_L2] = {
-    {-34, 224, 21, -134, 3, -87},
-    {92, 16, 164, -10, 143, -159},
-    {-66, 245, -145, 7, 239, -231},
-    {-227, 205, 86, 130, -67, 164},
-    {-204, 240, -45, -327, -86, -24},
-    {374, -13, -121, 44, -129, -163}
+    {-18, -58, -45, 7, -41, 85},
+    {-11, -16, -78, 52, 44, -20},
+    {-9, 62, 43, 6, -16, 57},
+    {38, 14, 37, -61, 30, 20},
+    {-49, 31, -34, 5, -42, -2},
+    {-35, 60, -20, 26, -67, -2}
 };
 
-int biases_L2[NUM_OF_NEURONS_L2] = {
-    -78,
-    66,
-    66,
-    211,
-    42,
-    156
-};
+int biases_L2[NUM_OF_NEURONS_L2] = {1, 31, -26, 20, 39, 34};
 
-int weights_output[NUM_OF_NEURONS_L2] = {
-    226,
-    -112,
-    -254,
-    325,
-    -317,
-    294
-};
+int weights_output[NUM_OF_NEURONS_L2] = {71, -51, 109, 71, 62, -36};
 
-int bias_output = -39;
+int bias_output = -16;
 
 /***********************main*************************************/
-
+/**
+ * @param inputs[0] = FRANCE
+ * @param inputs[1] = SPAIN
+ * @param inputs[2] = GERMANY
+ * @param inputs[3] = CREDIT SCORE
+ * @param inputs[4] = GENDER
+ * @param inputs[5] = AGE
+ * @param inputs[6] = TENURE
+ * @param inputs[7] = BALANCE
+ * @param inputs[8] = NumOfProducts
+ * @param inputs[9] = HasCrCard
+ * @param inputs[10] = IsActiveMember
+ * @param inputs[11] = EstimatedSalary
+ */
 int main() {        
     /*load data*/
     
     /*init Weights*/
-    int inputs[NUM_OF_INPUTS] = {1,0,0,600,1,40,3,60000,2,1,1,50000} ; //change for each specfic run
+    int inputs[NUM_OF_INPUTS] = {0, 1, 0, 12, 1, 20, 3, 127, 2, 1, 1, 127} ; //change for each specfic run
     int L1[NUM_OF_NEURONS_L1] = {0};
     int L2[NUM_OF_NEURONS_L2] = {0};
 
     layer_calc(inputs , NUM_OF_INPUTS , L1 , NUM_OF_NEURONS_L1 , weights_L1 , biases_L1);
     layer_calc(L1 , NUM_OF_NEURONS_L1 , L2 , NUM_OF_NEURONS_L2 , weights_L2 , biases_L2);
-    int sra_val = (NUM_OF_LAYERS + 1) * WEIGHTS_SLL_VAL - SIGMOID_STRECH;
-    int output = score_calc(L2 , NUM_OF_NEURONS_L2 , weights_output , bias_output , sra_val );
+    int output = score_calc(L2 , NUM_OF_NEURONS_L2 , weights_output , bias_output);
     
     //printf("output is: %d" , output);
     rvc_printf(" logog");
-    //rvc_print_int(output);
+    rvc_print_int(output);
 
     return 0;
 }
@@ -105,9 +96,7 @@ int Relu_func(int x) {
 
 
 
-
-int sigmoid_func_scaled32(int x) {
-    int sigmoid_scaled32[300] = {
+int sigmoid_scaled32[300] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -139,9 +128,12 @@ int sigmoid_func_scaled32(int x) {
     98, 98, 98, 98, 98, 98, 98, 98, 98, 98,
     98, 98, 98, 98, 98, 98, 98, 98, 98, 98
     };
-    if (x > 150)
-        return 1;
-    if (x > -150)
+
+int sigmoid_func_scaled32(int x) {
+    
+    if (x > 149)
+        return 100;
+    if (x < -150)
         return 0;
     return sigmoid_scaled32[x + 150];
 }
@@ -149,24 +141,25 @@ int sigmoid_func_scaled32(int x) {
 int neuron_calc(int* prevL , int prevL_len , int weights[][6] , int bias[] , int out_neuro_idx) {
     int sum = bias[out_neuro_idx];
     for (int j = 0 ; j < prevL_len ; j++) {
-        sum += prevL[j] * weights[out_neuro_idx][j];
+        sum += prevL[j] * weights[j][out_neuro_idx];
     }
     return Relu_func(sum);
 }
 
-int score_calc(int* prevL , int prevL_len , int *weights , int bias , int SRA) {
+int score_calc(int* prevL , int prevL_len , int *weights , int bias) {
     int sum = bias;
-    for (int j = 0 ; j < prevL_len ; j++) {
-        sum += prevL[j] * weights[j];
+    int sra_val = (NUM_OF_LAYERS + 1) * WEIGHTS_SLL_VAL - SIGMOID_STRECH;
+    for (int neuron_idx = 0 ; neuron_idx < prevL_len ; neuron_idx++) {
+        sum += prevL[neuron_idx] * weights[neuron_idx];
     }
-    return sigmoid_func_scaled32(sum >> SRA);
+    return sigmoid_func_scaled32(sum >> sra_val);
     //return 0;
 }
 
 
 void layer_calc (int* prevL , int prevL_len , int *nextL , int nextL_len , int weights[][6] , int *bias) {
-    for (int j = 0 ; j < nextL_len ; j++) {
-        nextL[j] = neuron_calc(prevL , prevL_len , weights , bias , j);
+    for (int neuron_idx = 0 ; neuron_idx < nextL_len ; neuron_idx++) {
+        nextL[neuron_idx] = neuron_calc(prevL , prevL_len , weights , bias , neuron_idx);
     }
 }
 
