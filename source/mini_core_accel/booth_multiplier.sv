@@ -17,9 +17,8 @@ import mini_core_pkg::*;
 (
     input logic                     clock,
     input logic                     rst,
-    input var t_booth_mul_req       input_req,
-    output var t_booth_output       output_rsp,
-    output logic                    busy
+    input var t_mul_input_req       input_req,
+    output var t_mul_output_rsp     output_rsp
 
 );
 
@@ -66,7 +65,7 @@ always_comb begin: state_machine
                 next_state = IDLE;
             end
         end
-
+        default: next_state = IDLE;
     endcase
 
 end
@@ -79,7 +78,7 @@ assign output_rsp.valid  = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0))
 assign output_rsp.result = ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0) && (multiplicand == -8'd128)) ? ~next_acc_multiplier_lsb[2*NUM_WIDTH:1] + 1 :
                            ((state == ARITHMETIC_SHIFT_RIGHT) && (itr_num == 0))                              ?  next_acc_multiplier_lsb[2*NUM_WIDTH:1]     :
                                                                                                                                                         1'b0;      // FIXME refactor the acc_multiplier_lsb
-assign busy = (state == IDLE) ? 1'b0 : 1'b1;
+assign output_rsp.busy = (state == IDLE) ? 1'b0 : 1'b1;
 
 logic rst_itr_num_en;
 assign rst_itr_num_en = rst || (state == IDLE);

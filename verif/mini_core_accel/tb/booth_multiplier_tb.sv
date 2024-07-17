@@ -1,14 +1,15 @@
 `include "macros.vh"
 
+// ./build.py -dut mini_core_accel -hw -sim -top booth_multiplier_tb -clean 
+
 module booth_multiplier_tb;
 import mini_core_pkg::*;
 import mini_core_accel_pkg::*;
 
 logic clk;
 logic rst;
-t_booth_mul_req   input_req;
-t_booth_output    output_rsp;
-logic busy;
+t_mul_input_req   input_req;
+t_mul_output_rsp  output_rsp;
 
 // ========================
 // clock gen
@@ -24,9 +25,8 @@ booth_multiplier booth_multiplier (
     .clock(clk),
     .rst(rst),
     .input_req(input_req),
-    .output_rsp(output_rsp),
-    .busy(busy)
-);
+    .output_rsp(output_rsp)
+    );
 
 task check_result;
     input signed [7:0] multiplicand;
@@ -34,14 +34,14 @@ task check_result;
     input signed [15:0] expected;
     begin
         // Wait for busy to go low indicating Booth multiplier is ready
-        wait (busy == 1'b0);
+        wait (output_rsp.busy == 1'b0);
         // Send the input request
         input_req.valid = 1'b1;
         input_req.multiplicand = multiplicand;
         input_req.multiplier  = multiplier;
 
         // Wait for busy to go high indicating operation started
-        wait (busy == 1'b1);
+        wait (output_rsp.busy == 1'b1);
         // Wait for output_rsp.valid to go high indicating operation complete
         wait (output_rsp.valid == 1'b1);
         #1

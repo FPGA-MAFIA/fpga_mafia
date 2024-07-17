@@ -55,7 +55,7 @@ always_comb begin :wr_to_accel_cr
           CR_MUL_5      : next_accel_cr.cr_mul_5[15:0] = data[15:0];
           CR_MUL_6      : next_accel_cr.cr_mul_6[15:0] = data[15:0];
           CR_MUL_7      : next_accel_cr.cr_mul_7[15:0] = data[15:0];
-          //in cr_mul_ctrl reg the even index is the data valid from core to multipliers
+          //in cr_mul_ctrl reg the even index is the data valid(start) from core to multipliers
           CR_MUL_CTRL   : next_accel_cr.cr_mul_ctrl    = data;
           default       : next_accel_cr.cr_mul_ctrl    = 32'b0;
         endcase

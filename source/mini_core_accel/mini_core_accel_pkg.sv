@@ -22,6 +22,7 @@ typedef struct packed {
 typedef struct packed {
    logic                    valid;
    logic [2*NUM_WIDTH-1:0]  result;
+   logic                    busy;
 }t_mul_output_rsp;
 
 typedef struct packed {
