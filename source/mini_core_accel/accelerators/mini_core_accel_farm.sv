@@ -1,8 +1,5 @@
 `include "macros.vh"
 
-`define CORE2MUL_REQ(INDEX)       core2mul_req.core2mul``INDEX``
-`define MUL2CORE_RSP(INDEX)       mul2core_rsp.mul2core``INDEX``
-
 module mini_core_accel_farm 
 import mini_core_pkg::*;
 import mini_core_accel_pkg::*;
@@ -21,9 +18,8 @@ generate
         booth_multiplier booth_multiplier (
             .clock(clock),
             .rst(rst),
-            .input_req(`CORE2MUL_REQ(mul_index)),
-            .output_rsp(`MUL2CORE_RSP(mul_index))
-
+            .input_req(core2mul_req[mul_index]),
+            .output_rsp(mul2core_rsp[mul_index])
         );
 
     end
