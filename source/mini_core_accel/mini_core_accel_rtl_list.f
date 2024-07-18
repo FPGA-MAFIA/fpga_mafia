@@ -15,6 +15,7 @@
 +incdir+../../../source/mini_core/
 +incdir+../../../source/big_core/
 +incdir+../../../source/fabric/
++incdir+../../../source/mini_core_accel/
 
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv

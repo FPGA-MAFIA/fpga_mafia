@@ -4,7 +4,7 @@
 
 package mini_core_accel_pkg;
 
-parameter NUM_WIDTH = 8;
+parameter NUM_WIDTH       = 8;
 typedef   logic [NUM_WIDTH-1:0] int8;
 
 typedef enum {
@@ -27,28 +27,16 @@ typedef struct packed {
 }t_mul_output_rsp;
 
 typedef struct packed { // {start, multiplicand, multiplier}
-    t_mul_input_req core2mul0;
-    t_mul_input_req core2mul1;
-    t_mul_input_req core2mul2;
-    t_mul_input_req core2mul3;
-    t_mul_input_req core2mul4;
-    t_mul_input_req core2mul5;
-    t_mul_input_req core2mul6;
-    t_mul_input_req core2mul7;
+    t_mul_input_req [7:0] core2mul;
 }t_core2mul_req;
 
 // response from multiplier 
 typedef struct packed {
-    t_mul_output_rsp mul2core0;
-    t_mul_output_rsp mul2core1;
-    t_mul_output_rsp mul2core2;
-    t_mul_output_rsp mul2core3;
-    t_mul_output_rsp mul2core4;
-    t_mul_output_rsp mul2core5;
-    t_mul_output_rsp mul2core6;
-    t_mul_output_rsp mul2core7;
+    t_mul_output_rsp [7:0] mul2core;
 }t_mul2core_rsp;
 
+// TODO - I keept the cr's naming looks the same as CR's addresses and 
+// not as array. Consider refactoring for naming consistency in the future 
 typedef struct packed {
     logic [16:0] cr_core2mul_0;
     logic [16:0] cr_core2mul_1;
