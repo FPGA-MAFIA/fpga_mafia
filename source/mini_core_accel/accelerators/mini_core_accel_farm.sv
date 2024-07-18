@@ -18,8 +18,8 @@ generate
         booth_multiplier booth_multiplier (
             .clock(clock),
             .rst(rst),
-            .input_req(core2mul_req[mul_index]),
-            .output_rsp(mul2core_rsp[mul_index])
+            .input_req(core2mul_req.core2mul[mul_index]),
+            .output_rsp(mul2core_rsp.mul2core[mul_index])
         );
 
     end

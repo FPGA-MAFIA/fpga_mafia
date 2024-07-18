@@ -135,7 +135,7 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 //==================================
 logic LocalDMemWrEnQ103H;
 logic NonLocalDMemReqQ103H;
-logic CrRegionMemHitQ103H;
+logic CrRegionMemHitQ103H, CrRegionMemHitQ104H;
 assign CrRegionMemHitQ103H  = ((DMemAddressQ103H >= CR_MEM_REGION_FLOOR ) && (DMemAddressQ103H <= CR_MEM_REGION_ROOF));
 assign LocalDMemWrEnQ103H   = (DMemWrEnQ103H) && 
                               ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
@@ -164,6 +164,9 @@ logic [31:0] FabricDataRspQ504H;
 logic        FabricDataRspValidQ504H;
 `MAFIA_DFF(FabricDataRspQ504H      , InFabricQ503H.data      , Clock)
 `MAFIA_DFF(FabricDataRspValidQ504H , FabricDataRspValidQ503H , Clock)
+`MAFIA_DFF(CrRegionMemHitQ104H , CrRegionMemHitQ103H , Clock)
+
+
 // There are multiple reasons to unset the DMemReady - back pressure the core from accessing the memory
 // 1) A outstanding read request was set and the read response was not received yet
 // 2) The c2f_req_fifo is full
@@ -198,7 +201,7 @@ end
 // Half & Byte READ
 assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
                         (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
-                        (CrRegionMemHitQ103H)            ? CrMemRdDataQ104H                       :
+                        (CrRegionMemHitQ104H)            ? CrMemRdDataQ104H                       :
                         (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
                         (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} : 
@@ -240,7 +243,7 @@ mini_core_accell_cr_mem mini_core_accell_cr_mem
     .data    (DMemWrDataQ103H),
     .address (DMemAddressQ103H),
     .wren    (CrMemWrEnQ103H),
-    .rden    (DMemRdEnQ103H),
+    .rden    (CrMemRdEnQ103H),
     .q       (CrMemRdDataQ104H),
 
     // Accelerators interface

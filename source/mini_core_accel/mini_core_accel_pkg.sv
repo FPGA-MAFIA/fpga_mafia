@@ -21,9 +21,9 @@ typedef struct packed {
 }t_mul_input_req;
 
 typedef struct packed {
+   logic                    busy;
    logic                    valid;
    logic [2*NUM_WIDTH-1:0]  result;
-   logic                    busy;
 }t_mul_output_rsp;
 
 typedef struct packed { // {start, multiplicand, multiplier}
@@ -38,7 +38,7 @@ typedef struct packed {
 // TODO - I keept the cr's naming looks the same as CR's addresses and 
 // not as array. Consider refactoring for naming consistency in the future 
 typedef struct packed {
-    logic [16:0] cr_core2mul_0;
+    logic [16:0] cr_core2mul_0;  // {start, multiplicand, multiplier}
     logic [16:0] cr_core2mul_1;
     logic [16:0] cr_core2mul_2;
     logic [16:0] cr_core2mul_3;
@@ -46,7 +46,7 @@ typedef struct packed {
     logic [16:0] cr_core2mul_5;
     logic [16:0] cr_core2mul_6;
     logic [16:0] cr_core2mul_7;
-    logic [17:0] cr_mul2core_0;
+    logic [17:0] cr_mul2core_0;  // {busy, ready, result}
     logic [17:0] cr_mul2core_1;
     logic [17:0] cr_mul2core_2;
     logic [17:0] cr_mul2core_3;
@@ -70,14 +70,14 @@ parameter CR_CORE2MUL_5     = CR_MEM_OFFSET + 'hf005;
 parameter CR_CORE2MUL_6     = CR_MEM_OFFSET + 'hf006;
 parameter CR_CORE2MUL_7     = CR_MEM_OFFSET + 'hf007;
 
-parameter CR_MUL2CORE_0     = CR_MEM_OFFSET + 'hf0008;
-parameter CR_MUL2CORE_1     = CR_MEM_OFFSET + 'hf0009;
-parameter CR_MUL2CORE_2     = CR_MEM_OFFSET + 'hf000a;
-parameter CR_MUL2CORE_3     = CR_MEM_OFFSET + 'hf000b;
-parameter CR_MUL2CORE_4     = CR_MEM_OFFSET + 'hf000c;
-parameter CR_MUL2CORE_5     = CR_MEM_OFFSET + 'hf000d;
-parameter CR_MUL2CORE_6     = CR_MEM_OFFSET + 'hf000e;
-parameter CR_MUL2CORE_7     = CR_MEM_OFFSET + 'hf000f;
+parameter CR_MUL2CORE_0     = CR_MEM_OFFSET + 'hf008;
+parameter CR_MUL2CORE_1     = CR_MEM_OFFSET + 'hf009;
+parameter CR_MUL2CORE_2     = CR_MEM_OFFSET + 'hf00a;
+parameter CR_MUL2CORE_3     = CR_MEM_OFFSET + 'hf00b;
+parameter CR_MUL2CORE_4     = CR_MEM_OFFSET + 'hf00c;
+parameter CR_MUL2CORE_5     = CR_MEM_OFFSET + 'hf00d;
+parameter CR_MUL2CORE_6     = CR_MEM_OFFSET + 'hf00e;
+parameter CR_MUL2CORE_7     = CR_MEM_OFFSET + 'hf00f;
 
 
 
