@@ -13,6 +13,9 @@ logic [NUM_WIDTH-1:0]    pre_multiplier;
 logic [2*NUM_WIDTH-1:0]  result;
 logic                    done;
 
+parameter LONG_DELAY  = 200;
+parameter SHORT_DELAY = 30;
+parameter CLK_DELAY   = 10;
 // ========================
 // clock gen
 // ========================
@@ -34,16 +37,64 @@ multiplier multiplier (
 
 initial begin : main_tb
     rst = 1'b1;
+    // reset the cr's
     pre_multiplicand = 8'd0;
     pre_multiplier   = 8'd0;
     #50
-    // we also reset the CR's that acts like inputs
+
     rst = 0;
     #20
+    // change one of the inputs and wait until done (basic test)
     @(posedge clk)
-    pre_multiplicand = -8'd5;
-    pre_multiplier   = 8'd12;
-    #200
+    pre_multiplicand = 8'd3;
+    pre_multiplier   = 8'd4;
+    #LONG_DELAY
+    
+    @(posedge clk)
+    pre_multiplicand = -8'd3;
+    pre_multiplier   = 8'd4;
+    #LONG_DELAY
+    
+    @(posedge clk)
+    pre_multiplicand = 8'd18;
+    pre_multiplier   = 8'd9;
+    #LONG_DELAY
+
+    // change one of the inputs during calculations
+    @(posedge clk)
+    pre_multiplicand = 8'd5;
+    pre_multiplier   = 8'd6; // won't calculate
+    #SHORT_DELAY
+
+    @(posedge clk)
+    pre_multiplicand = 8'd4;
+    pre_multiplier   = 8'd6;  // will calculate and display display 24
+    #LONG_DELAY
+
+    
+    @(posedge clk)
+    pre_multiplicand = 8'd12;
+    pre_multiplier   = 8'd6;  // won't calculate
+    #SHORT_DELAY
+
+    @(posedge clk)
+    pre_multiplicand = -8'd7;
+    pre_multiplier   = 8'd123;  // will calculate and desplay -861
+    #LONG_DELAY
+
+    // change one of the inputs each clock cycle
+    @(posedge clk)
+    pre_multiplicand = 8'd3;
+    pre_multiplier   = 8'd5;  // won't calculate
+    #CLK_DELAY
+
+    @(posedge clk)
+    pre_multiplicand = -8'd4;
+    pre_multiplier   = 8'd4;   // will calculate and display -16
+    #LONG_DELAY
+
+
+
 
     $finish();
 

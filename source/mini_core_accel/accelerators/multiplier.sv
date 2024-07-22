@@ -11,7 +11,7 @@ import mini_core_accel_pkg::*;
     output logic                   done
 );
 
-typedef enum  {IDLE, COMPUTE} t_states;
+typedef enum  {PRE_START, COMPUTE, DONE} t_states;
 
 t_states state, n_state;
 logic [NUM_WIDTH-1:0]       multiplicand, multiplier;
@@ -23,22 +23,25 @@ always_comb begin: state_machine
     n_itr_num  = itr_num;
     n_acc_multiplier_lsb = acc_multiplier_lsb;
     case(state)
-        IDLE: begin
-            n_acc_multiplier_lsb = {{(NUM_WIDTH){1'b0}}, pre_multiplier, 1'b0};
+        PRE_START: begin
+            n_acc_multiplier_lsb = {{(NUM_WIDTH){1'b0}}, multiplier, 1'b0};
             n_itr_num            =  NUM_WIDTH;
         end
         COMPUTE: begin
             if(acc_multiplier_lsb[1:0] == 2'b01) begin
-                n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] + pre_multiplicand, acc_multiplier_lsb[NUM_WIDTH:0]}) >>> 1 ;
+                n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] + multiplicand, acc_multiplier_lsb[NUM_WIDTH:0]}) >>> 1 ;
             end
             else if(acc_multiplier_lsb[1:0] == 2'b10) begin
-                 n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] + ~pre_multiplicand + 1'b1, acc_multiplier_lsb[NUM_WIDTH:0]}) >>> 1 ;
+                 n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH:NUM_WIDTH+1] + ~multiplicand + 1'b1, acc_multiplier_lsb[NUM_WIDTH:0]}) >>> 1 ;
             end
             else begin
                 n_acc_multiplier_lsb = $signed(acc_multiplier_lsb) >>> 1;
             end
             // dec by one in any case
             n_itr_num = itr_num - 1;
+        end
+        DONE: begin
+            // see assign 
         end
         default: ; // do nothing
     endcase
@@ -51,20 +54,31 @@ assign start_computation  = (pre_multiplicand != multiplicand) || (pre_multiplie
 always_comb begin: state_transition
     n_state = state;
     case(state)
-        IDLE: begin
+        PRE_START: begin
             if(start_computation) begin
-                n_state = COMPUTE;
+                n_state = PRE_START;
             end
             else begin
-                n_state = IDLE;
+                n_state = COMPUTE; 
             end
         end
         COMPUTE: begin
-            if(itr_num == 0) begin
-                n_state = IDLE;
+            if(itr_num == 1) begin // we dont count zero
+                n_state = DONE;
+            end
+            else if(start_computation) begin
+                n_state = PRE_START;
             end
             else begin
                 n_state = COMPUTE;
+            end
+        end
+        DONE: begin
+            if(start_computation) begin
+                n_state = PRE_START;
+            end
+            else begin
+                n_state = DONE;
             end
         end
         default: ; //do nothing  
@@ -72,12 +86,12 @@ always_comb begin: state_transition
 end
 
 
-assign done   = (state == IDLE) ? 1'b1 : 1'b0;
-assign result = ((state == IDLE) && (multiplicand == -8'd128)) ? ~acc_multiplier_lsb[2*NUM_WIDTH:1] + 1 :
-                (state == IDLE)                                ?  acc_multiplier_lsb[2*NUM_WIDTH:1]     :
+assign done   = (state == DONE) ? 1'b1 : 1'b0;
+assign result = ((state == DONE) && (multiplicand == -8'd128)) ? ~acc_multiplier_lsb[2*NUM_WIDTH:1] + 1 :
+                (state == DONE)                                ?  acc_multiplier_lsb[2*NUM_WIDTH:1]     :
                                                                                                     1'b0;  
 
-`MAFIA_RST_VAL_DFF(state, n_state, clock, rst, IDLE)
+`MAFIA_RST_VAL_DFF(state, n_state, clock, rst, DONE)
 
 // we sample the inputs once the input changed it triggers the multiplier to start calculations
 `MAFIA_RST_DFF(multiplicand, pre_multiplicand, clock, rst)
