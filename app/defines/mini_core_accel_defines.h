@@ -33,25 +33,22 @@
 //-----------------------------------------------------------------------------
 
 /* Control registers addressed */
-#define CR_CORE2MUL_0       ((volatile int *) (CR_MEM_BASE + 0xF000))
-#define CR_CORE2MUL_1       ((volatile int *) (CR_MEM_BASE + 0xF001))
-#define CR_CORE2MUL_2       ((volatile int *) (CR_MEM_BASE + 0xF002))
-#define CR_CORE2MUL_3       ((volatile int *) (CR_MEM_BASE + 0xF003))
-#define CR_CORE2MUL_4       ((volatile int *) (CR_MEM_BASE + 0xF004))
-#define CR_CORE2MUL_5       ((volatile int *) (CR_MEM_BASE + 0xF005))
-#define CR_CORE2MUL_6       ((volatile int *) (CR_MEM_BASE + 0xF006))
-#define CR_CORE2MUL_7       ((volatile int *) (CR_MEM_BASE + 0xF007))
+#define CR_CORE2MUL_INT8_0       ((volatile int *) (CR_MEM_BASE + 0xF000))
+#define CR_CORE2MUL_INT8_1       ((volatile int *) (CR_MEM_BASE + 0xF001))
+#define CR_CORE2MUL_INT8_2       ((volatile int *) (CR_MEM_BASE + 0xF002))
+#define CR_CORE2MUL_INT8_3       ((volatile int *) (CR_MEM_BASE + 0xF003))
+#define CR_CORE2MUL_INT8_4       ((volatile int *) (CR_MEM_BASE + 0xF004))
+#define CR_CORE2MUL_INT8_5       ((volatile int *) (CR_MEM_BASE + 0xF005))
+#define CR_CORE2MUL_INT8_6       ((volatile int *) (CR_MEM_BASE + 0xF006))
+#define CR_CORE2MUL_INT8_7       ((volatile int *) (CR_MEM_BASE + 0xF007))
 
-#define CR_MUL2CORE_0       ((volatile int *) (CR_MEM_BASE + 0xF008))
-#define CR_MUL2CORE_1       ((volatile int *) (CR_MEM_BASE + 0xF009))
-#define CR_MUL2CORE_2       ((volatile int *) (CR_MEM_BASE + 0xF00A))
-#define CR_MUL2CORE_3       ((volatile int *) (CR_MEM_BASE + 0xF00B))
-#define CR_MUL2CORE_4       ((volatile int *) (CR_MEM_BASE + 0xF00C))
-#define CR_MUL2CORE_5       ((volatile int *) (CR_MEM_BASE + 0xF00D))
-#define CR_MUL2CORE_6       ((volatile int *) (CR_MEM_BASE + 0xF00E))
-#define CR_MUL2CORE_7       ((volatile int *) (CR_MEM_BASE + 0xF00F))
-
-
-
+#define CR_MUL2CORE_INT8_0       ((volatile int *) (CR_MEM_BASE + 0xF008))
+#define CR_MUL2CORE_INT8_1       ((volatile int *) (CR_MEM_BASE + 0xF009))
+#define CR_MUL2CORE_INT8_2       ((volatile int *) (CR_MEM_BASE + 0xF00A))
+#define CR_MUL2CORE_INT8_3       ((volatile int *) (CR_MEM_BASE + 0xF00B))
+#define CR_MUL2CORE_INT8_4       ((volatile int *) (CR_MEM_BASE + 0xF00C))
+#define CR_MUL2CORE_INT8_5       ((volatile int *) (CR_MEM_BASE + 0xF00D))
+#define CR_MUL2CORE_INT8_6       ((volatile int *) (CR_MEM_BASE + 0xF00E))
+#define CR_MUL2CORE_INT8_7       ((volatile int *) (CR_MEM_BASE + 0xF00F))
 
 #endif
