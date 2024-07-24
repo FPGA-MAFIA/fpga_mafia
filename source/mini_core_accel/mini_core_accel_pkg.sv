@@ -4,9 +4,9 @@
 
 package mini_core_accel_pkg;
 
-parameter  NUM_WIDTH_INT8       = 8;
-typedef  logic [NUM_WIDTH_INT8-1:0]   int8;
-typedef  logic [2*NUM_WIDTH_INT8-1:0] int16;
+parameter  NUM_WIDTH_INT8  = 8;
+typedef  logic [7:0]       int8;
+typedef  logic [15:0]      int16;
 
 typedef enum {
     PRE_START,

@@ -15,36 +15,6 @@ int8                             multiplicand, multiplier;
 logic [2*NUM_WIDTH_INT8:0]       acc_multiplier_lsb, n_acc_multiplier_lsb;
 logic [$clog2(NUM_WIDTH_INT8):0] itr_num, n_itr_num;
 
-// state machine inner logic
-always_comb begin: state_machine
-    n_itr_num  = itr_num;
-    n_acc_multiplier_lsb = acc_multiplier_lsb;
-    case(state)
-        PRE_START: begin
-            n_acc_multiplier_lsb = {{(NUM_WIDTH_INT8){1'b0}}, multiplier, 1'b0};
-            n_itr_num            =  NUM_WIDTH_INT8;
-        end
-        COMPUTE: begin
-            if(acc_multiplier_lsb[1:0] == 2'b01) begin
-                n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH_INT8:NUM_WIDTH_INT8+1] + multiplicand, acc_multiplier_lsb[NUM_WIDTH_INT8:0]}) >>> 1 ;
-            end
-            else if(acc_multiplier_lsb[1:0] == 2'b10) begin
-                 n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH_INT8:NUM_WIDTH_INT8+1] + ~multiplicand + 1'b1, acc_multiplier_lsb[NUM_WIDTH_INT8:0]}) >>> 1 ;
-            end
-            else begin
-                n_acc_multiplier_lsb = $signed(acc_multiplier_lsb) >>> 1;
-            end
-            // dec by one in any case
-            n_itr_num = itr_num - 1;
-        end
-        DONE: begin
-            // see assign 
-        end
-        default: ; // do nothing
-    endcase
-end
-
-
 logic  start_computation;
 assign start_computation  = (mul_int_8_input.pre_multiplicand != multiplicand) || (mul_int_8_input.pre_multiplier != multiplier);
 
@@ -79,6 +49,35 @@ always_comb begin: state_transition
             end
         end
         default: ; //do nothing  
+    endcase
+end
+
+// state machine inner logic
+always_comb begin: state_machine
+    n_itr_num  = itr_num;
+    n_acc_multiplier_lsb = acc_multiplier_lsb;
+    case(state)
+        PRE_START: begin
+            n_acc_multiplier_lsb = {{(NUM_WIDTH_INT8){1'b0}}, multiplier, 1'b0};
+            n_itr_num            =  NUM_WIDTH_INT8;
+        end
+        COMPUTE: begin
+            if(acc_multiplier_lsb[1:0] == 2'b01) begin
+                n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH_INT8:NUM_WIDTH_INT8+1] + multiplicand, acc_multiplier_lsb[NUM_WIDTH_INT8:0]}) >>> 1 ;
+            end
+            else if(acc_multiplier_lsb[1:0] == 2'b10) begin
+                 n_acc_multiplier_lsb = $signed({acc_multiplier_lsb[2*NUM_WIDTH_INT8:NUM_WIDTH_INT8+1] + ~multiplicand + 1'b1, acc_multiplier_lsb[NUM_WIDTH_INT8:0]}) >>> 1 ;
+            end
+            else begin
+                n_acc_multiplier_lsb = $signed(acc_multiplier_lsb) >>> 1;
+            end
+            // dec by one in any case
+            n_itr_num = itr_num - 1;
+        end
+        DONE: begin
+            // see assign 
+        end
+        default: ; // do nothing
     endcase
 end
 
