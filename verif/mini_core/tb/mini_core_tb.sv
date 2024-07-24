@@ -41,6 +41,7 @@ logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MI
 string test_name;
 `include "mini_core_tasks.vh"
 `include "mini_core_trk.sv"
+`include "mini_core_pmon_tasks.vh"
 
 
 // ========================
@@ -100,9 +101,12 @@ initial begin: test_seq
     fork
     get_rf_write();
     get_ref_rf_write();
+    //count_inst_and_clk();
     begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
+        track_performance();
         eot(.msg("ebreak was called"));
     end
+    
     join
 
 end // test_seq
