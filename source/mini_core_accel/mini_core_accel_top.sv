@@ -55,8 +55,8 @@ assign DMemByteEnQ103H = Core2DmemReqQ103H.ByteEn;
 assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
 assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
 
-t_mul2core_rsp  mul2core_rsp;
-t_core2mul_req  core2mul_req; 
+t_accel_farm_input   accel_farm_input;
+t_accel_farm_output  accel_farm_output; 
 //---------------------------------------------------
 mini_core_accel_mem_wrap mini_core_accel_mem_wrap(
  .Clock                 (Clock)  ,             
@@ -80,8 +80,8 @@ mini_core_accel_mem_wrap mini_core_accel_mem_wrap(
  //============================================
  //     cr_mem (accelerators)
 //============================================
-  .mul2core_rsp         (mul2core_rsp),
-  .core2mul_req         (core2mul_req), 
+  .accel_farm_output    (accel_farm_output),
+  .accel_farm_input     (accel_farm_input), 
 //============================================
 //      fabric interface
 //============================================
@@ -98,10 +98,10 @@ mini_core_accel_farm
 #(.MUL_NUM(8))  // FIXME - parametrize
 mini_core_accel_farm 
 (
-    .clock        (Clock),
-    .rst          (Rst),
-    .core2mul_req (core2mul_req),
-    .mul2core_rsp (mul2core_rsp)
+    .clock             (Clock),
+    .rst               (Rst),
+    .accel_farm_input  (accel_farm_input),
+    .accel_farm_output (accel_farm_output)
 );
 
 endmodule

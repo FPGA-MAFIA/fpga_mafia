@@ -43,8 +43,8 @@ import mini_core_accel_pkg::*;
                 //============================================
                 //     cr_mem (accelerators)
                 //============================================
-                 input  var t_mul2core_rsp  mul2core_rsp,
-                 output var t_core2mul_req  core2mul_req, 
+                 input  var t_accel_farm_output accel_farm_output,
+                 output var t_accel_farm_input  accel_farm_input, 
                 //============================================
                 //      fabric interface
                 //============================================
@@ -247,8 +247,8 @@ mini_core_accell_cr_mem mini_core_accell_cr_mem
     .q       (CrMemRdDataQ104H),
 
     // Accelerators interface
-    .mul2core_rsp(mul2core_rsp),
-    .core2mul_req(core2mul_req) 
+    .accel_farm_output(accel_farm_output),
+    .accel_farm_input (accel_farm_input) 
 );
 
 
