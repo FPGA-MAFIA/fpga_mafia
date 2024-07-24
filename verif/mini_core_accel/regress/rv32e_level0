@@ -1,0 +1,6 @@
+alive.c -gMINI_RF_NUM_MSB=15
+bubblesort.c -gMINI_RF_NUM_MSB=15
+gcd.c -gMINI_RF_NUM_MSB=15
+stress.c -gV_TIMEOUT=500000 -gMINI_RF_NUM_MSB=15
+non_local_bubble.c -gMINI_RF_NUM_MSB=15
+non_local_rd_wr.c -gMINI_RF_NUM_MSB=15
