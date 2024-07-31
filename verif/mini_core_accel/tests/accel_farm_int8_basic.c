@@ -6,8 +6,6 @@
 //./build.py -dut mini_core_accel -test accel_farm_int8_basic -app -hw -sim 
 
 #include "mini_core_accel_defines.h"
-#define WRITE_REG(REG,VAL) (*REG) = VAL
-#define READ_REG(VAL,REG)  VAL    = (*REG)
 
 int main() {
 
