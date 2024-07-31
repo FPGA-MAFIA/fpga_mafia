@@ -15,8 +15,8 @@ typedef enum {
 } t_mul_int8_states;
 
 typedef struct packed {
-    int8   pre_multiplicand;
-    int8   pre_multiplier;
+    int8   multiplicand;
+    int8   multiplier;
 }t_mul_int8_input;
 
 typedef struct packed {

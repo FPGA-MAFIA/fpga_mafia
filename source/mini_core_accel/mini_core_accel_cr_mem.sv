@@ -46,7 +46,7 @@ always_comb begin :wr_to_accel_cr
     next_accel_cr = Rst ? '0 : accel_cr;
     if(wren) begin // writing data from core to accelerators. 
         unique casez (address)
-        // each CR_CORE2MUL_I concantinated with {pre_multiplicand, pre_multiplier}
+        // each CR_CORE2MUL_I concantinated with {multiplicand, multiplier}
           CR_CORE2MUL_INT8_0     : next_accel_cr.cr_core2mul_int8_0   = data[15:0]; 
           CR_CORE2MUL_INT8_1     : next_accel_cr.cr_core2mul_int8_1   = data[15:0];
           CR_CORE2MUL_INT8_2     : next_accel_cr.cr_core2mul_int8_2   = data[15:0];
@@ -87,22 +87,22 @@ always_comb begin : read_from_accel_cr
         endcase
     end
         // hard wired from cr to multipliers
-        {accel_farm_input.core2mul_int8[0].pre_multiplicand, accel_farm_input.core2mul_int8[0].pre_multiplier} = {accel_cr.cr_core2mul_int8_0[15:8], accel_cr.cr_core2mul_int8_0[7:0]};
+        {accel_farm_input.core2mul_int8[0].multiplicand, accel_farm_input.core2mul_int8[0].multiplier} = {accel_cr.cr_core2mul_int8_0[15:8], accel_cr.cr_core2mul_int8_0[7:0]};
 
 
-        {accel_farm_input.core2mul_int8[1].pre_multiplicand, accel_farm_input.core2mul_int8[1].pre_multiplier} = {accel_cr.cr_core2mul_int8_1[15:8], accel_cr.cr_core2mul_int8_1[7:0]};
+        {accel_farm_input.core2mul_int8[1].multiplicand, accel_farm_input.core2mul_int8[1].multiplier} = {accel_cr.cr_core2mul_int8_1[15:8], accel_cr.cr_core2mul_int8_1[7:0]};
 
-        {accel_farm_input.core2mul_int8[2].pre_multiplicand, accel_farm_input.core2mul_int8[2].pre_multiplier} = {accel_cr.cr_core2mul_int8_2[15:8], accel_cr.cr_core2mul_int8_2[7:0]};
+        {accel_farm_input.core2mul_int8[2].multiplicand, accel_farm_input.core2mul_int8[2].multiplier} = {accel_cr.cr_core2mul_int8_2[15:8], accel_cr.cr_core2mul_int8_2[7:0]};
 
-        {accel_farm_input.core2mul_int8[3].pre_multiplicand, accel_farm_input.core2mul_int8[3].pre_multiplier} = { accel_cr.cr_core2mul_int8_3[15:8], accel_cr.cr_core2mul_int8_3[7:0]};                                                                                                                                                                                                                                                                                                                                 
+        {accel_farm_input.core2mul_int8[3].multiplicand, accel_farm_input.core2mul_int8[3].multiplier} = { accel_cr.cr_core2mul_int8_3[15:8], accel_cr.cr_core2mul_int8_3[7:0]};                                                                                                                                                                                                                                                                                                                                 
         
-        {accel_farm_input.core2mul_int8[4].pre_multiplicand, accel_farm_input.core2mul_int8[4].pre_multiplier} = {accel_cr.cr_core2mul_int8_4[15:8], accel_cr.cr_core2mul_int8_4[7:0]};
+        {accel_farm_input.core2mul_int8[4].multiplicand, accel_farm_input.core2mul_int8[4].multiplier} = {accel_cr.cr_core2mul_int8_4[15:8], accel_cr.cr_core2mul_int8_4[7:0]};
         
-        {accel_farm_input.core2mul_int8[5].pre_multiplicand, accel_farm_input.core2mul_int8[5].pre_multiplier} = {accel_cr.cr_core2mul_int8_5[15:8], accel_cr.cr_core2mul_int8_5[7:0]};
+        {accel_farm_input.core2mul_int8[5].multiplicand, accel_farm_input.core2mul_int8[5].multiplier} = {accel_cr.cr_core2mul_int8_5[15:8], accel_cr.cr_core2mul_int8_5[7:0]};
         
-        {accel_farm_input.core2mul_int8[6].pre_multiplicand, accel_farm_input.core2mul_int8[6].pre_multiplier} = {accel_cr.cr_core2mul_int8_6[15:8], accel_cr.cr_core2mul_int8_6[7:0]};
+        {accel_farm_input.core2mul_int8[6].multiplicand, accel_farm_input.core2mul_int8[6].multiplier} = {accel_cr.cr_core2mul_int8_6[15:8], accel_cr.cr_core2mul_int8_6[7:0]};
         
-        {accel_farm_input.core2mul_int8[7].pre_multiplicand, accel_farm_input.core2mul_int8[7].pre_multiplier} = {accel_cr.cr_core2mul_int8_7[15:8], accel_cr.cr_core2mul_int8_7[7:0]};
+        {accel_farm_input.core2mul_int8[7].multiplicand, accel_farm_input.core2mul_int8[7].multiplier} = {accel_cr.cr_core2mul_int8_7[15:8], accel_cr.cr_core2mul_int8_7[7:0]};
        
 end
 

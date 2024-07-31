@@ -18,7 +18,7 @@ generate
         multiplier_int8 multiplier_int8 (
             .clock(clock),
             .rst(rst),
-            .mul_int_8_input(accel_farm_input.core2mul_int8[mul_index]),
+            .pre_mul_int_8_input(accel_farm_input.core2mul_int8[mul_index]),
             .mul_int8_output(accel_farm_output.mul2core_int8[mul_index])
         );
 
