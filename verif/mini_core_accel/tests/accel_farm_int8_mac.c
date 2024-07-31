@@ -28,6 +28,8 @@ int main() {
         data_ready = 0;
         READ_REG(mul_result, CR_MUL2CORE_INT8_0);
         result += mul_result; 
+
+        // used for debug purposes
         WRITE_REG(CR_DEBUG_0, result);
 
     }
