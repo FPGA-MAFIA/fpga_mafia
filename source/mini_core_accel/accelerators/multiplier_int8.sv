@@ -6,7 +6,7 @@ import mini_core_accel_pkg::*;
 (
     input logic                  clock,
     input logic                  rst,
-    input var t_mul_int8_input   mul_int_8_input,
+    input var t_mul_int8_input   pre_mul_int_8_input, // we compare between present and new inputs to start activating the multiplier
     output var t_mul_int8_output mul_int8_output
 );
 
@@ -16,7 +16,7 @@ logic [2*NUM_WIDTH_INT8:0]       acc_multiplier_lsb, n_acc_multiplier_lsb;
 logic [$clog2(NUM_WIDTH_INT8):0] itr_num, n_itr_num;
 
 logic  start_computation;
-assign start_computation  = (mul_int_8_input.pre_multiplicand != multiplicand) || (mul_int_8_input.pre_multiplier != multiplier);
+assign start_computation  = (pre_mul_int_8_input.multiplicand != multiplicand) || (pre_mul_int_8_input.multiplier != multiplier);
 
 always_comb begin: state_transition
     n_state = state;
@@ -93,8 +93,8 @@ assign mul_int8_output.result = ((state == DONE) && (multiplicand == -8'd128)) ?
 `MAFIA_RST_VAL_DFF(state, n_state, clock, rst, DONE)
 
 // we sample the inputs once the input changed it triggers the multiplier to start calculations
-`MAFIA_RST_DFF(multiplicand, mul_int_8_input.pre_multiplicand, clock, rst)
-`MAFIA_RST_DFF(multiplier, mul_int_8_input.pre_multiplier, clock, rst)
+`MAFIA_RST_DFF(multiplicand, pre_mul_int_8_input.multiplicand, clock, rst)
+`MAFIA_RST_DFF(multiplier, pre_mul_int_8_input.multiplier, clock, rst)
 `MAFIA_RST_DFF(itr_num, n_itr_num, clock, rst)
 `MAFIA_RST_DFF(acc_multiplier_lsb, n_acc_multiplier_lsb, clock, rst)
 `MAFIA_RST_VAL_DFF(itr_num, n_itr_num, clock, rst, NUM_WIDTH_INT8)

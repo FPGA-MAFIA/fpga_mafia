@@ -6,7 +6,11 @@
 // but its not obligatory.
 // For example: we are using the same ref model for all the cores and we dont want to change addresses of CR's in that core
 // cause this will cause us to make changes in thr ref model.
-    
+
+// macros
+#define WRITE_REG(REG,VAL) (*REG) = VAL
+#define READ_REG(VAL,REG)  VAL    = (*REG)
+
 #define D_MEM_BASE      0x00010000
 #define CR_MEM_BASE     0x00FE0000
 
@@ -42,13 +46,24 @@
 #define CR_CORE2MUL_INT8_6       ((volatile int *) (CR_MEM_BASE + 0xF006))
 #define CR_CORE2MUL_INT8_7       ((volatile int *) (CR_MEM_BASE + 0xF007))
 
-#define CR_MUL2CORE_INT8_0       ((volatile int *) (CR_MEM_BASE + 0xF008))
-#define CR_MUL2CORE_INT8_1       ((volatile int *) (CR_MEM_BASE + 0xF009))
-#define CR_MUL2CORE_INT8_2       ((volatile int *) (CR_MEM_BASE + 0xF00A))
-#define CR_MUL2CORE_INT8_3       ((volatile int *) (CR_MEM_BASE + 0xF00B))
-#define CR_MUL2CORE_INT8_4       ((volatile int *) (CR_MEM_BASE + 0xF00C))
-#define CR_MUL2CORE_INT8_5       ((volatile int *) (CR_MEM_BASE + 0xF00D))
-#define CR_MUL2CORE_INT8_6       ((volatile int *) (CR_MEM_BASE + 0xF00E))
-#define CR_MUL2CORE_INT8_7       ((volatile int *) (CR_MEM_BASE + 0xF00F))
+#define CR_MUL2CORE_INT8_0          ((volatile int *) (CR_MEM_BASE + 0xF008))
+#define CR_MUL2CORE_INT8_DONE_0     ((volatile int *) (CR_MEM_BASE + 0xF009))
+#define CR_MUL2CORE_INT8_1          ((volatile int *) (CR_MEM_BASE + 0xF00A))
+#define CR_MUL2CORE_INT8_DONE_1     ((volatile int *) (CR_MEM_BASE + 0xF00B))
+#define CR_MUL2CORE_INT8_2          ((volatile int *) (CR_MEM_BASE + 0xF00C))
+#define CR_MUL2CORE_INT8_DONE_2     ((volatile int *) (CR_MEM_BASE + 0xF00D))
+#define CR_MUL2CORE_INT8_3          ((volatile int *) (CR_MEM_BASE + 0xF00E))
+#define CR_MUL2CORE_INT8_DONE_3     ((volatile int *) (CR_MEM_BASE + 0xF00F))
+#define CR_MUL2CORE_INT8_4          ((volatile int *) (CR_MEM_BASE + 0xF010))
+#define CR_MUL2CORE_INT8_DONE_4     ((volatile int *) (CR_MEM_BASE + 0xF011))
+#define CR_MUL2CORE_INT8_5          ((volatile int *) (CR_MEM_BASE + 0xF012))
+#define CR_MUL2CORE_INT8_DONE_5     ((volatile int *) (CR_MEM_BASE + 0xF013))
+#define CR_MUL2CORE_INT8_6          ((volatile int *) (CR_MEM_BASE + 0xF014))
+#define CR_MUL2CORE_INT8_DONE_6     ((volatile int *) (CR_MEM_BASE + 0xF015))
+#define CR_MUL2CORE_INT8_7          ((volatile int *) (CR_MEM_BASE + 0xF016))
+#define CR_MUL2CORE_INT8_DONE_7     ((volatile int *) (CR_MEM_BASE + 0xF017))
+
+// used for debug purposes
+#define CR_DEBUG_0 ((volatile int *) (CR_MEM_BASE + 0xFF00))
 
 #endif
