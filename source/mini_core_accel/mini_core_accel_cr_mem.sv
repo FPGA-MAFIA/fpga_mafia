@@ -50,16 +50,25 @@ always_comb begin :wr_to_accel_cr
     next_cr_debug = Rst ? '0 : cr_debug;
     if(wren) begin // writing data from core to accelerators. 
         unique casez (address)
-        // each CR_CORE2MUL_I concantinated with {multiplicand, multiplier}
-          CR_CORE2MUL_INT8_0     : next_accel_cr.cr_int8_multiplier[0].cr_core2mul_int8   = data[15:0]; 
-          CR_CORE2MUL_INT8_1     : next_accel_cr.cr_int8_multiplier[1].cr_core2mul_int8   = data[15:0];
-          CR_CORE2MUL_INT8_2     : next_accel_cr.cr_int8_multiplier[2].cr_core2mul_int8   = data[15:0];
-          CR_CORE2MUL_INT8_3     : next_accel_cr.cr_int8_multiplier[3].cr_core2mul_int8   = data[15:0];
-          CR_CORE2MUL_INT8_4     : next_accel_cr.cr_int8_multiplier[4].cr_core2mul_int8   = data[15:0];
-          CR_CORE2MUL_INT8_5     : next_accel_cr.cr_int8_multiplier[5].cr_core2mul_int8   = data[15:0];
-          CR_CORE2MUL_INT8_6     : next_accel_cr.cr_int8_multiplier[6].cr_core2mul_int8   = data[15:0];
-          CR_CORE2MUL_INT8_7     : next_accel_cr.cr_int8_multiplier[7].cr_core2mul_int8   = data[15:0];
-          CR_DEBUG_0             : next_cr_debug.cr_debug_0                               = data[31:0]; 
+        // multiplicand and multiplier data comming from the core to the multiplier
+          CR_CORE2MUL_INT8_MULTIPLICANT_0     : next_accel_cr.cr_int8_multiplier[0].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_0       : next_accel_cr.cr_int8_multiplier[0].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_1     : next_accel_cr.cr_int8_multiplier[1].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_1       : next_accel_cr.cr_int8_multiplier[1].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_2     : next_accel_cr.cr_int8_multiplier[2].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_2       : next_accel_cr.cr_int8_multiplier[2].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_3     : next_accel_cr.cr_int8_multiplier[3].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_3       : next_accel_cr.cr_int8_multiplier[3].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_4     : next_accel_cr.cr_int8_multiplier[4].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_4       : next_accel_cr.cr_int8_multiplier[4].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_5     : next_accel_cr.cr_int8_multiplier[5].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_5       : next_accel_cr.cr_int8_multiplier[5].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_6     : next_accel_cr.cr_int8_multiplier[6].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_6       : next_accel_cr.cr_int8_multiplier[6].cr_core2mul_multiplier_int8    = data[7:0];
+          CR_CORE2MUL_INT8_MULTIPLICANT_7     : next_accel_cr.cr_int8_multiplier[7].cr_core2mul_multiplicant_int8  = data[7:0]; 
+          CR_CORE2MUL_INT8_MULTIPLIER_7       : next_accel_cr.cr_int8_multiplier[7].cr_core2mul_multiplier_int8    = data[7:0];
+   
+          CR_DEBUG_0                          : next_cr_debug.cr_debug_0                                           = data[31:0]; 
           default            : ; // do nothing
         endcase
     end
@@ -109,7 +118,7 @@ always_comb begin : read_from_accel_cr
         // hard wired from cr to multipliers
         for(int j=0; j < 8; j++) begin
             {accel_farm_input.core2mul_int8[j].multiplicand, accel_farm_input.core2mul_int8[j].multiplier} =
-                                                  {accel_cr.cr_int8_multiplier[j].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[j].cr_core2mul_int8[7:0]};
+                                                {accel_cr.cr_int8_multiplier[j].cr_core2mul_multiplicant_int8, accel_cr.cr_int8_multiplier[j].cr_core2mul_multiplier_int8};
        end
         
 end 

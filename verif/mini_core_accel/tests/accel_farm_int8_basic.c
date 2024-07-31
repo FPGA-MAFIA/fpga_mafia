@@ -11,10 +11,19 @@ int main() {
 
     //Writing to multiplier #0, #1
 
-    int data0 = 0x00000304; // {multiplicand = 3, multiplier = 4}
-    int data1 = 0x0000fd04; // {multiplicand = -3, multiplier = 4}
-    WRITE_REG(CR_CORE2MUL_INT8_0, data0);
-    WRITE_REG(CR_CORE2MUL_INT8_1, data1);
+    int multiplicand0 = 3; 
+    int multiplier0   = 4; 
+    
+    // writing data to multiplier0 and it immediately starts to work
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_0, multiplicand0);
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_0, multiplier0);
+
+    int multiplicand1 = -3; 
+    int multiplier1   = 4;
+
+    // writing data to multiplier0 and it immediately starts to work
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_1, multiplicand1);
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_1, multiplier1);
 
     int polling0 = 0;
     int polling1 = 0;
