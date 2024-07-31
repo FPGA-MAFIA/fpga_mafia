@@ -21,7 +21,7 @@ int main() {
     int multiplicand1 = -3; 
     int multiplier1   = 4;
 
-    // writing data to multiplier0 and it immediately starts to work
+    // writing data to multiplier1 and it immediately starts to work
     WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_1, multiplicand1);
     WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_1, multiplier1);
 
