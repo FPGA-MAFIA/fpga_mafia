@@ -6,7 +6,11 @@
 // but its not obligatory.
 // For example: we are using the same ref model for all the cores and we dont want to change addresses of CR's in that core
 // cause this will cause us to make changes in thr ref model.
-    
+
+// macros
+#define WRITE_REG(REG,VAL) (*REG) = VAL
+#define READ_REG(VAL,REG)  VAL    = (*REG)
+
 #define D_MEM_BASE      0x00010000
 #define CR_MEM_BASE     0x00FE0000
 
@@ -58,5 +62,8 @@
 #define CR_MUL2CORE_INT8_DONE_6     ((volatile int *) (CR_MEM_BASE + 0xF015))
 #define CR_MUL2CORE_INT8_7          ((volatile int *) (CR_MEM_BASE + 0xF016))
 #define CR_MUL2CORE_INT8_DONE_7     ((volatile int *) (CR_MEM_BASE + 0xF017))
+
+// used for debug purposes
+#define CR_DEBUG_0 ((volatile int *) (CR_MEM_BASE + 0xFF00))
 
 #endif

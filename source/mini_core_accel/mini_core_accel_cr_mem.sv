@@ -34,15 +34,20 @@ import mini_core_accel_pkg::*;
     output var t_accel_farm_input  accel_farm_input 
 );
 
+integer i,j;
+
 t_accel_cr_int8_multipliers accel_cr, next_accel_cr; // define a struct of structs for int8 multipliers
+t_cr_debug cr_debug, next_cr_debug;   // FIXME - remove cr for debug when we will have ref model
 
 `MAFIA_DFF(accel_cr, next_accel_cr, Clk)
+`MAFIA_DFF(cr_debug, next_cr_debug, Clk)
 
 logic [31:0] pre_q;
 
 // write to accel_cr
 always_comb begin :wr_to_accel_cr
     next_accel_cr = Rst ? '0 : accel_cr;
+    next_cr_debug = Rst ? '0 : cr_debug;
     if(wren) begin // writing data from core to accelerators. 
         unique casez (address)
         // each CR_CORE2MUL_I concantinated with {multiplicand, multiplier}
@@ -54,34 +59,15 @@ always_comb begin :wr_to_accel_cr
           CR_CORE2MUL_INT8_5     : next_accel_cr.cr_int8_multiplier[5].cr_core2mul_int8   = data[15:0];
           CR_CORE2MUL_INT8_6     : next_accel_cr.cr_int8_multiplier[6].cr_core2mul_int8   = data[15:0];
           CR_CORE2MUL_INT8_7     : next_accel_cr.cr_int8_multiplier[7].cr_core2mul_int8   = data[15:0];
+          CR_DEBUG_0             : next_cr_debug.cr_debug_0                               = data[31:0]; 
           default            : ; // do nothing
         endcase
     end
         // hard wired {done, result}
-        {next_accel_cr.cr_int8_multiplier[0].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[0].cr_mul2core_result} = 
-                                                                                {accel_farm_output.mul2core_int8[0].done, accel_farm_output.mul2core_int8[0].result};
-
-        {next_accel_cr.cr_int8_multiplier[1].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[1].cr_mul2core_result} = 
-                                                                               {accel_farm_output.mul2core_int8[1].done, accel_farm_output.mul2core_int8[1].result};
-
-        {next_accel_cr.cr_int8_multiplier[2].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[2].cr_mul2core_result} = 
-                                                                                {accel_farm_output.mul2core_int8[2].done, accel_farm_output.mul2core_int8[2].result};
-
-        {next_accel_cr.cr_int8_multiplier[3].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[3].cr_mul2core_result} =    
-                                                                                {accel_farm_output.mul2core_int8[3].done, accel_farm_output.mul2core_int8[3].result};
-
-        {next_accel_cr.cr_int8_multiplier[4].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[4].cr_mul2core_result} = 
-                                                                                {accel_farm_output.mul2core_int8[4].done, accel_farm_output.mul2core_int8[4].result};
-
-        {next_accel_cr.cr_int8_multiplier[5].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[5].cr_mul2core_result} = 
-                                                                                {accel_farm_output.mul2core_int8[5].done, accel_farm_output.mul2core_int8[5].result};
-
-        {next_accel_cr.cr_int8_multiplier[6].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[6].cr_mul2core_result} = 
-                                                                                {accel_farm_output.mul2core_int8[6].done, accel_farm_output.mul2core_int8[6].result};
-
-        {next_accel_cr.cr_int8_multiplier[7].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[7].cr_mul2core_result} = 
-                                                                                {accel_farm_output.mul2core_int8[7].done, accel_farm_output.mul2core_int8[7].result};
-
+        for(int i = 0; i < 8; i++) begin
+            {next_accel_cr.cr_int8_multiplier[i].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[i].cr_mul2core_result} = 
+                                                                                {accel_farm_output.mul2core_int8[i].done, accel_farm_output.mul2core_int8[i].result};
+        end
 
 end
 
@@ -115,27 +101,18 @@ always_comb begin : read_from_accel_cr
             CR_MUL2CORE_INT8_7      : pre_q = {16'b0, accel_cr.cr_int8_multiplier[7].cr_mul2core_result};
             CR_MUL2CORE_INT8_DONE_7 : pre_q = {31'b0, accel_cr.cr_int8_multiplier[7].cr_mul2core_done};
 
+            CR_DEBUG_0              : pre_q = cr_debug.cr_debug_0; 
+
             default      : ; // do nothing 
         endcase
     end
         // hard wired from cr to multipliers
-        {accel_farm_input.core2mul_int8[0].multiplicand, accel_farm_input.core2mul_int8[0].multiplier} = {accel_cr.cr_int8_multiplier[0].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[0].cr_core2mul_int8[7:0]};
-
-        {accel_farm_input.core2mul_int8[1].multiplicand, accel_farm_input.core2mul_int8[1].multiplier} = {accel_cr.cr_int8_multiplier[1].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[1].cr_core2mul_int8[7:0]};
-
-        {accel_farm_input.core2mul_int8[2].multiplicand, accel_farm_input.core2mul_int8[2].multiplier} = {accel_cr.cr_int8_multiplier[2].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[2].cr_core2mul_int8[7:0]};
-
-        {accel_farm_input.core2mul_int8[3].multiplicand, accel_farm_input.core2mul_int8[3].multiplier} = {accel_cr.cr_int8_multiplier[3].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[3].cr_core2mul_int8[7:0]};                                                                                                                                                                                                                                                                                                                              
+        for(int j=0; j < 8; j++) begin
+            {accel_farm_input.core2mul_int8[j].multiplicand, accel_farm_input.core2mul_int8[j].multiplier} =
+                                                  {accel_cr.cr_int8_multiplier[j].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[j].cr_core2mul_int8[7:0]};
+       end
         
-        {accel_farm_input.core2mul_int8[4].multiplicand, accel_farm_input.core2mul_int8[4].multiplier} = {accel_cr.cr_int8_multiplier[4].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[4].cr_core2mul_int8[7:0]};
-        
-        {accel_farm_input.core2mul_int8[5].multiplicand, accel_farm_input.core2mul_int8[5].multiplier} = {accel_cr.cr_int8_multiplier[5].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[5].cr_core2mul_int8[7:0]};
-        
-        {accel_farm_input.core2mul_int8[6].multiplicand, accel_farm_input.core2mul_int8[6].multiplier} = {accel_cr.cr_int8_multiplier[6].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[6].cr_core2mul_int8[7:0]};
-        
-        {accel_farm_input.core2mul_int8[7].multiplicand, accel_farm_input.core2mul_int8[7].multiplier} = {accel_cr.cr_int8_multiplier[7].cr_core2mul_int8[15:8], accel_cr.cr_int8_multiplier[7].cr_core2mul_int8[7:0]};
-       
-end
+end 
 
 `MAFIA_RST_DFF(q, pre_q, Clk, Rst)
 

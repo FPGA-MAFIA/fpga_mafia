@@ -43,26 +43,10 @@ typedef struct packed {
     t_cr_int8_multiplier [7:0] cr_int8_multiplier;
 }t_accel_cr_int8_multipliers;
 
-// TODO - I keept the cr's naming looks the same as CR's addresses and 
-// not as array. Consider refactoring for naming consistency in the future 
+// FIXME  used for degub purposes untill we will have dedicated ref model
 typedef struct packed {
-    logic [15:0] cr_core2mul_int8_0;  // {multiplicand, multiplier}
-    logic [15:0] cr_core2mul_int8_1;
-    logic [15:0] cr_core2mul_int8_2;
-    logic [15:0] cr_core2mul_int8_3;
-    logic [15:0] cr_core2mul_int8_4;
-    logic [15:0] cr_core2mul_int8_5;
-    logic [15:0] cr_core2mul_int8_6;
-    logic [15:0] cr_core2mul_int8_7;
-    logic [16:0] cr_mul2core_int8_0;  // {done, result}
-    logic [16:0] cr_mul2core_int8_1;
-    logic [16:0] cr_mul2core_int8_2;
-    logic [16:0] cr_mul2core_int8_3;
-    logic [16:0] cr_mul2core_int8_4;
-    logic [16:0] cr_mul2core_int8_5;
-    logic [16:0] cr_mul2core_int8_6;
-    logic [16:0] cr_mul2core_int8_7;
-} t_accel_cr;
+    logic [31:0] cr_debug_0;
+} t_cr_debug;
 
 // define CR's
 parameter CR_MEM_OFFSET       = 'h00FE_0000;
@@ -97,6 +81,7 @@ parameter CR_MUL2CORE_INT8_DONE_6   = CR_MEM_OFFSET + 'hf015;
 parameter CR_MUL2CORE_INT8_7        = CR_MEM_OFFSET + 'hf016;
 parameter CR_MUL2CORE_INT8_DONE_7   = CR_MEM_OFFSET + 'hf017; 
 
-
+// used for debug purposes
+parameter CR_DEBUG_0                = CR_MEM_OFFSET + 'hff00;
 
 endpackage
