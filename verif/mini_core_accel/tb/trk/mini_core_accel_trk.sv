@@ -63,26 +63,47 @@ initial begin: trk_rf_memory_access_gen
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  
 end
 //
+
+integer trk_cr_memory_access;
+initial begin: trk_cr_memory_access_gen
+    $timeformat(-9, 1, " ", 6);
+    trk_cr_memory_access = $fopen({"../../../target/mini_core_accel/tests/",test_name,"/trk_cr_memory_access.log"},"w");
+    $fwrite(trk_cr_memory_access,"---------------------------------------------------------\n");
+    $fwrite(trk_cr_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
+    $fwrite(trk_cr_memory_access,"---------------------------------------------------------\n");  
+end
 assign PcQ100H = mini_core_accel_top.PcQ100H;
 
 logic DMemRdEnQ104H;
 logic DMemWrEnQ104H;
+logic CrRegionMemHitQ104H;
 logic [31:0] DMemAddressQ104H;
 logic [31:0] DMemWrDataQ104H;
 
-assign DMemWrEnQ104H = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ104H.DMemWrEn;
-assign DMemRdEnQ104H = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ104H.DMemRdEn;
+assign DMemWrEnQ104H  = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ104H.DMemWrEn;
+assign DMemRdEnQ104H  = mini_core_accel_top.mini_core.mini_core_ctrl.CtrlQ104H.DMemRdEn;
 `MAFIA_DFF(DMemAddressQ104H, mini_core_accel_top.mini_core_accel_mem_wrap.DMemAddressQ103H , Clk)
 `MAFIA_DFF(DMemWrDataQ104H,  mini_core_accel_top.mini_core_accel_mem_wrap.DMemWrDataQ103H  , Clk)
+`MAFIA_DFF(CrRegionMemHitQ104H, mini_core_accel_top.mini_core_accel_mem_wrap.CrRegionMemHitQ103H  , Clk)
 
 
 //tracker on memory_access operations
 always @(posedge Clk) begin : memory_access_print
-    if(DMemWrEnQ104H) begin
+    if(DMemWrEnQ104H && !(CrRegionMemHitQ104H)) begin
         $fwrite(trk_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
     end
-    if(DMemRdEnQ104H) begin
+    if(DMemRdEnQ104H && !(+CrRegionMemHitQ104H)) begin
         $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_accel_top.mini_core.mini_core_rf.RegWrDataQ104H);
+    end
+end
+
+//tracker on cr memory_access operations
+always @(posedge Clk) begin : cr_memory_access_print
+    if(DMemWrEnQ104H && CrRegionMemHitQ104H) begin
+        $fwrite(trk_cr_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
+    end
+    if(DMemRdEnQ104H && CrRegionMemHitQ104H) begin
+        $fwrite(trk_cr_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_accel_top.mini_core.mini_core_rf.RegWrDataQ104H);
     end
 end
 
