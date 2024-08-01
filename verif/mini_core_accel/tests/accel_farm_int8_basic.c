@@ -6,20 +6,22 @@
 //./build.py -dut mini_core_accel -test accel_farm_int8_basic -app -hw -sim 
 
 #include "mini_core_accel_defines.h"
+#include "mafia_accel.h"
+
 
 int main() {
 
     //Writing to multiplier #0, #1
 
-    int multiplicand0 = 3; 
-    int multiplier0   = 4; 
+    int8_t multiplicand0 = 3; 
+    int8_t multiplier0   = 4; 
     
     // writing data to multiplier0 and it immediately starts to work
     WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_0, multiplicand0);
     WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_0, multiplier0);
 
-    int multiplicand1 = -3; 
-    int multiplier1   = 4;
+    int8_t multiplicand1 = -3; 
+    int8_t multiplier1   = 4;
 
     // writing data to multiplier1 and it immediately starts to work
     WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_1, multiplicand1);
@@ -27,7 +29,7 @@ int main() {
 
     int polling0 = 0;
     int polling1 = 0;
-    int mul_int8_result0, mul_int8_result1;
+    int16_t mul_int8_result0, mul_int8_result1;
 
     while(!polling0) {
         READ_REG(polling0, CR_MUL2CORE_INT8_DONE_0);

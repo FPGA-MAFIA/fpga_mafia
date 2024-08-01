@@ -6,15 +6,15 @@
 //./build.py -dut mini_core_accel -test accel_farm_int8_mac -app -hw -sim 
 
 #include "mini_core_accel_defines.h"
-
+#include "mafia_accel.h"
 
 int main() {
 
-    int data[16] = {3, 4, 3, 5, 3, 6, 3, 7, 3, 8, 3, 9, 4, 0, 5, 4}; // 3x4 + 3x5 + 3x6 + ... + 4x0 + 5x4
-    int data_size = sizeof(data)/sizeof(int);
+    int8_t data[16] = {3, 4, 3, 5, 3, 6, 3, 7, 3, 8, 3, 9, 4, 0, 5, 4}; // 3x4 + 3x5 + 3x6 + ... + 4x0 + 5x4
+    int8_t data_size = sizeof(data)/sizeof(int8_t);
 
-    int mul_result;
-    int result = 0;
+    int16_t mul_result;
+    int16_t result = 0;
     
     int data_ready = 0;
 

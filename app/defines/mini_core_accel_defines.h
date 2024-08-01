@@ -7,10 +7,6 @@
 // For example: we are using the same ref model for all the cores and we dont want to change addresses of CR's in that core
 // cause this will cause us to make changes in thr ref model.
 
-// macros
-#define WRITE_REG(REG,VAL) (*REG) = VAL
-#define READ_REG(VAL,REG)  VAL    = (*REG)
-
 #define D_MEM_BASE      0x00010000
 #define CR_MEM_BASE     0x00FE0000
 
