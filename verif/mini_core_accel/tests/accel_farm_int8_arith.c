@@ -159,7 +159,7 @@ int main() {
     WRITE_REG(CR_DEBUG_0, result3);
     */
     /////////////////////////////////////////
-   
+    /*
     // the 8 lsb bits are negative
     int8_t weights4[2] = {0x60, 0x05}; //0x60 = d96
 
@@ -217,6 +217,69 @@ int main() {
     // used for debug purposes
     WRITE_REG(CR_DEBUG_0, result4);
     
+    */
+   //////////////////////////////////////////
+
+   // the 8 lsb bits are negative
+    int8_t weights5[2] = {0x60, 0xfb}; //0x60 = d96, 0xfb = -5
+
+    int8_t input5 = 0x4;
+    // operation: ((weights[0]*input) * weights[1]) 
+    
+    int data_ready5 = 0;
+    int result5;
+    
+    int8_t  result5_lsb8, result5_msb8;
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_0, weights5[0]);
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_0, input5);
+
+    while(!data_ready5) {
+            READ_REG(data_ready5, CR_MUL2CORE_INT8_DONE_0);
+    }
+
+    // we got the result : 4x96 = 384. 0x180
+    READ_REG(result5, CR_MUL2CORE_INT8_0);
+
+    result5_lsb8 = result5 & 0x00ff;
+    result5_msb8 = (result5 & 0xff00) >> 8; ; 
+
+    int flag_neg_lsb = 0;
+    if(result5_lsb8 < 0){
+        result5_lsb8 = result5_lsb8 & 0x7f;
+        flag_neg_lsb = 1;   
+    }
+    
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_0, weights5[1]);
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_0, result5_lsb8);
+
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLICAND_1, weights5[1]);
+    WRITE_REG(CR_CORE2MUL_INT8_MULTIPLIER_1, result5_msb8);
+
+    data_ready5 = 0;
+
+    //mul#0 ready before mul#1
+     while(!data_ready5) {
+            READ_REG(data_ready5, CR_MUL2CORE_INT8_DONE_1);
+    }
+
+    int16_t result5_lsb, result5_msb;
+
+  
+    READ_REG(result5_lsb, CR_MUL2CORE_INT8_0);
+    READ_REG(result5_msb, CR_MUL2CORE_INT8_1);
+
+    if(flag_neg_lsb == 1){
+        result5_lsb = result5_lsb + weights5[1] << 7;
+    }
+    // we got the result = 384*-5 = -1920. 0x780
+    result5 = result5_lsb + (result5_msb << 8);
+
+    // used for debug purposes
+    WRITE_REG(CR_DEBUG_0, result5);
+    
+    int done;
+    int16_t res;
+    res = int8_mul(3, 4, 9, &done);
 
     return 0;
 }
