@@ -1,6 +1,6 @@
 // testing int16*int8 using int8 arithmetics
 
-//./build.py -dut mini_core_accel -test int16_mul_int8 -app -hw -sim 
+//./build.py -dut mini_core_accel -test int16_mul_int8 -app -hw -sim -clean
 
 #include "mini_core_accel_defines.h"
 #include "mafia_accel.h"
@@ -24,10 +24,10 @@ int main() {
     READ_REG(result16, CR_MUL2CORE_INT8_0); 
 
     int32_t result32;
-    result32 = mul_16by8(result16, weights[1]);
+    result32 = mul_16by8(result16, weights[1], 0, 1);
 
     // used for debug purposes
-    WRITE_REG(CR_DEBUG_0, result32);  //the result is 0x180
+    WRITE_REG(CR_DEBUG_0, result32);  //the result is 0xfffff880
 
     return 0;
 }
