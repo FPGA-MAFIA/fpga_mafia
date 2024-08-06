@@ -13,11 +13,14 @@
 
 +incdir+../../../source/common/
 +incdir+../../../source/mini_core/
++incdir+../../../source/accel_core/
 +incdir+../../../source/big_core/
 +incdir+../../../source/fabric/
 
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv
+../../../source/accel_core/accel_core_cr_pkg.sv
+
 
 // Common
 ../../../source/common/fifo.sv
@@ -32,7 +35,10 @@
 ../../../source/mini_core/mini_core_mem_acs.sv
 ../../../source/mini_core/mini_core_wb.sv
 ../../../source/mini_core/mini_core.sv
-../../../source/mini_core/mini_core_top.sv
-../../../source/mini_core/mini_mem_wrap.sv
-../../../source/mini_core/mini_core_booth_pipeline.sv
-../../../source/mini_core/shift_multiplier.sv
+../../../source/accel_core/accel_core_cr_mem.sv
+../../../source/accel_core/accel_core_mem_wrap.sv
+
+// additional files
+../../../source/accel_core/accel_core_top.sv
+
+

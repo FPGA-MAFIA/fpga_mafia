@@ -161,4 +161,11 @@ typedef struct packed {
     logic [3:0] ByteEn;
 } t_core2mem_req;
 
+parameter WIDTH = 8;
+typedef struct packed {
+    logic [2*WIDTH:0] AQQ_0;
+    logic [WIDTH-1:0] Mu;
+} stage_mul_inp_t;
+
 endpackage
+
