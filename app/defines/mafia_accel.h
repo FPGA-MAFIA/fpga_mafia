@@ -30,7 +30,7 @@ typedef signed int int32_t;      // 32-bit signed
 // bias   - 8 bit bias
 // index  - multiplier index
 // returns 32 bit signed result. We need only 17 bits max. data*weight + bias 
-int32_t perceptron8_8(int8_t data, int8_t weight, int8_t bias, unsigned int index) {
+int32_t mac8_8(int8_t data, int8_t weight, int8_t bias, unsigned int index) {
 
     WRITE_REG(CORE2MUL_INT8_MULTIPLICAND(index), weight);
     WRITE_REG(CORE2MUL_INT8_MULTIPLIER(index), data);
