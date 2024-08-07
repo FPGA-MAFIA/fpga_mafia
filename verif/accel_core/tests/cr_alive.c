@@ -2,12 +2,12 @@
 typedef unsigned int uint32_t;
 
 int main() {
-    volatile uint32_t *address = (volatile uint32_t *)0x00FE0004;
+    volatile uint32_t *address = (volatile uint32_t *)0x00FE0000;
     uint32_t value;
 
     // Store the value 101010 at the memory address using inline assembly
     asm volatile (
-        "li t1, 101010\n\t"        // Load immediate value 5 into t1
+        "li t1, 10\n\t"        // Load immediate value 5 into t1
         "sw t1, 0(%0)\n\t"    // Store t1 to the memory address in a0
         : // No outputs
         : "r" (address)
@@ -31,7 +31,7 @@ int main() {
 
     // Store the value 202020 at the memory address using inline assembly
     asm volatile (
-        "li t1, 202020\n\t"        // Load immediate value 5 into t1
+        "li t1, 5\n\t"        // Load immediate value 5 into t1
         "sw t1, 0(%0)\n\t"    // Store t1 to the memory address in a0
         : // No outputs
         : "r" (address)

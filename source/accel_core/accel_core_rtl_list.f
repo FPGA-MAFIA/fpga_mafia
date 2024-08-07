@@ -37,6 +37,7 @@
 ../../../source/mini_core/mini_core.sv
 ../../../source/accel_core/accel_core_cr_mem.sv
 ../../../source/accel_core/accel_core_mem_wrap.sv
+../../../source/accel_core/accel_core_xor.sv
 
 // additional files
 ../../../source/accel_core/accel_core_top.sv
