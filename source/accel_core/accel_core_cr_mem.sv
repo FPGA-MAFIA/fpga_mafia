@@ -59,7 +59,6 @@ always_comb begin
         next_cr.SEG7_5       = cr.SEG7_5 ;
         next_cr.LED          = cr.LED ;
     end
-    next_cr = Rst ? '0 : cr;//defualt value
     if(wren) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
