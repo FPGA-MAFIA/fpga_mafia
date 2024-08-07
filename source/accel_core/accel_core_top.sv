@@ -2,6 +2,7 @@
 `include "macros.vh"
 
 module accel_core_top
+import accel_core_pkg::*;
 import mini_core_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (

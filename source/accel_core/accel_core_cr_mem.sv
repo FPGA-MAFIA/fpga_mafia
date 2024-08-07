@@ -2,8 +2,7 @@
 `include "macros.vh"
 
 module accel_core_cr_mem 
-import mini_core_pkg::*;
-import accel_core_cr_pkg::*;
+import accel_core_pkg::*;
 
 (
     input  logic       Clk,
@@ -49,7 +48,6 @@ always_comb begin
         next_cr.SEG7_3       = 0;
         next_cr.SEG7_4       = 0;
         next_cr.SEG7_5       = 0;
-        next_cr.LED          = 0;
     end else begin
         next_cr.SEG7_0       = cr.SEG7_0 ;
         next_cr.SEG7_1       = cr.SEG7_1;
@@ -57,7 +55,6 @@ always_comb begin
         next_cr.SEG7_3       = cr.SEG7_3 ;
         next_cr.SEG7_4       = cr.SEG7_4 ;
         next_cr.SEG7_5       = cr.SEG7_5 ;
-        next_cr.LED          = cr.LED ;
     end
     if(wren) begin
         unique casez (address) // address holds the offset
@@ -68,7 +65,6 @@ always_comb begin
             CR_SEG7_3       : next_cr.SEG7_3       = data[7:0];
             CR_SEG7_4       : next_cr.SEG7_4       = data[7:0];
             CR_SEG7_5       : next_cr.SEG7_5       = data[7:0];
-            CR_LED          : next_cr.LED          = data[9:0];
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
@@ -90,7 +86,6 @@ always_comb begin
             CR_SEG7_3       : pre_q = {24'b0 , cr.SEG7_3}     ;
             CR_SEG7_4       : pre_q = {24'b0 , cr.SEG7_4}     ;
             CR_SEG7_5       : pre_q = {24'b0 , cr.SEG7_5}     ;
-            CR_LED          : pre_q = {22'b0 , cr.LED}        ;
             default        : pre_q = 32'b0                    ;
         endcase
     end
@@ -104,7 +99,6 @@ always_comb begin
         CR_SEG7_3      : pre_q_b = {24'b0 , cr.SEG7_3}   ;
         CR_SEG7_4      : pre_q_b = {24'b0 , cr.SEG7_4}   ;
         CR_SEG7_5      : pre_q_b = {24'b0 , cr.SEG7_5}   ;
-        CR_LED         : pre_q_b = {22'b0 , cr.LED}      ;
         default        : pre_q_b = 32'b0                    ;
     endcase
 end

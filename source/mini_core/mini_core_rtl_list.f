@@ -34,5 +34,3 @@
 ../../../source/mini_core/mini_core.sv
 ../../../source/mini_core/mini_core_top.sv
 ../../../source/mini_core/mini_mem_wrap.sv
-../../../source/mini_core/mini_core_booth_pipeline.sv
-../../../source/mini_core/shift_multiplier.sv

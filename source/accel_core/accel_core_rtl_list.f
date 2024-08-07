@@ -19,7 +19,7 @@
 
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv
-../../../source/accel_core/accel_core_cr_pkg.sv
+../../../source/accel_core/accel_core_pkg.sv
 
 
 // Common
@@ -35,11 +35,13 @@
 ../../../source/mini_core/mini_core_mem_acs.sv
 ../../../source/mini_core/mini_core_wb.sv
 ../../../source/mini_core/mini_core.sv
+
+
+// accel core files
+../../../source/accel_core/accel_core_top.sv
 ../../../source/accel_core/accel_core_cr_mem.sv
 ../../../source/accel_core/accel_core_mem_wrap.sv
 ../../../source/accel_core/accel_core_xor.sv
-
-// additional files
-../../../source/accel_core/accel_core_top.sv
-
+../../../source/accel_core/accel_core_booth_pipeline.sv
+../../../source/accel_core/shift_multiplier.sv
 

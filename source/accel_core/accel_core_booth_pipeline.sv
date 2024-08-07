@@ -8,8 +8,9 @@
 
 // FIXME - IMPLEMENT A SYSTEM FOR X BIT * Y BIT. PREMATURE ALGORITHM BREAK TO DECREASE PIPE STAGES 
 `include "macros.vh"
-module mini_core_booth_pipeline
-import mini_core_pkg::*;
+module accel_core_booth_pipeline
+import accel_core_pkg::*;
+
 (
     input logic                  clk,
     input logic                  rst,

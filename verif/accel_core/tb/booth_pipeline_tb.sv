@@ -12,7 +12,7 @@ module booth_pipeline_tb;
   logic signed [M_width + Q_width - 1:0] out; // 2's complement
 
   // Instantiate the DUT
-  mini_core_booth_pipeline
+  accel_core_booth_pipeline
   dut (
     .clk(Clock),
     .rst(Rst),

@@ -3,8 +3,8 @@
 
 //---------------------------------------------------
 module accel_core_mem_wrap
+import accel_core_pkg::*;
 import mini_core_pkg::*;
-import accel_core_cr_pkg::*;
 (
     input  logic        Clock  ,
     input  logic        Rst    ,
