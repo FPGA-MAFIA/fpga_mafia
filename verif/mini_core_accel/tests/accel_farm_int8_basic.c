@@ -3,7 +3,7 @@
 // using int8 multipliers
 //=========================================================
 
-//./build.py -dut mini_core_accel -test accel_farm_int8_basic -app -hw -sim 
+//./build.py -dut mini_core_accel -test accel_farm_int8_basic -app -hw -sim -clean
 
 #include "mini_core_accel_defines.h"
 #include "mafia_accel.h"
@@ -38,12 +38,18 @@ int main() {
     // Read the result of mul0 after polling is 1 (ready)
     READ_REG(mul_int8_result0, CR_MUL2CORE_INT8_0);  
 
+    // used for debug purposes
+    WRITE_REG(CR_DEBUG_0, mul_int8_result0);  
+
      while(!polling1) {
         READ_REG(polling1, CR_MUL2CORE_INT8_DONE_1);
     }
 
     // Read the result of mul1 after polling is 1 (ready)
     READ_REG(mul_int8_result1, CR_MUL2CORE_INT8_1);
+
+    // used for debug purposes
+    WRITE_REG(CR_DEBUG_0, mul_int8_result0);
 
     return 0;
 }

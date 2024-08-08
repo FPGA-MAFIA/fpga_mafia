@@ -7,8 +7,8 @@
 
 #define CORE2MUL_INT8_MULTIPLICAND(index)  (volatile int *)(CR_MEM_BASE + 0xF000 + 2*index) // FIXME - possible to merge the macros. Now its easier to debug
 #define CORE2MUL_INT8_MULTIPLIER(index)    (volatile int *)(CR_MEM_BASE + 0xF000 + 2*index+1)
-#define MUL2CORE_INT8_RESULT(index)        (volatile int *)(CR_MEM_BASE + 0xF010 + 2*index)
-#define MUL2CORE_INT8_DONE(index)          (volatile int *)(CR_MEM_BASE + 0xF010 + 2*index+1)
+#define MUL2CORE_INT8_RESULT(index)        (volatile int *)(CR_MEM_BASE + 0xF050 + 2*index)
+#define MUL2CORE_INT8_DONE(index)          (volatile int *)(CR_MEM_BASE + 0xF050 + 2*index+1)
 
 // error macros
 #define MUL_INDEX_OUT_OF_RANGE  -1
