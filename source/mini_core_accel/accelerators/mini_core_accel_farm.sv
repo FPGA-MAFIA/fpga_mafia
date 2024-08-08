@@ -3,7 +3,7 @@
 module mini_core_accel_farm 
 import mini_core_pkg::*;
 import mini_core_accel_pkg::*;
-#(parameter MUL_NUM = 8)
+#(parameter MUL_NUM = 16)
 (
     input logic                     clock,
     input logic                     rst,

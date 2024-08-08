@@ -3,7 +3,7 @@
 // using int8 multipliers
 //=========================================================
 
-//./build.py -dut mini_core_accel -test accel_farm_int8_mac -app -hw -sim 
+//./build.py -dut mini_core_accel -test accel_farm_int8_mac -app -hw -sim -clean
 
 #include "mini_core_accel_defines.h"
 #include "mafia_accel.h"
@@ -30,7 +30,7 @@ int main() {
         result += mul_result; 
 
         // used for debug purposes
-        WRITE_REG(CR_DEBUG_0, result);
+        WRITE_REG(CR_DEBUG_0, result);   // result is 0x89
 
     }
 

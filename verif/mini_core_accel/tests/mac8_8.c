@@ -1,7 +1,7 @@
 #include "mini_core_accel_defines.h"
 #include "mafia_accel.h"
 
-// ./build.py -dut mini_core_accel -test perceptron -app -hw -sim -clean
+// ./build.py -dut mini_core_accel -test mac8_8 -app -hw -sim -clean
 
 int main() {
 
@@ -11,7 +11,7 @@ int main() {
 
     int32_t output;
 
-    output = perceptron8_8(data, weight, bias, 5);
+    output = mac8_8(data, weight, bias, 5);
 
     // used for debug purposes
     WRITE_REG(CR_DEBUG_0, output);  // the result is d 0xfffffe28
