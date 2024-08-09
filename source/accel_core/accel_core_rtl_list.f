@@ -41,7 +41,10 @@
 ../../../source/accel_core/accel_core_top.sv
 ../../../source/accel_core/accel_core_cr_mem.sv
 ../../../source/accel_core/accel_core_mem_wrap.sv
+
+
+//accel core farm files
 ../../../source/accel_core/accel_core_xor.sv
 ../../../source/accel_core/accel_core_booth_pipeline.sv
 ../../../source/accel_core/shift_multiplier.sv
-
+../../../source/accel_core/accel_core_farm.sv

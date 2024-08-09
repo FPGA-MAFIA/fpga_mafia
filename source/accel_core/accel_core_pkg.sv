@@ -12,20 +12,20 @@ package accel_core_pkg;
     parameter MSB_REGION = 23;
 
     // CR Address Offsets
-    parameter CR_SEG7_0      = CR_MEM_OFFSET + 'h0  ; // RW 8 bit
-    parameter CR_SEG7_1      = CR_MEM_OFFSET + 'h4  ; // RW 8 bit
-    parameter CR_SEG7_2      = CR_MEM_OFFSET + 'h8  ; // RW 8 bit
-    parameter CR_SEG7_3      = CR_MEM_OFFSET + 'hC  ; // RW 8 bit
-    parameter CR_SEG7_4      = CR_MEM_OFFSET + 'h10 ; // RW 8 bit
-    parameter CR_SEG7_5      = CR_MEM_OFFSET + 'h14 ; // RW 8 bit
+
+    parameter CR_0 = CR_MEM_OFFSET + 'h200 ;
+    parameter CR_1 = CR_MEM_OFFSET + 'h204 ;
+    parameter CR_2 = CR_MEM_OFFSET + 'h208 ;
+    parameter CR_3 = CR_MEM_OFFSET + 'h20C ;
+    parameter CR_4 = CR_MEM_OFFSET + 'h210 ;
+    parameter CR_5 = CR_MEM_OFFSET + 'h214 ;
+    parameter CR_6 = CR_MEM_OFFSET + 'h218 ;
+
 
     typedef struct packed {
-        logic [7:0] SEG7_0;
-        logic [7:0] SEG7_1;
-        logic [7:0] SEG7_2;
-        logic [7:0] SEG7_3;
-        logic [7:0] SEG7_4;
-        logic [7:0] SEG7_5;
+        logic [7:0] xor_inp1;
+        logic [7:0] xor_inp2;
+        logic [7:0] xor_result;
     } t_cr;
 
     /****************************************ACCELERATORS*******************************/

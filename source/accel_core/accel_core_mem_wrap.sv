@@ -36,7 +36,13 @@ import mini_core_pkg::*;
     //
     output logic            OutFabricValidQ505H ,
     output var t_tile_trans OutFabricQ505H      ,
-    input  var t_fab_ready  fab_ready              
+    input  var t_fab_ready  fab_ready,
+    //============================================
+    //      accel farm
+    //============================================
+    output logic [7:0] xor_inp1,
+    output logic [7:0] xor_inp2,
+    input logic [7:0] xor_result
 );
 
 logic        F2C_IMemHitQ503H;
@@ -169,6 +175,7 @@ logic [1:0]  DMemAddressQ104H;
 logic        MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H;
 logic [31:0] PreCRMemRdDataQ104H;
 
+
 always_comb begin
 ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
                        (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
@@ -257,10 +264,13 @@ assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
         .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
         .q                (PreCRMemRdDataQ104H),
         //Fabric access interface
-        .data_b           (InFabricQ503H.data),
-        .address_b        (InFabricQ503H.address),
-        .wren_b           (F2C_CrMemWrEnQ503H),
-        .q_b              (F2C_CrMemRspDataQ504H)
+        //.data_b           (InFabricQ503H.data),
+        //.address_b        (InFabricQ503H.address),
+       // .wren_b           (F2C_CrMemWrEnQ503H),
+        //.q_b              (F2C_CrMemRspDataQ504H)
+        .xor_inp1(xor_inp1),
+        .xor_inp2(xor_inp2),
+        .xor_result(xor_result)
     );
 
  

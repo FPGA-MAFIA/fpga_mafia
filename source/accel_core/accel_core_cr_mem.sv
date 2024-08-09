@@ -14,25 +14,28 @@ import accel_core_pkg::*;
     input  logic        rden,
     output logic [31:0] q,
     // Fabric interface
-    input  logic [31:0] address_b,
-    input  logic [31:0] data_b,
-    input  logic        wren_b,
-    output logic [31:0] q_b
+    //input  logic [31:0] address_b,
+    //input  logic [31:0] data_b,
+    //input  logic        wren_b,
+    //output logic [31:0] q_b,
+    // CR for accelerator farm
+    input  logic [7:0] xor_result,
+    output logic [7:0] xor_inp1,
+    output logic [7:0] xor_inp2
 );
 
 t_cr cr;
 t_cr next_cr;
 
+assign xor_inp1 = cr.xor_inp1;
+assign xor_inp2 = cr.xor_inp2;
+
+
 // Data-Path signals
 logic [31:0] pre_q;
-logic [31:0] pre_q_b;
+//logic [31:0] pre_q_b;
 
-accel_core_xor accel_core_xor (
-    .Rst(Rst),
-    .x(cr.SEG7_0),
-    .y(cr.SEG7_1),
-    .out(next_cr.SEG7_2)
-);
+
 
 `MAFIA_DFF(cr, next_cr, Clk)
 //==============================
@@ -42,29 +45,16 @@ accel_core_xor accel_core_xor (
 //==============================
 always_comb begin
     if(Rst) begin 
-        next_cr.SEG7_0       = 0;
-        next_cr.SEG7_1       = 0;
-        // next_cr.SEG7_2    = 0; used by accel core
-        next_cr.SEG7_3       = 0;
-        next_cr.SEG7_4       = 0;
-        next_cr.SEG7_5       = 0;
+        next_cr = 0;
     end else begin
-        next_cr.SEG7_0       = cr.SEG7_0 ;
-        next_cr.SEG7_1       = cr.SEG7_1;
-        // next_cr.SEG7_2    = cr.SEG7_2 ; used by accel core
-        next_cr.SEG7_3       = cr.SEG7_3 ;
-        next_cr.SEG7_4       = cr.SEG7_4 ;
-        next_cr.SEG7_5       = cr.SEG7_5 ;
+        next_cr = cr;
+        next_cr.xor_result = xor_result;
     end
     if(wren) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
-            CR_SEG7_0       : next_cr.SEG7_0       = data[7:0];
-            CR_SEG7_1       : next_cr.SEG7_1       = data[7:0];
-           // CR_SEG7_2       : next_cr.SEG7_2       = data[7:0]; used by accel core
-            CR_SEG7_3       : next_cr.SEG7_3       = data[7:0];
-            CR_SEG7_4       : next_cr.SEG7_4       = data[7:0];
-            CR_SEG7_5       : next_cr.SEG7_5       = data[7:0];
+            CR_0       : next_cr.xor_inp1       = data[7:0];//xor inp 1
+            CR_1       : next_cr.xor_inp2       = data[7:0];// xor inp 2
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
@@ -76,36 +66,30 @@ end
 // This is the load
 always_comb begin
     pre_q   = 32'b0;
-    pre_q_b = 32'b0;
+    //pre_q_b = 32'b0;
     if(rden) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
-            CR_SEG7_0       : pre_q = {24'b0 , cr.SEG7_0}     ; 
-            CR_SEG7_1       : pre_q = {24'b0 , cr.SEG7_1}     ;
-            CR_SEG7_2       : pre_q = {24'b0 , cr.SEG7_2}     ;
-            CR_SEG7_3       : pre_q = {24'b0 , cr.SEG7_3}     ;
-            CR_SEG7_4       : pre_q = {24'b0 , cr.SEG7_4}     ;
-            CR_SEG7_5       : pre_q = {24'b0 , cr.SEG7_5}     ;
-            default        : pre_q = 32'b0                    ;
+            CR_0       : pre_q = {24'b0 , cr.xor_inp1};
+            CR_1       : pre_q = {24'b0 , cr.xor_inp2};
+            CR_2       : pre_q = {24'b0 , cr.xor_result};
+            default        : pre_q = 32'b0;
         endcase
     end
     
     //Fabric Read
-    unique casez (address_b) // address holds the offset
+   // unique casez (address_b) // address holds the offset
         // ---- RW memory ----
-        CR_SEG7_0      : pre_q_b = {24'b0 , cr.SEG7_0}   ; 
-        CR_SEG7_1      : pre_q_b = {24'b0 , cr.SEG7_1}   ;
-        CR_SEG7_2      : pre_q_b = {24'b0 , cr.SEG7_2}   ;
-        CR_SEG7_3      : pre_q_b = {24'b0 , cr.SEG7_3}   ;
-        CR_SEG7_4      : pre_q_b = {24'b0 , cr.SEG7_4}   ;
-        CR_SEG7_5      : pre_q_b = {24'b0 , cr.SEG7_5}   ;
-        default        : pre_q_b = 32'b0                    ;
-    endcase
+      //  CR_0       : pre_q_b = {24'b0 , cr.xor_inp1};
+      //  CR_1       : pre_q_b = {24'b0 , cr.xor_inp2};
+       // CR_2       : pre_q_b = {24'b0 , cr.xor_result};
+      //  default        : pre_q_b = 32'b0;
+   // endcase
 end
 
 
 // Sample the data load - synchorus load
 `MAFIA_DFF(q,   pre_q, Clk)
-`MAFIA_DFF(q_b, pre_q_b, Clk)
+//`MAFIA_DFF(q_b, pre_q_b, Clk)
 
-endmodule // Module 
+endmodule
