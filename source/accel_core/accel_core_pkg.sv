@@ -13,9 +13,9 @@ package accel_core_pkg;
 
     // CR Address Offsets
 
-    parameter CR_0 = CR_MEM_OFFSET + 'h200 ;
-    parameter CR_1 = CR_MEM_OFFSET + 'h204 ;
-    parameter CR_2 = CR_MEM_OFFSET + 'h208 ;
+    parameter CR_XOR_IN_1 = CR_MEM_OFFSET + 'h200 ;
+    parameter CR_XOR_IN_2 = CR_MEM_OFFSET + 'h204 ;
+    parameter CR_XOR_OUT = CR_MEM_OFFSET + 'h208 ;
     parameter CR_3 = CR_MEM_OFFSET + 'h20C ;
     parameter CR_4 = CR_MEM_OFFSET + 'h210 ;
     parameter CR_5 = CR_MEM_OFFSET + 'h214 ;

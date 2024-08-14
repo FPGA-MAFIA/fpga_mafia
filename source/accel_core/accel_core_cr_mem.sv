@@ -53,8 +53,8 @@ always_comb begin
     if(wren) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
-            CR_0       : next_cr.xor_inp1       = data[7:0];//xor inp 1
-            CR_1       : next_cr.xor_inp2       = data[7:0];// xor inp 2
+            CR_XOR_IN_1       : next_cr.xor_inp1       = data[7:0];//xor inp 1
+            CR_XOR_IN_2       : next_cr.xor_inp2       = data[7:0];// xor inp 2
             // ---- Other ----
             default   : /* Do nothing */;
         endcase
@@ -70,9 +70,9 @@ always_comb begin
     if(rden) begin
         unique casez (address) // address holds the offset
             // ---- RW memory ----
-            CR_0       : pre_q = {24'b0 , cr.xor_inp1};
-            CR_1       : pre_q = {24'b0 , cr.xor_inp2};
-            CR_2       : pre_q = {24'b0 , cr.xor_result};
+            CR_XOR_IN_1       : pre_q = {24'b0 , cr.xor_inp1};
+            CR_XOR_IN_2       : pre_q = {24'b0 , cr.xor_inp2};
+            CR_XOR_OUT       : pre_q = {24'b0 , cr.xor_result};
             default        : pre_q = 32'b0;
         endcase
     end

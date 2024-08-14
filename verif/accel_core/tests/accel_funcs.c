@@ -6,7 +6,7 @@ int xor_accel(int x, int y) {
     int result;
     WRITE_REG(address,x);
     WRITE_REG((address+1), y);
-    READ_REG(result,address+2);
+    NOP();
     READ_REG(result,address+2);
     return result;
 }
