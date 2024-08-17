@@ -36,15 +36,11 @@ import mini_core_accel_pkg::*;
     genvar stage_num;
     generate
         for(stage_num = 1; stage_num < 7; stage_num++) begin
-            always_comb begin
-                next_acc[stage_num] = $signed(acc[stage_num]) >>> 1 ;
-                if(acc[stage_num][1:0] == 2'b01)
-                    next_acc[stage_num] = $signed({acc[stage_num][16:9]+multiplicand, acc[stage_num][8:1], acc[stage_num][0]}) >>> 1;
-                else if(acc[stage_num][1:0] == 2'b10)
-                    next_acc[stage_num] = $signed({acc[stage_num][16:9]-multiplicand, acc[stage_num][8:1], acc[stage_num][0]}) >>> 1;
-            end // always comb
-        `MAFIA_DFF(acc[stage_num+1], next_acc[stage_num], clk)
-        `MAFIA_DFF(pre_ready[stage_num+1], pre_ready[stage_num], clk)
+            assign next_acc[stage_num] = (acc[stage_num][1:0] == 2'b01) ? $signed({acc[stage_num][16:9]+multiplicand, acc[stage_num][8:1], acc[stage_num][0]}) >>> 1 :
+                                         (acc[stage_num][1:0] == 2'b10) ? $signed({acc[stage_num][16:9]-multiplicand, acc[stage_num][8:1], acc[stage_num][0]}) >>> 1 :
+                                                                                                                                       $signed(acc[stage_num]) >>> 1 ;   
+            `MAFIA_DFF(acc[stage_num+1], next_acc[stage_num], clk)
+            `MAFIA_DFF(pre_ready[stage_num+1], pre_ready[stage_num], clk)
         end
     endgenerate
     
