@@ -16,17 +16,17 @@ import mini_core_accel_pkg::*;
     output logic [15:0] result
 );
 
-    logic [16:0] acc [7:1];  
-    logic [16:0] next_acc [6:0];  // that signal do not used in the last stage
-    logic [7:0]  stored_multiplicand [6:0];
-    logic [7:0]  pipe_is_full;
+    logic [16:0] acc [8:1];  
+    logic [16:0] next_acc [7:0];  
+    logic [7:0]  stored_multiplicand [7:0];
+    logic [8:0]  pipe_is_full;
     logic [16:0] init_acc;
 
 
     assign pipe_is_full[0] = (rst || !start) ? 1'b0 : 1'b1;
-    assign ready           = pipe_is_full[7]; // only after 8 stages the first result is ready
+    assign ready           = pipe_is_full[8]; // only after 8 stages the first result is ready
 
-    // first stage
+    // first stage (count from zero)
     assign stored_multiplicand[0]  = multiplicand;
     assign init_acc = (rst) ? 'b0 : (start) ? {8'b0, multiplier, 1'b0} : 'b0;
     assign next_acc[0] =  (init_acc[1:0] == 2'b01) ? $signed({init_acc[16:9]+stored_multiplicand[0], init_acc[8:1], init_acc[0]}) >>> 1 :
@@ -39,7 +39,7 @@ import mini_core_accel_pkg::*;
 
     genvar stage_num;
     generate
-        for(stage_num = 1; stage_num < 7; stage_num++) begin
+        for(stage_num = 1; stage_num <=7; stage_num++) begin
             assign next_acc[stage_num] = (acc[stage_num][1:0] == 2'b01) ? $signed({acc[stage_num][16:9]+stored_multiplicand[stage_num], acc[stage_num][8:1], acc[stage_num][0]}) >>> 1 :
                                          (acc[stage_num][1:0] == 2'b10) ? $signed({acc[stage_num][16:9]-stored_multiplicand[stage_num], acc[stage_num][8:1], acc[stage_num][0]}) >>> 1 :
                                                                                                                                                          $signed(acc[stage_num]) >>> 1 ;   
@@ -49,11 +49,7 @@ import mini_core_accel_pkg::*;
         end
     endgenerate
     
-    // last stage
-    assign acc[7] =  (acc[6][1:0] == 2'b01) ? $signed({acc[6][16:9]+stored_multiplicand[6], acc[6][8:1], acc[6][0]}) >>> 1 :
-                     (acc[6][1:0] == 2'b10) ? $signed({acc[6][16:9]-stored_multiplicand[6], acc[6][8:1], acc[6][0]}) >>> 1 :
-                                                                                                     $signed(acc[6]) >>> 1 ;
-    assign result = (!ready) ? 'b0 : acc[7][16:1];
+    assign result = (!ready) ? 'b0 : acc[8][16:1];
 
 endmodule 
 
