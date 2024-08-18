@@ -18,7 +18,7 @@ import mini_core_accel_pkg::*;
 
     logic [16:0] acc [8:1];  
     logic [16:0] next_acc [7:0];  
-    logic [7:0]  stored_multiplicand [7:0];
+    logic [7:0]  stored_multiplicand [8:0];
     logic [8:0]  pipe_is_full;
     logic [16:0] init_acc;
 
@@ -27,7 +27,7 @@ import mini_core_accel_pkg::*;
     assign ready           = pipe_is_full[8]; // only after 8 stages the first result is ready
 
     // first stage (count from zero)
-    assign stored_multiplicand[0]  = multiplicand;
+    assign stored_multiplicand[0]  = (start) ? multiplicand : 'b0;
     assign init_acc = (rst) ? 'b0 : (start) ? {8'b0, multiplier, 1'b0} : 'b0;
     assign next_acc[0] =  (init_acc[1:0] == 2'b01) ? $signed({init_acc[16:9]+stored_multiplicand[0], init_acc[8:1], init_acc[0]}) >>> 1 :
                           (init_acc[1:0] == 2'b10) ? $signed({init_acc[16:9]-stored_multiplicand[0], init_acc[8:1], init_acc[0]}) >>> 1 :
@@ -49,7 +49,7 @@ import mini_core_accel_pkg::*;
         end
     endgenerate
     
-    assign result = (!ready) ? 'b0 : acc[8][16:1];
+    assign result = (!ready) ? 'b0 : (stored_multiplicand[8] == -8'd128) ? ~acc[8][16:1] + 1 : acc[8][16:1];
 
 endmodule 
 

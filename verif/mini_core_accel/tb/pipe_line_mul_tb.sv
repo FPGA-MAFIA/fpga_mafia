@@ -42,12 +42,12 @@ initial begin :main_tn
 
     rst = 0;
     start = 0;
-    multiplier   = 8'd4;
-    multiplicand = 8'd3;
     #20;
     @(posedge clk)
 
     start = 1;
+    multiplier   = 8'd4;
+    multiplicand = 8'd3;
     #ONE_CYCLE_DELAY;
     @(posedge clk)
 
@@ -101,6 +101,24 @@ initial begin :main_tn
     #ONE_CYCLE_DELAY;
     @(posedge clk)
 
+    multiplier   =  8'd1;
+    multiplicand = -8'd128;
+    #ONE_CYCLE_DELAY;
+    @(posedge clk)
+
+    start = 0;
+    multiplier   =  8'd1;
+    multiplicand =  8'd1;
+    #ONE_CYCLE_DELAY;
+    @(posedge clk)
+
+    start = 0;
+    multiplier   =  8'd2;
+    multiplicand =  8'd2;
+    #ONE_CYCLE_DELAY;
+    @(posedge clk)
+
+    start = 1;
     multiplier   = -8'd128;
     multiplicand =  8'd1;
     #(50*ONE_CYCLE_DELAY);
