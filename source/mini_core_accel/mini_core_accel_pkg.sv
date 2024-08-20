@@ -5,10 +5,15 @@
 package mini_core_accel_pkg;
 
 parameter  INT8_MULTIPLIER_NUM = 16;
+parameter  NEURON_MAC_NUM      = 2;
 parameter  NUM_WIDTH_INT8      = 8;
 typedef  logic [7:0]       int8;
 typedef  logic [15:0]      int16;
 
+
+//-------------------------
+// int8 multiplier structs
+//-------------------------
 typedef enum {
     PRE_START,
     COMPUTE,
@@ -25,6 +30,22 @@ typedef struct packed {
     int16 result;
 }t_mul_int8_output;
 
+//-------------------------
+// neuron mac structs
+//-------------------------
+typedef struct packed {
+    logic [7:0][15:0] mul_result;  // result fron int8_multiplier
+    logic [7:0]       bias; 
+}t_neuron_mac_input;
+
+typedef struct packed {
+    logic [7:0] int8_result;
+}t_neuron_mac_output;
+
+
+//----------------------------
+// acceleration farm structs
+//----------------------------
 typedef struct packed { // {multiplicand, multiplier}
     t_mul_int8_input [INT8_MULTIPLIER_NUM-1:0] core2mul_int8;
 }t_accel_farm_input;
@@ -45,6 +66,9 @@ typedef struct packed {
     t_cr_int8_multiplier [INT8_MULTIPLIER_NUM-1:0] cr_int8_multiplier;
 }t_accel_cr_int8_multipliers;
 
+//-------------------------
+// Debug structs
+//-------------------------
 // FIXME  used for degub purposes untill we will have dedicated ref model
 typedef struct packed {
     logic [31:0] cr_debug_0;
