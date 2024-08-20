@@ -6,3 +6,4 @@
 ../../../verif/mini_core_accel/tb/mini_core_accel_tb.sv
 ../../../verif/mini_core_accel/tb/multiplier_int8_tb.sv
 ../../../verif/mini_core_accel/tb/pipe_line_mul_tb.sv
+../../../verif/mini_core_accel/tb/neuron_mac_output_tb.sv

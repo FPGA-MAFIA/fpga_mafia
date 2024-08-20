@@ -41,5 +41,6 @@
 // Accelerator farm files
 ../../../source/mini_core_accel/accelerators/multiplier_int8.sv
 ../../../source/mini_core_accel/accelerators/pipe_line_mul.sv
+../../../source/mini_core_accel/accelerators/neuron_mac.sv
 ../../../source/mini_core_accel/accelerators/mini_core_accel_farm.sv
 
