@@ -34,20 +34,23 @@ import mini_core_accel_pkg::*;
     output var t_accel_farm_input  accel_farm_input 
 );
 
-integer i,j;
+integer i,j,k,l;
 
 t_accel_cr_int8_multipliers accel_cr, next_accel_cr; // define a struct of structs for int8 multipliers
-t_cr_debug cr_debug, next_cr_debug;   // FIXME - remove cr for debug when we will have ref model
+t_accel_cr_neuron_mac       cr_neuron_mac, next_cr_neuron_mac; 
+t_cr_debug                  cr_debug, next_cr_debug;   // FIXME - remove cr for debug when we will have ref model
 
 `MAFIA_DFF(accel_cr, next_accel_cr, Clk)
+`MAFIA_DFF(cr_neuron_mac, next_cr_neuron_mac, Clk)
 `MAFIA_DFF(cr_debug, next_cr_debug, Clk)
 
 logic [31:0] pre_q;
 
 // write to accel_cr
 always_comb begin :wr_to_accel_cr
-    next_accel_cr = Rst ? '0 : accel_cr;
-    next_cr_debug = Rst ? '0 : cr_debug;
+    next_accel_cr      = Rst ? '0 : accel_cr;
+    next_cr_neuron_mac = Rst ? '0 : cr_neuron_mac;
+    next_cr_debug      = Rst ? '0 : cr_debug;
     if(wren) begin // writing data from core to accelerators. 
         unique casez (address)
         // multiplicand and multiplier data comming from the core to the multiplier
@@ -101,7 +104,16 @@ always_comb begin :wr_to_accel_cr
             CR_CORE2MUL_INT8_MULTIPLICANT_15    : next_accel_cr.cr_int8_multiplier[15].cr_core2mul_multiplicant_int8 = data[7:0]; 
             CR_CORE2MUL_INT8_MULTIPLIER_15      : next_accel_cr.cr_int8_multiplier[15].cr_core2mul_multiplier_int8   = data[7:0];
 
-            CR_DEBUG_0                          : next_cr_debug.cr_debug_0                                           = data[31:0]; 
+            // neuron_mac0
+            NEURON_MAC_BIAS0                    : next_cr_neuron_mac.neuron_mac_bias0                                = data[7:0];
+            // neuron_mac1
+            NEURON_MAC_BIAS1                    : next_cr_neuron_mac.neuron_mac_bias1                                = data[7:0];
+            
+            // cr's for debug
+            CR_DEBUG_0                          : next_cr_debug.cr_debug_0                                           = data[31:0];
+            CR_DEBUG_1                          : next_cr_debug.cr_debug_1                                           = data[31:0];
+            CR_DEBUG_2                          : next_cr_debug.cr_debug_2                                           = data[31:0];
+            CR_DEBUG_3                          : next_cr_debug.cr_debug_3                                           = data[31:0]; 
             default            : ; // do nothing
         endcase
     end
@@ -110,7 +122,10 @@ always_comb begin :wr_to_accel_cr
             {next_accel_cr.cr_int8_multiplier[i].cr_mul2core_done, next_accel_cr.cr_int8_multiplier[i].cr_mul2core_result} = 
                                                                                 {accel_farm_output.mul2core_int8[i].done, accel_farm_output.mul2core_int8[i].result};
         end
-
+        // hard wired result from neuron mac
+        next_cr_neuron_mac.neuron_mac_result0 = accel_farm_output.neuron_mac_result[0].int8_result;
+        next_cr_neuron_mac.neuron_mac_result1 = accel_farm_output.neuron_mac_result[1].int8_result;
+       
 end
 
 // reading data
@@ -167,7 +182,16 @@ always_comb begin : read_from_accel_cr
             CR_MUL2CORE_INT8_15      : pre_q = {16'b0, accel_cr.cr_int8_multiplier[15].cr_mul2core_result};
             CR_MUL2CORE_INT8_DONE_15 : pre_q = {31'b0, accel_cr.cr_int8_multiplier[15].cr_mul2core_done};
 
-            CR_DEBUG_0              : pre_q = cr_debug.cr_debug_0; 
+            // neuron_mac0
+            NEURON_MAC_RESULT0      : pre_q = {24'b0, cr_neuron_mac.neuron_mac_result0};
+            // neuron_mac1
+            NEURON_MAC_RESULT1      : pre_q = {24'b0, cr_neuron_mac.neuron_mac_result1};
+            
+            // cr's for debug
+            CR_DEBUG_0              : pre_q = cr_debug.cr_debug_0;
+            CR_DEBUG_1              : pre_q = cr_debug.cr_debug_1;
+            CR_DEBUG_2              : pre_q = cr_debug.cr_debug_2;
+            CR_DEBUG_3              : pre_q = cr_debug.cr_debug_3; 
 
             default      : ; // do nothing 
         endcase
@@ -177,7 +201,15 @@ always_comb begin : read_from_accel_cr
             {accel_farm_input.core2mul_int8[j].multiplicand, accel_farm_input.core2mul_int8[j].multiplier} =
                                                 {accel_cr.cr_int8_multiplier[j].cr_core2mul_multiplicant_int8, accel_cr.cr_int8_multiplier[j].cr_core2mul_multiplier_int8};
        end
-        
+       // hard wired neuron_mac results from multipliers
+       accel_farm_input.int8_mul2neuron_mac[0].bias = cr_neuron_mac.neuron_mac_bias0;
+       accel_farm_input.int8_mul2neuron_mac[1].bias = cr_neuron_mac.neuron_mac_bias1;
+       
+       for(int k=0; k<NEURON_MAC_NUM; k++) begin
+            for(l=0; l< INT8_MULTIPLIER_NUM/2; l++) begin
+                accel_farm_input.int8_mul2neuron_mac[k].mul_result[l] = accel_cr.cr_int8_multiplier[l+8*k].cr_mul2core_result;
+            end
+       end
 end 
 
 `MAFIA_RST_DFF(q, pre_q, Clk, Rst)
