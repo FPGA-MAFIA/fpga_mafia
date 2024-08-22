@@ -34,6 +34,10 @@
 
 /* Control registers addressed */
 //FIXME refactor to be more compact
+
+//=====================================
+//   define CR's for INT8 multiplier
+//=====================================
 #define CR_CORE2MUL_INT8_MULTIPLICAND_0     ((volatile int *) (CR_MEM_BASE + 0xF000))
 #define CR_CORE2MUL_INT8_MULTIPLIER_0       ((volatile int *) (CR_MEM_BASE + 0xF001))
 #define CR_CORE2MUL_INT8_MULTIPLICAND_1     ((volatile int *) (CR_MEM_BASE + 0xF002))
@@ -103,7 +107,18 @@
 #define CR_MUL2CORE_INT8_DONE_15    ((volatile int *) (CR_MEM_BASE + 0xF06F))
 
 
+//==================================
+//  define CR's for neuron_mac
+//==================================
+#define NEURON_MAC_BIAS0           ((volatile int *) (CR_MEM_BASE + 0xF100))
+#define NEURON_MAC_BIAS1           ((volatile int *) (CR_MEM_BASE + 0xF101))
+#define NEURON_MAC_RESULT0         ((volatile int *) (CR_MEM_BASE + 0xF102))
+#define NEURON_MAC_RESULT1         ((volatile int *) (CR_MEM_BASE + 0xF103))
+
 // used for debug purposes
 #define CR_DEBUG_0 ((volatile int *) (CR_MEM_BASE + 0xFF00))
+#define CR_DEBUG_1 ((volatile int *) (CR_MEM_BASE + 0xFF01))
+#define CR_DEBUG_2 ((volatile int *) (CR_MEM_BASE + 0xFF02))
+#define CR_DEBUG_3 ((volatile int *) (CR_MEM_BASE + 0xFF03))
 
 #endif

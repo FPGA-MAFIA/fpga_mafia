@@ -5,10 +5,15 @@
 package mini_core_accel_pkg;
 
 parameter  INT8_MULTIPLIER_NUM = 16;
+parameter  NEURON_MAC_NUM      = 2;
 parameter  NUM_WIDTH_INT8      = 8;
 typedef  logic [7:0]       int8;
 typedef  logic [15:0]      int16;
 
+
+//-------------------------
+// int8 multiplier structs
+//-------------------------
 typedef enum {
     PRE_START,
     COMPUTE,
@@ -25,15 +30,21 @@ typedef struct packed {
     int16 result;
 }t_mul_int8_output;
 
-typedef struct packed { // {multiplicand, multiplier}
-    t_mul_int8_input [INT8_MULTIPLIER_NUM-1:0] core2mul_int8;
-}t_accel_farm_input;
-
-// response from multiplier 
+//-------------------------
+// neuron mac structs
+//-------------------------
 typedef struct packed {
-    t_mul_int8_output [INT8_MULTIPLIER_NUM-1:0] mul2core_int8;
-}t_accel_farm_output;
+    logic [7:0][15:0] mul_result;  // result fron int8_multiplier
+    logic [7:0]       bias; 
+}t_neuron_mac_input;
 
+typedef struct packed {
+    logic [7:0] int8_result;
+}t_neuron_mac_output;
+
+//-------------------------
+// cr structs
+//-------------------------
 typedef struct packed {
     logic [7:0]  cr_core2mul_multiplicant_int8;  
     logic [7:0]  cr_core2mul_multiplier_int8; 
@@ -45,18 +56,51 @@ typedef struct packed {
     t_cr_int8_multiplier [INT8_MULTIPLIER_NUM-1:0] cr_int8_multiplier;
 }t_accel_cr_int8_multipliers;
 
+typedef struct packed{
+    logic [7:0] neuron_mac_bias0;
+    logic [7:0] neuron_mac_bias1;
+    logic [7:0] neuron_mac_result0;
+    logic [7:0] neuron_mac_result1;
+}t_accel_cr_neuron_mac;
+
+//-------------------------
+// Debug structs
+//-------------------------
 // FIXME  used for degub purposes untill we will have dedicated ref model
 typedef struct packed {
     logic [31:0] cr_debug_0;
+    logic [31:0] cr_debug_1;
+    logic [31:0] cr_debug_2;
+    logic [31:0] cr_debug_3;
 } t_cr_debug;
+
+//----------------------------
+// acceleration farm structs
+//----------------------------
+// data connecting CR to dedicated unit
+typedef struct packed { 
+    t_mul_int8_input   [INT8_MULTIPLIER_NUM-1:0] core2mul_int8;      // {multiplicand, multiplier}
+    t_neuron_mac_input [NEURON_MAC_NUM-1:0]      int8_mul2neuron_mac;  // {mul_result[7:0][15:0], bias}
+}t_accel_farm_input;
+
+// response from multiplier 
+typedef struct packed {
+    t_mul_int8_output   [INT8_MULTIPLIER_NUM-1:0] mul2core_int8;
+    t_neuron_mac_output [NEURON_MAC_NUM-1:0]      neuron_mac_result;
+}t_accel_farm_output;
+
+
 
 // define CR's
 parameter CR_MEM_OFFSET       = 'h00FE_0000;
 parameter CR_MEM_REGION_FLOOR =  CR_MEM_OFFSET;
 parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 - 1;
 
-// define CR's for INT8 multiplier
+
 //FIXME refactor to be more compact
+//=====================================
+//   define CR's for INT8 multiplier
+//=====================================
 parameter CR_CORE2MUL_INT8_MULTIPLICANT_0     = CR_MEM_OFFSET + 'hf000;
 parameter CR_CORE2MUL_INT8_MULTIPLIER_0       = CR_MEM_OFFSET + 'hf001;
 parameter CR_CORE2MUL_INT8_MULTIPLICANT_1     = CR_MEM_OFFSET + 'hf002;
@@ -124,7 +168,19 @@ parameter CR_MUL2CORE_INT8_DONE_14  = CR_MEM_OFFSET + 'hf06d;
 parameter CR_MUL2CORE_INT8_15       = CR_MEM_OFFSET + 'hf06e;
 parameter CR_MUL2CORE_INT8_DONE_15  = CR_MEM_OFFSET + 'hf06f; 
 
+
+//==================================
+//   define CR's for neuron_mac
+//==================================
+parameter NEURON_MAC_BIAS0         = CR_MEM_OFFSET + 'hf100;
+parameter NEURON_MAC_BIAS1         = CR_MEM_OFFSET + 'hf101; 
+parameter NEURON_MAC_RESULT0       = CR_MEM_OFFSET + 'hf102; 
+parameter NEURON_MAC_RESULT1       = CR_MEM_OFFSET + 'hf103;  
+
 // used for debug purposes
 parameter CR_DEBUG_0                = CR_MEM_OFFSET + 'hff00;
+parameter CR_DEBUG_1                = CR_MEM_OFFSET + 'hff01;
+parameter CR_DEBUG_2                = CR_MEM_OFFSET + 'hff02;
+parameter CR_DEBUG_3                = CR_MEM_OFFSET + 'hff03;
 
 endpackage
