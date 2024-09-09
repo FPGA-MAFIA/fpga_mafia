@@ -3,7 +3,7 @@ module uart_tx_top_tb;
 import uart_tx_pkg::*;
 
  // ./build.py -dut uart_tx -top uart_tx_top_tb -hw -sim  -clean
-parameter MAX_TIMER_VALUE_FOR_DEBUG = 4;
+parameter MAX_TIMER_VALUE_FOR_DEBUG = 10;
 
 logic       clk;
 logic       resetN;
@@ -36,14 +36,14 @@ initial begin: clock_gen
 end // initial clock_gen  
 
 initial begin: main_tb
-    din       = 8'b10111001;
+    din       = 8'b00111001;
     write_din = 0;
     resetN    = 0;
     #20;
     @(posedge clk);
 
-    resetN    = 1;
-    #20;
+    resetN    = 1;  // send '1' cause in idle state 
+    #100;
     @(posedge clk);
 
     write_din = 1;

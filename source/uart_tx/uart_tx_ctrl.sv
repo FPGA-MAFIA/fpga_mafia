@@ -46,25 +46,15 @@ always_comb begin: next_state_logic
             if(!(uart_tx_ctrl_in.t1))
                 next_state = SEND_START;
             else if(uart_tx_ctrl_in.t1)
-                next_state = CLEAR_TIMER;
-        end
-        CLEAR_TIMER: begin
-            next_state = SEND_DATA;
+                next_state = SEND_DATA;  
         end
         SEND_DATA: begin
             if(!(uart_tx_ctrl_in.t1))
                 next_state = SEND_DATA;
-            else if(uart_tx_ctrl_in.t1)
-                next_state = TEST_EOC;
-        end
-        TEST_EOC: begin
-            if(!(uart_tx_ctrl_in.eoc_dcount))
-                next_state = SHIFT_COUNT;
-            else if(uart_tx_ctrl_in.eoc_dcount)
+            else if(uart_tx_ctrl_in.t1 && uart_tx_ctrl_in.eoc_dcount)
                 next_state = SEND_STOP;
-        end
-        SHIFT_COUNT: begin
-            next_state = SEND_DATA;
+            else if(uart_tx_ctrl_in.t1 && !uart_tx_ctrl_in.eoc_dcount) // TODO - refactor, same SEND_DATA makes easier the dubug
+                next_state = SEND_DATA;    
         end
         SEND_STOP: begin
             if(!(uart_tx_ctrl_in.t1))
@@ -85,16 +75,24 @@ always_comb begin : output_logic
             uart_tx_ctrl_out.set_tx     = 1;   // in IDLE transmit '1'
         end
         SEND_START: begin
-            uart_tx_ctrl_out.te     = 1;
-            uart_tx_ctrl_out.clr_tx = 1;
+            if(!(uart_tx_ctrl_in.t1)) begin
+                uart_tx_ctrl_out.te     = 1;
+                uart_tx_ctrl_out.clr_tx = 1;
+            end
+            else if(uart_tx_ctrl_in.t1) begin
+                uart_tx_ctrl_out.te     = 0;
+                uart_tx_ctrl_out.clr_tx = 1;
+            end
         end
         SEND_DATA: begin
-            uart_tx_ctrl_out.te     = 1;
-            uart_tx_ctrl_out.ena_tx = 1;  
-        end
-        SHIFT_COUNT: begin
-            uart_tx_ctrl_out.ena_shift  = 1;
-            uart_tx_ctrl_out.ena_dcount = 1;
+            if(!(uart_tx_ctrl_in.t1)) begin
+                uart_tx_ctrl_out.te     = 1;
+                uart_tx_ctrl_out.ena_tx = 1;
+            end
+            else if(uart_tx_ctrl_in.t1 && !uart_tx_ctrl_in.eoc_dcount) begin
+               uart_tx_ctrl_out.ena_shift  = 1;
+               uart_tx_ctrl_out.ena_dcount = 1; 
+            end
         end
         SEND_STOP: begin
             uart_tx_ctrl_out.te     = 1;

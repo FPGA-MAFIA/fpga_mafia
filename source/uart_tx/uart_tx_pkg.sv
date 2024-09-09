@@ -17,10 +17,10 @@ parameter N_TIMER = 434; // 50Mhz/115200
 typedef enum {
     IDLE, 
     SEND_START,
-    CLEAR_TIMER,
+    CLEAR_TIMER,  // FIXME - state unused, remove
     SEND_DATA, 
-    TEST_EOC,    // end of 8 bits count 
-    SHIFT_COUNT,
+    TEST_EOC,     // FIXME - state unused, remove 
+    SHIFT_COUNT,  // FIXME - state unused, remove
     SEND_STOP
 } t_states;
 
