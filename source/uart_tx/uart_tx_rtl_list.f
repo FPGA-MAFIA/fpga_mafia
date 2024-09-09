@@ -19,6 +19,7 @@
 ../../../source/uart_tx/uart_tx_timer.sv
 ../../../source/uart_tx/uart_tx_output_ff.sv
 ../../../source/uart_tx/uart_tx_ctrl.sv
+../../../source/uart_tx/uart_tx_top.sv
 
 
 

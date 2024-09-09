@@ -12,7 +12,7 @@
 
 package uart_tx_pkg;
 
-parameter N_TIMER = 4340; // 50Mhz/11520
+parameter N_TIMER = 434; // 50Mhz/115200
 
 typedef enum {
     IDLE, 

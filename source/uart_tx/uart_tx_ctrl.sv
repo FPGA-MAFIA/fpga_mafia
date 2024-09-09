@@ -82,6 +82,7 @@ always_comb begin : output_logic
         IDLE: begin
             uart_tx_ctrl_out.ena_load   = 1;
             uart_tx_ctrl_out.clr_dcount = 1;
+            uart_tx_ctrl_out.set_tx     = 1;   // in IDLE transmit '1'
         end
         SEND_START: begin
             uart_tx_ctrl_out.te     = 1;

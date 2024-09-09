@@ -51,7 +51,7 @@ initial begin
 
     uart_tx_ctrl_in.eoc_dcount = 1;
     write_din                  = 0;
-    #100
+    #500
     @(posedge clk); // will eventually goes to SEND_STOP -> IDLE
     
     $finish();
@@ -59,7 +59,7 @@ initial begin
 end
 
 
-parameter V_TIMEOUT = 1000;
+parameter V_TIMEOUT = 10000;
 
 initial begin :time_out
     #V_TIMEOUT

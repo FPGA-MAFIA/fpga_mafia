@@ -21,7 +21,7 @@ import uart_tx_pkg::*;
 
 );
 
-logic [$clog2(MAX_VALUE)-1:0] timer, next_timer;
+logic [$clog2(MAX_VALUE):0] timer, next_timer;
 
 always_ff @(posedge clk or negedge resetN) begin: counter_ff
         if(!resetN) begin
@@ -32,15 +32,19 @@ always_ff @(posedge clk or negedge resetN) begin: counter_ff
         end
 end
 
+logic inc_en, inc_dis;
+assign inc_en  = te && (timer <= MAX_VALUE);
+assign inc_dis = te && (timer > MAX_VALUE);
+
 always_comb begin
     next_timer = timer;
     if(!te) begin
         next_timer = 0;
     end
-    if(te) begin
+    if(inc_en) begin
         next_timer = timer + 1;
     end
-    if(timer > MAX_VALUE) begin
+    if(inc_dis) begin
         next_timer = timer;
     end
 end
