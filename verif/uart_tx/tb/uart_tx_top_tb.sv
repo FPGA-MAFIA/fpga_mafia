@@ -51,8 +51,19 @@ initial begin: main_tb
     @(posedge clk);
 
     write_din = 0;
-    #2000;
+    #1500;
     @(posedge clk);
+
+    din  = 8'b01101011;
+    write_din = 1;
+    $display("time %t", $time);  // for debug purpose
+    #20;
+    @(posedge clk);
+
+    write_din = 0;
+    #1500;
+    @(posedge clk);
+
 
     $finish();
 
