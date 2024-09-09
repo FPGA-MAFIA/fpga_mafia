@@ -24,6 +24,21 @@ typedef enum {
     SEND_STOP
 } t_states;
 
+typedef struct packed {
+    logic ena_load;
+    logic ena_shift;
+    logic set_tx;
+    logic ena_tx;
+    logic clr_tx;
+    logic ena_dcount;
+    logic clr_dcount;
+    logic te;
+}t_uart_tx_ctrl_out;
+
+typedef struct packed {
+    logic t1;
+    logic eoc_dcount;
+}t_uart_tx_ctrl_in;
 
 
 

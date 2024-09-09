@@ -17,7 +17,8 @@
 ../../../source/uart_tx/uart_tx_shift_register.sv
 ../../../source/uart_tx/uart_tx_dcount.sv
 ../../../source/uart_tx/uart_tx_timer.sv
-../../../source/uart_tx//uart_tx_output_ff.sv
+../../../source/uart_tx/uart_tx_output_ff.sv
+../../../source/uart_tx/uart_tx_ctrl.sv
 
 
 
