@@ -20,6 +20,9 @@
 ../../../source/uart_tx/uart_tx_output_ff.sv
 ../../../source/uart_tx/uart_tx_ctrl.sv
 ../../../source/uart_tx/uart_tx_top.sv
+// fpga specific files
+../../../source/uart_tx/debouncer.sv
+../../../source/uart_tx/uart_tx_de2_top.sv
 
 
 
