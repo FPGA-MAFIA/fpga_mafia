@@ -38,6 +38,7 @@ uart_tx_top
 
 );
 
+// FIXME - the de2 board has a build in debouncer
 parameter CLK_DIVIDER = 499999;
 
 debouncer #(.CLK_DIVIDER(CLK_DIVIDER))
