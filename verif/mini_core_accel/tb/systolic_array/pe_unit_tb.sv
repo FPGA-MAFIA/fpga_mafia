@@ -9,6 +9,7 @@ import mini_core_accel_pkg::*;
 
 logic             clk;
 logic             rst;
+t_x_y             x_y;
 int16             result;
 t_pe_unit_input   pe_inputs;
 
@@ -27,6 +28,7 @@ pe_unit pe_unit
     .clk(clk),
     .rst(rst),
     .pe_inputs(pe_inputs),
+    .x_y(x_y),
     .result(result)
 );
 
@@ -34,27 +36,32 @@ initial begin:main_tb
     rst = 1;
     pe_inputs.done = 0;
     #20
-
+    @(posedge clk);  
+    
     rst = 0;
     pe_inputs.weight     = 8'd5;
     pe_inputs.activation = 8'd4;
-    #10   
+    #10 
+    @(posedge clk);  
     $display("Expected result is : 20, The result of mac is: %d", result);  
      
     pe_inputs.weight     = 8'd2;
     pe_inputs.activation = 8'd12;
     #10  
+    @(posedge clk);  
     $display("Expected result is : 44, The result of mac is: %d", result);
 
     pe_inputs.weight     = -8'd2;
     pe_inputs.activation = 8'd4;
     #10
+    @(posedge clk);  
     $display("Expected result is : 36, The result of mac is: %d", result);
 
     pe_inputs.weight     = -8'd5;
     pe_inputs.activation = -8'd6;
     pe_inputs.done = 1;
     #10
+    @(posedge clk);  
     $display("Expected result is : 66, The result of mac is: %d", result);
 
     $finish();

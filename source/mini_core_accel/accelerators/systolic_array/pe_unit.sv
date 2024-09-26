@@ -8,6 +8,7 @@ import mini_core_accel_pkg::*;
     input logic                 clk,
     input logic                 rst,
     input var t_pe_unit_input   pe_inputs,
+    output var t_x_y            x_y,
     output int16                result
 );
 
@@ -33,6 +34,9 @@ assign next_ff_result = {{2{mul_result[15]}},mul_result} + ff_result;
 
 `MAFIA_RST_DFF(ff_result, next_ff_result, clk, rst)
 
+// comunication with neighboured PE's
+`MAFIA_RST_DFF(x_y.right, pe_inputs.activation, clk, rst)
+`MAFIA_RST_DFF(x_y.down, pe_inputs.weight, clk, rst)
 
 always_comb begin
     result = ff_result[15:0];

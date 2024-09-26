@@ -51,6 +51,10 @@ typedef struct packed{
     logic done;   
 } t_pe_unit_input;
 
+typedef struct packed {
+    int8 right;
+    int8 down;
+} t_x_y;
 //-------------------------
 // cr structs
 //-------------------------
