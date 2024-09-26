@@ -43,4 +43,7 @@
 ../../../source/mini_core_accel/accelerators/pipe_line_mul.sv
 ../../../source/mini_core_accel/accelerators/neuron_mac.sv
 ../../../source/mini_core_accel/accelerators/mini_core_accel_farm.sv
+../../../source/mini_core_accel/accelerators/systolic_array/single_cycle_mul.sv
+
+
 
