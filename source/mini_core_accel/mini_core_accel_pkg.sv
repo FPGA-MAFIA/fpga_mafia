@@ -43,6 +43,15 @@ typedef struct packed {
 }t_neuron_mac_output;
 
 //-------------------------
+// systolic array structs
+//-------------------------
+typedef struct packed{
+    int8  weight;
+    int8  activation;
+    logic done;   
+} t_pe_unit_input;
+
+//-------------------------
 // cr structs
 //-------------------------
 typedef struct packed {
