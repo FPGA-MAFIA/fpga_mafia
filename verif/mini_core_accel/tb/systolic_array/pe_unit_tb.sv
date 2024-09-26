@@ -37,33 +37,37 @@ initial begin:main_tb
     pe_inputs.done = 0;
     #20
     @(posedge clk);  
-    
+
     rst = 0;
     pe_inputs.weight     = 8'd5;
     pe_inputs.activation = 8'd4;
     #10 
-    @(posedge clk);  
-    $display("Expected result is : 20, The result of mac is: %d", result);  
+    @(posedge clk);
+    $display("Expected result of mac is : 0, The result of mac is: %d", result);   
      
     pe_inputs.weight     = 8'd2;
     pe_inputs.activation = 8'd12;
     #10  
-    @(posedge clk);  
-    $display("Expected result is : 44, The result of mac is: %d", result);
+    @(posedge clk); 
+    $display("Expected result of mac is : 20, The result of mac is: %d", result);   
 
     pe_inputs.weight     = -8'd2;
     pe_inputs.activation = 8'd4;
     #10
-    @(posedge clk);  
-    $display("Expected result is : 36, The result of mac is: %d", result);
+    @(posedge clk);
+    $display("Expected result of mac is : 44, The result of mac is: %d", result);     
 
     pe_inputs.weight     = -8'd5;
     pe_inputs.activation = -8'd6;
-    pe_inputs.done = 1;
     #10
-    @(posedge clk);  
-    $display("Expected result is : 66, The result of mac is: %d", result);
-
+    @(posedge clk);
+    $display("Expected result of mac is : 36, The result of mac is: %d", result);     
+    
+    #10
+    @(posedge clk);
+    pe_inputs.done = 1;
+    $display("Expected result of mac is : 66, The result of mac is: %d", result);     
+    
     $finish();
 end
 

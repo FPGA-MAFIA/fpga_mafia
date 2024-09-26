@@ -31,8 +31,8 @@ single_cycle_mul single_cycle_mul
 logic [17:0] next_ff_result, ff_result;
 
 assign next_ff_result = {{2{mul_result[15]}},mul_result} + ff_result;
-
-`MAFIA_RST_DFF(ff_result, next_ff_result, clk, rst)
+`MAFIA_EN_RST_DFF(ff_result, next_ff_result, clk, !(pe_inputs.done), rst)
+//`MAFIA_RST_DFF(ff_result, next_ff_result, clk, rst)
 
 // comunication with neighboured PE's
 `MAFIA_RST_DFF(x_y.right, pe_inputs.activation, clk, rst)
