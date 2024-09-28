@@ -9,3 +9,4 @@
 ../../../verif/mini_core_accel/tb/neuron_mac_tb.sv
 ../../../verif/mini_core_accel/tb/systolic_array/single_cycle_mul_tb.sv
 ../../../verif/mini_core_accel/tb/systolic_array/pe_unit_tb.sv
+../../../verif/mini_core_accel/tb/systolic_array/systolic_array_net_tb.sv
