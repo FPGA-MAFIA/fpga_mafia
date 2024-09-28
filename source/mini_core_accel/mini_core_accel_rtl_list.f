@@ -45,6 +45,7 @@
 ../../../source/mini_core_accel/accelerators/mini_core_accel_farm.sv
 ../../../source/mini_core_accel/accelerators/systolic_array/single_cycle_mul.sv
 ../../../source/mini_core_accel/accelerators/systolic_array/pe_unit.sv
+../../../source/mini_core_accel/accelerators/systolic_array/systolic_array_net.sv
 
 
 

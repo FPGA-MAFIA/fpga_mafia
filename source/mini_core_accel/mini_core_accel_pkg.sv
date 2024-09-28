@@ -45,6 +45,8 @@ typedef struct packed {
 //-------------------------
 // systolic array structs
 //-------------------------
+parameter DIMENTION = 4;  // 4x4 grid. Do not change the grid size without updating structs
+
 typedef struct packed{
     int8  weight;
     int8  activation;
@@ -52,9 +54,10 @@ typedef struct packed{
 } t_pe_unit_input;
 
 typedef struct packed {
-    int8 right;
-    int8 down;
-} t_x_y;
+    int8  activation;
+    int8  weight;
+    logic done;
+} t_pe_unit_output;
 //-------------------------
 // cr structs
 //-------------------------
