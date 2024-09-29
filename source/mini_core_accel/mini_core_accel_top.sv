@@ -95,7 +95,7 @@ mini_core_accel_mem_wrap mini_core_accel_mem_wrap(
 );
 
 mini_core_accel_farm 
-#(.MUL_NUM(INT8_MULTIPLIER_NUM))  // FIXME - parametrize
+#(.MUL_NUM(INT8_MULTIPLIER_NUM), .NEURON_MAC_NUM(NEURON_MAC_NUM))  
 mini_core_accel_farm 
 (
     .clock             (Clock),

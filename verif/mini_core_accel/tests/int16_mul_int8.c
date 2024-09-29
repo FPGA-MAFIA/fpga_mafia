@@ -25,7 +25,7 @@ int main() {
 
     int32_t result32;
     result32 = mul_16by8(result16, weights[1], 9, 12);   // multiplier 9, 12
-
+    
     // used for debug purposes
     WRITE_REG(CR_DEBUG_0, result32);  //the result is 0xfffff880
 
