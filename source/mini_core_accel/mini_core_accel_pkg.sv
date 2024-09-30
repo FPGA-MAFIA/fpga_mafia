@@ -60,7 +60,7 @@ typedef struct packed {
     logic done;
 } t_pe_unit_output;
 
-typedef struct packed {
+typedef struct packed { // naming of each element is treated as a matrix 4x4 elements
      int16 pe00_result;
      int16 pe01_result;
      int16 pe02_result;
@@ -78,6 +78,17 @@ typedef struct packed {
      int16 pe32_result;
      int16 pe33_result;
 } t_pe_results;
+
+typedef enum {
+    IDLE,
+    STEP0,
+    STEP1,
+    STEP2,
+    STEP3,
+    STEP4,
+    STEP5,
+    STEP6
+} t_systolic_array_ctrl_states;
 //-------------------------
 // cr structs
 //-------------------------
