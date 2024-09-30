@@ -65,7 +65,13 @@ always_comb begin: next_state_logic
             next_state = STEP6;
         end
         STEP6: begin
-            next_state = IDLE;
+            next_state = WAIT;
+        end
+        WAIT: begin
+            if(valid)
+                next_state = IDLE;
+            else
+                next_state = WAIT;
         end
         default: next_state = IDLE;
     endcase
@@ -85,14 +91,13 @@ always_comb begin: outputs
         end
         STEP1: begin
             weights    = {8'h0, 8'h0, all_weights[23:16], all_weights[15:8]};
-            activation = {8'h0, 8'h0, all_activations[23:16], all_activations[23:16]};
+            activation = {8'h0, 8'h0, all_activations[23:16], all_activations[15:8]};
         end
         STEP2: begin
             weights    = {8'h0, all_weights[47:40], all_weights[39:32], all_weights[31:24]};
             activation = {8'h0, all_activations[47:40], all_activations[39:32], all_activations[31:24]};
         end
         STEP3: begin
-            first_done = 1;
             weights    = {all_weights[79:72], all_weights[71:64], all_weights[63:56], all_weights[55:48]};
             activation = {all_activations[79:72], all_activations[71:64], all_activations[63:56], all_activations[55:48]};
         end
@@ -108,8 +113,11 @@ always_comb begin: outputs
         end
         STEP6: begin
             first_done = 1;
-            weights    = {all_weights[127:0], 8'h0, 8'h0, 8'h0};
+            weights    = {all_weights[127:120], 8'h0, 8'h0, 8'h0};
             activation = {all_activations[127:120], 8'h0, 8'h0, 8'h0};
+        end
+        WAIT: begin
+            first_done = 1;
         end
         default: ; //do nothing;
     endcase
