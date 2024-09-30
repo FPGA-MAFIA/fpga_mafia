@@ -50,6 +50,7 @@ parameter DIMENTION = 4;  // 4x4 grid. Do not change the grid size without updat
 typedef struct packed{
     int8  weight;
     int8  activation;
+    logic start;
     logic done;   
 } t_pe_unit_input;
 
@@ -58,6 +59,36 @@ typedef struct packed {
     int8  weight;
     logic done;
 } t_pe_unit_output;
+
+typedef struct packed { // naming of each element is treated as a matrix 4x4 elements
+     int16 pe00_result;
+     int16 pe01_result;
+     int16 pe02_result;
+     int16 pe03_result;
+     int16 pe10_result;
+     int16 pe11_result;
+     int16 pe12_result;
+     int16 pe13_result;
+     int16 pe20_result;
+     int16 pe21_result;
+     int16 pe22_result;
+     int16 pe23_result;
+     int16 pe30_result;
+     int16 pe31_result;
+     int16 pe32_result;
+     int16 pe33_result;
+} t_pe_results;
+
+typedef enum {
+    IDLE,
+    STEP0,
+    STEP1,
+    STEP2,
+    STEP3,
+    STEP4,
+    STEP5,
+    STEP6
+} t_systolic_array_ctrl_states;
 //-------------------------
 // cr structs
 //-------------------------
