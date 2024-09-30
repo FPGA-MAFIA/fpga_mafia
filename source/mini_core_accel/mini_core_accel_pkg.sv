@@ -87,7 +87,8 @@ typedef enum {
     STEP3,
     STEP4,
     STEP5,
-    STEP6
+    STEP6,
+    WAIT
 } t_systolic_array_ctrl_states;
 //-------------------------
 // cr structs

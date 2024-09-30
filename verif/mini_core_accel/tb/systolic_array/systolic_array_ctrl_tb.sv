@@ -7,6 +7,7 @@ logic         rst;
 logic [127:0] all_weigths;
 logic [127:0] all_activations;
 logic         start;
+logic         valid;
 
 
 // ========================
@@ -26,14 +27,14 @@ systolic_array_ctrl systolic_array_ctrl
     .all_weights(all_weigths),      
     .all_activations(all_activations),  
     .start(start),            
-    .valid(),            
+    .valid(valid),            
     .pe_results()
 
 );
 
 initial begin
-    all_weigths     = 128'h11_22_33_44_55_66_77_88_99_aa_bb_cc_dd_ee_ff_10;
-    all_activations = 128'h10_ff_ee_dd_cc_bb_aa_99_88_77_66_55_44_33_22_11; 
+    all_activations = 128'h0D_0E_09_0F_0A_05_10_0B_06_01_0C_07_02_08_03_04; 
+    all_weigths     = 128'h05_09_04_0D_08_03_11_0C_07_02_10_0B_06_0F_0A_0E;
     rst   = 1;
     start = 0;
     #50
