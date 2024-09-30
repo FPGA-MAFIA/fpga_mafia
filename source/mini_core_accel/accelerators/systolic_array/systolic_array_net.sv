@@ -20,13 +20,14 @@
 module systolic_array_net
 import mini_core_accel_pkg::*;
 (
-    input logic         clk,
-    input logic         rst,
-    input logic  [31:0] weights,     // 4 weights of INT8 type
-    input logic  [31:0] activation,  // 4 inputs of INT8 type
-    input logic         first_done,  // top left PE done signal
-    input logic         start,
-    output logic        valid        // final valid signal
+    input logic             clk,
+    input logic             rst,
+    input logic  [31:0]     weights,     // 4 weights of INT8 type
+    input logic  [31:0]     activation,  // 4 inputs of INT8 type
+    input logic             first_done,  // top left PE done signal
+    input logic             start,
+    output var t_pe_results pe_results,
+    output logic            valid        // final valid signal
 );
 
     parameter DIMENTION = 4;  // 4x4 grid
@@ -78,5 +79,24 @@ import mini_core_accel_pkg::*;
 
     // Output valid signal: last PE's done signal indicates the entire array is done
     assign valid = done_signal[DIMENTION-1][DIMENTION-1];
+
+    // Output result signal
+    assign pe_results.pe00_result = result[0][0];
+    assign pe_results.pe01_result = result[0][1];
+    assign pe_results.pe02_result = result[0][2];
+    assign pe_results.pe03_result = result[0][3];
+    assign pe_results.pe10_result = result[1][0];
+    assign pe_results.pe11_result = result[1][1];
+    assign pe_results.pe12_result = result[1][2];
+    assign pe_results.pe13_result = result[1][3];
+    assign pe_results.pe20_result = result[2][0];
+    assign pe_results.pe21_result = result[2][1];
+    assign pe_results.pe22_result = result[2][2];
+    assign pe_results.pe23_result = result[2][3];
+    assign pe_results.pe30_result = result[3][0];
+    assign pe_results.pe31_result = result[3][1];
+    assign pe_results.pe32_result = result[3][2];
+    assign pe_results.pe33_result = result[3][3];
+
 
 endmodule

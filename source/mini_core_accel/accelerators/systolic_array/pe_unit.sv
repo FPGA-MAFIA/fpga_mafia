@@ -43,7 +43,7 @@ always_comb begin
     result = ff_result[15:0];
     if(pe_inputs.done) begin
         // saturation logic
-        if($signed(ff_result) > 18'd127) begin
+        if($signed(ff_result) > 18'd800) begin
             result = 16'sd127; 
         end
         if($signed(ff_result) < -18'sd128)begin
