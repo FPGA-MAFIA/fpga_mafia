@@ -25,6 +25,7 @@ import mini_core_accel_pkg::*;
     input logic  [31:0] weights,     // 4 weights of INT8 type
     input logic  [31:0] activation,  // 4 inputs of INT8 type
     input logic         first_done,  // top left PE done signal
+    input logic         start,
     output logic        valid        // final valid signal
 );
 
@@ -44,7 +45,7 @@ import mini_core_accel_pkg::*;
                 // Inputs for the PE
                 assign unit_input[row][col].weight = (row == 0) ? weights[(8*col+7)-:8] : unit_output[row-1][col].weight;
                 assign unit_input[row][col].activation = (col == 0) ? activation[(8*row+7)-:8] : unit_output[row][col-1].activation;
-
+                assign unit_input[row][col].start      = start;
                 // Done signal propagation
                 if (row == 0 && col == 0) begin
                     // PE00 gets the initial done signal

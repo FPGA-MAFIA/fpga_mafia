@@ -34,6 +34,7 @@ pe_unit pe_unit
 
 initial begin:main_tb
     rst = 1;
+    pe_inputs.start = 1;
     pe_inputs.done = 0;
     #20
     @(posedge clk);  
@@ -66,7 +67,7 @@ initial begin:main_tb
     #10
     @(posedge clk);
     pe_inputs.done = 1;
-    $display("Expected result of mac is : 6 6, The result of mac is: %d", result);     
+    $display("Expected result of mac is : 66, The result of mac is: %d", result);     
     #20
     @(posedge clk)
     

@@ -50,6 +50,7 @@ parameter DIMENTION = 4;  // 4x4 grid. Do not change the grid size without updat
 typedef struct packed{
     int8  weight;
     int8  activation;
+    logic start;
     logic done;   
 } t_pe_unit_input;
 

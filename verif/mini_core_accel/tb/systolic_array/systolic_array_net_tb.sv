@@ -8,6 +8,7 @@ logic        first_done;
 logic [31:0] weights;
 logic [31:0] activation;
 logic        valid;
+logic        start;
 
 // ========================
 // clock gen
@@ -25,12 +26,14 @@ systolic_array_net systolic_array_net
     .rst(rst),
     .weights(weights),     
     .activation(activation),  
-    .first_done(first_done),  
+    .first_done(first_done),
+    .start(start),  
     .valid(valid)       
 );
 
 initial begin: main_tb
-    rst = 1;
+    rst   = 1;
+    start = 1;
     #50
     @(posedge clk);
     first_done       = 0;
