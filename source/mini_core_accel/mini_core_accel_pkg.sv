@@ -79,6 +79,13 @@ typedef struct packed { // naming of each element is treated as a matrix 4x4 ele
      int16 pe33_result;
 } t_pe_results;
 
+typedef struct packed{
+    logic [127:0] cr_systolic_array_weights;
+    logic [127:0] cr_systolic_array_active;
+    logic         cr_systolic_array_start;
+    logic         cr_systolic_array_valid;
+} t_cr_systolic_array;
+
 typedef enum {
     IDLE,
     STEP0,
@@ -87,7 +94,8 @@ typedef enum {
     STEP3,
     STEP4,
     STEP5,
-    STEP6
+    STEP6,
+    WAIT
 } t_systolic_array_ctrl_states;
 //-------------------------
 // cr structs
@@ -223,6 +231,14 @@ parameter NEURON_MAC_BIAS0         = CR_MEM_OFFSET + 'hf100;
 parameter NEURON_MAC_BIAS1         = CR_MEM_OFFSET + 'hf101; 
 parameter NEURON_MAC_RESULT0       = CR_MEM_OFFSET + 'hf102; 
 parameter NEURON_MAC_RESULT1       = CR_MEM_OFFSET + 'hf103;  
+
+//=====================================
+//   define CR's for systolic array
+//=====================================
+parameter SYSTOLIC_ARRAY_WEIGHTS    = CR_MEM_OFFSET + 'hf200;
+parameter SYSTOLIC_ARRAY_ACTIVE     = CR_MEM_OFFSET + 'hf201;
+parameter SYSTOLIC_ARRAY_START      = CR_MEM_OFFSET + 'hf202;
+parameter SYSTOLIC_ARRAY_VALID      = CR_MEM_OFFSET + 'hf203;
 
 // used for debug purposes
 parameter CR_DEBUG_0                = CR_MEM_OFFSET + 'hff00;
