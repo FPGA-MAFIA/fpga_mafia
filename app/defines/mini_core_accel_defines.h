@@ -115,6 +115,15 @@
 #define NEURON_MAC_RESULT0         ((volatile int *) (CR_MEM_BASE + 0xF102))
 #define NEURON_MAC_RESULT1         ((volatile int *) (CR_MEM_BASE + 0xF103))
 
+
+//==================================
+//  define CR's for systolic array
+//==================================
+#define SYSTOLIC_ARRAY_WEIGHTS    = ((volatile int *) (CR_MEM_BASE + 0xF200));
+#define SYSTOLIC_ARRAY_ACTIVE     = ((volatile int *) (CR_MEM_BASE + 0xF201));
+#define SYSTOLIC_ARRAY_START      = ((volatile int *) (CR_MEM_BASE + 0xF202));
+#define SYSTOLIC_ARRAY_VALID      = ((volatile int *) (CR_MEM_BASE + 0xF203));
+
 // used for debug purposes
 #define CR_DEBUG_0 ((volatile int *) (CR_MEM_BASE + 0xFF00))
 #define CR_DEBUG_1 ((volatile int *) (CR_MEM_BASE + 0xFF01))

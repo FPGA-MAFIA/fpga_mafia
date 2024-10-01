@@ -49,6 +49,14 @@ initial begin
     #150
     @(posedge clk);
 
+    start = 0;
+    #50
+    @(posedge clk);
+
+    start = 1;
+    #150
+    @(posedge clk);
+
     $finish();
 
 end

@@ -7,7 +7,7 @@ import mini_core_accel_pkg::*;
     input logic             rst,
     input logic [127:0]     all_weights,      // hard wired to cr's
     input logic [127:0]     all_activations,  // hard wired to cr's
-    input logic             start,         // hard wired to cr
+    input logic             start,            // hard wired to cr
     output logic            valid,            // hard wired to cr data is valid 
     output var t_pe_results pe_results
 
@@ -68,7 +68,7 @@ always_comb begin: next_state_logic
             next_state = WAIT;
         end
         WAIT: begin
-            if(valid)
+            if(!start)
                 next_state = IDLE;
             else
                 next_state = WAIT;
