@@ -38,6 +38,15 @@ generate
     end
 endgenerate
 
+                            
+systolic_array_top systolic_array_top
+(
+    .clk(clock),
+    .rst(rst),
+    .cr_systolic_array_input(accel_farm_input.cr_systolic_array),
+    .cr_systolic_array_output(accel_farm_output.cr_systolic_array)
+);
+
 
 endmodule
 
