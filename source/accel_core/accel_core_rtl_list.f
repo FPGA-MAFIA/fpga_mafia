@@ -46,5 +46,6 @@
 //accel core farm files
 ../../../source/accel_core/accel_core_xor.sv
 ../../../source/accel_core/accel_core_booth_pipeline.sv
+../../../source/accel_core/accel_core_mul_wrapper.sv
 ../../../source/accel_core/shift_multiplier.sv
 ../../../source/accel_core/accel_core_farm.sv
