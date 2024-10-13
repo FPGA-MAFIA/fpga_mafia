@@ -103,7 +103,8 @@ assign debug_info.reg_wr_data = reg_wr_data;
 //=======================================================
 // DFF - the synchronous elements in the reference RV32I model
 //=======================================================
-`MAFIA_EN_DFF    (regfile, next_regfile,  clk, run);
+`MAFIA_EN_DFF    (regfile[0]   , '0                ,  clk, run);
+`MAFIA_EN_DFF    (regfile[31:1], next_regfile[31:1],  clk, run);
 `MAFIA_EN_DFF    (dmem,    next_dmem,     clk, run);
 `MAFIA_EN_DFF    (dmem_33, next_dmem_33,  clk, run);
 `MAFIA_EN_DFF    (imem,    next_imem,     clk, run);
@@ -563,7 +564,6 @@ always_comb begin
     end
     endcase
 
-    next_regfile[0] = '0; // x0 is always zero
 
 end// always_comb
 
