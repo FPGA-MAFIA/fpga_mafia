@@ -16,3 +16,24 @@ always @(posedge Clk) begin : memory_ref_access_print
     end
 end
 
+// new tracker for all writes to the register file 
+// track PC, register destination, and the data written to the register
+integer trk_ref_reg_write_data;
+
+initial begin: trk_ref_reg_write_data_gen
+#1
+    trk_ref_reg_write_data = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/trk_ref_reg_write_data.log"},"w");
+    $fwrite(trk_ref_reg_write_data,"---------------------------------------------------------\n");
+    $fwrite(trk_ref_reg_write_data," PC | reg_dst | data \n");
+    $fwrite(trk_ref_reg_write_data,"---------------------------------------------------------\n");  
+end
+
+always_ff @(posedge Clk ) begin
+    if(rv32i_ref.run && rv32i_ref.reg_wr_en) begin
+        $fwrite(trk_ref_reg_write_data,"%4h | %2d | %8h \n"
+        ,rv32i_ref.pc
+        ,rv32i_ref.rd
+        ,rv32i_ref.reg_wr_data
+        );
+    end
+end

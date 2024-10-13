@@ -265,7 +265,7 @@ unsigned int ASCII_BTM[128] = {
 
 
 /* ANIME tables */
-unsigned int ANIME_TOP[6]    = {WALK_MAN_TOP_0,   WALK_MAN_TOP_1,   WALK_MAN_TOP_2,   WALK_MAN_TOP_3,   WALK_MAN_TOP_4,   CLEAR_TOP};
+unsigned int ANIME_TOP[6] = {WALK_MAN_TOP_0,   WALK_MAN_TOP_1,   WALK_MAN_TOP_2,   WALK_MAN_TOP_3,   WALK_MAN_TOP_4,   CLEAR_TOP};
 unsigned int ANIME_BTM[6] = {WALK_MAN_BTM_0,WALK_MAN_BTM_1,WALK_MAN_BTM_2,WALK_MAN_BTM_3,WALK_MAN_BTM_4,CLEAR_BTM};
 
 /* Control registers addresses */
