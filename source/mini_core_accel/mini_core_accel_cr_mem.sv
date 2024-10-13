@@ -38,19 +38,22 @@ integer i,j,k,l;
 
 t_accel_cr_int8_multipliers accel_cr, next_accel_cr; // define a struct of structs for int8 multipliers
 t_accel_cr_neuron_mac       cr_neuron_mac, next_cr_neuron_mac; 
+t_cr_systolic_array         cr_systolic_array, next_cr_systolic_array;
 t_cr_debug                  cr_debug, next_cr_debug;   // FIXME - remove cr for debug when we will have ref model
 
 `MAFIA_DFF(accel_cr, next_accel_cr, Clk)
 `MAFIA_DFF(cr_neuron_mac, next_cr_neuron_mac, Clk)
+`MAFIA_DFF(cr_systolic_array, next_cr_systolic_array, Clk)
 `MAFIA_DFF(cr_debug, next_cr_debug, Clk)
 
 logic [31:0] pre_q;
 
 // write to accel_cr
 always_comb begin :wr_to_accel_cr
-    next_accel_cr      = Rst ? '0 : accel_cr;
-    next_cr_neuron_mac = Rst ? '0 : cr_neuron_mac;
-    next_cr_debug      = Rst ? '0 : cr_debug;
+    next_accel_cr          = Rst ? '0 : accel_cr;
+    next_cr_neuron_mac     = Rst ? '0 : cr_neuron_mac;
+    next_cr_systolic_array = Rst ? '0 : cr_systolic_array;
+    next_cr_debug          = Rst ? '0 : cr_debug;
     if(wren) begin // writing data from core to accelerators. 
         unique casez (address)
         // multiplicand and multiplier data comming from the core to the multiplier
@@ -109,6 +112,17 @@ always_comb begin :wr_to_accel_cr
             // neuron_mac1
             NEURON_MAC_BIAS1                    : next_cr_neuron_mac.neuron_mac_bias1                                = data[7:0];
             
+            // cr's for systolic array
+            SYSTOLIC_ARRAY_WEIGHTS31_0          : next_cr_systolic_array.cr_systolic_array_weights31_0               = data[31:0];   
+            SYSTOLIC_ARRAY_WEIGHTS63_32         : next_cr_systolic_array.cr_systolic_array_weights63_32              = data[31:0];
+            SYSTOLIC_ARRAY_WEIGHTS95_64         : next_cr_systolic_array.cr_systolic_array_weights95_64              = data[31:0];
+            SYSTOLIC_ARRAY_WEIGHTS127_96        : next_cr_systolic_array.cr_systolic_array_weights127_96             = data[31:0];
+            SYSTOLIC_ARRAY_ACTIVE31_0           : next_cr_systolic_array.cr_systolic_array_active31_0                = data[31:0];
+            SYSTOLIC_ARRAY_ACTIVE63_32          : next_cr_systolic_array.cr_systolic_array_active63_32               = data[31:0];
+            SYSTOLIC_ARRAY_ACTIVE95_64          : next_cr_systolic_array.cr_systolic_array_active95_64               = data[31:0];
+            SYSTOLIC_ARRAY_ACTIVE127_96         : next_cr_systolic_array.cr_systolic_array_active127_96              = data[31:0];
+            SYSTOLIC_ARRAY_START                : next_cr_systolic_array.cr_systolic_array_start                     = data[0];      
+
             // cr's for debug
             CR_DEBUG_0                          : next_cr_debug.cr_debug_0                                           = data[31:0];
             CR_DEBUG_1                          : next_cr_debug.cr_debug_1                                           = data[31:0];
@@ -125,7 +139,27 @@ always_comb begin :wr_to_accel_cr
         // hard wired result from neuron mac
         next_cr_neuron_mac.neuron_mac_result0 = accel_farm_output.neuron_mac_result[0].int8_result;
         next_cr_neuron_mac.neuron_mac_result1 = accel_farm_output.neuron_mac_result[1].int8_result;
-       
+
+        // hard wired result from systolic array results and valid
+        // FIXME - possible refactoring for compact coding style
+        next_cr_systolic_array.cr_systolic_array_valid = accel_farm_output.cr_systolic_array.cr_systolic_array_valid;
+        next_cr_systolic_array.cr_pe00_result          = accel_farm_output.cr_systolic_array.cr_pe00_result;
+        next_cr_systolic_array.cr_pe01_result          = accel_farm_output.cr_systolic_array.cr_pe01_result;
+        next_cr_systolic_array.cr_pe02_result          = accel_farm_output.cr_systolic_array.cr_pe02_result;
+        next_cr_systolic_array.cr_pe03_result          = accel_farm_output.cr_systolic_array.cr_pe03_result;
+        next_cr_systolic_array.cr_pe10_result          = accel_farm_output.cr_systolic_array.cr_pe10_result;
+        next_cr_systolic_array.cr_pe11_result          = accel_farm_output.cr_systolic_array.cr_pe11_result;
+        next_cr_systolic_array.cr_pe12_result          = accel_farm_output.cr_systolic_array.cr_pe12_result;
+        next_cr_systolic_array.cr_pe13_result          = accel_farm_output.cr_systolic_array.cr_pe13_result;
+        next_cr_systolic_array.cr_pe20_result          = accel_farm_output.cr_systolic_array.cr_pe20_result;
+        next_cr_systolic_array.cr_pe21_result          = accel_farm_output.cr_systolic_array.cr_pe21_result;
+        next_cr_systolic_array.cr_pe22_result          = accel_farm_output.cr_systolic_array.cr_pe22_result;
+        next_cr_systolic_array.cr_pe23_result          = accel_farm_output.cr_systolic_array.cr_pe23_result;
+        next_cr_systolic_array.cr_pe30_result          = accel_farm_output.cr_systolic_array.cr_pe30_result;
+        next_cr_systolic_array.cr_pe31_result          = accel_farm_output.cr_systolic_array.cr_pe31_result;
+        next_cr_systolic_array.cr_pe32_result          = accel_farm_output.cr_systolic_array.cr_pe32_result;
+        next_cr_systolic_array.cr_pe33_result          = accel_farm_output.cr_systolic_array.cr_pe33_result;
+
 end
 
 // reading data
@@ -187,6 +221,25 @@ always_comb begin : read_from_accel_cr
             // neuron_mac1
             NEURON_MAC_RESULT1      : pre_q = {24'b0, cr_neuron_mac.neuron_mac_result1};
             
+            // systolic array results and valid
+            SYSTOLIC_ARRAY_VALID          : pre_q = {31'b0, cr_systolic_array.cr_systolic_array_valid};
+            PE00_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe00_result};
+            PE01_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe01_result};
+            PE02_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe02_result};
+            PE03_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe03_result};
+            PE10_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe10_result};
+            PE11_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe11_result};
+            PE12_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe12_result};
+            PE13_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe13_result};
+            PE20_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe20_result};
+            PE21_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe21_result};
+            PE22_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe22_result};
+            PE23_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe23_result};
+            PE30_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe30_result};
+            PE31_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe31_result};
+            PE32_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe32_result};
+            PE33_RESULT                   : pre_q = {16'b0, cr_systolic_array.cr_pe33_result};
+
             // cr's for debug
             CR_DEBUG_0              : pre_q = cr_debug.cr_debug_0;
             CR_DEBUG_1              : pre_q = cr_debug.cr_debug_1;
@@ -210,6 +263,18 @@ always_comb begin : read_from_accel_cr
                 accel_farm_input.int8_mul2neuron_mac[k].mul_result[l] = accel_cr.cr_int8_multiplier[l+8*k].cr_mul2core_result;
             end
        end
+        // hard wired systolic array weights, activations and start
+        accel_farm_input.cr_systolic_array.cr_systolic_array_weights31_0   = cr_systolic_array.cr_systolic_array_weights31_0;
+        accel_farm_input.cr_systolic_array.cr_systolic_array_weights63_32  = cr_systolic_array.cr_systolic_array_weights63_32;
+        accel_farm_input.cr_systolic_array.cr_systolic_array_weights95_64  = cr_systolic_array.cr_systolic_array_weights95_64;
+        accel_farm_input.cr_systolic_array.cr_systolic_array_weights127_96 = cr_systolic_array.cr_systolic_array_weights127_96;
+
+        accel_farm_input.cr_systolic_array.cr_systolic_array_active31_0    = cr_systolic_array.cr_systolic_array_active31_0;
+        accel_farm_input.cr_systolic_array.cr_systolic_array_active63_32   = cr_systolic_array.cr_systolic_array_active63_32;
+        accel_farm_input.cr_systolic_array.cr_systolic_array_active95_64   = cr_systolic_array.cr_systolic_array_active95_64;
+        accel_farm_input.cr_systolic_array.cr_systolic_array_active127_96  = cr_systolic_array.cr_systolic_array_active127_96;
+
+        accel_farm_input.cr_systolic_array.cr_systolic_array_start         = cr_systolic_array.cr_systolic_array_start;
 end 
 
 `MAFIA_RST_DFF(q, pre_q, Clk, Rst)

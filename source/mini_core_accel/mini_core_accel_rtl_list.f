@@ -47,4 +47,4 @@
 ../../../source/mini_core_accel/accelerators/systolic_array/pe_unit.sv
 ../../../source/mini_core_accel/accelerators/systolic_array/systolic_array_net.sv
 ../../../source/mini_core_accel/accelerators/systolic_array/systolic_array_ctrl.sv
-
+../../../source/mini_core_accel/accelerators/systolic_array/systolic_array_top.sv

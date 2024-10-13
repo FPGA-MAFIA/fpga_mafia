@@ -9,7 +9,7 @@ import mini_core_accel_pkg::*;
     input logic                 rst,
     input var t_pe_unit_input   pe_inputs,
     output var t_pe_unit_output pe_outputs,
-    output int16                result
+    output int16                result   // TODO consider make the output int8
 );
 
 
