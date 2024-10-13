@@ -8,75 +8,8 @@ _start:
   nop                       
   nop                       
   nop                       
-reset_handler:
-  mv  x1, x0
-  mv  x2, x1
-  mv  x3, x1
-  mv  x4, x1
-  mv  x5, x1
-  mv  x6, x1
-  mv  x7, x1
-  mv  x8, x1
-  mv  x9, x1
-  mv x10, x1
-  mv x11, x1
-  mv x12, x1
-  mv x13, x1
-  mv x14, x1
-  mv x15, x1
-  mv x16, x1
-  mv x17, x1
-  mv x18, x1
-  mv x19, x1
-  mv x20, x1
-  mv x21, x1
-  mv x22, x1
-  mv x23, x1
-  mv x24, x1
-  mv x25, x1
-  mv x26, x1
-  mv x27, x1
-  mv x28, x1
-  mv x29, x1
-  mv x30, x1
-  mv x31, x1
+  j init_handler            # Jump to the initialization handler after NOPs
 
-csr_init:
-  li t0, 0x100      # Load the immediate value 0x100 of trap handler address
-  csrw mtvec, t0    # Write the value in t0 to the mtvec CSR
-
-  # Enable software and external interrupts. Set meie and msie to 1 and mtie to 0 as default values
-  li t0, 0x808
-  csrw	mie, t0     
-  
-  # Enable interrupts. Set MIE and MPIE bit to 1 and 0 respectively in mstatus register.
-  li t0, 0x8
-  csrw  mstatus, t0 
-  
-  # update custom csr at address 0xBC0 that serves as mtimecmp register
-  li t0, 0x00000500
-  csrw 0xBC0, t0    
-
-  /* stack initialization */
-  la   x2, _stack_start
-
-  /* Zero initialize .sbss section */
-zero_sbss:
-  la t0, __sbss_start   /* t0 = start of .sbss */
-  la t1, __sbss_end     /* t1 = end of .sbss */
-zero_sbss_loop:
-  bge t0, t1, jump_main /* If t0 >= t1, proceed to main */
-  sw x0, 0(t0)          /* Store zero in .sbss */
-  addi t0, t0, 4        /* Increment t0 */
-  j zero_sbss_loop      /* Repeat for next word */
-
-jump_main:
-  jal x1, main  //jump to main
-  nop
-  ebreak        //end                    
-  .section .text
-
-  
 ###############################################
 # Trap handler for interrupts and exceptions 
 ###############################################
@@ -156,3 +89,87 @@ restore_and_return:
     lw t6, 4(sp)
     addi sp, sp, 128      # Deallocate stack space
     mret                  # Return from interrupt
+
+# After the trap handler, initialize the system
+# --------------------------------------------------
+
+init_handler:
+
+reset_handler:
+  /* Initialize registers */
+  mv  x1, x0
+  mv  x2, x1
+  mv  x3, x1
+  mv  x4, x1
+  mv  x5, x1
+  mv  x6, x1
+  mv  x7, x1
+  mv  x8, x1
+  mv  x9, x1
+  mv x10, x1
+  mv x11, x1
+  mv x12, x1
+  mv x13, x1
+  mv x14, x1
+  mv x15, x1
+  mv x16, x1
+  mv x17, x1
+  mv x18, x1
+  mv x19, x1
+  mv x20, x1
+  mv x21, x1
+  mv x22, x1
+  mv x23, x1
+  mv x24, x1
+  mv x25, x1
+  mv x26, x1
+  mv x27, x1
+  mv x28, x1
+  mv x29, x1
+  mv x30, x1
+  mv x31, x1
+
+csr_init:
+  li t0, 0x100      # Load the immediate value 0x100 of trap handler address
+  csrw mtvec, t0    # Write the value in t0 to the mtvec CSR
+
+  # Enable software and external interrupts. Set meie and msie to 1 and mtie to 0 as default values
+  li t0, 0x808
+  csrw	mie, t0     
+  
+  # Enable interrupts. Set MIE and MPIE bit to 1 and 0 respectively in mstatus register.
+  li t0, 0x8
+  csrw  mstatus, t0 
+  
+  # update custom csr at address 0xBC0 that serves as mtimecmp register
+  li t0, 0x00000500
+  csrw 0xBC0, t0    
+
+  /* Stack initialization */
+  la   x2, _stack_start
+
+  /* Zero initialize .sbss section */
+zero_sbss:
+  la t0, __sbss_start   /* t0 = start of .sbss */
+  la t1, __sbss_end     /* t1 = end of .sbss */
+zero_sbss_loop:
+  bge t0, t1, zero_bss  /* If t0 >= t1, proceed to zeroing .bss */
+  sw x0, 0(t0)          /* Store zero in .sbss */
+  addi t0, t0, 4        /* Increment t0 */
+  j zero_sbss_loop      /* Repeat for next word */
+
+  /* Zero initialize .bss section */
+zero_bss:
+  la t0, __bss_start    /* t0 = start of .bss */
+  la t1, __bss_end      /* t1 = end of .bss */
+zero_bss_loop:
+  bge t0, t1, jump_main /* If t0 >= t1, proceed to main */
+  sw x0, 0(t0)          /* Store zero in .bss */
+  addi t0, t0, 4        /* Increment t0 */
+  j zero_bss_loop       /* Repeat for next word */
+
+jump_main:
+  jal x1, main          /* Jump to main */
+  nop
+  ebreak                /* End */
+  .section .text
