@@ -33,6 +33,7 @@ logic        DMemWrEn   ;
 logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
 logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
+logic  [7:0] TempDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 logic  [7:0] NextDMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
@@ -102,13 +103,14 @@ initial begin: test_seq
     // loading dmem 
     file = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
-        $fclose(file);
-        $readmemh({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../../target/big_core_cachel1/tests/",test_name,"/gcc_files/data_mem.sv"} , TempDMem);
         //force array.mem      = DMem; //backdoor to actual memory
-        force rv32i_ref.dmem = DMem; //backdoor to reference model memory
+        force rv32i_ref.dmem = TempDMem; //backdoor to reference model memory
+        force DMem           = TempDMem; //backdoor to reference model memory
         #10
         //release array.mem;
         release rv32i_ref.dmem;
+        release DMem;
     end
  
     
@@ -241,6 +243,7 @@ end
 
 //writing to D_MEM(Acts as FM):
 always_comb begin
+    NextDMem = DMem;
     NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}] = wr_enable_fm ? cache2fm_req_q3.data[7:0]     : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h0}];
     NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}] = wr_enable_fm ? cache2fm_req_q3.data[15:8]    : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h1}];
     NextDMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h2}] = wr_enable_fm ? cache2fm_req_q3.data[23:16]   : DMem[{cache2fm_req_q3.address[MSB_TAG:LSB_SET],4'h2}];
@@ -262,9 +265,11 @@ end
 
 
 // One Cycle Latency on memory read - sample the id & Valid.
-`MAFIA_DFF(samp_fm2cache_rd_rsp[0].address   ,cache2fm_req_q3.address   , Clk)
-`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid     ,cache2fm_req_q3.valid  && (cache2fm_req_q3.opcode == FILL_REQ_OP)   , Clk)
+//`MAFIA_DFF(samp_fm2cache_rd_rsp[0].address   ,cache2fm_req_q3.address   , Clk)
+//`MAFIA_DFF(samp_fm2cache_rd_rsp[0].valid     ,cache2fm_req_q3.valid  && (cache2fm_req_q3.opcode == FILL_REQ_OP)   , Clk)
 // Shift register to add 10 cycle latecy on FM read.
+assign samp_fm2cache_rd_rsp[0].address = cache2fm_req_q3.address;
+assign samp_fm2cache_rd_rsp[0].valid   = cache2fm_req_q3.valid  && (cache2fm_req_q3.opcode == FILL_REQ_OP) ;
 `MAFIA_DFF(samp_fm2cache_rd_rsp[9:1]       ,samp_fm2cache_rd_rsp[8:0] , Clk)
 `MAFIA_DFF(fm2cache_rd_rsp                 ,samp_fm2cache_rd_rsp[9]   , Clk)
 

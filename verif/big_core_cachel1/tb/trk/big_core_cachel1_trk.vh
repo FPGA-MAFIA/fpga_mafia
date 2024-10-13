@@ -68,9 +68,7 @@ logic CRHitQ104H, CRHitQ105H;
 logic [31:0] RegionMemRdDataQ105H;
 logic [31:0] RegionMemRdEnQ104H, RegionMemRdEnQ105H;
 assign RegionMemRdDataQ105H  = big_core_cachel1_top.big_core.big_core_wb.PostSxDMemRdDataQ105H;  // data read from memorry in case of MemRdEn
-`MAFIA_DFF(RegionMemRdEnQ104H, big_core_cachel1_top.big_core.big_core_mem_access1.Ctrl.DMemRdEnQ103H , Clk)
-`MAFIA_DFF(RegionMemRdEnQ105H, RegionMemRdEnQ104H , Clk)
-
+assign RegionMemRdEnQ105H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ105H.RegWrEn && big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ105H.e_SelWrBack == WB_DMEM;
 
 integer trk_data_memory_access;
 initial begin: trk_data_memory_access_gen
