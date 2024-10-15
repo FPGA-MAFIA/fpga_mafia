@@ -249,19 +249,6 @@ always @(posedge clk) begin
 //==================================================
 // tracker of reference model - core<->cache
 //==================================================
-    if(dmem_core2cache_req.valid && (dmem_core2cache_req.opcode == RD_OP )) begin
-        $fwrite(cache_ref_gold_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
-        dmem_core2cache_req.address, 
-        dmem_core2cache_req.reg_id, 
-        dmem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        dmem_core2cache_req.address[MSB_SET:LSB_SET]);      
-        //same condition for the actual cache
-        $fwrite(cache_ref_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
-        dmem_core2cache_req.address, 
-        dmem_core2cache_req.reg_id, 
-        dmem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        dmem_core2cache_req.address[MSB_SET:LSB_SET]);    
-    end
     if(ref_cache2core_rsp.valid) begin
         $fwrite(cache_ref_gold_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
         ref_cache2core_rsp.address, 
@@ -274,9 +261,6 @@ always @(posedge clk) begin
 // tracker of reference model - core<->cache
 //==================================================
     if(dmem_cache2core_rsp.valid) begin
-    // just for debug pring to the console when condition is met
-        $display("condition met");
-    // 
         $fwrite(cache_ref_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
         dmem_cache2core_rsp.address, 
         dmem_cache2core_rsp.reg_id, 
