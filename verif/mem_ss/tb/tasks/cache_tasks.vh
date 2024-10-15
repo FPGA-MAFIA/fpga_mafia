@@ -26,6 +26,7 @@ endtask
 task wr_req( input logic [19:0]  address, 
              input logic [31:0] data ,
              input logic [4:0]   id );
+    #1
     while (~ready) begin
       delay(1); $display("-> not ready! cant send write: %h ", address );
     end
@@ -46,6 +47,7 @@ endtask
 task wr_req_sb( input logic [19:0]  address, 
                 input logic [31:0]  data ,
                 input logic [4:0]   id);
+    #1
     while (~ready) begin
       delay(1); $display("-> not ready! cant send write: %h ", address );
     end
@@ -66,6 +68,7 @@ endtask
 task wr_req_sh( input logic [19:0]  address, 
                 input logic [31:0]  data ,
                 input logic [4:0]   id);
+    #1
     while (~ready) begin
       delay(1); $display("-> not ready! cant send write: %h ", address );
     end
@@ -85,6 +88,7 @@ endtask
 //=======================================================
 task rd_req( input logic [19:0] address,
              input logic [4:0] id); 
+    #1
     while (~ready) begin 
     delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
@@ -103,6 +107,7 @@ endtask
 //=======================================================
 task rd_req_lb( input logic [19:0] address,
                 input logic [4:0]  id); 
+    #1
     while (~ready) begin 
     delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
@@ -121,6 +126,7 @@ endtask
 //=======================================================
 task rd_req_lh( input logic [19:0] address,
                 input logic [4:0]  id); 
+    #1
     while (~ready) begin 
     delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
@@ -139,6 +145,7 @@ endtask
 //=======================================================
 task rd_req_lbu( input logic [19:0] address,
                  input logic [4:0]  id); 
+    #1
     while (~ready) begin 
     delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
@@ -157,6 +164,7 @@ endtask
 //=======================================================
 task rd_req_lhu( input logic [19:0] address,
                  input logic [4:0]  id); 
+    #1
     while (~ready) begin 
     delay(1);  $display("-> Not ready! cant send read: %h ", address);
     end
