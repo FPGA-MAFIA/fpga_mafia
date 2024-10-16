@@ -419,7 +419,8 @@ package accel_core_pkg;
     typedef enum { 
         W1,
         W2,
-        W3
+        W3,
+        FREE
     } t_buffer_sel;
 
 endpackage

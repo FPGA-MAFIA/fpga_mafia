@@ -1,6 +1,4 @@
-
 `include "macros.vh"
-
 module accel_core_mul_top 
 import accel_core_pkg::*;
 (
@@ -13,11 +11,14 @@ import accel_core_pkg::*;
     inout t_buffer_inout output
 );
 
+
+
 logic clear_m1;
 logic start_m1;
-t_l8_array weight_m1_data;
+t_buffer_weights weight_m1;
 logic signed [7:0] result_m1;
 logic out_valid_m1;
+t_buffer_sel assign_m1;
 
 accel_core_mul_wrapper m1 (
       .Clock(Clock),
@@ -25,16 +26,17 @@ accel_core_mul_wrapper m1 (
       .clear(clear_m1),
       .start(start_m1),
       .neuron_in(neuron_in),
-      .w1(weight_m1_data),
+      .w1(weight_m1),
       .result(result_m1),
       .out_valid(out_valid_m1)
   );
 
 logic clear_m2;
 logic start_m2;
-t_l8_array weight_m2_data;
+t_buffer_weights weight_m2;
 logic signed [7:0] result_m2;
 logic out_valid_m2;
+t_buffer_sel assign_m2;
 
   accel_core_mul_wrapper m2 (
       .Clock(Clock),
@@ -42,27 +44,74 @@ logic out_valid_m2;
       .clear(clear_m2),
       .start(start_m2),
       .neuron_in(neuron_in),
-      .w1(weight_m2_data),
+      .w1(weight_m2),
       .result(result_m2),
       .out_valid(out_valid_m2)
   );
-logic 
-always_comb mux begin // the logic which assigns the weight buffer to each mul
+
+logic move_out_to_in;
+accel_core_mul_controller mul_controller (
+    .Clock(Clock),
+    .Rst(Rst),
+    .input_metadata(input.meta_data),
+    .w1_metadata(w1.meta_data),
+    .w2_metadata(w2.meta_data),
+    .w3_metadata(w3.meta_data),
+    .out_metadata(output.meta_data),
+    .move_out_to_in(move_out_to_in),
+    ///////// m1 port
+    .clear_m1(clear_m1),
+    .start_m1(start_m1),
+    .assign_m1(assign_m1),
+    .out_valid_m1(out_valid_m1),
+    ///////// m2 port
+    .clear_m2(clear_m2),
+    .start_m2(start_m2),
+    .assign_m2(assign_m2),
+    .out_valid_m2(out_valid_m2)
+);
+
+always_comb mux_in begin // the logic which assigns the weight buffer to each mul
     if(Rst) begin
-        weight_m1_data = '0;
-        weight_m2_data = '0;
+        weight_m1 = '0;
+        weight_m2 = '0;
     end
     else begin
-        case (m1_assign)
-            W1: weight_m1_data = w1.data;
-            W2: weight_m1_data = w2.data;
-            W3: weight_m1_data = w3.data;
+        case (assign_m1)
+            W1: weight_m1 = w1;
+            W2: weight_m1 = w2;
+            W3: weight_m1 = w3;
         endcase
-        case (m2_assign)
-            W1: weight_m2_data = w1.data;
-            W2: weight_m2_data = w2.data;
-            W3: weight_m3_data = w3.data;
+        case (assign_m2)
+            W1: weight_m2 = w1;
+            W2: weight_m2 = w2;
+            W3: weight_m2 = w3;
         endcase
+    end
+end
+
+always_comb mux_out begin // assigns the result to the output
+    if(Rst)
+        output.data = '0; // Reset output data
+    else begin
+        if(out_valid_m1) begin
+            output.data[weight_m1.neuron_idx] = result_m1;
+            case (assign_m1)
+                W1: w1_metadata.in_use = 1'b0;
+                W2: w2_metadata.in_use = 1'b0;
+                W3: w3_metadata.in_use = 1'b0;
+                default: ;
+            endcase
+        end
+        if(out_valid_m2) begin
+            output.data[weight_m2.neuron_idx] = result_m2;
+            case (assign_m2_tmp)
+                W1: w1_metadata.in_use = 1'b0;
+                W2: w2_metadata.in_use = 1'b0;
+                W3: w3_metadata.in_use = 1'b0;
+                default: ;
+            endcase
+        end
     end
 end
 
