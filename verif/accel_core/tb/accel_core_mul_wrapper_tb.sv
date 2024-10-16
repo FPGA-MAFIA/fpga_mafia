@@ -54,8 +54,41 @@ import accel_core_pkg::*;  // Import your package
     w1.meta_data.input_len = 4;  // Number of elements in the weights buffer
     #10; 
     start = 1;
-    #1000; 
-
+    #300; 
+    clear=1;
+    neuron_in.data[0] = 8'h10;
+    neuron_in.data[1] = 8'h20;
+    neuron_in.data[2] = 8'h3;
+    neuron_in.data[3] = 8'h4;
+    neuron_in.data[4] = 8'h5;
+    neuron_in.data[5] = 8'h6;
+    w1.data[0] = 8'h10;
+    w1.data[1] = 8'h20;
+    w1.data[2] = 8'h3;
+    w1.data[3] = 8'h4;
+    w1.data[4] = 8'h5;
+    w1.data[5] = 8'h6;   
+    w1.meta_data.input_len = 4;  // Number of elements in the weights buffer
+    #10
+    clear=0;
+    #300; 
+    clear=1;
+    neuron_in.data[0] = -8'h10;
+    neuron_in.data[1] = -8'h20;
+    neuron_in.data[2] = 8'h3;
+    neuron_in.data[3] = 8'h4;
+    neuron_in.data[4] = 8'h5;
+    neuron_in.data[5] = 8'h6;
+    w1.data[0] = 8'h10;
+    w1.data[1] = 8'h20;
+    w1.data[2] = 8'h3;
+    w1.data[3] = 8'h4;
+    w1.data[4] = 8'h5;
+    w1.data[5] = 8'h6;   
+    w1.meta_data.input_len = 4;  // Number of elements in the weights buffer
+    #10
+    clear=0;
+    #300
     // Finish simulation
     $finish;
   end

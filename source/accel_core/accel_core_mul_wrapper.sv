@@ -10,12 +10,12 @@ import accel_core_pkg::*;
     input logic start,
     input t_buffer_inout neuron_in,
     input t_buffer_weights w1,
-    output logic [7:0] result,
+    output logic signed [7:0] result,
     output logic out_valid
 );
-logic [WEIGHT_WIDTH-1:0] Mu;
-logic [WEIGHT_WIDTH-1:0] Qu;
-logic [2*WEIGHT_WIDTH-1:0] product;
+logic signed [WEIGHT_WIDTH-1:0] Mu;
+logic signed [WEIGHT_WIDTH-1:0] Qu;
+logic signed [2*WEIGHT_WIDTH-1:0] product;
 
 shift_multiplier
   #(
@@ -43,15 +43,16 @@ shift_multiplier
     parameter int c_mul_reaction_time=10;
     logic unsigned [7:0] mul_idx;
     logic done;
-    logic [31:0] tmp_result;
+    logic signed [31:0] tmp_result;
 
     // Sequential logic: state register
     always_ff @(posedge Clock) begin
         if (Rst || clear) begin 
-            product = 0;
             tmp_result = 0;
             counter=0;
             counter2=0;
+            mul_idx=0;
+            done = 1'b0;
             current_state <= st_idle;  // Reset to idle state
         end 
         else begin
@@ -82,7 +83,7 @@ shift_multiplier
                     done = 1'b1;  
                     if(tmp_result > 127) // saturation
                         tmp_result = 127;
-                     else if (tmp_result < -128) 
+                    else if (tmp_result < -128) 
                         tmp_result = -128;
             end 
         endcase

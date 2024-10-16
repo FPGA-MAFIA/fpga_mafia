@@ -28,26 +28,32 @@ module shift_multiplier
 logic [M_width - 1:0] abs_M;
 logic [Q_width - 1:0] abs_Q;
 logic is_pos;
+logic signed [M_width + Q_width - 1:0] tmp_product;
 
 always_comb begin // convert to positive
-  if (Mu < 0) begin
-    abs_M = ~Mu + 1;
-  end else begin
-    abs_M = Mu;
+  if(Rst) begin
+    abs_M = 0;
+    abs_Q = 0;
+    is_pos = 0;
   end
-
-  if (Qu < 0) begin
-    abs_Q = ~Qu + 1;
-  end else begin
-    abs_Q = Qu;
+  else begin 
+    if (Mu < 0) begin
+      abs_M = ~Mu + 1;
+    end else begin
+      abs_M = Mu;
+    end
+    if (Qu < 0) begin
+      abs_Q = ~Qu + 1;
+    end else begin
+      abs_Q = Qu;
+    end
+    if ((Qu < 0 && Mu < 0) || (Qu > 0 && Mu > 0)) begin
+      is_pos = 1'b1;
+    end else begin
+      is_pos = 1'b0;
+    end
   end
-
-  if ((Qu < 0 && Mu < 0) || (Qu > 0 && Mu > 0)) begin
-    is_pos = 1'b1;
-  end else begin
-    is_pos = 1'b0;
-  end
-end
+end 
 
 stage_mul_inp_t stage_inputs [0:Q_width];
 ////////////////////////////////////////////////////////////////////////////
@@ -87,11 +93,13 @@ always_ff @(posedge Clock or posedge Rst) begin
 end
 
 always_comb begin // convert to positive
-  if (stage_inputs[Q_width].is_pos) begin
-    product = stage_inputs[Q_width].Accum;
+  if(Rst)
+    tmp_product = 0;
+  else if (stage_inputs[Q_width].is_pos) begin
+    tmp_product = stage_inputs[Q_width].Accum;
   end else begin
-    product = ~(stage_inputs[Q_width].Accum) + 1;
+    tmp_product = ~(stage_inputs[Q_width].Accum) + 1;
   end
 end
-
+assign product = tmp_product;
 endmodule

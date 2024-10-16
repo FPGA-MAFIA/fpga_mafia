@@ -383,17 +383,16 @@ package accel_core_pkg;
 
 
     parameter buffer_len = 252;
+    typedef logic [buffer_len-1:0][7:0] t_l8_array;
     typedef struct packed {
         t_metadata_weights meta_data;
-        logic [buffer_len-1:0][7:0] data; // 252 elements, each 8 bits wide
+        t_l8_array data; // 252 elements, each 8 bits wide
     } t_buffer_weights;
 
     typedef struct packed {
         t_metadata_inout meta_data;
-        logic [buffer_len-1:0][7:0] data; // 252 elements, each 8 bits wide
+        t_l8_array data; // 252 elements, each 8 bits wide
     } t_buffer_inout;
-
-
 
     typedef struct packed {
         logic [7:0] xor_inp1;
@@ -413,5 +412,14 @@ package accel_core_pkg;
         logic [2*WEIGHT_WIDTH:0] AQQ_0;
         logic [WEIGHT_WIDTH-1:0] Mu;
     } stage_mul_inp_t;
+
+
+
+    /*************************************ENUMS******************************************/
+    typedef enum { 
+        W1,
+        W2,
+        W3
+    } t_buffer_sel;
 
 endpackage
