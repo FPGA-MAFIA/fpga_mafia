@@ -115,7 +115,42 @@
 #define NEURON_MAC_RESULT0         ((volatile int *) (CR_MEM_BASE + 0xF102))
 #define NEURON_MAC_RESULT1         ((volatile int *) (CR_MEM_BASE + 0xF103))
 
-// used for debug purposes
+
+//==================================
+//  define CR's for systolic array
+//==================================
+#define SYSTOLIC_ARRAY_WEIGHTS31_0    ((volatile int *) (CR_MEM_BASE + 0xF200))
+#define SYSTOLIC_ARRAY_WEIGHTS63_32   ((volatile int *) (CR_MEM_BASE + 0xF201))
+#define SYSTOLIC_ARRAY_WEIGHTS95_64   ((volatile int *) (CR_MEM_BASE + 0xF202))
+#define SYSTOLIC_ARRAY_WEIGHTS127_96  ((volatile int *) (CR_MEM_BASE + 0xF203))
+#define SYSTOLIC_ARRAY_ACTIVE31_0     ((volatile int *) (CR_MEM_BASE + 0xF204))
+#define SYSTOLIC_ARRAY_ACTIVE63_32    ((volatile int *) (CR_MEM_BASE + 0xF205))
+#define SYSTOLIC_ARRAY_ACTIVE95_64    ((volatile int *) (CR_MEM_BASE + 0xF206))
+#define SYSTOLIC_ARRAY_ACTIVE127_96   ((volatile int *) (CR_MEM_BASE + 0xF207))
+#define SYSTOLIC_ARRAY_START          ((volatile int *) (CR_MEM_BASE + 0xF208))
+#define SYSTOLIC_ARRAY_VALID          ((volatile int *) (CR_MEM_BASE + 0xF209))
+
+#define PE00_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF20A))
+#define PE01_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF20B))
+#define PE02_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF20C))
+#define PE03_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF20D))
+#define PE10_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF20E))
+#define PE11_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF20F))
+#define PE12_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF210))
+#define PE13_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF211))
+#define PE20_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF212))
+#define PE21_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF213))
+#define PE22_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF214))
+#define PE23_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF215))
+#define PE30_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF216))
+#define PE31_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF217))
+#define PE32_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF218))
+#define PE33_RESULT                   ((volatile int *) (CR_MEM_BASE + 0xF219))
+
+
+//=====================================
+//   define CR's for dwbug purposes
+//=====================================
 #define CR_DEBUG_0 ((volatile int *) (CR_MEM_BASE + 0xFF00))
 #define CR_DEBUG_1 ((volatile int *) (CR_MEM_BASE + 0xFF01))
 #define CR_DEBUG_2 ((volatile int *) (CR_MEM_BASE + 0xFF02))

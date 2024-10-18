@@ -10,6 +10,8 @@
 #define MUL2CORE_INT8_RESULT(index)        (volatile int *)(CR_MEM_BASE + 0xF050 + 2*index)
 #define MUL2CORE_INT8_DONE(index)          (volatile int *)(CR_MEM_BASE + 0xF050 + 2*index+1)
 
+#define PACK_TO_32BIT(a, b, c, d) ((d & 0xFF) | ((c & 0xFF) << 8) | ((b & 0xFF) << 16) | ((a & 0xFF) << 24))
+
 // error macros
 #define MUL_INDEX_OUT_OF_RANGE  -1
 
@@ -96,5 +98,56 @@ int32_t mul_16by8(int16_t multiplier, int8_t multiplicand, unsigned int mul_inde
 
     return result;
 
+}
+
+//set data in systolic array data into cr's.
+// TODO - possible to start running systolic array after partial data load. We dont have perform full write of weights and
+// activation matrixes
+void set_systolic_array(int8_t activations[4][4], int8_t weights[4][4]){
+
+    // writing activates to systolic array + perform reordering
+    uint32_t packed_value_1 = PACK_TO_32BIT(activations[0][1], activations[1][3], activations[0][2], activations[0][3]);
+    uint32_t packed_value_2 = PACK_TO_32BIT(activations[1][1], activations[0][0], activations[2][3], activations[1][2]);
+    uint32_t packed_value_3 = PACK_TO_32BIT(activations[2][1], activations[1][0], activations[3][3], activations[2][2]);
+    uint32_t packed_value_4 = PACK_TO_32BIT(activations[3][0], activations[3][1], activations[2][0], activations[3][2]);
+    WRITE_REG(SYSTOLIC_ARRAY_ACTIVE31_0, packed_value_1);
+    WRITE_REG(SYSTOLIC_ARRAY_ACTIVE63_32, packed_value_2);
+    WRITE_REG(SYSTOLIC_ARRAY_ACTIVE95_64, packed_value_3);
+    WRITE_REG(SYSTOLIC_ARRAY_ACTIVE127_96, packed_value_4);
+
+    // writing weights to systolic array
+    packed_value_1 = PACK_TO_32BIT(weights[1][0], weights[3][1], weights[2][0], weights[3][0]);
+    packed_value_2 = PACK_TO_32BIT(weights[1][1], weights[0][0], weights[3][2], weights[2][1]);
+    packed_value_3 = PACK_TO_32BIT(weights[1][2], weights[0][1], weights[3][3], weights[2][2]);
+    packed_value_4 = PACK_TO_32BIT(weights[0 ][3], weights[1][3], weights[0][2], weights[2][3]);
+    WRITE_REG(SYSTOLIC_ARRAY_WEIGHTS31_0, packed_value_1);
+    WRITE_REG(SYSTOLIC_ARRAY_WEIGHTS63_32, packed_value_2);
+    WRITE_REG(SYSTOLIC_ARRAY_WEIGHTS95_64, packed_value_3);
+    WRITE_REG(SYSTOLIC_ARRAY_WEIGHTS127_96, packed_value_4);
+
+}
+
+int16_t (*systolic_array_result())[4] {
+    static int16_t results[4][4];
+
+    READ_REG(results[0][0], PE00_RESULT);
+    READ_REG(results[0][1], PE01_RESULT);
+    READ_REG(results[0][2], PE02_RESULT);
+    READ_REG(results[0][3], PE03_RESULT);
+    READ_REG(results[1][0], PE10_RESULT);
+    READ_REG(results[1][1], PE11_RESULT);
+    READ_REG(results[1][2], PE12_RESULT);
+    READ_REG(results[1][3], PE13_RESULT);
+    READ_REG(results[2][0], PE20_RESULT);
+    READ_REG(results[2][1], PE21_RESULT);
+    READ_REG(results[2][2], PE22_RESULT);
+    READ_REG(results[2][3], PE23_RESULT);
+    READ_REG(results[3][0], PE30_RESULT);
+    READ_REG(results[3][1], PE31_RESULT);
+    READ_REG(results[3][2], PE32_RESULT);
+    READ_REG(results[3][3], PE33_RESULT);
+    
+    
+    return results;
 }
 #endif 

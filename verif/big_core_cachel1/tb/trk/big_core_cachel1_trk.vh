@@ -68,9 +68,7 @@ logic CRHitQ104H, CRHitQ105H;
 logic [31:0] RegionMemRdDataQ105H;
 logic [31:0] RegionMemRdEnQ104H, RegionMemRdEnQ105H;
 assign RegionMemRdDataQ105H  = big_core_cachel1_top.big_core.big_core_wb.PostSxDMemRdDataQ105H;  // data read from memorry in case of MemRdEn
-`MAFIA_DFF(RegionMemRdEnQ104H, big_core_cachel1_top.big_core.big_core_mem_access1.Ctrl.DMemRdEnQ103H , Clk)
-`MAFIA_DFF(RegionMemRdEnQ105H, RegionMemRdEnQ104H , Clk)
-
+assign RegionMemRdEnQ105H = big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ105H.RegWrEn && big_core_cachel1_top.big_core.big_core_ctrl.CtrlQ105H.e_SelWrBack == WB_DMEM;
 
 integer trk_data_memory_access;
 initial begin: trk_data_memory_access_gen
@@ -109,7 +107,7 @@ always @(posedge Clk) begin : memory_access_print
         else if(CRHitQ105H) begin
             $fwrite(trk_cr_data_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemWrDataQ105H);
         end
-        else begin
+        begin//all writes to memory - no need for else
             $fwrite(trk_data_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemWrDataQ105H);
         end 
     end
@@ -120,7 +118,7 @@ always @(posedge Clk) begin : memory_access_print
         else if(CRHitQ105H) begin
             $fwrite(trk_cr_data_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemRdDataQ105H);
         end
-        else begin
+        begin// all reads from memory - no need for else
             $fwrite(trk_data_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ105H, RegionMemAddrQ105H, RegionMemRdDataQ105H);
         end
     end
@@ -192,4 +190,23 @@ always_ff @(posedge Clk ) begin
                            );
 end
 // FIXME
+
+integer trk_reg_write_data;
+initial begin: trk_reg_write_data_gen
+#1
+    trk_reg_write_data = $fopen({"../../../target/big_core_cachel1/tests/",test_name,"/trk_reg_write_data.log"},"w");
+    $fwrite(trk_reg_write_data,"---------------------------------------------------------\n");
+    $fwrite(trk_reg_write_data," PC | reg_dst | data \n");
+    $fwrite(trk_reg_write_data,"---------------------------------------------------------\n");  
+end
+
+always_ff @(posedge Clk ) begin
+    if(big_core_cachel1_top.big_core.big_core_rf.Ctrl.RegWrEnQ105H) begin
+        $fwrite(trk_reg_write_data,"%4h | %2d | %8h \n"
+        ,PcQ105H
+        ,big_core_cachel1_top.big_core.big_core_rf.Ctrl.RegDstQ105H
+        ,big_core_cachel1_top.big_core.big_core_rf.RegWrDataQ105H
+        );
+    end
+end
 

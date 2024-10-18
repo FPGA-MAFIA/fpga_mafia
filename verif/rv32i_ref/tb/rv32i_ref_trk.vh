@@ -1,5 +1,5 @@
 integer trk_ref_memory_access;
-initial begin: trk_rf_memory_access_gen
+initial begin: trk_ref_memory_access_gen
     #1
     trk_ref_memory_access = $fopen({"../../../target/rv32i_ref/tests/",test_name,"/trk_ref_memory_access.log"},"w");
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");
@@ -102,3 +102,25 @@ always_ff @(posedge Clk ) begin
                            );
 end
 
+
+
+// new tracker for all writes to the register file 
+// track PC, register destination, and the data written to the register
+integer trk_reg_write_data;
+
+initial begin: trk_reg_write_data_gen
+    trk_reg_write_data = $fopen({"../../../target/rv32i_ref/tests/",test_name,"/trk_reg_write_data_ref.log"},"w");
+    $fwrite(trk_reg_write_data,"---------------------------------------------------------\n");
+    $fwrite(trk_reg_write_data," PC | reg_dst | data \n");
+    $fwrite(trk_reg_write_data,"---------------------------------------------------------\n");  
+end
+
+always_ff @(posedge Clk ) begin
+    if(rv32i_ref.run) begin
+        $fwrite(trk_reg_write_data,"%4h | %2d | %8h \n"
+        ,rv32i_ref.pc
+        ,rv32i_ref.rd
+        ,rv32i_ref.regfile[rv32i_ref.rd]
+        );
+    end
+end

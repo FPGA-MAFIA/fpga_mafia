@@ -83,7 +83,7 @@ big_core_mem_wrap big_core_mem_wrap(
 // //      core interface
 // //============================================
 // i_mem
- .ReadyQ101H            (ReadyQ101H), // input logic        ReadyQ101H,          // To I_MEM
+ .ReadyQ101H            (ReadyQ101H),          // input logic        ReadyQ101H,          // To I_MEM
  .PcQ100H               (PcQ100H),             //input  logic [31:0] PcQ100H,        //curr_pc    ,
  .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction,
 // d_mem
@@ -93,7 +93,7 @@ big_core_mem_wrap big_core_mem_wrap(
  .DMemWrEnQ103H         (DMemWrEnQ103H),       // input  logic        DMemWrEnQ103H,       // To D_MEM
  .DMemRdEnQ103H         (DMemRdEnQ103H),       // input  logic        DMemRdEnQ103H,       // To D_MEM
  .DMemRdRspQ105H        (DMemRdRspQ105H),      // output logic [31:0] DMemRdRspQ105H       // From D_MEM
- .DMemReady        (DMemReady),      // output logic        DMemReady  , // From D_MEM
+ .DMemReady             (DMemReady),           // output logic        DMemReady  , // From D_MEM
 //============================================
 //      fabric interface
 //============================================

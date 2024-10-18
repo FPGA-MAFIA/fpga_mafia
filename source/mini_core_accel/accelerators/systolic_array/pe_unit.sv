@@ -9,7 +9,7 @@ import mini_core_accel_pkg::*;
     input logic                 rst,
     input var t_pe_unit_input   pe_inputs,
     output var t_pe_unit_output pe_outputs,
-    output int16                result
+    output int16                result   // TODO consider make the output int8
 );
 
 
@@ -31,13 +31,13 @@ single_cycle_mul single_cycle_mul
 logic [17:0] next_ff_result, ff_result;
 
 assign next_ff_result = {{2{mul_result[15]}},mul_result} + ff_result;
-`MAFIA_EN_RST_DFF(ff_result, next_ff_result, clk, !(pe_inputs.done), rst)
+`MAFIA_EN_RST_DFF(ff_result, next_ff_result, clk, !(pe_inputs.done), (rst || !(pe_inputs.start)))
 //`MAFIA_RST_DFF(ff_result, next_ff_result, clk, rst)
 
 // comunication with neighboured PE's
-`MAFIA_RST_DFF(pe_outputs.activation, pe_inputs.activation, clk, rst)
-`MAFIA_RST_DFF(pe_outputs.weight, pe_inputs.weight, clk, rst)
-`MAFIA_RST_DFF(pe_outputs.done, pe_inputs.done, clk, rst)
+`MAFIA_RST_DFF(pe_outputs.activation, pe_inputs.activation, clk, (rst || !(pe_inputs.start)))
+`MAFIA_RST_DFF(pe_outputs.weight, pe_inputs.weight, clk, (rst || !(pe_inputs.start)))
+`MAFIA_RST_DFF(pe_outputs.done, pe_inputs.done, clk, (rst || !(pe_inputs.start)))
 
 always_comb begin
     result = ff_result[15:0];

@@ -62,11 +62,11 @@ big_core (
    .Rst                 ( Rst                ), // input  logic        Rst,
    .RstPc               ( RstPc              ), // input  logic        RstPc,
    // Instruction Memory
-   .ReadyQ101H          ( ReadyQ101H    ), // output logic        ReadyQ101H,          // To I_MEM
+   .ReadyQ101H          ( ReadyQ101H         ), // output logic        ReadyQ101H,          // To I_MEM
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
    .PreInstructionQ101H ( PreInstructionQ101H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM
    // Data Memory
-   .DMemReady           ( DMemReady     ), // input  logic        DMemReady  , // From D_MEM
+   .DMemReady           ( DMemReady          ), // input  logic        DMemReady  , // From D_MEM
    .Core2DmemReqQ103H   ( Core2DmemReqQ103H  ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
    .DMemRdRspQ105H      ( DMemRdRspQ105H     )  // input  logic [31:0] DMemRdRspQ105H       // From D_MEM
 );

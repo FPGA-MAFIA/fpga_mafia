@@ -18,7 +18,7 @@
 `include "macros.vh"
 
 module rv32i_ref_tb;
-import common_pkg::*;
+import rv32i_ref_pkg::*;
 
 parameter I_MEM_OFFSET = 'h0_0000;
 parameter I_MEM_SIZE   = 'h1_0000; 

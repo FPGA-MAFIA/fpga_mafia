@@ -48,16 +48,78 @@ typedef struct packed {
 parameter DIMENTION = 4;  // 4x4 grid. Do not change the grid size without updating structs
 
 typedef struct packed{
-    int8  weight;
-    int8  activation;
-    logic done;   
+    int8  weight;     // input weight
+    int8  activation; // input activation
+    logic start;      // start calculation
+    logic done;       // stop calculation
 } t_pe_unit_input;
 
 typedef struct packed {
-    int8  activation;
-    int8  weight;
-    logic done;
+    int8  activation;  // activation passed to neighboured PE's
+    int8  weight;      // weight passed to neighboured PE's
+    logic done;        // done signal passing neighboured PE's
 } t_pe_unit_output;
+
+typedef struct packed { // naming of each element is treated as a matrix 4x4 elements
+     int16 pe00_result;
+     int16 pe01_result;
+     int16 pe02_result;
+     int16 pe03_result;
+     int16 pe10_result;
+     int16 pe11_result;
+     int16 pe12_result;
+     int16 pe13_result;
+     int16 pe20_result;
+     int16 pe21_result;
+     int16 pe22_result;
+     int16 pe23_result;
+     int16 pe30_result;
+     int16 pe31_result;
+     int16 pe32_result;
+     int16 pe33_result;
+} t_pe_results;
+
+typedef struct packed{
+    logic [31:0]  cr_systolic_array_weights31_0;
+    logic [31:0]  cr_systolic_array_weights63_32;
+    logic [31:0]  cr_systolic_array_weights95_64;
+    logic [31:0]  cr_systolic_array_weights127_96;
+    logic [31:0]  cr_systolic_array_active31_0;
+    logic [31:0]  cr_systolic_array_active63_32;
+    logic [31:0]  cr_systolic_array_active95_64;
+    logic [31:0]  cr_systolic_array_active127_96;
+    logic         cr_systolic_array_start;
+    logic         cr_systolic_array_valid;
+    // results
+    int16         cr_pe00_result;
+    int16         cr_pe01_result;
+    int16         cr_pe02_result;
+    int16         cr_pe03_result;
+    int16         cr_pe10_result;
+    int16         cr_pe11_result;
+    int16         cr_pe12_result;
+    int16         cr_pe13_result;
+    int16         cr_pe20_result;
+    int16         cr_pe21_result;
+    int16         cr_pe22_result;
+    int16         cr_pe23_result;
+    int16         cr_pe30_result;
+    int16         cr_pe31_result;
+    int16         cr_pe32_result;
+    int16         cr_pe33_result;
+} t_cr_systolic_array;
+
+typedef enum {
+    IDLE,
+    STEP0,
+    STEP1,
+    STEP2,
+    STEP3,
+    STEP4,
+    STEP5,
+    STEP6,
+    WAIT
+} t_systolic_array_ctrl_states;
 //-------------------------
 // cr structs
 //-------------------------
@@ -97,12 +159,14 @@ typedef struct packed {
 typedef struct packed { 
     t_mul_int8_input   [INT8_MULTIPLIER_NUM-1:0] core2mul_int8;      // {multiplicand, multiplier}
     t_neuron_mac_input [NEURON_MAC_NUM-1:0]      int8_mul2neuron_mac;  // {mul_result[7:0][15:0], bias}
+    t_cr_systolic_array                          cr_systolic_array;  
 }t_accel_farm_input;
 
 // response from multiplier 
 typedef struct packed {
     t_mul_int8_output   [INT8_MULTIPLIER_NUM-1:0] mul2core_int8;
     t_neuron_mac_output [NEURON_MAC_NUM-1:0]      neuron_mac_result;
+    t_cr_systolic_array                           cr_systolic_array;
 }t_accel_farm_output;
 
 
@@ -193,7 +257,41 @@ parameter NEURON_MAC_BIAS1         = CR_MEM_OFFSET + 'hf101;
 parameter NEURON_MAC_RESULT0       = CR_MEM_OFFSET + 'hf102; 
 parameter NEURON_MAC_RESULT1       = CR_MEM_OFFSET + 'hf103;  
 
-// used for debug purposes
+//=====================================
+//   define CR's for systolic array
+//=====================================
+parameter SYSTOLIC_ARRAY_WEIGHTS31_0    = CR_MEM_OFFSET + 'hf200;
+parameter SYSTOLIC_ARRAY_WEIGHTS63_32   = CR_MEM_OFFSET + 'hf201;
+parameter SYSTOLIC_ARRAY_WEIGHTS95_64   = CR_MEM_OFFSET + 'hf202;
+parameter SYSTOLIC_ARRAY_WEIGHTS127_96  = CR_MEM_OFFSET + 'hf203;
+parameter SYSTOLIC_ARRAY_ACTIVE31_0     = CR_MEM_OFFSET + 'hf204;
+parameter SYSTOLIC_ARRAY_ACTIVE63_32    = CR_MEM_OFFSET + 'hf205;
+parameter SYSTOLIC_ARRAY_ACTIVE95_64    = CR_MEM_OFFSET + 'hf206;
+parameter SYSTOLIC_ARRAY_ACTIVE127_96   = CR_MEM_OFFSET + 'hf207;
+parameter SYSTOLIC_ARRAY_START          = CR_MEM_OFFSET + 'hf208;
+parameter SYSTOLIC_ARRAY_VALID          = CR_MEM_OFFSET + 'hf209;
+
+parameter PE00_RESULT                   = CR_MEM_OFFSET + 'hf20a;
+parameter PE01_RESULT                   = CR_MEM_OFFSET + 'hf20b;
+parameter PE02_RESULT                   = CR_MEM_OFFSET + 'hf20c;
+parameter PE03_RESULT                   = CR_MEM_OFFSET + 'hf20d;
+parameter PE10_RESULT                   = CR_MEM_OFFSET + 'hf20e;
+parameter PE11_RESULT                   = CR_MEM_OFFSET + 'hf20f;
+parameter PE12_RESULT                   = CR_MEM_OFFSET + 'hf210;
+parameter PE13_RESULT                   = CR_MEM_OFFSET + 'hf211;
+parameter PE20_RESULT                   = CR_MEM_OFFSET + 'hf212;
+parameter PE21_RESULT                   = CR_MEM_OFFSET + 'hf213;
+parameter PE22_RESULT                   = CR_MEM_OFFSET + 'hf214;
+parameter PE23_RESULT                   = CR_MEM_OFFSET + 'hf215;
+parameter PE30_RESULT                   = CR_MEM_OFFSET + 'hf216;
+parameter PE31_RESULT                   = CR_MEM_OFFSET + 'hf217;
+parameter PE32_RESULT                   = CR_MEM_OFFSET + 'hf218;
+parameter PE33_RESULT                   = CR_MEM_OFFSET + 'hf219;
+
+
+//=====================================
+//   define CR's for dwbug purposes
+//=====================================
 parameter CR_DEBUG_0                = CR_MEM_OFFSET + 'hff00;
 parameter CR_DEBUG_1                = CR_MEM_OFFSET + 'hff01;
 parameter CR_DEBUG_2                = CR_MEM_OFFSET + 'hff02;
