@@ -376,7 +376,9 @@ package accel_core_pkg;
     } t_metadata_weights;
 
     typedef struct packed {
-        logic in_use;
+        logic [7:0] matrix_col_num;
+        logic [7:0] matrix_row_num;
+        logic in_use_by_accel;
         logic mov_out_to_in;
         logic output_ready;
     } t_metadata_inout;
@@ -416,11 +418,11 @@ package accel_core_pkg;
 
 
     /*************************************ENUMS******************************************/
-    typedef enum { 
-        W1,
-        W2,
-        W3,
-        FREE
+    typedef enum logic [1:0] { 
+        FREE = 2'b00,
+        W1   = 2'b01,
+        W2   = 2'b10,
+        W3   = 2'b11 
     } t_buffer_sel;
 
 endpackage

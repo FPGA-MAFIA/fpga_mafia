@@ -50,4 +50,4 @@
 ../../../source/accel_core/shift_multiplier.sv
 ../../../source/accel_core/accel_core_farm.sv
 ../../../source/accel_core/accel_core_mul_controller.sv
-../../../source/accel_core/accel_core_mul_top.sv
+//../../../source/accel_core/accel_core_mul_top.sv

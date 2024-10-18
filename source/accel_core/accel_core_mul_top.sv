@@ -50,6 +50,8 @@ t_buffer_sel assign_m2;
   );
 
 logic move_out_to_in;
+logic clear_output;
+logic done_layer;
 accel_core_mul_controller mul_controller (
     .Clock(Clock),
     .Rst(Rst),
@@ -59,6 +61,8 @@ accel_core_mul_controller mul_controller (
     .w3_metadata(w3.meta_data),
     .out_metadata(output.meta_data),
     .move_out_to_in(move_out_to_in),
+    .done_layer(done_layer),
+    .clear_output(clear_output),
     ///////// m1 port
     .clear_m1(clear_m1),
     .start_m1(start_m1),
@@ -89,30 +93,68 @@ always_comb mux_in begin // the logic which assigns the weight buffer to each mu
         endcase
     end
 end
-
 always_comb mux_out begin // assigns the result to the output
-    if(Rst)
+    if(Rst || clear_output) begin
         output.data = '0; // Reset output data
+        curr_neuron_idx = 0;
+        done_layer = 0;
+    end
     else begin
+        done_layer = 0;
         if(out_valid_m1) begin
             output.data[weight_m1.neuron_idx] = result_m1;
             case (assign_m1)
-                W1: w1_metadata.in_use = 1'b0;
-                W2: w2_metadata.in_use = 1'b0;
-                W3: w3_metadata.in_use = 1'b0;
+                W1: begin
+                    w1_metadata.in_use = 1'b0;
+                    if (w1_metadata.neuron_idx >= input.matrix_row_num) begin
+                        done_layer = 1;
+                    end
+                end
+                W2: begin
+                    w2_metadata.in_use = 1'b0;
+                    if (w2_metadata.neuron_idx >= input.matrix_row_num) begin
+                        done_layer = 1;
+                    end
+                end
+                W3: begin
+                    w3_metadata.in_use = 1'b0;
+                    if (w3_metadata.neuron_idx >= input.matrix_row_num) begin
+                        done_layer = 1;
+                    end
+                end
                 default: ;
             endcase
+
         end
         if(out_valid_m2) begin
             output.data[weight_m2.neuron_idx] = result_m2;
             case (assign_m2_tmp)
-                W1: w1_metadata.in_use = 1'b0;
-                W2: w2_metadata.in_use = 1'b0;
-                W3: w3_metadata.in_use = 1'b0;
+                W1: begin
+                    w1_metadata.in_use = 1'b0;
+                    if (w1_metadata.neuron_idx >= input.matrix_row_num) begin
+                        done_layer = 1;
+                    end
+                end
+                W2: begin
+                    w2_metadata.in_use = 1'b0;
+                    if (w2_metadata.neuron_idx >= input.matrix_row_num) begin
+                        done_layer = 1;
+                    end
+                end
+                W3: begin
+                    w3_metadata.in_use = 1'b0;
+                    if (w3_metadata.neuron_idx >= input.matrix_row_num) begin
+                        done_layer = 1;
+                    end
+                end
                 default: ;
             endcase
         end
     end
+end
+always_comb out_to_in begin
+    if(mov_out_to_in)
+        output = input;
 end
 
 endmodule
