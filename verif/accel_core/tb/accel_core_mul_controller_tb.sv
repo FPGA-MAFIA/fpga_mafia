@@ -50,7 +50,10 @@ logic out_valid_m2;
     .clear_m2(clear_m2),
     .start_m2(start_m2),
     .assign_m2(assign_m2),
-    .out_valid_m2(out_valid_m2)
+    .out_valid_m2(out_valid_m2),
+    .release_w1(open),
+    .release_w2(open),
+    .release_w3(open)
 );
     int test;
   // Clock generation: 10ns period (100MHz)

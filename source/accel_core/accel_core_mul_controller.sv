@@ -27,7 +27,11 @@ import accel_core_pkg::*;
     output logic clear_m2,
     output logic start_m2,
     output t_buffer_sel assign_m2,  // Enum for buffer selection (W1, W2, W3)
-    input logic out_valid_m2
+    input logic out_valid_m2,
+    // Control signals for CR
+    output logic release_w1,
+    output logic release_w2,
+    output logic release_w3
 );
 
 t_buffer_sel assign_m1_tmp;
@@ -35,8 +39,6 @@ t_buffer_sel assign_m2_tmp;
 t_buffer_sel assign_m1_tmp_ps;
 t_buffer_sel assign_m2_tmp_ps;
 
-logic clear_m1_tmp;
-logic clear_m2_tmp;
 logic test;
 always_comb begin
     // Default assignments
@@ -79,50 +81,25 @@ assign assign_m1 = assign_m1_tmp;
 assign assign_m2 = assign_m2_tmp;
 
 // Sequential logic for clearing clear_m1 and clear_m2 at the rising edge of the clock
-always_ff @(posedge Clock) begin
-    if (Rst) begin
-        assign_m1_tmp_ps <= FREE;
-        assign_m2_tmp_ps <= FREE;
-    end else begin
-        assign_m1_tmp_ps <= assign_m1_tmp;
-        assign_m2_tmp_ps <= assign_m2_tmp;
-        clear_m1_tmp <= (assign_m1_tmp_ps != assign_m1_tmp) ? 1'b1 : 1'b0;
-        clear_m2_tmp <= (assign_m2_tmp_ps != assign_m2_tmp) ? 1'b1 : 1'b0;
-    end
-end
-assign clear_m1 = clear_m1_tmp;
-assign clear_m2 = clear_m2_tmp;
 assign start_m1 = 1'b1;
 assign start_m2 = 1'b1;
 
-logic clear_output_tmp;
+`MAFIA_RST_VAL_DFF(assign_m1_tmp_ps, assign_m1_tmp, Clock, Rst, FREE);
+`MAFIA_RST_VAL_DFF(assign_m2_tmp_ps, assign_m2_tmp, Clock, Rst, FREE);
+assign clear_m1 = (assign_m1_tmp_ps == FREE && assign_m1_tmp != FREE) ? 1'b1 : 1'b0;
+assign clear_m2 = (assign_m2_tmp_ps == FREE && assign_m2_tmp != FREE) ? 1'b1 : 1'b0;
+assign release_w1 = ((assign_m1_tmp_ps == W1 && assign_m1_tmp == FREE) || 
+              (assign_m2_tmp_ps == W1 && assign_m2_tmp == FREE))   ? 1'b1 : 1'b0;
+assign release_w2 = ((assign_m1_tmp_ps == W2 && assign_m1_tmp == FREE) || 
+              (assign_m2_tmp_ps == W2 && assign_m2_tmp == FREE))   ? 1'b1 : 1'b0;
+assign release_w3 = ((assign_m1_tmp_ps == W3 && assign_m1_tmp == FREE) || 
+              (assign_m2_tmp_ps == W3 && assign_m2_tmp == FREE))   ? 1'b1 : 1'b0;
+
+// Process to detect the rising edge of meta_data.in_use
 logic in_use_ff; // Flip-flop to detect rising edge
 logic done_layer_ff; // Flip-flop to detect rising edge
-logic move_out_to_in_tmp;
-// Process to detect the rising edge of meta_data.in_use
-always_ff @(posedge Clock) begin
-    if (Rst) begin
-        clear_output_tmp <= 1'b0;
-        in_use_ff <= 1'b0;
-        done_layer_ff <= 1'b0;
-    end else begin
-        // Detect rising edge: transition from 0 to 1
-        in_use_ff <= input_metadata.in_use_by_accel;
-        if (~in_use_ff && input_metadata.in_use_by_accel) begin
-            clear_output_tmp <= 1'b1; // Rising edge detected, clear_output is set
-        end else begin
-            clear_output_tmp <= 1'b0; // No rising edge, clear_output is cleared
-        end
-
-        done_layer_ff <= done_layer;
-        if (~done_layer_ff && done_layer) begin
-            move_out_to_in_tmp <= 1'b1; // Rising edge detected, clear_output is set
-        end else begin
-            move_out_to_in_tmp <= 1'b0; // No rising edge, clear_output is cleared
-        end
-    end
-end
-assign clear_output=clear_output_tmp;
-assign move_out_to_in=move_out_to_in_tmp;
-
+`MAFIA_RST_DFF(in_use_ff, input_metadata.in_use_by_accel, Clock, Rst);
+`MAFIA_RST_DFF(done_layer_ff, done_layer, Clock, Rst);
+assign clear_output   = (~in_use_ff && input_metadata.in_use_by_accel) ? 1'b1 : 1'b0;
+assign move_out_to_in = (~done_layer_ff && done_layer) ? 1'b1 : 1'b0;
 endmodule
