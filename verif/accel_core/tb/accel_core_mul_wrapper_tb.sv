@@ -51,7 +51,7 @@ import accel_core_pkg::*;  // Import your package
     w1.data[3] = 8'h4;
     w1.data[4] = 8'h5;
     w1.data[5] = 8'h6;   
-    w1.meta_data.input_len = 4;  // Number of elements in the weights buffer
+    w1.meta_data.data_len = 4;  // Number of elements in the weights buffer
     #10; 
     start = 1;
     #300; 
@@ -68,7 +68,7 @@ import accel_core_pkg::*;  // Import your package
     w1.data[3] = 8'h4;
     w1.data[4] = 8'h5;
     w1.data[5] = 8'h6;   
-    w1.meta_data.input_len = 4;  // Number of elements in the weights buffer
+    w1.meta_data.data_len = 4;  // Number of elements in the weights buffer
     #10
     clear=0;
     #300; 
@@ -85,7 +85,7 @@ import accel_core_pkg::*;  // Import your package
     w1.data[3] = 8'h4;
     w1.data[4] = 8'h5;
     w1.data[5] = 8'h6;   
-    w1.meta_data.input_len = 4;  // Number of elements in the weights buffer
+    w1.meta_data.data_len = 4;  // Number of elements in the weights buffer
     #10
     clear=0;
     #300

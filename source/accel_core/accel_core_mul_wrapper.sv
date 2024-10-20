@@ -64,14 +64,14 @@ shift_multiplier
             mul_idx = mul_idx + 1;
             case (current_state) 
             st_idle: begin
-                    tmp_result = w1.data[(w1.meta_data.input_len - 1)]; //the bias element is the last element in the weights vec
+                    tmp_result = w1.data[(w1.meta_data.data_len - 1)]; //the bias element is the last element in the weights vec
                     mul_idx = 0;
                     counter = c_mul_reaction_time - 1;
                 end
             st_wait: begin
                 counter=counter-1;
                 if (counter == 0) begin
-                    counter2 = w1.meta_data.input_len - 1;
+                    counter2 = w1.meta_data.data_len - 1;
                 end
             end
 

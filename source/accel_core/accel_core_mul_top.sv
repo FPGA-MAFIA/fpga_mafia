@@ -4,13 +4,18 @@ import accel_core_pkg::*;
 (
     input logic Clock,
     input logic Rst,
-    inout t_buffer_inout input,
-    inout t_buffer_weights w1,
-    inout t_buffer_weights w2,
-    inout t_buffer_weights w3,
-    inout t_buffer_inout output
+    input t_buffer_inout input_vec,
+    input t_buffer_weights w1,
+    input t_buffer_weights w2,
+    input t_buffer_weights w3,
+    output t_buffer_inout output_vec,
+    output logic release_w1,
+    output logic release_w2,
+    output logic release_w3,
+    output logic move_out_to_in,
+    output logic done_layer
 );
-
+t_buffer_inout output_vec_tmp;
 
 
 logic clear_m1;
@@ -25,7 +30,7 @@ accel_core_mul_wrapper m1 (
       .Rst(Rst),
       .clear(clear_m1),
       .start(start_m1),
-      .neuron_in(neuron_in),
+      .neuron_in(input_vec),
       .w1(weight_m1),
       .result(result_m1),
       .out_valid(out_valid_m1)
@@ -43,23 +48,21 @@ t_buffer_sel assign_m2;
       .Rst(Rst),
       .clear(clear_m2),
       .start(start_m2),
-      .neuron_in(neuron_in),
+      .neuron_in(input_vec),
       .w1(weight_m2),
       .result(result_m2),
       .out_valid(out_valid_m2)
   );
 
-logic move_out_to_in;
 logic clear_output;
-logic done_layer;
 accel_core_mul_controller mul_controller (
     .Clock(Clock),
     .Rst(Rst),
-    .input_metadata(input.meta_data),
+    .input_metadata(input_vec.meta_data),
     .w1_metadata(w1.meta_data),
     .w2_metadata(w2.meta_data),
     .w3_metadata(w3.meta_data),
-    .out_metadata(output.meta_data),
+    .out_metadata(output_vec_tmp.meta_data),
     .move_out_to_in(move_out_to_in),
     .done_layer(done_layer),
     .clear_output(clear_output),
@@ -72,13 +75,17 @@ accel_core_mul_controller mul_controller (
     .clear_m2(clear_m2),
     .start_m2(start_m2),
     .assign_m2(assign_m2),
-    .out_valid_m2(out_valid_m2)
+    .out_valid_m2(out_valid_m2),
+    ///////// release
+    .release_w1(release_w1),
+    .release_w2(release_w2),
+    .release_w3(release_w3)
 );
 
-always_comb mux_in begin // the logic which assigns the weight buffer to each mul
+always_comb begin //mux_in - the logic which assigns the weight buffer to each mul
     if(Rst) begin
-        weight_m1 = '0;
-        weight_m2 = '0;
+        weight_m1 = FREE;
+        weight_m2 = FREE;
     end
     else begin
         case (assign_m1)
@@ -93,32 +100,28 @@ always_comb mux_in begin // the logic which assigns the weight buffer to each mu
         endcase
     end
 end
-always_comb mux_out begin // assigns the result to the output
+always_comb begin // mux_out - assigns the result to the output
     if(Rst || clear_output) begin
-        output.data = '0; // Reset output data
-        curr_neuron_idx = 0;
+        output_vec_tmp.data = '0; // Reset output data
         done_layer = 0;
     end
     else begin
         done_layer = 0;
         if(out_valid_m1) begin
-            output.data[weight_m1.neuron_idx] = result_m1;
+            output_vec_tmp.data[weight_m1.meta_data.neuron_idx] = result_m1;
             case (assign_m1)
                 W1: begin
-                    w1_metadata.in_use = 1'b0;
-                    if (w1_metadata.neuron_idx >= input.matrix_row_num) begin
+                    if (w1.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
                         done_layer = 1;
                     end
                 end
                 W2: begin
-                    w2_metadata.in_use = 1'b0;
-                    if (w2_metadata.neuron_idx >= input.matrix_row_num) begin
+                    if (w2.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
                         done_layer = 1;
                     end
                 end
                 W3: begin
-                    w3_metadata.in_use = 1'b0;
-                    if (w3_metadata.neuron_idx >= input.matrix_row_num) begin
+                    if (w3.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
                         done_layer = 1;
                     end
                 end
@@ -127,23 +130,20 @@ always_comb mux_out begin // assigns the result to the output
 
         end
         if(out_valid_m2) begin
-            output.data[weight_m2.neuron_idx] = result_m2;
-            case (assign_m2_tmp)
+            output_vec_tmp.data[weight_m2.meta_data.neuron_idx] = result_m2;
+            case (assign_m2)
                 W1: begin
-                    w1_metadata.in_use = 1'b0;
-                    if (w1_metadata.neuron_idx >= input.matrix_row_num) begin
+                    if (w1.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
                         done_layer = 1;
                     end
                 end
                 W2: begin
-                    w2_metadata.in_use = 1'b0;
-                    if (w2_metadata.neuron_idx >= input.matrix_row_num) begin
+                    if (w2.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
                         done_layer = 1;
                     end
                 end
                 W3: begin
-                    w3_metadata.in_use = 1'b0;
-                    if (w3_metadata.neuron_idx >= input.matrix_row_num) begin
+                    if (w3.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
                         done_layer = 1;
                     end
                 end
@@ -152,9 +152,5 @@ always_comb mux_out begin // assigns the result to the output
         end
     end
 end
-always_comb out_to_in begin
-    if(mov_out_to_in)
-        output = input;
-end
-
+assign output_vec = output_vec_tmp;
 endmodule

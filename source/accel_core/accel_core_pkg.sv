@@ -372,7 +372,7 @@ package accel_core_pkg;
     typedef struct packed {
         logic in_use;
         logic [7:0] neuron_idx;  // the output index (Weight Matrix Column)
-        logic [7:0] input_len;  // this is the actual number of weights in the buffer
+        logic [7:0] data_len;  // this is the actual number of weights + bias in the buffer
     } t_metadata_weights;
 
     typedef struct packed {
