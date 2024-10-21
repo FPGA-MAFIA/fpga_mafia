@@ -42,7 +42,10 @@ import mini_core_pkg::*;
     //============================================
     output logic [7:0] xor_inp1,
     output logic [7:0] xor_inp2,
-    input logic [7:0] xor_result
+    input logic [7:0] xor_result,
+    //================================== MUL ACCEL
+    input accel_outputs_t mul_outputs,
+    output accel_inputs_t mul_inputs
 );
 
 logic        F2C_IMemHitQ503H;
@@ -270,7 +273,9 @@ assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
         //.q_b              (F2C_CrMemRspDataQ504H)
         .xor_inp1(xor_inp1),
         .xor_inp2(xor_inp2),
-        .xor_result(xor_result)
+        .xor_result(xor_result),
+        .mul_outputs(mul_outputs),
+        .mul_inputs(mul_inputs)
     );
 
  

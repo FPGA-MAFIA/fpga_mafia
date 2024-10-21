@@ -6,7 +6,7 @@ package accel_core_pkg;
     parameter CR_MEM_OFFSET       = 'h00FE_0000;
     parameter CR_MEM_REGION_FLOOR = CR_MEM_OFFSET;
     parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 - 1;
-    parameter CR_ACCEL_OFFSET     = CR_MEM_OFFSET +  'h200;
+    parameter CR_ACCEL_OFFSET     = CR_MEM_OFFSET +  'h210;
 
     // Region bits
     parameter LSB_REGION = 0;

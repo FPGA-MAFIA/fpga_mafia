@@ -94,7 +94,9 @@ accel_core_mem_wrap accel_core_mem_wrap(
    //============================================
    .xor_inp1(xor_inp1),
    .xor_inp2(xor_inp2),
-   .xor_result(xor_result)
+   .xor_result(xor_result),
+   .mul_outputs(mul_outputs),
+   .mul_inputs(mul_inputs)
 );
 
 accel_core_farm accel_core_farm(
@@ -102,7 +104,9 @@ accel_core_farm accel_core_farm(
    .Rst(Rst),
    .xor_inp1(xor_inp1),
    .xor_inp2(xor_inp2),
-   .xor_result(xor_result)
+   .xor_result(xor_result),
+   .mul_inputs(mul_inputs),
+   .mul_outputs(mul_outputs)
 );
 
 endmodule
