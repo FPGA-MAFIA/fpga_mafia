@@ -6,7 +6,7 @@ package accel_core_pkg;
     parameter CR_MEM_OFFSET       = 'h00FE_0000;
     parameter CR_MEM_REGION_FLOOR = CR_MEM_OFFSET;
     parameter CR_MEM_REGION_ROOF  = 'h00FF_0000 - 1;
-    parameter CR_ACCEL_OFFSET     = CR_MEM_OFFSET +  ?;
+    parameter CR_ACCEL_OFFSET     = CR_MEM_OFFSET +  'h200;
 
     // Region bits
     parameter LSB_REGION = 0;
@@ -364,9 +364,9 @@ package accel_core_pkg;
     parameter CR_MUL_OUT_62 = CR_ACCEL_OFFSET + 319;
 
     typedef struct packed {
-        logic in_use;
         logic [7:0] neuron_idx;  // the output index (Weight Matrix Column)
         logic [7:0] data_len;  // this is the actual number of weights + bias in the buffer
+        logic in_use;
     } t_metadata_weights;
 
     typedef struct packed {
@@ -408,7 +408,21 @@ package accel_core_pkg;
         logic [WEIGHT_WIDTH-1:0] Mu;
     } stage_mul_inp_t;
 
+    typedef struct packed {
+        t_buffer_inout input_vec;
+        t_buffer_weights w1;
+        t_buffer_weights w2;
+        t_buffer_weights w3;
+    } accel_inputs_t;
 
+    typedef struct packed {
+        t_buffer_inout output_vec;
+        logic release_w1;
+        logic release_w2;
+        logic release_w3;
+        logic move_out_to_in;
+        logic done_layer;
+    } accel_outputs_t;
 
     /*************************************ENUMS******************************************/
     typedef enum logic [1:0] { 
