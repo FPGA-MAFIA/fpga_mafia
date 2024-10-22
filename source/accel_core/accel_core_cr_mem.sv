@@ -56,8 +56,11 @@ always_comb begin
         next_cr = cr;
         next_cr.xor_result = xor_result;
         // MUL ACCEL
-        if(mul_outputs.done_layer) 
+        if(mul_outputs.done_layer) begin
             next_cr.neuron_out = mul_outputs.output_vec;
+            next_cr.neuron_in.meta_data = '0;
+            next_cr.neuron_in.data = mul_outputs.output_vec.data;
+        end
         if(mul_outputs.release_w1)
             next_cr.w1.meta_data.in_use = 0;
         if(mul_outputs.release_w2)

@@ -111,17 +111,17 @@ always_comb begin // mux_out - assigns the result to the output
             output_vec_tmp.data[weight_m1.meta_data.neuron_idx] = result_m1;
             case (assign_m1)
                 W1: begin
-                    if (w1.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
+                    if (w1.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num - 1) begin
                         done_layer = 1;
                     end
                 end
                 W2: begin
-                    if (w2.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
+                    if (w2.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num - 1) begin
                         done_layer = 1;
                     end
                 end
                 W3: begin
-                    if (w3.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
+                    if (w3.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num - 1) begin
                         done_layer = 1;
                     end
                 end
@@ -133,17 +133,17 @@ always_comb begin // mux_out - assigns the result to the output
             output_vec_tmp.data[weight_m2.meta_data.neuron_idx] = result_m2;
             case (assign_m2)
                 W1: begin
-                    if (w1.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
+                    if (w1.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num - 1) begin
                         done_layer = 1;
                     end
                 end
                 W2: begin
-                    if (w2.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
+                    if (w2.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num - 1) begin
                         done_layer = 1;
                     end
                 end
                 W3: begin
-                    if (w3.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num) begin
+                    if (w3.meta_data.neuron_idx >= input_vec.meta_data.matrix_col_num - 1) begin
                         done_layer = 1;
                     end
                 end

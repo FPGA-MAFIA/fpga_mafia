@@ -370,8 +370,8 @@ package accel_core_pkg;
     } t_metadata_weights;
 
     typedef struct packed {
-        logic [7:0] matrix_col_num;
         logic [7:0] matrix_row_num;
+        logic [7:0] matrix_col_num;
         logic in_use_by_accel;
         logic mov_out_to_in;
         logic output_ready;
@@ -429,7 +429,7 @@ package accel_core_pkg;
         FREE = 2'b00,
         W1   = 2'b01,
         W2   = 2'b10,
-        W3   = 2'b11 
+        W3   = 2'b11
     } t_buffer_sel;
 
 endpackage

@@ -51,7 +51,6 @@ always_comb begin
         if (out_valid_m1) begin
             assign_m1_tmp = FREE;
         end else begin
-    
             if (assign_m1_tmp == FREE) begin //chatgpt - it seems like this if is always true
                 if (assign_m2_tmp != W1 && w1_metadata.in_use) begin
                     assign_m1_tmp = W1;

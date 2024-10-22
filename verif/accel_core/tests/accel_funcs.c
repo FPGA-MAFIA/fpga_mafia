@@ -7,27 +7,10 @@ typedef struct {
     int words_in_row;
     int rows_num;
     int elem_in_row;
-    int** p_trans_1D_mat_and_bias;
+    int** p_accel_mat; //pointer to 1D array mat
 } t_matrix_accel;
-/*
-mat=    
-    [1 2 3 4 5 6 7
-     8 9 0 1 2 3 4
-     5 6 7 8 9 0 1 
-     2 3 4 5 6 7 8 
-     9 0 1 2 3 4 5]
-bias = 
-    [1 2 3 4 5 6 7]
-trans_mat =
-    [1852 9100
-     2963 0200
-     3074 1300
-     ...]
-words in row = 2; (ceil(rows + 1 /4))
-elem in row = rows + 1;
-rows = cols
-*/
-t_matrix_accel* transposed_mat_array;
+int g_num_of_mats;
+t_matrix_accel* accel_mat_vec;
 
 int xor_accel(int x, int y) {
     int result = 0;
@@ -37,22 +20,6 @@ int xor_accel(int x, int y) {
     return result;
 }
 
-/**
- * @brief - takes a matrix and sets it up so it will be supported by the accel farm. 
- *          Notes: Matrix is transposed, each 4 weights are compressed to one word, bias
- *                 is at the end the matrix.
- * @param mat - a pointer to the matrix
- * @param row - num of rows
- * @param col -num of cols
- * @param bias - each layer computes U = Av + B. A is the weights matrix and B is the
- *               bias element.
- * @return  Null if failed, a pointer on succes
- *          the user is responsible to free the alocated mem
- */
-int** mat_set(int** mat, int row, int col, int* bias) 
-{
-
-}
 
 /**
  * @brief - write buffer, write to input, w1, w2 or w3
@@ -79,7 +46,6 @@ int buffer_write(int w_idx, int* data, int row, int words_in_row)
             address = (uint32_t*)(CR_MUL_W3_META + 1);
             break;
         default:
-            printf("Default case: Action for unknown w_idx\n");
             return FAIL;
     
     }
@@ -103,7 +69,146 @@ int calc_layer(int* input_vec, int* mat_A, int* vec_B)
     
 }
 
+/////////////////////////////// INIT ////////////////////////////////////////////
+/**
+ * @brief - copy the matrix
+ * @param mat - flat 1D array matrix
+ * @param rows - number of rows in mat
+ * @param cols - number of columns in mat
+ * @param output - pointer to the copied matrix
+ * @return SUCCESS or FAIL
+ */
+int copy_matrix(int *mat, int rows, int cols, int** output) {
+    if (!output || !mat || rows <= 0 || cols <= 0)
+        return FAIL;
 
+    // Allocate memory for the new matrix
+    *output = (int*)malloc(rows * cols * sizeof(int));
+    if (*output == NULL) {
+        return FAIL; // Memory allocation failed
+    }
+
+    // Copy the matrix data
+    for (int i = 0; i < rows * cols; i++) {
+        (*output)[i] = mat[i];
+    }
+
+    return SUCCESS;
+}
+
+/**
+ * @brief - transpose the matrix
+ * @param mat - the matrix (assumed to be a flat 1D array)
+ * @param rows - number of rows in mat
+ * @param cols - number of columns in mat
+ * @return SUCCESS or FAIL
+ */
+int transpose_mat(int *mat, int rows, int cols) {
+    // Check for valid input
+    if (mat == NULL || rows <= 0 || cols <= 0) {
+        return FAIL;
+    }
+
+    int transposed[cols][rows];  // Temporary array to hold transposed matrix
+
+    // Transpose the matrix
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            transposed[j][i] = mat[i * cols + j];
+        }
+    }
+
+    // Copy transposed matrix back into original matrix (1D form)
+    for (int i = 0; i < cols; i++) {
+        for (int j = 0; j < rows; j++) {
+            mat[i * rows + j] = transposed[i][j];
+        }
+    }
+
+    return SUCCESS;
+}
+
+/**
+ * @brief - insert vec as col to the right
+ * @param p_mat - pointer to the matrix (assumed to be a flat 1D array)
+ * @param rows - number of rows in mat
+ * @param cols - number of columns in mat
+ * @param vec - vector that has "rows" elements
+ * @return SUCCESS or FAIL
+ */
+int insert_col(int **p_mat, int rows, int cols, int* vec) {
+    if (!p_mat || !(*p_mat) || !vec)
+        return FAIL;
+
+    int* mat = *p_mat;
+    // Allocate space for the new matrix with one more column
+    int* new_mat = (int*)malloc(rows * (cols + 1) * sizeof(int));
+    if (new_mat == NULL) {
+        return FAIL; // Memory allocation failure
+    }
+
+    // Copy the old matrix and insert vec as the last column
+    for (int i = 0; i < rows; i++) {
+        // Copy the current row from old matrix
+        for (int j = 0; j < cols; j++) {
+            new_mat[i * (cols + 1) + j] = mat[i * cols + j];
+        }
+        // Insert the new column (vec)
+        new_mat[i * (cols + 1) + cols] = vec[i];
+    }
+
+    // Replace the old matrix with the new one (you might want to return or update the original pointer)
+    free(*p_mat); // Free old matrix memory
+    *p_mat = new_mat;
+
+    return SUCCESS;
+}
+
+/**
+ * @brief - treats each element as int 8,
+            for each row: compress four elements to one. if the number of
+            element isn't divisable by 4 complete with 0's
+ * @param p_mat - pointer to the matrix (assumed to be a flat 1D array)
+ * @param rows - number of rows in mat
+ * @param cols - number of columns in mat
+ * @return SUCCESS or FAIL
+ */
+
+int compress_mat(int** p_mat, int rows, int cols) {
+    if (!p_mat || !(*p_mat))
+        return FAIL;
+
+    int* mat = *p_mat;
+    // Calculate new number of columns (each 4 int8s -> 1 int32)
+    int new_cols = (cols + 3) / 4; // Equivalent to ceil(cols / 4.0)
+
+    // Allocate space for the compressed matrix
+    int *compressed_mat = (int*)malloc(rows * new_cols * sizeof(int));
+    if (compressed_mat == NULL) {
+        return FAIL; // Memory allocation failure
+    }
+
+    // Compress the matrix row by row
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < new_cols; j++) {
+            // Pack up to 4 int8 elements into a single int32
+            int packed = 0;
+            for (int k = 0; k < 4; k++) {
+                int col_idx = j * 4 + k;
+                if (col_idx < cols) {
+                    packed |= (mat[i * cols + col_idx] & 0xFF) << (k * 8);
+                }
+            }
+            compressed_mat[i * new_cols + j] = packed;
+        }
+    }
+
+    // Replace the original matrix with the compressed matrix
+    free(*p_mat);
+    *p_mat = compressed_mat;
+
+    return SUCCESS;
+}
 
 /**
  * @brief - Initiates layer of a neural network. Sets a set of A matrices and
@@ -116,68 +221,62 @@ int calc_layer(int* input_vec, int* mat_A, int* vec_B)
 
  * @return - 0 if failed, 1 on success
  */
-int init_accel_core(int num_of_mats, int** mat_array int* rows, int* cols , int **bias)
+int init_accel_core(int** mat_array , int* rows, int* cols, int num_of_mats, int **bias_array)
 {
+    g_num_of_mats = num_of_mats;
     /*args check*/
-
-    /*allcate mem in global*/
-    
-
-    /*insert mats*/
-    for (int i =0 ; i < num_of_mats , i ++) {
-        if (!insert_mat(mat_array[i] , rows[i] , cols[i], i)) {
-            //free everything
-            return FAIL;
-        } 
+    if (!mat_array || !rows || !cols || !bias_array) { //invalid input null pointer
+        return FAIL; // Invalid input
     }
+
+    for (int i = 0 ; i < num_of_mats ; i++) { //invalid matrix
+        if (!(mat_array[i]) || !(bias_array[i]) || (rows[i] <= 0) || (cols[i] <= 0))
+            return FAIL;
+    }
+
+    for (int i = 0 ; i < num_of_mats - 1; i++) { //matrix size doesnt match
+        if (cols[i] != rows[i+1])
+            return FAIL;
+    }
+
+    /*allocating mem*/
+    accel_mat_vec = malloc(num_of_mats * sizeof(t_matrix_accel));
+    for (int i = 0 ; i < num_of_mats ; i++) {
+        accel_mat_vec[i].p_accel_mat = malloc(sizeof(int**));
+    }
+
+    /*insert the matricses*/
+    for (int i = 0 ; i < num_of_mats ; i++) {
+        int row = rows[i];
+        int col = cols[i];
+        copy_matrix(mat_array[i] , row, col, accel_mat_vec[i].p_accel_mat);
+        transpose_mat(*(accel_mat_vec[i].p_accel_mat) , row , col);
+        row = cols[i];
+        col = rows[i];
+        insert_col(accel_mat_vec[i].p_accel_mat , row , col , bias_array[i]) ;
+        col = col + 1;
+        compress_mat(accel_mat_vec[i].p_accel_mat , row , col);
+        accel_mat_vec[i].words_in_row = (col + 3) / 4; //ceil (col /4)
+        accel_mat_vec[i].elem_in_row = col;
+        accel_mat_vec[i].rows_num = row;
+    }
+
     return SUCCESS;
 }
 
+/**
+ * @brief - free the strucrt
+ */
+ void cleanup(int num_of_mats) {
+    if (!accel_mat_vec) return; // Check if accel_mat_vec is already NULL
 
-// Fucntion to transpose a matrix
-int* transpose_matrix(int* mat, int rows, int cols) {
-    int* transposed = (int*)malloc(cols * rows * sizeof(int));
-    
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            transposed[j * rows + i] = mat[i * cols + j];
-        }
-    }
-    
-    return transposed;
-}
-
-// Function to compress the transposed matrix with bias and padding
-int* compress_matrix(int* mat, int* bias, int rows, int cols) {
-    int elements_per_row = cols + 1;  // Adding the bias as the extra element
-    int words_in_row = (int)ceil((double)elements_per_row / 4);  // Number of 32-bit words per row
-    int* compressed_mat = (int*)malloc(rows * words_in_row * sizeof(int));
-
-    // Compress each row
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < words_in_row; j++) {
-            int combined_value = 0;
-
-            // Combine up to 4 elements from the matrix, bias, and padding
-            for (int k = 0; k < 4; k++) {
-                int idx = 4 * j + k;
-                if (idx < cols) {
-                    combined_value |= (mat[i * cols + idx] << (8 * (3 - k)));  // Add matrix element
-                } else if (idx == cols) {
-                    combined_value |= (bias[i] << (8 * (3 - k)));  // Add bias element after the last matrix element
-                }
-            }
-
-            compressed_mat[i * words_in_row + j] = combined_value;  // Store the combined value
+    for (int i = 0; i < num_of_mats; i++) {
+        if (accel_mat_vec[i].p_accel_mat) {
+            free(*(accel_mat_vec[i].p_accel_mat)); // Free the matrix data (1D array)
+            free(accel_mat_vec[i].p_accel_mat);    // Free the pointer to the matrix
         }
     }
 
-    return compressed_mat;
-}
-
-int insert_mat(int* mat , int rows ,int cols ,int* bias, int mat_idx) {
-    int* mat_transposed = transpose_matrix(mat, rows, cols);
-    int* mat_compressed = compress_matrix(mat_transposed, bias, cols, rows);
-} 
-
-
+    free(accel_mat_vec); // Free the accel_mat_vec array itself
+    accel_mat_vec = NULL; // Set to NULL to avoid dangling pointers
+ }

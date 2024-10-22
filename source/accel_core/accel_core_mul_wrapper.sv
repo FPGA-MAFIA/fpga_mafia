@@ -71,7 +71,7 @@ shift_multiplier
             st_wait: begin
                 counter=counter-1;
                 if (counter == 0) begin
-                    counter2 = w1.meta_data.data_len - 1;
+                    counter2 = w1.meta_data.data_len - 2;
                 end
             end
 

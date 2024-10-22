@@ -60,6 +60,8 @@ assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
 assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
 
 //---------------------------------------------------
+accel_inputs_t mul_inputs;
+accel_outputs_t mul_outputs;
 accel_core_mem_wrap accel_core_mem_wrap(
    .Clock                 (Clock)  ,              // input  logic        Clock  ,
    .Rst                   (Rst)    ,              // input  logic        Rst    ,
