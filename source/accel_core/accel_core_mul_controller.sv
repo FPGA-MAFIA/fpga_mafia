@@ -39,7 +39,12 @@ t_buffer_sel assign_m2_tmp;
 t_buffer_sel assign_m1_tmp_ps;
 t_buffer_sel assign_m2_tmp_ps;
 
-logic test;
+logic out_valid_m1_ff;
+logic out_valid_m2_ff;
+`MAFIA_RST_DFF(out_valid_m1_ff, out_valid_m1, Clock, Rst);
+`MAFIA_RST_DFF(out_valid_m2_ff, out_valid_m2, Clock, Rst);
+
+
 always_comb begin
     // Default assignments
     
@@ -48,7 +53,7 @@ always_comb begin
         assign_m2_tmp = FREE;
     end else begin
         // Releasing the buffers when valid outputs
-        if (out_valid_m1) begin
+        if (out_valid_m1_ff) begin
             assign_m1_tmp = FREE;
         end else begin
             if (assign_m1_tmp == FREE) begin //chatgpt - it seems like this if is always true
@@ -62,7 +67,7 @@ always_comb begin
             end
         end  
         
-        if (out_valid_m2) begin 
+        if (out_valid_m2_ff) begin 
             assign_m2_tmp = FREE;
         end else  if (assign_m2_tmp == FREE) begin
             if (assign_m1_tmp != W1 && w1_metadata.in_use) begin
@@ -82,17 +87,16 @@ assign assign_m2 = assign_m2_tmp;
 // Sequential logic for clearing clear_m1 and clear_m2 at the rising edge of the clock
 assign start_m1 = 1'b1;
 assign start_m2 = 1'b1;
-
 `MAFIA_RST_VAL_DFF(assign_m1_tmp_ps, assign_m1_tmp, Clock, Rst, FREE);
 `MAFIA_RST_VAL_DFF(assign_m2_tmp_ps, assign_m2_tmp, Clock, Rst, FREE);
 assign clear_m1 = (assign_m1_tmp_ps == FREE && assign_m1_tmp != FREE) ? 1'b1 : 1'b0;
 assign clear_m2 = (assign_m2_tmp_ps == FREE && assign_m2_tmp != FREE) ? 1'b1 : 1'b0;
-assign release_w1 = ((assign_m1_tmp_ps == W1 && assign_m1_tmp == FREE) || 
-              (assign_m2_tmp_ps == W1 && assign_m2_tmp == FREE))   ? 1'b1 : 1'b0;
-assign release_w2 = ((assign_m1_tmp_ps == W2 && assign_m1_tmp == FREE) || 
-              (assign_m2_tmp_ps == W2 && assign_m2_tmp == FREE))   ? 1'b1 : 1'b0;
-assign release_w3 = ((assign_m1_tmp_ps == W3 && assign_m1_tmp == FREE) || 
-              (assign_m2_tmp_ps == W3 && assign_m2_tmp == FREE))   ? 1'b1 : 1'b0;
+assign release_w1 = ((assign_m1_tmp_ps == W1 && out_valid_m1) || 
+              (assign_m2_tmp_ps == W1 && out_valid_m2))   ? 1'b1 : 1'b0;
+assign release_w2 = ((assign_m1_tmp_ps == W2 && out_valid_m1) || 
+              (assign_m2_tmp_ps == W2 && out_valid_m2))   ? 1'b1 : 1'b0;
+assign release_w3 = ((assign_m1_tmp_ps == W3 && out_valid_m1) || 
+              (assign_m2_tmp_ps == W3 && out_valid_m2))   ? 1'b1 : 1'b0;
 
 // Process to detect the rising edge of meta_data.in_use
 logic in_use_ff; // Flip-flop to detect rising edge
