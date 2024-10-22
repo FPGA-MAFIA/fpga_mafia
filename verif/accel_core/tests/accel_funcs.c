@@ -21,53 +21,6 @@ int xor_accel(int x, int y) {
 }
 
 
-/**
- * @brief - write buffer, write to input, w1, w2 or w3
- * @param w_idx - the index of the buffer to be written (0,1, 2, 3)
- * @param data  - data to be written to buffer (matrix combined to an rray)
- * @param words_num - the number of words to be written to the buffer
- * @return - 0 if failed, 1 on success
- * @note - this function is not reposible to check if the buffer is free
- */
-int buffer_write(int w_idx, int* data, int row, int words_in_row)
-{
-    uint32_t* address;
-    switch (w_idx) {
-        case 0:
-            address = (uint32_t*)(CR_MUL_IN_META + 1);
-            break;
-        case 1:
-            address = (uint32_t*)(CR_MUL_W1_META + 1);
-            break;
-        case 2:
-            address = (uint32_t*)(CR_MUL_W2_META + 1);
-            break;
-        case 3:
-            address = (uint32_t*)(CR_MUL_W3_META + 1);
-            break;
-        default:
-            return FAIL;
-    
-    }
-    for(int i=0; i<words_in_row; i++)
-        WRITE_REG((uint32_t*)(address + i), data[row*words_in_row + i]);
-    return SUCCESS;
-}
-
-/**
- * @brief - Calculates a layer of a neural network by computing Av + B.
- *          A is the weights matrix and B is the bias vector.
- *          ouput of the network then passes through a sigmoid activation function!
- * @param input_vec - the vector that contains the input of the network
- * @param mat_A  - weight matrix of the network. A column is a single neuron. 
- * @param vec_B  - weight matrix of the network. A column is a single neuron. 
-
- * @return - 0 if failed, 1 on success
- */
-int calc_layer(int* input_vec, int* mat_A, int* vec_B)
-{
-    
-}
 
 /////////////////////////////// INIT ////////////////////////////////////////////
 /**
@@ -264,6 +217,7 @@ int init_accel_core(int** mat_array , int* rows, int* cols, int num_of_mats, int
     return SUCCESS;
 }
 
+///////////////////////////// CLEANUP ////////////////////////////////////////
 /**
  * @brief - free the strucrt
  */
@@ -280,3 +234,108 @@ int init_accel_core(int** mat_array , int* rows, int* cols, int num_of_mats, int
     free(accel_mat_vec); // Free the accel_mat_vec array itself
     accel_mat_vec = NULL; // Set to NULL to avoid dangling pointers
  }
+
+
+//////////////////////////// PROCCESS ////////////////////////////////////////
+/**
+ * @brief - write buffer, write to input, w1, w2 or w3
+ * @param neuron_idx - the index of the current neuron to calculate
+ * @param data  - data to be written to buffer (one row fromm the matrix)
+ * @param words_num - the number of words to be written to the buffer
+ * @return - 0 if failed, 1 on success
+ * @note - this function is not reposible to check if the buffer is free
+ */
+int buffer_write(int neuron_idx, int* data, int row, int words_num)
+{
+    int w_idx = neuron_idx%3 + 1;
+    int address;
+    switch (w_idx) {
+        case 1:
+            address = (CR_MUL_W1_META);
+            break;
+        case 2:
+            address = (CR_MUL_W2_META);
+            break;
+        case 3:
+            address = (CR_MUL_W3_META);
+            break;
+        default:
+            return FAIL;
+    
+    }
+    int read_buff;
+    do
+    {
+        READ_REG(read_buff, (uint32_t*)(address));
+    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+    for(int i=0; i<words_num; i++)
+        WRITE_REG((uint32_t*)(address + i + 1), data[i]);
+
+    
+    return SUCCESS;
+}
+
+
+
+/**
+ * @brief - Calculates a layer of a neural network by computing Av + B.
+ *          A is the weights matrix and B is the bias vector.
+ *          ouput of the network then passes through a sigmoid activation function!
+ * @param idx - the index of the layer to calculate
+ * @return - 0 if failed, 1 on success
+ */
+int calc_layer(int idx)
+{
+    if(idx<0 || idx >= g_num_of_mats)
+        return FAIL;
+    t_matrix_accel curr_mat = accel_mat_vec[idx];
+    for (int i = 0; i < curr_mat.rows_num; i++)
+    {
+        int buffer_idx = i%3 + 1;
+        buffer_write
+    }
+    
+    
+}
+
+
+/**
+ * @brief - Calculates the entire network output of a neural network
+ * @param input_vec - the vector that contains the input of the network.
+ * @param input_vec_len - the length of the input vec
+ * @return - a number between 0 and 100 (100 times the output of the sigmoid). -1 on fail
+ */ 
+int calc_network(int* input_vec, int input_vec_len)
+{
+    //args check
+    if(!input_vec || input_vec_len != accel_mat_vec[0].elem_in_row - 1)
+        return -1;
+    int read_buff;
+    // wait for accel to be free
+    do
+    {
+        READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+    //parse input vector
+    int** p_input_vec; // FREE THIS!
+    copy_matrix(input_vec, 1, input_vec_len, p_input_vec);
+    if(!compress_mat(p_input_vec, 1, input_vec_len))
+        return -1;
+    int words_in_compressed_inp = ( input_vec_len + 3) / 4;
+    // load input vec to cr space
+    for (int i = 0; i < words_in_compressed_inp; i++)
+    {
+        WRITE_REG((uint32_t*)(CR_MUL_IN_DATA+i), *p_input_vec[i]);
+    }
+    // calc layer for each layer
+    for (int i = 0; i < g_num_of_mats; i++)
+    {
+        calc_layer(i);
+    }
+    free(*p_input_vec);
+    int result;
+    //read network result
+    READ_REG(result, (uint32_t*)(CR_MUL_OUT_META+1));
+    //sigmoid(&result);
+    return result;
+}
