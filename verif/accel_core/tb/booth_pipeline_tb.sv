@@ -13,9 +13,13 @@ module booth_pipeline_tb;
 
   // Instantiate the DUT
   accel_core_booth_pipeline
+  #(
+    .M_width(M_width),
+    .Q_width(Q_width)
+  )
   dut (
-    .clk(Clock),
-    .rst(Rst),
+    .Clock(Clock),
+    .Rst(Rst),
     .Mu(Mu),
     .Qu(Qu),
     .out(out)
@@ -41,6 +45,12 @@ module booth_pipeline_tb;
     Mu = 5;
     Qu = 3;
     #10;
+
+    // Test case 1: 5 * 3
+    Mu = 0;
+    Qu = 0;
+    #10;
+
 
     // Test case 2: -5 * 3
     Mu = -5;
@@ -85,6 +95,7 @@ module booth_pipeline_tb;
     // Test case 10: -2^23 * -2^7
     Mu = -(1 << (M_width - 1));
     Qu = -(1 << (Q_width - 1));
+  
     #150;
 
     // Finish simulation

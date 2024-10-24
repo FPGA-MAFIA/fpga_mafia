@@ -2,10 +2,12 @@
 #define SUCCESS 1
 #define FAIL 0 
 #include "accel_core_defines.h"
+#include <stdlib.h>
+
 uint32_t *address = (uint32_t *)0x00FE0200;
 typedef struct {
     int words_in_row;
-    int rows_num;
+    int rows_num; // TRANSPOSED
     int elem_in_row;
     int** p_accel_mat; //pointer to 1D array mat
 } t_matrix_accel;
@@ -193,9 +195,10 @@ int init_accel_core(int** mat_array , int* rows, int* cols, int num_of_mats, int
     }
 
     /*allocating mem*/
-    accel_mat_vec = malloc(num_of_mats * sizeof(t_matrix_accel));
+    accel_mat_vec = (t_matrix_accel*)malloc(num_of_mats * sizeof(t_matrix_accel));
     for (int i = 0 ; i < num_of_mats ; i++) {
-        accel_mat_vec[i].p_accel_mat = malloc(sizeof(int**));
+        accel_mat_vec[i].p_accel_mat = 
+        (int**)malloc(sizeof(int**));
     }
 
     /*insert the matricses*/
@@ -240,13 +243,13 @@ int init_accel_core(int** mat_array , int* rows, int* cols, int num_of_mats, int
 /**
  * @brief - write buffer, write to input, w1, w2 or w3
  * @param neuron_idx - the index of the current neuron to calculate
- * @param data  - data to be written to buffer (one row fromm the matrix)
- * @param words_num - the number of words to be written to the buffer
+ * @param matrix_idx - the idx of the matrix in the global array
  * @return - 0 if failed, 1 on success
  * @note - this function is not reposible to check if the buffer is free
  */
-int buffer_write(int neuron_idx, int* data, int row, int words_num)
+int buffer_write(int neuron_idx, int matrix_idx)
 {
+    // Decide which buffer to write to
     int w_idx = neuron_idx%3 + 1;
     int address;
     switch (w_idx) {
@@ -264,14 +267,19 @@ int buffer_write(int neuron_idx, int* data, int row, int words_num)
     
     }
     int read_buff;
+    // wait for the buffer to be free
     do
     {
         READ_REG(read_buff, (uint32_t*)(address));
     } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+    // write the data
+    int words_num = accel_mat_vec[matrix_idx].words_in_row;
+    int* data = (*accel_mat_vec[matrix_idx].p_accel_mat) + words_num*neuron_idx;
     for(int i=0; i<words_num; i++)
         WRITE_REG((uint32_t*)(address + i + 1), data[i]);
-
-    
+    int w_metadata = neuron_idx + (accel_mat_vec[matrix_idx].elem_in_row << 8) + (1 << 16);
+    // write the metadata
+    WRITE_REG((uint32_t*)address, w_metadata);       
     return SUCCESS;
 }
 
@@ -284,18 +292,28 @@ int buffer_write(int neuron_idx, int* data, int row, int words_num)
  * @param idx - the index of the layer to calculate
  * @return - 0 if failed, 1 on success
  */
-int calc_layer(int idx)
+int calc_layer(int matrix_idx)
 {
-    if(idx<0 || idx >= g_num_of_mats)
-        return FAIL;
-    t_matrix_accel curr_mat = accel_mat_vec[idx];
+    //if(matrix_idx<0 || matrix_idx >= g_num_of_mats)
+    //    return FAIL;
+
+    // wait for previous layer to be completed
+    int read_buff;
+    do
+    {
+        READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+    //Write metadata of input vector
+    int input_meta = (accel_mat_vec[matrix_idx].rows_num) + ((accel_mat_vec[matrix_idx].elem_in_row-1) << 8) + (1 << 16);
+    WRITE_REG((uint32_t*)(CR_MUL_IN_META), input_meta);
+    // Write data to buffers
+    t_matrix_accel curr_mat = accel_mat_vec[matrix_idx];
     for (int i = 0; i < curr_mat.rows_num; i++)
     {
-        int buffer_idx = i%3 + 1;
-        buffer_write
+        if(buffer_write(i, matrix_idx) == FAIL)
+            return FAIL;
     }
-    
-    
+    return SUCCESS;
 }
 
 

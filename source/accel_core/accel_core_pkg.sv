@@ -404,8 +404,10 @@ package accel_core_pkg;
     /****************************************ACCELERATORS*******************************/
     parameter WEIGHT_WIDTH = 8;
     typedef struct packed {
-        logic [2*WEIGHT_WIDTH:0] AQQ_0;
-        logic [WEIGHT_WIDTH-1:0] Mu;
+        logic signed [WEIGHT_WIDTH-1:0] Accum;
+        logic signed [WEIGHT_WIDTH-1:0] Qu;
+        logic q0;
+        logic signed [WEIGHT_WIDTH-1:0] Mu;
     } stage_mul_inp_t;
 
     typedef struct packed {

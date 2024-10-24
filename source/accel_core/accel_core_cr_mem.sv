@@ -76,7 +76,7 @@ always_comb begin
             CR_XOR_IN_2       : next_cr.xor_inp2       = data[7:0];// xor inp 2
             // MUL ACCEL INPUT
                 CR_MUL_IN_META    : begin 
-                    next_cr.neuron_in.meta_data.matrix_col_num  = data[7:0]; //in metadata
+                    next_cr.neuron_in.meta_data.matrix_col_num  = data[7:0]; //in metadata. NOT TRANSPOSED!
                     next_cr.neuron_in.meta_data.matrix_row_num  = data[15:8];
                     next_cr.neuron_in.meta_data.in_use_by_accel = data[16];
                     next_cr.neuron_in.meta_data.mov_out_to_in   = data[17];
