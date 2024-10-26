@@ -36,7 +36,6 @@ accel_core_mul_top
     .release_w1    (mul_outputs.release_w1),
     .release_w2    (mul_outputs.release_w2),
     .release_w3    (mul_outputs.release_w3),
-    .move_out_to_in(mul_outputs.move_out_to_in),
     .done_layer    (mul_outputs.done_layer)
 );
 

@@ -373,8 +373,6 @@ package accel_core_pkg;
         logic [7:0] matrix_row_num;
         logic [7:0] matrix_col_num;
         logic in_use_by_accel;
-        logic mov_out_to_in;
-        logic output_ready;
     } t_metadata_inout;
 
 
@@ -422,7 +420,6 @@ package accel_core_pkg;
         logic release_w1;
         logic release_w2;
         logic release_w3;
-        logic move_out_to_in;
         logic done_layer;
     } accel_outputs_t;
 

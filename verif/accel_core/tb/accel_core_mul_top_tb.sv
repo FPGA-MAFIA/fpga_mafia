@@ -11,7 +11,6 @@ t_buffer_inout output_vec;
 logic release_w1;
 logic release_w2;
 logic release_w3;
-logic move_out_to_in;
 logic done_layer;
 
   // Instantiate the DUT
@@ -26,7 +25,6 @@ accel_core_mul_top accel_core_instance (
     .release_w1    (release_w1),
     .release_w2    (release_w2),
     .release_w3    (release_w3),
-    .move_out_to_in(move_out_to_in),
     .done_layer    (done_layer)
 );
 

@@ -67,7 +67,6 @@ always_comb begin
             next_cr.w2.meta_data.in_use = 0;
         if(mul_outputs.release_w3)
             next_cr.w3.meta_data.in_use = 0;
-            // WHAT ABOUT MOV_OUT_TO_IN?
     end
     if(wren) begin
         unique casez (address) // address holds the offset
@@ -79,8 +78,6 @@ always_comb begin
                     next_cr.neuron_in.meta_data.matrix_col_num  = data[7:0]; //in metadata. NOT TRANSPOSED!
                     next_cr.neuron_in.meta_data.matrix_row_num  = data[15:8];
                     next_cr.neuron_in.meta_data.in_use_by_accel = data[16];
-                    next_cr.neuron_in.meta_data.mov_out_to_in   = data[17];
-                    next_cr.neuron_in.meta_data.output_ready    = data[18];
                 end 
                 CR_MUL_IN_0       : begin 
                     next_cr.neuron_in.data[0]   = data[7:0];
@@ -1619,8 +1616,6 @@ always_comb begin
                     next_cr.neuron_out.meta_data.matrix_col_num = data[7:0]; //in metadata
                     next_cr.neuron_out.meta_data.matrix_row_num = data[15:8];
                     next_cr.neuron_out.meta_data.in_use_by_accel = data[16];
-                    next_cr.neuron_out.meta_data.mov_out_to_in   = data[17];
-                    next_cr.neuron_out.meta_data.output_ready    = data[18];
                 end 
                 CR_MUL_OUT_0       : begin 
                     next_cr.neuron_out.data[0]   = data[7:0];
@@ -2020,9 +2015,7 @@ always_comb begin
             CR_XOR_OUT       : pre_q = {24'b0 , cr.xor_result};
 
             // CR MUL IN
-                CR_MUL_IN_META : pre_q = {  13'b0, 
-                                            cr.neuron_in.meta_data.output_ready ,
-                                            cr.neuron_in.meta_data.mov_out_to_in ,
+                CR_MUL_IN_META : pre_q = {  15'b0, 
                                             cr.neuron_in.meta_data.in_use_by_accel,
                                             cr.neuron_in.meta_data.matrix_row_num,
                                             cr.neuron_in.meta_data.matrix_col_num };   
@@ -3052,9 +3045,7 @@ always_comb begin
                                             cr.w3.data[249],
                                             cr.w3.data[248] };
             // OUT
-                CR_MUL_OUT_META : pre_q = {  13'b0, 
-                                            cr.neuron_out.meta_data.output_ready ,
-                                            cr.neuron_out.meta_data.mov_out_to_in ,
+                CR_MUL_OUT_META : pre_q = {  15'b0, 
                                             cr.neuron_out.meta_data.in_use_by_accel,
                                             cr.neuron_out.meta_data.matrix_row_num,
                                             cr.neuron_out.meta_data.matrix_col_num };

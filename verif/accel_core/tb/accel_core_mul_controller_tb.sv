@@ -13,19 +13,16 @@ t_metadata_weights w3_meta_data;
 t_metadata_inout output_meta_data;
 
 // Control signals
-logic move_out_to_in;
 logic done_layer;
 logic clear_output;
 
 // Signals for m1
 logic clear_m1;
-logic start_m1;
 t_buffer_sel assign_m1; // Assuming t_buffer_sel is the correct enum type
 logic out_valid_m1;
 
 // Signals for m2
 logic clear_m2;
-logic start_m2;
 t_buffer_sel assign_m2; // Assuming t_buffer_sel is the correct enum type
 logic out_valid_m2;
 
@@ -38,17 +35,14 @@ logic out_valid_m2;
     .w2_metadata(w2_meta_data),
     .w3_metadata(w3_meta_data),
     .out_metadata(output_meta_data),
-    .move_out_to_in(move_out_to_in),
     .done_layer(done_layer),
     .clear_output(clear_output),
     ///////// m1 port
     .clear_m1(clear_m1),
-    .start_m1(start_m1),
     .assign_m1(assign_m1),
     .out_valid_m1(out_valid_m1),
     ///////// m2 port
     .clear_m2(clear_m2),
-    .start_m2(start_m2),
     .assign_m2(assign_m2),
     .out_valid_m2(out_valid_m2),
     .release_w1(open),
@@ -74,7 +68,6 @@ logic out_valid_m2;
     output_meta_data = '0;
 
     // Control signals
-    move_out_to_in = 1'b0;
     done_layer = 1'b0;
 
     // Signals for m1

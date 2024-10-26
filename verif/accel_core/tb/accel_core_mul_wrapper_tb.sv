@@ -4,7 +4,6 @@ import accel_core_pkg::*;  // Import your package
   logic Clock;
   logic Rst;
   logic clear;
-  logic start;
   t_buffer_inout neuron_in;  // Defined in accel_core_pkg
   t_buffer_weights w1;       // Defined in accel_core_pkg
   logic [7:0] result;
@@ -15,7 +14,6 @@ import accel_core_pkg::*;  // Import your package
       .Clock(Clock),
       .Rst(Rst),
       .clear(clear),
-      .start(start),
       .neuron_in(neuron_in),
       .w1(w1),
       .result(result),
@@ -30,7 +28,6 @@ import accel_core_pkg::*;  // Import your package
     Clock = 0;
     Rst = 0;
     clear = 0;
-    start = 0;
     neuron_in = '{default: '0};
     w1 = '{default: '0};
     // Apply reset
@@ -53,7 +50,6 @@ import accel_core_pkg::*;  // Import your package
     w1.data[5] = 8'h6;   
     w1.meta_data.data_len = 4;  // Number of elements in the weights buffer
     #10; 
-    start = 1;
     #300; 
     clear=1;
     neuron_in.data[0] = 8'h10;

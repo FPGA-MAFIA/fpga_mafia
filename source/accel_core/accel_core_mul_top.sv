@@ -15,14 +15,12 @@ import accel_core_pkg::*;
     output logic release_w1,
     output logic release_w2,
     output logic release_w3,
-    output logic move_out_to_in,
     output logic done_layer
 );
 t_buffer_inout output_vec_tmp;
 
 
 logic clear_m1;
-logic start_m1;
 t_buffer_weights weight_m1;
 logic signed [7:0] result_m1;
 logic out_valid_m1;
@@ -35,7 +33,6 @@ accel_core_mul_wrapper
       .Clock(Clock),
       .Rst(Rst),
       .clear(clear_m1),
-      .start(start_m1),
       .neuron_in(input_vec),
       .w1(weight_m1),
       .result(result_m1),
@@ -43,7 +40,6 @@ accel_core_mul_wrapper
   );
 
 logic clear_m2;
-logic start_m2;
 t_buffer_weights weight_m2;
 logic signed [7:0] result_m2;
 logic out_valid_m2;
@@ -56,7 +52,6 @@ t_buffer_sel assign_m2;
       .Clock(Clock),
       .Rst(Rst),
       .clear(clear_m2),
-      .start(start_m2),
       .neuron_in(input_vec),
       .w1(weight_m2),
       .result(result_m2),
@@ -72,17 +67,14 @@ accel_core_mul_controller mul_controller (
     .w2_metadata(w2.meta_data),
     .w3_metadata(w3.meta_data),
     .out_metadata(output_vec_tmp.meta_data),
-    .move_out_to_in(move_out_to_in),
     .done_layer(done_layer),
     .clear_output(clear_output),
     ///////// m1 port
     .clear_m1(clear_m1),
-    .start_m1(start_m1),
     .assign_m1(assign_m1),
     .out_valid_m1(out_valid_m1),
     ///////// m2 port
     .clear_m2(clear_m2),
-    .start_m2(start_m2),
     .assign_m2(assign_m2),
     .out_valid_m2(out_valid_m2),
     ///////// release

@@ -10,7 +10,6 @@ import accel_core_pkg::*;
     input logic Clock,
     input logic Rst,
     input logic clear,
-    input logic start,
     input t_buffer_inout neuron_in,
     input t_buffer_weights w1,
     output logic signed [7:0] result,
@@ -116,9 +115,7 @@ endgenerate
         next_state = current_state;
         case (current_state)
             st_idle: begin
-                if (start) begin
-                    next_state = st_wait;  // Transition to wait state when start is asserted
-                end
+                next_state = st_wait;
             end
 
             st_wait: begin
