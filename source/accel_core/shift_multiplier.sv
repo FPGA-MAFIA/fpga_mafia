@@ -56,41 +56,33 @@ always_comb begin // convert to positive
 end 
 
 stage_mul_inp_t stage_inputs [0:Q_width];
+stage_mul_inp_t stage_inputs_ns [0:Q_width];
 ////////////////////////////////////////////////////////////////////////////
 // setting default values to stage_inputs(0)
-always_ff @(posedge Clock or posedge Rst) begin
-  if (Rst) begin
-    stage_inputs[0].Accum <= '0;
-    stage_inputs[0].Mu <= '0;
-    stage_inputs[0].Qu <= '0;
-    stage_inputs[0].is_pos <= 1'b0;
-  end else begin
-    stage_inputs[0].Accum <= '0;
-    stage_inputs[0].Mu <= abs_M;
-    stage_inputs[0].Qu <= abs_Q;
-    stage_inputs[0].is_pos <= is_pos;
-  end
+`MAFIA_RST_DFF(stage_inputs[0] , stage_inputs_ns[0] , Clock, Rst);
+always_comb begin
+  stage_inputs_ns[0].Accum   = '0;
+  stage_inputs_ns[0].Mu      = abs_M;
+  stage_inputs_ns[0].Qu      = abs_Q;
+  stage_inputs_ns[0].is_pos  = is_pos;
 end
 
 ////////////////////////////////////////////////////////////////////////////
 // cycle i: Total Q_width cycles
-always_ff @(posedge Clock or posedge Rst) begin
-  if (Rst) begin
-    for (int i = 0; i < Q_width; i++) begin
-      stage_inputs[i+1].Accum <= '0;
-      stage_inputs[i+1].Mu <= '0;
-      stage_inputs[i+1].Qu <= '0;
-      stage_inputs[i+1].is_pos <= 1'b0;
-    end
-  end else begin
-    for (int i = 0; i < Q_width; i++) begin
-      stage_inputs[i+1].Accum <= (stage_inputs[i].Qu[0]) ? stage_inputs[i].Accum + (stage_inputs[i].Mu << i) : stage_inputs[i].Accum;
-      stage_inputs[i+1].Mu <= stage_inputs[i].Mu;
-      stage_inputs[i+1].Qu <= stage_inputs[i].Qu >> 1;
-      stage_inputs[i+1].is_pos <= stage_inputs[i].is_pos;
-    end
+generate;
+  for (genvar i=1; i<=Q_width; ++i) begin
+    `MAFIA_RST_DFF(stage_inputs[i] , stage_inputs_ns[i] , Clock, Rst);
+  end
+endgenerate
+always_comb begin
+  for (int i = 0; i < Q_width; i++) begin
+    stage_inputs_ns[i+1].Accum  = (stage_inputs[i].Qu[0]) ? stage_inputs[i].Accum + (stage_inputs[i].Mu << i) : stage_inputs[i].Accum;
+    stage_inputs_ns[i+1].Mu     = stage_inputs[i].Mu;
+    stage_inputs_ns[i+1].Qu     = stage_inputs[i].Qu >> 1;
+    stage_inputs_ns[i+1].is_pos = stage_inputs[i].is_pos;
   end
 end
+
 
 always_comb begin // convert to positive
   if(Rst)
