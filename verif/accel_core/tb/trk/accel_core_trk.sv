@@ -1,3 +1,4 @@
+import accel_core_pkg::*;
 
 integer trk_alu;
 initial begin: trk_alu_gen
@@ -46,6 +47,7 @@ initial begin: trk_memory_access_gen
     $fwrite(trk_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
 end
+
 integer trk_ref_memory_access;
 initial begin: trk_rf_memory_access_gen
     $timeformat(-9, 1, " ", 6);
@@ -53,6 +55,12 @@ initial begin: trk_rf_memory_access_gen
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");
     $fwrite(trk_ref_memory_access,"Time  |  PC   | Opcode  | Address  | Data  |\n");
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  
+end
+
+integer trk_accel_mul_data;
+initial begin: trk_accel_mul_data_gen
+    $timeformat(-9, 1, " ", 6);
+    trk_accel_mul_data = $fopen({"../../../target/accel_core/tests/",test_name,"/trk_accel_mul_data.log"},"w");
 end
 //
 assign PcQ100H = accel_core_top.PcQ100H;
@@ -137,6 +145,80 @@ always_ff @(posedge Clk ) begin
                            );
 end
 
+// accel_mul_trk
+t_buffer_inout input_vec;
+t_buffer_inout output_vec;
+t_buffer_weights w1;
+t_buffer_weights w2;
+t_buffer_weights w3;
+integer mul_trk_file;
+logic unsigned [7:0] matrix_col_num; 
+// Assign vectors to specific instances within the module hierarchy
+assign input_vec = accel_core_top.accel_core_farm.mul_inputs.input_vec;
+assign output_vec = accel_core_top.accel_core_farm.mul_outputs.output_vec;
+assign w1 = accel_core_top.accel_core_farm.mul_inputs.w1;
+assign w2 = accel_core_top.accel_core_farm.mul_inputs.w2;
+assign w3 = accel_core_top.accel_core_farm.mul_inputs.w3;
+logic input_vec_in_use_ps; 
+logic w1_in_use_ps; 
+logic w2_in_use_ps;
+logic w3_in_use_ps;
+always_ff @(posedge Clk) begin
+    if (Rst) begin
+        input_vec_in_use_ps <= 1'b0;
+        w1_in_use_ps <= 1'b0;
+        w2_in_use_ps <= 1'b0;
+        w3_in_use_ps <= 1'b0;
+    end else begin 
+        input_vec_in_use_ps <= input_vec.meta_data.in_use_by_accel;
+        w1_in_use_ps <= w1.meta_data.in_use;
+        w2_in_use_ps <= w2.meta_data.in_use;
+        w3_in_use_ps <= w3.meta_data.in_use;
+        if (!input_vec_in_use_ps &&  input_vec.meta_data.in_use_by_accel) begin
+            $fwrite(trk_accel_mul_data,"*************************************************************\n");
+            $fwrite(trk_accel_mul_data, "Matrix size: %0d x %0d\n",
+                    input_vec.meta_data.matrix_row_num,
+                    input_vec.meta_data.matrix_col_num);
+            $fwrite(trk_accel_mul_data,"Input Vector is: ");
+            for (int i = 0; i < input_vec.meta_data.matrix_row_num - 1; i++) begin
+                $fwrite(trk_accel_mul_data, "%0d, ", input_vec.data[i]);
+            end
+            $fwrite(trk_accel_mul_data, "%0d\n", input_vec.data[input_vec.meta_data.matrix_row_num - 1]);
+            matrix_col_num <= input_vec.meta_data.matrix_col_num;
+            
+        end
+        if (!w1_in_use_ps &&  w1.meta_data.in_use) begin
+            $fwrite(trk_accel_mul_data,"W1 Data is: ");
+            for (int i = 0; i < w1.meta_data.data_len - 1; i++) begin
+               $fwrite(trk_accel_mul_data,"%0d, ", w1.data[i]);
+            end
+            $fwrite(trk_accel_mul_data,"Bias: %0d \n", w1.data[w1.meta_data.data_len - 1]);
+        end
+        if (!w2_in_use_ps &&  w2.meta_data.in_use) begin
+            $fwrite(trk_accel_mul_data,"W2 Data is: ");
+            for (int i = 0; i < w2.meta_data.data_len - 1; i++) begin
+               $fwrite(trk_accel_mul_data,"%0d, ", w2.data[i]);
+            end
+            $fwrite(trk_accel_mul_data,"Bias: %0d \n", w2.data[w2.meta_data.data_len - 1]);
+        end
+        if (!w3_in_use_ps &&  w3.meta_data.in_use) begin
+            $fwrite(trk_accel_mul_data,"W3 Data is: ");
+            for (int i = 0; i < w3.meta_data.data_len - 1; i++) begin
+               $fwrite(trk_accel_mul_data,"%0d, ", w3.data[i]);
+            end
+            $fwrite(trk_accel_mul_data,"Bias: %0d \n", w3.data[w3.meta_data.data_len - 1]);
+        end
+        if (input_vec_in_use_ps &&  !input_vec.meta_data.in_use_by_accel) begin
+           
+            $fwrite(trk_accel_mul_data,"Output Vector is: ");
+            for (int i = 0; i < matrix_col_num - 1; i++) begin
+                $fwrite(trk_accel_mul_data, "%0d, ",output_vec.data[i]);
+            end
+            $fwrite(trk_accel_mul_data, "%0d\n",output_vec.data[matrix_col_num - 1]);
+            $fwrite(trk_accel_mul_data,"*************************************************************\n");
+        end
+    end
+end
 
 
 // FIXME

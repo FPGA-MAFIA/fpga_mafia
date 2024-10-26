@@ -94,6 +94,7 @@ initial begin: test_seq
         release accel_core_top.accel_core_mem_wrap.d_mem.mem;
         release rv32i_ref.dmem;
     end
+
     
     //=======================================
     // enable the checker data collection (monitor)

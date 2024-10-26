@@ -1,6 +1,9 @@
 `include "macros.vh"
 module accel_core_mul_top 
 import accel_core_pkg::*;
+#(
+  parameter string mul_type = "Booth" // options: Booth (default) , Shift
+)
 (
     input logic Clock,
     input logic Rst,
@@ -25,7 +28,10 @@ logic signed [7:0] result_m1;
 logic out_valid_m1;
 t_buffer_sel assign_m1;
 
-accel_core_mul_wrapper m1 (
+accel_core_mul_wrapper
+    #(
+        .mul_type(mul_type)
+    ) m1 (
       .Clock(Clock),
       .Rst(Rst),
       .clear(clear_m1),
@@ -43,7 +49,10 @@ logic signed [7:0] result_m2;
 logic out_valid_m2;
 t_buffer_sel assign_m2;
 
-  accel_core_mul_wrapper m2 (
+  accel_core_mul_wrapper
+    #(
+        .mul_type(mul_type)
+    ) m2 (
       .Clock(Clock),
       .Rst(Rst),
       .clear(clear_m2),
@@ -102,7 +111,7 @@ always_comb begin //mux_in - the logic which assigns the weight buffer to each m
 end
 always_comb begin // mux_out - assigns the result to the output
     if(Rst || clear_output) begin
-        output_vec_tmp.data = '0; // Reset output data
+        output_vec_tmp = '0; // Reset output data
         done_layer = 0;
     end
     else begin

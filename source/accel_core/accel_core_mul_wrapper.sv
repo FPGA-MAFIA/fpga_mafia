@@ -3,6 +3,9 @@
 
 module accel_core_mul_wrapper 
 import accel_core_pkg::*;
+#(
+  parameter string mul_type = "Booth" // options: Booth (default) , Shift
+)
 (
     input logic Clock,
     input logic Rst,
@@ -17,18 +20,35 @@ logic signed [WEIGHT_WIDTH-1:0] Mu;
 logic signed [WEIGHT_WIDTH-1:0] Qu;
 logic signed [2*WEIGHT_WIDTH-1:0] product;
 
-shift_multiplier
-  #(
-    .M_width(WEIGHT_WIDTH),
-    .Q_width(WEIGHT_WIDTH)
-  )
-  dut (
-    .Clock(Clock),
-    .Rst(Rst),
-    .Mu(Mu),
-    .Qu(Qu),
-    .product(product)
-  );
+generate 
+    if(mul_type == "Booth") begin
+        accel_core_booth_pipeline 
+        #(
+            .M_width(WEIGHT_WIDTH),
+            .Q_width(WEIGHT_WIDTH)
+        )
+        dut (
+            .Clock(Clock),
+            .Rst(Rst),
+            .Mu(Mu),
+            .Qu(Qu),
+            .out(product)
+        );
+    end else begin
+        shift_multiplier
+        #(
+            .M_width(WEIGHT_WIDTH),
+            .Q_width(WEIGHT_WIDTH)
+        )
+        dut (
+            .Clock(Clock),
+            .Rst(Rst),
+            .Mu(Mu),
+            .Qu(Qu),
+            .product(product)
+        );
+    end
+endgenerate
 
 // Define state encoding
     typedef enum logic [1:0] {
@@ -40,7 +60,7 @@ shift_multiplier
 
     state_t current_state, next_state;
     logic unsigned [7:0] counter, counter2;
-    parameter int c_mul_reaction_time=10;
+    parameter int c_mul_reaction_time = (mul_type == "Booth") ? 10 : 10;
     logic unsigned [7:0] mul_idx;
     logic done;
     logic signed [31:0] tmp_result;

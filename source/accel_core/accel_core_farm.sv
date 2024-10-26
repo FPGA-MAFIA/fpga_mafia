@@ -22,7 +22,10 @@ accel_core_xor accel_core_xor (
     .out(xor_result)
 );
 
-accel_core_mul_top mul_accel (
+accel_core_mul_top 
+#(
+    .mul_type("Booth") //Booth or Shift
+) mul_accel (
     .Clock         (Clk),
     .Rst           (Rst),
     .input_vec     (mul_inputs.input_vec),

@@ -81,72 +81,124 @@ int wait_for_buffer(int w_idx, uint32_t** data_address,  uint32_t** meta_address
 int main () {
     int read_buff;
     int inp_vec = 0x04030201;
-    int inp_meta = (1 << 16) + (3 << 8) + 6;
-    int w_meta = 0x00010400;
+    int w_meta;
+    int inp_meta;
     int w1_1 = 0x02010201;
     int w2_1 = 0x03020302;
     int w3_1 = 0x04030403;
     int w1_2 = 0x05040504;
     int w2_2 = 0x06050605;
     int w3_2 = 0x07060706;
-    //write inp
-    do
-    {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_IN_DATA), inp_vec);
-    WRITE_REG((uint32_t*)(CR_MUL_IN_META) , inp_meta);
 
-    //write w1
-    do
-    {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_W1_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_W1_DATA), w1_1);
-    WRITE_REG((uint32_t*)(CR_MUL_W1_META) , w_meta);
-    
-    //write w2
-    do
-    {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_W2_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_W2_DATA), w2_1);
-    WRITE_REG((uint32_t*)(CR_MUL_W2_META) ,  w_meta + 1);
-    
-    //write w3
-     do
-    {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_W3_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_W3_DATA), w3_1);
-    WRITE_REG((uint32_t*)(CR_MUL_W3_META) ,  w_meta + 2);
-    
-    //write w1
-    do
-    {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_W1_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_W1_DATA), w1_2);
-    WRITE_REG((uint32_t*)(CR_MUL_W1_META) , w_meta + 3);
+    //MAT num 1
+        
 
-    //write w2
-    do
+        inp_meta = (1 << 16) + (2 << 8) + 3; //mat 2x3
+        w_meta =  (1 << 16) + (3 << 8) + 0; //2 + 1 elem each row
+        //write inp
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_IN_DATA), inp_vec);
+        WRITE_REG((uint32_t*)(CR_MUL_IN_META) , inp_meta);
+
+        //write w1
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W1_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W1_DATA), w1_1);
+        WRITE_REG((uint32_t*)(CR_MUL_W1_META) , w_meta);
+        
+        //write w2
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W2_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W2_DATA), w2_1);
+        WRITE_REG((uint32_t*)(CR_MUL_W2_META) ,  w_meta + 1);
+        
+        //write w3
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W3_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W3_DATA), w3_1);
+        WRITE_REG((uint32_t*)(CR_MUL_W3_META) ,  w_meta + 2);
+        
+        //wait for don
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+        } while (!(read_buff & (1 << 16))); // while the 16th bit is 1
+
+    //MAT num 2
+        inp_meta = (1 << 16) + (3 << 8) + 6; //mat 3x6
+        w_meta =  (1 << 16) + (4 << 8) + 0; //3 + 1 elem each row
+        //write inp
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_IN_META) , inp_meta);
+
+        //write w1
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W1_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W1_DATA), w1_1);
+        WRITE_REG((uint32_t*)(CR_MUL_W1_META) , w_meta);
+        
+        //write w2
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W2_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W2_DATA), w2_1);
+        WRITE_REG((uint32_t*)(CR_MUL_W2_META) ,  w_meta + 1);
+        
+        //write w3
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W3_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W3_DATA), w3_1);
+        WRITE_REG((uint32_t*)(CR_MUL_W3_META) ,  w_meta + 2);
+        
+        //write w1
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W1_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W1_DATA), w1_2);
+        WRITE_REG((uint32_t*)(CR_MUL_W1_META) , w_meta + 3);
+
+        //write w2
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W2_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W2_DATA), w2_2);
+        WRITE_REG((uint32_t*)(CR_MUL_W2_META) ,  w_meta + 4);
+        
+        //write w3
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_W3_META));
+        } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+        WRITE_REG((uint32_t*)(CR_MUL_W3_DATA), w3_2);
+        WRITE_REG((uint32_t*)(CR_MUL_W3_META) ,  w_meta + 5);
+        
+        //write inp
+        do
+        {
+            READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+        } while (!(read_buff & (1 << 16))); // while the 16th bit is 1
+        
+    for (int i = 0; i < 3; i++)
     {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_W2_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_W2_DATA), w2_2);
-    WRITE_REG((uint32_t*)(CR_MUL_W2_META) ,  w_meta + 4);
-    
-    //write w3
-    do
-    {
-        READ_REG(read_buff, (uint32_t*)(CR_MUL_W3_META));
-    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
-    WRITE_REG((uint32_t*)(CR_MUL_W3_DATA), w3_2);
-    WRITE_REG((uint32_t*)(CR_MUL_W3_META) ,  w_meta + 5);
-    
-    while(1){
-        // self destruct
     }
     return 0;
 }
