@@ -89,8 +89,8 @@ assign start_m1 = 1'b1;
 assign start_m2 = 1'b1;
 `MAFIA_RST_VAL_DFF(assign_m1_tmp_ps, assign_m1_tmp, Clock, Rst, FREE);
 `MAFIA_RST_VAL_DFF(assign_m2_tmp_ps, assign_m2_tmp, Clock, Rst, FREE);
-assign clear_m1 = (assign_m1_tmp_ps == FREE && assign_m1_tmp != FREE) ? 1'b1 : 1'b0;
-assign clear_m2 = (assign_m2_tmp_ps == FREE && assign_m2_tmp != FREE) ? 1'b1 : 1'b0;
+assign clear_m1 = (assign_m1_tmp_ps == FREE /*&& assign_m1_tmp != FREE*/) ? 1'b1 : 1'b0;
+assign clear_m2 = (assign_m2_tmp_ps == FREE /*&& assign_m2_tmp != FREE*/) ? 1'b1 : 1'b0;
 assign release_w1 = ((assign_m1_tmp_ps == W1 && out_valid_m1) || 
               (assign_m2_tmp_ps == W1 && out_valid_m2))   ? 1'b1 : 1'b0;
 assign release_w2 = ((assign_m1_tmp_ps == W2 && out_valid_m1) || 
