@@ -175,7 +175,6 @@ always_ff @(posedge Clk) begin
         w2_in_use_ps <= w2.meta_data.in_use;
         w3_in_use_ps <= w3.meta_data.in_use;
         if (!input_vec_in_use_ps &&  input_vec.meta_data.in_use_by_accel) begin
-            $fwrite(trk_accel_mul_data,"*************************************************************\n");
             $fwrite(trk_accel_mul_data, "Matrix size: %0d x %0d\n",
                     input_vec.meta_data.matrix_row_num,
                     input_vec.meta_data.matrix_col_num);
