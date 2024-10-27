@@ -42,6 +42,7 @@ logic [31:0]                RegRdData2Q101H;
 //===================
 //---- The Register File ----
  `MAFIA_EN_DFF(Register[Ctrl.RegDstQ105H] , RegWrDataQ105H , Clock , (Ctrl.RegWrEnQ105H && (Ctrl.RegDstQ105H!=5'b0)))
+ 
 // ---- Read Register File ----
 assign MatchRd1AftrWrQ101H = (Ctrl.RegSrc1Q101H == Ctrl.RegDstQ105H) && (Ctrl.RegWrEnQ105H);
 assign RegRdData1Q101H = (Ctrl.RegSrc1Q101H == 5'b0) ? 32'b0                      : // Reading from Register[0] should result in '0
