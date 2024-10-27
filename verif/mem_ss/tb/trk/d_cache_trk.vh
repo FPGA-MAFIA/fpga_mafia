@@ -23,6 +23,7 @@ integer cache_ref_trk;
 integer d_cache_pipe_stages_trk;
 
 initial begin
+    #1
     if ($value$plusargs ("STRING=%s", test_name))
         $display("creating tracker in test directory: target/mem_ss/tests/%s", test_name);
     $timeformat(-12, 0, "", 6);
@@ -62,13 +63,13 @@ initial begin
     $fwrite(d_cache_tq_trk,"---------------------------------------------------------------------------------------------------------------------\n ");
 
     cache_ref_gold_trk = $fopen({"../../../target/mem_ss/tests/",test_name,"/cache_ref_gold_trk.log"},"w");
-    cache_ref_trk      = $fopen({"../../../target/mem_sS/tests/",test_name,"/cache_ref_trk.log"},"w");
     $fwrite(cache_ref_gold_trk,"====================================================================================================================\n");
     $fwrite(cache_ref_gold_trk,"                      Core<->Cache  -  Test: ",test_name,"\n");
     $fwrite(cache_ref_gold_trk,"====================================================================================================================\n");
     $fwrite(cache_ref_gold_trk,"-----------------------------------------------------------------------------------\n");
     $fwrite(cache_ref_gold_trk,"   OPCODE        || address ||REG      || tag  || Set ||    Data \n");
     $fwrite(cache_ref_gold_trk,"-----------------------------------------------------------------------------------\n");
+    cache_ref_trk      = $fopen({"../../../target/mem_sS/tests/",test_name,"/cache_ref_trk.log"},"w");
     $fwrite(cache_ref_trk,"====================================================================================================================\n");
     $fwrite(cache_ref_trk,"                      Core<->Cache  -  Test: ",test_name,"\n");
     $fwrite(cache_ref_trk,"====================================================================================================================\n");
@@ -241,18 +242,13 @@ if(d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q3.lu_valid) begin
 
         end
     end    
+end //always(posedge)
 
 
+always @(posedge clk) begin
 //==================================================
 // tracker of reference model - core<->cache
 //==================================================
-    if(dmem_core2cache_req.valid && (dmem_core2cache_req.opcode == RD_OP )) begin
-        $fwrite(cache_ref_gold_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
-        dmem_core2cache_req.address, 
-        dmem_core2cache_req.reg_id, 
-        dmem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        dmem_core2cache_req.address[MSB_SET:LSB_SET]);      
-    end
     if(ref_cache2core_rsp.valid) begin
         $fwrite(cache_ref_gold_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
         ref_cache2core_rsp.address, 
@@ -261,17 +257,9 @@ if(d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q3.lu_valid) begin
         ref_cache2core_rsp.address[MSB_SET:LSB_SET], 
         ref_cache2core_rsp.data);
     end
-
 //==================================================
 // tracker of reference model - core<->cache
 //==================================================
-    if(dmem_core2cache_req.valid && (dmem_core2cache_req.opcode == RD_OP )) begin
-        $fwrite(cache_ref_trk,"     CORE_RD_REQ       %h       %h        %h     %h      ( -- read request -- ) \n",
-        dmem_core2cache_req.address, 
-        dmem_core2cache_req.reg_id, 
-        dmem_core2cache_req.address[MSB_TAG:LSB_TAG] , 
-        dmem_core2cache_req.address[MSB_SET:LSB_SET]);      
-    end
     if(dmem_cache2core_rsp.valid) begin
         $fwrite(cache_ref_trk,"     CACHE_RD_RSP      %h       %h        %h     %h      %h \n",
         dmem_cache2core_rsp.address, 
@@ -280,6 +268,7 @@ if(d_cache.d_cache_pipe_wrap.d_cache_pipe.cache_pipe_lu_q3.lu_valid) begin
         dmem_cache2core_rsp.address[MSB_SET:LSB_SET], 
         dmem_cache2core_rsp.data);
     end
+    
 
 
 end //always(posedge)

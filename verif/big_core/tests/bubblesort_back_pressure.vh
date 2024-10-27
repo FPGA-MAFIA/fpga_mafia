@@ -1,6 +1,6 @@
 // generating non deterministic back pressure at non deterministic times
 
-    random = $urandom_range(10, 100); // Set the number of back pressure events
+    random = $urandom_range(1, 10); // Set the number of back pressure events
 
     // random = 7'd65; // Set the number of back pressure events
     $display("Back pressure will be activated: %1d times", random);
