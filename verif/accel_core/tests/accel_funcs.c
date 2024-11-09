@@ -2,8 +2,6 @@
 #define SUCCESS 1
 #define FAIL 0 
 #include "accel_core_defines.h"
-#include <stdlib.h>
-
 uint32_t *address = (uint32_t *)0x00FE0200;
 typedef struct {
     int words_in_row;
