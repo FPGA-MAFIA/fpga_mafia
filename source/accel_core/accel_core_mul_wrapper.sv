@@ -83,7 +83,8 @@ endgenerate
             mul_idx = mul_idx + 1;
             case (current_state) 
             st_idle: begin
-                    tmp_result = w1.data[(w1.meta_data.data_len - 1)]; //the bias element is the last element in the weights vec
+                     //the bias element is the last element in the weights vec
+                    tmp_result = {{24{w1.data[w1.meta_data.data_len - 1][7]}}, w1.data[w1.meta_data.data_len - 1]};
                     mul_idx = 0;
                     counter = c_mul_reaction_time - 1;
                 end
@@ -95,15 +96,18 @@ endgenerate
             end
 
             st_mac: begin
-                tmp_result = tmp_result + product;
+                tmp_result = tmp_result + {{24{product[15]}}, product}; // sign-extend product to 32 bits before addition
                 counter2 = counter2 - 1;
             end
             st_done: begin 
                     done = 1'b1;  
-                    if(tmp_result > 127) // saturation
+                    //saturation
+                    if (tmp_result > 127) begin // greater than 127
                         tmp_result = 127;
-                    else if (tmp_result < -128) 
+                    end
+                    else if (tmp_result < -128) begin // less than -128
                         tmp_result = -128;
+                    end
             end 
         endcase
         end

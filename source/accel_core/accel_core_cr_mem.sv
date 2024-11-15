@@ -59,7 +59,12 @@ always_comb begin
         if(mul_outputs.done_layer) begin
             next_cr.neuron_out = mul_outputs.output_vec;
             next_cr.neuron_in.meta_data = '0;
-            next_cr.neuron_in.data = mul_outputs.output_vec.data;
+            
+            for (int i = 0; i < buffer_len; i++) begin //relu func
+                next_cr.neuron_in.data[i] = ($signed(mul_outputs.output_vec.data[i]) > 0) ?
+                                            mul_outputs.output_vec.data[i]:
+                                            0;
+            end        
         end
         if(mul_outputs.release_w1)
             next_cr.w1.meta_data.in_use = 0;
@@ -1999,8 +2004,6 @@ always_comb begin
             default   : /* Do nothing */;
         endcase
     end
-
-    
 end
 
 // This is the load

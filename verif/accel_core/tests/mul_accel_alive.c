@@ -83,7 +83,7 @@ int main () {
     int inp_vec = 0x04030201;
     int w_meta;
     int inp_meta;
-    int w1_1 = 0x02010201;
+    int w1_1 = 0x02F002F0;
     int w2_1 = 0x03020302;
     int w3_1 = 0x04030403;
     int w1_2 = 0x05040504;
