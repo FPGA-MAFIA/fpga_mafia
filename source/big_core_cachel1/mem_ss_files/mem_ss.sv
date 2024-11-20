@@ -41,38 +41,9 @@ import d_cache_param_pkg::*;
 );
 
 //================================================================
-//                 d_mem_ss module(L1 CACHE, VGA, CR)    
-//================================================================
-
-d_mem_ss d_mem_ss (
-    .Clock              (Clock),
-    .Rst                (Rst),
-    .Core2DmemReqQ103H  (Core2DmemReqQ103H),
-    .DMemRdRspQ105H     (DMemRdRspQ105H),
-    .DMemReady          (DMemReady),          // back pressure  
-    .inDisplayArea      (inDisplayArea),
-    .vga_out            (vga_out),
-    .kbd_data_rd        (kbd_data_rd),
-    .kbd_ctrl           (kbd_ctrl),
-    .fpga_in            (fpga_in),
-    .fpga_out           (fpga_out),
-    .cache2fm_req_q3(cache2fm_req_q3),
-    .fm2cache_rd_rsp(fm2cache_rd_rsp)  
-);
-
-//================================================================
 //                  imem module   
 //================================================================
 logic [31:0] InstructionQ101H;
-
-i_mem_reissue i_mem_reissue
-(
-    .Clock(Clock), 
-    .ReadyQ101H(ReadyQ101H),
-    .InstructionQ101H(InstructionQ101H),
-    .PreInstructionQ101H(PreInstructionQ101H)
-);
-
 
 mem  #(
   .WORD_WIDTH(32),                //FIXME - Parametrize!!
@@ -93,5 +64,34 @@ mem  #(
     .byteena_b  (4'b1111), 
     .q_b        ()              
     );
+i_mem_reissue i_mem_reissue
+(
+    .Clock(Clock), 
+    .ReadyQ101H(ReadyQ101H),
+    .InstructionQ101H(InstructionQ101H),
+    .PreInstructionQ101H(PreInstructionQ101H)
+);
+//================================================================
+//                 d_mem_ss module(L1 CACHE, VGA, CR)    
+//================================================================
+
+d_mem_ss d_mem_ss (
+    .Clock              (Clock),
+    .Rst                (Rst),
+    .Core2DmemReqQ103H  (Core2DmemReqQ103H),
+    .DMemRdRspQ105H     (DMemRdRspQ105H),
+    .DMemReady          (DMemReady),          // back pressure  
+    .inDisplayArea      (inDisplayArea),
+    .vga_out            (vga_out),
+    .kbd_data_rd        (kbd_data_rd),
+    .kbd_ctrl           (kbd_ctrl),
+    .fpga_in            (fpga_in),
+    .fpga_out           (fpga_out),
+    .cache2fm_req_q3(cache2fm_req_q3),
+    .fm2cache_rd_rsp(fm2cache_rd_rsp)  
+);
+
+
+
 
 endmodule

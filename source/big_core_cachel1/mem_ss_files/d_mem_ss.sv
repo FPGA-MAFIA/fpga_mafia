@@ -33,14 +33,21 @@ import d_cache_param_pkg::*;
     input  var t_fpga_in   fpga_in,  // CR_MEM
     output t_fpga_out      fpga_out      // CR_MEM       
 );
-logic [31:0]      VgaDMemWrDataQ103H;
-logic [3:0]       VgaDMemByteEnQ103H;
-assign VgaDMemWrDataQ103H = Core2DmemReqQ103H.WrData;
-assign VgaDMemByteEnQ103H = Core2DmemReqQ103H.ByteEn;
 //================================================================
 //                   Memory region detection     
 //================================================================
 t_dmem_region MatchDmemRegionQ103H;
+logic [31:0]  CRMemRdDataQ104H;
+logic [31:0]  VGAMemRdDataQ104H;
+logic [31:0]  Cache2coreRespDataQ105H;
+logic [31:0]     ReIssueVGAMemRdDataQ104H , VGAMemRdDataQ105H;
+logic [31:0]     ReIssuedCrMemRdDataQ104H , CrMemRdDataQ105H;
+logic [31:0]     ReissueCache2coreRespDataQ105H;
+t_req    core2cache_reqQ103H;
+t_rd_rsp cache2core_rspQ105H;
+logic VgaWrEn;
+logic [31:0] VgaAddressWithOffsetQ103H;
+t_dmem_region MatchDmemRegionQ104H, MatchDmemRegionQ105H;
 
 d_mem_region_detect d_mem_region_detect
 (
@@ -50,44 +57,32 @@ d_mem_region_detect d_mem_region_detect
     .MatchDmemRegionQ103H       (MatchDmemRegionQ103H)
 );
 
-
 //================================================================
 //              dmem re-issue and dmem2core data     
 //================================================================
-
-logic [31:0]  CRMemRdDataQ104H;
-logic [31:0]  PreVGAMemRdDataQ104H;
-logic [31:0]  Cache2coreRespDataQ105H;
-
-
-logic [31:0]     ReIssueVGAMemRdDataQ105H ;
-logic [31:0]     ReIssuedCrMemRdDataQ105H ;
-logic [31:0]     ReissueCache2coreRespDataQ105H;
 
 d_mem_reissue d_mem_reissue
 (
     .Clock                          (Clock),
     .Rst                            (Rst),
-    .DMemReady                      (DMemReady),
-    .MatchDmemRegionQ103H           (MatchDmemRegionQ103H),
-    .Core2DmemReqQ103H              (Core2DmemReqQ103H),  
+    .DMemReady                      (DMemReady),                //input logic              DMemReady,
+    .MatchDmemRegionQ103H           (MatchDmemRegionQ103H),     //input var t_dmem_region  MatchDmemRegionQ103H,
+    .Core2DmemReqQ103H              (Core2DmemReqQ103H),        //input var t_core2mem_req Core2DmemReqQ103H,
     // cr interface
-    .CRMemRdDataQ104H               (CRMemRdDataQ104H),
+    .CRMemRdDataQ104H               (CRMemRdDataQ104H),         //input  logic [31:0]      CRMemRdDataQ104H,
     // vga interface
-    .PreVGAMemRdDataQ104H      (PreVGAMemRdDataQ104H),
+    .VGAMemRdDataQ104H              (VGAMemRdDataQ104H),        //input  logic [31:0]     VGAMemRdDataQ104H,
     // cache interface
-    .Cache2coreRespDataQ105H        (Cache2coreRespDataQ105H),
-    .ReIssueVGAMemRdDataQ105H       (ReIssueVGAMemRdDataQ105H),
-    .ReIssuedCrMemRdDataQ105H       (ReIssuedCrMemRdDataQ105H),
-    .ReissueCache2coreRespDataQ105H (ReissueCache2coreRespDataQ105H) 
+    .Cache2coreRespDataQ105H        (Cache2coreRespDataQ105H),  //input logic  [31:0]     Cache2coreRespDataQ105H,
+    // output
+    .ReIssueVGAMemRdDataQ104H       (ReIssueVGAMemRdDataQ104H), //output logic [31:0]     ,
+    .ReIssuedCrMemRdDataQ104H       (ReIssuedCrMemRdDataQ104H), //output logic [31:0]     ,
+    .ReissueCache2coreRespDataQ105H (ReissueCache2coreRespDataQ105H) //output logic [31:0]     ReissueCache2coreRespDataQ105H
 );
 
 //================================================================
 //                          D_CACHE     
 //================================================================
-t_req    core2cache_reqQ103H;
-t_rd_rsp cache2core_rspQ105H;
-
 // core to cache request
 assign core2cache_reqQ103H.valid       = MatchDmemRegionQ103H.MathcDcacheRegion && (Core2DmemReqQ103H.WrEn || Core2DmemReqQ103H.RdEn) && DMemReady; 
 assign core2cache_reqQ103H.reg_id      = 1'b0;  // TODO - add logic to cache to support oor exevution
@@ -150,8 +145,6 @@ logic [9:0] VGA_CounterY;
 //================================================================
 //                          VGA controller     
 //================================================================
-logic VgaWrEn;
-logic [31:0] VgaAddressWithOffsetQ103H;
 
 assign VgaWrEn = Core2DmemReqQ103H.WrEn && MatchDmemRegionQ103H.MatchVgaRegion;
 assign VgaAddressWithOffsetQ103H = Core2DmemReqQ103H.Address - VGA_MEM_REGION_FLOOR;
@@ -161,13 +154,13 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .Reset             (Rst),
    // Core interface
    // write
-   .ReqDataQ503H       (VgaDMemWrDataQ103H),   
+   .ReqDataQ503H       (Core2DmemReqQ103H.WrData),   
    .ReqAddressQ503H    (VgaAddressWithOffsetQ103H),  
-   .CtrlVGAMemByteEn   (VgaDMemByteEnQ103H), 
+   .CtrlVGAMemByteEn   (Core2DmemReqQ103H.ByteEn), 
    .CtrlVgaMemWrEnQ503 (VgaWrEn),     
    // read
    .CtrlVgaMemRdEnQ503 (VgaWrEn),
-   .VgaRspDataQ504H    (PreVGAMemRdDataQ104H),
+   .VgaRspDataQ504H    (VGAMemRdDataQ104H),
    // VGA output
    .VGA_CounterX      (VGA_CounterX)  , // output  logic [9:0] VGA_CounterX,
    .VGA_CounterY      (VGA_CounterY)  , // output  logic [9:0] VGA_CounterY,
@@ -185,20 +178,17 @@ big_core_vga_ctrl big_core_vga_ctrl (
 //====================================
 // Read Response to the core
 //====================================
- 
-t_core2mem_req Core2DmemReqQ104H, Core2DmemReqQ105H;
-`MAFIA_EN_DFF(Core2DmemReqQ104H, Core2DmemReqQ103H, Clock ,  DMemReady)
-`MAFIA_EN_DFF(Core2DmemReqQ105H, Core2DmemReqQ104H, Clock ,  DMemReady)
-t_dmem_region MatchDmemRegionQ104H, MatchDmemRegionQ105H;
- 
 `MAFIA_EN_DFF(MatchDmemRegionQ104H.MatchCrRegion, MatchDmemRegionQ103H.MatchCrRegion, Clock, DMemReady) 
 `MAFIA_EN_DFF(MatchDmemRegionQ105H.MatchCrRegion, MatchDmemRegionQ104H.MatchCrRegion, Clock, DMemReady)
 
 `MAFIA_EN_DFF(MatchDmemRegionQ104H.MatchVgaRegion, MatchDmemRegionQ103H.MatchVgaRegion, Clock, DMemReady)
 `MAFIA_EN_DFF(MatchDmemRegionQ105H.MatchVgaRegion, MatchDmemRegionQ104H.MatchVgaRegion, Clock, DMemReady)
 
-assign DMemRdRspQ105H = MatchDmemRegionQ105H.MatchVgaRegion ? ReIssueVGAMemRdDataQ105H :
-                        MatchDmemRegionQ105H.MatchCrRegion  ? ReIssuedCrMemRdDataQ105H :
+`MAFIA_DFF(CrMemRdDataQ105H, ReIssuedCrMemRdDataQ104H, Clock)
+`MAFIA_DFF(VGAMemRdDataQ105H, ReIssueVGAMemRdDataQ104H, Clock)
+
+assign DMemRdRspQ105H = MatchDmemRegionQ105H.MatchVgaRegion ? VGAMemRdDataQ105H :
+                        MatchDmemRegionQ105H.MatchCrRegion  ? CrMemRdDataQ105H :
                                                               ReissueCache2coreRespDataQ105H ; 
 
 

@@ -13,10 +13,8 @@ module i_mem_reissue
 logic [31:0] LastInstructionFetchQ101H;
 logic        SampleReadyQ101H;
 
-assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructionFetchQ101H;
-
-
 `MAFIA_DFF   (SampleReadyQ101H, ReadyQ101H , Clock)
 `MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , SampleReadyQ101H)
+assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructionFetchQ101H;
 
 endmodule
