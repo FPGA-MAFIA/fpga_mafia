@@ -5,9 +5,8 @@
 
 #define SUCCESS 0
 #define FAIL 1
-#define NUM_OF_MATS 1 /*USER EDIT*/
-#define NUM_OF_INPUTS 1 /*USER EDIT, needs to be edited as well in the defines*/
-#define MEM_SIZE 10	/*USER EDIT*/
+#define NUM_OF_MATS 3 /*USER EDIT*/
+#define MEM_SIZE 40	/*USER EDIT*/
 
 
 /* this is Imaginary struct, this the way it is arranged in the memory
@@ -66,7 +65,7 @@ int init_accel_core(int mats_and_bias[] , int rows[], int cols[], int* p_heap_ad
 /**
  * @brief - Calculates the entire network output of a neural network
  * @param input_vec - the vector that contains the input of the network.
- * @return - a number between 0 and 100 (100 times the output of the sigmoid). -1 on fail
+ * @return - a number between -128 and 127. -1 on fail
  */
 int calc_network(int input_vec[]);
 
@@ -94,34 +93,32 @@ int calc_layer(int idx);
 #endif /*ACCEL_FUNCS_H*/
 
 
-int sigmoid[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5,
-                5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 7,
-                7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9,
-                9, 10, 10, 10, 10, 11, 11, 11, 12,
-                12, 12, 13, 13, 13, 14, 14, 14, 15,
-                15, 16, 16, 16, 17, 17, 18, 18, 19,
-                19, 20, 20, 21, 21, 22, 22, 23, 23,
-                24, 25, 25, 26, 26, 27, 28, 28, 29,
-                29, 30, 31, 31, 32, 33, 33, 34, 35,
-                36, 36, 37, 38, 38, 39, 40, 41, 41,
-                42, 43, 44, 45, 45, 46, 47, 48, 48,
-                49, 50, 51, 52, 52, 53, 54, 55, 55,
-                56, 57, 58, 59, 59, 60, 61, 62, 62,
-                63, 64, 64, 65, 66, 67, 67, 68, 69,
-                69, 70, 71, 71, 72, 72, 73, 74, 74,
-                75, 75, 76, 77, 77, 78, 78, 79, 79,
-                80, 80, 81, 81, 82, 82, 83, 83, 84,
-                84, 84, 85, 85, 86, 86, 86, 87, 87,
-                87, 88, 88, 88, 89, 89, 89, 90, 90,
-                90, 90, 91, 91, 91, 91, 92, 92, 92,
-                92, 93, 93, 93, 93, 93, 94, 94, 94,
-                94, 94, 94, 95, 95, 95, 95, 95, 95,
-                96, 96, 96, 96, 96, 96, 96, 96, 96,
-                97, 97, 97, 97, 97, 97, 97, 97, 97,
-                97, 97, 98, 98, 98, 98, 98, 98, 98,
-                98, 98, 98};
+int sigmoid[] = {   2 ,2 ,2 ,2 ,2 ,2 ,2 ,2 ,2 ,2 ,
+                    2 ,3 ,3 ,3 ,3 ,3 ,3 ,3 ,3 ,3 ,
+                    3 ,3 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,
+                    4 ,5 ,5 ,5 ,5 ,5 ,5 ,6 ,6 ,6 ,
+                    6 ,6 ,6 ,7 ,7 ,7 ,7 ,7 ,8 ,8 ,
+                    8 ,8 ,9 ,9 ,9 ,9 ,10,10,10,10,
+                    11,11,11,12,12,12,13,13,13,14,
+                    14,14,15,15,16,16,16,17,17,18,
+                    18,19,19,20,20,21,21,22,22,23,
+                    23,24,25,25,26,26,27,28,28,29,
+                    29,30,31,31,32,33,33,34,35,36,
+                    36,37,38,38,39,40,41,41,42,43,
+                    44,45,45,46,47,48,48,49,50,51,
+                    52,52,53,54,55,55,56,57,58,59,
+                    59,60,61,62,62,63,64,64,65,66,
+                    67,67,68,69,69,70,71,71,72,72,
+                    73,74,74,75,75,76,77,77,78,78,
+                    79,79,80,80,81,81,82,82,83,83,
+                    84,84,84,85,85,86,86,86,87,87,
+                    87,88,88,88,89,89,89,90,90,90,
+                    90,91,91,91,91,92,92,92,92,93,
+                    93,93,93,93,94,94,94,94,94,94,
+                    95,95,95,95,95,95,96,96,96,96,
+                    96,96,96,96,96,97,97,97,97,97,
+                    97,97,97,97,97,97,98,98,98,98,
+                    98,98,98,98,98,98};
 
 int sigmoid_func(int a) {
     if (a < -128 || a > 127) //invalid arg
@@ -269,10 +266,15 @@ int calc_network(int input_vec[])
     }
     
     int result;
+    do
+    {
+        READ_REG(read_buff, (uint32_t*)(CR_MUL_IN_META));
+    } while ((read_buff & (1 << 16))); // while the 16th bit is 1
+
     //read network result
     READ_REG(result, (uint32_t*)(CR_MUL_OUT_META+1));
     //sigmoid(&result);
-    return result;
+    return result & 0x000000FF;
 }
 
 int calc_layer(int matrix_idx)

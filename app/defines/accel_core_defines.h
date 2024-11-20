@@ -16,5 +16,5 @@ typedef unsigned int uint32_t;
 #define CR_MUL_W3_META 0x00FE02D0
 #define CR_MUL_W3_DATA 0x00FE02D1
 #define CR_MUL_OUT_META 0x00FE0310
-
+#define MAX_INPUT_SIZE 252
 #endif

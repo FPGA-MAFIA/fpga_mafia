@@ -195,10 +195,10 @@ end
 // Half & Byte READ
 assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                     ://Fabric response to an older core request
                         (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}                  ://Special case - WhoAmI respond the "hard coded" local tile id
+                        (MatchCRMemRegionQ104H)          ? ReIssuedPreCrMemRdDataQ104H            :
                         (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftDMemRdDataQ104H[31:8] } : 
                         (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftDMemRdDataQ104H[31:16]} : 
-                        (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} :                                                   
-                        (MatchCRMemRegionQ104H)          ? ReIssuedPreCrMemRdDataQ104H            :     
+                        (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftDMemRdDataQ104H[31:24]} :                                                        
                         PreShiftDMemRdDataQ104H;
 
 
