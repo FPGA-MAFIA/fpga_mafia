@@ -104,9 +104,9 @@ initial begin: test_seq
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/big_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        force big_core_top.big_core_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force big_core_top.big_core_mem_wrap.d_mem.d_mem.mem = DMem; //backdoor to actual memory
         #10
-        release big_core_top.big_core_mem_wrap.d_mem.mem;
+        release big_core_top.big_core_mem_wrap.d_mem.d_mem.mem;
     end
     
     //================================

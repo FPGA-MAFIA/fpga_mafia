@@ -38,6 +38,7 @@
 ../../../source/big_core/big_core.sv
 ../../../source/big_core/big_core_top.sv
 ../../../source/big_core/big_core_mem_wrap.sv
+../../../source/big_core/big_core_d_mem_wrap.sv
 
 // KBD FIles
 ../../../source/big_core/ps2_kbd/ps2_kbd_ctrl.sv
