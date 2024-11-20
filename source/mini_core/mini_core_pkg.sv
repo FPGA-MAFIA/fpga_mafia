@@ -57,6 +57,7 @@ typedef enum logic [2:0] {
 typedef enum logic [3:0] {
     ADD  = 4'b0000 ,
     SUB  = 4'b1000 ,
+    ADD_INC = 4'b1110,
     SLT  = 4'b0010 ,
     SLTU = 4'b0011 ,
     SLL  = 4'b0001 , 

@@ -87,7 +87,8 @@ always_comb begin : alu_logic
   ShamtQ102H      = AluIn2Q102H[4:0];
   unique casez (Ctrl.AluOpQ102H) 
     // Adder
-    ADD     : AluOutQ102H = AluIn1Q102H +   AluIn2Q102H;                            // ADD/LW/SW/AUIOC/JAL/JALR/BRANCH/
+    ADD     : AluOutQ102H = AluIn1Q102H +  AluIn2Q102H;                            // ADD/LW/SW/AUIOC/JAL/JALR/BRANCH/
+    ADD_INC : AluOutQ102H = AluIn1Q102H +  AluIn2Q102H + 1'b1;                      // ADD_INC
     SUB     : AluOutQ102H = AluIn1Q102H + (~AluIn2Q102H) + 1'b1;                    // SUB
     SLT     : AluOutQ102H = {31'b0, ($signed(AluIn1Q102H) < $signed(AluIn2Q102H))}; // SLT
     SLTU    : AluOutQ102H = {31'b0 , AluIn1Q102H < AluIn2Q102H};                    // SLTU

@@ -141,6 +141,7 @@ always_comb begin
     {3'b000, 7'b0000000, R_OP} : CtrlQ101H.AluOp = ADD;  // ADD
     {3'b000, 7'b0100000, R_OP} : CtrlQ101H.AluOp = SUB;  // SUB
     {3'b001, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SLL;  // SLL
+    {3'b001, 7'b0100000, R_OP} : CtrlQ101H.AluOp = ADD_INC;  // ADD_INC
     {3'b010, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SLT;  // SLT
     {3'b011, 7'b0000000, R_OP} : CtrlQ101H.AluOp = SLTU; // SLTU
     {3'b100, 7'b0000000, R_OP} : CtrlQ101H.AluOp = XOR;  // XOR
