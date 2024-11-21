@@ -68,23 +68,24 @@ import big_core_pkg::*;
            
 );
 
-logic [9:0] VGA_CounterX;
-logic [9:0] VGA_CounterY;
+logic [31:0] F2C_RspDataQ505H;
+logic [9:0]  VGA_CounterX;
+logic [9:0]  VGA_CounterY;
 logic        F2C_IMemHitQ503H;
 logic        F2C_IMemWrEnQ503H;
-logic [31:0] F2C_IMemRspDataQ504H;
+logic [31:0] F2C_IMemRspDataQ504H, F2C_IMemRspDataQ505H;
 
 logic        F2C_DMemHitQ503H;
 logic        F2C_DMemWrEnQ503H;
-logic [31:0] F2C_DMemRspDataQ504H;
+logic [31:0] F2C_DMemRspDataQ505H;
 
 logic        F2C_CrMemHitQ503H;
 logic        F2C_CrMemWrEnQ503H;
-logic [31:0] F2C_CrMemRspDataQ504H;
+logic [31:0] F2C_CrMemRspDataQ504H, F2C_CrMemRspDataQ505H;
 
-logic   F2C_CrMemHitQ504H;
-logic   F2C_IMemHitQ504H ;
-logic   F2C_DMemHitQ504H ;
+logic   F2C_CrMemHitQ504H, F2C_CrMemHitQ505H;
+logic   F2C_IMemHitQ504H , F2C_IMemHitQ505H;
+logic   F2C_DMemHitQ504H , F2C_DMemHitQ505H;
 
 t_tile_trans  C2F_OutFabricQ104H;
 t_tile_trans  C2F_ReqQ103H;
@@ -94,10 +95,47 @@ logic         C2F_ReqFull, C2F_ReqEmpty;
 logic [1:0] winner_dec_id;
 logic [1:0] valid_candidate;
 
+logic OutstandingReadReq;
+logic SetOutstandingReadReqQ103H;
+logic RstOutstandingReadReqQ503H;
 t_tile_trans F2C_InFabricQ503H;
 
 logic F2C_OutFabricValidQ505H;
 t_tile_trans F2C_OutFabricQ505H;
+
+
+
+logic F2C_RspFull, F2C_RspEmpty;
+logic F2C_AlmostFull;
+logic F2C_OutFabricValidQ503H, F2C_OutFabricValidQ504H;
+t_tile_trans F2C_OutFabricQ504H;
+logic [31:0] F2C_RdRspAddressQ503H;
+logic [31:0] F2C_RspDataQ504H;
+logic [31:0] VgaAddressWithOffsetQ103H;
+logic [31:0]  VgaAdrsReq;
+logic         VgaWrEn;
+
+logic WhoAmIReqQ103H;
+logic WhoAmIReqQ104H;
+logic WhoAmIReqQ105H;
+logic [31:0] CRMemRdDataQ104H, CRMemRdDataQ105H;
+logic [31:0] DMemRdDataQ105H;
+logic        DMemRdDataValidQ105H;
+logic [31:0] VGAMemRdDataQ104H, VGAMemRdDataQ105H;
+logic [31:0] LastInstructionFetchQ101H;
+logic        SampleReadyQ101H;
+logic        NonLocalDMemReqQ103H;
+logic        LocalDMemWrEnQ103H;
+logic        MatchVGAMemRegionQ103H, MatchVGAMemRegionQ104H, MatchVGAMemRegionQ105H;
+logic        MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H,  MatchCRMemRegionQ105H;
+logic [31:0] InstructionQ101H; //instruction,
+logic FabricDataRspValidQ503H;
+logic [31:0] FabricDataRspQ504H;
+logic        FabricDataRspValidQ504H;
+logic        DMemValidReqQ103H;
+
+
+
 //===========================================
 //    set F2C request 503 ( D_MEM )
 //===========================================
@@ -114,7 +152,6 @@ assign F2C_CrMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= CR_
                             (InFabricQ503H.address[MSB_REGION:LSB_REGION] < CR_MEM_REGION_ROOF) ;
 assign F2C_CrMemWrEnQ503H = F2C_CrMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 
-logic [31:0] InstructionQ101H; //instruction,
 //==================================
 // Instruction Memory
 //==================================
@@ -138,8 +175,6 @@ mem  #(
     .q_b        (F2C_IMemRspDataQ504H)              
     );
 
-logic [31:0] LastInstructionFetchQ101H;
-logic        SampleReadyQ101H;
 `MAFIA_DFF   (SampleReadyQ101H, ReadyQ101H      , Clock)
 `MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , SampleReadyQ101H)
 assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructionFetchQ101H;
@@ -148,43 +183,35 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 //==================================
 // Memory regions
 //==================================
-logic        LocalDMemWrEnQ103H;
-logic        NonLocalDMemReqQ103H;
-logic        MatchVGAMemRegionQ103H, MatchVGAMemRegionQ104H;
-logic        MatchCRMemRegionQ103H,  MatchCRMemRegionQ104H;
 //The VGA Base address is 0x00FF0000, and the Size is 0x9600 (38400 bytes) FIXME
 //assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
-assign MatchVGAMemRegionQ103H = ((DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
-`MAFIA_EN_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H  , Clock, DMemReady)
+assign DMemValidReqQ103H = DMemWrEnQ103H || DMemRdEnQ103H;
+assign MatchVGAMemRegionQ103H = DMemValidReqQ103H && ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
+assign LocalDMemWrEnQ103H     = DMemWrEnQ103H && ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&   (!MatchVGAMemRegionQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
+assign MatchCRMemRegionQ103H  = DMemValidReqQ103H && ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR)  && (DMemAddressQ103H[MSB_REGION    :LSB_REGION] <= CR_MEM_REGION_ROOF)) && !MatchVGAMemRegionQ103H;
 
-assign MatchCRMemRegionQ103H  = MatchVGAMemRegionQ103H ? 1'b0 : ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && (DMemAddressQ103H[MSB_REGION:LSB_REGION] <= CR_MEM_REGION_ROOF));
-`MAFIA_EN_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H   , Clock, DMemReady)
-
-// accessing the local tile or writing to other  local d_mem region
-assign LocalDMemWrEnQ103H     = (DMemWrEnQ103H) && 
-                                ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&
-                                (!MatchVGAMemRegionQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
+`MAFIA_EN_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H, Clock, DMemReady)
+`MAFIA_EN_DFF(MatchCRMemRegionQ104H  , MatchCRMemRegionQ103H , Clock, DMemReady)
+`MAFIA_EN_DFF(MatchVGAMemRegionQ105H , MatchVGAMemRegionQ104H, Clock, DMemReady)
+`MAFIA_EN_DFF(MatchCRMemRegionQ105H  , MatchCRMemRegionQ104H , Clock, DMemReady)
 // FIXME - need to "freeze" the core PC when reading a non local address
 // accessing DMem not from local_tile but other one
-assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H) &&
-                              (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
-logic OutstandingReadReq;
-logic SetOutstandingReadReqQ103H;
-logic RstOutstandingReadReqQ503H;
+assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H)           && // rd or wr request
+                              (DMemAddressQ103H[31:24] != local_tile_id) && // not local tile
+                              (DMemAddressQ103H[31:24] != 8'b0);            // not "force" local tile (offset 0)
 // Set the OutstandingReadReq indication when there is a non local read request (MSB is not the local tile id or 0)
-assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&
-                                    (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
+assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&  (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
 
-logic FabricDataRspValidQ503H;
 assign FabricDataRspValidQ503H = (OutstandingReadReq) &&  (InFabricQ503H.opcode == RD_RSP) && InFabricValidQ503H ;
 assign RstOutstandingReadReqQ503H = FabricDataRspValidQ503H || Rst;
 `MAFIA_EN_RST_DFF(OutstandingReadReq, 1'b1 ,Clock, SetOutstandingReadReqQ103H, RstOutstandingReadReqQ503H) 
 
-logic [31:0] FabricDataRspQ504H;
-logic        FabricDataRspValidQ504H;
 `MAFIA_DFF(FabricDataRspQ504H      , InFabricQ503H.data      , Clock)
 `MAFIA_DFF(FabricDataRspValidQ504H , FabricDataRspValidQ503H , Clock)
+// FIXME - need to "freeze" the core PC when reading a non local address
+// accessing DMem not from local_tile but other one
+
 // There are multiple reasons to unset the DMemReady - back pressure the core from accessing the memory
 // 1) A outstanding read request was set and the read response was not received yet
 // 2) The c2f_req_fifo is full
@@ -194,80 +221,31 @@ assign DMemReady  =!(OutstandingReadReq) &&  !C2F_ReqFull;
 // This logic is a special case for the WhoAmI request
 // We are using a memory address of 0x00FFFFFF to detect the WhoAmI request and respond with the local tile id
 //==================================
-logic WhoAmIReqQ103H;
-logic WhoAmIReqQ104H;
 assign WhoAmIReqQ103H = (DMemAddressQ103H[31:24] == 8'b0) && (DMemAddressQ103H[23:0] == 24'hFFFFFF) && DMemRdEnQ103H;
 `MAFIA_DFF(WhoAmIReqQ104H , WhoAmIReqQ103H , Clock)
-// Support the byte enable for the data memory by shifting the data to the correct position
-// Half & Byte Write
-logic [31:0] ShiftDMemWrDataQ103H;
-logic [3:0]  ShiftDMemByteEnQ103H;
-logic [31:0] PreShiftRdDataQ104H;
-logic [1:0]  DMemAddressQ104H;
-logic [31:0] PreCRMemRdDataQ104H;
+`MAFIA_DFF(WhoAmIReqQ105H , WhoAmIReqQ104H , Clock)
 
-always_comb begin
-ShiftDMemWrDataQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemWrDataQ103H[23:0],8'b0  } :
-                       (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemWrDataQ103H[15:0],16'b0 } :
-                       (DMemAddressQ103H[1:0] == 2'b11 ) ? { DMemWrDataQ103H[7:0] ,24'b0 } :
-                                                             DMemWrDataQ103H;
-ShiftDMemByteEnQ103H = (DMemAddressQ103H[1:0] == 2'b01 ) ? { DMemByteEnQ103H[2:0],1'b0 } :
-                       (DMemAddressQ103H[1:0] == 2'b10 ) ? { DMemByteEnQ103H[1:0],2'b0 } :
-                       (DMemAddressQ103H[1:0] == 2'b11 ) ? { DMemByteEnQ103H[0]  ,3'b0 } :
-                                                             DMemByteEnQ103H;
-end               
-
-
-`MAFIA_DFF(DMemAddressQ104H[1:0] , DMemAddressQ103H[1:0] , Clock)
-
-// Half & Byte READ
-logic [31:0] DMemRdRspQ104H;
-logic [31:0] PreShiftDMemRdDataQ104H;
-logic [31:0] ReIssuedPreShiftDMemRdDataQ104H;
-logic [31:0] ReIssuedPreCrMemRdDataQ104H;
-logic [31:0] ReIssuePreShiftVGAMemRdDataQ104H;
-logic [31:0] PreShiftVGAMemRdDataQ104H;
-logic [31:0] PreShiftCRMemRdDataQ104H;
-assign PreShiftRdDataQ104H = MatchVGAMemRegionQ104H ? ReIssuePreShiftVGAMemRdDataQ104H : ReIssuedPreShiftDMemRdDataQ104H; 
-assign DMemRdRspQ104H =  FabricDataRspValidQ504H         ? FabricDataRspQ504H                 ://Fabric response to an older core request
-                        (WhoAmIReqQ104H)                 ? {24'b0,local_tile_id}              ://Special case - WhoAmI respond the "hard coded" local tile id
-                         MatchCRMemRegionQ104H           ? ReIssuedPreCrMemRdDataQ104H        :
-                        (DMemAddressQ104H[1:0] == 2'b01) ? { 8'b0,PreShiftRdDataQ104H[31:8] } : 
-                        (DMemAddressQ104H[1:0] == 2'b10) ? {16'b0,PreShiftRdDataQ104H[31:16]} : 
-                        (DMemAddressQ104H[1:0] == 2'b11) ? {24'b0,PreShiftRdDataQ104H[31:24]} : 
-                                                                  PreShiftRdDataQ104H         ; 
-
- // increase read latency from 1 to 2 cycle latency 
-`MAFIA_EN_DFF(DMemRdRspQ105H ,DMemRdRspQ104H, Clock, DMemReady)
-
-mem   
+big_core_d_mem_wrap   
 #(.WORD_WIDTH(32),//FIXME - Parametrize!!
   .ADRS_WIDTH(D_MEM_ADRS_MSB+1) //FIXME - Parametrize!!
 ) d_mem  (
-    .clock    (Clock),
+    .clock           (Clock),
     //Core interface (instruction fitch)
-    .address_a  (DMemAddressQ103H[D_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
-    .data_a     (ShiftDMemWrDataQ103H),
-    .wren_a     (LocalDMemWrEnQ103H),
-    .byteena_a  (ShiftDMemByteEnQ103H),
-    .q_a        (PreShiftDMemRdDataQ104H),
+    .q103_address_a  (DMemAddressQ103H),
+    .q103_data_a     (DMemWrDataQ103H),
+    .q103_wren_a     (LocalDMemWrEnQ103H),
+    .q103_rden_a     (DMemRdEnQ103H),
+    .q103_byteena_a  (DMemByteEnQ103H),
+    .q105_q_a        (DMemRdDataQ105H),
+    .q105_q_valid_a  (DMemRdDataValidQ105H),
     //fabric interface
-    .address_b  (InFabricQ503H.address[D_MEM_ADRS_MSB:2]),//FIXME - Parametrize!!
-    .data_b     (InFabricQ503H.data),              
-    .wren_b     (F2C_DMemWrEnQ503H),                
-    .byteena_b  (4'b1111),//FIXME - should accept the byte enable from the fabric
-    .q_b        (F2C_DMemRspDataQ504H)              
+    .q503_address_b  (InFabricQ503H.address),
+    .q503_data_b     (InFabricQ503H.data),              
+    .q503_wren_b     (F2C_DMemWrEnQ503H),                
+    .q503_byteena_b  (4'b1111),//FIXME - should accept the byte enable from the fabric
+    .q505_q_b        (F2C_DMemRspDataQ505H)              
     );
 
-
-// re-issue mechanism of d_mem region
-// When DmemReady = 1'b0. We have to pass the last data from Dmem untill back pressure is deactivated  
-logic [31:0] LastDataFromDmemQ104H;
-logic        SampleDmemReadyQ104H;
-`MAFIA_DFF   (SampleDmemReadyQ104H, DMemReady      , Clock)
-`MAFIA_EN_DFF(LastDataFromDmemQ104H, PreShiftDMemRdDataQ104H, Clock , SampleDmemReadyQ104H)
-assign ReIssuedPreShiftDMemRdDataQ104H = SampleDmemReadyQ104H ? PreShiftDMemRdDataQ104H : LastDataFromDmemQ104H;
- 
  //==================================
  // CR mem instantiation
  //==================================
@@ -278,7 +256,7 @@ assign ReIssuedPreShiftDMemRdDataQ104H = SampleDmemReadyQ104H ? PreShiftDMemRdDa
     .address          (DMemAddressQ103H),
     .wren             (DMemWrEnQ103H && MatchCRMemRegionQ103H),
     .rden             (DMemRdEnQ103H && MatchCRMemRegionQ103H),
-    .q                (PreCRMemRdDataQ104H),
+    .q                (CRMemRdDataQ104H),
     //Fabric access interface
     .data_b           (InFabricQ503H.data),
     .address_b        (InFabricQ503H.address),
@@ -294,28 +272,12 @@ assign ReIssuedPreShiftDMemRdDataQ104H = SampleDmemReadyQ104H ? PreShiftDMemRdDa
     .fpga_in          (fpga_in),  
     .fpga_out         (fpga_out)
 );
- 
-// re-issue mechanism of cr region
-// When DmemReady = 1'b0. We have to pass the last data from CR untill back pressure is deactivated  
-logic [31:0] LastDataFromCRmemQ104H;
-logic        SampleCrmemReadyQ104H;
-`MAFIA_DFF   (SampleCrmemReadyQ104H, DMemReady      , Clock)
-`MAFIA_EN_DFF(LastDataFromCRmemQ104H, PreCRMemRdDataQ104H, Clock , SampleCrmemReadyQ104H)
-assign ReIssuedPreCrMemRdDataQ104H = SampleCrmemReadyQ104H ? PreCRMemRdDataQ104H : LastDataFromCRmemQ104H;
 
  //==================================
- // VGA cntroller instantiation
+ // VGA controllers instantiation
  //==================================
-logic [31:0] VgaAddressWithOffsetQ103H;
 assign VgaAddressWithOffsetQ103H = DMemAddressQ103H - VGA_MEM_REGION_FLOOR;
 
-logic [31:0]  VgaWrData;
-logic [31:0]  VgaAdrsReq;
-logic [3:0]   VgaWrByteEn;
-logic         VgaWrEn;
-assign VgaWrData    = ShiftDMemWrDataQ103H;
-assign VgaAdrsReq   = VgaAddressWithOffsetQ103H;
-assign VgaWrByteEn  = ShiftDMemByteEnQ103H;
 assign VgaWrEn      = DMemWrEnQ103H && MatchVGAMemRegionQ103H;
 
 big_core_vga_ctrl big_core_vga_ctrl (
@@ -323,13 +285,13 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .Reset             (Rst),
    // Core interface
    // write
-   .ReqDataQ503H       (VgaWrData),
-   .ReqAddressQ503H    (VgaAdrsReq),
-   .CtrlVGAMemByteEn   (VgaWrByteEn),
+   .ReqDataQ503H       (DMemWrDataQ103H),
+   .ReqAddressQ503H    (VgaAddressWithOffsetQ103H),
+   .CtrlVGAMemByteEn   (DMemByteEnQ103H),
    .CtrlVgaMemWrEnQ503 (VgaWrEn),
    // read
    .CtrlVgaMemRdEnQ503 (VgaWrEn),
-   .VgaRspDataQ504H    (PreShiftVGAMemRdDataQ104H),
+   .VgaRspDataQ504H    (VGAMemRdDataQ104H),
    // VGA output
    .VGA_CounterX      (VGA_CounterX)  , // output  logic [9:0] VGA_CounterX,
    .VGA_CounterY      (VGA_CounterY)  , // output  logic [9:0] VGA_CounterY,
@@ -341,29 +303,37 @@ big_core_vga_ctrl big_core_vga_ctrl (
    .v_sync            (vga_out.VGA_VS)
 );
 
-// re-issue mechanism of vga region
-// When DmemReady = 1'b0. We have to pass the last data from VGA untill back pressure is deactivated  
-logic [31:0] LastDataFromVgamemQ104H;
-logic        SampleVgamemReadyQ104H;
-`MAFIA_DFF   (SampleVgamemReadyQ104H, DMemReady      , Clock)
-`MAFIA_EN_DFF(LastDataFromVgamemQ104H, PreShiftVGAMemRdDataQ104H, Clock , SampleVgamemReadyQ104H)
-assign ReIssuePreShiftVGAMemRdDataQ104H = SampleVgamemReadyQ104H ? PreShiftVGAMemRdDataQ104H : LastDataFromVgamemQ104H;
+
+// Align latency of CR and VGA memory to the d_mem
+`MAFIA_EN_DFF(CRMemRdDataQ105H, CRMemRdDataQ104H, Clock , DMemReady)
+`MAFIA_EN_DFF(VGAMemRdDataQ105H, VGAMemRdDataQ104H, Clock, DMemReady)
+assign DMemRdRspQ105H =  FabricDataRspValidQ504H ? FabricDataRspQ504H    : //Fabric response to an older core request
+                         WhoAmIReqQ105H          ? {24'b0,local_tile_id} : //Special case - WhoAmI respond the "hard coded" local tile id
+                         MatchCRMemRegionQ105H   ? CRMemRdDataQ105H      : //CR memory response
+                         MatchVGAMemRegionQ105H  ? VGAMemRdDataQ105H     : //VGA memory response
+                         DMemRdDataValidQ105H    ? DMemRdDataQ105H       : //d_mem response - response from local tile - Note: this is a lowest priority of the match in this mux
+                                                   '0                    ; //default response
+
+
 //==================================
 // F2C response 504 ( D_MEM/I_MEM )
 //==================================
-logic [31:0] F2C_RspDataQ504H;
 `MAFIA_DFF(F2C_IMemHitQ504H , F2C_IMemHitQ503H , Clock)
 `MAFIA_DFF(F2C_DMemHitQ504H , F2C_DMemHitQ503H , Clock)
 `MAFIA_DFF(F2C_CrMemHitQ504H, F2C_CrMemHitQ503H, Clock)
+`MAFIA_DFF(F2C_IMemHitQ505H , F2C_IMemHitQ504H , Clock)
+`MAFIA_DFF(F2C_DMemHitQ505H , F2C_DMemHitQ504H , Clock)
+`MAFIA_DFF(F2C_CrMemHitQ505H, F2C_CrMemHitQ504H, Clock)
 
-assign F2C_RspDataQ504H   = F2C_CrMemHitQ504H ? F2C_CrMemRspDataQ504H : //CR hit is the highest priority
-                            F2C_IMemHitQ504H  ? F2C_IMemRspDataQ504H  :
-                            F2C_DMemHitQ504H  ? F2C_DMemRspDataQ504H  :
+// align latency
+`MAFIA_DFF(F2C_CrMemRspDataQ505H, F2C_CrMemRspDataQ504H, Clock)
+`MAFIA_DFF(F2C_IMemRspDataQ505H , F2C_IMemRspDataQ504H , Clock)
+
+assign F2C_RspDataQ505H   = F2C_CrMemHitQ505H ? F2C_CrMemRspDataQ505H : //CR hit is the highest priority
+                            F2C_IMemHitQ505H  ? F2C_IMemRspDataQ505H  :
+                            F2C_DMemHitQ505H  ? F2C_DMemRspDataQ505H  :
                                                '0                     ;
 
-logic F2C_OutFabricValidQ503H, F2C_OutFabricValidQ504H;
-t_tile_trans F2C_OutFabricQ504H;
-logic [31:0] F2C_RdRspAddressQ503H;
 assign F2C_OutFabricValidQ503H =  (InFabricValidQ503H && (InFabricQ503H.opcode == RD));
 assign F2C_InFabricQ503H       = F2C_OutFabricValidQ503H   ?  InFabricQ503H  :  '0;
 // Set the target address to the requestor id (This is the Read response address)
@@ -388,8 +358,6 @@ assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
 // F2C FIFO - accumulate read responses to the fabric (A response to a Fabric 2 Core read request)
 //==================================
 // a FIFO to accumulate the read responses to the fabric
-logic F2C_RspFull, F2C_RspEmpty;
-logic F2C_AlmostFull;
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 f2c_rsp_fifo  (.clk       (Clock),
                .rst       (Rst),
