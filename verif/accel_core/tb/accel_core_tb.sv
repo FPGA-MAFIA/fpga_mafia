@@ -110,7 +110,7 @@ initial begin: test_seq
 
 end // test_seq
 
-parameter V_TIMEOUT = 1000000;
+parameter V_TIMEOUT = 100000000;
 parameter MINI_RF_NUM_MSB = 31;
 initial begin: detect_timeout
     //=======================================

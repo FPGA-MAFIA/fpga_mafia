@@ -10,35 +10,32 @@
  */
 
 /*this is how the user insert the matrices*/
-	int rows[NUM_OF_MATS] = {2 , 2 , 4};/*USER EDIT*/
-	int cols[NUM_OF_MATS] = {2 , 4 , 5};/*USER EDIT*/
+	int rows[NUM_OF_MATS] = {30 , 2};/*USER EDIT*/
+	int cols[NUM_OF_MATS] = {2 , 1};/*USER EDIT*/
 	int mats_and_bias[] = /*USER EDIT*/
 	{
-	/* Matrix Number 0 */
-	1, 2,
-	3, 4,
-	//bias
-	5, 6,
-
-	/* Matrix Number 1 */
-	1, 2, 3, 3,
-	4, 5, 6, 6,
-	//bias
-	7, 8 ,9, 9,
-
-	/* Matrix Number 1 */
-	1, 2, 3, 4, 5,
-	6, 7, 8 ,9 ,10,
-	11,12,13,14,15,
-	17,18,19,20,21,
-	//bias
-	22,23,24,25,26
+	// Matrix Number 0
+		-3, 0, 1, 3, -1, -2, 2, -3, 0, 1,
+		-1, 2, 3, -2, -3, 1, 0, -1, 2, 3,
+		-1, 2, -3, 1, 0, -2, 3, -1, 2, -3,
+		1 , 0, -2, 3, -1, 2, -3, 1, 0, -2,
+		-1, 2, 3, -2, -3, 1, 0, -1, 2, 3,
+		-1, 2, -3, 1, 0, -2, 3, -1, 2, -3,
+		//bias
+		-3, 0
+		
+	// Matrix Number 1
+		-6 , 7,
+		//bias
+		10
 	};
 
 	int input_vec[MAX_INPUT_SIZE] = //USER EDIT, make sure input_len = rows[0] 
 	{
 	//input
-	1, 2
+		1, 2, 3, 2, 3, 1, 0, 1, 2, 3,
+		1, 2, 3, 1, 0, 2, 3, 1, 2, 3,
+		3, 0, 1, 3, 1, 2, 2, 3, 0, 1
 	};
 
 int main()
@@ -65,28 +62,32 @@ int main()
 	}
 	else {
 		int output_vec[MAX_INPUT_SIZE];
-		int temp_res = 0;
-		int mat_offset = 0;
-		for (int k = 0 ; k < NUM_OF_MATS ; k++) { //for each matrix
-			for (int j = 0 ; j < cols[k] ; j++)  {//each col
-				temp_res = mats_and_bias[mat_offset + rows[k] * cols[k] + j];
-				for (int i = 0 ; i < rows[k] ; i++ ) { //sums all the rows + bias
-					temp_res += input_vec[i] * mats_and_bias[mat_offset + i * cols[k] + j];
+		if(!ONLY_INIT) {
+			int temp_res = 0;
+			int mat_offset = 0;
+			for (int k = 0 ; k < NUM_OF_MATS ; k++) { //for each matrix
+				for (int j = 0 ; j < cols[k] ; j++)  {//each col
+					temp_res = mats_and_bias[mat_offset + rows[k] * cols[k] + j];
+					for (int i = 0 ; i < rows[k] ; i++ ) { //sums all the rows + bias
+						temp_res += input_vec[i] * mats_and_bias[mat_offset + i * cols[k] + j];
+					}
+					if (temp_res > 127)
+						output_vec[j] = 127;
+					else if (temp_res < -128)
+						output_vec[j] = -128;
+					else 
+						output_vec[j] = temp_res;
 				}
-				if (temp_res > 127)
-					output_vec[j] = 127;
-				else if (temp_res < -128)
-					output_vec[j] = -128;
-				else 
-					output_vec[j] = temp_res;
+				if (k != NUM_OF_MATS - 1) {
+					mat_offset += (rows[k] + 1) * cols[k];
+					for (int j = 0 ; j < cols[k] ; j++)  {//each col
+						input_vec[j] = (output_vec[j] > 0) ? output_vec[j] : 0;
+					}
+				}
 			}
-			for (int j = 0 ; j < cols[k] ; j++)  {//each col
-				input_vec[j] = (output_vec[j] > 0) ? output_vec[j] : 0;
-			}
+			result = output_vec[0];
 		}
-		result = output_vec[0];
 	}
-	WRITE_REG((uint32_t*)(CR_MUL_IN_DATA), (int)(&result));
 	WRITE_REG((uint32_t*)(CR_MUL_IN_DATA), result);
 	result = sigmoid_func(result);
 	WRITE_REG((uint32_t*)(CR_MUL_IN_DATA), result);

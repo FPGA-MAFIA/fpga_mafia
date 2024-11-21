@@ -5,8 +5,8 @@
 
 #define SUCCESS 0
 #define FAIL 1
-#define NUM_OF_MATS 3 /*USER EDIT*/
-#define MEM_SIZE 40	/*USER EDIT*/
+#define NUM_OF_MATS 2 /*USER EDIT*/
+#define MEM_SIZE 100	/*USER EDIT*/
 
 
 /* this is Imaginary struct, this the way it is arranged in the memory
@@ -246,9 +246,9 @@ int calc_network(int input_vec[])
     } while ((read_buff & (1 << 16))); // while the 16th bit is 1
 
     //parse input vector
-    int vec_len = (*(int*)(g_mats_base_addr[0]) + ELEM_IN_ROW) - 1;
+    int vec_len = (*((int*)(g_mats_base_addr[0]) + ELEM_IN_ROW)) - 1;
     int vec_addr =  g_mats_base_addr[NUM_OF_MATS];
-    insert_compressed_mat(input_vec, 1, vec_len , &vec_addr);
+    insert_compressed_mat(input_vec, vec_len - 1, 1 , &vec_addr); //args a bit weird but thats the way to avoid implementing dedicated func
 
     int words_in_compressed_inp =   *((int*)(g_mats_base_addr[NUM_OF_MATS]) + 
                                     WORDS_IN_ROW);
@@ -273,8 +273,13 @@ int calc_network(int input_vec[])
 
     //read network result
     READ_REG(result, (uint32_t*)(CR_MUL_OUT_META+1));
-    //sigmoid(&result);
-    return result & 0x000000FF;
+    if (result & 0x00000080) { //cutting relevant bits and extanding
+        result = result | 0xFFFFFF00; //sign bit extention
+    }
+    else {
+        result = result & 0x000000FF; //sign bit extention
+    }
+    return result;
 }
 
 int calc_layer(int matrix_idx)
