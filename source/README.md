@@ -33,18 +33,3 @@ The memory subsystem includes the L1 instruction and data cache, memory controll
 
 ### Hardware Accelerators
 The mini core with hardware accelerators includes specialized hardware units for accelerating specific computations, such as matrix multiplication and neural network operations.
-
-## Links to Subdirectories
-
-- [Big Core](big_core)
-- [Big Core with L1 Cache](big_core_cachel1)
-- [Common RTL Files](common)
-- [Fabric Architecture](fabric)
-  - [Router](fabric/router)
-- [LOTR Project](lotr)
-- [Memory Subsystem](mem_ss)
-- [Mini Core](mini_core)
-- [Mini Core with Hardware Accelerators](mini_core_accel)
-- [Mini Core with RRV Support](mini_core_rrv)
-- [Single Cycle Core](sc_core)
-- [UART Module](uart)
