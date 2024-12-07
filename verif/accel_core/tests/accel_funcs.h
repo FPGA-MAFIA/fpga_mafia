@@ -5,8 +5,8 @@
 
 #define SUCCESS 0
 #define FAIL 1
-#define NUM_OF_MATS 3 /*USER EDIT*/
-#define MEM_SIZE 2000	/*USER EDIT*/
+#define NUM_OF_MATS 2 /*USER EDIT*/
+#define MEM_SIZE 500	/*USER EDIT*/
 
 
 /* this is Imaginary struct, this the way it is arranged in the memory
