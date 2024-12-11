@@ -18,25 +18,25 @@ output logic insLineValidOut
 
 tag_arr_t tagArray [NUM_TAGS];
 data_arr_t dataArray [NUM_LINES];
-logic [TAG_WIDTH - OFFSET_WIDTH - 1 ] pcTag;
+logic [TAG_WIDTH - OFFSET_WIDTH - 1 : 0 ] pcTag;
 
-assign pcTag = pc[TAG_WIDTH-1:OFFSET];
+assign pcTag = pc[TAG_WIDTH-1:OFFSET_WIDTH];
 
-always_comb@ begin
+always_comb begin
     if(Rst) begin
         tagArray.Valid = '0;
     end
 end
 
-always_ff(posedge Clock) begin
+always_ff@(posedge Clock) begin
     
     if (!insLineValidOut && insLineValidIn) begin
         for (int i = 0 ; i < NUM_TAGS ; i++) begin
             if (!tagArray[i].valid) begin    
                 dataArray[i] <= insLineIn;
-                tagArray[i].valid <= 1b'1;
+                tagArray[i].valid <= 1'b1;
                 tagArray[i].tag <= pcTag;
-                insLineValidOut <= 1b'1;
+                insLineValidOut <= 1'b1;
                 insLineOut <= insLineIn;
             end
         end
@@ -47,7 +47,7 @@ always_ff@(posedge Clock) begin
 
     insLineValidOut <= 0;
     for (int i = 0 ; i < NUM_TAGS ; i++) begin
-        if(tagArray[i].tag == pcTag) 
+        if(tagArray[i].tag == pcTag) begin
             insLineValidOut <= tagArray[i].Valid;
             insLineOut <= dataArray[i];
         end
