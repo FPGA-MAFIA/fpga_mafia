@@ -2,7 +2,6 @@
  
  package ifu_pkg;
 
-`include "common_pkg.vh"
 
 parameter NUM_TAGS = 16;      // Number of tags
 parameter NUM_LINES = 16;     // Number of lines: should be equal to number of tags
@@ -19,3 +18,5 @@ parameter OFFSET_WIDTH = 4;   // Width of each offset
 typedef struct packed {
         logic [LINE_WIDTH-1:0] line;  // Tag value
 } data_arr_t;
+
+ endpackage
