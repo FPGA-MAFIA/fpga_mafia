@@ -5,9 +5,10 @@ module ifu_cache_tb;
 import ifu_pkg::*;
 
     // Parameters (you need to define these values appropriately)
-    parameter NUM_TAGS = 4;
-    parameter NUM_LINES = 4;
-    parameter TAG_WIDTH = 8;
+    parameter NUM_TAGS = 16;      // Number of tags
+    parameter NUM_LINES = 16;     // Number of lines: should be equal to number of tags
+    parameter TAG_WIDTH = 30;     // Width of each tag: evacuation_bit + valid_bit + tag_bits = 1 + 1 + 28
+    parameter LINE_WIDTH = 128;    // Width of each cache line
     parameter OFFSET_WIDTH = 4;
 
     // Inputs
@@ -26,7 +27,8 @@ import ifu_pkg::*;
         .NUM_TAGS(NUM_TAGS),
         .NUM_LINES(NUM_LINES),
         .TAG_WIDTH(TAG_WIDTH),
-        .OFFSET_WIDTH(OFFSET_WIDTH)
+        .OFFSET_WIDTH(OFFSET_WIDTH),
+        .LINE_WIDTH(LINE_WIDTH)
     ) dut (
         .Clock(Clock),
         .Rst(Rst),

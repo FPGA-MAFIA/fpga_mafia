@@ -5,6 +5,13 @@
 
 module ifu_cache
 import ifu_pkg::*;
+#( 
+    parameter NUM_TAGS,      // Number of tags
+    parameter NUM_LINES,     // Number of lines: should be equal to number of tags
+    parameter TAG_WIDTH,     // Width of each tag: evacuation_bit + valid_bit + tag_bits = 1 + 1 + 28
+    parameter LINE_WIDTH,    // Width of each cache line
+    parameter OFFSET_WIDTH
+)
 (
 // Inputs
 input logic Clock,
@@ -25,9 +32,11 @@ logic [TAG_WIDTH - OFFSET_WIDTH - 1 : 0 ] pcTag;
 
 assign pcTag = pc[TAG_WIDTH-1:OFFSET_WIDTH];
 
-always_comb begin
-    if(Rst) begin
-        tagArray.Valid = '0;
+always_ff@(posedge Rst) begin
+    if (Rst) begin
+        for (int i = 0 ; i < NUM_TAGS ; i++) begin
+            tagArray[i] <= 0;
+        end
     end
 end
 
@@ -51,7 +60,7 @@ always_ff@(posedge Clock) begin
     insLineValidOut <= 0;
     for (int i = 0 ; i < NUM_TAGS ; i++) begin
         if(tagArray[i].tag == pcTag) begin
-            insLineValidOut <= tagArray[i].Valid;
+            insLineValidOut <= tagArray[i].valid;
             insLineOut <= dataArray[i];
         end
     end
