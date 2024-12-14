@@ -2,6 +2,8 @@
 
 module ifu_cache_tb;
 
+import ifu_pkg::*;
+
     // Parameters (you need to define these values appropriately)
     parameter NUM_TAGS = 4;
     parameter NUM_LINES = 4;

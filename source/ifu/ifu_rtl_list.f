@@ -1,5 +1,6 @@
 
 +incdir+../../../source/common/
++incdir+../../../source/fabric/
 
 // param packages
 ../../../source/ifu/ifu_pkg.sv

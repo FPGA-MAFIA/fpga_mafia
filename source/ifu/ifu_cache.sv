@@ -1,8 +1,11 @@
 
 `include "macros.vh"
 
-module ifu_cache(
 
+
+module ifu_cache
+import ifu_pkg::*;
+(
 // Inputs
 input logic Clock,
 input logic Rst,
