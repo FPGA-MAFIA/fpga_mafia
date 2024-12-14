@@ -18,7 +18,9 @@ output logic            mini_core_ready     ,
 //
 output logic            OutFabricValidQ505H ,
 output var t_tile_trans OutFabricQ505H      ,
-input  var t_fab_ready  fab_ready
+input  var t_fab_ready  fab_ready,
+
+output logic            all_signals_xor     // Output XOR of all signals
 );
 
 logic [31:0] PcQ100H;             // To I_MEM
@@ -58,6 +60,9 @@ assign DMemAddressQ103H = Core2DmemReqQ103H.Address;
 assign DMemByteEnQ103H = Core2DmemReqQ103H.ByteEn;
 assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
 assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
+
+
+
 
 //---------------------------------------------------
 accel_inputs_t mul_inputs;
@@ -110,5 +115,13 @@ accel_core_farm accel_core_farm(
    .mul_inputs(mul_inputs),
    .mul_outputs(mul_outputs)
 );
+
+// Combine all signals for XORing
+assign all_signals_xor = 
+    ^{Clock, Rst, local_tile_id, 
+      InFabricValidQ503H, mini_core_ready, OutFabricValidQ505H, fab_ready,
+      PcQ100H, PreInstructionQ101H, DMemWrDataQ103H, DMemAddressQ103H, DMemByteEnQ103H,
+      DMemWrEnQ103H, DMemRdEnQ103H, DMemRdRspQ104H, xor_inp1, xor_inp2, xor_result, 
+      DMemReady, ReadyQ101H};
 
 endmodule
