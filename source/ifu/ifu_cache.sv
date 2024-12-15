@@ -17,7 +17,7 @@ import ifu_pkg::*;
 input logic Clock,
 input logic Rst,
 input logic [31:0] pc,
-input logic insLineIn,
+input logic [127:0] insLineIn,
 input logic insLineValidIn,
 
 // Outputs
@@ -52,11 +52,11 @@ always_ff@(posedge Clock) begin
                 insLineOut <= insLineIn;
             end
         end
-    end  
+    end 
 end
 
 always_ff@(posedge Clock) begin
-
+    
     insLineValidOut <= 0;
     for (int i = 0 ; i < NUM_TAGS ; i++) begin
         if(tagArray[i].tag == pcTag) begin
@@ -64,7 +64,7 @@ always_ff@(posedge Clock) begin
             insLineOut <= dataArray[i];
         end
     end
-end
+end 
 
 
 
