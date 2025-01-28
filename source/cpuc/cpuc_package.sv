@@ -3,8 +3,11 @@
 package cpuc_package;
 
     parameter DATA_WIDTH    = 8;
+
+    // memories sizes
     parameter INST_MEM_ADDR = 4; // instruction memory address width
     parameter ADDRESS_WIDTH = 4; // dual memory address width
+    parameter CONST_NUM     = 4; // number of constants in the memory
 
     // cpuc_componenets
     parameter REG_NUM            = 8;
@@ -12,12 +15,15 @@ package cpuc_package;
     parameter EQUAL_COMPERATOR   = 4;
     parameter GREATOR_COMPERATOR = 4;
     parameter MUX                = 2;
-    parameter CONSTANTS          = 4;
     parameter PC_NUM             = 1;
 
-    // memories
+    // memories components
     parameter INSRUCTION_MEM = 1;
     parameter DUAL_RAM       = 1;
+
+    //grid parameters
+    parameter HORIZONTAL_GRID_SIZE = REG_NUM + EQUAL_COMPERATOR + GREATOR_COMPERATOR + ADDER_NUM + MUX + PC_NUM +
+                                     DUAL_RAM + DUAL_RAM; // we have two output ports
 
     typedef struct packed{
 
@@ -34,5 +40,9 @@ package cpuc_package;
     typedef struct packed {
         logic [DATA_WIDTH-1:0] dout2_cpuc;
     } t_dual_ram2_cpuc;
+
+    typedef struct packed{
+        logic [CONST_NUM-1:0][DATA_WIDTH-1:0] constants_output;
+    } t_constants_output;
 
 endpackage
