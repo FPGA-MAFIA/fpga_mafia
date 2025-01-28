@@ -15,3 +15,4 @@
 ../../../source/cpuc/cpuc_constants.sv
 ../../../source/cpuc/cpuc_inst_mem.sv
 ../../../source/cpuc/cpuc_dual_ram.sv
+../../../source/cpuc/cpuc.sv
