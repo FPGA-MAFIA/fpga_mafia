@@ -1,12 +1,13 @@
-//------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //                 CPUC SUGGESTED CONFIGURATION
-//------------------------------------------------------------------------------------------
-// R7 R6 R5 R4 R3 R2 R1 R0 == == == ==  > > > > + + + + X1 X2 M1 A1 V1 we1 we2 M2 A2 V2 PC
-//------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------
+// R7 R6 R5 R4 R3 R2 R1 R0 == == == ==  > > > > + + + + X1 X2 M1 A1 V1 we1 we2 M2 A2 V2 M01 A01 M02 A02 M03 A03 M04 A04 V01 V02 we01 we02 PC
+//-------------------------------------------------------------------------------------------------------------------------------------------
 // R - register
 // X - 2x1 mux
-// M, A, V, we - memory ports corresponds to data_in, address, data_out and write enable
-//------------------------------------------------------------------------------------------
+// M, A, V, we - memory ports corresponds to data_out, address, data_in and write enable
+// * memory ports with index 0x referred to quad ram
+//----------------------------------------------------------------------------------------
 
 `include "cpuc_macros.vh"
 module cpuc
@@ -17,15 +18,15 @@ import cpuc_package::*;
     
     // instruction memory interface
     input logic [INST_MEM_ADDR-1:0]  instruction_in,
+    output logic [DATA_WIDTH-1:0]    pc_reg,
 
-    // dual data memory interface portA
-    input var t_dual_ram2_cpuc       dual_ram2_cpuc_a,  
-    output var t_cpuc2_dual_ram      cpuc2_dual_ram_a,
+    // dual data memory interface 
+    input var t_dual_ram2_cpuc       dual_ram2_cpuc,  
+    output var t_cpuc2_dual_ram      cpuc2_dual_ram,
     
-    // dual data memory interface portB
-    input var t_dual_ram2_cpuc       dual_ram2_cpuc_b,  
-    output var t_cpuc2_dual_ram      cpuc2_dual_ram_b,
-    
+    // quad ram memory interface
+    input var  t_quad_ram2_cpuc      quad_ram2_cpuc,
+    output var t_cpuc2_quad_ram      cpuc2_quad_ram,
     // register outputs
     output var t_reg_output          cpuc_register_outputs
 );
@@ -114,29 +115,34 @@ generate
     end
 endgenerate
 
-//-----
-// V
-//-----
-genvar mem_data_out;
-generate 
-    for(mem_data_out=0; mem_data_out < DUAL_RAM; mem_data_out++) begin
-            cpuc_dual_ram
-            #(.ADDRESS_WIDTH(ADDRESS_WIDTH), .DATA_WIDTH(DATA_WIDTH))
-            cpuc2_dual_ram
-            (
-                .clk(clk),
-                // port A
-                .addr_a(),
-                .din_a(),
-                .we_a(),
-                .dout_a(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-mem_data_out]), 
-                // port B
-                .addr_b(),
-                .din_b(),
-                .we_b(),
-                .dout_b(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-(mem_data_out+1)])
-            );
-        end
+//---------------
+// M - dual ram
+//---------------
+genvar dual_mem_data_out;
+generate
+    for(dual_mem_data_out=0; dual_mem_data_out < DUAL_RAM; dual_mem_data_out++) begin
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-dual_mem_data_out] = 
+                              dual_ram2_cpuc.dout_a;
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-(dual_mem_data_out+1)] = 
+                              dual_ram2_cpuc.dout_b;
+    end
+endgenerate
+
+//---------------
+// M - quad ram
+//---------------
+genvar quad_data_mem_out;
+generate
+    for(quad_data_mem_out=0; quad_data_mem_out < QUAD_RAM; quad_data_mem_out++) begin
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+0)] = 
+                            quad_ram2_cpuc.dout_a;
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+1)] = 
+                            quad_ram2_cpuc.dout_b;
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+2)] = 
+                            quad_ram2_cpuc.dout_c;
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+3)] = 
+                            quad_ram2_cpuc.dout_d;
+    end
 endgenerate
 
 //-----
@@ -150,7 +156,7 @@ generate
             .clk(clk),
             .rst(rst),
             .data_in(),
-            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-2*DUAL_RAM-pc])
+            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPERATOR-GREATOR_COMPERATOR-ADDER_NUM-MUX-2*DUAL_RAM-4*QUAD_RAM-pc])
         );
     end
 endgenerate

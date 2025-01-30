@@ -20,26 +20,52 @@ package cpuc_package;
     // memories components
     parameter INSRUCTION_MEM = 1;
     parameter DUAL_RAM       = 1;
+    parameter QUAD_RAM       = 1;
 
     //grid parameters
-    parameter HORIZONTAL_GRID_SIZE = REG_NUM + EQUAL_COMPERATOR + GREATOR_COMPERATOR + ADDER_NUM + MUX + PC_NUM +
-                                     DUAL_RAM + DUAL_RAM; // we have two output ports
-
+    parameter HORIZONTAL_GRID_SIZE = REG_NUM + EQUAL_COMPERATOR + GREATOR_COMPERATOR + ADDER_NUM + MUX +
+                                     DUAL_RAM + DUAL_RAM +  // we have two output ports
+                                     QUAD_RAM + QUAD_RAM + QUAD_RAM + QUAD_RAM + // we have four output ports
+                                     PC_NUM;
+    
+    // registers
     typedef struct packed{
-
         logic [REG_NUM-1:0][DATA_WIDTH-1:0] reg_output;
-
     } t_reg_output;
 
+    // dual ram
     typedef struct packed {
-        logic [ADDRESS_WIDTH-1:0] addr2_dmem;
-        logic [DATA_WIDTH-1:0]    din2_dmem;
-        logic                     we2_dmem;
+        logic [ADDRESS_WIDTH-1:0] addr_a;
+        logic [ADDRESS_WIDTH-1:0] addr_b;
+        logic [DATA_WIDTH-1:0]    data_a;
+        logic [DATA_WIDTH-1:0]    data_b;
+        logic                     we_a;
+        logic                     we_b;
     } t_cpuc2_dual_ram;
 
     typedef struct packed {
-        logic [DATA_WIDTH-1:0] dout2_cpuc;
+        logic [DATA_WIDTH-1:0] dout_a;
+        logic [DATA_WIDTH-1:0] dout_b;
     } t_dual_ram2_cpuc;
+
+    // quad ram
+    typedef struct packed{
+        logic [ADDRESS_WIDTH-1:0] addr_a;
+        logic [ADDRESS_WIDTH-1:0] addr_b;
+        logic [ADDRESS_WIDTH-1:0] addr_c;
+        logic [ADDRESS_WIDTH-1:0] addr_d;
+        logic [DATA_WIDTH-1:0]    data_a;
+        logic [DATA_WIDTH-1:0]    data_b;
+        logic                     we_a;
+        logic                     we_b;
+    } t_cpuc2_quad_ram;
+
+   typedef struct packed {
+        logic [DATA_WIDTH-1:0] dout_a;
+        logic [DATA_WIDTH-1:0] dout_b;
+        logic [DATA_WIDTH-1:0] dout_c;
+        logic [DATA_WIDTH-1:0] dout_d;
+   } t_quad_ram2_cpuc;
 
     typedef struct packed{
         logic [CONST_NUM-1:0][DATA_WIDTH-1:0] constants_output;
