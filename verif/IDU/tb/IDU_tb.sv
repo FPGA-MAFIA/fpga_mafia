@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module IDU_tb;
+module idu_tb;
 
     // Inputs to the IDU
     logic [31:0] instr1, instr2;
@@ -8,7 +8,7 @@ module IDU_tb;
     logic [31:0] issue_instr1, issue_instr2;
 
     // Instantiate the IDU module
-    IDU dut (
+    idu dut (
         .instr1(instr1),
         .instr2(instr2),
         .issue_instr1(issue_instr1),

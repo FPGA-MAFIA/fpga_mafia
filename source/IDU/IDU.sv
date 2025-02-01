@@ -1,4 +1,4 @@
-module IDU (
+module idu (
     input logic [31:0] instr1,       
     input logic [31:0] instr2,      
     output logic [31:0] issue_instr1, // Instruction for primary issue
