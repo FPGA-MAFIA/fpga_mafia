@@ -93,15 +93,36 @@ module idu_tb;
         #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
 
         instr1 = 32'h00428063; // beq x4, x4, 4
-        instr2 = 32'h00420093; // addi x1, x4, 1
+        instr2 = 32'h00002003; // lw x1, 0(x0)
         #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
 
-        instr1 = 32'h00428063; // beq x4, x4, 4
-        instr2 = 32'h00000063; // beq x0, x0, 0
+        // Test Case 5: Second Instruction Has Memory Access
+        $display("Test Case 5: Second Instruction Has Memory Access");
+        instr1 = 32'h00200093; // addi x1, x0, 2
+        instr2 = 32'h00002003; // lw x1, 0(x0)
         #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
 
-        instr1 = 32'h00428063; // beq x4, x4, 4
-        instr2 = 32'h00002003; // lb x1, 0(x0)
+        instr1 = 32'h00400113; // addi x2, x0, 4
+        instr2 = 32'h00402223; // sw x2, 4(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+
+        // Test Case 6: Both Instructions Have Memory Access
+        $display("Test Case 6: Both Instructions Have Memory Access");
+
+        instr1 = 32'h00402223; // sw x2, 4(x0)
+        instr2 = 32'h00002003; // lw x1, 0(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+
+        instr1 = 32'h00802423; // sw x2, 8(x0)
+        instr2 = 32'h00C02623; // sw x3, 12(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+
+        instr1 = 32'h01002083; // lw x1, 16(x0)
+        instr2 = 32'h01402223; // sw x2, 20(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+
+        instr1 = 32'h01802083; // lw x1, 24(x0)
+        instr2 = 32'h01C02103; // lw x2, 28(x0)
         #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
 
         $finish;
