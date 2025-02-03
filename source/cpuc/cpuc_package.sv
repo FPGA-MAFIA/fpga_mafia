@@ -23,10 +23,10 @@ package cpuc_package;
     parameter QUAD_RAM        = 1;
 
     //grid parameters
-    parameter HORIZONTAL_GRID_SIZE = REG_NUM + EQUAL_COMPARATOR + GREATER_COMPARATOR + ADDER_NUM + MUX +
+    parameter HORIZONTAL_GRID_SIZE = REG_NUM + PC_NUM + EQUAL_COMPARATOR + GREATER_COMPARATOR + ADDER_NUM + MUX +
                                      DUAL_RAM + DUAL_RAM +  // we have two output ports
-                                     QUAD_RAM + QUAD_RAM + QUAD_RAM + QUAD_RAM + // we have four output ports
-                                     PC_NUM;
+                                     QUAD_RAM + QUAD_RAM + QUAD_RAM + QUAD_RAM; // we have four output ports
+                                  
     
     // registers
     typedef struct packed{

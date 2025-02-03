@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------------------
 //                 CPUC SUGGESTED CONFIGURATION
 //-------------------------------------------------------------------------------------------------------------------------------------------
-// R0 R1 R2 R3 R4 R5 R6 R7 == == == ==  > > > > + + + + X1 X2 M1 A1 V1 we1 we2 M2 A2 V2 M01 A01 M02 A02 M03 A03 M04 A04 V01 V02 we01 we02 PC
+// R0 R1 R2 R3 R4 R5 R6 R7 PC == == == ==  > > > > + + + + X1 X2 M1 A1 V1 we1 we2 M2 A2 V2 M01 A01 M02 A02 M03 A03 M04 A04 V01 V02 we01 we02
 //-------------------------------------------------------------------------------------------------------------------------------------------
 // R - register
 // X - 2x1 mux
@@ -62,6 +62,22 @@ generate
 endgenerate
 
 //-----
+// PC
+//-----
+genvar pc;
+generate 
+    for(pc=0; pc<PC_NUM; pc++) begin
+        cpuc_register cpuc_pc
+        (
+            .clk(clk),
+            .rst(rst),
+            .data_in(),
+            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-pc])
+        );
+    end
+endgenerate
+
+//-----
 // ==
 //-----
 genvar equal;
@@ -71,7 +87,7 @@ generate
         (
             .data_in0(vertical_equal_grid_in0[equal]),
             .data_in1(vertical_equal_grid_in1[equal]),
-            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-equal])    
+            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-equal])    
         );
     end
 endgenerate
@@ -86,7 +102,7 @@ generate
         (
             .data_in0(vertical_greater_grid_in0[greater]),
             .data_in1(vertical_greater_grid_in0[greater]),
-            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-greater])    
+            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-greater])    
         );
     end
 endgenerate
@@ -101,7 +117,7 @@ generate
         (
             .data_in0(vertical_add_grid_in0[add]),
             .data_in1(vertical_add_grid_in1[add]),
-            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-add]),
+            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-add]),
             .carry_out()
         );
     end
@@ -118,7 +134,7 @@ generate
             .data_in0(),
             .data_in1(),
             .ctrl(), 
-            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-mux])
+            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-mux])
         );
     end
 endgenerate
@@ -129,9 +145,9 @@ endgenerate
 genvar dual_mem_data_out;
 generate
     for(dual_mem_data_out=0; dual_mem_data_out < DUAL_RAM; dual_mem_data_out++) begin
-        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-dual_mem_data_out] = 
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-dual_mem_data_out] = 
                               dual_ram2_cpuc.dout_a;
-        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(dual_mem_data_out+1)] = 
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(dual_mem_data_out+1)] = 
                               dual_ram2_cpuc.dout_b;
     end
 endgenerate
@@ -142,32 +158,17 @@ endgenerate
 genvar quad_data_mem_out;
 generate
     for(quad_data_mem_out=0; quad_data_mem_out < QUAD_RAM; quad_data_mem_out++) begin
-        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+0)] = 
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+0)] = 
                             quad_ram2_cpuc.dout_a;
-        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+1)] = 
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+1)] = 
                             quad_ram2_cpuc.dout_b;
-        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+2)] = 
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+2)] = 
                             quad_ram2_cpuc.dout_c;
-        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+3)] = 
+        assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+3)] = 
                             quad_ram2_cpuc.dout_d;
     end
 endgenerate
 
-//-----
-// PC
-//-----
-genvar pc;
-generate 
-    for(pc=0; pc<PC_NUM; pc++) begin
-        cpuc_register cpuc_pc
-        (
-            .clk(clk),
-            .rst(rst),
-            .data_in(),
-            .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-2*DUAL_RAM-4*QUAD_RAM-pc])
-        );
-    end
-endgenerate
 
 //-------------------------------
 //         input grid
