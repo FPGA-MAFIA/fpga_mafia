@@ -2,7 +2,7 @@
 
 `include "cpuc_macros.vh"
 
-module cpuc_greator_comperator
+module cpuc_greater_comparator
 import cpuc_package::*;
 (
     input logic [DATA_WIDTH-1:0]  data_in0,

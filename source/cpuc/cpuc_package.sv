@@ -12,18 +12,18 @@ package cpuc_package;
     // cpuc_componenets
     parameter REG_NUM            = 8;
     parameter ADDER_NUM          = 4; 
-    parameter EQUAL_COMPERATOR   = 4;
-    parameter GREATOR_COMPERATOR = 4;
+    parameter EQUAL_COMPARATOR   = 4;
+    parameter GREATER_COMPARATOR = 4;
     parameter MUX                = 2;
     parameter PC_NUM             = 1;
 
     // memories components
-    parameter INSRUCTION_MEM = 1;
-    parameter DUAL_RAM       = 1;
-    parameter QUAD_RAM       = 1;
+    parameter INSTRUCTION_MEM = 1;
+    parameter DUAL_RAM        = 1;
+    parameter QUAD_RAM        = 1;
 
     //grid parameters
-    parameter HORIZONTAL_GRID_SIZE = REG_NUM + EQUAL_COMPERATOR + GREATOR_COMPERATOR + ADDER_NUM + MUX +
+    parameter HORIZONTAL_GRID_SIZE = REG_NUM + EQUAL_COMPARATOR + GREATER_COMPARATOR + ADDER_NUM + MUX +
                                      DUAL_RAM + DUAL_RAM +  // we have two output ports
                                      QUAD_RAM + QUAD_RAM + QUAD_RAM + QUAD_RAM + // we have four output ports
                                      PC_NUM;
