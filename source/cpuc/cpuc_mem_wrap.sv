@@ -8,6 +8,7 @@ import cpuc_package::*;
 #(parameter ADDRESS_WIDTH, parameter DATA_WIDTH)
 (
     input logic clk,
+    input logic rst, 
     // instruction memory interface
     output logic [INST_MEM_ADDR-1:0]  instruction_out,
     input  logic [DATA_WIDTH-1:0]     pc, 
@@ -17,9 +18,24 @@ import cpuc_package::*;
     
     // quad ram memory interface
     output var  t_quad_ram2_cpuc   quad_ram2_cpuc,
-    input var t_cpuc2_quad_ram     cpuc2_quad_ram
+    input var t_cpuc2_quad_ram     cpuc2_quad_ram,
+
+    // constant memory
+    output var t_constants_output constants_output
 
 );
+
+cpuc_inst_mem 
+#(.INST_MEM_ADDR(INST_MEM_ADDR), .INST_WIDTH()) // TODO - define INST_WIDTH
+cpuc_inst_mem
+    (
+    .clk(clk),
+    .we(),
+    .instruction_in(),
+    .address(pc),
+    .instruction_out(instruction_out) 
+    );
+
 
 // FIXME - structs must be refactored when dual and quad ram will be more than 1
 //-------------------
@@ -80,16 +96,16 @@ generate
 endgenerate
 
 
-cpuc_inst_mem 
-#(.INST_MEM_ADDR(INST_MEM_ADDR), .INST_WIDTH()) // TODO - define INST_WIDTH
-cpuc_inst_mem
-    (
+cpuc_constants
+#(.CONST_NUM(CONST_NUM))
+cpuc_constant_mem
+(   
     .clk(clk),
+    .rst(rst),
+    .constant_in(),
     .we(),
-    .instruction_in(),
-    .address(pc),
-    .instruction_out(instruction_out) 
-    );
-
+    .address(),
+    .constants_output(constants_output)
+);
 
 endmodule

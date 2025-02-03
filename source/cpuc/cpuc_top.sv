@@ -24,6 +24,9 @@ t_cpuc2_dual_ram          cpuc2_dual_ram;
 t_quad_ram2_cpuc         quad_ram2_cpuc;
 t_cpuc2_quad_ram         cpuc2_quad_ram;
 
+// constant memory
+t_constants_output constants_output;
+
 //-------------------
 //   cpuc 
 //-------------------
@@ -44,7 +47,9 @@ cpuc cpuc
     .quad_ram2_cpuc(quad_ram2_cpuc),
     .cpuc2_quad_ram(),
     // register outputs
-    .cpuc_register_outputs(cpuc_register_outputs)
+    .cpuc_register_outputs(cpuc_register_outputs),
+    // constants
+    .constants2_cpuc(constants_output)
 );
 
 
@@ -65,7 +70,10 @@ cpuc_mem_wrapper
     
     // quad ram memory interface
     .quad_ram2_cpuc(quad_ram2_cpuc),
-    .cpuc2_quad_ram(cpuc2_quad_ram)
+    .cpuc2_quad_ram(cpuc2_quad_ram),
+
+    // constant memory
+    .constants_output(constants_output)
 
 );
 
