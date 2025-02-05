@@ -54,6 +54,18 @@ logic [CONST_NUM-1:0][DATA_WIDTH-1]             vertical_add_const_grid_in0;
 logic [ADDER_NUM-1:0][DATA_WIDTH-1]             vertical_add_grid_in1;
 logic [CONST_NUM-1:0][DATA_WIDTH-1]             vertical_add_const_grid_in1; 
 
+logic [MUX-1:0][DATA_WIDTH-1]                   vertical_mux_grid_in0;
+logic [MUX-1:0][DATA_WIDTH-1]                   vertical_mux_grid_in1;
+logic [MUX-1:0][DATA_WIDTH-1]                   vertical_mux_grid_ctrl;
+
+logic [DUAL_RAM-1:0][DATA_WIDTH-1]             vertical_dual_ram_grid_A1;
+logic [DUAL_RAM-1:0][DATA_WIDTH-1]             vertical_dual_ram_grid_V1;
+logic [DUAL_RAM-1:0][DATA_WIDTH-1]             vertical_dual_ram_grid_we1;
+logic [DUAL_RAM-1:0][DATA_WIDTH-1]             vertical_dual_ram_grid_A2;
+logic [DUAL_RAM-1:0][DATA_WIDTH-1]             vertical_dual_ram_grid_V2;
+logic [DUAL_RAM-1:0][DATA_WIDTH-1]             vertical_dual_ram_grid_we2;
+
+
 //-------------------------------
 //         output grid
 //-------------------------------
@@ -144,9 +156,9 @@ generate
     for(mux=0; mux < MUX; mux++) begin
         cpuc_mux cpuc_mux
         (
-            .data_in0(),
-            .data_in1(),
-            .ctrl(), 
+            .data_in0(vertical_mux_grid_in0[mux]),
+            .data_in1(vertical_mux_grid_in1[mux]),
+            .ctrl(vertical_mux_grid_ctrl[mux]), 
             .data_out(horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-mux])
         );
     end
@@ -158,10 +170,18 @@ endgenerate
 genvar dual_mem_data_out;
 generate
     for(dual_mem_data_out=0; dual_mem_data_out < DUAL_RAM; dual_mem_data_out++) begin
+        // from dual ram to cpuc
         assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-dual_mem_data_out] = 
                               dual_ram2_cpuc.dout_a;
         assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(dual_mem_data_out+1)] = 
                               dual_ram2_cpuc.dout_b;
+        // to dual ram from cpuc
+        assign cpuc2_dual_ram.addr_a = vertical_dual_ram_grid_A1[dual_mem_data_out];
+        assign cpuc2_dual_ram.data_a = vertical_dual_ram_grid_V1[dual_mem_data_out];
+        assign cpuc2_dual_ram.we_a   = vertical_dual_ram_grid_we1[dual_mem_data_out];
+        assign cpuc2_dual_ram.addr_b = vertical_dual_ram_grid_A2[dual_mem_data_out];
+        assign cpuc2_dual_ram.data_b = vertical_dual_ram_grid_V2[dual_mem_data_out];
+        assign cpuc2_dual_ram.we_b   = vertical_dual_ram_grid_we2[dual_mem_data_out];
     end
 endgenerate
 
@@ -171,6 +191,7 @@ endgenerate
 genvar quad_data_mem_out;
 generate
     for(quad_data_mem_out=0; quad_data_mem_out < QUAD_RAM; quad_data_mem_out++) begin
+        // from quad ram to cpuc
         assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+0)] = 
                             quad_ram2_cpuc.dout_a;
         assign horizontal_grid[HORIZONTAL_GRID_SIZE-1-REG_NUM-PC_NUM-EQUAL_COMPARATOR-GREATER_COMPARATOR-ADDER_NUM-MUX-(DUAL_RAM+1)-(quad_data_mem_out+1)] = 
@@ -333,6 +354,91 @@ generate
     end 
 endgenerate
 
+//--------
+// Mux
+//--------
+genvar i_mux, j_mux;  
+generate
+    for(i_mux=0; i_mux<MUX; i_mux++)begin                   
+        for(j_mux=0; j_mux<REG_NUM+PC_NUM; j_mux++) begin // mux inputs only comes from registers and PC 
+                cpuc_tri_state cpuc_mux_tri_state_in0
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_mux]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + ((i_mux*(REG_NUM+PC_NUM)+3*j_mux))), 
+                    .data_out(vertical_mux_grid_in0[i_mux])
+                );
+
+                  cpuc_tri_state cpuc_mux_tri_state_in1
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_mux]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + ((i_mux*(REG_NUM+PC_NUM)+3*j_mux+1))), 
+                    .data_out(vertical_mux_grid_in1[i_mux])
+                );
+
+                  cpuc_tri_state cpuc_mux_tri_state_ctrl
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_mux]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + ((i_mux*(REG_NUM+PC_NUM)+3*j_mux+2))), 
+                    .data_out(vertical_mux_grid_ctrl[i_mux])
+                );
+        end
+    end
+endgenerate
+
+//-----------
+// Dual RAM
+//-----------
+genvar i_dual, j_dual;  
+generate
+    for(i_dual=0; i_dual<DUAL_RAM; i_dual++)begin                   
+        for(j_dual=0; j_dual<REG_NUM+PC_NUM; j_dual++) begin // dual ram inputs only comes from registers and PC 
+                // A1 address port1
+                cpuc_tri_state cpuc_dual_tri_state_A1
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_dual]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + 3*MUX*(REG_NUM+PC_NUM) + ((i_dual*(REG_NUM+PC_NUM)+6*j_dual))), 
+                    .data_out(vertical_dual_ram_grid_A1[i_dual])
+                );
+                // V1 input data port1
+                cpuc_tri_state cpuc_dual_tri_state_V1
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_dual]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + 3*MUX*(REG_NUM+PC_NUM) + ((i_dual*(REG_NUM+PC_NUM)+6*j_dual+1))), 
+                    .data_out(vertical_dual_ram_grid_V1[i_dual])
+                );
+                // write enabel port1
+                cpuc_tri_state cpuc_dual_tri_state_we1
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_dual]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + 3*MUX*(REG_NUM+PC_NUM) + ((i_dual*(REG_NUM+PC_NUM)+6*j_dual+2))), 
+                    .data_out(vertical_dual_ram_grid_we1[i_dual])
+                );
+                // A2 address port2
+                cpuc_tri_state cpuc_dual_tri_state_A2
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_dual]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + 3*MUX*(REG_NUM+PC_NUM) + ((i_dual*(REG_NUM+PC_NUM)+6*j_dual+3))), 
+                    .data_out(vertical_dual_ram_grid_A2[i_dual])
+                );
+                // V2 inpur data port2
+                cpuc_tri_state cpuc_dual_tri_state_V2
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_dual]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + 3*MUX*(REG_NUM+PC_NUM) + ((i_dual*(REG_NUM+PC_NUM)+6*j_dual+4))), 
+                    .data_out(vertical_dual_ram_grid_V2[i_dual])
+                );
+                // write enbale port2
+                cpuc_tri_state cpuc_dual_tri_state_we2
+                (
+                    .data_in(horizontal_grid[HORIZONTAL_GRID_SIZE-1-j_dual]),
+                    .en((REG_NUM+PC_NUM)*HORIZONTAL_GRID_SIZE+(REG_NUM+PC_NUM)*CONST_NUM+2*EQUAL_COMPARATOR*(REG_NUM+PC_NUM)+2*EQUAL_COMPARATOR*CONST_NUM+2*GREATER_COMPARATOR*(REG_NUM+PC_NUM)+2*GREATER_COMPARATOR*CONST_NUM+2*ADDER_NUM*(REG_NUM+PC_NUM)+2*ADDER_NUM*CONST_NUM + 3*MUX*(REG_NUM+PC_NUM) + ((i_dual*(REG_NUM+PC_NUM)+6*j_dual+5))), 
+                    .data_out(vertical_dual_ram_grid_we2[i_dual])
+                );
+
+             
+        end
+    end
+endgenerate
 endmodule
 
 
