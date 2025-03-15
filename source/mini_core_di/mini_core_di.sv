@@ -57,7 +57,9 @@ t_ctrl_wb     CtrlWb;
 // 2. Calc/Set the NextPc
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_if mini_core_if (
+//IDU
+
+mini_core_di_if mini_core_di_if (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
@@ -85,7 +87,7 @@ mini_core_if mini_core_if (
 // 4. construct the Immediate types.
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_ctrl mini_core_ctrl (
+mini_core_di_ctrl mini_core_di_ctrl (
   .Rst                  (Rst    ), //input
   .Clock                (Clock  ), //input
   // input instruction 
@@ -110,9 +112,9 @@ mini_core_ctrl mini_core_ctrl (
   .ImmediateQ101H       (ImmediateQ101H     ) //output
 );
 
-mini_core_rf 
+mini_core_di_rf 
 #( .RF_NUM_MSB(RF_NUM_MSB) )    
-mini_core_rf (
+mini_core_di_rf (
   .Clock            (Clock),          // input
   .Rst              (Rst),            // input 
   .Ctrl             (CtrlRf),         // input
@@ -145,7 +147,7 @@ mini_core_rf (
 //      c) Calculate branch/jump target.
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_exe mini_core_exe (
+mini_core_di_exe mini_core_di_exe (
   .Clock               (Clock              ), //  input 
   .Rst                 (Rst                ), //  input 
   // Input Control Signals
@@ -181,7 +183,7 @@ mini_core_exe mini_core_exe (
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_mem_acs mini_core_mem_access (
+mini_core_di_mem_acs mini_core_di_mem_access (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -211,7 +213,7 @@ mini_core_mem_acs mini_core_mem_access (
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_wb mini_core_wb
+mini_core_di_wb mini_core_di_wb
 ( 
  .Clock     (Clock ), // input  logic           Clock,       //input 
  .Rst       (Rst   ), // input  logic           Rst,         //input  
