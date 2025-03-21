@@ -11,7 +11,7 @@
 
 `include "macros.vh"
 
-module mini_core_exe
+module mini_core_dip_exe
 import mini_core_pkg::*;
 (
     input  logic        Clock,

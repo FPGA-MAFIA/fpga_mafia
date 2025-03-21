@@ -15,12 +15,13 @@
 ../../../source/common/mem.sv
 
 //RTL FIles
+../../../source/idu/idu.sv
 ../../../source/mini_core/mini_core_if.sv
 ../../../source/mini_core/mini_core_ctrl.sv
 ../../../source/mini_core/mini_core_rf.sv
 ../../../source/mini_core/mini_core_exe.sv
 ../../../source/mini_core/mini_core_mem_acs.sv
 ../../../source/mini_core/mini_core_wb.sv
-../../../source/mini_core/mini_core.sv
+../../../source/mini_core_di/mini_core_di.sv
 ../../../source/mini_core/mini_core_top.sv
 ../../../source/mini_core/mini_mem_wrap.sv

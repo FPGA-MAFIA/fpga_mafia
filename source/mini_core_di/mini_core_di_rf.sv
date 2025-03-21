@@ -24,11 +24,19 @@ import mini_core_pkg::*;
     input  logic [31:0] PcQ101H,
     input  logic [31:0] ImmediateQ101H,
     input  logic [31:0] RegWrDataQ104H,
+    input  logic        ReadyQ202H,
+    input  logic [31:0] PcQ201H,
+    input  logic [31:0] ImmediateQ201H,
+    input  logic [31:0] RegWrDataQ204H,
     // output data path
     output logic [31:0] PcQ102H,
     output logic [31:0] ImmediateQ102H,
     output logic [31:0] RegRdData1Q102H,
     output logic [31:0] RegRdData2Q102H
+    output logic [31:0] PcQ202H,
+    output logic [31:0] ImmediateQ202H,
+    output logic [31:0] RegRdData1Q202H,
+    output logic [31:0] RegRdData2Q202H
 );
 
 

@@ -19,6 +19,7 @@ import mini_core_pkg::*;
 );
 
 // ---- Data-Path signals ----
+// ---- issue 1 ----
 logic [31:0]  PcQ101H, PcQ102H;
 logic [31:0]  PcPlus4Q103H, PcPlus4Q104H;
 logic [31:0]  ImmediateQ101H, ImmediateQ102H;
@@ -27,6 +28,15 @@ logic [31:0]  PreRegRdData1Q102H, RegRdData1Q102H;
 logic [31:0]  PreRegRdData2Q102H, RegRdData2Q102H;
 logic [31:0]  RegWrDataQ104H; 
 logic [31:0]  DMemWrDataQ103H;
+// ---- issue 2 ----
+logic [31:0]  PcQ201H, PcQ202H;
+logic [31:0]  PcPlus4Q203H, PcPlus4Q204H;
+logic [31:0]  ImmediateQ201H, ImmediateQ202H;
+logic [31:0]  AluOutQ202H, AluOutQ203H, AluOutQ204H;
+logic [31:0]  PreRegRdData1Q202H, RegRdData1Q202H;
+logic [31:0]  PreRegRdData2Q202H, RegRdData2Q202H;
+logic [31:0]  RegWrDataQ204H; 
+
 
 // Control bits
 logic         BranchCondMetQ102H;
@@ -34,6 +44,11 @@ logic         ReadyQ100H;
 logic         ReadyQ102H;
 logic         ReadyQ103H;
 logic         ReadyQ104H;
+logic         ReadyQ200H;
+logic         ReadyQ202H;
+logic         ReadyQ203H;
+logic         ReadyQ204H;
+
 t_mini_ctrl   Ctrl;
 t_ctrl_if     CtrlIf;
 t_ctrl_rf     CtrlRf;
@@ -59,15 +74,19 @@ t_ctrl_wb     CtrlWb;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //IDU
 
-mini_core_di_if mini_core_di_if (
+mini_core_di_idu mini_core_di_idu (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
+  .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,
+  .ReadyQ201H   (ReadyQ201H  ), // input  logic        ReadyQ201H,
   .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
+  .PcQ100H      (PcQ200H     ), // output logic [31:0] PcQ200H,
+  .PcQ101H      (PcQ201H     ) // output logic [31:0]  PcQ201H
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,6 +112,8 @@ mini_core_di_ctrl mini_core_di_ctrl (
   // input instruction 
   .PreInstructionQ101H  (PreInstructionQ101H), //input
   .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
+  .PreInstructionQ201H  (PreInstructionQ201H), //input
+  .PcQ201H              (PcQ201H), // output logic [31:0] PcQ101H
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input
   .DMemReady            (DMemReady), //input
@@ -102,6 +123,11 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .ReadyQ102H           (ReadyQ102H), //  output 
   .ReadyQ103H           (ReadyQ103H), //  output 
   .ReadyQ104H           (ReadyQ104H), //  output 
+  .ReadyQ200H           (ReadyQ200H), //  output 
+  .ReadyQ201H           (ReadyQ201H), //  output 
+  .ReadyQ202H           (ReadyQ202H), //  output 
+  .ReadyQ203H           (ReadyQ203H), //  output 
+  .ReadyQ204H           (ReadyQ204H), //  output 
   // output ctrl signals
   .CtrlIf               (CtrlIf             ), //output
   .CtrlRf               (CtrlRf             ), //output
@@ -110,6 +136,7 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
   .ImmediateQ101H       (ImmediateQ101H     ) //output
+  .ImmediateQ201H       (ImmediateQ201H     ) //output
 );
 
 mini_core_di_rf 
@@ -119,15 +146,23 @@ mini_core_di_rf (
   .Rst              (Rst),            // input 
   .Ctrl             (CtrlRf),         // input
   .ReadyQ102H       (ReadyQ102H),     // input
+  .ReadyQ102H       (ReadyQ202H),     // input
   // input data path
   .ImmediateQ101H   (ImmediateQ101H), // input
   .PcQ101H          (PcQ101H),        // input  
   .RegWrDataQ104H   (RegWrDataQ104H), // input 
+  .ImmediateQ201H   (ImmediateQ201H), // input
+  .PcQ201H          (PcQ201H),        // input  
+  .RegWrDataQ204H   (RegWrDataQ204H), // input 
   // output data path
   .PcQ102H          (PcQ102H),        // output   
   .ImmediateQ102H   (ImmediateQ102H), // output
   .RegRdData1Q102H  (RegRdData1Q102H),// output
   .RegRdData2Q102H  (RegRdData2Q102H) // output
+  .PcQ102H          (PcQ202H),        // output   
+  .ImmediateQ102H   (ImmediateQ202H), // output
+  .RegRdData1Q102H  (RegRdData1Q202H),// output
+  .RegRdData2Q102H  (RegRdData2Q202H) // output
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

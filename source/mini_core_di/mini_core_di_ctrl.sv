@@ -19,6 +19,8 @@ import mini_core_pkg::*;
     // input instruction 
     input   logic [31:0] PreInstructionQ101H,
     input   logic [31:0] PcQ101H,
+    input   logic [31:0] PreInstructionQ201H,
+    input   logic [31:0] PcQ201H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
     input   logic        DMemReady,
@@ -28,6 +30,11 @@ import mini_core_pkg::*;
     output  logic        ReadyQ102H,
     output  logic        ReadyQ103H,
     output  logic        ReadyQ104H,
+    output  logic        ReadyQ200H,
+    output  logic        ReadyQ201H,
+    output  logic        ReadyQ202H,
+    output  logic        ReadyQ203H,
+    output  logic        ReadyQ204H,
     // output ctrl signals
     output var t_ctrl_if    CtrlIf,
     output var t_ctrl_rf    CtrlRf,
@@ -35,7 +42,9 @@ import mini_core_pkg::*;
     output var t_ctrl_mem   CtrlMem,
     output var t_ctrl_wb    CtrlWb,
     // output data path signals
-    output  logic [31:0] ImmediateQ101H 
+    output  logic [31:0] ImmediateQ101H,
+    output  logic [31:0] ImmediateQ201H 
+
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
