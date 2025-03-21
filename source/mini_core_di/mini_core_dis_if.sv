@@ -5,22 +5,20 @@ module mini_core_dis_if
 import mini_core_pkg::*;
 (
     input  logic        Clock,
-    input  logic        Rst,
-
-    input logic [31:0]  NextPcQ200H  // Instruction for secondary issue
+    input  logic        Rst,    
+    input  var t_ctrl_if    Ctrl,
+    input  logic [31:0] PreLastPcIssuedQ101
     input  logic        ReadyQ200H,
-    input  logic        ReadyQ201H,
-    
-    output logic [31:0] PcQ200H,
-    output logic [31:0] PcQ201H
+
+    output logic [31:0] PcQ200H
+
 );
 
+logic [31:0] PcPlus4Q200H;
 logic [31:0] NextPcQnnnH;
-
-assign NextPcQnnnH  =  issue_instr2;
+assign PcPlus8Q200H = PreLastPcIssuedQ101 + 3'h8;
+assign AluOutQ102Plus4 = AluOutQ102H + 3'h4;
+assign NextPcQnnnH  = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102Plus4 : PcPlus4Q200H;
 `MAFIA_EN_RST_DFF(PcQ200H, NextPcQnnnH, Clock, ReadyQ200H, Rst)
-
-// Q200H to Q201H Flip Flops. 
-`MAFIA_EN_DFF(PcQ201H, PcQ200H, Clock, ReadyQ201H)
 
 endmodule

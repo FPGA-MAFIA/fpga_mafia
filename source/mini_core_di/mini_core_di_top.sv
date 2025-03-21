@@ -65,7 +65,8 @@ mini_mem_di_wrap mini_mem_di_wrap(
 // i_mem
  .ReadyQ101H            (ReadyQ101H), // input logic        ReadyQ101H,          // To I_MEM
  .PcQ100H               (PcQ100H),             //input  logic [31:0] PcQ100H,        //curr_pc    ,
- .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction,
+ .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction 1,
+ .PreInstructionQ201H   (PreInstructionQ201H), //output logic [31:0] PreInstructionQ201H, //instruction 2,
 // d_mem
  .DMemWrDataQ103H       (DMemWrDataQ103H),     // input  logic [31:0] DMemWrDataQ103H,     // To D_MEM
  .DMemAddressQ103H      (DMemAddressQ103H),    // input  logic [31:0] DMemAddressQ103H,    // To D_MEM

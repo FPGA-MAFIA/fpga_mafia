@@ -9,9 +9,13 @@ import mini_core_pkg::*;
     input  logic        Clock,
     input  logic        Rst,
     // Instruction Memory
-    output logic       ReadyQ101H,
+    output logic        ReadyQ101H,
     output logic [31:0] PcQ100H,             // To I_MEM
+    output logic        ReadyQ201H,
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
+    input  logic [31:0] PreInstructionQ201H, // From I_MEM
+    input  logic [31:0] PreInstructionQ101H_issued, // From idu to ctrl
+    input  logic [31:0] PreInstructionQ201H_issued, // From idu to ctrl
     // Data Memory
     input  logic          DMemReady,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
@@ -39,6 +43,7 @@ logic [31:0]  RegWrDataQ204H;
 
 
 // Control bits
+logic         issue2ValidN;
 logic         BranchCondMetQ102H;
 logic         ReadyQ100H;
 logic         ReadyQ102H;
@@ -70,23 +75,34 @@ t_ctrl_wb     CtrlWb;
 // -----------------
 // 1. Send the PC (program counter) to the I_MEM
 // 2. Calc/Set the NextPc
+// 3. Issue instructions to each issue
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-//IDU
 
 mini_core_di_idu mini_core_di_idu (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
+
+  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
+
+  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
-  .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,
+  .PreInstructionQ101H (PreInstructionQ101H), // input  logic
+
+  .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,  
   .ReadyQ201H   (ReadyQ201H  ), // input  logic        ReadyQ201H,
-  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
-  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  .PreInstructionQ201H (PreInstructionQ201H), // input  logic
+
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
-  .PcQ100H      (PcQ200H     ), // output logic [31:0] PcQ200H,
-  .PcQ101H      (PcQ201H     ) // output logic [31:0]  PcQ201H
+  .PreInstructionQ101H_issued (PreInstructionQ101H_issued) // output logic
+
+  // .PcQ200H      (PcQ200H     ), // output logic [31:0] PcQ200H,
+  .PcQ201H      (PcQ201H     ) // output logic [31:0]  PcQ201H
+  .PreInstructionQ201H_issued (PreInstructionQ201H_issued) // output logic
+
+  .issue2ValidN(issue2ValidN)
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,9 +126,9 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .Rst                  (Rst    ), //input
   .Clock                (Clock  ), //input
   // input instruction 
-  .PreInstructionQ101H  (PreInstructionQ101H), //input
+  .PreInstructionQ101H  (PreInstructionQ101H_issued), //input
   .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
-  .PreInstructionQ201H  (PreInstructionQ201H), //input
+  .PreInstructionQ201H  (PreInstructionQ201H_issued), //input
   .PcQ201H              (PcQ201H), // output logic [31:0] PcQ101H
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input

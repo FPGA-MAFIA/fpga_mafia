@@ -1,8 +1,13 @@
 module idu (
+    input logic [31:0] PC1_in;
+    input logic [31:0] PC2_in;
     input logic [31:0] instr1,       
-    input logic [31:0] instr2,      
+    input logic [31:0] instr2,
+    output logic [31:0] PC1_out;
+    output logic [31:0] PC2_out;      
     output logic [31:0] issue_instr1, // Instruction for primary issue
-    output logic [31:0] issue_instr2  // Instruction for secondary issue
+    output logic [31:0] issue_instr2,  // Instruction for secondary issue
+    output logic issue2ValidN
 );
 
     // Dependency Flags
@@ -43,24 +48,29 @@ module idu (
 
     assign mem_access_instr2 = (opcode2 == 7'b0000011) || // Load instructions
                                (opcode2 == 7'b0100011);  // Store instructions
-
-
-
     
     always_comb begin
         // Default assignments
         issue_instr1 = instr1;     
-        issue_instr2 = instr2;     
+        issue_instr2 = instr2;
+        PC1_out = PC1_in;
+        PC2_out = PC2_in;     
 
         // Ensure memory access in primary issue
         if (mem_access_instr2 && mem_access_instr1 == 0) begin
             issue_instr1 = instr2;
             issue_instr2 = instr1;
+            PC1_out = PC2_in;
+            PC2_out = PC1_in;   
         end
 
         // Stall the second pipe if there are dependencies, branch, or memory access
         if (raw_dependency || waw_dependency || branch_instr || mem_access_instr2) begin
-            issue_instr2 = 32'b0; 
+            issue_instr1 = instr1;
+            PC1_out = PC1_in;    
+            PC2_out = PC2_in; 
+            issue_instr2 = 32'b0;
+            issue2ValidN = 1'b1;
         end
     end
 
