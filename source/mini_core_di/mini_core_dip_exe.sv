@@ -70,6 +70,8 @@ assign Hazard1Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegW
 assign Hazard2Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q102H != 5'b0);
 assign Hazard1Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q102H != 5'b0);
 assign Hazard2Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc2Q102H != 5'b0);
+// FIXME - Abd: need to add Hazard detection for multi issue use
+
 // Forwarding unite
 assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
                          Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104

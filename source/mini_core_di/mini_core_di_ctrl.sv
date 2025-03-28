@@ -21,6 +21,7 @@ import mini_core_pkg::*;
     input   logic [31:0] PcQ101H,
     input   logic [31:0] PreInstructionQ201H,
     input   logic [31:0] PcQ201H,
+    input   logic Issue2ValidNQ201H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
     input   logic        DMemReady,
@@ -44,7 +45,6 @@ import mini_core_pkg::*;
     // output data path signals
     output  logic [31:0] ImmediateQ101H,
     output  logic [31:0] ImmediateQ201H 
-
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,6 +111,17 @@ assign PreValidInstQ101H = flushQ102H          ? 1'b0 :
                            LoadHzrdDetectQ101H ? 1'b0 : 
                                                  1'b1 ;
 
+assign InstructionQ201H = flushQ102H          ? NOP :
+                          flushQ103H          ? NOP :
+                          LoadHzrdDetectQ101H ? NOP : // FIXME - Abd: need to change LoadHzrd to fire for both issues even if only one issue has Hzrd
+                                                PreInstructionQ201H;
+
+
+
+
+
+
+
 // End Load and Ctrl hazard detection
 assign OpcodeQ101H                = t_opcode'(InstructionQ101H[6:0]);
 assign Funct3Q101H                = InstructionQ101H[14:12];
@@ -140,6 +151,8 @@ assign CtrlQ101H.BranchOp         = t_branch_type'(Funct3Q101H);
 assign CtrlQ101H.RegDst           = InstructionQ101H[11:7];
 assign CtrlQ101H.RegSrc1          = InstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2          = InstructionQ101H[24:20];
+
+// FIXME - Abd: need to add Parallel issue control bits, necessiry for WB and Hzrd cases.
 
 logic ebreak_was_calledQ101H; 
 assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
@@ -192,11 +205,20 @@ always_comb begin
 end
 
 //FIXME - there are various reasons for back-pressure. Need to code it here
+// Q1
 assign ReadyQ104H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
 assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrdDetectQ101H); //
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
+// Q2
+assign ReadyQ204H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
+assign ReadyQ203H = (!CoreFreeze);
+assign ReadyQ202H = (!CoreFreeze);//
+assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H) && (!Issue2ValidNQ201H); //  FIXME - Abd: probably right need to validate
+assign ReadyQ200H = (!CoreFreeze) && ReadyQ201H;//
+
+
 // Sample the Ctrl bits though the pipe
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
@@ -212,6 +234,7 @@ assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
 
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
+assign CtrlIf.SelNextPcPlus4Q201H =   Issue2ValidNQ201H;
 
 //Register File Control Signals
 assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;

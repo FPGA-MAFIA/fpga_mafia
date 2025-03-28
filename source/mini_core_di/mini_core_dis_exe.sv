@@ -1,17 +1,6 @@
-//-----------------------------------------------------------------------------
-// Title            : 
-// Project          : mafia_asap
-//-----------------------------------------------------------------------------
-// File             : 
-// Original Author  : Amichai Ben-David
-// Code Owner       : 
-// Adviser          : Amichai Ben-David
-// Created          : 7/2023
-//-----------------------------------------------------------------------------
-
 `include "macros.vh"
 
-module mini_core_di_exe
+module mini_core_dis_exe
 import mini_core_pkg::*;
 (
     input  logic        Clock,
@@ -20,34 +9,30 @@ import mini_core_pkg::*;
     // Input Control Signals
     //===================
     input  var t_ctrl_exe   Ctrl,
-    input  logic        ReadyQ103H,
-    //===================
-    // Output Control Signals
-    //===================
-    output logic       BranchCondMetQ102H ,
+    input  logic        ReadyQ203H,
     //===================
     // Input Data path
     //===================
-    //Q102H
-    input logic [31:0]  PreRegRdData1Q102H,
-    input logic [31:0]  PreRegRdData2Q102H,
-    input logic [31:0]  PcQ102H,
-    input logic [31:0]  ImmediateQ102H,
-    //Q104H
-    input logic [31:0]  RegWrDataQ104H, // used for forwarding
+    //Q202H
+    input logic [31:0]  PreRegRdData1Q202H,
+    input logic [31:0]  PreRegRdData2Q202H,
+    input logic [31:0]  PcQ202H,
+    input logic [31:0]  ImmediateQ202H,
+    //Q204H
+    input logic [31:0]  RegWrDataQ204H, // used for forwarding
     //===================
     // output data path
     //===================
-    output logic [31:0] AluOutQ102H,
-    output logic [31:0] AluOutQ103H,
-    output logic [31:0] PcPlus4Q103H,
-    output logic [31:0] DMemWrDataQ103H
+    output logic [31:0] AluOutQ202H,
+    output logic [31:0] AluOutQ203H,
+    output logic [31:0] PcPlus4Q203H
+    // output logic [31:0] DMemWrDataQ203H // no memeory acces for issue 2
 );
 
-logic        Hazard1Data1Q102H, Hazard2Data1Q102H, Hazard1Data2Q102H, Hazard2Data2Q102H;
-logic [31:0] AluIn1Q102H, AluIn2Q102H;
-logic [4:0]  ShamtQ102H;
-logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
+logic        Hazard1Data1Q202H, Hazard2Data1Q202H, Hazard1Data2Q202H, Hazard2Data2Q202H;
+logic [31:0] AluIn1Q202H, AluIn2Q202H;
+logic [4:0]  ShamtQ202H;
+logic [31:0] RegRdData1Q202H, RegRdData2Q202H;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    _____  __     __   _____   _        ______          ____    __    ___    ___    _    _ 
 //   / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  |__ \  | |  | |
@@ -61,65 +46,51 @@ logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
 // -----------------
 // 1. Use the Imm/Registers to compute:
 //      a) data to write back to register.
-//      b) Calculate address for load/store
-//      c) Calculate branch/jump target.
-// 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Hazard Detection
-assign Hazard1Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc1Q102H != 5'b0);
-assign Hazard2Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q102H != 5'b0);
-assign Hazard1Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q102H != 5'b0);
-assign Hazard2Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc2Q102H != 5'b0);
-// Forwarding unite
-assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
-                                             PreRegRdData1Q102H; // Common Case - No Hazard
+assign Hazard1Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc1Q202H != 5'b0);
+assign Hazard2Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc1Q202H != 5'b0);
+assign Hazard1Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc2Q202H != 5'b0);
+assign Hazard2Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc2Q202H != 5'b0);
+// FIXME - Abd: need to add Hazard detection for multi issue use
 
-assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data2Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104 
-                                             PreRegRdData2Q102H; // Common Case - No Hazard
+// Forwarding unite
+assign RegRdData1Q202H = Hazard1Data1Q202H ? AluOutQ203H       : // Rd 202 After Wr 203
+                         Hazard2Data1Q202H ? RegWrDataQ204H    : // Rd 202 After Wr 204
+                                             PreRegRdData1Q202H; // Common Case - No Hazard
+
+assign RegRdData2Q202H = Hazard1Data2Q202H ? AluOutQ203H       : // Rd 202 After Wr 203
+                         Hazard2Data2Q202H ? RegWrDataQ204H    : // Rd 202 After Wr 204 
+                                             PreRegRdData2Q202H; // Common Case - No Hazard
 
 // End Take care to data hazard
-assign AluIn1Q102H = Ctrl.SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
-assign AluIn2Q102H = Ctrl.SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
+assign AluIn1Q202H = Ctrl.SelAluPcQ202H  ? PcQ202H          : RegRdData1Q202H;
+assign AluIn2Q202H = Ctrl.SelAluImmQ202H ? ImmediateQ202H   : RegRdData2Q202H;
 
 always_comb begin : alu_logic
-  ShamtQ102H      = AluIn2Q102H[4:0];
-  unique casez (Ctrl.AluOpQ102H) 
+  ShamtQ202H      = AluIn2Q202H[4:0];
+  unique casez (Ctrl.AluOpQ202H) 
     // Adder
-    ADD     : AluOutQ102H = AluIn1Q102H +   AluIn2Q102H;                            // ADD/LW/SW/AUIOC/JAL/JALR/BRANCH/
-    SUB     : AluOutQ102H = AluIn1Q102H + (~AluIn2Q102H) + 1'b1;                    // SUB
-    SLT     : AluOutQ102H = {31'b0, ($signed(AluIn1Q102H) < $signed(AluIn2Q102H))}; // SLT
-    SLTU    : AluOutQ102H = {31'b0 , AluIn1Q102H < AluIn2Q102H};                    // SLTU
+    ADD     : AluOutQ202H = AluIn1Q202H +   AluIn2Q202H;                            // ADD/LW/SW/AUIOC/JAL/JALR/BRANCH/
+    SUB     : AluOutQ202H = AluIn1Q202H + (~AluIn2Q202H) + 1'b1;                    // SUB
+    SLT     : AluOutQ202H = {31'b0, ($signed(AluIn1Q202H) < $signed(AluIn2Q202H))}; // SLT
+    SLTU    : AluOutQ202H = {31'b0 , AluIn1Q202H < AluIn2Q202H};                    // SLTU
     // Shifter
-    SLL     : AluOutQ102H = AluIn1Q102H << ShamtQ102H;                              // SLL
-    SRL     : AluOutQ102H = AluIn1Q102H >> ShamtQ102H;                              // SRL
-    SRA     : AluOutQ102H = $signed(AluIn1Q102H) >>> ShamtQ102H;                    // SRA
+    SLL     : AluOutQ202H = AluIn1Q202H << ShamtQ202H;                              // SLL
+    SRL     : AluOutQ202H = AluIn1Q202H >> ShamtQ202H;                              // SRL
+    SRA     : AluOutQ202H = $signed(AluIn1Q202H) >>> ShamtQ202H;                    // SRA
     // Bit wise operations
-    XOR     : AluOutQ102H = AluIn1Q102H ^ AluIn2Q102H;                              // XOR
-    OR      : AluOutQ102H = AluIn1Q102H | AluIn2Q102H;                              // OR
-    AND     : AluOutQ102H = AluIn1Q102H & AluIn2Q102H;                              // AND
-    default : AluOutQ102H = AluIn1Q102H + AluIn2Q102H;
+    XOR     : AluOutQ202H = AluIn1Q202H ^ AluIn2Q202H;                              // XOR
+    OR      : AluOutQ202H = AluIn1Q202H | AluIn2Q202H;                              // OR
+    AND     : AluOutQ202H = AluIn1Q202H & AluIn2Q202H;                              // AND
+    default : AluOutQ202H = AluIn1Q202H + AluIn2Q202H;
   endcase
-  if (Ctrl.LuiQ102H) AluOutQ102H = AluIn2Q102H;                                     // LUI
+  if (Ctrl.LuiQ202H) AluOutQ202H = AluIn2Q202H;                                     // LUI
 end
 
-always_comb begin : branch_comp
-  // Check branch condition
-  unique casez ({Ctrl.BranchOpQ102H})
-    BEQ     : BranchCondMetQ102H =  (RegRdData1Q102H == RegRdData2Q102H);                  // BEQ
-    BNE     : BranchCondMetQ102H = !(RegRdData1Q102H == RegRdData2Q102H);                  // BNE
-    BLT     : BranchCondMetQ102H =  ($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BLT
-    BGE     : BranchCondMetQ102H = !($signed(RegRdData1Q102H) < $signed(RegRdData2Q102H)); // BGE
-    BLTU    : BranchCondMetQ102H =  (RegRdData1Q102H < RegRdData2Q102H);                   // BLTU
-    BGEU    : BranchCondMetQ102H = !(RegRdData1Q102H < RegRdData2Q102H);                   // BGEU
-    default : BranchCondMetQ102H = 1'b0;
-  endcase
-end
-
-// Q102H to Q103H Flip Flops
-`MAFIA_EN_DFF(DMemWrDataQ103H     , RegRdData2Q102H     , Clock, ReadyQ103H)
-`MAFIA_EN_DFF(AluOutQ103H         , AluOutQ102H         , Clock, ReadyQ103H)
-`MAFIA_EN_DFF(PcPlus4Q103H        , (PcQ102H+32'd4)     , Clock, ReadyQ103H)
+// Q202H to Q203H Flip Flops
+`MAFIA_EN_DFF(DMemWrDataQ203H     , RegRdData2Q202H     , Clock, ReadyQ203H)
+`MAFIA_EN_DFF(AluOutQ203H         , AluOutQ202H         , Clock, ReadyQ203H)
+`MAFIA_EN_DFF(PcPlus4Q203H        , (PcQ202H+32'd4)     , Clock, ReadyQ203H)
 
 endmodule

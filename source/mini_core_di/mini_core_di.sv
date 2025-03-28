@@ -43,8 +43,8 @@ logic [31:0]  RegWrDataQ204H;
 
 
 // Control bits
-logic         issue2ValidN;
 logic         BranchCondMetQ102H;
+logic         Issue2ValidNQ201H;
 logic         ReadyQ100H;
 logic         ReadyQ102H;
 logic         ReadyQ103H;
@@ -73,37 +73,22 @@ t_ctrl_wb     CtrlWb;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Instruction fetch
 // -----------------
-// 1. Send the PC (program counter) to the I_MEM
-// 2. Calc/Set the NextPc
-// 3. Issue instructions to each issue
+// 1. Send the PC (program counter) to the I_MEM.
+// 2. Calc/Set the NextPc.
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-mini_core_di_idu mini_core_di_idu (
+mini_core_di_if mini_core_di_if (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
-
-  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
-
-  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
-  .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
-  .PreInstructionQ101H (PreInstructionQ101H), // input  logic
-
-  .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,  
-  .ReadyQ201H   (ReadyQ201H  ), // input  logic        ReadyQ201H,
-  .PreInstructionQ201H (PreInstructionQ201H), // input  logic
-
+  .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,
+  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
+  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
-  .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
-  .PreInstructionQ101H_issued (PreInstructionQ101H_issued) // output logic
-
-  // .PcQ200H      (PcQ200H     ), // output logic [31:0] PcQ200H,
-  .PcQ201H      (PcQ201H     ) // output logic [31:0]  PcQ201H
-  .PreInstructionQ201H_issued (PreInstructionQ201H_issued) // output logic
-
-  .issue2ValidN(issue2ValidN)
+  .PcQ200H      (PcQ200H)
 );
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    __   _    _ 
@@ -120,8 +105,30 @@ mini_core_di_idu mini_core_di_idu (
 // 2. Get the instruciton from I_MEM and use the decoder to set the Ctrl Bits.
 // 3. Use the rs1 & rs2 (RegSrc) to read the Register file data.
 // 4. construct the Immediate types.
+// 5. Issue instructions to each issue.
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
+mini_core_di_idu mini_core_di_idu (
+  .Clock        (Clock       ), // input  logic        Clock,
+  .Rst          (Rst         ), // input  logic        Rst,
+
+  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
+  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+
+  .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
+  .PreInstructionQ101H (PreInstructionQ101H), // input  logic
+  .ReadyQ201H   (ReadyQ201H  ), // input  logic        ReadyQ201H,
+  .PreInstructionQ201H (PreInstructionQ201H), // input  logic
+
+  .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
+  .PreInstructionQ101H_issued (PreInstructionQ101H_issued) // output logic
+  .PcQ201H      (PcQ201H     ) // output logic [31:0]  PcQ201H
+  .PreInstructionQ201H_issued (PreInstructionQ201H_issued) // output logic
+
+  .issue2ValidN(Issue2ValidNQ201H) // output logic for Ctrl
+);
+
 mini_core_di_ctrl mini_core_di_ctrl (
   .Rst                  (Rst    ), //input
   .Clock                (Clock  ), //input
@@ -130,6 +137,7 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
   .PreInstructionQ201H  (PreInstructionQ201H_issued), //input
   .PcQ201H              (PcQ201H), // output logic [31:0] PcQ101H
+  ,Issue2ValidNQ201H    (Issue2ValidNQ201H)
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input
   .DMemReady            (DMemReady), //input
@@ -198,7 +206,7 @@ mini_core_di_rf (
 //      c) Calculate branch/jump target.
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_di_exe mini_core_di_exe (
+mini_core_dip_exe mini_core_dip_exe (
   .Clock               (Clock              ), //  input 
   .Rst                 (Rst                ), //  input 
   // Input Control Signals
@@ -220,6 +228,28 @@ mini_core_di_exe mini_core_di_exe (
   .PcPlus4Q103H        (PcPlus4Q103H       ), //  output
   .DMemWrDataQ103H     (DMemWrDataQ103H    )  //  output
 );
+
+mini_core_dis_exe mini_core_dis_exe (
+  .Clock               (Clock              ), //  input 
+  .Rst                 (Rst                ), //  input 
+  // Input Control Signals
+  .Ctrl                (CtrlExe            ), //  input 
+  .ReadyQ203H          (ReadyQ203H         ), //  input
+  // Input Data path
+  //Q102H
+  .PreRegRdData1Q202H  (RegRdData1Q202H ), //  input 
+  .PreRegRdData2Q202H  (RegRdData2Q202H ), //  input 
+  .PcQ202H             (PcQ202H            ), //  input 
+  .ImmediateQ202H      (ImmediateQ202H     ), //  input 
+  //Q104H
+  .RegWrDataQ204H      (RegWrDataQ204H     ), //  input 
+  // output data path
+  .AluOutQ202H         (AluOutQ202H        ), //  output
+  .AluOutQ203H         (AluOutQ203H        ), //  output
+  .PcPlus4Q203H        (PcPlus4Q203H       ) //  output
+
+);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 
@@ -264,7 +294,7 @@ mini_core_di_mem_acs mini_core_di_mem_access (
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_di_wb mini_core_di_wb
+mini_core_dip_wb mini_core_dip_wb
 ( 
  .Clock     (Clock ), // input  logic           Clock,       //input 
  .Rst       (Rst   ), // input  logic           Rst,         //input  
@@ -274,9 +304,23 @@ mini_core_di_wb mini_core_di_wb
  .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ104H, //input
  .AluOutQ104H     (AluOutQ104H     ), // input  logic [31:0]    AluOutQ104H,     //input
  .PcPlus4Q104H    (PcPlus4Q104H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
+ .PcPlus4Q104H    (PcPlus8Q104H    ), // input  logic [31:0]    PcPlus8Q104H,    //input
  // data path output
  .RegWrDataQ104H  (RegWrDataQ104H  )  // output logic [31:0]    RegWrDataQ104H  //output
+);
+
+mini_core_dis_wb mini_core_dis_wb
+( 
+ .Clock     (Clock ), // input  logic           Clock,       //input 
+ .Rst       (Rst   ), // input  logic           Rst,         //input  
+ // Ctrl
+ .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
+ // Data path input
+ .AluOutQ204H     (AluOutQ204H     ), // input  logic [31:0]    AluOutQ204H,     //input
+ // data path output
+ .RegWrDataQ204H  (RegWrDataQ204H  )  // output logic [31:0]    RegWrDataQ204H  //output
 
 );
+
 
 endmodule // Module mafia_asap_5pl
