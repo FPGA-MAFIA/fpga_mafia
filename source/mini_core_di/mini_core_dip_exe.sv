@@ -41,6 +41,7 @@ import mini_core_pkg::*;
     output logic [31:0] AluOutQ102H,
     output logic [31:0] AluOutQ103H,
     output logic [31:0] PcPlus4Q103H,
+    output logic [31:0] PcPlus8Q103H,
     output logic [31:0] DMemWrDataQ103H
 );
 
@@ -123,5 +124,7 @@ end
 `MAFIA_EN_DFF(DMemWrDataQ103H     , RegRdData2Q102H     , Clock, ReadyQ103H)
 `MAFIA_EN_DFF(AluOutQ103H         , AluOutQ102H         , Clock, ReadyQ103H)
 `MAFIA_EN_DFF(PcPlus4Q103H        , (PcQ102H+32'd4)     , Clock, ReadyQ103H)
+`MAFIA_EN_DFF(PcPlus8Q103H        , (PcQ102H+32'd8)     , Clock, ReadyQ103H)
+
 
 endmodule

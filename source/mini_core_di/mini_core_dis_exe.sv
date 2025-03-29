@@ -24,8 +24,7 @@ import mini_core_pkg::*;
     // output data path
     //===================
     output logic [31:0] AluOutQ202H,
-    output logic [31:0] AluOutQ203H,
-    output logic [31:0] PcPlus4Q203H
+    output logic [31:0] AluOutQ203H
     // output logic [31:0] DMemWrDataQ203H // no memeory acces for issue 2
 );
 
@@ -91,6 +90,5 @@ end
 // Q202H to Q203H Flip Flops
 `MAFIA_EN_DFF(DMemWrDataQ203H     , RegRdData2Q202H     , Clock, ReadyQ203H)
 `MAFIA_EN_DFF(AluOutQ203H         , AluOutQ202H         , Clock, ReadyQ203H)
-`MAFIA_EN_DFF(PcPlus4Q203H        , (PcQ202H+32'd4)     , Clock, ReadyQ203H)
 
 endmodule

@@ -113,7 +113,23 @@ typedef struct packed {
     t_e_sel_wb  e_SelWrBack;
     logic [31:0] Pc;            //Used for debug - not really a control signal
     logic [31:0] Instruction;   //Used for debug - not really a control signal
-} t_mini_ctrl;
+} t_mini_ctrl_dip;
+
+typedef struct packed {
+    logic       SelAluPc;
+    logic       SelAluImm;
+    logic       Lui;
+    logic       RegWrEn;
+    logic [4:0] RegDst;
+    logic [4:0] RegSrc1;
+    logic [4:0] RegSrc2;
+    t_alu_op    AluOp;
+    t_opcode    Opcode;
+    t_e_sel_wb  e_SelWrBack;
+    logic [31:0] Pc;            //Used for debug - not really a control signal
+    logic [31:0] Instruction;   //Used for debug - not really a control signal
+} t_mini_ctrl_dis;
+
 
 typedef struct packed {
     logic SelNextPcAluOutQ102H;
@@ -146,8 +162,6 @@ typedef struct packed {
     logic       DMemRdEnQ103H;  
     logic [3:0] DMemByteEnQ103H;
 } t_ctrl_mem;
-
-
 
 typedef struct packed {
     logic [3:0] ByteEnQ104H;

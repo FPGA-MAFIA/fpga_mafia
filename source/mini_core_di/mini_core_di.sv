@@ -83,10 +83,10 @@ mini_core_di_if mini_core_di_if (
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,
-  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
+  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
-  .PcQ200H      (PcQ200H)
+  .PcQ200H      (PcQ200H     )  // output logic [31:0] PcQ200H,
 );
 
 
@@ -114,7 +114,6 @@ mini_core_di_idu mini_core_di_idu (
   .Rst          (Rst         ), // input  logic        Rst,
 
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
-  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
 
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .PreInstructionQ101H (PreInstructionQ101H), // input  logic
@@ -236,18 +235,16 @@ mini_core_dis_exe mini_core_dis_exe (
   .Ctrl                (CtrlExe            ), //  input 
   .ReadyQ203H          (ReadyQ203H         ), //  input
   // Input Data path
-  //Q102H
+  //Q202H
   .PreRegRdData1Q202H  (RegRdData1Q202H ), //  input 
   .PreRegRdData2Q202H  (RegRdData2Q202H ), //  input 
   .PcQ202H             (PcQ202H            ), //  input 
   .ImmediateQ202H      (ImmediateQ202H     ), //  input 
-  //Q104H
+  //Q204H
   .RegWrDataQ204H      (RegWrDataQ204H     ), //  input 
   // output data path
   .AluOutQ202H         (AluOutQ202H        ), //  output
-  .AluOutQ203H         (AluOutQ203H        ), //  output
-  .PcPlus4Q203H        (PcPlus4Q203H       ) //  output
-
+  .AluOutQ203H         (AluOutQ203H        )  //  output
 );
 
 
@@ -264,7 +261,7 @@ mini_core_dis_exe mini_core_dis_exe (
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_di_mem_acs mini_core_di_mem_access (
+mini_core_dip_mem_acs mini_core_dip_mem_access (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -272,14 +269,26 @@ mini_core_di_mem_acs mini_core_di_mem_access (
   .ReadyQ104H         (ReadyQ104H),     //input
   // Input Data path
   .PcPlus4Q103H       (PcPlus4Q103H),   //input
+  .PcPlus8Q103H       (PcPlus8Q103H),   //input
   .AluOutQ103H        (AluOutQ103H),    //input
   .DMemWrDataQ103H    (DMemWrDataQ103H),//input
   // data path output
   .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
   .PcPlus4Q104H       (PcPlus4Q104H),   //input
+  .PcPlus8Q104H       (PcPlus8Q104H),   //input
   .AluOutQ104H        (AluOutQ104H)     //input
 );
 
+mini_core_dis_mem_dly mini_core_dis_mem_delay (
+  .Clock              (Clock),          //input 
+  .Rst                (Rst),            //input  
+  // Input Control Signals
+  .ReadyQ204H         (ReadyQ204H),     //input
+  // Delay Signals input
+  .AluOutQ203H        (AluOutQ203H),    //input
+  // Delay Signals output
+  .AluOutQ204H        (AluOutQ204H)     //input
+);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 

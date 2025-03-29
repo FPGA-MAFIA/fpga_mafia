@@ -11,19 +11,17 @@
 
 `include "macros.vh"
 
-module mini_core_dis_wb
+module mini_core_dip_mem_acs
 import mini_core_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
-  // Ctrl
-  input var  t_ctrl_wb       Ctrl, //input
-  // Data path input
-  input  logic [31:0]    AluOutQ104H,     //input
-  // data path output
-  output logic [31:0]    RegWrDataQ104H  //output
-
+  // ctrl
+  input  logic           ReadyQ204H,  //input
+  // delay
+  input  logic [31:0]    AluOutQ203H, //input
+  output logic [31:0]    AluOutQ204H //output
 );
 
-// ---- Select what write to the register file ----
-assign RegWrDataQ104H = (Ctrl.e_SelWrBackQ204H == WB_ALU)  ? AluOutQ104H : 32'b0;
+`MAFIA_EN_DFF(AluOutQ204H,  AluOutQ203H , Clock, ReadyQ204H)
+
 endmodule
