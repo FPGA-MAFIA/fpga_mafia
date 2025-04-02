@@ -137,13 +137,20 @@ typedef struct packed {
 } t_ctrl_if;
 
 typedef struct packed {
+    // Q1
     logic [4:0] RegSrc1Q101H;
     logic [4:0] RegSrc2Q101H;
     logic [4:0] RegDstQ104H;
     logic       RegWrEnQ104H;
+    // Q2
+    logic [4:0] RegSrc1Q201H;
+    logic [4:0] RegSrc2Q201H;
+    logic [4:0] RegDstQ204H;
+    logic       RegWrEnQ204H;
 } t_ctrl_rf;
 
 typedef struct packed {
+    // Q1
     logic [4:0] RegSrc1Q102H;
     logic [4:0] RegSrc2Q102H;
     t_alu_op    AluOpQ102H;
@@ -155,6 +162,17 @@ typedef struct packed {
     logic       RegWrEnQ104H;
     logic       SelAluPcQ102H;
     logic       SelAluImmQ102H;
+    // Q2
+    logic [4:0] RegSrc1Q202H;
+    logic [4:0] RegSrc2Q202H;
+    t_alu_op    AluOpQ202H;
+    logic       LuiQ202H;
+    logic [4:0] RegDstQ203H;
+    logic [4:0] RegDstQ204H;
+    logic       RegWrEnQ203H;
+    logic       RegWrEnQ204H;
+    logic       SelAluPcQ202H;
+    logic       SelAluImmQ202H;
 } t_ctrl_exe;
 
 typedef struct packed {
@@ -164,9 +182,12 @@ typedef struct packed {
 } t_ctrl_mem;
 
 typedef struct packed {
+    // Q1
     logic [3:0] ByteEnQ104H;
     logic [3:0] SignExtQ104H;
     t_e_sel_wb    e_SelWrBackQ104H;
+    // Q2
+    t_e_sel_wb    e_SelWrBackQ204H;
 } t_ctrl_wb;
 
 typedef struct packed {

@@ -59,6 +59,7 @@ import mini_core_pkg::*;
 // Decode
 // -----------------
 // 1. Load hazard detection.
+// 2. Issue usage detection.
 // 2. Get the instruction from I_MEM and use the decoder to set the Ctrl Bits.
 // 3. Use the rs1 & rs2 (RegSrc) to read the Register file data.
 // 4. construct the Immediate types.
@@ -116,11 +117,13 @@ assign PreValidInstQ101H = flushQ102H          ? 1'b0 :
 assign InstructionQ201H = flushQ102H          ? NOP :
                           flushQ103H          ? NOP :
                           LoadHzrdDetectQ101H ? NOP : // FIXME - Abd: LoadHzrd should fire for both issues
-                                                PreInstructionQ201H;
-
-
-
-
+                          !Issue2ValidNQ201H  ? NOP : // FIXME - Abd: when second issue not in use instruction should be NOP
+                                                PreInstructionQ201H;                                             
+assign PreValidInstQ201H = flushQ102H          ? 1'b0 : 
+                           flushQ103H          ? 1'b0 : 
+                           LoadHzrdDetectQ101H ? 1'b0 : 
+                           !Issue2ValidNQ201H  ? 1'b0 : // FIXME - Abd: when second issue not in use instruction should not Valid
+                                                 1'b1 ;
 
 
 
@@ -286,14 +289,15 @@ assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 assign ReadyQ204H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ203H = (!CoreFreeze);
 assign ReadyQ202H = (!CoreFreeze);//
-assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H || LoadHzrdDetectQ101H || (!Issue2ValidNQ201H)); //  FIXME - Abd: probably wrong need to validate
+assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H || LoadHzrdDetectQ101H); //  FIXME - Abd: probably right need to validate
 assign ReadyQ200H = (!CoreFreeze) && ReadyQ201H;//
 
 
-// Sample the Ctrl bits though the pipe Q1 + Q2
+// Sample the Ctrl bits though the pipe Q1 
 `MAFIA_EN_RST_DFF(CtrlQ102H, CtrlQ101H, Clock, ReadyQ102H, Rst )
 `MAFIA_EN_DFF    (CtrlQ103H, CtrlQ102H, Clock, ReadyQ103H )
 `MAFIA_EN_DFF    (CtrlQ104H, CtrlQ103H, Clock, ReadyQ104H )
+// Sample the Ctrl bits though the pipe Q2
 `MAFIA_EN_RST_DFF(CtrlQ202H, CtrlQ201H, Clock, ReadyQ202H, Rst )
 `MAFIA_EN_DFF    (CtrlQ203H, CtrlQ202H, Clock, ReadyQ203H )
 `MAFIA_EN_DFF    (CtrlQ204H, CtrlQ203H, Clock, ReadyQ204H )
@@ -320,13 +324,11 @@ assign ValidInstQ204H = ReadyQ204H && PreValidInstQ204H;
 // Instruction Fetch Control Signals
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
 assign CtrlIf.SelNextPcPlus4Q201H =   Issue2ValidNQ201H;
-
 //Register File Control Signals
 assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
 assign CtrlRf.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
 assign CtrlRf.RegDstQ104H   = CtrlQ104H.RegDst;
 assign CtrlRf.RegWrEnQ104H  = ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
-
 //Execute Control Signals
 assign CtrlExe.RegSrc1Q102H  = CtrlQ102H.RegSrc1;
 assign CtrlExe.RegSrc2Q102H  = CtrlQ102H.RegSrc2;
@@ -339,12 +341,10 @@ assign CtrlExe.RegWrEnQ104H  = CtrlQ104H.RegWrEn;
 assign CtrlExe.RegDstQ104H   = CtrlQ104H.RegDst;
 assign CtrlExe.SelAluPcQ102H = CtrlQ102H.SelAluPc;
 assign CtrlExe.SelAluImmQ102H= CtrlQ102H.SelAluImm;
-
 // Memory access Control Signals
 assign CtrlMem.DMemWrEnQ103H   = CtrlQ103H.DMemWrEn;  
 assign CtrlMem.DMemRdEnQ103H   = CtrlQ103H.DMemRdEn;  
 assign CtrlMem.DMemByteEnQ103H = CtrlQ103H.DMemByteEn;
-
 // Write Back Control Signals
 assign CtrlWb.ByteEnQ104H      = CtrlQ104H.DMemByteEn;
 assign CtrlWb.SignExtQ104H     = CtrlQ104H.SignExt;
@@ -356,7 +356,6 @@ assign CtrlRf.RegSrc1Q201H  = CtrlQ201H.RegSrc1;
 assign CtrlRf.RegSrc2Q201H  = CtrlQ201H.RegSrc2;
 assign CtrlRf.RegDstQ204H   = CtrlQ204H.RegDst;
 assign CtrlRf.RegWrEnQ204H  = ValidInstQ204H ? CtrlQ204H.RegWrEn : 1'b0;
-
 // Execute Control Signals
 assign CtrlExe.RegSrc1Q202H  = CtrlQ202H.RegSrc1;
 assign CtrlExe.RegSrc2Q202H  = CtrlQ202H.RegSrc2;
@@ -368,7 +367,6 @@ assign CtrlExe.RegWrEnQ204H  = CtrlQ204H.RegWrEn;
 assign CtrlExe.RegDstQ204H   = CtrlQ204H.RegDst;
 assign CtrlExe.SelAluPcQ202H = CtrlQ202H.SelAluPc;
 assign CtrlExe.SelAluImmQ202H= CtrlQ202H.SelAluImm;
-
 // Write Back Control Signals
 assign CtrlWb.e_SelWrBackQ204H = CtrlQ204H.e_SelWrBack;
 
