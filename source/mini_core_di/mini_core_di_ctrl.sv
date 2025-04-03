@@ -117,12 +117,12 @@ assign PreValidInstQ101H = flushQ102H          ? 1'b0 :
 assign InstructionQ201H = flushQ102H          ? NOP :
                           flushQ103H          ? NOP :
                           LoadHzrdDetectQ101H ? NOP : // FIXME - Abd: LoadHzrd should fire for both issues
-                          !Issue2ValidNQ201H  ? NOP : // FIXME - Abd: when second issue not in use instruction should be NOP
+                          Issue2ValidNQ201H  ? NOP : // FIXME - Abd: when second issue not in use instruction should be NOP
                                                 PreInstructionQ201H;                                             
 assign PreValidInstQ201H = flushQ102H          ? 1'b0 : 
                            flushQ103H          ? 1'b0 : 
                            LoadHzrdDetectQ101H ? 1'b0 : 
-                           !Issue2ValidNQ201H  ? 1'b0 : // FIXME - Abd: when second issue not in use instruction should not Valid
+                           Issue2ValidNQ201H  ? 1'b0 : // FIXME - Abd: when second issue not in use instruction should not Valid
                                                  1'b1 ;
 
 
@@ -143,9 +143,11 @@ assign CtrlQ101H.SelRegWrPc       = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR
 assign CtrlQ101H.SelAluPc         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);
 assign CtrlQ101H.SelAluImm        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
 assign CtrlQ101H.SelDMemWb        = (OpcodeQ101H == LOAD);
-assign CtrlQ101H.e_SelWrBack      = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR) ? WB_PC4  :
-                                    (OpcodeQ101H == LOAD)                         ? WB_DMEM :
-                                                                                    WB_ALU  ;
+assign CtrlQ101H.e_SelWrBack      = ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H > PcQ201H || Issue2ValidNQ201H) ? WB_PC4 :
+                                    ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H < PcQ201H && !Issue2ValidNQ201H) ? WB_PC8 :
+                                    (OpcodeQ101H == LOAD) ? WB_DMEM :
+                                                            WB_ALU  ;
+                                                                                   
 assign CtrlQ101H.Lui              = (OpcodeQ101H == LUI);
 assign CtrlQ101H.RegWrEn          = (OpcodeQ101H == LUI ) || (OpcodeQ101H == AUIPC) || (OpcodeQ101H == JAL)  || (OpcodeQ101H == JALR) ||
                                     (OpcodeQ101H == LOAD) || (OpcodeQ101H == I_OP)  || (OpcodeQ101H == R_OP) || (OpcodeQ101H == FENCE);

@@ -38,6 +38,7 @@ assign Core2DmemReqQ103H.RdEn    = Ctrl.DMemRdEnQ103H;
 assign Core2DmemReqQ103H.ByteEn  = Ctrl.DMemByteEnQ103H;
 
 `MAFIA_EN_DFF(PcPlus4Q104H, PcPlus4Q103H, Clock, ReadyQ104H)
+`MAFIA_EN_DFF(PcPlus8Q104H, PcPlus8Q103H, Clock, ReadyQ104H)  // FIXME abed ,mohammad
 `MAFIA_EN_DFF(AluOutQ104H,  AluOutQ103H , Clock, ReadyQ104H)
 
 endmodule

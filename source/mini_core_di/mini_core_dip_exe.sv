@@ -35,6 +35,8 @@ import mini_core_pkg::*;
     input logic [31:0]  ImmediateQ102H,
     //Q104H
     input logic [31:0]  RegWrDataQ104H, // used for forwarding
+    input logic [31:0]  RegWrDataQ204H, // used for forwarding
+    
     //===================
     // output data path
     //===================

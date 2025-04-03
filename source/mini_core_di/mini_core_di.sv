@@ -115,15 +115,18 @@ mini_core_di_idu mini_core_di_idu (
 
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
 
+  .PcQ100H      (PcQ100H     ), // input logic [31:0] PcQ100H,
+  .PcQ200H      (PcQ200H     ), // input logic [31:0] PcQ200H,
+
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .PreInstructionQ101H (PreInstructionQ101H), // input  logic
   .ReadyQ201H   (ReadyQ201H  ), // input  logic        ReadyQ201H,
   .PreInstructionQ201H (PreInstructionQ201H), // input  logic
 
-  .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
-  .PreInstructionQ101H_issued (PreInstructionQ101H_issued) // output logic
-  .PcQ201H      (PcQ201H     ) // output logic [31:0]  PcQ201H
-  .PreInstructionQ201H_issued (PreInstructionQ201H_issued) // output logic
+  .PcQ101H      (PcQ101H     ), // output logic [31:0] PcQ101H
+  .PreInstructionQ101H_issued (PreInstructionQ101H_issued), // output logic
+  .PcQ201H      (PcQ201H     ), // output logic [31:0]  PcQ201H
+  .PreInstructionQ201H_issued (PreInstructionQ201H_issued), // output logic
 
   .issue2ValidN(Issue2ValidNQ201H) // output logic for Ctrl
 );
@@ -218,9 +221,12 @@ mini_core_dip_exe mini_core_dip_exe (
   .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
   .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input 
   .PcQ102H             (PcQ102H            ), //  input 
-  .ImmediateQ102H      (ImmediateQ102H     ), //  input 
+  .ImmediateQ102H      (ImmediateQ102H     ), //  input   // add x1,x1,x2
+                                                          // NOP
+                                                          // add x1 x1 x2 
   //Q104H
   .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
+  .RegWrDataQ204H      (RegWrDataQ204H     ), //  input 
   // output data path
   .AluOutQ102H         (AluOutQ102H        ), //  output
   .AluOutQ103H         (AluOutQ103H        ), //  output
@@ -241,7 +247,9 @@ mini_core_dis_exe mini_core_dis_exe (
   .PcQ202H             (PcQ202H            ), //  input 
   .ImmediateQ202H      (ImmediateQ202H     ), //  input 
   //Q204H
+  .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
   .RegWrDataQ204H      (RegWrDataQ204H     ), //  input 
+
   // output data path
   .AluOutQ202H         (AluOutQ202H        ), //  output
   .AluOutQ203H         (AluOutQ203H        )  //  output

@@ -10,11 +10,14 @@ module mini_core_di_idu (
     // jmp feedback
     input  var t_ctrl_if    Ctrl,
 
+    input logic [31:0] PcQ100H,
+    input logic [31:0] PcQ200H,
+
     input  logic        ReadyQ101H,
-    input  logic        PreInstructionQ101H,
+    input  logic [31:0] PreInstructionQ101H,
 
     input  logic        ReadyQ201H,
-    input  logic        PreInstructionQ201H,
+    input  logic [31:0] PreInstructionQ201H,
 
     output logic [31:0] PcQ101H,
     output logic [31:0] PreInstructionQ101H_issued,
@@ -26,13 +29,13 @@ module mini_core_di_idu (
     output logic issue2ValidN
 );
 
-logic [31:0] PcQ200H;
+//logic [31:0] PcQ200H;
 logic [31:0] prePCQ101H;
 logic [31:0] prePCQ201H;
 
 idu idu (
-        .PC1_in(PcQ101H),
-        .PC2_in(PcQ201H),
+        .PC1_in(PcQ100H),
+        .PC2_in(PcQ200H),
         .instr1(PreInstructionQ101H),
         .instr2(PreInstructionQ201H),
         .issue_instr1(PreInstructionQ101H_issued),

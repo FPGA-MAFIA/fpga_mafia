@@ -19,6 +19,7 @@ import mini_core_pkg::*;
     input logic [31:0]  PcQ202H,
     input logic [31:0]  ImmediateQ202H,
     //Q204H
+    input logic [31:0]  RegWrDataQ104H, // used for forwarding
     input logic [31:0]  RegWrDataQ204H, // used for forwarding
     //===================
     // output data path
