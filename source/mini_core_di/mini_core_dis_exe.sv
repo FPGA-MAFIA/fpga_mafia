@@ -48,12 +48,12 @@ logic [31:0] RegRdData1Q202H, RegRdData2Q202H;
 // 1. Use the Imm/Registers to compute:
 //      a) data to write back to register.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Hazard Detection
+// Hazard Detection/Forwarding from Q2
 assign Hazard1Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q203 dst -> Q202 src 1
 assign Hazard2Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q204 dst -> Q202 src 1
 assign Hazard1Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q203 dst -> Q202 src 2
 assign Hazard2Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q204 dst -> Q202 src 2
-// FIXME - Abd: need to add Hazard detection for multi issue use
+// Hazard Detection/Forwarding from Q1
 assign Hazard3Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q103 dst -> Q202 src 1
 assign Hazard4Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q104 dst -> Q202 src 1
 assign Hazard3Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q103 dst -> Q202 src 2
