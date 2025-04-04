@@ -21,7 +21,9 @@ input  var t_fab_ready  fab_ready
 );
 
 logic [31:0] PcQ100H;             // To I_MEM
+logic [31:0] PcQ200H;             // To I_MEM
 logic [31:0] PreInstructionQ101H; // From I_MEM
+logic [31:0] PreInstructionQ201H; // From I_MEM
 logic [31:0] DMemWrDataQ103H;     // To D_MEM
 logic [31:0] DMemAddressQ103H;    // To D_MEM
 logic [3:0]  DMemByteEnQ103H;     // To D_MEM
@@ -41,7 +43,9 @@ mini_core_di (
    // Instruction Memory
    .ReadyQ101H          ( ReadyQ101H    ), // output logic        ReadyQ101H,          // To I_MEM
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
+   .PcQ200H             ( PcQ200H            ), // output logic [31:0] PcQ100H + 3h'4,      // To I_MEM
    .PreInstructionQ101H ( PreInstructionQ101H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM
+   .PreInstructionQ201H ( PreInstructionQ201H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM
    // Data Memory
    .DMemReady           ( DMemReady     ), // input  logic        DMemReady  , // From D_MEM
    .Core2DmemReqQ103H   ( Core2DmemReqQ103H  ), // output logic [31:0] DMemWrDataQ103H,     // To D_MEM
@@ -64,7 +68,9 @@ mini_mem_di_wrap mini_mem_di_wrap(
 // //============================================
 // i_mem
  .ReadyQ101H            (ReadyQ101H), // input logic        ReadyQ101H,          // To I_MEM
+ .ReadyQ201H            (ReadyQ201H), // input logic        ReadyQ101H,          // To I_MEM
  .PcQ100H               (PcQ100H),             //input  logic [31:0] PcQ100H,        //curr_pc    ,
+ .PcQ200H               (PcQ200H),             //input  logic [31:0] PcQ200H,        //curr_pc    ,
  .PreInstructionQ101H   (PreInstructionQ101H), //output logic [31:0] PreInstructionQ101H, //instruction 1,
  .PreInstructionQ201H   (PreInstructionQ201H), //output logic [31:0] PreInstructionQ201H, //instruction 2,
 // d_mem

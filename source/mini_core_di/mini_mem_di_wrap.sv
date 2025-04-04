@@ -27,8 +27,11 @@ import mini_core_pkg::*;
                 //     i_mem
                 //============================================
                 input  logic        ReadyQ101H,
-                input  logic [31:0] PcQ100H,             //cur_pc    ,
+                input  logic        ReadyQ201H,
+                input  logic [31:0] PcQ100H,             //cur_pc     ,
+                input  logic [31:0] PcQ200H,             //cur_pc + 3h'4,
                 output logic [31:0] PreInstructionQ101H, //instruction,
+                output logic [31:0] PreInstructionQ201H, //instruction,
                 //============================================
                 //     d_mem
                 //============================================
@@ -94,35 +97,50 @@ assign F2C_CrMemHitQ503H  = 1'b0; //FIXME - Add CR_MEM offset hit indication
 assign F2C_CrMemWrEnQ503H = 1'b0; //FIXME - Add CR_MEM offset hit indication
 
 logic [31:0] InstructionQ101H; //instruction,
+logic [31:0] InstructionQ201H; //instruction,
 //==================================
 // Instruction Memory
 //==================================
 //This is the instruction memory
-mem  #(
+mem_di  #(
   .WORD_WIDTH(32),                //FIXME - Parametrize!!
   .ADRS_WIDTH(I_MEM_ADRS_MSB_MINI+1)   //FIXME - Parametrize!!
 ) i_mem  (
     .clock    (Clock),
-    //Core interface (instruction fitch)
+    //Core interface (instruction fitch) Q1
     .address_a  (PcQ100H[I_MEM_ADRS_MSB_MINI:2]),           //FIXME - Parametrize!!
     .data_a     ('0),
     .wren_a     (1'b0),
     .byteena_a  (4'b0),
     .q_a        (InstructionQ101H),
+    //Core interface (instruction fitch) Q2
+    .address_b  (PcQ200H[I_MEM_ADRS_MSB_MINI:2]),           
+    .data_b     ('0),
+    .wren_b     (1'b0),
+    .byteena_b  (4'b0),
+    .q_b        (InstructionQ201H),  
     //fabric interface
-    .address_b  (InFabricQ503H.address[I_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
-    .data_b     (InFabricQ503H.data),              
-    .wren_b     (F2C_IMemWrEnQ503H),                
-    .byteena_b  (4'b1111), // NOTE no need to support byte enable for instruction memory
-    .q_b        (F2C_IMemRspDataQ504H)              
+    .address_c  (InFabricQ503H.address[I_MEM_ADRS_MSB_MINI:2]),//FIXME - Parametrize!!
+    .data_c     (InFabricQ503H.data),              
+    .wren_c     (F2C_IMemWrEnQ503H),                
+    .byteena_c  (4'b1111), // NOTE no need to support byte enable for instruction memory
+    .q_c        (F2C_IMemRspDataQ504H)            
     );
 
 logic [31:0] LastInstructionFetchQ101H;
 logic        SampleReadyQ101H;
+logic [31:0] LastInstructionFetchQ201H;
+logic        SampleReadyQ201H;
+// Q1
 `MAFIA_DFF   (SampleReadyQ101H, ReadyQ101H      , Clock)
 `MAFIA_EN_DFF(LastInstructionFetchQ101H, InstructionQ101H, Clock , SampleReadyQ101H)
 assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructionFetchQ101H;
 //assign PreInstructionQ101H = InstructionQ101H;
+// Q2
+`MAFIA_DFF   (SampleReadyQ201H, ReadyQ201H      , Clock)
+`MAFIA_EN_DFF(LastInstructionFetchQ201H, InstructionQ201H, Clock , SampleReadyQ201H)
+assign PreInstructionQ201H = SampleReadyQ201H ? InstructionQ201H : LastInstructionFetchQ201H;
+
 
 //==================================
 // DATA Memory

@@ -143,7 +143,7 @@ assign CtrlQ101H.SelRegWrPc       = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR
 assign CtrlQ101H.SelAluPc         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);
 assign CtrlQ101H.SelAluImm        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
 assign CtrlQ101H.SelDMemWb        = (OpcodeQ101H == LOAD);
-assign CtrlQ101H.e_SelWrBack      = ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H > PcQ201H || Issue2ValidNQ201H) ? WB_PC4 :
+assign CtrlQ101H.e_SelWrBack      = ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H > PcQ201H || Issue2ValidNQ201H)  ? WB_PC4 :
                                     ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H < PcQ201H && !Issue2ValidNQ201H) ? WB_PC8 :
                                     (OpcodeQ101H == LOAD) ? WB_DMEM :
                                                             WB_ALU  ;
@@ -285,13 +285,13 @@ end
 assign ReadyQ104H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ103H = (!CoreFreeze);
 assign ReadyQ102H = (!CoreFreeze);//
-assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrdDetectQ101H || LoadHzrdDetectQ201H); //
+assign ReadyQ101H = (!CoreFreeze) && !(LoadHzrdDetectQ101H); //
 assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 // Q2
 assign ReadyQ204H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ203H = (!CoreFreeze);
 assign ReadyQ202H = (!CoreFreeze);//
-assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H || LoadHzrdDetectQ101H); //  FIXME - Abd: probably right need to validate
+assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H); //  FIXME - Abd: probably right need to validate
 assign ReadyQ200H = (!CoreFreeze) && ReadyQ201H;//
 
 

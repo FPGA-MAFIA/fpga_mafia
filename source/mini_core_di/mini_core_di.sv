@@ -10,12 +10,11 @@ import mini_core_pkg::*;
     input  logic        Rst,
     // Instruction Memory
     output logic        ReadyQ101H,
-    output logic [31:0] PcQ100H,             // To I_MEM
     output logic        ReadyQ201H,
+    output logic [31:0] PcQ100H,             // To I_MEM
+    output logic [31:0] PcQ200H,             // To I_MEM
     input  logic [31:0] PreInstructionQ101H, // From I_MEM
     input  logic [31:0] PreInstructionQ201H, // From I_MEM
-    input  logic [31:0] PreInstructionQ101H_issued, // From idu to ctrl
-    input  logic [31:0] PreInstructionQ201H_issued, // From idu to ctrl
     // Data Memory
     input  logic          DMemReady,    // From D_MEM
     output t_core2mem_req Core2DmemReqQ103H,
@@ -26,6 +25,7 @@ import mini_core_pkg::*;
 // ---- issue 1 ----
 logic [31:0]  PcQ101H, PcQ102H;
 logic [31:0]  PcPlus4Q103H, PcPlus4Q104H;
+logic [31:0]  PcPlus8Q103H, PcPlus8Q104H;
 logic [31:0]  ImmediateQ101H, ImmediateQ102H;
 logic [31:0]  AluOutQ102H, AluOutQ103H, AluOutQ104H;
 logic [31:0]  PreRegRdData1Q102H, RegRdData1Q102H;
@@ -41,6 +41,9 @@ logic [31:0]  PreRegRdData1Q202H, RegRdData1Q202H;
 logic [31:0]  PreRegRdData2Q202H, RegRdData2Q202H;
 logic [31:0]  RegWrDataQ204H; 
 
+// ---- Real issued signals ----
+logic [31:0] PreInstructionQ101H_issued; // From idu to ctrl
+logic [31:0] PreInstructionQ201H_issued; // From idu to ctrl
 
 // Control bits
 logic         BranchCondMetQ102H;
@@ -139,7 +142,7 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
   .PreInstructionQ201H  (PreInstructionQ201H_issued), //input
   .PcQ201H              (PcQ201H), // output logic [31:0] PcQ101H
-  ,Issue2ValidNQ201H    (Issue2ValidNQ201H)
+  .Issue2ValidNQ201H    (Issue2ValidNQ201H),
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input
   .DMemReady            (DMemReady), //input
@@ -161,7 +164,7 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .CtrlMem              (CtrlMem            ), //output
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
-  .ImmediateQ101H       (ImmediateQ101H     ) //output
+  .ImmediateQ101H       (ImmediateQ101H     ), //output
   .ImmediateQ201H       (ImmediateQ201H     ) //output
 );
 
@@ -172,7 +175,7 @@ mini_core_di_rf (
   .Rst              (Rst),            // input 
   .Ctrl             (CtrlRf),         // input
   .ReadyQ102H       (ReadyQ102H),     // input
-  .ReadyQ102H       (ReadyQ202H),     // input
+  .ReadyQ202H       (ReadyQ202H),     // input
   // input data path
   .ImmediateQ101H   (ImmediateQ101H), // input
   .PcQ101H          (PcQ101H),        // input  
@@ -184,7 +187,7 @@ mini_core_di_rf (
   .PcQ102H          (PcQ102H),        // output   
   .ImmediateQ102H   (ImmediateQ102H), // output
   .RegRdData1Q102H  (RegRdData1Q102H),// output
-  .RegRdData2Q102H  (RegRdData2Q102H) // output
+  .RegRdData2Q102H  (RegRdData2Q102H), // output
   .PcQ202H          (PcQ202H),        // output   
   .ImmediateQ202H   (ImmediateQ202H), // output
   .RegRdData1Q202H  (RegRdData1Q202H),// output
@@ -321,7 +324,7 @@ mini_core_dip_wb mini_core_dip_wb
  .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ104H, //input
  .AluOutQ104H     (AluOutQ104H     ), // input  logic [31:0]    AluOutQ104H,     //input
  .PcPlus4Q104H    (PcPlus4Q104H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
- .PcPlus4Q104H    (PcPlus8Q104H    ), // input  logic [31:0]    PcPlus8Q104H,    //input
+ .PcPlus8Q104H    (PcPlus8Q104H    ), // input  logic [31:0]    PcPlus8Q104H,    //input
  // data path output
  .RegWrDataQ104H  (RegWrDataQ104H  )  // output logic [31:0]    RegWrDataQ104H  //output
 );

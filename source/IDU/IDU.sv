@@ -1,10 +1,10 @@
 module idu (
-    input logic [31:0] PC1_in;
-    input logic [31:0] PC2_in;
+    input logic [31:0] PC1_in,
+    input logic [31:0] PC2_in,
     input logic [31:0] instr1,       
     input logic [31:0] instr2,
-    output logic [31:0] PC1_out;
-    output logic [31:0] PC2_out;      
+    output logic [31:0] PC1_out,
+    output logic [31:0] PC2_out,      
     output logic [31:0] issue_instr1, // Instruction for primary issue
     output logic [31:0] issue_instr2,  // Instruction for secondary issue
     output logic issue2ValidN
