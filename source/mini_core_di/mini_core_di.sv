@@ -185,10 +185,10 @@ mini_core_di_rf (
   .ImmediateQ102H   (ImmediateQ102H), // output
   .RegRdData1Q102H  (RegRdData1Q102H),// output
   .RegRdData2Q102H  (RegRdData2Q102H) // output
-  .PcQ102H          (PcQ202H),        // output   
-  .ImmediateQ102H   (ImmediateQ202H), // output
-  .RegRdData1Q102H  (RegRdData1Q202H),// output
-  .RegRdData2Q102H  (RegRdData2Q202H) // output
+  .PcQ202H          (PcQ202H),        // output   
+  .ImmediateQ202H   (ImmediateQ202H), // output
+  .RegRdData1Q202H  (RegRdData1Q202H),// output
+  .RegRdData2Q202H  (RegRdData2Q202H) // output
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

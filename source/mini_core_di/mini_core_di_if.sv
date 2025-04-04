@@ -1,6 +1,6 @@
 `include "macros.vh"
 
-module mini_core_dip_if 
+module mini_core_di_if 
 import mini_core_pkg::*;
 (
     input  logic        Clock,

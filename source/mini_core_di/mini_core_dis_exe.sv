@@ -30,6 +30,7 @@ import mini_core_pkg::*;
 );
 
 logic        Hazard1Data1Q202H, Hazard2Data1Q202H, Hazard1Data2Q202H, Hazard2Data2Q202H;
+logic        Hazard3Data1Q202H, Hazard4Data1Q202H, Hazard1Data3Q202H, Hazard4Data2Q202H;
 logic [31:0] AluIn1Q202H, AluIn2Q202H;
 logic [4:0]  ShamtQ202H;
 logic [31:0] RegRdData1Q202H, RegRdData2Q202H;
@@ -48,19 +49,27 @@ logic [31:0] RegRdData1Q202H, RegRdData2Q202H;
 //      a) data to write back to register.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Hazard Detection
-assign Hazard1Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc1Q202H != 5'b0);
-assign Hazard2Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc1Q202H != 5'b0);
-assign Hazard1Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc2Q202H != 5'b0);
-assign Hazard2Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc2Q202H != 5'b0);
+assign Hazard1Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q203 dst -> Q202 src 1
+assign Hazard2Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q204 dst -> Q202 src 1
+assign Hazard1Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ203H) && (Ctrl.RegWrEnQ203H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q203 dst -> Q202 src 2
+assign Hazard2Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ204H) && (Ctrl.RegWrEnQ204H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q204 dst -> Q202 src 2
 // FIXME - Abd: need to add Hazard detection for multi issue use
+assign Hazard3Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q103 dst -> Q202 src 1
+assign Hazard4Data1Q202H = (Ctrl.RegSrc1Q202H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q202H != 5'b0); // Q104 dst -> Q202 src 1
+assign Hazard3Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q103 dst -> Q202 src 2
+assign Hazard4Data2Q202H = (Ctrl.RegSrc2Q202H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc2Q202H != 5'b0); // Q104 dst -> Q202 src 2
 
 // Forwarding unite
 assign RegRdData1Q202H = Hazard1Data1Q202H ? AluOutQ203H       : // Rd 202 After Wr 203
                          Hazard2Data1Q202H ? RegWrDataQ204H    : // Rd 202 After Wr 204
+                         Hazard3Data1Q202H ? AluOutQ103H       : // Rd 202 After Wr 103
+                         Hazard4Data1Q202H ? RegWrDataQ104H    : // Rd 202 After Wr 104
                                              PreRegRdData1Q202H; // Common Case - No Hazard
 
 assign RegRdData2Q202H = Hazard1Data2Q202H ? AluOutQ203H       : // Rd 202 After Wr 203
-                         Hazard2Data2Q202H ? RegWrDataQ204H    : // Rd 202 After Wr 204 
+                         Hazard2Data2Q202H ? RegWrDataQ204H    : // Rd 202 After Wr 204
+                         Hazard3Data2Q202H ? AluOutQ103H       : // Rd 202 After Wr 103
+                         Hazard4Data2Q202H ? RegWrDataQ104H    : // Rd 202 After Wr 104  
                                              PreRegRdData2Q202H; // Common Case - No Hazard
 
 // End Take care to data hazard
