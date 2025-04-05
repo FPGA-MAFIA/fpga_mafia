@@ -12,7 +12,7 @@
 `include "macros.vh"
 
 module mini_core_di_ctrl
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 (
     input   logic        Clock,
     input   logic        Rst,
@@ -67,22 +67,35 @@ import mini_core_pkg::*;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 t_immediate         SelImmTypeQ101H;
- logic [4:0]  PreRegSrc1Q101H;
- logic [4:0]  PreRegSrc2Q101H;
- logic        LoadHzrdDetectQ101H;
- logic [31:0] InstructionQ101H;
- logic        flushQ102H;
- logic        flushQ103H;
- t_opcode     OpcodeQ101H;
- logic [2:0]  Funct3Q101H;
- logic [6:0]  Funct7Q101H;
+logic [4:0]  PreRegSrc1Q101H;
+logic [4:0]  PreRegSrc2Q101H;
+logic        LoadHzrdDetectQ101H;
+logic [31:0] InstructionQ101H;
+logic        flushQ102H;
+logic        flushQ103H;
+t_opcode     OpcodeQ101H;
+logic [2:0]  Funct3Q101H;
+logic [6:0]  Funct7Q101H;
 logic PreValidInstQ101H, ValidInstQ101H;
 logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 
+t_immediate         SelImmTypeQ201H;
+logic [4:0]         PreRegSrc1Q201H;
+logic [4:0]         PreRegSrc2Q201H;
+logic               LoadHzrdDetectQ201H;
+logic [31:0]        InstructionQ201H;
+t_opcode     OpcodeQ201H;
+logic [2:0]  Funct3Q201H;
+logic [6:0]  Funct7Q201H;
+logic        PreValidInstQ201H, ValidInstQ201H;
+logic        PreValidInstQ202H, ValidInstQ202H;
+logic        PreValidInstQ203H, ValidInstQ203H;
+logic        PreValidInstQ204H, ValidInstQ204H;
+
 t_mini_ctrl_dip CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
-t_mini_crtl_dis CtrlQ201H, CtrlQ202H, CtrlQ203H, CtrlQ204H;
+t_mini_ctrl_dis CtrlQ201H, CtrlQ202H, CtrlQ203H, CtrlQ204H;
 
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;

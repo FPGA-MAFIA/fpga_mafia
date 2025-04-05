@@ -1,7 +1,7 @@
 `include "macros.vh"
 
 module mini_core_dis_exe
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
@@ -19,6 +19,7 @@ import mini_core_pkg::*;
     input logic [31:0]  PcQ202H,
     input logic [31:0]  ImmediateQ202H,
     //Q204H
+    input logic [31:0]  AluOutQ103H, // used for forwarding
     input logic [31:0]  RegWrDataQ104H, // used for forwarding
     input logic [31:0]  RegWrDataQ204H, // used for forwarding
     //===================
@@ -30,7 +31,7 @@ import mini_core_pkg::*;
 );
 
 logic        Hazard1Data1Q202H, Hazard2Data1Q202H, Hazard1Data2Q202H, Hazard2Data2Q202H;
-logic        Hazard3Data1Q202H, Hazard4Data1Q202H, Hazard1Data3Q202H, Hazard4Data2Q202H;
+logic        Hazard3Data1Q202H, Hazard4Data1Q202H, Hazard3Data2Q202H, Hazard4Data2Q202H;
 logic [31:0] AluIn1Q202H, AluIn2Q202H;
 logic [4:0]  ShamtQ202H;
 logic [31:0] RegRdData1Q202H, RegRdData2Q202H;
@@ -98,7 +99,7 @@ always_comb begin : alu_logic
 end
 
 // Q202H to Q203H Flip Flops
-`MAFIA_EN_DFF(DMemWrDataQ203H     , RegRdData2Q202H     , Clock, ReadyQ203H)
+//`MAFIA_EN_DFF(DMemWrDataQ203H     , RegRdData2Q202H     , Clock, ReadyQ203H) // FIXME - Abd: this is memory write shouldn't be in secondary issue
 `MAFIA_EN_DFF(AluOutQ203H         , AluOutQ202H         , Clock, ReadyQ203H)
 
 endmodule

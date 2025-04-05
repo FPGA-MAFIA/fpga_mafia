@@ -12,7 +12,7 @@
 `include "macros.vh"
 
 module mini_core_dip_exe
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
@@ -34,6 +34,7 @@ import mini_core_pkg::*;
     input logic [31:0]  PcQ102H,
     input logic [31:0]  ImmediateQ102H,
     //Q104H
+    input logic [31:0]  AluOutQ203H, // used for forwarding
     input logic [31:0]  RegWrDataQ104H, // used for forwarding
     input logic [31:0]  RegWrDataQ204H, // used for forwarding
     

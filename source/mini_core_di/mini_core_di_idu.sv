@@ -42,7 +42,7 @@ idu idu (
         .issue_instr2(PreInstructionQ201H_issued),
         .PC1_out(prePCQ101H),
         .PC2_out(prePCQ201H),
-        ,issue2ValidN(issue2ValidN)
+        .issue2ValidN(issue2ValidN)
 );
 
 // Q100H/Q200H to Q101H/Q201H Flip Flops. 

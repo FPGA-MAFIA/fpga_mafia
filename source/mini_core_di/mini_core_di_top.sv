@@ -2,7 +2,7 @@
 `include "macros.vh"
 
 module mini_core_di_top
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
 input  logic        Clock  ,
@@ -33,6 +33,7 @@ logic [31:0] DMemRdRspQ104H;      // From D_MEM
 
 logic DMemReady;
 logic ReadyQ101H;
+logic ReadyQ201H;
 t_core2mem_req Core2DmemReqQ103H;
 
 mini_core_di 

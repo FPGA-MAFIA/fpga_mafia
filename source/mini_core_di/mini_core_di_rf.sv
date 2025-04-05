@@ -12,7 +12,7 @@
 `include "macros.vh"
 
 module mini_core_di_rf 
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input logic Clock,
@@ -32,7 +32,7 @@ import mini_core_pkg::*;
     output logic [31:0] PcQ102H,
     output logic [31:0] ImmediateQ102H,
     output logic [31:0] RegRdData1Q102H,
-    output logic [31:0] RegRdData2Q102H
+    output logic [31:0] RegRdData2Q102H,
     output logic [31:0] PcQ202H,
     output logic [31:0] ImmediateQ202H,
     output logic [31:0] RegRdData1Q202H,
@@ -49,10 +49,10 @@ logic                       MatchRd2AftrWrQ101H;
 logic [31:0]                RegRdData1Q101H;
 logic [31:0]                RegRdData2Q101H;
 // Q2
-logic                       MatchRd1AftrWrQ101H;
-logic                       MatchRd2AftrWrQ101H;
-logic [31:0]                RegRdData1Q101H;
-logic [31:0]                RegRdData2Q101H;
+logic                       MatchRd1AftrWrQ201H;
+logic                       MatchRd2AftrWrQ201H;
+logic [31:0]                RegRdData1Q201H;
+logic [31:0]                RegRdData2Q201H;
 //===================
 //  Register File
 //===================
@@ -91,7 +91,5 @@ assign RegRdData2Q201H = (Ctrl.RegSrc2Q201H == 5'b0) ? 32'b0                    
 `MAFIA_EN_DFF(PcQ202H,         PcQ201H,         Clock, ReadyQ202H)
 `MAFIA_EN_DFF(RegRdData1Q202H, RegRdData1Q201H, Clock, ReadyQ202H)
 `MAFIA_EN_DFF(RegRdData2Q202H, RegRdData2Q201H, Clock, ReadyQ202H)
-
-
 
 endmodule

@@ -165,7 +165,7 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .CtrlWb               (CtrlWb             ), //output
   // output data path signals
   .ImmediateQ101H       (ImmediateQ101H     ), //output
-  .ImmediateQ201H       (ImmediateQ201H     ) //output
+  .ImmediateQ201H       (ImmediateQ201H     )  //output
 );
 
 mini_core_di_rf 
@@ -224,9 +224,9 @@ mini_core_dip_exe mini_core_dip_exe (
   .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
   .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input 
   .PcQ102H             (PcQ102H            ), //  input 
-  .ImmediateQ102H      (ImmediateQ102H     ), //  input   // add x1,x1,x2
-                                                          // NOP
-                                                          // add x1 x1 x2 
+  .ImmediateQ102H      (ImmediateQ102H     ), //  input   
+  //Q203
+  .AluOutQ203H         (AluOutQ203H     ), //  input   
   //Q104H
   .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
   .RegWrDataQ204H      (RegWrDataQ204H     ), //  input 
@@ -249,6 +249,8 @@ mini_core_dis_exe mini_core_dis_exe (
   .PreRegRdData2Q202H  (RegRdData2Q202H ), //  input 
   .PcQ202H             (PcQ202H            ), //  input 
   .ImmediateQ202H      (ImmediateQ202H     ), //  input 
+  //Q103
+  .AluOutQ103H         (AluOutQ103H     ), //  input 
   //Q204H
   .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
   .RegWrDataQ204H      (RegWrDataQ204H     ), //  input 

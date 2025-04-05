@@ -1,7 +1,7 @@
 `include "macros.vh"
 
 module mini_core_di_if 
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
@@ -11,6 +11,8 @@ import mini_core_pkg::*;
 
     input  logic [31:0] AluOutQ102H,
     input  logic        ReadyQ100H,
+    input  logic        ReadyQ200H,
+
     // input  logic        ReadyQ200H,
 
     output logic [31:0] PcQ100H,
@@ -18,9 +20,10 @@ import mini_core_pkg::*;
 
 );
 
-logic [31:0] PcQ200H;
 logic [31:0] NextPcQ1nnH;
 logic [31:0] NextPcQ2nnH;
+logic [31:0] PcPlus4Q100H;
+logic [31:0] PcPlus8Q100H;
 
 // Pc Inc
 assign PcPlus4Q100H = PcQ100H + 3'h4; 

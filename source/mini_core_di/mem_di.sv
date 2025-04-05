@@ -15,7 +15,7 @@
 `include "macros.vh"
 
 //---------------------------------------------------
-module mem #(
+module mem_di #(
     parameter WORD_WIDTH,   //no default value.
     parameter ADRS_WIDTH    //no default value.
 ) (
