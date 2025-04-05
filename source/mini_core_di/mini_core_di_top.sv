@@ -43,6 +43,7 @@ mini_core_di (
    .Rst                 ( Rst                ), // input  logic        Rst,
    // Instruction Memory
    .ReadyQ101H          ( ReadyQ101H    ), // output logic        ReadyQ101H,          // To I_MEM
+   .ReadyQ201H          ( ReadyQ201H    ), // output logic        ReadyQ101H,          // To I_MEM
    .PcQ100H             ( PcQ100H            ), // output logic [31:0] PcQ100H,             // To I_MEM
    .PcQ200H             ( PcQ200H            ), // output logic [31:0] PcQ100H + 3h'4,      // To I_MEM
    .PreInstructionQ101H ( PreInstructionQ101H), // input  logic [31:0] PreInstructionQ101H, // From I_MEM

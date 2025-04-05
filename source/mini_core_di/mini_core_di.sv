@@ -3,7 +3,7 @@
 `include "macros.vh"
 
 module mini_core_di 
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input  logic        Clock,
@@ -57,7 +57,7 @@ logic         ReadyQ202H;
 logic         ReadyQ203H;
 logic         ReadyQ204H;
 
-t_mini_ctrl   Ctrl;
+//t_mini_ctrl   Ctrl;
 t_ctrl_if     CtrlIf;
 t_ctrl_rf     CtrlRf;
 t_ctrl_exe    CtrlExe;
@@ -234,6 +234,7 @@ mini_core_dip_exe mini_core_dip_exe (
   .AluOutQ102H         (AluOutQ102H        ), //  output
   .AluOutQ103H         (AluOutQ103H        ), //  output
   .PcPlus4Q103H        (PcPlus4Q103H       ), //  output
+  .PcPlus8Q103H        (PcPlus8Q103H       ), //  output
   .DMemWrDataQ103H     (DMemWrDataQ103H    )  //  output
 );
 

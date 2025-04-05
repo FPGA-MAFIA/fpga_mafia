@@ -27,6 +27,7 @@ import mini_core_di_pkg::*;
 logic        Clk;
 logic        Rst;
 logic [31:0] PcQ100H;
+logic [31:0] PcQ200H;
 logic [31:0] Instruction;
 logic [31:0] DMemAddress;
 logic [31:0] DMemData   ;

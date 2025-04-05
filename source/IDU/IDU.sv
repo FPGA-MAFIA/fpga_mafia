@@ -69,7 +69,7 @@ module idu (
             issue_instr1 = instr1;
             PC1_out = PC1_in;    
             PC2_out = PC2_in; 
-            issue_instr2 = 32'b0;
+            issue_instr2 = instr2;
             issue2ValidN = 1'b1;
         end
     end
