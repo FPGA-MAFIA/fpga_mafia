@@ -11,7 +11,7 @@
 
 `include "macros.vh"
 
-module mini_core_dip_mem_acs
+module mini_core_di_mem_acs
 import mini_core_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  

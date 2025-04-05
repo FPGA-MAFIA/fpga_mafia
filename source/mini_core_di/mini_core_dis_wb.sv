@@ -18,12 +18,12 @@ import mini_core_di_pkg::*;
   // Ctrl
   input var  t_ctrl_wb       Ctrl, //input
   // Data path input
-  input  logic [31:0]    AluOutQ104H,     //input
+  input  logic [31:0]    AluOutQ204H,     //input
   // data path output
-  output logic [31:0]    RegWrDataQ104H  //output
+  output logic [31:0]    RegWrDataQ204H  //output
 
 );
 
 // ---- Select what write to the register file ----
-assign RegWrDataQ104H = (Ctrl.e_SelWrBackQ204H == WB_ALU)  ? AluOutQ104H : 32'b0;
+assign RegWrDataQ204H = (Ctrl.e_SelWrBackQ204H == WB_ALU)  ? AluOutQ204H : 32'b0;
 endmodule

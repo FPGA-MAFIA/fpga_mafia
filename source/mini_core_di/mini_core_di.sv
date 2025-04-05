@@ -274,7 +274,7 @@ mini_core_dis_exe mini_core_dis_exe (
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_dip_mem_acs mini_core_dip_mem_access (
+mini_core_di_mem_acs mini_core_di_mem_access (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -292,7 +292,7 @@ mini_core_dip_mem_acs mini_core_dip_mem_access (
   .AluOutQ104H        (AluOutQ104H)     //input
 );
 
-mini_core_dis_mem_dly mini_core_dis_mem_delay (
+mini_core_di_mem_dly mini_core_di_mem_delay (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -300,7 +300,7 @@ mini_core_dis_mem_dly mini_core_dis_mem_delay (
   // Delay Signals input
   .AluOutQ203H        (AluOutQ203H),    //input
   // Delay Signals output
-  .AluOutQ204H        (AluOutQ204H)     //input
+  .AluOutQ204H        (AluOutQ204H)     //output
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
