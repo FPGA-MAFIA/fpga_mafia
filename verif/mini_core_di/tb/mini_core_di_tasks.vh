@@ -12,6 +12,7 @@ t_rf_write_history ref_rf_write_history[$];
 t_rf_write_history ref_rf_cur_write;
 
 logic [31:0] PcQ101H;             // To I_MEM
+logic [31:0] PcQ201H;             // To I_MEM
 logic [31:0] PcQ102H;             // To I_MEM
 logic [31:0] PcQ202H;             // To I_MEM
 logic [31:0] PcQ103H, PcQ104H;
@@ -22,12 +23,13 @@ assign PcQ102H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ102H.Pc;
 assign PcQ103H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ103H.Pc;
 assign PcQ104H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ104H.Pc;
 
+assign PcQ201H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ201H.Pc;
 assign PcQ202H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ202H.Pc;
 assign PcQ204H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ204H.Pc;
 
 //debug second issue usage
 logic Issue2ValidNQ201H;
-assign Issue2ValidNQ201H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.Issue2ValidNQ201H;
+assign Issue2ValidNQ201H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.ValidInstQ201H;
 
 logic RegWrEnQ104H;
 logic [4:0]  RegDstQ104H;

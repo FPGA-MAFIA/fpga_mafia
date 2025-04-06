@@ -12,32 +12,54 @@ always @(posedge Clk) begin : alu_print
     $fwrite(trk_alu,"%t\t| %8h | %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H,PcQ202H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn1Q102H , mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn2Q102H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluOutQ102H);
 end
 
+
+integer trk_idu;
+initial begin: trk_idu_gen
+    #1
+    $timeformat(-9, 1, " ", 6);
+    trk_idu = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_idu.log"},"w");
+    $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");
+    $fwrite(trk_idu,"   Time |  PC1_in  |  PC2_in  | PC1_out  | PC2_out  | I2NV |           Instruction_1         |           Instruction_2         |\n");
+    $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");  
+end
+
+assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ101H;
+assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H;
+
+always @(posedge Clk) begin : idu_print
+    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |\n", $realtime,PcQ101H, PcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2);
+end
+
+
 integer trk_inst;
 initial begin: trk_inst_gen
     #1
     $timeformat(-9, 1, " ", 6);
     trk_inst = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_inst.log"},"w");
-    $fwrite(trk_inst,"---------------------------------------------------------\n");
-    $fwrite(trk_inst,"Time\t|\tPC \t | Instruction\t|\n");
-    $fwrite(trk_inst,"---------------------------------------------------------\n");  
+    $fwrite(trk_inst,"--------------------------------------------------------------------------------------------------------\n");
+    $fwrite(trk_inst,"  Time 	|     PC1    |           Instruction           |     PC2     |           Instruction           |\n");
+    $fwrite(trk_inst,"--------------------------------------------------------------------------------------------------------\n");  
 end
 // Uncomment and update when needed
-//always @(posedge Clk) begin : inst_print
-//    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,PcQ100H, Instruction);
-//end
+assign Instruction_1 = mini_core_di_top.mini_core_di.mini_core_di_ctrl.InstructionQ101H;
+assign Instruction_2 = mini_core_di_top.mini_core_di.mini_core_di_ctrl.InstructionQ201H;
+
+always @(posedge Clk) begin : inst_print
+   $fwrite(trk_inst,"%t\t| %8h \t |%32b | %8h \t |%32b | \n", $realtime,PcQ101H, Instruction_1 ,PcQ201H, Instruction_2 );
+end
 
 integer trk_fetch;
 initial begin: trk_fetch_gen
     #1
     $timeformat(-9, 1, " ", 6);
     trk_fetch = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_fetch.log"},"w");
-    $fwrite(trk_fetch,"--------------------------------------------------------------\n");
-    $fwrite(trk_fetch,"  Time	|	    PC1 	 |	   PC2 	   |Funct3 | Funct7  | Opcode| I2NV |\n");
-    $fwrite(trk_fetch,"--------------------------------------------------------------\n");  
+    $fwrite(trk_fetch,"--------------------------------------------------------------------\n");
+    $fwrite(trk_fetch,"  Time	|	    PC1 	 |	   PC2 	   |Funct3 | Funct7  | Opcode| I2V |\n");
+    $fwrite(trk_fetch,"--------------------------------------------------------------------\n");  
 end
 // Uncomment and update when needed
 always @(posedge Clk) begin : fetch_print
-   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t |%3b \t |%7b\t |%7b| %1b |\n", $realtime,PcQ100H,PcQ200H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.Funct3Q101H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.Funct7Q101H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.OpcodeQ101H, Issue2ValidNQ201H);
+   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t |%3b \t |%7b\t |%7b|  %1b  |\n", $realtime,PcQ100H,PcQ200H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.Funct3Q101H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.Funct7Q101H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.OpcodeQ101H, Issue2ValidNQ201H);
 end
 
 integer trk_memory_access;

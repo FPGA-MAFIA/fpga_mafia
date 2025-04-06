@@ -135,7 +135,7 @@ assign InstructionQ201H = flushQ102H          ? NOP :
 assign PreValidInstQ201H = flushQ102H          ? 1'b0 : 
                            flushQ103H          ? 1'b0 : 
                            LoadHzrdDetectQ101H ? 1'b0 : 
-                           Issue2ValidNQ201H   ? 1'b0 : // FIXME - Abd: when second issue not in use instruction should not Valid
+                           Issue2ValidNQ201H   ? 1'b0 : // FIXME - Abd: when second issue not in use instruction should not be Valid
                                                  1'b1 ;
 
 

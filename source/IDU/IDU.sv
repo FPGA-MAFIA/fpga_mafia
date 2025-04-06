@@ -17,8 +17,6 @@ module idu (
     logic mem_access_instr1; // Memory access detection for instr1
     logic mem_access_instr2; // Memory access detection for instr2
 
-    
-
     logic [6:0] opcode1, opcode2;    // Opcode fields for instr1 and instr2
     logic [4:0] rd1, rs1_1, rs2_1;  // Fields for instr1
     logic [4:0] rd2, rs1_2, rs2_2;  // Fields for instr2
@@ -49,6 +47,8 @@ module idu (
     assign mem_access_instr2 = (opcode2 == 7'b0000011) || // Load instructions
                                (opcode2 == 7'b0100011);  // Store instructions
     
+    assign issue2ValidN = raw_dependency || waw_dependency || branch_instr || mem_access_instr2;
+
     always_comb begin
         // Default assignments
         issue_instr1 = instr1;     
@@ -70,7 +70,6 @@ module idu (
             PC1_out = PC1_in;    
             PC2_out = PC2_in; 
             issue_instr2 = instr2;
-            issue2ValidN = 1'b1;
         end
     end
 
