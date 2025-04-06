@@ -88,6 +88,8 @@ mini_core_di_if mini_core_di_if (
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ200H   (ReadyQ200H  ), // input  logic        ReadyQ200H,
+  .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ100H,
+  .ReadyQ201H   (ReadyQ201H  ), // input  logic        ReadyQ200H,
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
@@ -188,11 +190,11 @@ mini_core_di_rf (
   .PcQ201H          (PostPcQ201H),        // input  
   .RegWrDataQ204H   (RegWrDataQ204H), // input 
   // output data path
-  .PcQ102H          (PostPcQ102H),        // output   
+  .PcQ102H          (PcQ102H),        // output   
   .ImmediateQ102H   (ImmediateQ102H), // output
   .RegRdData1Q102H  (RegRdData1Q102H),// output
   .RegRdData2Q102H  (RegRdData2Q102H), // output
-  .PcQ202H          (PostPcQ202H),        // output   
+  .PcQ202H          (PcQ202H),        // output   
   .ImmediateQ202H   (ImmediateQ202H), // output
   .RegRdData1Q202H  (RegRdData1Q202H),// output
   .RegRdData2Q202H  (RegRdData2Q202H) // output

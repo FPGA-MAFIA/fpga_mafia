@@ -47,7 +47,7 @@ module idu (
     assign mem_access_instr2 = (opcode2 == 7'b0000011) || // Load instructions
                                (opcode2 == 7'b0100011);  // Store instructions
     
-    assign issue2ValidN = raw_dependency || waw_dependency || branch_instr || mem_access_instr2;
+    assign issue2ValidN =  (raw_dependency || waw_dependency || branch_instr || mem_access_instr2);
 
     always_comb begin
         // Default assignments
@@ -62,14 +62,6 @@ module idu (
             issue_instr2 = instr1;
             PC1_out = PC2_in;
             PC2_out = PC1_in;   
-        end
-
-        // Stall the second pipe if there are dependencies, branch, or memory access
-        if (raw_dependency || waw_dependency || branch_instr || mem_access_instr2) begin
-            issue_instr1 = instr1;
-            PC1_out = PC1_in;    
-            PC2_out = PC2_in; 
-            issue_instr2 = instr2;
         end
     end
 

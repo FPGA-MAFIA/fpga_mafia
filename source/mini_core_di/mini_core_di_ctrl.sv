@@ -21,7 +21,7 @@ import mini_core_di_pkg::*;
     input   logic [31:0] PcQ101H,
     input   logic [31:0] PreInstructionQ201H,
     input   logic [31:0] PcQ201H,
-    input   logic Issue2ValidNQ201H,
+    input   logic        Issue2ValidNQ201H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
     input   logic        DMemReady,
@@ -107,11 +107,26 @@ logic RegDstQ102MatchRegSrc2Q101H;
 assign PreRegSrc1Q101H   = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H   = PreInstructionQ101H[24:20];
 assign PreOpcodeQ101H    = t_opcode'(PreInstructionQ101H[6:0]);
+
+t_opcode    PreOpcodeQ201H;
+logic LoadHazardValidRegSrc2Q201H;
+logic RegDstQ202MatchRegSrc1Q201H;
+logic RegDstQ202MatchRegSrc2Q201H;
+assign PreRegSrc1Q201H   = PreInstructionQ201H[19:15];
+assign PreRegSrc2Q201H   = PreInstructionQ201H[24:20];
+assign PreOpcodeQ201H    = t_opcode'(PreInstructionQ201H[6:0]);
+
 assign  LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH;
+assign  LoadHazardValidRegSrc2Q201H = PreOpcodeQ201H == R_OP;// || PreOpcodeQ201H == STORE || PreOpcodeQ201H == BRANCH;
+
 assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD);
 assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
+assign  RegDstQ102MatchRegSrc1Q201H = (PreRegSrc1Q201H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD);
+assign  RegDstQ102MatchRegSrc2Q201H = (PreRegSrc2Q201H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q201H);
+
 assign LoadHzrdDetectQ101H          = (Rst)                                                        ? 1'b0 : 
                                       (RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H) ? 1'b1 :
+                                      (RegDstQ102MatchRegSrc1Q201H || RegDstQ102MatchRegSrc2Q201H) ? 1'b1 :
                                                                                                      1'b0 ;
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles (including the second issue):
 logic IndirectBranchQ102H;
@@ -130,7 +145,7 @@ assign PreValidInstQ101H = flushQ102H          ? 1'b0 :
 assign InstructionQ201H = flushQ102H          ? NOP :
                           flushQ103H          ? NOP :
                           LoadHzrdDetectQ101H ? NOP : // FIXME - Abd: LoadHzrd should fire for both issues
-                          Issue2ValidNQ201H  ? NOP : // FIXME - Abd: when second issue not in use instruction should be NOP
+                          Issue2ValidNQ201H   ? NOP : // FIXME - Abd: when second issue not in use instruction should be NOP
                                                 PreInstructionQ201H;                                             
 assign PreValidInstQ201H = flushQ102H          ? 1'b0 : 
                            flushQ103H          ? 1'b0 : 
@@ -304,7 +319,7 @@ assign ReadyQ100H = (!CoreFreeze) && ReadyQ101H;//
 assign ReadyQ204H = (!CoreFreeze);// FIXME - this is back pressure from mem_wrap incase of non-local memory load 
 assign ReadyQ203H = (!CoreFreeze);
 assign ReadyQ202H = (!CoreFreeze);//
-assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H); //  FIXME - Abd: probably right need to validate
+assign ReadyQ201H = (!CoreFreeze) && !(LoadHzrdDetectQ101H) ; //  FIXME - Abd: probably right need to validate
 assign ReadyQ200H = (!CoreFreeze) && ReadyQ201H;//
 
 

@@ -29,21 +29,36 @@ module mini_core_di_idu (
     output logic issue2ValidN
 );
 
-//logic [31:0] PcQ200H;
-// logic [31:0] postPCQ101H;
-// logic [31:0] postPCQ201H;
+
+logic [31:0] InstructionBufferQ101H;
+logic [31:0] PcBufferQ101H;
+logic        BufferSel;
+
+logic [31:0] PrePcQ101H;
+logic [31:0] PrePcQ201H;
+logic [31:0] PreInstructionQ101H_idu;
+logic [31:0] PreInstructionQ201H_idu;
+
+assign PrePcQ101H = BufferSel ? PcBufferQ101H : PcQ101H;
+assign PrePcQ201H = BufferSel ? PcQ101H       : PcQ201H;                    
+assign PreInstructionQ101H_idu = BufferSel ? InstructionBufferQ101H : PreInstructionQ101H;
+assign PreInstructionQ201H_idu = BufferSel ? PreInstructionQ101H    : PreInstructionQ201H;
 
 idu idu (
-        .PC1_in(PcQ101H),
-        .PC2_in(PcQ201H),
-        .instr1(PreInstructionQ101H),
-        .instr2(PreInstructionQ201H),
+        .PC1_in(PrePcQ101H),
+        .PC2_in(PrePcQ201H),
+        .instr1(PreInstructionQ101H_idu),
+        .instr2(PreInstructionQ201H_idu),
         .issue_instr1(PreInstructionQ101H_issued),
         .issue_instr2(PreInstructionQ201H_issued),
         .PC1_out(PostPcQ101H),
         .PC2_out(PostPcQ201H),
         .issue2ValidN(issue2ValidN)
 );
+
+`MAFIA_EN_RST_DFF(InstructionBufferQ101H, PreInstructionQ201H, Clock, issue2ValidN, Rst)
+`MAFIA_EN_RST_DFF(PcBufferQ101H, PcQ201H, Clock, issue2ValidN, Rst)
+`MAFIA_RST_DFF(BufferSel, issue2ValidN, Clock, Rst)
 
 // Q100H/Q200H to Q101H/Q201H Flip Flops. 
 // `MAFIA_EN_DFF(PcQ102H, prePCQ102H, Clock, ReadyQ102H)

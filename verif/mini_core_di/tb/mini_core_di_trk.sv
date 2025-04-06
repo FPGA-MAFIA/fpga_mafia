@@ -23,11 +23,11 @@ initial begin: trk_idu_gen
     $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");  
 end
 
-assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ101H;
-assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H;
+assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ101H_issued;
+assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H_issued;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |\n", $realtime,PcQ101H, PcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2);
+    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2);
 end
 
 
