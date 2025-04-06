@@ -19,15 +19,23 @@ initial begin: trk_idu_gen
     $timeformat(-9, 1, " ", 6);
     trk_idu = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_idu.log"},"w");
     $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(trk_idu,"   Time |  PC1_in  |  PC2_in  | PC1_out  | PC2_out  | I2NV |           Instruction_1         |           Instruction_2         |\n");
+    $fwrite(trk_idu,"   Time |  PC1_in  |  PC2_in  | PC1_out  | PC2_out  | I2NV |           Instruction_1         |           Instruction_2         | b/m/r/w\n");
     $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");  
 end
 
 assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ101H_issued;
 assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H_issued;
+logic branch_h;
+logic mem_h;
+logic raw_h;
+logic waw_h;
+assign branch_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.branch_jmp_instr;
+assign mem_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.mem_access_instr1 || mini_core_di_top.mini_core_di.mini_core_di_idu.idu.mem_access_instr2;
+assign raw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.raw_dependency;
+assign waw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.waw_dependency;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |  %1b   |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2, mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel);
+    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |  %1b   | %1b/%1b/%1b/%1b\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2, mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel, branch_h,mem_h,raw_h,waw_h);
 end
 
 

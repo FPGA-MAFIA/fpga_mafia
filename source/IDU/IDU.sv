@@ -58,7 +58,7 @@ module idu (
         PC2_out = PC2_in;     
 
         // Ensure memory access in primary issue
-        if (mem_access_instr2 && mem_access_instr1 == 0) begin
+        if (mem_access_instr2 && mem_access_instr1 == 0 && !(raw_dependency || waw_dependency || branch_jmp_instr)) begin
             issue_instr1 = instr2;
             issue_instr2 = instr1;
             PC1_out = PC2_in;

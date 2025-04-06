@@ -61,9 +61,9 @@ idu idu (
 // assign PreBufferSel = issue2ValidN_idu;
 assign issue2ValidN = issue2ValidN_idu;
 
-`MAFIA_EN_RST_DFF(InstructionBufferQ101H, PreInstructionQ201H, Clock, issue2ValidN, Rst)
-`MAFIA_EN_RST_DFF(PcBufferQ101H, PcQ201H, Clock, issue2ValidN, Rst)
-`MAFIA_RST_DFF(BufferSel, issue2ValidN_idu, Clock, Rst)
+`MAFIA_EN_RST_DFF(InstructionBufferQ101H, PreInstructionQ201H, Clock, issue2ValidN && ReadyQ101H, Rst)
+`MAFIA_EN_RST_DFF(PcBufferQ101H, PcQ201H, Clock, issue2ValidN && ReadyQ101H, Rst)
+`MAFIA_RST_DFF(BufferSel, issue2ValidN_idu && ReadyQ101H, Clock, Rst)
 
 // Q100H/Q200H to Q101H/Q201H Flip Flops. 
 // `MAFIA_EN_DFF(PcQ102H, prePCQ102H, Clock, ReadyQ102H)
