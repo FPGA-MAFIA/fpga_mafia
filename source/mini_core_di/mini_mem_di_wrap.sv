@@ -16,7 +16,7 @@
 
 //---------------------------------------------------
 module mini_mem_di_wrap
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
