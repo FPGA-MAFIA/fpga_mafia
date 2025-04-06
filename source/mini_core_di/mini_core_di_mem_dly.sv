@@ -12,7 +12,7 @@
 `include "macros.vh"
 
 module mini_core_di_mem_dly
-import mini_core_pkg::*;
+import mini_core_di_pkg::*;
 ( input  logic           Clock,       //input 
   input  logic           Rst,         //input  
   // ctrl
