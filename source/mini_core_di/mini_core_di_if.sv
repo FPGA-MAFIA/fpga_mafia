@@ -30,19 +30,19 @@ logic [31:0] PcPlus8Q100H;
 
 // Pc Inc
 assign PcPlus4Q100H = PcQ100H + 3'h4; 
-assign PcPlus8Q100H = PcQ100H + 3'h8; 
+assign PcPlus8Q100H = PcQ100H + 4'h8; 
 
 // Q1
-assign NextPcQ1nnH = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H  :                 // jmp case
-                     Ctrl.SelNextPcPlus4Q201H  ? PcPlus4Q100H :
-                                                 PcPlus8Q100H;   // issue 2 used or not 
+assign NextPcQ1nnH =    Ctrl.SelNextPcPlus4Q201H  ? PcPlus4Q100H :
+                        Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H  :  // jmp case
+                                                    PcPlus8Q100H;   // issue 2 used or not 
 `MAFIA_EN_RST_DFF(PcQ100H, NextPcQ1nnH, Clock, ReadyQ100H, Rst)
-`MAFIA_EN_RST_DFF(PcQ101H, PcQ100H, Clock, ReadyQ101H, Rst)
+`MAFIA_EN_DFF(PcQ101H, PcQ100H, Clock, ReadyQ101H)
 
 // Q2
 assign NextPcQ2nnH = NextPcQ1nnH + 3'h4;
 `MAFIA_EN_RST_DFF(PcQ200H, NextPcQ2nnH, Clock, ReadyQ200H, Rst)
-`MAFIA_EN_RST_DFF(PcQ201H, PcQ200H, Clock, ReadyQ201H, Rst)
+`MAFIA_EN_DFF(PcQ201H, PcQ200H, Clock, ReadyQ201H)
 
 
 

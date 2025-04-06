@@ -125,7 +125,7 @@ mini_core_di_idu mini_core_di_idu (
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
 
   .PcQ101H      (PcQ101H     ), // input logic [31:0] PcQ101H,
-  .PcQ201H      (PcQ101H     ), // input logic [31:0] PcQ201H,
+  .PcQ201H      (PcQ201H     ), // input logic [31:0] PcQ201H,
 
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .PreInstructionQ101H (PreInstructionQ101H), // input  logic

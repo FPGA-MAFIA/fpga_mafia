@@ -13,7 +13,7 @@ module idu (
     // Dependency Flags
     logic raw_dependency;  // Read-After-Write (RAW)
     logic waw_dependency;  // Write-After-Write (WAW)
-    logic branch_instr;    // Branch detection
+    logic branch_jmp_instr;    // Branch detection
     logic mem_access_instr1; // Memory access detection for instr1
     logic mem_access_instr2; // Memory access detection for instr2
 
@@ -33,12 +33,13 @@ module idu (
     assign rs2_2 = instr2[24:20];
 
     
-    assign raw_dependency = (rs1_2 == rd1) || (rs2_2 == rd1);
+    assign raw_dependency = ((rs1_2 == rd1) && (rd1 != 5'b0)) || ((rs2_2 == rd1) && (rd1 != 5'b0));
 
     assign waw_dependency = (rd1 == rd2) && (rd1 != 5'b0);
 
     // Branch Detection
-    assign branch_instr = (opcode1 == 7'b1100011); 
+    assign branch_jmp_instr = (opcode1 == 7'b1100011) || (opcode1 == 7'b1101111 ) ||  (opcode1 == 7'b1100111  ) ||
+                              (opcode2 == 7'b1100011) || (opcode2 == 7'b1101111 ) ||  (opcode2 == 7'b1100111  ); 
 
     // Memory Access Detection
     assign mem_access_instr1 = (opcode1 == 7'b0000011) || // Load instructions
@@ -47,7 +48,7 @@ module idu (
     assign mem_access_instr2 = (opcode2 == 7'b0000011) || // Load instructions
                                (opcode2 == 7'b0100011);  // Store instructions
     
-    assign issue2ValidN =  (raw_dependency || waw_dependency || branch_instr || mem_access_instr2);
+    assign issue2ValidN =  (raw_dependency || waw_dependency || branch_jmp_instr || mem_access_instr2);
 
     always_comb begin
         // Default assignments

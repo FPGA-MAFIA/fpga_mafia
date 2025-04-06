@@ -33,6 +33,8 @@ module mini_core_di_idu (
 logic [31:0] InstructionBufferQ101H;
 logic [31:0] PcBufferQ101H;
 logic        BufferSel;
+// logic        PreBufferSel;
+logic        issue2ValidN_idu;
 
 logic [31:0] PrePcQ101H;
 logic [31:0] PrePcQ201H;
@@ -53,12 +55,15 @@ idu idu (
         .issue_instr2(PreInstructionQ201H_issued),
         .PC1_out(PostPcQ101H),
         .PC2_out(PostPcQ201H),
-        .issue2ValidN(issue2ValidN)
+        .issue2ValidN(issue2ValidN_idu)
 );
+
+// assign PreBufferSel = issue2ValidN_idu;
+assign issue2ValidN = issue2ValidN_idu;
 
 `MAFIA_EN_RST_DFF(InstructionBufferQ101H, PreInstructionQ201H, Clock, issue2ValidN, Rst)
 `MAFIA_EN_RST_DFF(PcBufferQ101H, PcQ201H, Clock, issue2ValidN, Rst)
-`MAFIA_RST_DFF(BufferSel, issue2ValidN, Clock, Rst)
+`MAFIA_RST_DFF(BufferSel, issue2ValidN_idu, Clock, Rst)
 
 // Q100H/Q200H to Q101H/Q201H Flip Flops. 
 // `MAFIA_EN_DFF(PcQ102H, prePCQ102H, Clock, ReadyQ102H)

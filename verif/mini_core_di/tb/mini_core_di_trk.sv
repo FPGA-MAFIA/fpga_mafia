@@ -27,7 +27,7 @@ assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInst
 assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H_issued;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2);
+    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |  %1b   |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2, mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel);
 end
 
 
@@ -59,7 +59,7 @@ initial begin: trk_fetch_gen
 end
 // Uncomment and update when needed
 always @(posedge Clk) begin : fetch_print
-   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t |%3b \t |%7b\t |%7b|  %1b  |\n", $realtime,PcQ100H,PcQ200H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.Funct3Q101H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.Funct7Q101H, mini_core_di_top.mini_core_di.mini_core_di_ctrl.OpcodeQ101H, Issue2ValidNQ201H);
+   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t | %1b  |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ100H, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ200H, Issue2ValidNQ201H);
 end
 
 integer trk_memory_access;
