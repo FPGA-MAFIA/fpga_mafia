@@ -29,13 +29,17 @@ logic branch_h;
 logic mem_h;
 logic raw_h;
 logic waw_h;
+logic [4:0]rs1_2;
+logic [4:0]rd1;
 assign branch_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.branch_jmp_instr;
 assign mem_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.mem_access_instr1 || mini_core_di_top.mini_core_di.mini_core_di_idu.idu.mem_access_instr2;
 assign raw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.raw_dependency;
 assign waw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.waw_dependency;
+assign rs1_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rs1_2;
+assign rd1 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rd1;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |  %1b   | %1b/%1b/%1b/%1b\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2, mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel, branch_h,mem_h,raw_h,waw_h);
+    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |  %1b   | %1b/%1b/%1b/%1b | %5b %5b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2, mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel, branch_h,mem_h,raw_h,waw_h, rd1, rs1_2);
 end
 
 

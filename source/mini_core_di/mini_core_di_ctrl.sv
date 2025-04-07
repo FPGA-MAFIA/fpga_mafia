@@ -110,8 +110,8 @@ assign PreOpcodeQ101H    = t_opcode'(PreInstructionQ101H[6:0]);
 
 t_opcode    PreOpcodeQ201H;
 logic LoadHazardValidRegSrc2Q201H;
-logic RegDstQ202MatchRegSrc1Q201H;
-logic RegDstQ202MatchRegSrc2Q201H;
+logic RegDstQ102MatchRegSrc1Q201H;
+logic RegDstQ102MatchRegSrc2Q201H;
 assign PreRegSrc1Q201H   = PreInstructionQ201H[19:15];
 assign PreRegSrc2Q201H   = PreInstructionQ201H[24:20];
 assign PreOpcodeQ201H    = t_opcode'(PreInstructionQ201H[6:0]);
