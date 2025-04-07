@@ -25,11 +25,18 @@ assign PcQ104H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ104H.Pc;
 
 assign PcQ201H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ201H.Pc;
 assign PcQ202H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ202H.Pc;
+assign PcQ203H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ201H.Pc;
 assign PcQ204H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ204H.Pc;
 
 //debug second issue usage
 logic Issue2ValidNQ201H;
-assign Issue2ValidNQ201H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.ValidInstQ201H;
+assign Issue2ValidNQ201H = mini_core_di_top.mini_core_di.mini_core_di_if.Ctrl.SelNextPcPlus4Q201H;
+
+logic jmp_taken;
+logic [31:0] jmp_addr;
+assign jmp_taken = mini_core_di_top.mini_core_di.mini_core_di_if.Ctrl.SelNextPcAluOutQ102H;
+assign jmp_addr = mini_core_di_top.mini_core_di.mini_core_di_if.AluOutQ102H;
+
 
 logic RegWrEnQ104H;
 logic [4:0]  RegDstQ104H;

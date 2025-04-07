@@ -3,6 +3,8 @@ package idu_pkg;
 
 `include "common_pkg.vh"
 
+parameter NOP = 32'b000000000000000000000000010011; // addi x0 , x0 , 0
+
 typedef enum logic [2:0] {
    BEQ  = 3'b000 ,
    BNE  = 3'b001 ,

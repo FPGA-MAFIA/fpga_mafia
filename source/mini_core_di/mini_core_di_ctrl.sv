@@ -38,6 +38,7 @@ import mini_core_di_pkg::*;
     output  logic        ReadyQ204H,
     // output ctrl signals
     output var t_ctrl_if    CtrlIf,
+    output var t_ctrl_idu   CtrlIdu,
     output var t_ctrl_rf    CtrlRf,
     output var t_ctrl_exe   CtrlExe,
     output var t_ctrl_mem   CtrlMem,
@@ -214,8 +215,8 @@ assign CtrlQ201H.RegDst           = InstructionQ201H[11:7];
 assign CtrlQ201H.RegSrc1          = InstructionQ201H[19:15];
 assign CtrlQ201H.RegSrc2          = InstructionQ201H[24:20];
 
-logic ebreak_was_calledQ201H; 
-assign ebreak_was_calledQ201H = (InstructionQ201H == 32'b000000000001_00000_000_00000_1110011); // FIXME - Abd: check if we should support e-breaks 
+// logic ebreak_was_calledQ201H; 
+// assign ebreak_was_calledQ201H = (InstructionQ201H == 32'b000000000001_00000_000_00000_1110011); // FIXME - Abd: check if we should support e-breaks 
 
 
 
@@ -349,6 +350,9 @@ assign ValidInstQ202H = ReadyQ202H && PreValidInstQ202H;
 assign ValidInstQ203H = ReadyQ203H && PreValidInstQ203H;
 `MAFIA_EN_DFF    (PreValidInstQ204H, ValidInstQ203H, Clock, ReadyQ204H)
 assign ValidInstQ204H = ReadyQ204H && PreValidInstQ204H;
+
+// CtrlIdu
+assign CtrlIdu.FlushBufferQ102H = IndirectBranchQ102H;
 
 //Q1
 // Instruction Fetch Control Signals

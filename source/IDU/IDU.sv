@@ -22,6 +22,7 @@ module idu
     logic mem_access_instr1; // Memory access detection for instr1
     logic mem_access_instr2; // Memory access detection for instr2
     logic flip_instructions;
+    logic ebreak_instruction;
 
     logic [6:0] opcode1, opcode2;    // Opcode fields for instr1 and instr2
     logic [4:0] rd1, rs1_1, rs2_1;  // Fields for instr1
@@ -58,7 +59,10 @@ module idu
     assign mem_access_instr2 = (opcode2 == 7'b0000011) || // Load instructions
                                (opcode2 == 7'b0100011);  // Store instructions
     
-    assign issue2ValidN =  (raw_dependency || waw_dependency || branch_jmp_instr || (mem_access_instr2 && mem_access_instr1) );
+    // Ebrake call
+    assign ebreak_instruction = (instr1 == 32'b000000000001_00000_000_00000_1110011 || instr1 == 32'b000000000000000000000000010011 || instr2 == 32'b000000000001_00000_000_00000_1110011 || instr2 == 32'b000000000000000000000000010011);
+
+    assign issue2ValidN =  (raw_dependency || waw_dependency || branch_jmp_instr || (mem_access_instr2 && mem_access_instr1) || ebreak_instruction );
 
     assign flip_instructions = (mem_access_instr2 && mem_access_instr1 == 0) && !issue2ValidN;
 

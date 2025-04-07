@@ -61,6 +61,7 @@ logic         ReadyQ204H;
 
 //t_mini_ctrl   Ctrl;
 t_ctrl_if     CtrlIf;
+t_ctrl_if     CtrlIdu;
 t_ctrl_rf     CtrlRf;
 t_ctrl_exe    CtrlExe;
 t_ctrl_mem    CtrlMem;
@@ -122,7 +123,7 @@ mini_core_di_idu mini_core_di_idu (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
 
-  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
+  .Ctrl         (CtrlIdu      ), // input  t_ctrl_if    Ctrl,
 
   .PcQ101H      (PcQ101H     ), // input logic [31:0] PcQ101H,
   .PcQ201H      (PcQ201H     ), // input logic [31:0] PcQ201H,
@@ -165,6 +166,7 @@ mini_core_di_ctrl mini_core_di_ctrl (
   .ReadyQ204H           (ReadyQ204H), //  output 
   // output ctrl signals
   .CtrlIf               (CtrlIf             ), //output
+  .CtrlIdu              (CtrlIdu            ), //output
   .CtrlRf               (CtrlRf             ), //output
   .CtrlExe              (CtrlExe            ), //output
   .CtrlMem              (CtrlMem            ), //output

@@ -32,6 +32,7 @@ logic [31:0] Instruction_1;
 logic [31:0] Instruction_2;
 logic [31:0] PreInstruction_1;
 logic [31:0] PreInstruction_2;
+logic [31:0] BufferInstruction;
 logic [31:0] DMemAddress;
 logic [31:0] DMemData   ;
 logic [3:0]  DMemByteEn ;

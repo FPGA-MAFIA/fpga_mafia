@@ -132,6 +132,10 @@ typedef struct packed {
 
 
 typedef struct packed {
+    logic FlushBufferQ102H;
+} t_ctrl_idu;
+
+typedef struct packed {
     logic SelNextPcAluOutQ102H;
     logic SelNextPcPlus4Q201H;
 } t_ctrl_if;

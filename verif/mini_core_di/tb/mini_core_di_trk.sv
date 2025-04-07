@@ -18,28 +18,33 @@ initial begin: trk_idu_gen
     #1
     $timeformat(-9, 1, " ", 6);
     trk_idu = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_idu.log"},"w");
-    $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(trk_idu,"   Time |  PC1_in  |  PC2_in  | PC1_out  | PC2_out  | I2NV |           Instruction_1         |           Instruction_2         | b/m/r/w\n");
-    $fwrite(trk_idu,"--------------------------------------------------------------------------------------------------------------------------------\n");  
+    $fwrite(trk_idu,"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+    $fwrite(trk_idu,"   Time |  PC1_in  |  PC2_in  |   PC_bf  | PC1_out  | PC2_out  | I2NV |           Instruction_1         |           Instruction_2         |              buffer             | b/m/r/w/e  |\n");
+    $fwrite(trk_idu,"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");  
 end
 
-assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ101H_issued;
-assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H_issued;
+assign PreInstruction_1 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ101H;
+assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInstructionQ201H;
+assign BufferInstruction = mini_core_di_top.mini_core_di.mini_core_di_idu.InstructionBufferQ101H;
+logic [31:0] BufferPC;
+assign BufferPC = mini_core_di_top.mini_core_di.mini_core_di_idu.PcBufferQ101H;
 logic branch_h;
 logic mem_h;
 logic raw_h;
 logic waw_h;
+logic e_break;
 logic [4:0]rs1_2;
 logic [4:0]rd1;
 assign branch_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.branch_jmp_instr;
 assign mem_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.mem_access_instr1 || mini_core_di_top.mini_core_di.mini_core_di_idu.idu.mem_access_instr2;
 assign raw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.raw_dependency;
 assign waw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.waw_dependency;
+assign e_break = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.ebreak_instruction;
 assign rs1_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rs1_2;
 assign rd1 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rd1;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t\t| %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |  %1b   | %1b/%1b/%1b/%1b | %5b %5b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PrePcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2, mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel, branch_h,mem_h,raw_h,waw_h, rd1, rs1_2);
+    $fwrite(trk_idu,"%t | %8h | %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
 end
 
 
@@ -71,7 +76,7 @@ initial begin: trk_fetch_gen
 end
 // Uncomment and update when needed
 always @(posedge Clk) begin : fetch_print
-   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t | %1b  |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ100H, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ200H, Issue2ValidNQ201H);
+   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t | %1b  | %1b | %8h  |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ100H, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ200H, Issue2ValidNQ201H, jmp_taken, jmp_addr);
 end
 
 integer trk_memory_access;
