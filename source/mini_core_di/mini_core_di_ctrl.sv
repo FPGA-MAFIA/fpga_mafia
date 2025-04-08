@@ -205,8 +205,8 @@ assign Funct7Q201H                = InstructionQ201H[31:25];
 assign CtrlQ201H.Pc               = PcQ201H;
 assign CtrlQ201H.Instruction      = InstructionQ201H;
 assign CtrlQ201H.Opcode           = OpcodeQ201H;
-assign CtrlQ201H.SelAluImm        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
-assign CtrlQ201H.SelAluPc         = (OpcodeQ101H == AUIPC);
+assign CtrlQ201H.SelAluImm        =!(OpcodeQ201H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
+assign CtrlQ201H.SelAluPc         = (OpcodeQ201H == AUIPC);
 assign CtrlQ201H.e_SelWrBack      =  WB_ALU; // FIXME - Abd: constant maybe we don't need it
 assign CtrlQ201H.Lui              = (OpcodeQ201H == LUI);
 assign CtrlQ201H.RegWrEn          = (OpcodeQ201H == LUI ) || (OpcodeQ201H == AUIPC) || (OpcodeQ201H == I_OP)  || 
