@@ -36,6 +36,7 @@ logic        BufferSel;
 logic        BufferValid;
 // logic        PreBufferSel;
 logic        issue2ValidN_idu;
+logic        HoldFlushBufferQ102;
 
 logic [31:0] PrePcQ101H;
 logic [31:0] PrePcQ201H;
@@ -60,11 +61,13 @@ idu idu (
         .issue2ValidN(issue2ValidN_idu)
 );
 
-assign issue2ValidN = issue2ValidN_idu;
+assign issue2ValidN = issue2ValidN_idu && !(Ctrl.FlushBufferQ102H || HoldFlushBufferQ102);
 assign BufferSel = BufferValid && !Ctrl.FlushBufferQ102H;
 
-`MAFIA_EN_RST_DFF(InstructionBufferQ101H, PreInstructionQ201H_idu, Clock, issue2ValidN_idu && ReadyQ101H, Rst)
-`MAFIA_EN_RST_DFF(PcBufferQ101H, PrePcQ201H, Clock, issue2ValidN_idu && ReadyQ101H, Rst)
-`MAFIA_RST_DFF(BufferValid, issue2ValidN_idu && ReadyQ101H, Clock, Rst)
+`MAFIA_EN_RST_DFF(InstructionBufferQ101H, PreInstructionQ201H_idu, Clock, issue2ValidN_idu && ReadyQ101H, Rst || Ctrl.FlushBufferQ102H)
+`MAFIA_EN_RST_DFF(PcBufferQ101H, PrePcQ201H, Clock, issue2ValidN_idu && ReadyQ101H, Rst || Ctrl.FlushBufferQ102H)
+`MAFIA_RST_DFF(BufferValid, issue2ValidN_idu && ReadyQ101H, Clock, Rst || Ctrl.FlushBufferQ102H)
+
+`MAFIA_EN_RST_DFF(HoldFlushBufferQ102, Ctrl.FlushBufferQ102H && !HoldFlushBufferQ102, Clock, ReadyQ101H , Rst)
 
 endmodule
