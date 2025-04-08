@@ -28,6 +28,8 @@ assign PreInstruction_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.PreInst
 assign BufferInstruction = mini_core_di_top.mini_core_di.mini_core_di_idu.InstructionBufferQ101H;
 logic [31:0] BufferPC;
 assign BufferPC = mini_core_di_top.mini_core_di.mini_core_di_idu.PcBufferQ101H;
+logic BufferSel;
+assign BufferSel = mini_core_di_top.mini_core_di.mini_core_di_idu.FlushBufferQ103;
 logic branch_h;
 logic mem_h;
 logic raw_h;
@@ -44,7 +46,7 @@ assign rs1_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rs1_2;
 assign rd1 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rd1;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t | %8h | %8h | %8h | %8h | %8h |  %1b   |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
+    $fwrite(trk_idu,"%t | %8h | %8h | %8h | %8h | %8h |  %1b/%1b  |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN,BufferSel, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
 end
 
 

@@ -192,7 +192,7 @@ assign CtrlQ101H.RegSrc1          = InstructionQ101H[19:15];
 assign CtrlQ101H.RegSrc2          = InstructionQ101H[24:20];
 
 logic ebreak_was_calledQ101H; 
-assign ebreak_was_calledQ101H = 0;// (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
+assign ebreak_was_calledQ101H = (InstructionQ101H == 32'b000000000001_00000_000_00000_1110011);
 
 // FIXME - Abd: need to add Parallel issue control bits, necessary for WB and Hzrd cases.
 
