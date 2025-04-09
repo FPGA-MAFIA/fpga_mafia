@@ -4,12 +4,14 @@ initial begin: trk_alu_gen
     $timeformat(-9, 1, " ", 6);
     trk_alu = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_alu.log"},"w");
     $fwrite(trk_alu,"---------------------------------------------------------\n");
-    $fwrite(trk_alu,"Time\t|\tPC1 \t |\tPC2 \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t|\n");
+    $fwrite(trk_alu,"Time\t|\tPC1 \t |\tPC2 \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t| AluIn1Q202H\t| AluIn2Q202H\t| AluOutQ202H\t|\n");
     $fwrite(trk_alu,"---------------------------------------------------------\n");  
 end
 
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h | %8h |%8h \t|%8h \t|%8h \t| \n", $realtime,PcQ102H,PcQ202H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn1Q102H , mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn2Q102H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluOutQ102H);
+    $fwrite(trk_alu,"%t\t| %8h | %8h |%8h \t|%8h \t|%8h \t|%8h \t|%8h \t|%8h \t \n", $realtime,PcQ102H,PcQ202H,
+    mini_core_di_top.mini_core_di.mini_core_dip_exe.PreRegRdData1Q102H , mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegSrc1Q101H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluOutQ102H, 
+    mini_core_di_top.mini_core_di.mini_core_dis_exe.PreRegRdData1Q202H , mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegSrc1Q201H, mini_core_di_top.mini_core_di.mini_core_dis_exe.AluOutQ202H);
 end
 
 
@@ -87,7 +89,7 @@ initial begin: trk_memory_access_gen
     $timeformat(-9, 1, " ", 6);
     trk_memory_access = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_memory_access,"Time  |  PC1 | PC2   | Opcode  | Address  | Data  |\n");
+    $fwrite(trk_memory_access,"Time  |  PC  | Opcode  | Address  | Data  |\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
 end
 

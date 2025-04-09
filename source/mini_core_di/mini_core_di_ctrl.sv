@@ -172,9 +172,9 @@ assign CtrlQ101H.SelRegWrPc       = (OpcodeQ101H == JAL) || (OpcodeQ101H == JALR
 assign CtrlQ101H.SelAluPc         = (OpcodeQ101H == JAL) || (OpcodeQ101H == BRANCH) || (OpcodeQ101H == AUIPC);
 assign CtrlQ101H.SelAluImm        =!(OpcodeQ101H == R_OP); // Only in case of RegReg Operation the Imm Selector is deasserted - defualt is asserted
 assign CtrlQ101H.SelDMemWb        = (OpcodeQ101H == LOAD);
-assign CtrlQ101H.e_SelWrBack      = ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H > PcQ201H || Issue2ValidNQ201H)  ? WB_PC4 :
-                                    ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H < PcQ201H && !Issue2ValidNQ201H) ? WB_PC8 :
-                                    (OpcodeQ101H == LOAD) ? WB_DMEM :
+assign CtrlQ101H.e_SelWrBack      = (OpcodeQ101H == LOAD) ? WB_DMEM :
+                                    ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR))   ? WB_PC4 :
+                                    // ((OpcodeQ101H == JAL) || (OpcodeQ101H == JALR)) && (PcQ101H < PcQ201H && !Issue2ValidNQ201H) ? WB_PC8 :
                                                             WB_ALU  ;
                                                                                    
 assign CtrlQ101H.Lui              = (OpcodeQ101H == LUI);

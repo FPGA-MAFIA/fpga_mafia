@@ -41,6 +41,6 @@ assign PostSxDMemRdDataQ104H[31:24] =  Ctrl.ByteEnQ104H[3] ? DMemRdDataQ104H[31:
 assign RegWrDataQ104H = (Ctrl.e_SelWrBackQ104H == WB_DMEM) ? PostSxDMemRdDataQ104H : // TODO - Conseder using unique case instead of priority mux, to improve timing by reduce number of logical steps for the mux out.
                         (Ctrl.e_SelWrBackQ104H == WB_ALU)  ? AluOutQ104H           :
                         (Ctrl.e_SelWrBackQ104H == WB_PC4)  ? PcPlus4Q104H          : 
-                        (Ctrl.e_SelWrBackQ104H == WB_PC8)  ? PcPlus8Q104H          : // FIXME - Abd: make sure Ctrl Signals + package are adjusted 
+                        // (Ctrl.e_SelWrBackQ104H == WB_PC8)  ? PcPlus8Q104H          : // FIXME - Abd: make sure Ctrl Signals + package are adjusted 
                                                            32'b0;
 endmodule
