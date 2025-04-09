@@ -10,8 +10,8 @@ end
 
 always @(posedge Clk) begin : alu_print
     $fwrite(trk_alu,"%t\t| %8h | %8h |%8h \t|%8h \t|%8h \t|%8h \t|%8h \t|%8h \t \n", $realtime,PcQ102H,PcQ202H,
-    mini_core_di_top.mini_core_di.mini_core_dip_exe.PreRegRdData1Q102H , mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegSrc1Q101H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluOutQ102H, 
-    mini_core_di_top.mini_core_di.mini_core_dis_exe.PreRegRdData1Q202H , mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegSrc1Q201H, mini_core_di_top.mini_core_di.mini_core_dis_exe.AluOutQ202H);
+    mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn1Q102H , mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn2Q102H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluOutQ102H, 
+    mini_core_di_top.mini_core_di.mini_core_dis_exe.AluIn1Q202H , mini_core_di_top.mini_core_di.mini_core_dis_exe.AluIn2Q202H, mini_core_di_top.mini_core_di.mini_core_dis_exe.AluOutQ202H);
 end
 
 

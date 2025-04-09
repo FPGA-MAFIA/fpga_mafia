@@ -46,7 +46,7 @@ module idu
 
     assign raw_dependency =  rd1_valid && (((rs1_2 == rd1) && (rs1_2_valid) && (rd1 != 5'b0)) || ((rs2_2 == rd1) && (rs2_2_valid) && (rd1 != 5'b0)));
 
-    assign waw_dependency = (rd1 == rd2) && (rd1_valid) && (rd1 != 5'b0);
+    assign waw_dependency = (rd1 == rd2) && (rd1_valid) && (rd1 != 5'b0)  ;
 
     // Branch Detection
     assign branch_jmp_instr = (opcode1 == 7'b1100011) || (opcode1 == 7'b1101111 ) ||  (opcode1 == 7'b1100111  ) ||
@@ -70,7 +70,7 @@ module idu
     always_comb begin
         // Default assignments
         issue_instr1 = instr1;     
-        issue_instr2 = instr2;
+        issue_instr2 = instr1 == 32'b00000000000000001000000001100111 ? 32'b000000000000000000000000010011 : instr2; // if second instruction fetched is out of bound
         PC1_out = PC1_in;
         PC2_out = PC2_in;     
 

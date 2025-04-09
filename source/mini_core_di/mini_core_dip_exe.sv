@@ -84,14 +84,14 @@ assign Hazard4Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ204H) && (Ctrl.RegW
 
 // Forwarding unite
 assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
                          Hazard3Data1Q102H ? AluOutQ203H       : // Rd 102 After Wr 203
+                         Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
                          Hazard4Data1Q102H ? RegWrDataQ204H    : // Rd 102 After Wr 204
                                              PreRegRdData1Q102H; // Common Case - No Hazard
 
 assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
-                         Hazard2Data2Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
                          Hazard3Data2Q102H ? AluOutQ203H       : // Rd 102 After Wr 203
+                         Hazard2Data2Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104
                          Hazard4Data2Q102H ? RegWrDataQ204H    : // Rd 102 After Wr 204  
                                              PreRegRdData2Q102H; // Common Case - No Hazard
 
