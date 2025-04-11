@@ -70,7 +70,7 @@ module idu
     always_comb begin
         // Default assignments
         issue_instr1 = instr1;     
-        issue_instr2 = instr1 == 32'b00000000000000001000000001100111 ? 32'b000000000000000000000000010011 : instr2; // if second instruction fetched is out of bound
+        issue_instr2 = (instr1 == 32'b00000000000000001000000001100111 || issue2ValidN) ? 32'b00000000000000000000000001001  : instr2; // if second instruction fetched is out of bound
         PC1_out = PC1_in;
         PC2_out = PC2_in;     
 
