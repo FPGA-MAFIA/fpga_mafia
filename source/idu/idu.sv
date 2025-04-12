@@ -23,6 +23,7 @@ module idu
     logic mem_access_instr2; // Memory access detection for instr2
     logic flip_instructions;
     logic ebreak_instruction;
+    logic nop_instruction;
 
     logic [6:0] opcode1, opcode2;    // Opcode fields for instr1 and instr2
     logic [4:0] rd1, rs1_1, rs2_1;  // Fields for instr1
@@ -62,6 +63,9 @@ module idu
     // Ebrake call
     assign ebreak_instruction = (instr1 == 32'b000000000001_00000_000_00000_1110011 || instr1 == 32'b000000000000000000000000010011 || instr2 == 32'b000000000001_00000_000_00000_1110011 || instr2 == 32'b000000000000000000000000010011);
 
+    // NOP instruction
+    assign nop_instruction = instr1 == 32'b00000000000000001000000001100111 || instr2 == 32'b00000000000000001000000001100111;
+
     assign issue2ValidN =  (raw_dependency || waw_dependency || branch_jmp_instr || (mem_access_instr2 && mem_access_instr1) || ebreak_instruction);
 
     assign flip_instructions = (mem_access_instr2 && mem_access_instr1 == 0) && !issue2ValidN;
@@ -70,7 +74,7 @@ module idu
     always_comb begin
         // Default assignments
         issue_instr1 = instr1;     
-        issue_instr2 = (instr1 == 32'b00000000000000001000000001100111 || issue2ValidN) ? 32'b00000000000000000000000001001  : instr2; // if second instruction fetched is out of bound
+        issue_instr2 = ( issue2ValidN) ? 32'b00000000000000000000000001001  : instr2; // if second instruction fetched is out of bound
         PC1_out = PC1_in;
         PC2_out = PC2_in;     
 

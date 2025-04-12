@@ -2,128 +2,130 @@
 
 module idu_tb;
 
-    // Inputs to the IDU
     logic [31:0] instr1, instr2;
-    // Outputs from the IDU
-    logic [31:0] issue_instr1, issue_instr2;
+    logic [31:0] PC1_in, PC2_in;
 
-    // Instantiate the IDU module
+    logic [31:0] PC1_out, PC2_out;
+    logic [31:0] issue_instr1, issue_instr2;
+    logic issue2ValidN;
+
     idu dut (
+        .PC1_in(PC1_in),
+        .PC2_in(PC2_in),
         .instr1(instr1),
         .instr2(instr2),
+        .PC1_out(PC1_out),
+        .PC2_out(PC2_out),
         .issue_instr1(issue_instr1),
-        .issue_instr2(issue_instr2)
+        .issue_instr2(issue_instr2),
+        .issue2ValidN(issue2ValidN)
     );
 
-    // Task to display results
     task display_results;
         input [31:0] instr1, instr2;
         input [31:0] issue_instr1, issue_instr2;
+        input [31:0] PC1_in, PC2_in;
+        input [31:0] PC1_out, PC2_out;
+        input logic issue2ValidN;
         begin
             $display("--------------------------------------------------");
-            $display("Input Instructions:");
-            $display("instr1 = %h", instr1);
-            $display("instr2 = %h", instr2);
-            $display("Output Issued Instructions:");
-            $display("issue_instr1 = %h", issue_instr1);
-            $display("issue_instr2 = %h", issue_instr2);
+            $display("Input PCs:       PC1_in = %h | PC2_in = %h", PC1_in, PC2_in);
+            $display("Input Instrs:    instr1 = %h | instr2 = %h", instr1, instr2);
+            $display("Output PCs:      PC1_out = %h | PC2_out = %h", PC1_out, PC2_out);
+            $display("Issued Instrs:   issue_instr1 = %h | issue_instr2 = %h", issue_instr1, issue_instr2);
+            $display("issue2ValidN:    %b", issue2ValidN);
             $display("--------------------------------------------------");
         end
     endtask
 
     initial begin
-        // Test Case 1: No Dependencies
-        $display("Test Case 1: No Dependencies");
-        instr1 = 32'h00200093; // addi x1, x0, 2
-        instr2 = 32'h00300113; // addi x2, x0, 3
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
 
-        instr1 = 32'h00408093; // addi x1, x1, 4
-        instr2 = 32'h00510113; // addi x2, x2, 5
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 1: No Dependency, Dual Issue Expected
+        $display("Test 1: No Dependency");
+        PC1_in = 32'h00000000; PC2_in = 32'h00000004;
+        instr1 = 32'h00200093; instr2 = 32'h00300113;
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00200113; // addi x2, x0, 2
-        instr2 = 32'h00300213; // addi x4, x0, 3
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        PC1_in = 32'h00000008; PC2_in = 32'h0000000C;
+        instr1 = 32'h00600213; instr2 = 32'h00700293;
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00600093; // addi x1, x0, 6
-        instr2 = 32'h00700113; // addi x2, x0, 7
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 2: RAW Dependency, Single Issue Expected
+        $display("Test 2: RAW Dependency");
+        PC1_in = 32'h00000010; PC2_in = 32'h00000014;
+        instr1 = 32'h00100113; // addi x2, x0, 1
+        instr2 = 32'h00210213; // addi x4, x2, 2
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        // Test Case 2: RAW Dependency
-        $display("Test Case 2: RAW Dependency");
-        instr1 = 32'h00208093; // addi x1, x1, 2
-        instr2 = 32'h00108113; // addi x2, x1, 1
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        PC1_in = 32'h00000018; PC2_in = 32'h0000001C;
+        instr1 = 32'h00500293; // addi x5, x0, 5
+        instr2 = 32'h00628313; // addi x6, x5, 6
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00200093; // addi x1, x0, 2
-        instr2 = 32'h00100113; // addi x2, x1, 1
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 3: WAW Dependency, Single Issue Expected
+        $display("Test 3: WAW Dependency");
+        PC1_in = 32'h00000020; PC2_in = 32'h00000024;
+        instr1 = 32'h00100093; // addi x1, x0, 1
+        instr2 = 32'h00200093; // addi x1, x0, 2
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
+        PC1_in = 32'h00000028; PC2_in = 32'h0000002C;
         instr1 = 32'h00300113; // addi x2, x0, 3
-        instr2 = 32'h00208113; // addi x2, x2, 2
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        instr2 = 32'h00400113; // addi x2, x0, 4
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00408113; // addi x2, x2, 4
-        instr2 = 32'h00310113; // addi x3, x2, 3
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 4: Branch Hazard, Second Instruction Stalled
+        $display("Test 4: Branch or Jump");
+        PC1_in = 32'h00000030; PC2_in = 32'h00000034;
+        instr1 = 32'h0000006F; // jal x0, 0
+        instr2 = 32'h00300113; // addi x2, x0, 3
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        // Test Case 3: WAW Dependency
-        $display("Test Case 3: WAW Dependency");
-        instr1 = 32'h00208093; // addi x1, x1, 2
-        instr2 = 32'h00308093; // addi x1, x1, 3
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        PC1_in = 32'h00000038; PC2_in = 32'h0000003C;
+        instr1 = 32'h00028063; // beq x5, x0, offset
+        instr2 = 32'h00200093; // addi x1, x0, 2
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00408113; // addi x2, x1, 4
-        instr2 = 32'h00508113; // addi x2, x1, 5
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 5: Memory Access Conflict
+        $display("Test 5: Memory Access");
+        PC1_in = 32'h00000040; PC2_in = 32'h00000044;
+        instr1 = 32'h00002003; // lw x0, 0(x0)
+        instr2 = 32'h00002283; // lw x5, 0(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00610213; // addi x3, x2, 6
-        instr2 = 32'h00710213; // addi x3, x2, 7
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        PC1_in = 32'h00000048; PC2_in = 32'h0000004C;
+        instr1 = 32'h00402023; // sw x4, 0(x0)
+        instr2 = 32'h00802023; // sw x8, 0(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00820293; // addi x4, x3, 8
-        instr2 = 32'h00920293; // addi x4, x3, 9
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 6: Instruction Swapping
+        $display("Test 6: Swapping Memory to Primary Slot");
+        PC1_in = 32'h00000050; PC2_in = 32'h00000054;
+        instr1 = 32'h00300113; // addi x2, x0, 3
+        instr2 = 32'h00002003; // lw x0, 0(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        // Test Case 4: Branch Conditions
-        $display("Test Case 4: Branch Conditions");
-        instr1 = 32'h00428063; // beq x4, x4, 4
-        instr2 = 32'h00500113; // addi x2, x0, 5
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        PC1_in = 32'h00000058; PC2_in = 32'h0000005C;
+        instr1 = 32'h00500293; // addi x5, x0, 5
+        instr2 = 32'h00402003; // lw x0, 4(x0)
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        instr1 = 32'h00428063; // beq x4, x4, 4
-        instr2 = 32'h00002003; // lw x1, 0(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        // Test 7: NOP/EBREAK handling
+        $display("Test 7: NOP or EBREAK");
+        PC1_in = 32'h00000060; PC2_in = 32'h00000064;
+        instr1 = 32'h00000013; // NOP
+        instr2 = 32'h00300113; // addi x2, x0, 3
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
-        // Test Case 5: Second Instruction Has Memory Access
-        $display("Test Case 5: Second Instruction Has Memory Access");
+        PC1_in = 32'h00000068; PC2_in = 32'h0000006C;
+        instr1 = 32'h00100073; // EBREAK
+        instr2 = 32'h00200093; // addi x1, x0, 2
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
+
+        PC1_in = 32'h00000070; PC2_in = 32'h00000074;
         instr1 = 32'h00200093; // addi x1, x0, 2
-        instr2 = 32'h00002003; // lw x1, 0(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
-
-        instr1 = 32'h00400113; // addi x2, x0, 4
-        instr2 = 32'h00402223; // sw x2, 4(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
-
-        // Test Case 6: Both Instructions Have Memory Access
-        $display("Test Case 6: Both Instructions Have Memory Access");
-
-        instr1 = 32'h00402223; // sw x2, 4(x0)
-        instr2 = 32'h00002003; // lw x1, 0(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
-
-        instr1 = 32'h00802423; // sw x2, 8(x0)
-        instr2 = 32'h00C02623; // sw x3, 12(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
-
-        instr1 = 32'h01002083; // lw x1, 16(x0)
-        instr2 = 32'h01402223; // sw x2, 20(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
-
-        instr1 = 32'h01802083; // lw x1, 24(x0)
-        instr2 = 32'h01C02103; // lw x2, 28(x0)
-        #10; display_results(instr1, instr2, issue_instr1, issue_instr2);
+        instr2 = 32'h00000013; // NOP
+        #10; display_results(instr1, instr2, issue_instr1, issue_instr2, PC1_in, PC2_in, PC1_out, PC2_out, issue2ValidN);
 
         $finish;
     end
