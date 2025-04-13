@@ -42,10 +42,17 @@ logic RegWrEnQ104H;
 logic [4:0]  RegDstQ104H;
 logic [31:0] RegWrDataQ104H;
 
+logic RegWrEnQ24H;
+logic [4:0]  RegDstQ204H;
+logic [31:0] RegWrDataQ204H;
+
 assign RegWrEnQ104H   = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlRf.RegWrEnQ104H;
 assign RegDstQ104H    = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlRf.RegDstQ104H;
 assign RegWrDataQ104H = mini_core_di_top.mini_core_di.mini_core_di_rf.RegWrDataQ104H;
 
+assign RegWrEnQ204H   = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlRf.RegWrEnQ204H;
+assign RegDstQ204H    = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlRf.RegDstQ204H;
+assign RegWrDataQ204H = mini_core_di_top.mini_core_di.mini_core_di_rf.RegWrDataQ204H;
 
 
 task get_rf_write();
@@ -54,12 +61,39 @@ task get_rf_write();
         forever begin 
             @(posedge Clk) begin
                 if (RegWrEnQ104H && (RegDstQ104H != 5'b0)) begin
+                    if (RegWrEnQ204H && (RegDstQ204H != 5'b0) && PcQ104H > PcQ204H  ) begin 
+                        rf_cur_write.RegDst    = RegDstQ204H;
+                        rf_cur_write.Data      = RegWrDataQ204H;
+                        rf_cur_write.Pc        = PcQ204H;
+                        rf_cur_write.cur_time  = $time;
+                        rf_write_history.push_back(rf_cur_write);
+                        $display("I am smaller = %h , %h ", PcQ204H, PcQ104H );
+                    end
                     rf_cur_write.RegDst    = RegDstQ104H;
                     rf_cur_write.Data      = RegWrDataQ104H;
                     rf_cur_write.Pc        = PcQ104H;
                     rf_cur_write.cur_time  = $time;
                     rf_write_history.push_back(rf_cur_write);
+                    
+                    if (RegWrEnQ204H && (RegDstQ204H != 5'b0) && PcQ104H < PcQ204H ) begin 
+                        rf_cur_write.RegDst    = RegDstQ204H;
+                        rf_cur_write.Data      = RegWrDataQ204H;
+                        rf_cur_write.Pc        = PcQ204H;
+                        rf_cur_write.cur_time  = $time;
+                        rf_write_history.push_back(rf_cur_write);
+                        $display("I am bigger = %h , %h ", PcQ204H, PcQ104H );
+                    end
+
                     // $display("rf_cur_write = %p", rf_cur_write);
+                end else begin
+                    if (RegWrEnQ204H && (RegDstQ204H != 5'b0)) begin 
+                        rf_cur_write.RegDst    = RegDstQ204H;
+                        rf_cur_write.Data      = RegWrDataQ204H;
+                        rf_cur_write.Pc        = PcQ204H;
+                        rf_cur_write.cur_time  = $time;
+                        rf_write_history.push_back(rf_cur_write);
+                        $display("I am solo = %h , %h ", PcQ204H, PcQ104H );
+                    end
                 end
             end
         end
