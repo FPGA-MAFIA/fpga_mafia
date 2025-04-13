@@ -140,16 +140,19 @@ initial begin: trk_reg_write_gen
     $timeformat(-9, 1, " ", 6);
     #1
     trk_reg_write = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_reg_write_ref.log"},"w");
-    $fwrite(trk_reg_write,"---------------------------------------------------------\n");
-    $fwrite(trk_reg_write," Time | PC1 | PC2 |reg_dst|  X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
-    $fwrite(trk_reg_write,"---------------------------------------------------------\n");  
+    $fwrite(trk_reg_write,"------------------------------------------------------\n");
+    $fwrite(trk_reg_write,"  Time |   PC1    |   PC2    | dst1 | W1 | dst2 | W2 | X0      | X1     | X2     | X3     | X4     | X5     | X6     | X7     | X8     | X9     | X10    | X11    | X12    | X13    | X14    | X15    | X16    | X17    | X18    | X19    | X20    | X21    | X22    | X23    | X24    | X25    | X26    | X27    | X28    | X29    | X30    | X31    | \n");
+    $fwrite(trk_reg_write,"------------------------------------------------------\n");  
 end
 
 always_ff @(posedge Clk ) begin
-        $fwrite(trk_reg_write,"%6d | %8h | %8h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+        $fwrite(trk_reg_write,"%6d | %8h | %8h | %2d   | %1b  | %2d   | %1b  | %8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h|%8h \n"
         ,$time,            
                            PcQ104H, PcQ204H,
                            mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegDstQ104H,
+                           mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegWrEnQ104H,
+                           mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegDstQ204H,
+                           mini_core_di_top.mini_core_di.mini_core_di_rf.Ctrl.RegWrEnQ204H,
                            mini_core_di_top.mini_core_di.mini_core_di_rf.Register[0],
                            mini_core_di_top.mini_core_di.mini_core_di_rf.Register[1],
                            mini_core_di_top.mini_core_di.mini_core_di_rf.Register[2],
