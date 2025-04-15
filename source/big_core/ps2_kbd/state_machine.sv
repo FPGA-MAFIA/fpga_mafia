@@ -1,4 +1,4 @@
-module traffic_light_fsm(
+module state_machine(
 
     input logic clk,
     input logic rst,
@@ -23,7 +23,7 @@ counter timer(
 
     .clk(clk),
     .rst(rst),
-    .count_enable(1'b1),   // always count when FSM is active
+ //   .count_enable(1'b1),   // always count when FSM is active
     .count (count),
     .count_end(count_end)
 );
