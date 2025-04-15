@@ -8,12 +8,18 @@ module counter(
 
 );
 
-
+logic init = 0;
 always_ff @( posedge clk or negedge rst ) begin 
 
     if (!rst) begin
         count <= 4'd0;
         count_end <= 1'd0;
+    end
+
+    else if (!init) begin
+        count<=4'd0;
+        count_end<=1'd0;
+        init = 1'd1;
     end
 
     

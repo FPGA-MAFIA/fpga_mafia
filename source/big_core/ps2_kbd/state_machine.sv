@@ -4,7 +4,8 @@ module state_machine(
     input logic rst,
     output logic red,
     output logic yellow,
-    output logic green
+    output logic green,
+    output logic count_end
 );
 
 
@@ -15,8 +16,9 @@ typedef enum logic[1:0]{
 }colours;
 
  logic [3:0] count;
- logic count_end;
+// logic count_end;
 
+logic init = 0;
 
 colours current_colour,next_colour;
 counter timer(
@@ -35,6 +37,11 @@ always_ff @(posedge clk or negedge rst) begin
         current_colour <= RED;
  else if (count_end)
          current_colour <= next_colour;
+ else if (!init) begin
+        current_colour <= RED;
+        init = 1;
+ end
+               
 
 end
 

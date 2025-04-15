@@ -5,6 +5,7 @@ module state_machine_tb;
      logic red;
      logic yellow;
      logic green;
+     logic count_end;
 
 
 always #1 clk = ~clk;  
@@ -15,7 +16,8 @@ state_machine traffic_light (
         .rst(rst),
         .red(red),
         .yellow(yellow),
-        .green(green)
+        .green(green),
+        .count_end(count_end)
     );
 
      // Simulation control
@@ -26,8 +28,8 @@ state_machine traffic_light (
 
 
         // Reset pulse
-        #700;
-        rst = 0;
+       // #700;
+        //rst = 0;
 
         // Let the simulation run long enough to observe full cycles
         #1000;
