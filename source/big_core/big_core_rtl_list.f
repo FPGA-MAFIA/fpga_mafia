@@ -42,6 +42,10 @@
 
 // KBD FIles
 ../../../source/big_core/ps2_kbd/ps2_kbd_ctrl.sv
+../../../source/big_core/ps2_kbd/counter.sv
+../../../source/big_core/ps2_kbd/state_machine.sv
+
+
 
 
 
