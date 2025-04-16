@@ -33,8 +33,5 @@ if (read_data_3 != 0xfeedface) {
     return 4;
 }
 
-
-
-
 return 0;
 }  // main()

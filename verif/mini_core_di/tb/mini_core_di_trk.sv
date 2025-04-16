@@ -3,13 +3,13 @@ initial begin: trk_alu_gen
     #1
     $timeformat(-9, 1, " ", 6);
     trk_alu = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_alu.log"},"w");
-    $fwrite(trk_alu,"---------------------------------------------------------\n");
-    $fwrite(trk_alu,"Time\t|\tPC1 \t |\tPC2 \t | AluIn1Q102H\t| AluIn2Q102H\t| AluOutQ102H\t| AluIn1Q202H\t| AluIn2Q202H\t| AluOutQ202H\t|\n");
-    $fwrite(trk_alu,"---------------------------------------------------------\n");  
+    $fwrite(trk_alu,"--------------------------------------------------------------------------------------------------------------------\n");
+    $fwrite(trk_alu,"Time\t|   PC1    |   PC2    | AluIn1Q102H | AluIn2Q102H | AluOutQ102H | AluIn1Q202H | AluIn2Q202H | AluOutQ202H |\n");
+    $fwrite(trk_alu,"--------------------------------------------------------------------------------------------------------------------\n");  
 end
 
 always @(posedge Clk) begin : alu_print
-    $fwrite(trk_alu,"%t\t| %8h | %8h |%8h \t|%8h \t|%8h \t|%8h \t|%8h \t|%8h \t \n", $realtime,PcQ102H,PcQ202H,
+    $fwrite(trk_alu,"%.3t\t| %8h | %8h |  %8h   |  %8h   |  %8h   |  %8h   |  %8h   |  %8h   | \n", $realtime,PcQ102H,PcQ202H,
     mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn1Q102H , mini_core_di_top.mini_core_di.mini_core_dip_exe.AluIn2Q102H, mini_core_di_top.mini_core_di.mini_core_dip_exe.AluOutQ102H, 
     mini_core_di_top.mini_core_di.mini_core_dis_exe.AluIn1Q202H , mini_core_di_top.mini_core_di.mini_core_dis_exe.AluIn2Q202H, mini_core_di_top.mini_core_di.mini_core_dis_exe.AluOutQ202H);
 end
@@ -21,7 +21,7 @@ initial begin: trk_idu_gen
     $timeformat(-9, 1, " ", 6);
     trk_idu = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_idu.log"},"w");
     $fwrite(trk_idu,"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-    $fwrite(trk_idu,"   Time |  PC1_in  |  PC2_in  |   PC_bf  | PC1_out  | PC2_out  | I2NV |           Instruction_1         |           Instruction_2         |              buffer             | b/m/r/w/e  |\n");
+    $fwrite(trk_idu,"  Time |  PC1_in  |  PC2_in  |   PC_bf  | PC1_out  | PC2_out  | I2NV  |           Instruction_1         |           Instruction_2         |              buffer             | b/m/r/w/e  |\n");
     $fwrite(trk_idu,"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");  
 end
 
@@ -31,7 +31,7 @@ assign BufferInstruction = mini_core_di_top.mini_core_di.mini_core_di_idu.Instru
 logic [31:0] BufferPC;
 assign BufferPC = mini_core_di_top.mini_core_di.mini_core_di_idu.PcBufferQ101H;
 logic BufferSel;
-assign BufferSel = mini_core_di_top.mini_core_di.mini_core_di_idu.FlushBufferQ103;
+assign BufferSel = mini_core_di_top.mini_core_di.mini_core_di_idu.BufferSel;
 logic branch_h;
 logic mem_h;
 logic raw_h;
@@ -48,7 +48,7 @@ assign rs1_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rs1_2;
 assign rd1 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rd1;
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%t | %8h | %8h | %8h | %8h | %8h |  %1b/%1b  |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN,BufferSel, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
+    $fwrite(trk_idu,"%.3t | %8h | %8h | %8h | %8h | %8h |  %1b/%1b  |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN,BufferSel, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
 end
 
 
@@ -66,7 +66,7 @@ assign Instruction_1 = mini_core_di_top.mini_core_di.mini_core_di_ctrl.Instructi
 assign Instruction_2 = mini_core_di_top.mini_core_di.mini_core_di_ctrl.InstructionQ201H;
 
 always @(posedge Clk) begin : inst_print
-   $fwrite(trk_inst,"%t\t| %8h \t |%32b | %8h \t |%32b | \n", $realtime,PcQ101H, Instruction_1 ,PcQ201H, Instruction_2 );
+   $fwrite(trk_inst,"%.3t\t| %8h \t |%32b | %8h \t |%32b | \n", $realtime,PcQ101H, Instruction_1 ,PcQ201H, Instruction_2 );
 end
 
 integer trk_fetch;
@@ -74,13 +74,13 @@ initial begin: trk_fetch_gen
     #1
     $timeformat(-9, 1, " ", 6);
     trk_fetch = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_fetch.log"},"w");
-    $fwrite(trk_fetch,"--------------------------------------------------------------------\n");
-    $fwrite(trk_fetch,"  Time	|	    PC1 	 |	   PC2 	   |Funct3 | Funct7  | Opcode| I2V |\n");
-    $fwrite(trk_fetch,"--------------------------------------------------------------------\n");  
+    $fwrite(trk_fetch,"----------------------------------------------------------\n");
+    $fwrite(trk_fetch,"  Time	|	    PC1 	 |	   PC2 	   | I2V | J |  J_addr  |\n");
+    $fwrite(trk_fetch,"----------------------------------------------------------\n");  
 end
 // Uncomment and update when needed
 always @(posedge Clk) begin : fetch_print
-   $fwrite(trk_fetch,"%t\t| %8h \t | %8h \t | %1b  | %1b | %8h  |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ100H, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ200H, Issue2ValidNQ201H, jmp_taken, jmp_addr);
+   $fwrite(trk_fetch,"%.3t\t| %8h \t | %8h \t |  %1b  | %1b | %8h |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ100H, mini_core_di_top.mini_core_di.mini_core_di_if.PcQ200H, Issue2ValidNQ201H, jmp_taken, jmp_addr);
 end
 
 integer trk_memory_access;
@@ -89,7 +89,7 @@ initial begin: trk_memory_access_gen
     $timeformat(-9, 1, " ", 6);
     trk_memory_access = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_memory_access.log"},"w");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_memory_access,"Time  |  PC  | Opcode  | Address  | Data  |\n");
+    $fwrite(trk_memory_access," Time  |    PC    | Opcode | Address |  Data  |\n");
     $fwrite(trk_memory_access,"---------------------------------------------------------\n");  
 end
 
@@ -99,7 +99,7 @@ initial begin: trk_rf_memory_access_gen
     $timeformat(-9, 1, " ", 6);
     trk_ref_memory_access = $fopen({"../../../target/mini_core_di/tests/",test_name,"/trk_ref_memory_access.log"},"w");
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");
-    $fwrite(trk_ref_memory_access,"Time  |  PC | Opcode  | Address  | Data  |\n");
+    $fwrite(trk_ref_memory_access," Time  |    PC    | Opcode | Address |  Data  |\n");
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  
 end
 
@@ -118,20 +118,20 @@ assign DMemRdEnQ104H = mini_core_di_top.mini_core_di.mini_core_di_ctrl.CtrlQ104H
 
 always @(posedge Clk) begin : memory_access_print
     if(DMemWrEnQ104H) begin
-        $fwrite(trk_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
+        $fwrite(trk_memory_access,"%.3t | %8h | write  |%8h |%8h| \n", $realtime, PcQ104H, DMemAddressQ104H, DMemWrDataQ104H);
     end
     if(DMemRdEnQ104H) begin
-        $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_di_top.mini_core_di.mini_core_di_rf.RegWrDataQ104H);
+        $fwrite(trk_memory_access,"%.3t | %8h | read   |%8h |%8h| \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_di_top.mini_core_di.mini_core_di_rf.RegWrDataQ104H);
     end
 end
 
 import rv32i_ref_pkg::*;
 always @(posedge Clk) begin : memory_ref_access_print
     if(rv32i_ref.DMemWrEn) begin
-        $fwrite(trk_ref_memory_access,"%t | %8h | write |%8h |%8h \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_wr_addr, rv32i_ref.data_rd2);
+        $fwrite(trk_ref_memory_access,"%.3t | %8h | write  |%8h |%8h| \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_wr_addr, rv32i_ref.data_rd2);
     end
     if(rv32i_ref.DMemRdEn) begin
-        $fwrite(trk_ref_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_rd_addr, rv32i_ref.next_regfile[rv32i_ref.rd]);
+        $fwrite(trk_ref_memory_access,"%.3t | %8h | read   |%8h |%8h| \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_rd_addr, rv32i_ref.next_regfile[rv32i_ref.rd]);
     end
 end
 
