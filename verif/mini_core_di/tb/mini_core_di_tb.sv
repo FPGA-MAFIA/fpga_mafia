@@ -209,4 +209,3 @@ rv32i_ref
                // every time the run is set, the next instruction is executed
 );
 endmodule //mini_core_tb
-

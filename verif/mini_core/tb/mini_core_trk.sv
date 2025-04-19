@@ -37,9 +37,9 @@ initial begin: trk_fetch_gen
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
 
 end
-//always @(posedge Clk) begin : fetch_print
-//    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,PcQ100H, mini_core.Funct3Q101H, mini_core.Funct7Q101H, mini_core.OpcodeQ101H);
-//end
+always @(posedge Clk) begin : fetch_print
+   $fwrite(trk_fetch,"%.3t\t| %8h | \n", $realtime,PcQ100H);
+end
 
 integer trk_memory_access;
 initial begin: trk_memory_access_gen

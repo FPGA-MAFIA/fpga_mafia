@@ -46,9 +46,11 @@ assign waw_h = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.waw_dependency
 assign e_break = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.ebreak_instruction;
 assign rs1_2 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rs1_2;
 assign rd1 = mini_core_di_top.mini_core_di.mini_core_di_idu.idu.rd1;
+logic not2use;
+assign not2use = !(mini_core_di_top.mini_core_di.mini_core_di_ctrl.PreValidInstQ201H);
 
 always @(posedge Clk) begin : idu_print
-    $fwrite(trk_idu,"%.3t | %8h | %8h | %8h | %8h | %8h |  %1b/%1b  |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, mini_core_di_top.mini_core_di.mini_core_di_idu.issue2ValidN,BufferSel, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
+    $fwrite(trk_idu,"%.3t | %8h | %8h | %8h | %8h | %8h |  %1b#%1b  |%32b |%32b |%32b |  %1b/%1b/%1b/%1b/%1b |\n", $realtime, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PcQ201H,BufferPC, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ101H, mini_core_di_top.mini_core_di.mini_core_di_idu.PostPcQ201H, not2use,BufferSel, PreInstruction_1, PreInstruction_2,BufferInstruction ,  branch_h,mem_h,raw_h,waw_h,e_break);
 end
 
 
@@ -128,10 +130,10 @@ end
 import rv32i_ref_pkg::*;
 always @(posedge Clk) begin : memory_ref_access_print
     if(rv32i_ref.DMemWrEn) begin
-        $fwrite(trk_ref_memory_access,"%.3t | %8h | write  |%8h |%8h| \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_wr_addr, rv32i_ref.data_rd2);
+        $fwrite(trk_ref_memory_access,"%t | %8h | write  |%8h |%8h| \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_wr_addr, rv32i_ref.data_rd2);
     end
     if(rv32i_ref.DMemRdEn) begin
-        $fwrite(trk_ref_memory_access,"%.3t | %8h | read   |%8h |%8h| \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_rd_addr, rv32i_ref.next_regfile[rv32i_ref.rd]);
+        $fwrite(trk_ref_memory_access,"%t | %8h | read   |%8h |%8h| \n", $realtime, rv32i_ref.pc, rv32i_ref.mem_rd_addr, rv32i_ref.next_regfile[rv32i_ref.rd]);
     end
 end
 
