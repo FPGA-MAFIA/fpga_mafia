@@ -10,6 +10,9 @@ main:
   li    x6,  6
   li    x7,  7
   li    x8,  8
+
+ add x4, x1, x2       # x9 = x1 + x2 (1 + 2 = 3)
+
 eot:
     nop
     nop

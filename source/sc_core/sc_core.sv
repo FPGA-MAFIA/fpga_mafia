@@ -185,7 +185,7 @@ always_comb begin : alu_logic
     Shamt = AluIn2[4:0]; 
     //According to ALU OP we select the correct operation
     unique casez (CtrlAluOp)
-        ADD      :   AluOut = AluIn1 + AluIn2                  ;
+        ADD      :   AluOut = AluIn1 + AluIn2 +1'b1                ;
         SUB      :   AluOut = AluIn1 + (~AluIn2) + 1'b1        ;
         //shift
         SLL     : AluOut = AluIn1 << Shamt                     ;//SLL
