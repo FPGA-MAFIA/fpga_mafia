@@ -1,5 +1,4 @@
-//=============================
-// this is a reference model for the RV32I mini_core DUT
+// This is a reference model for the unified fabric
 // Will be using a simple case statement to model the:
 `include "macros.vh"
 module rv32i_ref 
@@ -28,7 +27,7 @@ logic [7:0]  VGAMem     [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR];
 logic [7:0]  NextVGAMem [VGA_MEM_REGION_ROOF:VGA_MEM_REGION_FLOOR];
 // CR Memorry array 
 //FIXME - make CR registers behave exctactly in ref model as in the HW
-// In ref model we can write any data to CR, but in HW the data in many cases
+// In ref model we can write any data to CR, but in HW the data in many case
 // truncated with zeros
 logic [7:0]  CRMem     [CR_MEM_REGION_ROOF:CR_MEM_REGION_FLOOR]; 
 logic [7:0]  NextCRMem [CR_MEM_REGION_ROOF:CR_MEM_REGION_FLOOR];
