@@ -23,7 +23,7 @@
 
 module mini_core_smt 
 
-logic thread_id;
+  logic thread_id;
   logic [31:0] pc_thread0, pc_thread1, pc_if;
   logic [15:0] i_mem_addr, d_mem_addr;
   logic [31:0] pc_next;
@@ -47,17 +47,17 @@ import mini_core_pkg::*;
 //----thread switching ----
 logic CurrThread;
 always_ff @(posedge Clock or posedge Rst) begin
-    if (Rst) begin
-      thread_id <= 1'b0;
-      pc_thread0 <= 32'h00000000;
-      pc_thread1 <= 32'h00008000;
-    end else begin
-      thread_id <= ~thread_id;
-      if (thread_id == 1'b0)
-        pc_thread0 <= pc_next;
-      else
-        pc_thread1 <= pc_next;
-    end
+   // if (Rst) begin
+   //   thread_id <= 1'b0;
+   //  pc_thread0 <= 32'h00000000;
+   //   pc_thread1 <= 32'h00008000;
+    //end else begin
+     // thread_id <= ~thread_id;
+     // if (thread_id == 1'b0)
+     //   pc_thread0 <= pc_next;
+     // else
+     //   pc_thread1 <= pc_next;
+   // end
   if (Rst)
     CurrThread <= 1'b0;
   else
@@ -112,13 +112,14 @@ t_ctrl_wb     CtrlWb;
 // 2. Calc/Set the NextPc
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_if mini_core_if (
+mini_core_smt_if mini_core_if (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
-  .Ctrl         (CtrlIf        ), // input  t_ctrl_if    Ctrl,
+  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  .CurrThread   (CurrThread  ),
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
 );
@@ -173,8 +174,11 @@ mini_core_rf
 #( .RF_NUM_MSB(RF_NUM_MSB) ) rf_thread0 (
   .Clock            (Clock),          // input
   .Rst              (Rst),            // input 
+  .regFileID        (1'b0),            // input
+  .readEnThread     (ThreadIDQ101H),            // input
+  .writeEnThread    (ThreadIDQ104H),            // input
   .Ctrl             (CtrlRf),         // input
-  .ReadyQ102H       (ReadyQ102H && (ThreadIDQ102H == 1'b0)),     // input
+  .ReadyQ102H       (ReadyQ102H),     // input
   // input data path
   .ImmediateQ101H   (ImmediateQ101H), // input
   .PcQ101H          (PcQ101H),        // input  
@@ -190,8 +194,11 @@ mini_core_rf
 #( .RF_NUM_MSB(RF_NUM_MSB) ) rf_thread1 (
   .Clock            (Clock),          // input
   .Rst              (Rst),            // input 
+  .regFileID        (1'b1),            // input
+  .readEnThread     (ThreadIDQ101H),            // input
+  .writeEnThread    (ThreadIDQ104H),            // input
   .Ctrl             (CtrlRf),         // input
-  .ReadyQ102H       (ReadyQ102H && (ThreadIDQ102H == 1'b1)),     // input
+  .ReadyQ102H       (ReadyQ102H),     // input
   // input data path
   .ImmediateQ101H   (ImmediateQ101H), // input
   .PcQ101H          (PcQ101H),        // input  
@@ -262,7 +269,7 @@ mini_core_exe mini_core_exe (
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_mem_acs mini_core_mem_access (
+mini_core_smt_mem_acs mini_core_mem_access (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -272,6 +279,7 @@ mini_core_mem_acs mini_core_mem_access (
   .PcPlus4Q103H       (PcPlus4Q103H),   //input
   .AluOutQ103H        (AluOutQ103H),    //input
   .DMemWrDataQ103H    (DMemWrDataQ103H),//input
+  .ThreadIDQ103H      (ThreadIDQ103H ),
   // data path output
   .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
   .PcPlus4Q104H       (PcPlus4Q104H),   //input

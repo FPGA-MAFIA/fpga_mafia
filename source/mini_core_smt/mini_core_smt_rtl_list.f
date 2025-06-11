@@ -27,7 +27,7 @@
 //RTL FIles
 ../../../source/mini_core_smt/mini_core_smt_if.sv
 ../../../source/mini_core/mini_core_ctrl.sv
-../../../source/mini_core/mini_core_rf.sv
+../../../source/mini_core_smt/mini_core_smt_rf.sv
 ../../../source/mini_core/mini_core_exe.sv
 ../../../source/mini_core_smt/mini_core_smt_mem_acs.sv
 ../../../source/mini_core/mini_core_wb.sv
