@@ -233,12 +233,15 @@ assign RegRdData2Q102H = (ThreadIDQ102H == 1'b0) ? RegRdData2Q102H_t0 : RegRdDat
 //      c) Calculate branch/jump target.
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_exe mini_core_exe (
+mini_core_smt_exe mini_core_smt_exe (
   .Clock               (Clock              ), //  input 
   .Rst                 (Rst                ), //  input 
   // Input Control Signals
   .Ctrl                (CtrlExe            ), //  input 
   .ReadyQ103H          (ReadyQ103H         ), //  input
+  .ThreadIDQ102H       (ThreadIDQ102H      ), //  input
+  .ThreadIDQ103H       (ThreadIDQ103H      ), //  input 
+  .ThreadIDQ104H       (ThreadIDQ104H      ), //  input
   // Output Control Signals
   .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
   // Input Data path
