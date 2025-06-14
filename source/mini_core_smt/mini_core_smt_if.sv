@@ -36,10 +36,23 @@ assign PcPlus4Q100H_t1 = PcQ100H_t1 + 3'h4;
 assign NextPcQnnnH_t0 = (Ctrl.SelNextPcAluOutQ102H && (CurrThread == 1'b0)) ? AluOutQ102H : PcPlus4Q100H_t0;
 assign NextPcQnnnH_t1 = (Ctrl.SelNextPcAluOutQ102H && (CurrThread == 1'b1)) ? AluOutQ102H : PcPlus4Q100H_t1;
 
-`MAFIA_EN_RST_DFF(PcQ100H_t0, NextPcQnnnH_t0, Clock, (ReadyQ100H && CurrThread == 1'b0), Rst)
-`MAFIA_EN_RST_DFF(PcQ100H_t1, NextPcQnnnH_t1, Clock, (ReadyQ100H && CurrThread == 1'b1), Rst)
+//`MAFIA_EN_RST_DFF(PcQ100H_t0, NextPcQnnnH_t0, Clock, (ReadyQ100H && CurrThread == 1'b0), Rst)
+//`MAFIA_EN_RST_DFF(PcQ100H_t1, NextPcQnnnH_t1, Clock, (ReadyQ100H && CurrThread == 1'b1), Rst)
+always_ff @(posedge Clock or posedge Rst) begin
+  if (Rst)
+    PcQ100H_t0 <= 32'h00000000;
+  else if (ReadyQ100H && CurrThread == 1'b0)
+    PcQ100H_t0 <= NextPcQnnnH_t0;
+end
 
-assign PcForIMem = (CurrThread == 1'b0) ? PcQ100H_t0 : (PcQ100H_t1 + 32'h8000);
+always_ff @(posedge Clock or posedge Rst) begin
+  if (Rst)
+    PcQ100H_t1 <= 32'h00008000;
+  else if (ReadyQ100H && CurrThread == 1'b1)
+    PcQ100H_t1 <= NextPcQnnnH_t1;
+end
+
+assign PcForIMem = (CurrThread == 1'b0) ? PcQ100H_t0 : PcQ100H_t1;
 assign PcQ100H   = PcForIMem;
 
 // Q100H to Q101H Flip Flops. 
