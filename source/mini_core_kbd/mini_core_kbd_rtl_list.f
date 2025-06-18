@@ -18,6 +18,8 @@
 
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv
+../../../source/mini_core_kbd/mini_core_kbd_pkg.sv
+
 
 // Common
 ../../../source/common/fifo.sv

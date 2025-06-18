@@ -16,7 +16,7 @@
 
 //---------------------------------------------------
 module mini_core_kbd_mem_wrap
-import big_core_pkg::*;
+import mini_core_kbd_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
