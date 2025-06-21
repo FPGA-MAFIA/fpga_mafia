@@ -6,3 +6,4 @@ _start:
     add x11, x11, x10
     nop
     nop
+    ebreak

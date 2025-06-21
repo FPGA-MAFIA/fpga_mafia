@@ -23,10 +23,10 @@
 
 module mini_core_smt 
 
-  logic thread_id;
-  logic [31:0] pc_thread0, pc_thread1, pc_if;
-  logic [15:0] i_mem_addr, d_mem_addr;
-  logic [31:0] pc_next;
+  //logic thread_id;
+ // logic [31:0] pc_thread0, pc_thread1, pc_if;
+  //logic [15:0] i_mem_addr, d_mem_addr;
+  //logic [31:0] pc_next;
 
 import mini_core_pkg::*;
 #(parameter RF_NUM_MSB) 
@@ -43,6 +43,18 @@ import mini_core_pkg::*;
     input  logic [31:0]   DMemRdRspQ104H     // From D_MEM
 );
 
+// Control bits
+logic         BranchCondMetQ102H;
+logic         ReadyQ100H;
+logic         ReadyQ102H;
+logic         ReadyQ103H;
+logic         ReadyQ104H;
+t_mini_ctrl   Ctrl;
+t_ctrl_if     CtrlIf;
+t_ctrl_rf     CtrlRf;
+t_ctrl_exe    CtrlExe;
+t_ctrl_mem    CtrlMem;
+t_ctrl_wb     CtrlWb;
 
 //----thread switching ----
 logic CurrThread;
@@ -60,7 +72,7 @@ always_ff @(posedge Clock or posedge Rst) begin
    // end
   if (Rst)
     CurrThread <= 1'b0;
-  else
+  else if (ReadyQ100H)
     CurrThread <= ~CurrThread;
 end
 
@@ -84,18 +96,6 @@ logic [31:0]  RegWrDataQ104H;
 logic [31:0]  DMemWrDataQ103H;
 
 // Control bits
-logic         BranchCondMetQ102H;
-logic         ReadyQ100H;
-logic         ReadyQ102H;
-logic         ReadyQ103H;
-logic         ReadyQ104H;
-t_mini_ctrl   Ctrl;
-t_ctrl_if     CtrlIf;
-t_ctrl_rf     CtrlRf;
-t_ctrl_exe    CtrlExe;
-t_ctrl_mem    CtrlMem;
-t_ctrl_wb     CtrlWb;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
@@ -112,7 +112,7 @@ t_ctrl_wb     CtrlWb;
 // 2. Calc/Set the NextPc
 // -----------------
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_smt_if mini_core_if (
+mini_core_smt_if mini_core_smt_if (
   .Clock        (Clock       ), // input  logic        Clock,
   .Rst          (Rst         ), // input  logic        Rst,
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
@@ -170,7 +170,7 @@ mini_core_ctrl mini_core_ctrl (
 logic [31:0] PcQ102H_t0, ImmediateQ102H_t0, RegRdData1Q102H_t0, RegRdData2Q102H_t0;
 logic [31:0] PcQ102H_t1, ImmediateQ102H_t1, RegRdData1Q102H_t1, RegRdData2Q102H_t1;
 
-mini_core_rf 
+mini_core_smt_rf 
 #( .RF_NUM_MSB(RF_NUM_MSB) ) rf_thread0 (
   .Clock            (Clock),          // input
   .Rst              (Rst),            // input 
@@ -190,7 +190,7 @@ mini_core_rf
   .RegRdData2Q102H  (RegRdData2Q102H_t0) // output
 );
 
-mini_core_rf 
+mini_core_smt_rf 
 #( .RF_NUM_MSB(RF_NUM_MSB) ) rf_thread1 (
   .Clock            (Clock),          // input
   .Rst              (Rst),            // input 

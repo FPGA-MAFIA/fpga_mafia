@@ -17,7 +17,7 @@
 +incdir+../../../source/fabric/
 
 // param packages
-../../../source/mini_core/mini_core_pkg.sv
+../../../source/mini_core_smt/mini_core_smt_pkg.sv
 
 // Common
 ../../../source/common/fifo.sv
@@ -26,11 +26,11 @@
 
 //RTL FIles
 ../../../source/mini_core_smt/mini_core_smt_if.sv
-../../../source/mini_core/mini_core_ctrl.sv
+../../../source/mini_core_smt/mini_core_smt_ctrl.sv
 ../../../source/mini_core_smt/mini_core_smt_rf.sv
 ../../../source/mini_core_smt/mini_core_smt_exe.sv
 ../../../source/mini_core_smt/mini_core_smt_mem_acs.sv
-../../../source/mini_core/mini_core_wb.sv
+../../../source/mini_core_smt/mini_core_smt_wb.sv
 ../../../source/mini_core_smt/mini_core_smt.sv
-../../../source/mini_core/mini_core_top.sv
-../../../source/mini_core/mini_mem_wrap.sv
+../../../source/mini_core_smt/mini_core_smt_top.sv
+../../../source/mini_core_smt/mini_smt_mem_wrap.sv

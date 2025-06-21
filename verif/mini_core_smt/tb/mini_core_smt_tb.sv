@@ -18,7 +18,7 @@
 `include "macros.vh"
 
 
-module mini_core_tb;
+module mini_core_smt_tb;
 
 
 import mini_core_pkg::*;
@@ -39,8 +39,8 @@ logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MI
 
 
 string test_name;
-`include "mini_core_tasks.vh"
-`include "mini_core_trk.sv"
+`include "mini_core_smt_tasks.vh"
+`include "mini_core_smt_trk.sv"
 
 
 // ========================
@@ -73,24 +73,24 @@ initial begin: test_seq
     //load the program to the DUT & reference model
     //======================================
     // Make sure inst_mem.sv exists
-    file = $fopen({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    file = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
     if (!file) begin
-        $error("the file: ../../../target/mini_core/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
+        $error("the file: ../../../target/mini_core_smt/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
         $display("ERROR: inst_mem.sv file does not exist");
         $finish;
     end
-    $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    $readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    force mini_core_smt_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 
-    file = $fopen({"../../../target/mini_core/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    file = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
-        $readmemh({"../../../target/mini_core/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        force mini_core_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        $readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        force mini_core_smt_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10
-        release mini_core_top.mini_mem_wrap.d_mem.mem;
+        release mini_core_smt_top.mini_mem_wrap.d_mem.mem;
         release rv32i_ref.dmem;
     end
     
@@ -100,7 +100,7 @@ initial begin: test_seq
     fork
     get_rf_write();
     get_ref_rf_write();
-    begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
+    begin wait(mini_core_smt_top.mini_core_smt.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
         eot(.msg("ebreak was called"));
     end
     join
@@ -172,9 +172,9 @@ assign InFabricQ503H        = ShiftInFabric[2];
 assign InFabricValidQ503H   = ShiftInFabricValid[2];
 // DUT instance mini_core 
 assign  local_tile_id = 8'h2_2;
-mini_core_top
+mini_core_smt_top
 #( .RF_NUM_MSB(MINI_RF_NUM_MSB) )    
-mini_core_top (
+mini_core_smt_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),

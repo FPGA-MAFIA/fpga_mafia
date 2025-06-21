@@ -11,7 +11,7 @@
 
 `include "macros.vh"
 
-module mini_core_rf 
+module mini_core_smt_rf 
 import mini_core_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
