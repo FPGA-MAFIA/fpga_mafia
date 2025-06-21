@@ -59,17 +59,6 @@ t_ctrl_wb     CtrlWb;
 //----thread switching ----
 logic CurrThread;
 always_ff @(posedge Clock or posedge Rst) begin
-   // if (Rst) begin
-   //   thread_id <= 1'b0;
-   //  pc_thread0 <= 32'h00000000;
-   //   pc_thread1 <= 32'h00008000;
-    //end else begin
-     // thread_id <= ~thread_id;
-     // if (thread_id == 1'b0)
-     //   pc_thread0 <= pc_next;
-     // else
-     //   pc_thread1 <= pc_next;
-   // end
   if (Rst)
     CurrThread <= 1'b0;
   else if (ReadyQ100H)
@@ -119,7 +108,6 @@ mini_core_smt_if mini_core_smt_if (
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
-  .CurrThread   (CurrThread  ),
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
 );
