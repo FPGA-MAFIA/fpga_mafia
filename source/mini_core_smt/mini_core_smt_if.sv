@@ -11,8 +11,8 @@
 
 `include "macros.vh"
 
-module mini_core_smt_if 
-import mini_core_smt_pkg::*;
+module mini_core_smt_if
+import mini_core_pkg::*;
 (
     input  logic        Clock,
     input  logic        Rst,
@@ -20,6 +20,7 @@ import mini_core_smt_pkg::*;
     input  logic        ReadyQ100H,
     input  logic        ReadyQ101H,
     input  logic [31:0] AluOutQ102H,
+    input  logic        CurrThread,
     output logic [31:0] PcQ100H,
     output logic [31:0] PcQ101H
 );
