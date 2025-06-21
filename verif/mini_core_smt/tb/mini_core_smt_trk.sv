@@ -143,11 +143,7 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[30],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[31]
                            );
-end
-
-
-always_ff @(posedge Clk ) begin
-        $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+                                   $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Ctrl.RegDstQ104H,
