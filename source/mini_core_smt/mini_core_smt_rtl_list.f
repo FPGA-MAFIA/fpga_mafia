@@ -13,6 +13,7 @@
 
 +incdir+../../../source/common/
 +incdir+../../../source/mini_core/
++incdir+../../../source/mini_core_smt/
 +incdir+../../../source/big_core/
 +incdir+../../../source/fabric/
 

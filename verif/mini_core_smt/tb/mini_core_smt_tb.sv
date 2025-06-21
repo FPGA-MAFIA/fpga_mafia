@@ -21,7 +21,7 @@
 module mini_core_smt_tb;
 
 
-import mini_core_pkg::*;
+import mini_core_smt_pkg::*;
 //FIXME - dont know why need to include the common_pkg.. its already included in the the mini_core_pkg
 `include "common_pkg.vh"
 logic        Clk;
@@ -80,17 +80,17 @@ initial begin: test_seq
         $finish;
     end
     $readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_core_smt_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force mini_core_smt_top.mini_smt_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 
     file = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        force mini_core_smt_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10
-        release mini_core_smt_top.mini_mem_wrap.d_mem.mem;
+        release mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem;
         release rv32i_ref.dmem;
     end
     
@@ -100,7 +100,7 @@ initial begin: test_seq
     fork
     get_rf_write();
     get_ref_rf_write();
-    begin wait(mini_core_smt_top.mini_core_smt.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
+    begin wait(mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ebreak_was_calledQ101H == 1'b1);
         eot(.msg("ebreak was called"));
     end
     join

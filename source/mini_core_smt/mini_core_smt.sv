@@ -28,7 +28,7 @@ module mini_core_smt
   //logic [15:0] i_mem_addr, d_mem_addr;
   //logic [31:0] pc_next;
 
-import mini_core_pkg::*;
+import mini_core_smt_pkg::*;
 #(parameter RF_NUM_MSB) 
 (
     input  logic        Clock,
@@ -141,7 +141,7 @@ mini_core_smt_if mini_core_smt_if (
 // 4. construct the Immediate types.
 // ----------------- 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_ctrl mini_core_ctrl (
+mini_core_smt_ctrl mini_core_smt_ctrl (
   .Rst                  (Rst    ), //input
   .Clock                (Clock  ), //input
   // input instruction 
@@ -272,7 +272,7 @@ mini_core_smt_exe mini_core_smt_exe (
 // -----------------
 // 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_smt_mem_acs mini_core_mem_access (
+mini_core_smt_mem_acs mini_core_smt_mem_access (
   .Clock              (Clock),          //input 
   .Rst                (Rst),            //input  
   // Input Control Signals
@@ -303,7 +303,7 @@ mini_core_smt_mem_acs mini_core_mem_access (
 // -----------------
 // 1. Select which data should be written back to the register file AluOut or DMemRdData.
 //////////////////////////////////////////////////////////////////////////////////////////////////
-mini_core_wb mini_core_wb
+mini_core_smt_wb mini_core_smt_wb
 ( 
  .Clock     (Clock ), // input  logic           Clock,       //input 
  .Rst       (Rst   ), // input  logic           Rst,         //input  

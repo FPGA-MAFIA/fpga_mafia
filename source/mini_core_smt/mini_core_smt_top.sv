@@ -2,7 +2,7 @@
 `include "macros.vh"
 
 module mini_core_smt_top
-import mini_core_pkg::*;
+import mini_core_smt_pkg::*;
 #(parameter RF_NUM_MSB=15)  //default 15 for rv32e compatible (save space on FPGA
 (
 input  logic        Clock  ,
@@ -55,7 +55,7 @@ assign DMemWrEnQ103H = Core2DmemReqQ103H.WrEn;
 assign DMemRdEnQ103H = Core2DmemReqQ103H.RdEn;
 
 //---------------------------------------------------
-mini_mem_wrap mini_mem_wrap(
+mini_smt_mem_wrap mini_smt_mem_wrap(
  .Clock                 (Clock)  ,              // input  logic        Clock  ,
  .Rst                   (Rst)    ,              // input  logic        Rst    ,
  .local_tile_id         (local_tile_id)       , //input  t_tile_id    local_tile_id,

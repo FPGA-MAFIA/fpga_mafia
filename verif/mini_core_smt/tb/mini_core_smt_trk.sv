@@ -67,10 +67,10 @@ logic DMemWrEnQ104H;
 logic [31:0] DMemAddressQ104H;
 logic [31:0] DMemWrDataQ104H;
 
-assign DMemWrEnQ104H = mini_core_smt_top.mini_core_smt.mini_core_ctrl.CtrlQ104H.DMemWrEn;
-assign DMemRdEnQ104H = mini_core_smt_top.mini_core_smt.mini_core_ctrl.CtrlQ104H.DMemRdEn;
-`MAFIA_DFF(DMemAddressQ104H, mini_core_smt_top.mini_mem_wrap.DMemAddressQ103H , Clk)
-`MAFIA_DFF(DMemWrDataQ104H,  mini_core_smt_top.mini_mem_wrap.DMemWrDataQ103H  , Clk)
+assign DMemWrEnQ104H = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlQ104H.DMemWrEn;
+assign DMemRdEnQ104H = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlQ104H.DMemRdEn;
+`MAFIA_DFF(DMemAddressQ104H, mini_core_smt_top.mini_smt_mem_wrap.DMemAddressQ103H , Clk)
+`MAFIA_DFF(DMemWrDataQ104H,  mini_core_smt_top.mini_smt_mem_wrap.DMemWrDataQ103H  , Clk)
 
 
 //tracker on memory_access operations
@@ -80,6 +80,8 @@ always @(posedge Clk) begin : memory_access_print
     end
     if(DMemRdEnQ104H) begin
         $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_smt_top.mini_core_smt.rf_thread0.RegWrDataQ104H);
+        $fwrite(trk_memory_access,"%t | %8h | read  |%8h |%8h \n", $realtime, PcQ104H, DMemAddressQ104H, mini_core_smt_top.mini_core_smt.rf_thread1.RegWrDataQ104H);
+
     end
 end
 
@@ -142,6 +144,48 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[31]
                            );
 end
+
+
+always_ff @(posedge Clk ) begin
+        $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+        ,$time,            
+                           PcQ104H,
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Ctrl.RegDstQ104H,
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[0],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[1],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[2],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[3],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[4],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[5],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[6],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[7],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[8],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[9],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[10],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[11],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[12],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[13],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[14],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[15],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[16],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[17],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[18],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[19],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[20],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[21],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[22],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[23],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[24],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[25],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[26],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[27],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[28],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[29],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[30],
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Register[31]
+                           );
+end
+
 
 
 
