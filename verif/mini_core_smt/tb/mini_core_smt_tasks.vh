@@ -18,17 +18,23 @@ logic [31:0] PcQ103H, PcQ104H;
 logic CurrThread;
 logic ThreadIDQ101H,ThreadIDQ102H,ThreadIDQ103H,ThreadIDQ104H;
 logic ReadyQ100H,ReadyQ101H,ReadyQ102H,ReadyQ103H,ReadyQ104H;
+logic ImmediateQ102H, RegRdData1Q102H,RegRdData2Q102H;
 assign ReadyQ100H = mini_core_smt_top.mini_core_smt.ReadyQ100H;
 assign ReadyQ101H = mini_core_smt_top.mini_core_smt.ReadyQ101H;
 assign ReadyQ102H = mini_core_smt_top.mini_core_smt.ReadyQ102H;
 assign ReadyQ103H = mini_core_smt_top.mini_core_smt.ReadyQ103H;
 assign ReadyQ104H = mini_core_smt_top.mini_core_smt.ReadyQ104H;
 
-assign currThread = mini_core_smt_top.mini_core_smt.CurrThread;
+assign CurrThread = mini_core_smt_top.mini_core_smt.CurrThread;
 assign ThreadIDQ101H = mini_core_smt_top.mini_core_smt.ThreadIDQ101H;
 assign ThreadIDQ102H = mini_core_smt_top.mini_core_smt.ThreadIDQ102H;
 assign ThreadIDQ103H = mini_core_smt_top.mini_core_smt.ThreadIDQ103H;
 assign ThreadIDQ104H = mini_core_smt_top.mini_core_smt.ThreadIDQ104H;
+
+
+assign ImmediateQ102H = mini_core_smt_top.mini_core_smt.ImmediateQ102H;
+assign RegRdData1Q102H = mini_core_smt_top.mini_core_smt.RegRdData1Q102H;
+assign RegRdData2Q102H = mini_core_smt_top.mini_core_smt.RegRdData2Q102H;
 
 
 
@@ -41,8 +47,7 @@ logic [4:0]  RegDstQ104H;
 logic [31:0] RegWrDataQ104H;
 assign RegWrEnQ104H   = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlRf.RegWrEnQ104H;
 assign RegDstQ104H    = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlRf.RegDstQ104H;
-assign RegWrDataQ104H = ThreadIDQ104H ? mini_core_smt_top.mini_core_smt.rf_thread0.RegWrDataQ104H : 
-    mini_core_smt_top.mini_core_smt.rf_thread1.RegWrDataQ104H;
+assign RegWrDataQ104H = mini_core_smt_top.mini_core_smt.RegWrDataQ104H;
 task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 
@@ -53,7 +58,7 @@ fork forever begin
             rf_cur_write.Pc        = PcQ104H;
             rf_cur_write.cur_time  = $time;
             rf_write_history.push_back(rf_cur_write);
-    // $display("rf_cur_write = %p", rf_cur_write);
+       $display("rf_cur_write = %p", rf_cur_write);
         end
     end
 end
@@ -70,7 +75,7 @@ fork forever begin
             ref_rf_cur_write.cur_time   = $time;
             if (rv32i_ref.rd != 5'b0) begin
                 ref_rf_write_history.push_back(ref_rf_cur_write);
-                // $display("ref_rf_cur_write = %p", ref_rf_cur_write);
+                 $display("ref_rf_cur_write = %p", ref_rf_cur_write);
             end
         end
     end
@@ -97,7 +102,8 @@ foreach(ref_rf_write_history[i])begin
         $display(" >> rf_write_history[%0d] Mismatch!!", i);
         $error("ERROR: rf_write_history mismatch");
         $display("      thread in WB 104 is : %d, thread in MEM 103 is : %d, thread in EXE 102 is : %d ,thread in DEC 101 is : %d, thread in IF 100 is : %d", ThreadIDQ104H, ThreadIDQ103H,ThreadIDQ102H,ThreadIDQ101H,CurrThread); 
-        $display("      Ready 104 is : %d, Ready 103 is : %d, Ready 102 is : %d ,Ready 101 is : %d, Ready 100 is : %d", ReadyQ104H, ReadyQ103H,ReadyQ102H,ReadyQ101H,ReadyQ100H);
+        $display("      CurrThread is : %d ,Ready 104 is : %d, Ready 103 is : %d, Ready 102 is : %d ,Ready 101 is : %d, Ready 100 is : %d", CurrThread, ReadyQ104H, ReadyQ103H,ReadyQ102H,ReadyQ101H,ReadyQ100H);
+        $display("      PcQ102H is %8h, ImmediateQ102H is %8h, RegRdData1Q102H is %8h, RegRdData2Q102H is %8h ",PcQ102H,ImmediateQ102H,RegRdData1Q102H,RegRdData2Q102H );
         $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
         $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
         msg = "Data integrity test failed - rf_write_history mismatch";

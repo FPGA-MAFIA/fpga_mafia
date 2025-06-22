@@ -57,22 +57,34 @@ t_ctrl_mem    CtrlMem;
 t_ctrl_wb     CtrlWb;
 
 //----thread switching ----
-logic CurrThread;
-always_ff @(posedge Clock or posedge Rst) begin
-  if (Rst)
-    CurrThread <= 1'b0;
-  else if (ReadyQ100H)
-    CurrThread <= ~CurrThread;
-end
+logic CurrThread=1'b0;
+// async reset, enable on ReadyQ100H, reset value = 0
+ //always_ff @(posedge Clock or posedge Rst) begin
+   // if (Rst) begin
+   //   thread_id <= 1'b0;
+   //  pc_thread0 <= 32'h00000000;
+   //   pc_thread1 <= 32'h00008000;
+    //end else begin
+     // thread_id <= ~thread_id;
+     // if (thread_id == 1'b0)
+     //   pc_thread0 <= pc_next;
+     // else
+     //   pc_thread1 <= pc_next;
+   // end
+//  if (Rst)
+//    CurrThread <= 1'b0;
+//  else if (ReadyQ100H)
+//    CurrThread <= ~CurrThread;
+//end
 
 //-----thread pipeline tags
 logic ThreadIDQ100H, ThreadIDQ101H, ThreadIDQ102H, ThreadIDQ103H, ThreadIDQ104H;
 assign ThreadIDQ100H = CurrThread;
 
-`MAFIA_EN_DFF(ThreadIDQ101H, ThreadIDQ100H, Clock, ReadyQ101H)
-`MAFIA_EN_DFF(ThreadIDQ102H, ThreadIDQ101H, Clock, ReadyQ102H)
-`MAFIA_EN_DFF(ThreadIDQ103H, ThreadIDQ102H, Clock, ReadyQ103H)
-`MAFIA_EN_DFF(ThreadIDQ104H, ThreadIDQ103H, Clock, ReadyQ104H)
+`MAFIA_EN_RST_DFF(ThreadIDQ101H, ThreadIDQ100H, Clock, ReadyQ101H, Rst)
+`MAFIA_EN_RST_DFF(ThreadIDQ102H, ThreadIDQ101H, Clock, ReadyQ102H, Rst)
+`MAFIA_EN_RST_DFF(ThreadIDQ103H, ThreadIDQ102H, Clock, ReadyQ103H, Rst)
+`MAFIA_EN_RST_DFF(ThreadIDQ104H, ThreadIDQ103H, Clock, ReadyQ104H, Rst)
 
 // ---- Data-Path signals ----
 logic [31:0]  PcQ101H, PcQ102H;
