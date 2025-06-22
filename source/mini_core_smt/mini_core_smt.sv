@@ -57,9 +57,9 @@ t_ctrl_mem    CtrlMem;
 t_ctrl_wb     CtrlWb;
 
 //----thread switching ----
-logic CurrThread=1'b0;
+logic CurrThread;
 // async reset, enable on ReadyQ100H, reset value = 0
- //always_ff @(posedge Clock or posedge Rst) begin
+ always_ff @(posedge Clock or posedge Rst) begin
    // if (Rst) begin
    //   thread_id <= 1'b0;
    //  pc_thread0 <= 32'h00000000;
@@ -71,11 +71,11 @@ logic CurrThread=1'b0;
      // else
      //   pc_thread1 <= pc_next;
    // end
-//  if (Rst)
-//    CurrThread <= 1'b0;
-//  else if (ReadyQ100H)
-//    CurrThread <= ~CurrThread;
-//end
+  if (Rst)
+    CurrThread <= 1'b0;
+  else if (ReadyQ100H)
+    CurrThread <= ~CurrThread;
+end
 
 //-----thread pipeline tags
 logic ThreadIDQ100H, ThreadIDQ101H, ThreadIDQ102H, ThreadIDQ103H, ThreadIDQ104H;
