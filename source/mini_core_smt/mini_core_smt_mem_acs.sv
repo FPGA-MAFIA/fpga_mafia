@@ -35,12 +35,12 @@ assign AlignedAddr = (ThreadIDQ103H == 1'b0) ? AluOutQ103H : (AluOutQ103H+ 32'h8
 //
 // Outputs to memory
 assign Core2DmemReqQ103H.WrData  = DMemWrDataQ103H;
-assign Core2DmemReqQ103H.Address = AlignedAddr;
+assign Core2DmemReqQ103H.Address = AluOutQ103H;
 assign Core2DmemReqQ103H.WrEn    = Ctrl.DMemWrEnQ103H;
 assign Core2DmemReqQ103H.RdEn    = Ctrl.DMemRdEnQ103H;
 assign Core2DmemReqQ103H.ByteEn  = Ctrl.DMemByteEnQ103H;
 
 `MAFIA_EN_DFF(PcPlus4Q104H, PcPlus4Q103H, Clock, ReadyQ104H)
-`MAFIA_EN_DFF(AluOutQ104H,  AlignedAddr , Clock, ReadyQ104H)
+`MAFIA_EN_DFF(AluOutQ104H,  AluOutQ103H , Clock, ReadyQ104H)
 
 endmodule
