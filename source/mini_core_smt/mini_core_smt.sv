@@ -71,10 +71,11 @@ logic CurrThread;
      // else
      //   pc_thread1 <= pc_next;
    // end
-  if (Rst)
-    CurrThread <= 1'b0;
-  else if (ReadyQ100H)
-    CurrThread <= ~CurrThread;
+    if (Rst)
+       CurrThread <= 1'b0;
+    else
+  // if (ReadyQ100H)
+       CurrThread <= ~CurrThread;
 end
 
 //-----thread pipeline tags
@@ -120,6 +121,7 @@ mini_core_smt_if mini_core_smt_if (
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
   .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  .CurrThread   (CurrThread),
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
 );
@@ -184,10 +186,10 @@ mini_core_smt_rf
   .PcQ101H          (PcQ101H),        // input  
   .RegWrDataQ104H   (RegWrDataQ104H), // input 
   // output data path
-  .PcQ102H          (PcQ102H_t0),        // output   
-  .ImmediateQ102H   (ImmediateQ102H_t0), // output
-  .RegRdData1Q102H  (RegRdData1Q102H_t0),// output
-  .RegRdData2Q102H  (RegRdData2Q102H_t0) // output
+  .PcQ102Hk          (PcQ102H_t0),        // output   
+  .ImmediateQ102Hk   (ImmediateQ102H_t0), // output
+  .RegRdData1Q102Hk  (RegRdData1Q102H_t0),// output
+  .RegRdData2Q102Hk  (RegRdData2Q102H_t0) // output
 );
 
 mini_core_smt_rf 
@@ -204,10 +206,10 @@ mini_core_smt_rf
   .PcQ101H          (PcQ101H),        // input  
   .RegWrDataQ104H   (RegWrDataQ104H), // input 
   // output data path
-  .PcQ102H          (PcQ102H_t1),        // output   
-  .ImmediateQ102H   (ImmediateQ102H_t1), // output
-  .RegRdData1Q102H  (RegRdData1Q102H_t1),// output
-  .RegRdData2Q102H  (RegRdData2Q102H_t1) // output
+  .PcQ102Hk          (PcQ102H_t1),        // output   
+  .ImmediateQ102Hk   (ImmediateQ102H_t1), // output
+  .RegRdData1Q102Hk  (RegRdData1Q102H_t1),// output
+  .RegRdData2Q102Hk  (RegRdData2Q102H_t1) // output
 );
 
 assign PcQ102H         = (ThreadIDQ102H == 1'b0) ? PcQ102H_t0         : PcQ102H_t1;

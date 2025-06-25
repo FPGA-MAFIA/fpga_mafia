@@ -35,7 +35,7 @@ assign AlignedAddr = (ThreadIDQ103H == 1'b0) ? AluOutQ103H : (AluOutQ103H+ 32'h8
 //
 // Outputs to memory
 assign Core2DmemReqQ103H.WrData  = DMemWrDataQ103H;
-assign Core2DmemReqQ103H.Address = AluOutQ103H;
+assign Core2DmemReqQ103H.Address = AlignedAddr;
 assign Core2DmemReqQ103H.WrEn    = Ctrl.DMemWrEnQ103H;
 assign Core2DmemReqQ103H.RdEn    = Ctrl.DMemRdEnQ103H;
 assign Core2DmemReqQ103H.ByteEn  = Ctrl.DMemByteEnQ103H;

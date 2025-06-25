@@ -24,6 +24,8 @@ initial begin: trk_inst_gen
     $fwrite(trk_inst,"---------------------------------------------------------\n");  
 
 end
+
+assign PcQ100H = mini_core_smt_top.PcQ100H;
 //always @(posedge Clk) begin : inst_print
 //    $fwrite(trk_inst,"%t\t| %8h \t |%32b | \n", $realtime,PcQ100H, Instruction);
 //end
@@ -37,9 +39,9 @@ initial begin: trk_fetch_gen
     $fwrite(trk_fetch,"---------------------------------------------------------\n");  
 
 end
-//always @(posedge Clk) begin : fetch_print
-//    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,PcQ100H, mini_core.Funct3Q101H, mini_core.Funct7Q101H, mini_core.OpcodeQ101H);
-//end
+always @(posedge Clk) begin : fetch_print
+    $fwrite(trk_fetch,"%t\t| %8h \t |%3b \t |%7b\t |%7b| \n", $realtime,PcQ100H, mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.Funct3Q101H, mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.Funct7Q101H,  mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.OpcodeQ101H);
+end
 
 integer trk_memory_access;
 initial begin: trk_memory_access_gen
@@ -60,7 +62,7 @@ initial begin: trk_rf_memory_access_gen
     $fwrite(trk_ref_memory_access,"---------------------------------------------------------\n");  
 end
 //
-assign PcQ100H = mini_core_smt_top.PcQ100H;
+
 
 logic DMemRdEnQ104H;
 logic DMemWrEnQ104H;
@@ -101,14 +103,20 @@ initial begin: trk_reg_write_gen
     #1
     trk_reg_write = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/trk_reg_write_ref.log"},"w");
     $fwrite(trk_reg_write,"---------------------------------------------------------\n");
-    $fwrite(trk_reg_write," Time | PC |reg_dst|  X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
+    $fwrite(trk_reg_write," Time | PC | PCQ100H | ReadyQ100H | ReadyQ101H | CurrThread | pcThread0 | pcThread1 | reg_dst|  X0   ,  X1   ,  X2   ,  X3    ,  X4    ,  X5    ,  X6    ,  X7    ,  X8    ,  X9    ,  X10    , X11    , X12    , X13    , X14    , X15    , X16    , X17    , X18    , X19    , X20    , X21    , X22    , X23    , X24    , X25    , X26    , X27    , X28    , X29    , X30    , X31 \n");
     $fwrite(trk_reg_write,"---------------------------------------------------------\n");  
 end
 
 always_ff @(posedge Clk ) begin
-        $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+        $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %8h | %8h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
+                           PcQ100H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ100H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ101H,
+                           CurrThread,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread0,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread1,
                            mini_core_smt_top.mini_core_smt.rf_thread0.Ctrl.RegDstQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[0],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[1],
@@ -143,9 +151,15 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[30],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[31]
                            );
-                                   $fwrite(trk_reg_write,"%6d | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+                                   $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %8h | %8h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
+                           PcQ100H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ100H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ101H,
+                           CurrThread,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread0,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread1,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Ctrl.RegDstQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[0],
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[1],
