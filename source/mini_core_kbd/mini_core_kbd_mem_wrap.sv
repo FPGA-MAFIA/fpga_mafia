@@ -20,7 +20,7 @@ import mini_core_kbd_pkg::*;
 (
                 input  logic        Clock  ,
                 input  logic        Rst    ,
-                input  t_tile_id    local_tile_id,
+                //input  t_tile_id    local_tile_id,
                 //============================================
                 //      core interface
                 //============================================
@@ -43,12 +43,12 @@ import mini_core_kbd_pkg::*;
                 //      fabric interface
                 //============================================
                 input  logic            InFabricValidQ503H  ,
-                input  var t_tile_trans InFabricQ503H       ,
+               // input  var t_tile_trans InFabricQ503H       ,
                 output logic            big_core_ready     ,
                 //
                 output logic            OutFabricValidQ505H ,
-                output var t_tile_trans OutFabricQ505H      ,
-                input  var t_fab_ready  fab_ready,
+               // output var t_tile_trans OutFabricQ505H      ,
+               // input  var t_fab_ready  fab_ready,
                 //============================================
                 //      keyboard interface
                 //============================================
@@ -87,8 +87,8 @@ logic   F2C_CrMemHitQ504H, F2C_CrMemHitQ505H;
 logic   F2C_IMemHitQ504H , F2C_IMemHitQ505H;
 logic   F2C_DMemHitQ504H , F2C_DMemHitQ505H;
 
-t_tile_trans  C2F_OutFabricQ104H;
-t_tile_trans  C2F_ReqQ103H;
+//t_tile_trans  C2F_OutFabricQ104H;
+//t_tile_trans  C2F_ReqQ103H;
 logic         C2F_ReqValidQ103H;
 logic         C2F_OutFabricValidQ104H;
 logic         C2F_ReqFull, C2F_ReqEmpty;
@@ -98,17 +98,17 @@ logic [1:0] valid_candidate;
 logic OutstandingReadReq;
 logic SetOutstandingReadReqQ103H;
 logic RstOutstandingReadReqQ503H;
-t_tile_trans F2C_InFabricQ503H;
+//t_tile_trans F2C_InFabricQ503H;
 
 logic F2C_OutFabricValidQ505H;
-t_tile_trans F2C_OutFabricQ505H;
+//t_tile_trans F2C_OutFabricQ505H;
 
 
 
 logic F2C_RspFull, F2C_RspEmpty;
 logic F2C_AlmostFull;
 logic F2C_OutFabricValidQ503H, F2C_OutFabricValidQ504H;
-t_tile_trans F2C_OutFabricQ504H;
+//t_tile_trans F2C_OutFabricQ504H;
 logic [31:0] F2C_RdRspAddressQ503H;
 logic [31:0] F2C_RspDataQ504H;
 logic [31:0] VgaAddressWithOffsetQ103H;
@@ -142,15 +142,15 @@ logic        DMemValidReqQ103H;
 // Set the F2C IMEM hit indications
 assign F2C_IMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > I_MEM_REGION_FLOOR) && 
                            (InFabricQ503H.address[MSB_REGION:LSB_REGION] < I_MEM_REGION_ROOF) ;
-assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
+//assign F2C_IMemWrEnQ503H = F2C_IMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 // Set the F2C DMEM hit indications
 assign F2C_DMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] > D_MEM_REGION_FLOOR) && 
                            (InFabricQ503H.address[MSB_REGION:LSB_REGION] < D_MEM_REGION_ROOF) ;
-assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && ((InFabricQ503H.opcode == WR));
+//assign F2C_DMemWrEnQ503H = F2C_DMemHitQ503H && InFabricValidQ503H && ((InFabricQ503H.opcode == WR));
 // Set the F2C CrMEM hit indications
 assign F2C_CrMemHitQ503H  = (InFabricQ503H.address[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR) && 
                             (InFabricQ503H.address[MSB_REGION:LSB_REGION] < CR_MEM_REGION_ROOF) ;
-assign F2C_CrMemWrEnQ503H = F2C_CrMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
+//assign F2C_CrMemWrEnQ503H = F2C_CrMemHitQ503H && InFabricValidQ503H && (InFabricQ503H.opcode == WR);
 
 //==================================
 // Instruction Memory
@@ -187,7 +187,7 @@ assign PreInstructionQ101H = SampleReadyQ101H ? InstructionQ101H : LastInstructi
 //assign VgaSpaceQ103H = (DMemAddressQ103H[31:16] == 16'h00FF) && (DMemAddressQ103H[15:0] < 16'h9600);
 assign DMemValidReqQ103H = DMemWrEnQ103H || DMemRdEnQ103H;
 assign MatchVGAMemRegionQ103H = DMemValidReqQ103H && ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= VGA_MEM_REGION_FLOOR) && (DMemAddressQ103H[VGA_MSB_REGION:LSB_REGION] <= VGA_MEM_REGION_ROOF));
-assign LocalDMemWrEnQ103H     = DMemWrEnQ103H && ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&   (!MatchVGAMemRegionQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
+//assign LocalDMemWrEnQ103H     = DMemWrEnQ103H && ((DMemAddressQ103H[31:24] == local_tile_id) || (DMemAddressQ103H[31:24] == 8'b0)) &&   (!MatchVGAMemRegionQ103H);//FIXME - the VGA Space needs to be with a unique Tile ID
 assign MatchCRMemRegionQ103H  = DMemValidReqQ103H && ((DMemAddressQ103H[MSB_REGION:LSB_REGION] >= CR_MEM_REGION_FLOOR)  && (DMemAddressQ103H[MSB_REGION    :LSB_REGION] <= CR_MEM_REGION_ROOF)) && !MatchVGAMemRegionQ103H;
 
 `MAFIA_EN_DFF(MatchVGAMemRegionQ104H , MatchVGAMemRegionQ103H, Clock, DMemReady)
@@ -196,14 +196,14 @@ assign MatchCRMemRegionQ103H  = DMemValidReqQ103H && ((DMemAddressQ103H[MSB_REGI
 `MAFIA_EN_DFF(MatchCRMemRegionQ105H  , MatchCRMemRegionQ104H , Clock, DMemReady)
 // FIXME - need to "freeze" the core PC when reading a non local address
 // accessing DMem not from local_tile but other one
-assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H)           && // rd or wr request
-                              (DMemAddressQ103H[31:24] != local_tile_id) && // not local tile
-                              (DMemAddressQ103H[31:24] != 8'b0);            // not "force" local tile (offset 0)
+//assign NonLocalDMemReqQ103H = (DMemWrEnQ103H || DMemRdEnQ103H)           && // rd or wr request
+//                              (DMemAddressQ103H[31:24] != local_tile_id) && // not local tile
+//                              (DMemAddressQ103H[31:24] != 8'b0);            // not "force" local tile (offset 0)
 // Set the OutstandingReadReq indication when there is a non local read request (MSB is not the local tile id or 0)
-assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&  (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
+//assign SetOutstandingReadReqQ103H = (DMemRdEnQ103H) &&  (DMemAddressQ103H[31:24] != local_tile_id) && (DMemAddressQ103H[31:24] != 8'b0);
 
 
-assign FabricDataRspValidQ503H = (OutstandingReadReq) &&  (InFabricQ503H.opcode == RD_RSP) && InFabricValidQ503H ;
+//assign FabricDataRspValidQ503H = (OutstandingReadReq) &&  (InFabricQ503H.opcode == RD_RSP) && InFabricValidQ503H ;
 assign RstOutstandingReadReqQ503H = FabricDataRspValidQ503H || Rst;
 `MAFIA_EN_RST_DFF(OutstandingReadReq, 1'b1 ,Clock, SetOutstandingReadReqQ103H, RstOutstandingReadReqQ503H) 
 
@@ -307,12 +307,12 @@ big_core_vga_ctrl big_core_vga_ctrl (
 // Align latency of CR and VGA memory to the d_mem
 `MAFIA_EN_DFF(CRMemRdDataQ105H, CRMemRdDataQ104H, Clock , DMemReady)
 `MAFIA_EN_DFF(VGAMemRdDataQ105H, VGAMemRdDataQ104H, Clock, DMemReady)
-assign DMemRdRspQ105H =  FabricDataRspValidQ504H ? FabricDataRspQ504H    : //Fabric response to an older core request
-                         WhoAmIReqQ105H          ? {24'b0,local_tile_id} : //Special case - WhoAmI respond the "hard coded" local tile id
-                         MatchCRMemRegionQ105H   ? CRMemRdDataQ105H      : //CR memory response
-                         MatchVGAMemRegionQ105H  ? VGAMemRdDataQ105H     : //VGA memory response
-                         DMemRdDataValidQ105H    ? DMemRdDataQ105H       : //d_mem response - response from local tile - Note: this is a lowest priority of the match in this mux
-                                                   '0                    ; //default response
+//assign DMemRdRspQ105H =  FabricDataRspValidQ504H ? FabricDataRspQ504H    : //Fabric response to an older core request
+//                         WhoAmIReqQ105H          ? {24'b0,local_tile_id} : //Special case - WhoAmI respond the "hard coded" local tile id
+//                         MatchCRMemRegionQ105H   ? CRMemRdDataQ105H      : //CR memory response
+ //                        MatchVGAMemRegionQ105H  ? VGAMemRdDataQ105H     : //VGA memory response
+//                         DMemRdDataValidQ105H    ? DMemRdDataQ105H       : //d_mem response - response from local tile - Note: this is a lowest priority of the match in this mux
+//                                                   '0                    ; //default response
 
 
 //==================================
@@ -334,16 +334,16 @@ assign F2C_RspDataQ505H   = F2C_CrMemHitQ505H ? F2C_CrMemRspDataQ505H : //CR hit
                             F2C_DMemHitQ505H  ? F2C_DMemRspDataQ505H  :
                                                '0                     ;
 
-assign F2C_OutFabricValidQ503H =  (InFabricValidQ503H && (InFabricQ503H.opcode == RD));
-assign F2C_InFabricQ503H       = F2C_OutFabricValidQ503H   ?  InFabricQ503H  :  '0;
+//assign F2C_OutFabricValidQ503H =  (InFabricValidQ503H && (InFabricQ503H.opcode == RD));
+//assign F2C_InFabricQ503H       = F2C_OutFabricValidQ503H   ?  InFabricQ503H  :  '0;
 // Set the target address to the requestor id (This is the Read response address)
 assign F2C_RdRspAddressQ503H = {F2C_InFabricQ503H.requestor_id[7:0],F2C_InFabricQ503H.address[23:0]};
 `MAFIA_DFF(F2C_OutFabricValidQ504H                 , F2C_OutFabricValidQ503H , Clock)
-`MAFIA_DFF(F2C_OutFabricQ504H.address              , F2C_RdRspAddressQ503H   , Clock) 
-`MAFIA_DFF(F2C_OutFabricQ504H.opcode               , RD_RSP                  , Clock)
-`MAFIA_DFF(F2C_OutFabricQ504H.requestor_id         , local_tile_id           , Clock) // The requestor id is the local tile id
-`MAFIA_DFF(F2C_OutFabricQ504H.next_tile_fifo_arb_id, NULL_CARDINAL           , Clock) //will be overwritten in the tile
-assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
+//`MAFIA_DFF(F2C_OutFabricQ504H.address              , F2C_RdRspAddressQ503H   , Clock) 
+//`MAFIA_DFF(F2C_OutFabricQ504H.opcode               , RD_RSP                  , Clock)
+//`MAFIA_DFF(F2C_OutFabricQ504H.requestor_id         , local_tile_id           , Clock) // The requestor id is the local tile id
+//`MAFIA_DFF(F2C_OutFabricQ504H.next_tile_fifo_arb_id, NULL_CARDINAL           , Clock) //will be overwritten in the tile
+//assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
 
 
 //==================================
@@ -358,7 +358,7 @@ assign F2C_OutFabricQ504H.data =  F2C_RspDataQ504H;
 // F2C FIFO - accumulate read responses to the fabric (A response to a Fabric 2 Core read request)
 //==================================
 // a FIFO to accumulate the read responses to the fabric
-fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
+//fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
 f2c_rsp_fifo  (.clk       (Clock),
                .rst       (Rst),
                .push      (F2C_OutFabricValidQ504H),  // input
@@ -376,11 +376,11 @@ f2c_rsp_fifo  (.clk       (Clock),
 // C2F FIFO - accumulate core 2 Fabric requests
 //==================================
 // a FIFO to accumulate the requests from the core to the fabric
-assign C2F_ReqQ103H.address      = DMemAddressQ103H;
-assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
-assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
-assign C2F_ReqQ103H.requestor_id = local_tile_id;
-assign C2F_ReqQ103H.next_tile_fifo_arb_id = NULL_CARDINAL;
+//assign C2F_ReqQ103H.address      = DMemAddressQ103H;
+//assign C2F_ReqQ103H.data         = DMemWrDataQ103H;
+//assign C2F_ReqQ103H.opcode       = DMemWrEnQ103H ? WR : RD;
+//assign C2F_ReqQ103H.requestor_id = local_tile_id;
+//assign C2F_ReqQ103H.next_tile_fifo_arb_id = NULL_CARDINAL;
 assign C2F_ReqValidQ103H         = NonLocalDMemReqQ103H && (!OutstandingReadReq);
 
 fifo #(.DATA_WIDTH($bits(t_tile_trans)),.FIFO_DEPTH(2))
@@ -400,8 +400,8 @@ c2f_req_fifo  (.clk       (Clock),
 //==================================
 // The arbiter is a Round Robin arbiter 
 // FIXME currently this is a naive implementation - not checking the target fifo_arb - waiting until all fifo_arb are ready
-assign valid_candidate[0] = !F2C_RspEmpty && (&fab_ready);  // add back pressure from the fabric
-assign valid_candidate[1] = !C2F_ReqEmpty && (&fab_ready);  // add back pressure from the fabric
+//assign valid_candidate[0] = !F2C_RspEmpty && (&fab_ready);  // add back pressure from the fabric
+//assign valid_candidate[1] = !C2F_ReqEmpty && (&fab_ready);  // add back pressure from the fabric
 arbiter #(
     .NUM_CLIENTS        (2)
 ) u_arbiter (
@@ -415,9 +415,9 @@ assign F2C_OutFabricValidQ505H = winner_dec_id[0];
 assign C2F_OutFabricValidQ104H = winner_dec_id[1];
 
 assign OutFabricValidQ505H =  F2C_OutFabricValidQ505H | C2F_OutFabricValidQ104H;
-assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
-                              C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
-                                                        '0;                 
+//assign OutFabricQ505H      =  F2C_OutFabricValidQ505H ? F2C_OutFabricQ505H :
+//                              C2F_OutFabricValidQ104H ? C2F_OutFabricQ104H :
+//                                                        '0;                 
                                                         
 assign big_core_ready = (!F2C_AlmostFull); // add back pressure to the fabric
 

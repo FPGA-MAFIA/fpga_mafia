@@ -13,9 +13,9 @@
 
 package mini_core_kbd_pkg;
 
-`include "big_core_csr_pkg.vh"
-`include "big_core_ips_pkg.vh"
-`include "big_core_fab_pkg.vh"
+`include "mini_core_kbd_big_core_csr_pkg.vh"
+`include "mini_core_kbd_big_core_ips_pkg.vh"
+//`include "big_core_fab_pkg.vh"
 
 parameter I_MEM_SIZE   = 'h1_0000; 
 parameter I_MEM_OFFSET = 'h0_0000;
