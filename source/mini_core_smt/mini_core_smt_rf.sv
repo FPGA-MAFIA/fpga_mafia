@@ -28,10 +28,10 @@ import mini_core_smt_pkg::*;
     input  logic [31:0] ImmediateQ101H,
     input  logic [31:0] RegWrDataQ104H,
     // output data path
-    output logic [31:0] PcQ102H,
-    output logic [31:0] ImmediateQ102H,
-    output logic [31:0] RegRdData1Q102H,
-    output logic [31:0] RegRdData2Q102H
+    output logic [31:0] PcQ102Hk,
+    output logic [31:0] ImmediateQ102Hk,
+    output logic [31:0] RegRdData1Q102Hk,
+    output logic [31:0] RegRdData2Q102Hk
 );
 
 
@@ -56,9 +56,9 @@ assign RegRdData2Q101H = (Ctrl.RegSrc2Q101H == 5'b0) ? 32'b0                    
                          MatchRd2AftrWrQ101H         ? RegWrDataQ104H             : // forwards WrDataQ104H -> RdDataQ101H
                                                        Register[Ctrl.RegSrc2Q101H]; // Common Case - reading from Register file
 
-`MAFIA_EN_DFF(ImmediateQ102H,  ImmediateQ101H,  Clock, ReadyQ102H && (readEnThread == regFileID))
-`MAFIA_EN_DFF(PcQ102H,         PcQ101H,         Clock, ReadyQ102H && (readEnThread == regFileID))
-`MAFIA_EN_DFF(RegRdData1Q102H, RegRdData1Q101H, Clock, ReadyQ102H && (readEnThread == regFileID))
-`MAFIA_EN_DFF(RegRdData2Q102H, RegRdData2Q101H, Clock, ReadyQ102H && (readEnThread == regFileID))
+`MAFIA_EN_DFF(ImmediateQ102Hk,  ImmediateQ101H,  Clock, ReadyQ102H && (readEnThread == regFileID))
+`MAFIA_EN_DFF(PcQ102Hk,         PcQ101H,         Clock, ReadyQ102H && (readEnThread == regFileID))
+`MAFIA_EN_DFF(RegRdData1Q102Hk, RegRdData1Q101H, Clock, ReadyQ102H && (readEnThread == regFileID))
+`MAFIA_EN_DFF(RegRdData2Q102Hk, RegRdData2Q101H, Clock, ReadyQ102H && (readEnThread == regFileID))
 
 endmodule
