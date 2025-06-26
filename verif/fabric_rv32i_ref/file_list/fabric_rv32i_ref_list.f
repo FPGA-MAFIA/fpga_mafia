@@ -8,4 +8,7 @@
 
 ../../../verif/fabric_rv32i_ref/tb/fabric_rv32i_ref_pkg.sv
 ../../../verif/fabric_rv32i_ref/tb/fabric_rv32i_ref.sv
+../../../verif/fabric_rv32i_ref/tb/fabric_rv32i_ref_top.sv
+
+// test benches
 ../../../verif/fabric_rv32i_ref/tb/fabric_rv32i_ref_tb.sv

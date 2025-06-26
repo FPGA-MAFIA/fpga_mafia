@@ -2,18 +2,21 @@
 // this is a reference model for the RV32I mini_core DUT
 // Will be using a simple case statement to model the:
 `include "macros.vh"
-module fabric_rv32i_ref 
+module fabric_rv32i_ref
+import fabric_rv32i_ref_pkg::*;
 #(  
     parameter I_MEM_LSB = 'h0_0000,
     parameter I_MEM_MSB = 'h1_0000 - 1'h1,
     parameter D_MEM_LSB = 'h1_0000,
     parameter D_MEM_MSB = 'h2_0000 - 1'h1 
-) (
-    input clk,
-    input rst,
-    input run
+) 
+(
+    input logic clk,
+    input logic rst,
+    input logic run,
+    output var t_core2mem_req core2mem_req
 );
-import rv32i_ref_pkg::*;
+
 // Define VGA memory sizes
 parameter SIZE_VGA_MEM          = 38400; 
 parameter VGA_MEM_REGION_FLOOR  = 32'h00FF_0000;

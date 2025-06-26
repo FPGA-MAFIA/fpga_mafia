@@ -178,4 +178,13 @@ typedef struct packed {
     logic [31:0] reg_wr_data;
 } t_debug_info;
 
+typedef struct packed {
+    logic [31:0] Data;
+    logic        WrEn;
+    logic        RdEn;
+    logic [31:0] Address;
+    logic [3:0]  ByteEn;
+    logic [2:0]  TileId;
+} t_core2mem_req;
+
 endpackage
