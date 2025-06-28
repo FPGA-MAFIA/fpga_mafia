@@ -6,3 +6,5 @@ main:
   li    x2,  2
   li    x3,  3
   li    x4,  4
+
+ add x4, x2 , x1 

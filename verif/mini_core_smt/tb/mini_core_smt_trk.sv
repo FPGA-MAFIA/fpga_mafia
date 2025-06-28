@@ -108,18 +108,22 @@ initial begin: trk_reg_write_gen
 end
 
 always_ff @(posedge Clk ) begin
-        $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+        $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %2d | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
                            PcQ100H,
-                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ100H,
-                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ101H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ101H,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CoreFreeze,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.LoadHzrdDetectQ101H,
                            CurrThread,
+                           //mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H_t0,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread0,
+                           //mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H_t1,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread1,
                            mini_core_smt_top.mini_core_smt.rf_thread0.Ctrl.RegDstQ104H,
+                           mini_core_smt_top.mini_core_smt.rf_thread0.writeEnThread,
+                           mini_core_smt_top.mini_core_smt.rf_thread1.writeEnThread,
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[0],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[1],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[2],
@@ -153,18 +157,22 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[30],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[31]
                            );
-                                   $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+                                   $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %2d | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
                            PcQ100H,
-                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ100H,
-                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ReadyQ101H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ101H,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CoreFreeze,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.LoadHzrdDetectQ101H,
                            CurrThread,
+                           //mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H_t0,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread0,
+                           //mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H_t1,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread1,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Ctrl.RegDstQ104H,
+                           mini_core_smt_top.mini_core_smt.rf_thread0.writeEnThread,
+                           mini_core_smt_top.mini_core_smt.rf_thread1.writeEnThread,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[0],
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[1],
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[2],

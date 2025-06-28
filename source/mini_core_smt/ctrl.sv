@@ -11,31 +11,42 @@
 
 `include "macros.vh"
 
-module mini_core_ctrl
-import mini_core_pkg::*;
+module mini_core_smt_ctrl
+import mini_core_smt_pkg::*;
 (
     input   logic        Clock,
     input   logic        Rst,
-    // input instruction 
+    // input instruction thread 0
     input   logic [31:0] PreInstructionQ101H,
     input   logic [31:0] PcQ101H,
+    // input instruction thread 1
+    input   logic [31:0] PreInstructionQ201H,
+    input   logic [31:0] PcQ201H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
     input   logic        DMemReady,
-    // ready signals for "back-pressure" - use as the enable for the pipe stage sample
+    // ready signals for "back-pressure" - use as the enable for the pipe stage sample thread 0
     output  logic        ReadyQ100H,
     output  logic        ReadyQ101H,
     output  logic        ReadyQ102H,
     output  logic        ReadyQ103H,
     output  logic        ReadyQ104H,
+    // ready signals for "back-pressure" - use as the enable for the pipe stage sample thread 1
+    output  logic        ReadyQ200H,
+    output  logic        ReadyQ201H,
+    output  logic        ReadyQ202H,
+    output  logic        ReadyQ203H,
+    output  logic        ReadyQ204H,
     // output ctrl signals
     output var t_ctrl_if    CtrlIf,
     output var t_ctrl_rf    CtrlRf,
     output var t_ctrl_exe   CtrlExe,
     output var t_ctrl_mem   CtrlMem,
     output var t_ctrl_wb    CtrlWb,
-    // output data path signals
-    output  logic [31:0] ImmediateQ101H 
+    // output data path signals thread 0
+    output  logic [31:0] ImmediateQ101H
+    // output data path signals thread 1
+    output  logic [31:0] ImmediateQ201H  
 );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,10 +82,27 @@ logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 
+t_immediate         SelImmTypeQ201H;
+ logic [4:0]  PreRegSrc1Q201H;
+ logic [4:0]  PreRegSrc2Q201H;
+ logic        LoadHzrdDetectQ201H;
+ logic [31:0] InstructionQ201H;
+ logic        flushQ202H;
+ logic        flushQ203H;
+ t_opcode     OpcodeQ201H;
+ logic [2:0]  Funct3Q201H;
+ logic [6:0]  Funct7Q201H;
+logic PreValidInstQ201H, ValidInstQ201H;
+logic PreValidInstQ202H, ValidInstQ202H;
+logic PreValidInstQ203H, ValidInstQ203H;
+logic PreValidInstQ204H, ValidInstQ204H;
+
 t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
+t_mini_ctrl CtrlQ201H, CtrlQ202H, CtrlQ203H, CtrlQ204H;
+
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
-// Load and Ctrl hazard detection
+// Load and Ctrl hazard detection thread 0
 t_opcode    PreOpcodeQ101H;
 logic LoadHazardValidRegSrc2Q101H;
 logic RegDstQ102MatchRegSrc1Q101H;
@@ -82,9 +110,24 @@ logic RegDstQ102MatchRegSrc2Q101H;
 assign PreRegSrc1Q101H   = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H   = PreInstructionQ101H[24:20];
 assign PreOpcodeQ101H    = t_opcode'(PreInstructionQ101H[6:0]);
+
+// Load and Ctrl hazard detection thread 1
+t_opcode    PreOpcodeQ201H;
+logic LoadHazardValidRegSrc2Q201H;
+logic RegDstQ102MatchRegSrc1Q201H;
+logic RegDstQ102MatchRegSrc2Q201H;
+assign PreRegSrc1Q201H   = PreInstructionQ201H[19:15];
+assign PreRegSrc2Q201H   = PreInstructionQ201H[24:20];
+assign PreOpcodeQ201H    = t_opcode'(PreInstructionQ201H[6:0]);
+
 assign  LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH;
+assign  LoadHazardValidRegSrc2Q201H = PreOpcodeQ201H == R_OP || PreOpcodeQ201H == STORE || PreOpcodeQ201H == BRANCH;
+
 assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD);
 assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
+assign  RegDstQ102MatchRegSrc1Q201H = (PreRegSrc1Q201H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD);
+assign  RegDstQ102MatchRegSrc2Q201H = (PreRegSrc2Q201H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q201H);
+
 assign LoadHzrdDetectQ101H          = (Rst)                                                        ? 1'b0 : 
                                       (RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H) ? 1'b1 :
                                                                                                      1'b0 ;
@@ -234,4 +277,3 @@ assign CtrlWb.SignExtQ104H     = CtrlQ104H.SignExt;
 assign CtrlWb.e_SelWrBackQ104H = CtrlQ104H.e_SelWrBack;
 
 endmodule
-

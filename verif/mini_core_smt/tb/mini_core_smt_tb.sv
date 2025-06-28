@@ -73,13 +73,15 @@ initial begin: test_seq
     //load the program to the DUT & reference model
     //======================================
     // Make sure inst_mem.sv exists
-    file = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    //file = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"}, "r");
+    file = $fopen({"../../../target/mini_core_smt/instz_mem.sv"}, "r");
     if (!file) begin
         $error("the file: ../../../target/mini_core_smt/tests/%s/gcc_files/inst_mem.sv does not exist", test_name);
         $display("ERROR: inst_mem.sv file does not exist");
         $finish;
     end
-    $readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    //$readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
+    $readmemh({"../../../target/mini_core_smt/instz_mem.sv"} , IMem);
     force mini_core_smt_top.mini_smt_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 

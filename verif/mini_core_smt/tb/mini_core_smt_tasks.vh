@@ -20,7 +20,7 @@ logic ThreadIDQ101H,ThreadIDQ102H,ThreadIDQ103H,ThreadIDQ104H;
 logic ReadyQ100H,ReadyQ101H,ReadyQ102H,ReadyQ103H,ReadyQ104H;
 logic ImmediateQ102H, RegRdData1Q102H,RegRdData2Q102H;
 assign ReadyQ100H = mini_core_smt_top.mini_core_smt.ReadyQ100H;
-assign ReadyQ101H = mini_core_smt_top.mini_core_smt.ReadyQ101H;
+//assign ReadyQ101H = mini_core_smt_top.mini_core_smt.ReadyQ101H;
 assign ReadyQ102H = mini_core_smt_top.mini_core_smt.ReadyQ102H;
 assign ReadyQ103H = mini_core_smt_top.mini_core_smt.ReadyQ103H;
 assign ReadyQ104H = mini_core_smt_top.mini_core_smt.ReadyQ104H;
@@ -102,7 +102,7 @@ foreach(ref_rf_write_history[i])begin
         $display(" >> rf_write_history[%0d] Mismatch!!", i);
         $error("ERROR: rf_write_history mismatch");
         $display("      thread in WB 104 is : %d, thread in MEM 103 is : %d, thread in EXE 102 is : %d ,thread in DEC 101 is : %d, thread in IF 100 is : %d", ThreadIDQ104H, ThreadIDQ103H,ThreadIDQ102H,ThreadIDQ101H,CurrThread); 
-        $display("      CurrThread is : %d ,Ready 104 is : %d, Ready 103 is : %d, Ready 102 is : %d ,Ready 101 is : %d, Ready 100 is : %d", CurrThread, ReadyQ104H, ReadyQ103H,ReadyQ102H,ReadyQ101H,ReadyQ100H);
+        //$display("      CurrThread is : %d ,Ready 104 is : %d, Ready 103 is : %d, Ready 102 is : %d ,Ready 101 is : %d, Ready 100 is : %d", CurrThread, ReadyQ104H, ReadyQ103H,ReadyQ102H,ReadyQ101H,ReadyQ100H);
         $display("      PcQ102H is %8h, ImmediateQ102H is %8h, RegRdData1Q102H is %8h, RegRdData2Q102H is %8h ",PcQ102H,ImmediateQ102H,RegRdData1Q102H,RegRdData2Q102H );
         $display("      ref_rf_write_history[%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, ref_rf_write_history[i].cur_time, ref_rf_write_history[i].Pc, ref_rf_write_history[i].RegDst, ref_rf_write_history[i].Data);
         $display("      rf_write_history    [%0d] =   {time: %0d, Pc: %8h, RegDst: %d, Data: %h}", i, rf_write_history[i].cur_time    , rf_write_history[i].Pc    , rf_write_history[i].RegDst    , rf_write_history[i].Data    );
