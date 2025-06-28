@@ -74,7 +74,7 @@ logic CurrThread;
     if (Rst)
        CurrThread <= 1'b0;
     else
-  // if (ReadyQ100H)
+    //if (ReadyQ100H)
        CurrThread <= ~CurrThread;
 end
 

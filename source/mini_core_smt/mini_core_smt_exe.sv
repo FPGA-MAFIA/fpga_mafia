@@ -70,10 +70,10 @@ logic [31:0] RegRdData1Q102H, RegRdData2Q102H;
 // 2. Check branch condition.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Hazard Detection
-assign Hazard1Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc1Q102H != 5'b0); // && (ThreadIDQ102H == ThreadIDQ103H);
-assign Hazard2Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q102H != 5'b0);// && (ThreadIDQ102H == ThreadIDQ104H);
-assign Hazard1Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q102H != 5'b0);// && (ThreadIDQ102H == ThreadIDQ103H);
-assign Hazard2Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc2Q102H != 5'b0);// && (ThreadIDQ102H == ThreadIDQ104H);
+assign Hazard1Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc1Q102H != 5'b0) && (ThreadIDQ102H == ThreadIDQ103H);
+assign Hazard2Data1Q102H = (Ctrl.RegSrc1Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc1Q102H != 5'b0) && (ThreadIDQ102H == ThreadIDQ104H);
+assign Hazard1Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ103H) && (Ctrl.RegWrEnQ103H) && (Ctrl.RegSrc2Q102H != 5'b0) && (ThreadIDQ102H == ThreadIDQ103H);
+assign Hazard2Data2Q102H = (Ctrl.RegSrc2Q102H == Ctrl.RegDstQ104H) && (Ctrl.RegWrEnQ104H) && (Ctrl.RegSrc2Q102H != 5'b0) && (ThreadIDQ102H == ThreadIDQ104H);
 // Forwarding unite
 assign RegRdData1Q102H = Hazard1Data1Q102H ? AluOutQ103H       : // Rd 102 After Wr 103
                          Hazard2Data1Q102H ? RegWrDataQ104H    : // Rd 102 After Wr 104

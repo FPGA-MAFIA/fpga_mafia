@@ -11,11 +11,11 @@ main:
   li    x7,  70
   li    x8,  80
 
- sw   x7, 0(x14)
- lw   x15, 0(x14)
- addi x5, x1, 0x7       # x5 = x1 + x3 (1 + 3 = 4)
- sub x5, x2, x1       # x5 = 10
- add x6, x2, x4       # x6 = x4 + x2 (4 + 2 = 6)
+ #sw   x7, 0(x14)
+ #lw   x15, 0(x14)
+ addi x1, x3, 0x7       # x5 = x1 + x3 (1 + 3 = 4)
+ sub x5, x4, x2       # x5 = 10
+ #add x6, x2, x4       # x6 = x4 + x2 (4 + 2 = 6)
 
 eot:
     nop

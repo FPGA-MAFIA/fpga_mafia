@@ -25,39 +25,33 @@ import mini_core_smt_pkg::*;
     output logic [31:0] PcQ101H
 );
 
-logic [31:0] PcPlus4Q100H;
+logic [31:0] PC_thread0, PC_thread1;
+logic [31:0] SelectedPC;
 logic [31:0] NextPcQnnnH;
 
-// Per-thread program counters
-logic [31:0] PC_thread0;
-logic [31:0] PC_thread1;
+// Pick PC based on current thread
+assign SelectedPC = (CurrThread == 1'b0) ? (PC_thread0) : (PC_thread1) ;
 
+// Compute PC+4 or branch target
+assign NextPcQnnnH = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H : (SelectedPC + 3'h4) ;
 
-// Send current thread PC downstream (to decode stage)
-//assign PcQ100H = (CurrThread == 1'b0) ? PC_thread0 : PC_thread1;
+// Feed to pipeline (only if ReadyQ100H)
+`MAFIA_EN_RST_DFF(PcQ100H, SelectedPC, Clock, ReadyQ100H, Rst)
 
-// Update selected thread's PC
-always_ff @(posedge Clock) begin
+// Register PCQ100H to Q101H
+`MAFIA_EN_DFF(PcQ101H, PcQ100H, Clock, ReadyQ101H)
+
+// Update thread PC after fetch success
+always_ff @(posedge Clock or posedge Rst) begin
     if (Rst) begin
         PC_thread0 <= 32'h00000000;
-        PC_thread1 <= 32'h00008000;
-    end else begin
+        PC_thread1 <= 32'h00000200;
+    end else if (ReadyQ100H) begin
         if (CurrThread == 1'b0)
-            PC_thread0 <= PC_thread0 + 3'h4;
+            PC_thread0 <= NextPcQnnnH;
         else
-            PC_thread1 <= PC_thread1 + 3'h4;
+            PC_thread1 <= NextPcQnnnH;
     end
 end
-
-assign PcPlus4Q100H = (CurrThread == 1'b0) ? (PC_thread0 ) : (PC_thread1 );
-assign NextPcQnnnH  = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H : PcPlus4Q100H;
-
-
-
-`MAFIA_EN_RST_DFF(PcQ100H, NextPcQnnnH, Clock, ReadyQ100H, Rst)
-//`MAFIA_EN_RST_DFF(PcQ100H, NextPcQnnnH, Clock, 1'b1, Rst)
-// Q100H to Q101H Flip Flops. 
-`MAFIA_EN_DFF(PcQ101H, PcQ100H, Clock, ReadyQ101H)
-//`MAFIA_EN_DFF(PcQ101H, PcQ100H, Clock, 1'b1)
 
 endmodule

@@ -174,13 +174,16 @@ class Test:
                     #global tests
                     if self.name == tests[0].name:
                       i_mem_base = '0x00000000'
+                      d_mem_base = '0x00010000'
                     elif len(tests) > 1 and self.name == tests[1].name:
-                      i_mem_base = '0x00008000'
+                      i_mem_base = '0x00000200'
+                      d_mem_base = '0x00017800'
                     else:
                        i_mem_base = Test.I_MEM_OFFSET  # fallback
+                       d_mem_base = Test.D_MEM_OFFSET  #fallback
 
-                    i_mem_offset = f'-Wl,--defsym=I_MEM_OFFSET={i_mem_base} -Wl,--defsym=I_MEM_LENGTH=0x8000 '
-                    d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
+                    i_mem_offset = f'-Wl,--defsym=I_MEM_OFFSET={i_mem_base} -Wl,--defsym=I_MEM_LENGTH=0x0200 '
+                    d_mem_offset = f'-Wl,--defsym=D_MEM_OFFSET={d_mem_base} -Wl,--defsym=D_MEM_LENGTH=0x7800 '
                     mem_offset   = i_mem_offset+d_mem_offset
                     crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     #crt0_file = '../../../../../app/crt0/ctr0_default.s '
@@ -206,6 +209,7 @@ class Test:
                         try:
                             forth_cmd  = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
                             run_cmd(forth_cmd)
+            
                         except:
                             print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')
                             self.fail_flag = True
