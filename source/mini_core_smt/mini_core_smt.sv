@@ -45,6 +45,7 @@ import mini_core_smt_pkg::*;
 
 // Control bits
 logic         BranchCondMetQ102H;
+logic         BranchCondMetQ103H;
 logic         ReadyQ100H;
 logic         ReadyQ102H;
 logic         ReadyQ103H;
@@ -151,7 +152,16 @@ mini_core_smt_ctrl mini_core_smt_ctrl (
   .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
   // input feedback from data path
   .BranchCondMetQ102H   (BranchCondMetQ102H), //input
+  .BranchCondMetQ103H   (BranchCondMetQ103H), //input
+
   .DMemReady            (DMemReady), //input
+
+  ///Thread ID newly added by Obaida
+  .ThreadIDQ100H        (ThreadIDQ100H),
+  .ThreadIDQ101H        (ThreadIDQ101H),
+  .ThreadIDQ102H        (ThreadIDQ102H),
+  .ThreadIDQ103H        (ThreadIDQ103H),
+  .ThreadIDQ104H        (ThreadIDQ104H),
   // ready signals for "back-pressure" - use as the enable for the pipe stage sample
   .ReadyQ100H           (ReadyQ100H), //  output 
   .ReadyQ101H           (ReadyQ101H), //  output 
@@ -246,6 +256,7 @@ mini_core_smt_exe mini_core_smt_exe (
   .ThreadIDQ104H       (ThreadIDQ104H      ), //  input
   // Output Control Signals
   .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
+  .BranchCondMetQ103H  (BranchCondMetQ103H ), //  output 
   // Input Data path
   //Q102H
   .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 

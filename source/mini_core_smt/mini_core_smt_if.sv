@@ -28,6 +28,7 @@ import mini_core_smt_pkg::*;
 logic [31:0] PC_thread0, PC_thread1;
 logic [31:0] SelectedPC;
 logic [31:0] NextPcQnnnH;
+logic [31:0] AluOut; // added
 
 // Pick PC based on current thread
 assign SelectedPC = (CurrThread == 1'b0) ? (PC_thread0) : (PC_thread1) ;

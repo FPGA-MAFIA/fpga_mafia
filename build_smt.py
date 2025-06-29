@@ -627,10 +627,21 @@ def main():
     print_message('=================================================================================')
     print_message('---------------------------------------------------------------------------------')
     print_message('=================================================================================')
-    if(run_status == "FAILED"):
-        return 1
+#    merged = []
+#    for test in tests:
+#       inst = os.path.join(TARGET, 'tests', test.name, 'gcc_files', 'inst_mem.sv')
+#       if os.path.exists(inst):
+#           with open(inst, 'r') as f:
+#               merged.append(f.read())
+#    if merged:
+#        out_path = os.path.join(TARGET, 'instz_mem.sv')
+#        with open(out_path, 'w') as f:
+#            f.write('\n'.join(merged))
+#        print_message(f"[INFO] Wrote merged inst_mem to {out_path}")
+    if run_status == "FAILED":
+         return 1
     else:
-        return 0
+         return 0
 
 if __name__ == "__main__" :
     start_time = time.time()

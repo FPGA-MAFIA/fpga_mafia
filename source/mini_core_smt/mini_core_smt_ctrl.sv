@@ -11,7 +11,7 @@
 
 `include "macros.vh"
 
-module mini_core_ctrl
+module mini_core_smt_ctrl
 import mini_core_pkg::*;
 (
     input   logic        Clock,
@@ -21,7 +21,15 @@ import mini_core_pkg::*;
     input   logic [31:0] PcQ101H,
     // input feedback from data path
     input   logic        BranchCondMetQ102H,
+    input   logic        BranchCondMetQ103H,
+
     input   logic        DMemReady,
+    // input logic 
+    input   logic        ThreadIDQ100H,
+    input   logic        ThreadIDQ101H,
+    input   logic        ThreadIDQ102H,
+    input   logic        ThreadIDQ103H,
+    input   logic        ThreadIDQ104H,
     // ready signals for "back-pressure" - use as the enable for the pipe stage sample
     output  logic        ReadyQ100H,
     output  logic        ReadyQ101H,
@@ -62,7 +70,7 @@ t_immediate         SelImmTypeQ101H;
  logic        LoadHzrdDetectQ101H;
  logic [31:0] InstructionQ101H;
  logic        flushQ102H;
- logic        flushQ103H;
+ //logic        flushQ103H;
  t_opcode     OpcodeQ101H;
  logic [2:0]  Funct3Q101H;
  logic [6:0]  Funct7Q101H;
@@ -71,7 +79,7 @@ logic PreValidInstQ102H, ValidInstQ102H;
 logic PreValidInstQ103H, ValidInstQ103H;
 logic PreValidInstQ104H, ValidInstQ104H;
 
-t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H;
+t_mini_ctrl CtrlQ101H, CtrlQ102H, CtrlQ103H, CtrlQ104H , Ctrl102;
 logic CoreFreeze;
 assign CoreFreeze = !DMemReady;
 // Load and Ctrl hazard detection
@@ -83,22 +91,30 @@ assign PreRegSrc1Q101H   = PreInstructionQ101H[19:15];
 assign PreRegSrc2Q101H   = PreInstructionQ101H[24:20];
 assign PreOpcodeQ101H    = t_opcode'(PreInstructionQ101H[6:0]);
 assign  LoadHazardValidRegSrc2Q101H = PreOpcodeQ101H == R_OP || PreOpcodeQ101H == STORE || PreOpcodeQ101H == BRANCH;
-assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD);
-assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H);
+assign  RegDstQ102MatchRegSrc1Q101H = (PreRegSrc1Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (ThreadIDQ101H == ThreadIDQ102H);    //Need to check ThreadID
+assign  RegDstQ102MatchRegSrc2Q101H = (PreRegSrc2Q101H == CtrlQ102H.RegDst) && (ValidInstQ102H) && (CtrlQ102H.Opcode == LOAD) && (LoadHazardValidRegSrc2Q101H) && (ThreadIDQ101H == ThreadIDQ102H);
 assign LoadHzrdDetectQ101H          = (Rst)                                                        ? 1'b0 : 
                                       (RegDstQ102MatchRegSrc1Q101H || RegDstQ102MatchRegSrc2Q101H) ? 1'b1 :
                                                                                                      1'b0 ;
 //incase of a jump/branch we select the ALU out in pipe stage 102, which means we need to flush the pipe for 2 cycles:
 logic IndirectBranchQ102H;
-assign IndirectBranchQ102H = (CtrlQ102H.SelNextPcAluOutB && BranchCondMetQ102H) || (CtrlQ102H.SelNextPcAluOutJ);
+//CHANGED HERE AND ADDED Ctrl102
+logic BranchCondMet102;
+assign Ctrl102 = (ThreadIDQ101H == ThreadIDQ102H) ? CtrlQ102H :
+                 CtrlQ103H;
+
+assign BranchCondMet102 = (ThreadIDQ101H == ThreadIDQ102H) ? BranchCondMetQ102H :
+                 BranchCondMetQ103H;
+
+assign IndirectBranchQ102H = (Ctrl102.SelNextPcAluOutB && BranchCondMet102) || (Ctrl102.SelNextPcAluOutJ);
 assign flushQ102H = IndirectBranchQ102H;
-`MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
+//`MAFIA_EN_DFF(flushQ103H , flushQ102H   , Clock , ReadyQ103H)
 assign InstructionQ101H = flushQ102H          ? NOP :
-                          flushQ103H          ? NOP :
+//                          flushQ103H          ? NOP :
                           LoadHzrdDetectQ101H ? NOP : 
                                                 PreInstructionQ101H;
 assign PreValidInstQ101H = flushQ102H          ? 1'b0 : 
-                           flushQ103H          ? 1'b0 : 
+//                           flushQ103H          ? 1'b0 : 
                            LoadHzrdDetectQ101H ? 1'b0 : 
                                                  1'b1 ;
 

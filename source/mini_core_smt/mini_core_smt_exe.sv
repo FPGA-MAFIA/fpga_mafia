@@ -29,6 +29,7 @@ import mini_core_smt_pkg::*;
     // Output Control Signals
     //===================
     output logic       BranchCondMetQ102H ,
+    output logic       BranchCondMetQ103H ,
     //===================
     // Input Data path
     //===================
@@ -125,5 +126,8 @@ end
 `MAFIA_EN_DFF(DMemWrDataQ103H     , RegRdData2Q102H     , Clock, ReadyQ103H)
 `MAFIA_EN_DFF(AluOutQ103H         , AluOutQ102H         , Clock, ReadyQ103H)
 `MAFIA_EN_DFF(PcPlus4Q103H        , (PcQ102H+32'd4)     , Clock, ReadyQ103H)
+`MAFIA_EN_DFF(BranchCondMetQ103H  , BranchCondMetQ102H  , Clock, ReadyQ103H)
+
+
 
 endmodule
