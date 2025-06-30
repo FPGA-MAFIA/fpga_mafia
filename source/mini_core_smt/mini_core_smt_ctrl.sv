@@ -38,7 +38,8 @@ import mini_core_pkg::*;
     output  logic        ReadyQ104H,
     // output ctrl signals
     output var t_ctrl_if    CtrlIf,
-    output var t_ctrl_rf    CtrlRf,
+    output var t_ctrl_rf    CtrlRf_t0,
+    output var t_ctrl_rf    CtrlRf_t1,
     output var t_ctrl_exe   CtrlExe,
     output var t_ctrl_mem   CtrlMem,
     output var t_ctrl_wb    CtrlWb,
@@ -221,10 +222,18 @@ assign ValidInstQ104H = ReadyQ104H && PreValidInstQ104H;
 assign CtrlIf.SelNextPcAluOutQ102H =  IndirectBranchQ102H;
 
 //Register File Control Signals
-assign CtrlRf.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
-assign CtrlRf.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
-assign CtrlRf.RegDstQ104H   = CtrlQ104H.RegDst;
-assign CtrlRf.RegWrEnQ104H  = ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
+//Register file thread 0 
+assign CtrlRf_t0.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
+assign CtrlRf_t0.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
+assign CtrlRf_t0.RegDstQ104H   = ( ThreadIDQ104H == 1'b0 ) ? CtrlQ104H.RegDst : 5'd0 ;
+assign CtrlRf_t0.RegWrEnQ104H  = ( ThreadIDQ104H == 1'b0 ) && ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
+//Register file thread 1 
+assign CtrlRf_t1.RegSrc1Q101H  = CtrlQ101H.RegSrc1;
+assign CtrlRf_t1.RegSrc2Q101H  = CtrlQ101H.RegSrc2;
+assign CtrlRf_t1.RegDstQ104H   = ( ThreadIDQ104H == 1'b1 ) ? CtrlQ104H.RegDst : 5'd0 ;
+assign CtrlRf_t1.RegWrEnQ104H  = ( ThreadIDQ104H == 1'b1 ) && ValidInstQ104H ? CtrlQ104H.RegWrEn : 1'b0;
+
+
 
 //Execute Control Signals
 assign CtrlExe.RegSrc1Q102H  = CtrlQ102H.RegSrc1;

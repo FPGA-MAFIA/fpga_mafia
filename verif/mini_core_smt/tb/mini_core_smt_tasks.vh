@@ -45,8 +45,8 @@ assign PcQ104H = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlQ104H.Pc
 logic RegWrEnQ104H;
 logic [4:0]  RegDstQ104H;
 logic [31:0] RegWrDataQ104H;
-assign RegWrEnQ104H   = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlRf.RegWrEnQ104H;
-assign RegDstQ104H    = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlRf.RegDstQ104H;
+assign RegWrEnQ104H   = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlRf_t0.RegWrEnQ104H;
+assign RegDstQ104H    = mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.CtrlRf_t0.RegDstQ104H;
 assign RegWrDataQ104H = mini_core_smt_top.mini_core_smt.RegWrDataQ104H;
 task get_rf_write();
 $display("get_rf_write start");

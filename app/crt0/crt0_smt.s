@@ -75,61 +75,10 @@ reset_handler:
   /* Stack initialization */
   la   x2, _stack_start
 
-  /* Zero initialize .sbss section */
-zero_sbss:
-  la t0, __sbss_start   /* t0 = start of .sbss */
-  la t1, __sbss_end     /* t1 = end of .sbss */
-zero_sbss_loop:
-  bge t0, t1, zero_bss  /* If t0 >= t1, proceed to zeroing .bss */
-  sw x0, 0(t0)          /* Store zero in .sbss */
-  addi t0, t0, 4        /* Increment t0 */
-  j zero_sbss_loop      /* Repeat for next word */
-
-  /* Zero initialize .bss section */
-zero_bss:
-  la t0, __bss_start    /* t0 = start of .bss */
-  la t1, __bss_end      /* t1 = end of .bss */
-zero_bss_loop:
-  bge t0, t1, jump_main /* If t0 >= t1, proceed to main */
-  sw x0, 0(t0)          /* Store zero in .bss */
-  addi t0, t0, 4        /* Increment t0 */
-  j zero_bss_loop       /* Repeat for next word */
-
-jump_main:
+  /* jump_main */
   jal x1, main          /* Jump to main */
+  nop
   nop
   ebreak                /* End */
   .section .text
  
-##################################################
-# Interrupt handler for the counter in location 
-##################################################
-handle_interrupt:
-  .org 0x100
-    # Save registers on the stack
-    addi sp, sp, -32     # Allocate stack space for 8 registers
-    sw ra, 28(sp)        # Save return address
-    sw a0, 24(sp)        # Save a0-a3
-    sw a1, 20(sp)
-    sw a2, 16(sp)
-    sw a3, 12(sp)
-    sw t0, 8(sp)         # Save t0-t1
-    sw t1, 4(sp)
-
-handle_exception:
-    # increment the counter of CSR 0x9
-    csrr t0, 0x9
-    addi t0, t0, 1
-    csrw 0x9, t0
-    
-restore_and_return:
-    # Restore registers from the stack
-    lw ra, 28(sp)
-    lw a0, 24(sp)
-    lw a1, 20(sp)
-    lw a2, 16(sp)
-    lw a3, 12(sp)
-    lw t0, 8(sp)
-    lw t1, 4(sp)
-    addi sp, sp, 32      # Deallocate stack space
-    mret                 # Return from interrupt

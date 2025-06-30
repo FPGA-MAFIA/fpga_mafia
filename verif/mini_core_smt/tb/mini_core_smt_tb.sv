@@ -85,10 +85,10 @@ initial begin: test_seq
     force mini_core_smt_top.mini_smt_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 
-    file = $fopen({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
+    file = $fopen({"../../../target/mini_core_smt/dataz_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
-        $readmemh({"../../../target/mini_core_smt/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
+        $readmemh({"../../../target/mini_core_smt/dataz_mem.sv"} , DMem);
         force mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10

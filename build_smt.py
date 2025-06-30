@@ -183,7 +183,8 @@ class Test:
                        d_mem_base = Test.D_MEM_OFFSET  #fallback
 
                     i_mem_offset = f'-Wl,--defsym=I_MEM_OFFSET={i_mem_base} -Wl,--defsym=I_MEM_LENGTH=0x0200 '
-                    d_mem_offset = f'-Wl,--defsym=D_MEM_OFFSET={d_mem_base} -Wl,--defsym=D_MEM_LENGTH=0x7800 '
+                    d_mem_offset = f'-Wl,--defsym=D_MEM_OFFSET={d_mem_base} -Wl,--defsym=D_MEM_LENGTH=0x07800 '
+                    # d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
                     crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     #crt0_file = '../../../../../app/crt0/ctr0_default.s '
@@ -221,7 +222,8 @@ class Test:
                                 memories = open('inst_mem.sv', 'r').read()
                                 #The string that we want to search for to check if the data memory is exist
                                 # example: @00010000
-                                dmem_string = '@{:08x}'.format(int(Test.D_MEM_OFFSET))
+                                # dmem_string = '@{:08x}'.format(int(Test.D_MEM_OFFSET))
+                                dmem_string = '@{:08x}'.format(int(d_mem_base,16))
                                 #print_message(dmem_string)
                                 if dmem_string in memories:
                                     print_message('[INFO] Data memory exist')

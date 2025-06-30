@@ -108,7 +108,7 @@ initial begin: trk_reg_write_gen
 end
 
 always_ff @(posedge Clk ) begin
-        $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %2d | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+        $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %2d | %2d | %2d | %2d | %4h | %4h | %2d | %2d | %4h | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
                            PcQ100H,
@@ -121,9 +121,18 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread0,
                            //mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H_t1,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread1,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ThreadIDQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread0.Ctrl.RegDstQ104H,
+                           mini_core_smt_top.mini_core_smt.rf_thread0.Ctrl.RegWrEnQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread0.writeEnThread,
                            mini_core_smt_top.mini_core_smt.rf_thread1.writeEnThread,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.NextPcQnnnH,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_exe.AluOutQ102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.IndirectBranchQ102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.Ctrl102.SelNextPcAluOutJ,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_exe.AluIn1Q102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_exe.AluIn2Q102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.Ctrl.SelNextPcAluOutQ102H,
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[0],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[1],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[2],
@@ -157,7 +166,7 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[30],
                            mini_core_smt_top.mini_core_smt.rf_thread0.Register[31]
                            );
-                                   $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %2d | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
+                                   $fwrite(trk_reg_write,"%6d | %4h | %4h | %2d | %2d | %2d | %2d | %2d | %8h | %8h | %2d | %2d | %2d | %2d | %2d | %4h | %4h | %2d | %2d | %4h | %4h | %2d | %8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h \n"
         ,$time,            
                            PcQ104H,
                            PcQ100H,
@@ -170,9 +179,18 @@ always_ff @(posedge Clk ) begin
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread0,
                            //mini_core_smt_top.mini_core_smt.mini_core_smt_if.ReadyQ100H_t1,
                            mini_core_smt_top.mini_core_smt.mini_core_smt_if.PC_thread1,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ThreadIDQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Ctrl.RegDstQ104H,
+                           mini_core_smt_top.mini_core_smt.rf_thread1.Ctrl.RegWrEnQ104H,
                            mini_core_smt_top.mini_core_smt.rf_thread0.writeEnThread,
                            mini_core_smt_top.mini_core_smt.rf_thread1.writeEnThread,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.NextPcQnnnH,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.AluOutQ103H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.IndirectBranchQ102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.Ctrl102.SelNextPcAluOutJ,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_exe.AluIn1Q102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_exe.AluIn2Q102H,
+                           mini_core_smt_top.mini_core_smt.mini_core_smt_if.Ctrl.SelNextPcAluOutQ102H,
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[0],
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[1],
                            mini_core_smt_top.mini_core_smt.rf_thread1.Register[2],

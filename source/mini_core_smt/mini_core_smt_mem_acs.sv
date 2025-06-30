@@ -31,11 +31,11 @@ import mini_core_smt_pkg::*;
 
 // Address offset based on thread
 logic [31:0] AlignedAddr;
-assign AlignedAddr = (ThreadIDQ103H == 1'b0) ? AluOutQ103H : (AluOutQ103H+ 32'h0200);
+assign AlignedAddr = (ThreadIDQ103H == 1'b0) ? AluOutQ103H : (AluOutQ103H+ 32'h07800);
 //
 // Outputs to memory
 assign Core2DmemReqQ103H.WrData  = DMemWrDataQ103H;
-assign Core2DmemReqQ103H.Address = AluOutQ103H;
+assign Core2DmemReqQ103H.Address = ( Ctrl.DMemWrEnQ103H || Ctrl.DMemRdEnQ103H ) ?  AlignedAddr : AluOutQ103H ;
 assign Core2DmemReqQ103H.WrEn    = Ctrl.DMemWrEnQ103H;
 assign Core2DmemReqQ103H.RdEn    = Ctrl.DMemRdEnQ103H;
 assign Core2DmemReqQ103H.ByteEn  = Ctrl.DMemByteEnQ103H;

@@ -52,7 +52,8 @@ logic         ReadyQ103H;
 logic         ReadyQ104H;
 t_mini_ctrl   Ctrl;
 t_ctrl_if     CtrlIf;
-t_ctrl_rf     CtrlRf;
+t_ctrl_rf     CtrlRf_t0;
+t_ctrl_rf     CtrlRf_t1;
 t_ctrl_exe    CtrlExe;
 t_ctrl_mem    CtrlMem;
 t_ctrl_wb     CtrlWb;
@@ -61,27 +62,21 @@ t_ctrl_wb     CtrlWb;
 logic CurrThread;
 // async reset, enable on ReadyQ100H, reset value = 0
  always_ff @(posedge Clock or posedge Rst) begin
-   // if (Rst) begin
-   //   thread_id <= 1'b0;
-   //  pc_thread0 <= 32'h00000000;
-   //   pc_thread1 <= 32'h00008000;
-    //end else begin
-     // thread_id <= ~thread_id;
-     // if (thread_id == 1'b0)
-     //   pc_thread0 <= pc_next;
-     // else
-     //   pc_thread1 <= pc_next;
-   // end
-    if (Rst)
+    if (Rst) 
        CurrThread <= 1'b0;
-    else
-    //if (ReadyQ100H)
+    else if (ReadyQ100H) 
        CurrThread <= ~CurrThread;
 end
 
 //-----thread pipeline tags
 logic ThreadIDQ100H, ThreadIDQ101H, ThreadIDQ102H, ThreadIDQ103H, ThreadIDQ104H;
-assign ThreadIDQ100H = CurrThread;
+//assign ThreadIDQ100H = CurrThread;
+always_ff @(posedge Clock or posedge Rst) begin
+  if (Rst)
+    ThreadIDQ100H <= 1'b0;
+  else if (ReadyQ100H)
+    ThreadIDQ100H <= CurrThread;
+end
 
 `MAFIA_EN_RST_DFF(ThreadIDQ101H, ThreadIDQ100H, Clock, ReadyQ101H, Rst)
 `MAFIA_EN_RST_DFF(ThreadIDQ102H, ThreadIDQ101H, Clock, ReadyQ102H, Rst)
@@ -121,8 +116,10 @@ mini_core_smt_if mini_core_smt_if (
   .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
   .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
   .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
-  .AluOutQ102H  (AluOutQ102H ), // input  logic [31:0] AluOutQ102H,
+  .AluOutQ103H  (AluOutQ103H ), // input  logic [31:0] AluOutQ102H,
   .CurrThread   (CurrThread),
+  .ThreadIDQ100H (ThreadIDQ100H),
+  .ThreadIDQ102H (ThreadIDQ102H),
   .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
   .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
 );
@@ -170,7 +167,8 @@ mini_core_smt_ctrl mini_core_smt_ctrl (
   .ReadyQ104H           (ReadyQ104H), //  output 
   // output ctrl signals
   .CtrlIf               (CtrlIf             ), //output
-  .CtrlRf               (CtrlRf             ), //output
+  .CtrlRf_t0            (CtrlRf_t0          ), //output
+  .CtrlRf_t1            (CtrlRf_t1          ), //output
   .CtrlExe              (CtrlExe            ), //output
   .CtrlMem              (CtrlMem            ), //output
   .CtrlWb               (CtrlWb             ), //output
@@ -189,7 +187,7 @@ mini_core_smt_rf
   .regFileID        (1'b0),            // input
   .readEnThread     (ThreadIDQ101H),            // input
   .writeEnThread    (ThreadIDQ104H),            // input
-  .Ctrl             (CtrlRf),         // input
+  .Ctrl             (CtrlRf_t0),         // input
   .ReadyQ102H       (ReadyQ102H),     // input
   // input data path
   .ImmediateQ101H   (ImmediateQ101H), // input
@@ -209,7 +207,7 @@ mini_core_smt_rf
   .regFileID        (1'b1),            // input
   .readEnThread     (ThreadIDQ101H),            // input
   .writeEnThread    (ThreadIDQ104H),            // input
-  .Ctrl             (CtrlRf),         // input
+  .Ctrl             (CtrlRf_t1),         // input
   .ReadyQ102H       (ReadyQ102H),     // input
   // input data path
   .ImmediateQ101H   (ImmediateQ101H), // input

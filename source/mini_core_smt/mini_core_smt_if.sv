@@ -19,8 +19,10 @@ import mini_core_smt_pkg::*;
     input  var t_ctrl_if    Ctrl,
     input  logic        ReadyQ100H,
     input  logic        ReadyQ101H,
-    input  logic [31:0] AluOutQ102H,
+    input  logic [31:0] AluOutQ103H,
     input  logic        CurrThread,
+    input  logic        ThreadIDQ100H,
+    input  logic        ThreadIDQ102H,
     output logic [31:0] PcQ100H,
     output logic [31:0] PcQ101H
 );
@@ -34,10 +36,10 @@ logic [31:0] AluOut; // added
 assign SelectedPC = (CurrThread == 1'b0) ? (PC_thread0) : (PC_thread1) ;
 
 // Compute PC+4 or branch target
-assign NextPcQnnnH = Ctrl.SelNextPcAluOutQ102H ? AluOutQ102H : (SelectedPC + 3'h4) ;
+assign NextPcQnnnH = ( Ctrl.SelNextPcAluOutQ102H ) ? AluOutQ103H : (SelectedPC + 3'h4) ;
 
 // Feed to pipeline (only if ReadyQ100H)
-`MAFIA_EN_RST_DFF(PcQ100H, SelectedPC, Clock, ReadyQ100H, Rst)
+`MAFIA_EN_RST_DFF(PcQ100H, NextPcQnnnH, Clock, ReadyQ100H, Rst)
 
 // Register PCQ100H to Q101H
 `MAFIA_EN_DFF(PcQ101H, PcQ100H, Clock, ReadyQ101H)

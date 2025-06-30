@@ -88,6 +88,7 @@ assign RegRdData2Q102H = Hazard1Data2Q102H ? AluOutQ103H       : // Rd 102 After
 assign AluIn1Q102H = Ctrl.SelAluPcQ102H  ? PcQ102H          : RegRdData1Q102H;
 assign AluIn2Q102H = Ctrl.SelAluImmQ102H ? ImmediateQ102H   : RegRdData2Q102H;
 
+
 always_comb begin : alu_logic
   ShamtQ102H      = AluIn2Q102H[4:0];
   unique casez (Ctrl.AluOpQ102H) 
