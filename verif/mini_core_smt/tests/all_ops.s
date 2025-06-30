@@ -19,6 +19,7 @@ main:
     add   x9,  x1, x2      # x9  = 10 + 20 = 30
     sub   x10, x3, x1      # x10 = 30 - 10 = 20
     addi  x11, x2, 5       # x11 = 20 + 5  = 25
+    sub   x5,  x8, x11     # read after write x5 = 80 - 25 = 55
 
     # -------------------------------
     # Memory operations
@@ -26,11 +27,12 @@ main:
     # Store word and Load word
     sw    x11, 0(x12)       # Store x11 at 0(x12)
     lw    x13, 0(x12)       # Load back into x13 → should be 25
-
+    add   x5, x13, x13       # x5 = x13 + x13 → should be 50, forwarding
     # -------------------------------
     # Branches (make them predictable)
     # -------------------------------
     beq   x1, x1, label_eq      # Taken
+    add   x5 , x5 , x1          # x5 = 55 + 10 = 65 should be flushed
     nop
 label_eq:
     addi  x10 , x10 , 0x4       # x10 = 20 + 4 = 24

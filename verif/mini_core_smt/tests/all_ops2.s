@@ -17,6 +17,7 @@ main:
     # Arithmetic
     # -------------------------------
     add   x9,  x1, x2      # x9  = 1 + 2 = 3
+    sll   x8,  x2, x9      #read after write x8 = 2 << 3
     sub   x10, x3, x1      # x10 = 3 - 1 = 2
     addi  x11, x2, 5       # x11 = 2 + 5  = 7
 
@@ -26,11 +27,13 @@ main:
     # Store word and Load word
     sw    x10, 0(x12)       # Store x10 at 0(x12)
     lw    x13, 0(x12)       # Load back into x13 → should be 2
+    add   x5, x13, x13       # x5 = x13 + x13 → should be 4, forwarding
 
     # -------------------------------
     # Branches (make them predictable)
     # -------------------------------
     beq   x1, x1, label_eq      # Taken
+    add   x5 , x5 , x1          # x5 = 5 + 1 = 6 should be flushed
     nop
 label_eq:
     bne   x1, x2, label_ne      # Taken
