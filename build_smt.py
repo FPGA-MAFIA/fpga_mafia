@@ -640,6 +640,42 @@ def main():
 #        with open(out_path, 'w') as f:
 #            f.write('\n'.join(merged))
 #        print_message(f"[INFO] Wrote merged inst_mem to {out_path}")
+# Merge inst_mem.sv files into instz_mem.sv (once)
+    instz_mem_path = os.path.join(TARGET, 'instz_mem.sv')
+    if not os.path.exists(instz_mem_path):
+        merged_inst = []
+        for test in tests:
+            inst_path = os.path.join(TARGET, 'tests', test.name, 'gcc_files', 'inst_mem.sv')
+            if os.path.exists(inst_path):
+                with open(inst_path, 'r') as f:
+                    merged_inst.append(f.read())
+        if merged_inst:
+            with open(instz_mem_path, 'w') as f:
+                f.write('\n'.join(merged_inst))
+            print_message(f"[INFO] Merged inst_mem files into: {instz_mem_path}")
+        else:
+            print_message(f"[WARN] No inst_mem.sv files found to merge")
+    else:
+        print_message(f"[INFO] Skipped merging inst_mem: {instz_mem_path} already exists")
+
+    # Merge data_mem.sv files into dataz_mem.sv (once)
+    dataz_mem_path = os.path.join(TARGET, 'dataz_mem.sv')
+    if not os.path.exists(dataz_mem_path):
+        merged_data = []
+        for test in tests:
+            data_path = os.path.join(TARGET, 'tests', test.name, 'gcc_files', 'data_mem.sv')
+            if os.path.exists(data_path):
+                with open(data_path, 'r') as f:
+                    merged_data.append(f.read())
+        if merged_data:
+            with open(dataz_mem_path, 'w') as f:
+                f.write('\n'.join(merged_data))
+            print_message(f"[INFO] Merged data_mem files into: {dataz_mem_path}")
+        else:
+            print_message(f"[WARN] No data_mem.sv files found to merge")
+    else:
+        print_message(f"[INFO] Skipped merging data_mem: {dataz_mem_path} already exists")
+
     if run_status == "FAILED":
          return 1
     else:
