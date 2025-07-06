@@ -245,10 +245,10 @@ class Test:
                 exit(1)
             else:
                 #run the script to override the parameters using the csv file
-                cmd_param_script = 'python ./scripts/ovrd_params.py -dut big_core -ovrd_file '+csv_param_file
+                cmd_param_script = [sys.executable, './scripts/ovrd_params.py', '-dut', 'big_core', '-ovrd_file', csv_param_file]
                 if args.verbose:
-                    cmd_param_script += ' -v'
-                results = run_cmd_with_capture(cmd_param_script) 
+                    cmd_param_script.append('-v')
+                results = subprocess.run(cmd_param_script, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                 print_message(results.stdout)
 
 
@@ -260,7 +260,7 @@ class Test:
         chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
-                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+FILE_LIST
+                comp_sim_cmd = 'vlog -lint -f ../../../'+FILE_LIST
                 results = run_cmd_with_capture(comp_sim_cmd) 
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -285,7 +285,7 @@ class Test:
         try:
             if not os.path.exists('../tests/'+self.name):
                 mkdir('../tests/'+self.name)
-            sim_cmd = 'vsim.exe work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            sim_cmd = 'vsim work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -307,7 +307,7 @@ class Test:
     def _gui(self):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
+            gui_cmd = 'vsim -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -425,9 +425,9 @@ def run_cmd_with_capture(cmd):
     if args.verbose:  # Check if the verbose flag is set
         print_message(f'[COMMAND] '+cmd)
     # default value for results so return value is not None
-    results = subprocess.run("echo ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    results = subprocess.CompletedProcess(args=[], returncode=0, stdout='', stderr='')
     if(args.cmd == False):
-        results = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        results = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
     return results
 #####################################################################################################
 #                                           main
