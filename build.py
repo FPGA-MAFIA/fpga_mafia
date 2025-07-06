@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import time
 import os
 import shutil
@@ -160,7 +160,7 @@ class Test:
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd = 'riscv-none-embed-gcc.exe ' + Test.gcc_optimize + ' -S -ffreestanding -march=' + Test.rv32_gcc + ' ' + search_path + test_resources_path + ' ' + '../../../../../' + self.path + ' -o ' + cs_path
+                    first_cmd = 'riscv64-unknown-elf-gcc ' + Test.gcc_optimize + ' -S -ffreestanding -march=' + Test.rv32_gcc + ' -mabi=ilp32 ' + search_path + test_resources_path + ' ' + '../../../../../' + self.path + ' -o ' + cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -169,32 +169,32 @@ class Test:
                 self.fail_flag = True
             else:
                 try:
-                    rv32_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=' +Test.rv32_gcc+ ' '
+                    rv32_gcc    = 'riscv64-unknown-elf-gcc -O3 -march=' +Test.rv32_gcc+ ' -mabi=ilp32 '
                     i_mem_offset = '-Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+' -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+' '
                     d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
                     crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + test_resources_path +' ' +  mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
+                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + test_resources_path +' ' +  mem_offset + '-nostartfiles -nostdlib -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
                     self.fail_flag = True
                 else:
                     try:
-                        third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
+                        third_cmd  = 'riscv64-unknown-elf-objdump -gd {} > {}'.format(elf_path, txt_path)
                         run_cmd(third_cmd)
                         # clean version of the elf.txt file - using the -M numeric -M no-aliases flags so we get x0,x1,x2 instead of zero, ra, sp.
                         # also using the ISA instruction instead of the pseudo instruction (instead of nop we get addi x0, x0, 0)
-                        third_cmd_v2  = 'riscv-none-embed-objdump.exe -M numeric -M no-aliases -gd {} > {}'.format(elf_path, txt_path_v2)
+                        third_cmd_v2  = 'riscv64-unknown-elf-objdump -M numeric -M no-aliases -gd {} > {}'.format(elf_path, txt_path_v2)
                         run_cmd(third_cmd_v2)
                     except:
                         print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
                         self.fail_flag = True
                     else:
                         try:
-                            forth_cmd  = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
+                            forth_cmd  = 'riscv64-unknown-elf-objcopy --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
                             run_cmd(forth_cmd)
                         except:
                             print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')

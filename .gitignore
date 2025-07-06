@@ -36,4 +36,14 @@ verif/*/__pycache__
 lotr_orig/pyterminal/src/__pycache__
 lotr_orig/target/*
 
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+
 
