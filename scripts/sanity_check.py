@@ -28,8 +28,18 @@ parser.add_argument("-dut", "--dut", help="Optional: Specific DUT (Device Under 
 
 args = parser.parse_args()
 
+# Improved git command execution for better cross-platform compatibility
+def get_git_root():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], 
+                              capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to current directory if git is not available or not in a git repo
+        return os.getcwd()
+
 # Get the root directory of the git repository
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().strip()
+MODEL_ROOT = get_git_root()
 # Change the current working directory to the root of the git repository
 os.chdir(MODEL_ROOT)
 

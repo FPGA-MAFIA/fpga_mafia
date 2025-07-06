@@ -54,7 +54,17 @@ if args.top is None:
 if args.cmd:
     args.verbose = True
 
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+# Improved git command execution for better cross-platform compatibility
+def get_git_root():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], 
+                              capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to current directory if git is not available or not in a git repo
+        return os.getcwd()
+
+MODEL_ROOT = get_git_root()
 VERIF     = './verif/'+args.dut+'/'
 TB        = './verif/'+args.dut+'/tb/'
 FILE_LIST = '/verif/'+args.dut+'/file_list/'+args.dut+'_list.f'
@@ -201,8 +211,8 @@ class Test:
                             self.fail_flag = True
                         else:
                             if(args.cmd==False):
-                                # copy the inst_mem to a new file, call it og_inst_mem.sv
-                                os.system('cp inst_mem.sv og_inst_mem.sv')
+                                # Use shutil.copy instead of os.system for better cross-platform compatibility
+                                shutil.copy('inst_mem.sv', 'og_inst_mem.sv')
                                 # same the content of the inst_mem.sv to the variable "memories"
                                 memories = open('inst_mem.sv', 'r').read()
                                 #The string that we want to search for to check if the data memory is exist
@@ -356,7 +366,8 @@ class Test:
                 if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
                     d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
                 else:
-                    d_mem_mif_cmd = 'cp mif/defult_d_mem.mif mif/d_mem.mif'
+                    # Use shutil.copy instead of cp for better cross-platform compatibility
+                    d_mem_mif_cmd = 'shutil.copy(mif/defult_d_mem.mif, mif/d_mem.mif)'
                 results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
             except:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
@@ -414,7 +425,7 @@ def run_cmd(cmd):
 def mkdir(dir):
     if args.verbose:  # Check if the verbose flag is set
         print_message(f'[COMMAND] mkdir '+dir)
-    os.makedirs(dir)
+    os.makedirs(dir, exist_ok=True)  # Add exist_ok=True to prevent errors if directory already exists
 
 def chdir(dir):
     if args.verbose:  # Check if the verbose flag is set
@@ -527,7 +538,8 @@ def main():
                     print_message(f'[ERROR] There is no test {test_name} in your tests directory')
                     exit(1)
                 else:
-                    test_file = test_path.replace('\\', '/').split('/')[-1]
+                    # Use os.path.normpath for better cross-platform path handling
+                    test_file = os.path.basename(os.path.normpath(test_path))
                     tests.append(Test(test_file, parameter, args.dut))
 
 

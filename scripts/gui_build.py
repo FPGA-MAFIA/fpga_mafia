@@ -9,7 +9,17 @@ import queue
 import csv
 
 
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+# Get the root directory of the git repository
+def get_git_root():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], 
+                              capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to current directory if git is not available or not in a git repo
+        return os.getcwd()
+
+MODEL_ROOT = get_git_root()
 os.chdir(MODEL_ROOT)
 class CommandLineBuilder(tk.Tk):
 
@@ -52,7 +62,7 @@ class CommandLineBuilder(tk.Tk):
             "-regress"  : "Specify the regression that has pre-determine test lists to run.",
             "-top"      : "Specify the top module to elaboration & simulate the tb of the DUT.",
             "-app"      : "For CPU tests that needs to compile a C or Assembly code to create the elf to load to DUT memory.",
-            "-hw"       : "HW Compile the DUT system verilog using vlog.exe - according to the .f file list.",
+            "-hw"       : "HW Compile the DUT system verilog using vlog - according to the .f file list.",
             "-sim"      : "HW Elaborate the Compiled model + start running the TB (test-bench).",
             "-gui"      :"Execute this option with the '-sim' flag to open the ModelSim GUI.",
             "-full_run" : "SW & HW compile + simulation (-app -hw -sim)",
