@@ -12,7 +12,17 @@ import re
 import argparse
 import subprocess
 
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+# Get the root directory of the git repository
+def get_git_root():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], 
+                              capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to current directory if git is not available or not in a git repo
+        return os.getcwd()
+
+MODEL_ROOT = get_git_root()
 os.chdir(MODEL_ROOT)
 def parse_parameters(content):
     """

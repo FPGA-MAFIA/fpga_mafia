@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import time
 import os
 import shutil
@@ -20,8 +20,8 @@ python build.py -dut 'big_core' -tests 'alive' -hw                  -> compiling
 python build.py -dut 'big_core' -tests 'alive' -sim -gui            -> running simulation with gui for 'alive' test only 
 python build.py -dut 'big_core' -tests 'alive' -app -hw -sim -fpga  -> running alive test + FPGA compilation & synthesis
 python build.py -dut 'big_core' -tests 'alive' -app -cmd            -> get the command for compiling the sw for 'alive' test only 
-python build.py -dut 'router'  -tests simple -hw -sim -params '\-gV_NUM_FIFO=4' -> using parameter override in simulation
-python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '\-gV_REQUESTS=4' -> using parameter override in simulation
+python build.py -dut 'router'  -tests simple -hw -sim -params '-gV_NUM_FIFO=4' -> using parameter override in simulation
+python build.py -dut 'router'  -tests all_fifo_full_BW -hw -sim -params '-gV_REQUESTS=4' -> using parameter override in simulation
 python build.py -dut 'fabric -top fabric_mini_cors_tb -app -hw -sim -> Using the -top argument to specify the tb top module name for simulation
 '''
 parser = argparse.ArgumentParser(description='Build script for any project', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples)
@@ -54,7 +54,17 @@ if args.top is None:
 if args.cmd:
     args.verbose = True
 
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+# Improved git command execution for better cross-platform compatibility
+def get_git_root():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], 
+                              capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to current directory if git is not available or not in a git repo
+        return os.getcwd()
+
+MODEL_ROOT = get_git_root()
 VERIF     = './verif/'+args.dut+'/'
 TB        = './verif/'+args.dut+'/tb/'
 FILE_LIST = '/verif/'+args.dut+'/file_list/'+args.dut+'_list.f'
@@ -160,7 +170,7 @@ class Test:
             chdir(self.gcc_dir)
             try:
                 if not self.assembly:
-                    first_cmd = 'riscv-none-embed-gcc.exe ' + Test.gcc_optimize + ' -S -ffreestanding -march=' + Test.rv32_gcc + ' ' + search_path + test_resources_path + ' ' + '../../../../../' + self.path + ' -o ' + cs_path
+                    first_cmd = 'riscv64-unknown-elf-gcc ' + Test.gcc_optimize + ' -S -ffreestanding -march=' + Test.rv32_gcc + ' -mabi=ilp32 ' + search_path + test_resources_path + ' ' + '../../../../../' + self.path + ' -o ' + cs_path
                     run_cmd(first_cmd)
                 else:
                     pass
@@ -169,40 +179,40 @@ class Test:
                 self.fail_flag = True
             else:
                 try:
-                    rv32_gcc    = 'riscv-none-embed-gcc.exe -O3 -march=' +Test.rv32_gcc+ ' '
+                    rv32_gcc    = 'riscv64-unknown-elf-gcc -O3 -march=' +Test.rv32_gcc+ ' -mabi=ilp32 '
                     i_mem_offset = '-Wl,--defsym=I_MEM_OFFSET='+Test.I_MEM_OFFSET+' -Wl,--defsym=I_MEM_LENGTH='+Test.I_MEM_LENGTH+' '
                     d_mem_offset = '-Wl,--defsym=D_MEM_OFFSET='+Test.D_MEM_OFFSET+' -Wl,--defsym=D_MEM_LENGTH='+Test.D_MEM_LENGTH+' '
                     mem_offset   = i_mem_offset+d_mem_offset
                     crt0_file = '../../../../../app/crt0/' + Test.crt0_file+' '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
                     mem_layout   = '-Wl,-Map='+self.name+'.map '
-                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + test_resources_path +' ' +  mem_offset + '-nostartfiles -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
+                    second_cmd = rv32_gcc+'-T ../../../../../app/link.common.ld ' + search_path + test_resources_path +' ' +  mem_offset + '-nostartfiles -nostdlib -D__riscv__ '+ mem_layout + crt0_file + cs_path+ ' -o ' + elf_path
                     run_cmd(second_cmd)
                 except:
                     print_message(f'[ERROR] failed to insert linker & crt0.S to the test - {self.name}')
                     self.fail_flag = True
                 else:
                     try:
-                        third_cmd  = 'riscv-none-embed-objdump.exe -gd {} > {}'.format(elf_path, txt_path)
+                        third_cmd  = 'riscv64-unknown-elf-objdump -gd {} > {}'.format(elf_path, txt_path)
                         run_cmd(third_cmd)
                         # clean version of the elf.txt file - using the -M numeric -M no-aliases flags so we get x0,x1,x2 instead of zero, ra, sp.
                         # also using the ISA instruction instead of the pseudo instruction (instead of nop we get addi x0, x0, 0)
-                        third_cmd_v2  = 'riscv-none-embed-objdump.exe -M numeric -M no-aliases -gd {} > {}'.format(elf_path, txt_path_v2)
+                        third_cmd_v2  = 'riscv64-unknown-elf-objdump -M numeric -M no-aliases -gd {} > {}'.format(elf_path, txt_path_v2)
                         run_cmd(third_cmd_v2)
                     except:
                         print_message(f'[ERROR] failed to create "elf.txt" to the test - {self.name}')
                         self.fail_flag = True
                     else:
                         try:
-                            forth_cmd  = 'riscv-none-embed-objcopy.exe --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
+                            forth_cmd  = 'riscv64-unknown-elf-objcopy --srec-len 1 --output-target=verilog '+elf_path+' inst_mem.sv' 
                             run_cmd(forth_cmd)
                         except:
                             print_message(f'[ERROR] failed to create "inst_mem.sv" to the test - {self.name}')
                             self.fail_flag = True
                         else:
                             if(args.cmd==False):
-                                # copy the inst_mem to a new file, call it og_inst_mem.sv
-                                os.system('cp inst_mem.sv og_inst_mem.sv')
+                                # Use shutil.copy instead of os.system for better cross-platform compatibility
+                                shutil.copy('inst_mem.sv', 'og_inst_mem.sv')
                                 # same the content of the inst_mem.sv to the variable "memories"
                                 memories = open('inst_mem.sv', 'r').read()
                                 #The string that we want to search for to check if the data memory is exist
@@ -245,10 +255,10 @@ class Test:
                 exit(1)
             else:
                 #run the script to override the parameters using the csv file
-                cmd_param_script = 'python ./scripts/ovrd_params.py -dut big_core -ovrd_file '+csv_param_file
+                cmd_param_script = [sys.executable, './scripts/ovrd_params.py', '-dut', 'big_core', '-ovrd_file', csv_param_file]
                 if args.verbose:
-                    cmd_param_script += ' -v'
-                results = run_cmd_with_capture(cmd_param_script) 
+                    cmd_param_script.append('-v')
+                results = subprocess.run(cmd_param_script, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                 print_message(results.stdout)
 
 
@@ -260,7 +270,7 @@ class Test:
         chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
-                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+FILE_LIST
+                comp_sim_cmd = 'vlog -lint -f ../../../'+FILE_LIST
                 results = run_cmd_with_capture(comp_sim_cmd) 
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
@@ -285,7 +295,7 @@ class Test:
         try:
             if not os.path.exists('../tests/'+self.name):
                 mkdir('../tests/'+self.name)
-            sim_cmd = 'vsim.exe work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            sim_cmd = 'vsim work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
@@ -307,7 +317,7 @@ class Test:
     def _gui(self):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
+            gui_cmd = 'vsim -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -356,7 +366,8 @@ class Test:
                 if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv'):
                     d_mem_mif_cmd = 'python scripts/mif_gen.py ../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv mif/d_mem.mif 10000'
                 else:
-                    d_mem_mif_cmd = 'cp mif/defult_d_mem.mif mif/d_mem.mif'
+                    # Use shutil.copy instead of cp for better cross-platform compatibility
+                    d_mem_mif_cmd = 'shutil.copy(mif/defult_d_mem.mif, mif/d_mem.mif)'
                 results = run_cmd_with_capture(d_mem_mif_cmd) if os.path.exists('../../'+TARGET+'tests/'+self.name+'/gcc_files/data_mem.sv') else True
             except:
                 print_message('[ERROR] Failed to generate d_mem.mif file for test '+self.name)
@@ -414,7 +425,7 @@ def run_cmd(cmd):
 def mkdir(dir):
     if args.verbose:  # Check if the verbose flag is set
         print_message(f'[COMMAND] mkdir '+dir)
-    os.makedirs(dir)
+    os.makedirs(dir, exist_ok=True)  # Add exist_ok=True to prevent errors if directory already exists
 
 def chdir(dir):
     if args.verbose:  # Check if the verbose flag is set
@@ -425,9 +436,9 @@ def run_cmd_with_capture(cmd):
     if args.verbose:  # Check if the verbose flag is set
         print_message(f'[COMMAND] '+cmd)
     # default value for results so return value is not None
-    results = subprocess.run("echo ", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    results = subprocess.CompletedProcess(args=[], returncode=0, stdout='', stderr='')
     if(args.cmd == False):
-        results = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        results = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
     return results
 #####################################################################################################
 #                                           main
@@ -527,7 +538,8 @@ def main():
                     print_message(f'[ERROR] There is no test {test_name} in your tests directory')
                     exit(1)
                 else:
-                    test_file = test_path.replace('\\', '/').split('/')[-1]
+                    # Use os.path.normpath for better cross-platform path handling
+                    test_file = os.path.basename(os.path.normpath(test_path))
                     tests.append(Test(test_file, parameter, args.dut))
 
 

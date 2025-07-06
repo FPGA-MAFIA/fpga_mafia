@@ -34,8 +34,17 @@ def print_message(msg):
     #print only if verbose is set
     if args.verbose:
         print(colored(msg, color, attrs=['bold']))
-# Make sure we are in the MODEL_ROOT directory
-MODEL_ROOT = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode().split('\n')[0]
+# Get the root directory of the git repository
+def get_git_root():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], 
+                              capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to current directory if git is not available or not in a git repo
+        return os.getcwd()
+
+MODEL_ROOT = get_git_root()
 def chdir(dir):
     if args.verbose:  # Check if the verbose flag is set
         print_message(f'[VAG_PARSER_COMMAND] cd '+dir)
