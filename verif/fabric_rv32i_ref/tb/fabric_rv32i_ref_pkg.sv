@@ -185,6 +185,35 @@ typedef struct packed {
     logic [31:0] Address;
     logic [3:0]  ByteEn;
     logic [2:0]  TileId;
+    // logic        IsCustom; //indicates if the request is for a custom memory
+    // logic        IsCSR;    //indicates if the request is for a CSR
+    // logic        IsDebug;  //indicates if the request is for a debug memory
+    // logic        IsCustomLFSR; //indicates if the request is for a custom LFSR memory
+    // logic        IsCustomSP;   //indicates if the request is for a custom SP memory
+    // logic        IsCustomMTime; //indicates if the request is for a custom MTime memory
+    // logic        IsCustomMTimeCmp; //indicates if the request is for a custom MTimeCmp memory
+    // logic        IsCustomDebug; //indicates if the request is for a custom debug memory
+    // logic        IsCustomDMem; //indicates if the request is for a custom data memory
+    // logic        IsCustomIMem; //indicates if the request is for a custom instruction memory
+    // logic        IsCustomCore; //indicates if the request is for a custom core memory   
+    // logic        IsCustomCore2Mem; //indicates if the request is for a custom core to memory communication
+    // logic        IsCustomCore2MemReq; //indicates if the request is for a custom core to memory request
+    // logic        IsCustomCore2MemResp; //indicates if the request is for a custom core to memory response
+    // logic        IsCustomCore2MemReqResp; //indicates if the request is for a custom core to memory request response
+    // logic        IsCustomCore2MemReqData; //indicates if the request is for a custom core to memory request data
+    // logic        IsCustomCore2MemReqAddr; //indicates if the request is for a custom core to memory request address
+    // logic        IsCustomCore2MemReqByteEn; //indicates if the request is for a custom core to memory request byte enable
+    // logic        IsCustomCore2MemReqTileId; //indicates if the request is for a custom core to memory request tile ID
+    // logic        IsCustomCore2MemReqIsCustom; //indicates if the request is for a custom core to memory request that is custom
+    // logic        IsCustomCore2MemReqIsCSR; //indicates if the request is for a custom core to memory request that is a CSR
+    // logic        IsCustomCore2MemReqIsDebug; //indicates if the request is for a custom core to memory request that is a debug memory
+    // logic        IsCustomCore2MemReqIsCustomLFSR; //indicates if the request is for a custom core to memory request that is a custom LFSR memory
+    // logic        IsCustomCore2MemReqIsCustomSP; //indicates if the request is for a custom core to memory request that is a custom SP memory
+    // logic        IsCustomCore2MemReqIsCustomMTime; //indicates if the request is for a custom core to memory request that is a custom MTime memory
+    // logic        IsCustomCore2MemReqIsCustomMTimeCmp; //indicates if the request is for a custom core to memory request that is a custom MTimeCmp memory
+    // logic        IsCustomCore2MemReqIsCustomDebug; //indicates if the request   is for a custom core to memory request that is a custom debug memory
+    // logic        IsCustomCore2MemReqIsCustomDMem; //indicates if the request is for a custom core to memory request that is a custom data memory
+    
 } t_core2mem_req;
 
 endpackage
