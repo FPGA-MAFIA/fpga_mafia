@@ -19,6 +19,7 @@
 // param packages
 ../../../source/mini_core/mini_core_pkg.sv
 ../../../source/mini_core_kbd/packages/mini_core_kbd_pkg.sv
+../../../source/big_core/packages/big_core_pkg.sv
 
 
 // Common
@@ -34,6 +35,23 @@
 ../../../source/mini_core/mini_core_mem_acs.sv
 ../../../source/mini_core/mini_core_wb.sv
 ../../../source/mini_core/mini_core.sv
-../../../source/mini_core/mini_core_top.sv
+//../../../source/mini_core/mini_core_top.sv
 ../../../source/mini_core_kbd/mini_core_kbd_mem_wrap.sv
 ../../../source/mini_core_kbd/mini_core_kbd_cr_mem.sv
+../../../source/mini_core_kbd/mini_core_kbd_top.sv
+../../../source/mini_core_kbd/mini_core_kbd_d_mem_wrap.sv
+../../../source/mini_core_kbd/mini_core_kbd_vga_ctrl.sv
+../../../source/mini_core_kbd/mini_core_kbd_vga_sync_gen.sv
+../../../source/big_core/vga_mem.sv
+../../../source/mini_core_kbd/mini_core_kbd.sv
+../../../source/mini_core_kbd/mini_core_kbd_if.sv
+../../../source/mini_core_kbd/mini_core_kbd_ctrl.sv
+../../../source/mini_core_kbd/mini_core_kbd_rf.sv
+../../../source/mini_core_kbd/mini_core_kbd_exe.sv
+../../../source/mini_core_kbd/mini_core_kbd_csr.sv
+../../../source/mini_core_kbd/mini_core_kbd_mem_acs1.sv
+../../../source/mini_core_kbd/mini_core_kbd_mem_acs2.sv
+../../../source/mini_core_kbd/mini_core_kbd_wb.sv
+
+
+

@@ -18,7 +18,7 @@
 `include "macros.vh"
 
 module mini_core_kbd_cr_mem 
-import mini_core_kbd_pkg::*;
+import big_core_pkg::*;
 (
     input  logic       Clk,
     input  logic       Rst,

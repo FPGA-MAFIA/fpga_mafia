@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Title            : core tb
-// Project          : simple_core
+// Project          : mini_core_kbd. 6 stage pipeline
 //-----------------------------------------------------------------------------
 // File             : core_tb.sv
 // Original Author  : Amichai Ben-David
@@ -18,11 +18,9 @@
 `include "macros.vh"
 
 
-module mini_core_kbd_tb;
-
-
-import mini_core_pkg::*;
-//FIXME - dont know why need to include the common_pkg.. its already included in the the mini_core_pkg
+module mini_core_kbd_tb  ;
+import mini_core_kbd_pkg::*;
+import rv32i_ref_pkg::*;
 `include "common_pkg.vh"
 logic        Clk;
 logic        Rst;
@@ -34,14 +32,37 @@ logic [3:0]  DMemByteEn ;
 logic        DMemWrEn   ;
 logic        DMemRdEn   ;
 logic [31:0] DMemRdRspData;
-logic  [7:0] IMem     [I_MEM_SIZE_MINI + I_MEM_OFFSET_MINI - 1 : I_MEM_OFFSET_MINI];
-logic  [7:0] DMem     [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] IMem     [I_MEM_SIZE + I_MEM_OFFSET - 1 : I_MEM_OFFSET];
+logic  [7:0] DMem     [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 
+logic ps2_clk;
+logic ps2_data;
+
+integer random;
+integer i;
 
 string test_name;
-`include "mini_core_kbd_tasks.vh"
-`include "mini_core_kbd_trk.sv"
+logic [31:0] PcQ101H;
+logic [31:0] PcQ102H;
+logic [31:0] PcQ103H, PcQ104H, PcQ105H;
+assign PcQ101H = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlQ101H.Pc;
+assign PcQ102H = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlQ102H.Pc;
+assign PcQ103H = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlQ103H.Pc;
+assign PcQ104H = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlQ104H.Pc;
+assign PcQ105H = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlQ105H.Pc;
 
+
+`include "mini_core_kbd_tasks.vh"
+`include "mini_core_kbd_mem_tasks.vh"
+`include "mini_core_kbd_pmon_tasks.vh"
+`include "mini_core_kbd_trk.vh"
+`include "mini_core_kbd_ref_trk.vh"
+`include "mini_core_kbd_ps2_tasks.vh"
+//`include "mini_core_kbd_hw_seq.vh"
+
+//VGA interface outputs
+t_vga_out   vga_out;
+logic       inDisplayArea;
 
 // ========================
 // clock gen
@@ -80,35 +101,54 @@ initial begin: test_seq
         $finish;
     end
     $readmemh({"../../../target/mini_core_kbd/tests/",test_name,"/gcc_files/inst_mem.sv"} , IMem);
-    force mini_core_top.mini_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    force mini_core_kbd_top.mini_core_kbd_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
     force rv32i_ref.imem                        = IMem; //backdoor to reference model memory
     //load the data to the DUT & reference model 
     file = $fopen({"../../../target/mini_core_kbd/tests/",test_name,"/gcc_files/data_mem.sv"}, "r");
     if (file) begin
         $fclose(file);
         $readmemh({"../../../target/mini_core_kbd/tests/",test_name,"/gcc_files/data_mem.sv"} , DMem);
-        force mini_core_top.mini_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        force mini_core_kbd_top.mini_core_kbd_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
         force rv32i_ref.dmem                        = DMem; //backdoor to reference model memory
         #10
-        release mini_core_top.mini_mem_wrap.d_mem.mem;
+        release mini_core_kbd_top.mini_core_kbd_mem_wrap.d_mem.mem;
         release rv32i_ref.dmem;
     end
     
     //=======================================
     // enable the checker data collection (monitor)
     //=======================================
+    //fork
+    //get_rf_write();
+    //get_ref_rf_write();
+    //begin wait(mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.ebreak_was_calledQ101H == 1'b1);
+    //    eot(.msg("ebreak was called"));
+    //end
+    //join
+
+    //=======================================
+    // enable the checker data collection (monitor)
+    //=======================================
     fork
     get_rf_write();
-    get_ref_rf_write();
-    begin wait(mini_core_top.mini_core.mini_core_ctrl.ebreak_was_calledQ101H == 1'b1);
-        eot(.msg("ebreak was called"));
+    get_ref_rf_write();   
+    get_mem_store();
+    get_ref_mem_store();
+    get_mem_load();
+    get_ref_mem_load();
+    begin wait(mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.ebreak_was_calledQ101H == 1'b1);
+    track_performance();     // monitoring CPI and IPC
+    print_vga_screen();
+    eot(.msg("ebreak was called"));
+    sl_eot(.s_msg("ebreak was called"), .l_msg("ebreak was called"));
     end
     join
 
+   
 end // test_seq
 
-parameter V_TIMEOUT = 1000000;
-parameter MINI_RF_NUM_MSB = 31;
+parameter V_TIMEOUT = 250000;
+parameter RF_NUM_MSB = 31; // NOTE!!!: auto inserted from script ovrd_params.py
 initial begin: detect_timeout
     //=======================================
     // timeout
@@ -120,7 +160,7 @@ initial begin: detect_timeout
 end
 
 
-t_tile_id    local_tile_id;
+t_tile_id local_tile_id;
 logic        InFabricValidQ503H  ; 
 logic        OutFabricValidQ505H ;
 t_tile_trans InFabricQ503H ; 
@@ -128,8 +168,8 @@ t_tile_trans [2:0] ShiftInFabric ;
 logic        [2:0] ShiftInFabricValid ; 
 t_tile_trans OutFabricQ505H ;
 
-logic  [7:0] TILE33_DMem      [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
-logic  [7:0] next_TILE33_DMem [D_MEM_SIZE_MINI + D_MEM_OFFSET_MINI - 1 : D_MEM_OFFSET_MINI];
+logic  [7:0] TILE33_DMem      [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
+logic  [7:0] next_TILE33_DMem [D_MEM_SIZE + D_MEM_OFFSET - 1 : D_MEM_OFFSET];
 `MAFIA_DFF(TILE33_DMem, next_TILE33_DMem, Clk)
 
 logic [31:0] next_test;
@@ -170,38 +210,55 @@ end
 `MAFIA_DFF(ShiftInFabricValid[2:1], ShiftInFabricValid[1:0], Clk)
 assign InFabricQ503H        = ShiftInFabric[2];
 assign InFabricValidQ503H   = ShiftInFabricValid[2];
-// DUT instance mini_core 
+// DUT instance mini_core_kbd 
 assign  local_tile_id = 8'h2_2;
-mini_core_top
-#( .RF_NUM_MSB(MINI_RF_NUM_MSB) )    
-mini_core_top (
+mini_core_kbd_top
+#( .RF_NUM_MSB(RF_NUM_MSB) )    
+mini_core_kbd_top (
 .Clock               (Clk),
 .Rst                 (Rst),
 .local_tile_id       (local_tile_id),
+.RstPc               (Rst), //input  logic        RstPc,
 //============================================
 //      fabric interface
 //============================================
  .InFabricValidQ503H    (InFabricValidQ503H),// input  logic        F2C_ReqValidQ503H     ,
  .InFabricQ503H         (InFabricQ503H),// input  t_opcode     F2C_ReqOpcodeQ503H    ,
- .mini_core_ready       (),  // output  logic  mini_core_ready       ,
+ .big_core_ready       (),  // output  logic  mini_core_kbd_ready       ,
  //
  .OutFabricQ505H        (OutFabricQ505H),  // output t_rdata      F2C_RspDataQ504H      ,
  .OutFabricValidQ505H   (OutFabricValidQ505H),  // output logic        F2C_RspValidQ504H
- .fab_ready             (5'b11111)   // input  t_fab_ready  fab_ready 
+ .fab_ready             (5'b11111),   // input  t_fab_ready  fab_ready 
+//============================================
+//      keyboard interface
+//============================================
+.kbd_clk     ( 1'b0  ) ,// input logic             kbd_clk, // Clock from keyboard
+.data_in_kc  ( 1'b0 ) ,// input logic             data_in_kc, // Data from keyboard
+//============================================
+//      vga interface
+//============================================
+.inDisplayArea(inDisplayArea),
+.vga_out(vga_out),         // VGA_OUTPUT 
+//============================================
+//      fpga interface
+//============================================             
+.fpga_in  ('0), //input  var t_fpga_in   fpga_in,  // CR_MEM
+.fpga_out (  )  //output t_fpga_out      fpga_out      // CR_MEM
 );      
 
 
 rv32i_ref
 # (
-    .I_MEM_LSB (I_MEM_OFFSET_MINI),
-    .I_MEM_MSB (I_MEM_MSB_MINI),
-    .D_MEM_LSB (D_MEM_OFFSET_MINI),
-    .D_MEM_MSB (D_MEM_MSB_MINI)
+    .I_MEM_LSB (I_MEM_OFFSET),
+    .I_MEM_MSB (I_MEM_MSB),
+    .D_MEM_LSB (D_MEM_OFFSET),
+    .D_MEM_MSB (D_MEM_MSB)
 )  rv32i_ref (
 .clk    (Clk),
 .rst    (Rst),
-.run    (1'b1) // FIXME - set the RUN only when the mini_core DUT is retiring the instruction.
+.run    (1'b1) // FIXME - set the RUN only when the mini_core_kbd DUT is retiring the instruction.
                // every time the run is set, the next instruction is executed
 );
-endmodule //mini_core_tb
 
+
+endmodule //mini_core_kbd_tb

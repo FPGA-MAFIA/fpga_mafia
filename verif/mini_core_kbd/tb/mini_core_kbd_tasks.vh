@@ -1,3 +1,10 @@
+
+task delay(input int cycles);
+  for(int i =0; i< cycles; i++) begin
+    @(posedge Clk);
+  end
+endtask
+
 // Core -> Cache request
 typedef struct packed {
     logic [4:0]   RegDst;   //reg destination
@@ -11,28 +18,20 @@ t_rf_write_history rf_cur_write;
 t_rf_write_history ref_rf_write_history[$];
 t_rf_write_history ref_rf_cur_write;
 
-
-logic [31:0] PcQ101H;             // To I_MEM
-logic [31:0] PcQ102H;             // To I_MEM
-logic [31:0] PcQ103H, PcQ104H;
-assign PcQ101H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ101H.Pc;
-assign PcQ102H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ102H.Pc;
-assign PcQ103H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ103H.Pc;
-assign PcQ104H = mini_core_top.mini_core.mini_core_ctrl.CtrlQ104H.Pc;
-logic RegWrEnQ104H;
-logic [4:0]  RegDstQ104H;
-logic [31:0] RegWrDataQ104H;
-assign RegWrEnQ104H   = mini_core_top.mini_core.mini_core_ctrl.CtrlRf.RegWrEnQ104H;
-assign RegDstQ104H    = mini_core_top.mini_core.mini_core_ctrl.CtrlRf.RegDstQ104H;
-assign RegWrDataQ104H = mini_core_top.mini_core.mini_core_rf.RegWrDataQ104H;
+logic RegWrEnQ105H;
+logic [4:0]  RegDstQ105H;
+logic [31:0] RegWrDataQ105H;
+assign RegWrEnQ105H   = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlRf.RegWrEnQ105H;
+assign RegDstQ105H    = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_ctrl.CtrlRf.RegDstQ105H;
+assign RegWrDataQ105H = mini_core_kbd_top.mini_core_kbd.mini_core_kbd_rf.RegWrDataQ105H;
 task get_rf_write();
 $display("get_rf_write start");
 fork forever begin 
     @(posedge Clk) begin
-        if (RegWrEnQ104H && (RegDstQ104H!=5'b0)) begin
-            rf_cur_write.RegDst    = RegDstQ104H;
-            rf_cur_write.Data      = RegWrDataQ104H;
-            rf_cur_write.Pc        = PcQ104H;
+        if (RegWrEnQ105H && (RegDstQ105H!=5'b0)) begin
+            rf_cur_write.RegDst    = RegDstQ105H;
+            rf_cur_write.Data      = RegWrDataQ105H;
+            rf_cur_write.Pc        = PcQ105H;
             rf_cur_write.cur_time  = $time;
             rf_write_history.push_back(rf_cur_write);
     // $display("rf_cur_write = %p", rf_cur_write);
@@ -103,6 +102,25 @@ endtask
 
 
 
+task print_vga_screen ;
+// VGA memory snapshot - simulate a screen
+    integer fd1;
+    string draw;
+    fd1 = $fopen({"../../../target/mini_core_kbd/tests/",test_name,"/screen.log"},"w");
+    if (fd1) $display("File was open successfully : %0d", fd1);
+    else $display("File was not open successfully : %0d", fd1);
+    for (int i = 0 ; i < SIZE_VGA_MEM; i = i+320) begin // Lines
+        for (int j = 0 ; j < 4; j = j+1) begin // Bytes
+            for (int k = 0 ; k < 320; k = k+4) begin // Words
+                for (int l = 0 ; l < 8; l = l+1) begin // Bits  
+                    draw = (mini_core_kbd_top.mini_core_kbd_mem_wrap.mini_core_kbd_vga_ctrl.vga_mem.VGAMem[k+j+i][l] === 1'b1) ? "x" : " ";
+                    $fwrite(fd1,"%s",draw);
+                end        
+            end 
+            $fwrite(fd1,"\n");
+        end
+    end
+endtask
 
 task eot (string msg);
     #10;
@@ -114,5 +132,7 @@ task eot (string msg);
     $display("Starting data integrity test");
     $display("===============================");
     di_register_write();
-    $finish;
+    `ifndef USE_RF_AND_MEM_CHK
+        $finish;
+    `endif
 endtask
