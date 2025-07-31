@@ -9,6 +9,11 @@
 ../../../verif/big_core/tb/big_core_no_ref_tb.sv
 ../../../verif/big_core/tb/big_core_tb.sv
 
+../../../verif/big_core/tb/state_machine_tb.sv
+../../../verif/big_core/tb/counter_tb.sv
+
+
+
 
 
 

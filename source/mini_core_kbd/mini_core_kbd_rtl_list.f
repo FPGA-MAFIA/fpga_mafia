@@ -1,0 +1,57 @@
+//-----------------------------------------------------------------------------
+// Title            : simple core  design
+// Project          : simple_core
+//-----------------------------------------------------------------------------
+// File             : core
+// Original Author  : Amichai Ben-David
+// Code Owner       : 
+// Created          : 9/2022
+//-----------------------------------------------------------------------------
+// Description :
+//-----------------------------------------------------------------------------
+
+
++incdir+../../../source/common/
++incdir+../../../source/mini_core/
++incdir+../../../source/big_core/
++incdir+../../../source/fabric/
+
+// param packages
+../../../source/mini_core/mini_core_pkg.sv
+../../../source/mini_core_kbd/packages/mini_core_kbd_pkg.sv
+../../../source/big_core/packages/big_core_pkg.sv
+
+
+// Common
+../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
+../../../source/common/mem.sv
+
+//RTL FIles
+../../../source/mini_core/mini_core_if.sv
+../../../source/mini_core/mini_core_ctrl.sv
+../../../source/mini_core/mini_core_rf.sv
+../../../source/mini_core/mini_core_exe.sv
+../../../source/mini_core/mini_core_mem_acs.sv
+../../../source/mini_core/mini_core_wb.sv
+../../../source/mini_core/mini_core.sv
+//../../../source/mini_core/mini_core_top.sv
+../../../source/mini_core_kbd/mini_core_kbd_mem_wrap.sv
+../../../source/mini_core_kbd/mini_core_kbd_cr_mem.sv
+../../../source/mini_core_kbd/mini_core_kbd_top.sv
+../../../source/mini_core_kbd/mini_core_kbd_d_mem_wrap.sv
+../../../source/mini_core_kbd/mini_core_kbd_vga_ctrl.sv
+../../../source/mini_core_kbd/mini_core_kbd_vga_sync_gen.sv
+../../../source/big_core/vga_mem.sv
+../../../source/mini_core_kbd/mini_core_kbd.sv
+../../../source/mini_core_kbd/mini_core_kbd_if.sv
+../../../source/mini_core_kbd/mini_core_kbd_ctrl.sv
+../../../source/mini_core_kbd/mini_core_kbd_rf.sv
+../../../source/mini_core_kbd/mini_core_kbd_exe.sv
+../../../source/mini_core_kbd/mini_core_kbd_csr.sv
+../../../source/mini_core_kbd/mini_core_kbd_mem_acs1.sv
+../../../source/mini_core_kbd/mini_core_kbd_mem_acs2.sv
+../../../source/mini_core_kbd/mini_core_kbd_wb.sv
+
+
+
