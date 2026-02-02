@@ -50,36 +50,52 @@ end
 `MAFIA_DFF(IMem, IMem, Clk)
 `MAFIA_DFF(DMem, DMem, Clk)
 
-integer file;
+
+integer file0,file1;
 initial begin: test_seq
     if ($value$plusargs ("STRING=%s", test_name))
         $display("STRING value %s", test_name);
 
-    // Load the program to the DUT
-    $readmemh("../../../target/mini_core_smt/instz_mem.sv", IMem);
-    force mini_core_smt_top.mini_smt_mem_wrap.i_mem.mem = IMem;
+    file0 = $fopen({"../../../target/mini_core_smt/tests/test0/gcc_files/inst_mem.sv"}, "r");
+    file1 = $fopen({"../../../target/mini_core_smt/tests/test1/gcc_files/inst_mem.sv"}, "r");
 
-    $readmemh("../../../target/mini_core_smt/dataz_mem.sv", DMem);
-    force mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem = DMem;
-    #10;
-    release mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem;
+    if (!file0 || !file1) begin
+        $error("one of inst_mem.sv couldn't be opened");
+        $display("ERROR: inst_mem.sv file does not exist");
+        $finish;
+    end
+    $readmemh({"../../../target/mini_core_smt/tests/instz_mem.sv"} , IMem);
+    force mini_core_smt_top.mini_smt_mem_wrap.i_mem.mem = IMem; //backdoor to actual memory
+    $readmemh({"../../../target/mini_core_smt/tests/test0/gcc_files/inst_mem.sv"} ,ref_core0.imem);
+    $readmemh({"../../../target/mini_core_smt/tests/test1/gcc_files/inst_mem.sv"} ,ref_core1.imem);
 
-    // Load per-thread memory into each reference core
-    $readmemh("../../../target/mini_core_smt/tests/test0/gcc_files/inst_mem.sv", ref_core0.imem);
-    $readmemh("../../../target/mini_core_smt/tests/test1/gcc_files/inst_mem.sv", ref_core1.imem);
-
-    $readmemh("../../../target/mini_core_smt/tests/test0/gcc_files/data_mem.sv", ref_core0.dmem);
-    $readmemh("../../../target/mini_core_smt/tests/test1/gcc_files/data_mem.sv", ref_core1.dmem);
-
+    //load the data to the DUT & reference model 
+    file0 = $fopen({"../../../target/mini_core_smt/tests/test0/gcc_files/data_mem.sv"}, "r");
+    file1 = $fopen({"../../../target/mini_core_smt/tests/test1/gcc_files/data_mem.sv"}, "r");
+    if (file0 && file1) begin
+        $fclose(file0);
+        $fclose(file1);
+        $readmemh({"../../../target/mini_core_smt/tests/dataz_mem.sv"} , DMem);
+        force mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem = DMem; //backdoor to actual memory
+        $readmemh({"../../../target/mini_core_smt/tests/test0/gcc_files/dmem_mem.sv"} ,ref_core0.dmem);
+        $readmemh({"../../../target/mini_core_smt/tests/test1/gcc_files/dmem_mem.sv"} ,ref_core1.dmem);
+        #10
+        release mini_core_smt_top.mini_smt_mem_wrap.d_mem.mem;
+        //release rv32i_ref.dmem;
+    end
+    
+    //=======================================
+    // enable the checker data collection (monitor)
+    //=======================================
     fork
-        get_rf_write();
-        get_ref_rf_write();
-        begin
-            wait(mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ebreak_was_calledQ101H == 1'b1);
-            eot(.msg("ebreak was called"));
-        end
+    get_rf_write();
+    get_ref_rf_write();
+    begin wait(mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ebreak_was_calledQ101H == 1'b1);
+        eot(.msg("ebreak was called"));
+    end
     join
-end
+
+end // test_seq
 
 parameter V_TIMEOUT = 1000000;
 parameter MINI_RF_NUM_MSB = 31;

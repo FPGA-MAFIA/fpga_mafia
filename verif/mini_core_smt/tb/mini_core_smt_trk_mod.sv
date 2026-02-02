@@ -115,7 +115,7 @@ initial begin: trk_reg_write_gen
 
 end
 always_ff @(posedge Clk) begin
-    if (mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ThreadIDQ104H == 1'b0) begin
+    //if (mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ThreadIDQ104H == 1'b0) begin
         $fwrite(trk_reg_write_t0, "%6t | %8h | %8h | %1d | %1d | %1d | %8h | %2d |%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h\n",
             $time,
             PcQ104H,
@@ -160,7 +160,7 @@ always_ff @(posedge Clk) begin
         );
 
 
-    end else if (mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ThreadIDQ104H == 1'b1) begin
+    //end else if (mini_core_smt_top.mini_core_smt.mini_core_smt_ctrl.ThreadIDQ104H == 1'b1) begin
         $fwrite(trk_reg_write_t1, "%6t | %8h | %8h | %1d | %1d | %1d | %8h | %2d |%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h,%8h\n",
             $time,
             PcQ104H,
@@ -204,7 +204,7 @@ always_ff @(posedge Clk) begin
             mini_core_smt_top.mini_core_smt.rf_thread1.Register[31]
         );
 
-    end
+    //end
 end
 
 

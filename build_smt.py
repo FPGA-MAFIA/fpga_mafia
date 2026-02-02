@@ -457,7 +457,13 @@ def main():
     if args.clean:
         print_message('[INFO] Cleaning target/'+args.dut+'/tests/ directory')
         if os.path.exists('target/'+args.dut+'/tests/'):
-            rm_target_cmd  = 'rm -rf target/'+args.dut+'/tests/'
+            ##rm_target_cmd  = 'rm -rf target/'+args.dut+'/tests/'
+            rm_target_cmd = (
+                            'rm -rf '
+                            'target/' + args.dut + '/tests/ '
+                            'target/' + args.dut + '/dataz_mem.sv '
+                            'target/' + args.dut + '/instz_mem.sv'
+                            )
             run_cmd(rm_target_cmd)
             #shutil.rmtree('target/'+args.dut+'/tests/')
         else:
