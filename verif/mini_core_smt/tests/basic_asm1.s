@@ -11,7 +11,11 @@ main:
   li    x7,  7
   li    x8,  8
 
- add x4, x1, x2       # x9 = x1 + x2 (1 + 2 = 3)
+ #sw   x3, 0(x13)
+ #lw   x12, 0(x13)
+ addi x5, x1, 0x7       # x5 = x1 + x3 (1 + 3 = 4)
+ sub x4, x3, x2       # x5 = 10
+ #add x6, x2, x4       # x6 = x4 + x2 (4 + 2 = 6)
 
 eot:
     nop

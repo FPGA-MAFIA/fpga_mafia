@@ -1,0 +1,332 @@
+//-----------------------------------------------------------------------------
+// Title            : riscv as-fast-as-possible 
+// Project          : mafia_asap
+//-----------------------------------------------------------------------------
+// File             : mafia_asap_5pl 
+// Original Author  : Amichai Ben-David
+// Code Owner       : 
+// Adviser          : Amichai Ben-David
+// Created          : 10/2021
+//-----------------------------------------------------------------------------
+// Description :
+// This module will contain a complete RISCV Core supporting the RV32I
+// Will be implemented in a single cycle micro-architecture.
+// The I_MEM & D_MEM will support async memory read. (This will allow the single-cycle arch)
+// ---- 5 Pipeline Stages -----
+// 1) Q100H Instruction Fetch
+// 2) Q101H Instruction Decode 
+// 3) Q102H Execute 
+// 4) Q103H Memory Access
+// 5) Q104H Write back data from Memory/ALU to Register file
+
+`include "macros.vh"
+
+module mini_core_smt 
+
+  //logic thread_id;
+ // logic [31:0] pc_thread0, pc_thread1, pc_if;
+  //logic [15:0] i_mem_addr, d_mem_addr;
+  //logic [31:0] pc_next;
+
+import mini_core_smt_pkg::*;
+#(parameter RF_NUM_MSB) 
+(
+    input  logic        Clock,
+    input  logic        Rst,
+    // Instruction Memory
+    output logic       ReadyQ101H,
+    output logic [31:0] PcQ100H,             // To I_MEM
+    input  logic [31:0] PreInstructionQ101H, // From I_MEM
+    // Data Memory
+    input  logic          DMemReady,    // From D_MEM
+    output t_core2mem_req Core2DmemReqQ103H,
+    input  logic [31:0]   DMemRdRspQ104H     // From D_MEM
+);
+
+// Control bits
+logic         BranchCondMetQ102H;
+logic         BranchCondMetQ103H;
+logic         ReadyQ100H;
+logic         ReadyQ102H;
+logic         ReadyQ103H;
+logic         ReadyQ104H;
+t_mini_ctrl   Ctrl;
+t_ctrl_if     CtrlIf;
+t_ctrl_rf     CtrlRf_t0;
+t_ctrl_rf     CtrlRf_t1;
+t_ctrl_exe    CtrlExe;
+t_ctrl_mem    CtrlMem;
+t_ctrl_wb     CtrlWb;
+
+//----thread switching ----
+logic CurrThread;
+// async reset, enable on ReadyQ100H, reset value = 0
+ always_ff @(posedge Clock or posedge Rst) begin
+    if (Rst) 
+       CurrThread <= 1'b0;
+    else if (ReadyQ100H) 
+       CurrThread <= ~CurrThread;
+end
+
+//-----thread pipeline tags
+logic ThreadIDQ100H, ThreadIDQ101H, ThreadIDQ102H, ThreadIDQ103H, ThreadIDQ104H;
+//assign ThreadIDQ100H = CurrThread;
+always_ff @(posedge Clock or posedge Rst) begin
+  if (Rst)
+    ThreadIDQ100H <= 1'b0;
+  else if (ReadyQ100H)
+    ThreadIDQ100H <= CurrThread;
+end
+
+`MAFIA_EN_RST_DFF(ThreadIDQ101H, ThreadIDQ100H, Clock, ReadyQ101H, Rst)
+`MAFIA_EN_RST_DFF(ThreadIDQ102H, ThreadIDQ101H, Clock, ReadyQ102H, Rst)
+`MAFIA_EN_RST_DFF(ThreadIDQ103H, ThreadIDQ102H, Clock, ReadyQ103H, Rst)
+`MAFIA_EN_RST_DFF(ThreadIDQ104H, ThreadIDQ103H, Clock, ReadyQ104H, Rst)
+
+// ---- Data-Path signals ----
+logic [31:0]  PcQ101H, PcQ102H;
+logic [31:0]  PcPlus4Q103H, PcPlus4Q104H;
+logic [31:0]  ImmediateQ101H, ImmediateQ102H;
+logic [31:0]  AluOutQ102H, AluOutQ103H, AluOutQ104H;
+logic [31:0]  PreRegRdData1Q102H, RegRdData1Q102H;
+logic [31:0]  PreRegRdData2Q102H, RegRdData2Q102H;
+logic [31:0]  RegWrDataQ104H; 
+logic [31:0]  DMemWrDataQ103H;
+
+// Control bits
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//   _____  __     __   _____   _        ______          ____    __    ___     ___    _    _ 
+//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \   / _ \  | |  | |
+// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | | | | | | | |__| |
+// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | | | | | | |  __  |
+// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| | | |_| | | |  | |
+//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/   \___/  |_|  |_|
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Instruction fetch
+// -----------------
+// 1. Send the PC (program counter) to the I_MEM
+// 2. Calc/Set the NextPc
+// -----------------
+//////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_smt_if mini_core_smt_if (
+  .Clock        (Clock       ), // input  logic        Clock,
+  .Rst          (Rst         ), // input  logic        Rst,
+  .ReadyQ100H   (ReadyQ100H  ), // input  logic        ReadyQ100H,
+  .ReadyQ101H   (ReadyQ101H  ), // input  logic        ReadyQ101H,
+  .Ctrl         (CtrlIf      ), // input  t_ctrl_if    Ctrl,
+  .AluOutQ103H  (AluOutQ103H ), // input  logic [31:0] AluOutQ102H,
+  .CurrThread   (CurrThread),
+  .ThreadIDQ100H (ThreadIDQ100H),
+  .ThreadIDQ102H (ThreadIDQ102H),
+  .PcQ100H      (PcQ100H     ), // output logic [31:0] PcQ100H,
+  .PcQ101H      (PcQ101H     ) // output logic [31:0] PcQ101H
+);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//   _____  __     __   _____   _        ______          ____    __    ___    __   _    _ 
+//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  /_ | | |  | |
+// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | |  | | | |__| |
+// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | |  | | |  __  |
+// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |  | | | |  | |
+//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/   |_| |_|  |_|
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Decode
+// -----------------
+// 1. Load hazard detection.
+// 2. Get the instruciton from I_MEM and use the decoder to set the Ctrl Bits.
+// 3. Use the rs1 & rs2 (RegSrc) to read the Register file data.
+// 4. construct the Immediate types.
+// ----------------- 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_smt_ctrl mini_core_smt_ctrl (
+  .Rst                  (Rst    ), //input
+  .Clock                (Clock  ), //input
+  // input instruction 
+  .PreInstructionQ101H  (PreInstructionQ101H), //input
+  .PcQ101H              (PcQ101H), // output logic [31:0] PcQ101H
+  // input feedback from data path
+  .BranchCondMetQ102H   (BranchCondMetQ102H), //input
+  .BranchCondMetQ103H   (BranchCondMetQ103H), //input
+
+  .DMemReady            (DMemReady), //input
+
+  ///Thread ID newly added by Obaida
+  .ThreadIDQ100H        (ThreadIDQ100H),
+  .ThreadIDQ101H        (ThreadIDQ101H),
+  .ThreadIDQ102H        (ThreadIDQ102H),
+  .ThreadIDQ103H        (ThreadIDQ103H),
+  .ThreadIDQ104H        (ThreadIDQ104H),
+  // ready signals for "back-pressure" - use as the enable for the pipe stage sample
+  .ReadyQ100H           (ReadyQ100H), //  output 
+  .ReadyQ101H           (ReadyQ101H), //  output 
+  .ReadyQ102H           (ReadyQ102H), //  output 
+  .ReadyQ103H           (ReadyQ103H), //  output 
+  .ReadyQ104H           (ReadyQ104H), //  output 
+  // output ctrl signals
+  .CtrlIf               (CtrlIf             ), //output
+  .CtrlRf_t0            (CtrlRf_t0          ), //output
+  .CtrlRf_t1            (CtrlRf_t1          ), //output
+  .CtrlExe              (CtrlExe            ), //output
+  .CtrlMem              (CtrlMem            ), //output
+  .CtrlWb               (CtrlWb             ), //output
+  // output data path signals
+  .ImmediateQ101H       (ImmediateQ101H     ) //output
+);
+
+//----register file x2----
+logic [31:0] PcQ102H_t0, ImmediateQ102H_t0, RegRdData1Q102H_t0, RegRdData2Q102H_t0;
+logic [31:0] PcQ102H_t1, ImmediateQ102H_t1, RegRdData1Q102H_t1, RegRdData2Q102H_t1;
+
+mini_core_smt_rf 
+#( .RF_NUM_MSB(RF_NUM_MSB) ) rf_thread0 (
+  .Clock            (Clock),          // input
+  .Rst              (Rst),            // input 
+  .regFileID        (1'b0),            // input
+  .readEnThread     (ThreadIDQ101H),            // input
+  .writeEnThread    (ThreadIDQ104H),            // input
+  .Ctrl             (CtrlRf_t0),         // input
+  .ReadyQ102H       (ReadyQ102H),     // input
+  // input data path
+  .ImmediateQ101H   (ImmediateQ101H), // input
+  .PcQ101H          (PcQ101H),        // input  
+  .RegWrDataQ104H   (RegWrDataQ104H), // input 
+  // output data path
+  .PcQ102Hk          (PcQ102H_t0),        // output   
+  .ImmediateQ102Hk   (ImmediateQ102H_t0), // output
+  .RegRdData1Q102Hk  (RegRdData1Q102H_t0),// output
+  .RegRdData2Q102Hk  (RegRdData2Q102H_t0) // output
+);
+
+mini_core_smt_rf 
+#( .RF_NUM_MSB(RF_NUM_MSB) ) rf_thread1 (
+  .Clock            (Clock),          // input
+  .Rst              (Rst),            // input 
+  .regFileID        (1'b1),            // input
+  .readEnThread     (ThreadIDQ101H),            // input
+  .writeEnThread    (ThreadIDQ104H),            // input
+  .Ctrl             (CtrlRf_t1),         // input
+  .ReadyQ102H       (ReadyQ102H),     // input
+  // input data path
+  .ImmediateQ101H   (ImmediateQ101H), // input
+  .PcQ101H          (PcQ101H),        // input  
+  .RegWrDataQ104H   (RegWrDataQ104H), // input 
+  // output data path
+  .PcQ102Hk          (PcQ102H_t1),        // output   
+  .ImmediateQ102Hk   (ImmediateQ102H_t1), // output
+  .RegRdData1Q102Hk  (RegRdData1Q102H_t1),// output
+  .RegRdData2Q102Hk  (RegRdData2Q102H_t1) // output
+);
+
+assign PcQ102H         = (ThreadIDQ102H == 1'b0) ? PcQ102H_t0         : PcQ102H_t1;
+assign ImmediateQ102H  = (ThreadIDQ102H == 1'b0) ? ImmediateQ102H_t0  : ImmediateQ102H_t1;
+assign RegRdData1Q102H = (ThreadIDQ102H == 1'b0) ? RegRdData1Q102H_t0 : RegRdData1Q102H_t1;
+assign RegRdData2Q102H = (ThreadIDQ102H == 1'b0) ? RegRdData2Q102H_t0 : RegRdData2Q102H_t1;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//    _____  __     __   _____   _        ______          ____    __    ___    ___    _    _ 
+//   / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  |__ \  | |  | |
+//  | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | |    ) | | |__| |
+//  | |        \   /   | |      | |      |  __|         | |  | |  | | | | | |   / /  |  __  |
+//  | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |  / /_  | |  | |
+//   \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/  |____| |_|  |_|
+//                                                                                           
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Execute
+// -----------------
+// 1. Use the Imm/Registers to compute:
+//      a) data to write back to register.
+//      b) Calculate address for load/store
+//      c) Calculate branch/jump target.
+// 2. Check branch condition.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_smt_exe mini_core_smt_exe (
+  .Clock               (Clock              ), //  input 
+  .Rst                 (Rst                ), //  input 
+  // Input Control Signals
+  .Ctrl                (CtrlExe            ), //  input 
+  .ReadyQ103H          (ReadyQ103H         ), //  input
+  .ThreadIDQ102H       (ThreadIDQ102H      ), //  input
+  .ThreadIDQ103H       (ThreadIDQ103H      ), //  input 
+  .ThreadIDQ104H       (ThreadIDQ104H      ), //  input
+  // Output Control Signals
+  .BranchCondMetQ102H  (BranchCondMetQ102H ), //  output
+  .BranchCondMetQ103H  (BranchCondMetQ103H ), //  output 
+  // Input Data path
+  //Q102H
+  .PreRegRdData1Q102H  (RegRdData1Q102H ), //  input 
+  .PreRegRdData2Q102H  (RegRdData2Q102H ), //  input 
+  .PcQ102H             (PcQ102H            ), //  input 
+  .ImmediateQ102H      (ImmediateQ102H     ), //  input 
+  //Q104H
+  .RegWrDataQ104H      (RegWrDataQ104H     ), //  input 
+  // output data path
+  .AluOutQ102H         (AluOutQ102H        ), //  output
+  .AluOutQ103H         (AluOutQ103H        ), //  output
+  .PcPlus4Q103H        (PcPlus4Q103H       ), //  output
+  .DMemWrDataQ103H     (DMemWrDataQ103H    )  //  output
+);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//   _____  __     __   _____   _        ______          ____    __    ___    ____    _    _ 
+//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  |___ \  | |  | |
+// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | |   __) | | |__| |
+// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | |  |__ <  |  __  |
+// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |  ___) | | |  | |
+//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/  |____/  |_|  |_|
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Memory Access
+// -----------------
+// 1. Access D_MEM for Wrote (STORE) and Reads (LOAD)
+//////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_smt_mem_acs mini_core_smt_mem_access (
+  .Clock              (Clock),          //input 
+  .Rst                (Rst),            //input  
+  // Input Control Signals
+  .Ctrl               (CtrlMem),        //input
+  .ReadyQ104H         (ReadyQ104H),     //input
+  // Input Data path
+  .PcPlus4Q103H       (PcPlus4Q103H),   //input
+  .AluOutQ103H        (AluOutQ103H),    //input
+  .DMemWrDataQ103H    (DMemWrDataQ103H),//input
+  .ThreadIDQ103H      (ThreadIDQ103H ),
+  // data path output
+  .Core2DmemReqQ103H  (Core2DmemReqQ103H),//output
+  .PcPlus4Q104H       (PcPlus4Q104H),   //input
+  .AluOutQ104H        (AluOutQ104H)     //input
+);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//    ____  __     __   _____   _        ______          ____    __    ___    _  _     _    _ 
+//  / ____| \ \   / /  / ____| | |      |  ____|        / __ \  /_ |  / _ \  | || |   | |  | |
+// | |       \ \_/ /  | |      | |      | |__          | |  | |  | | | | | | | || |_  | |__| |
+// | |        \   /   | |      | |      |  __|         | |  | |  | | | | | | |__   _| |  __  |
+// | |____     | |    | |____  | |____  | |____        | |__| |  | | | |_| |    | |   | |  | |
+//  \_____|    |_|     \_____| |______| |______|        \___\_\  |_|  \___/     |_|   |_|  |_|
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Write-Back
+// -----------------
+// 1. Select which data should be written back to the register file AluOut or DMemRdData.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+mini_core_smt_wb mini_core_smt_wb
+( 
+ .Clock     (Clock ), // input  logic           Clock,       //input 
+ .Rst       (Rst   ), // input  logic           Rst,         //input  
+ // Ctrl
+ .Ctrl      (CtrlWb),  // input var  t_ctrl_wb       Ctrl  //input
+ // Data path input
+ .DMemRdDataQ104H (DMemRdRspQ104H ), // input  logic [31:0]    DMemRdDataQ104H, //input
+ .AluOutQ104H     (AluOutQ104H     ), // input  logic [31:0]    AluOutQ104H,     //input
+ .PcPlus4Q104H    (PcPlus4Q104H    ), // input  logic [31:0]    PcPlus4Q104H,    //input
+ // data path output
+ .RegWrDataQ104H  (RegWrDataQ104H  )  // output logic [31:0]    RegWrDataQ104H  //output
+
+);
+
+endmodule // Module mafia_asap_5pl

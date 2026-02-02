@@ -11,7 +11,8 @@ main:
   li    x7,  7
   li    x8,  8
 
- add x4, x1, x2       # x9 = x1 + x2 (1 + 2 = 3)
+ add x5, x1, x3       # x9 = x1 + x2 (1 + 2 = 3)
+ add x6, x2, x4
 
 eot:
     nop

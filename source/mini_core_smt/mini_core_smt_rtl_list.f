@@ -1,0 +1,37 @@
+//-----------------------------------------------------------------------------
+// Title            : simple core  design
+// Project          : simple_core
+//-----------------------------------------------------------------------------
+// File             : core
+// Original Author  : Amichai Ben-David
+// Code Owner       : 
+// Created          : 9/2022
+//-----------------------------------------------------------------------------
+// Description :
+//-----------------------------------------------------------------------------
+
+
++incdir+../../../source/common/
++incdir+../../../source/mini_core/
++incdir+../../../source/mini_core_smt/
++incdir+../../../source/big_core/
++incdir+../../../source/fabric/
+
+// param packages
+../../../source/mini_core_smt/mini_core_smt_pkg.sv
+
+// Common
+../../../source/common/fifo.sv
+../../../source/common/arbiter.sv
+../../../source/common/mem.sv
+
+//RTL FIles
+../../../source/mini_core_smt/mini_core_smt_if.sv
+../../../source/mini_core_smt/mini_core_smt_ctrl.sv
+../../../source/mini_core_smt/mini_core_smt_rf.sv
+../../../source/mini_core_smt/mini_core_smt_exe.sv
+../../../source/mini_core_smt/mini_core_smt_mem_acs.sv
+../../../source/mini_core_smt/mini_core_smt_wb.sv
+../../../source/mini_core_smt/mini_core_smt.sv
+../../../source/mini_core_smt/mini_core_smt_top.sv
+../../../source/mini_core_smt/mini_smt_mem_wrap.sv
