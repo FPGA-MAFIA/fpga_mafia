@@ -173,20 +173,20 @@ initial begin: test_seq
         $fclose(file);
         $readmemh({"../../../target/lotr/tests/",hpath,"/gcc_files/data_mem.sv"}, DMemQnnnH);
     end
-    ////TILE 1    
-        // Backdoor load the Instruction memory
-        lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.i_mem_wrap.i_mem.next_mem = IMemQnnnH[I_MEM_OFFSET+SIZE_I_MEM-1:0];
-        lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.i_mem_wrap.i_mem.mem      = IMemQnnnH[I_MEM_OFFSET+SIZE_I_MEM-1:0];
-        // Backdoor load the Inst1uction memory
-        lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.d_mem_wrap.d_mem.next_mem = DMemQnnnH[D_MEM_OFFSET+SIZE_D_MEM-1:D_MEM_OFFSET];
-        lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.d_mem_wrap.d_mem.mem      = DMemQnnnH[D_MEM_OFFSET+SIZE_D_MEM-1:D_MEM_OFFSET];
-    ////TILE 2    
-        // Backdoor load the Instruction memory
-        lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.i_mem_wrap.i_mem.next_mem = IMemQnnnH[I_MEM_OFFSET+SIZE_I_MEM-1:0];
-        lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.i_mem_wrap.i_mem.mem      = IMemQnnnH[I_MEM_OFFSET+SIZE_I_MEM-1:0];
-        // Backdoor load the Inst2uction memory
-        lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.d_mem_wrap.d_mem.next_mem = DMemQnnnH[D_MEM_OFFSET+SIZE_D_MEM-1:D_MEM_OFFSET];
-        lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.d_mem_wrap.d_mem.mem      = DMemQnnnH[D_MEM_OFFSET+SIZE_D_MEM-1:D_MEM_OFFSET];
+    // Backdoor-load via `force` (mem / next_mem are driven by always_ff / always_comb;
+    // Questa >=2025 forbids a second procedural driver). We release after one clock so the
+    // flops capture the loaded contents, then behave normally.
+    ////TILE 1
+        force lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.i_mem_wrap.i_mem.mem      = IMemQnnnH[I_MEM_OFFSET+SIZE_I_MEM-1:0];
+        force lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.d_mem_wrap.d_mem.mem      = DMemQnnnH[D_MEM_OFFSET+SIZE_D_MEM-1:D_MEM_OFFSET];
+    ////TILE 2
+        force lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.i_mem_wrap.i_mem.mem      = IMemQnnnH[I_MEM_OFFSET+SIZE_I_MEM-1:0];
+        force lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.d_mem_wrap.d_mem.mem      = DMemQnnnH[D_MEM_OFFSET+SIZE_D_MEM-1:D_MEM_OFFSET];
+    #20;
+        release lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.i_mem_wrap.i_mem.mem;
+        release lotr_tb.lotr.gpc_4t_tile_1.gpc_4t.d_mem_wrap.d_mem.mem;
+        release lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.i_mem_wrap.i_mem.mem;
+        release lotr_tb.lotr.gpc_4t_tile_2.gpc_4t.d_mem_wrap.d_mem.mem;
     #1000000         
     end_tb(" Finished With time out");
 end: test_seq

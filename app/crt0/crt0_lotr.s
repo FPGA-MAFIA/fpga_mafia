@@ -45,9 +45,14 @@ reset_handler:
   mv x30, x1
   mv x31, x1
 
-  /* stack initilization */
-  la   x2, 0xC0000C
-
+  /* Per-thread stack init:
+   * CR_STACK_BASE_OFFSET lives at 0xC0000C in the local CR region.
+   * The hardware returns the correct per-thread stack base when the
+   * current thread reads that address, so we just dereference it into
+   * sp (x2). The prior version did `la x2, 0xC0000C` + `lw x2, 0(x5)`
+   * which loaded sp from address 0 -- every function call trashed
+   * random memory and the CPU usually died silently. */
+  li   x5, 0xC0000C
   lw   x2, 0(x5)
   jal x1, main
   ebreak
