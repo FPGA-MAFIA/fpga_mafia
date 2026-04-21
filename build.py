@@ -8,7 +8,7 @@ import argparse
 import sys
 import json
 import fileinput
-from termcolor import colored
+import re
 
 examples = '''
 Examples:
@@ -40,7 +40,10 @@ parser.add_argument('-v', '--verbose', action='store_true', help='Increase outpu
 parser.add_argument('-pp',        action='store_true',    help='run post-process on the tests')
 parser.add_argument('-no_debug',  action='store_true',    help='run simulation without debug flag')
 parser.add_argument('-gui',       action='store_true',    help='run simulation with gui')
-parser.add_argument('-fpga',      action='store_true',    help='run compile & synthesis for the fpga')
+parser.add_argument('-fpga',      action='store_true',    help='Quartus full compile (Analysis/Synth+Fit+Asm+STA) for the DUT')
+parser.add_argument('-fpga_project', default=None,         help='Override Quartus project name (default: auto-detect *.qsf under FPGA/<dut>/)')
+parser.add_argument('-prog',      action='store_true',    help='Program the DE10-Lite with the produced .sof (requires -fpga or an existing .sof)')
+parser.add_argument('-reload',    action='store_true',    help='Fast reload: regen MIFs + quartus_cdb --update_mif + quartus_asm (no Map/Fit). Needs prior full -fpga compile.')
 parser.add_argument('-params',    default=' ',            help='used for overriding parameter values in simulation')
 parser.add_argument('-keep_going',action='store_true',    help='keep going even if one test fails')
 parser.add_argument('-mif'       ,action='store_true',    help='create the mif memory files for the FPGA load')
@@ -136,11 +139,25 @@ class Test:
             else:
                 print_message(f'[INFO] Using configuration from \'{args.cfg}\'')
                  #loading configuration from the specified JSON file
-                self.load_json(json_file)               
+                self.load_json(json_file)
         else:
-            print_message(f'[INFO] Using default configuration')
-            json_file = os.path.join(json_directory, 'default.json')
-            self.load_json(json_file)              
+            # Auto-pick a per-DUT config if present (e.g. app/cfg/lotr_rv32i.json),
+            # otherwise fall back to default.json. Tries <dut>_rv32i, <dut>_rv32e,
+            # then <dut>.json before default.
+            candidates = [args.dut + '_rv32i', args.dut + '_rv32e', args.dut]
+            picked = None
+            for name in candidates:
+                p = os.path.join(json_directory, name + '.json')
+                if os.path.isfile(p):
+                    picked = (name, p)
+                    break
+            if picked:
+                print_message(f'[INFO] Auto-selected configuration \'{picked[0]}\' for dut={args.dut}')
+                self.load_json(picked[1])
+            else:
+                print_message(f'[INFO] Using default configuration')
+                json_file = os.path.join(json_directory, 'default.json')
+                self.load_json(json_file)
 
     def _compile_sw(self):
         print_message('--------------------------------------------')
@@ -260,42 +277,75 @@ class Test:
         chdir(MODELSIM)
         if not Test.hw_compilation:
             try:
-                comp_sim_cmd = 'vlog.exe -lint -f ../../../'+FILE_LIST
+                # +acc keeps signals visible for waveform/debug (Questa vopt otherwise strips hierarchy).
+                comp_sim_cmd = 'vlog.exe -lint +acc -f ../../../'+FILE_LIST
                 results = run_cmd_with_capture(comp_sim_cmd) 
             except:
                 print_message('[ERROR] Failed to compile simulation of '+self.name)
                 self.fail_flag = True
             else:
                 Test.hw_compilation = True
-                if len(results.stdout.split('Error')) > 2:
+                errors, warnings, summary = Test._summarize_vsim_output(results.stdout)
+                if errors > 0 or summary is None:
                     self.fail_flag = True
                     print_message(results.stdout)
+                    if summary is None:
+                        print_message('[ERROR] HW compilation did not produce an Errors/Warnings summary.')
+                    else:
+                        print_message('[ERROR] HW compilation reported ' + summary)
                 else:
                     with open("hw_compile.log", "w") as file:
                         file.write(results.stdout)
-                    print_message('[INFO] hw compilation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                    print_message('[INFO] hw compilation finished with - ' + summary)
                     print_message('=== Compile results >>>>> target/'+self.dut+'/modelsim/hw_compile.log')
                     print_message('--------------------------------------------')
         else:
             print_message(f'[INFO] HW compilation is already done\n')
         chdir(MODEL_ROOT)
+
+    @staticmethod
+    def _summarize_vsim_output(stdout):
+        """Return (errors, warnings, summary_line) parsed from Questa output.
+
+        Parses the final ``Errors: N, Warnings: M`` line; falls back to scanning
+        for any ``** Error`` / ``** Fatal`` messages so we don't silently pass if
+        Questa died before printing a summary.
+        """
+        summary_re = re.compile(r'^#?\s*Errors:\s*(\d+),\s*Warnings:\s*(\d+)', re.MULTILINE)
+        matches = list(summary_re.finditer(stdout or ''))
+        if matches:
+            m = matches[-1]
+            return int(m.group(1)), int(m.group(2)), m.group(0).lstrip('#').strip()
+        hard_error_re = re.compile(r'^\s*#?\s*\*\*\s*(Error|Fatal)\b', re.MULTILINE)
+        hard_errors = len(hard_error_re.findall(stdout or ''))
+        return hard_errors, 0, None
+
     def _start_simulation(self):
         chdir(MODELSIM)
         print_message('[INFO] Now running simulation ...')
         try:
             if not os.path.exists('../tests/'+self.name):
                 mkdir('../tests/'+self.name)
-            sim_cmd = 'vsim.exe work.' + self.top + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            sim_cmd = (
+                'vsim.exe -voptargs=+acc work.' + self.top
+                + ' -c -do "run -all" ' + self.params + ' +STRING=' + self.name
+            )
             results = run_cmd_with_capture(sim_cmd)
         except:
             print_message('[ERROR] Failed to simulate '+self.name)
             self.fail_flag = True
         else:
-            if len(results.stdout.split('Error')) > 2:
+            errors, warnings, summary = Test._summarize_vsim_output(results.stdout)
+            if errors > 0 or summary is None:
                 self.fail_flag = True
                 print_message(results.stdout)
+                if summary is None:
+                    print_message('[ERROR] Simulation did not produce an Errors/Warnings summary (possible crash).')
+                else:
+                    print_message('[ERROR] Simulation reported ' + summary)
             else:
-                print_message('[INFO] HW simulation finished with - '+','.join(results.stdout.split('\n')[-2:-1]))
+                summary_text = summary if summary else 'Errors: 0, Warnings: ' + str(warnings)
+                print_message('[INFO] HW simulation finished with - ' + summary_text)
             print_message('=== Simulation results >>>>> target/'+self.dut+'/tests/'+self.name+'/'+self.name+'_transcript')
             print_message('--------------------------------------------')
         if os.path.exists('transcript'):  # copy transcript file to the test directory
@@ -307,7 +357,14 @@ class Test:
     def _gui(self):
         chdir(MODELSIM)
         try:
-            gui_cmd = 'vsim.exe -gui work.'+ self.top +  self.params + ' +STRING='+self.name+' &'
+            wave_tcl = os.path.join(MODEL_ROOT, 'verif', self.dut, 'tb', 'wave.do')
+            do_wave = ''
+            if os.path.isfile(wave_tcl):
+                do_wave = ' -do "do ../../../verif/' + self.dut + '/tb/wave.do"'
+            gui_cmd = (
+                'vsim.exe -gui -voptargs=+acc work.' + self.top + self.params
+                + ' +STRING=' + self.name + do_wave + ' &'
+            )
             run_cmd(gui_cmd)
         except:
             print_message('[ERROR] Failed to run gui of '+self.name)
@@ -333,7 +390,7 @@ class Test:
             #remove \n from the end of the stdout (if it exists)
             if return_val.stdout and return_val.stdout[-1] == '\n':
                 return_val.stdout = return_val.stdout[:-1]
-            print_message(colored(return_val.stdout,'yellow',attrs=['bold']))        
+            print(return_val.stdout, flush=True)
         except:
             print_message('[ERROR] Failed to run post process ')
             self.fail_flag = True
@@ -364,44 +421,172 @@ class Test:
         chdir(MODEL_ROOT)       
         self.mif_flag = True
 
+    @staticmethod
+    def _detect_fpga_project(fpga_dir):
+        """Return Quartus project name (without extension) to use under ``fpga_dir``.
+
+        Order: CLI override, ``de10_lite_<dut>.qsf``, any ``*.qsf`` in the dir.
+        """
+        if args.fpga_project:
+            return args.fpga_project
+        preferred = os.path.join(fpga_dir, 'de10_lite_' + args.dut + '.qsf')
+        if os.path.isfile(preferred):
+            return 'de10_lite_' + args.dut
+        qsfs = sorted(glob.glob(os.path.join(fpga_dir, '*.qsf')))
+        if qsfs:
+            return os.path.splitext(os.path.basename(qsfs[0]))[0]
+        return None
+
     def _start_fpga(self):
+        """Run the full Quartus flow: quartus_sh --flow compile <project>."""
+        fpga_dir_abs = os.path.abspath(FPGA_ROOT)
+        project = Test._detect_fpga_project(FPGA_ROOT)
+        if project is None:
+            print_message('[ERROR] No Quartus .qsf found under ' + FPGA_ROOT + ' (try -fpga_project <name>)')
+            self.fail_flag = True
+            return
+        print_message('[INFO] Running Quartus full compile for project ' + project + ' in ' + FPGA_ROOT)
         chdir(FPGA_ROOT)
         if not self.fail_flag:
             try:
-                fpga_cmd = 'quartus_map --read_settings_files=on --write_settings_files=off de10_lite_'+self.dut+' -c de10_lite_'+self.dut+' '
+                fpga_cmd = 'quartus_sh --flow compile ' + project
                 results = run_cmd_with_capture(fpga_cmd)
-            except:
-                print_message('[ERROR] Failed to run FPGA compilation & synth of '+self.name)
+                log_path = os.path.join('output_files', project + '.flow.log')
+                try:
+                    os.makedirs('output_files', exist_ok=True)
+                    with open(log_path, 'w') as fh:
+                        fh.write(results.stdout or '')
+                except Exception:
+                    pass
+                stdout = results.stdout or ''
+                if 'Full Compilation was successful' in stdout:
+                    print_message('[INFO] Quartus full compile succeeded.')
+                else:
+                    print_message(stdout[-4000:])
+                    print_message('[ERROR] Quartus full compile did not report success. See output_files/*.rpt and ' + log_path)
+                    self.fail_flag = True
+            except Exception:
+                print_message('[ERROR] Failed to run FPGA full compile of ' + self.name)
                 self.fail_flag = True
-        chdir(MODEL_ROOT)       
-        find_war_err_cmd = 'grep -ri --color "Info.*error.*warning" ./FPGA/'+args.dut+'/output_files/*'
+        chdir(MODEL_ROOT)
+        # Summary line with key "Info:" lines from report files.
+        find_war_err_cmd = 'grep -Hi "Info.*error.*warning" ' + FPGA_ROOT + 'output_files/*.rpt'
         results = run_cmd_with_capture(find_war_err_cmd)
-        print_message(f'[INFO]'+results.stdout)
-        print_message(f'[INFO] FPGA results: - FPGA/'+args.dut+'/output_files/')
+        if results.stdout:
+            print_message('[INFO] ' + results.stdout)
+        print_message('[INFO] FPGA results: - ' + FPGA_ROOT + 'output_files/  (project: ' + project + ')')
+        self._fpga_project = project
+        self._fpga_sof = os.path.join(fpga_dir_abs, 'output_files', project + '.sof')
+
+    def _reload_fpga(self):
+        """Fast reload: regen MIFs + quartus_cdb --update_mif + quartus_asm.
+
+        Skips Analysis & Synthesis and Fitter; reuses the existing placement/routing
+        database and only refreshes embedded memory ROM initialization (`altsyncram`
+        init_file). Typical wall time ~10 s on a 10M50.
+        """
+        fpga_dir_abs = os.path.abspath(FPGA_ROOT)
+        project = Test._detect_fpga_project(FPGA_ROOT)
+        if project is None:
+            print_message('[ERROR] No Quartus .qsf found under ' + FPGA_ROOT
+                          + ' (try -fpga_project <name>)')
+            self.fail_flag = True
+            return
+
+        # Locate mif_gen.py (per-DUT first, then fall back to big_core's copy).
+        mif_gen = os.path.join(FPGA_ROOT, 'scripts', 'mif_gen.py')
+        if not os.path.isfile(mif_gen):
+            mif_gen = os.path.join('FPGA', 'big_core', 'scripts', 'mif_gen.py')
+        if not os.path.isfile(mif_gen):
+            print_message('[ERROR] mif_gen.py not found at FPGA/<dut>/scripts or FPGA/big_core/scripts')
+            self.fail_flag = True
+            return
+
+        # Memory init dir varies by project: LOTR uses mem_hex/, big_core uses mif/.
+        mif_dir = None
+        for candidate in ('mem_hex', 'mif'):
+            c_path = os.path.join(FPGA_ROOT, candidate)
+            if os.path.isdir(c_path):
+                mif_dir = c_path
+                break
+        if mif_dir is None:
+            print_message('[ERROR] No mem_hex/ or mif/ directory under ' + FPGA_ROOT)
+            self.fail_flag = True
+            return
+
+        inst_src = os.path.join(TARGET, 'tests', self.name, 'gcc_files', 'inst_mem.sv')
+        data_src = os.path.join(TARGET, 'tests', self.name, 'gcc_files', 'data_mem.sv')
+        if not os.path.isfile(inst_src):
+            print_message('[ERROR] {} missing; run -app first.'.format(inst_src))
+            self.fail_flag = True
+            return
+
+        d_mem_offset_hex = '{:x}'.format(int(Test.D_MEM_OFFSET))
+        imem_mif = os.path.join(mif_dir, 'i_mem.mif')
+        dmem_mif = os.path.join(mif_dir, 'd_mem.mif')
+
+        print_message('[INFO] Regenerating MIFs under ' + mif_dir)
+        try:
+            run_cmd('python {} {} {} 0'.format(mif_gen, inst_src, imem_mif))
+            if os.path.isfile(data_src):
+                run_cmd('python {} {} {} {}'.format(
+                    mif_gen, data_src, dmem_mif, d_mem_offset_hex))
+            else:
+                print_message('[INFO] No data_mem.sv; leaving d_mem.mif untouched.')
+        except Exception:
+            print_message('[ERROR] MIF regen failed')
+            self.fail_flag = True
+            return
+
+        chdir(FPGA_ROOT)
+        try:
+            print_message('[INFO] quartus_cdb --update_mif ' + project)
+            run_cmd('quartus_cdb --update_mif ' + project)
+            print_message('[INFO] quartus_asm ' + project)
+            run_cmd('quartus_asm ' + project + ' -c ' + project)
+        except Exception:
+            print_message('[ERROR] update_mif / assembler failed (run a full -fpga first?)')
+            self.fail_flag = True
+            chdir(MODEL_ROOT)
+            return
+        chdir(MODEL_ROOT)
+
+        self._fpga_project = project
+        self._fpga_sof = os.path.join(fpga_dir_abs, 'output_files', project + '.sof')
+        print_message('[INFO] Reload done. SOF: ' + self._fpga_sof)
+
+    def _program_fpga(self):
+        """Load the latest .sof onto the DE10-Lite via quartus_pgm."""
+        project = getattr(self, '_fpga_project', None) or Test._detect_fpga_project(FPGA_ROOT)
+        if project is None:
+            print_message('[ERROR] Cannot program: no Quartus project found under ' + FPGA_ROOT)
+            self.fail_flag = True
+            return
+        sof = getattr(self, '_fpga_sof', None) or os.path.abspath(
+            os.path.join(FPGA_ROOT, 'output_files', project + '.sof')
+        )
+        if not os.path.isfile(sof):
+            print_message('[ERROR] SOF not found: ' + sof + ' (run with -fpga first)')
+            self.fail_flag = True
+            return
+        print_message('[INFO] Programming DE10-Lite with ' + sof)
+        try:
+            run_cmd('quartus_pgm -m jtag -o "p;' + sof + '"')
+            print_message('[INFO] Programming done.')
+        except Exception:
+            print_message('[ERROR] quartus_pgm failed. Check USB-Blaster connection and JTAG cable.')
+            self.fail_flag = True
 
 def print_message(msg):
     # Trim whitespace and check if the message is empty
     if not msg.strip():
         return  # Exit the function early if there's nothing to print
 
-    # Split the message once and reuse the result
     msg_parts = msg.split()
-    msg_type = msg_parts[0] if msg_parts else '[INFO]'  # Default to '[INFO]' if msg is empty
+    msg_type = msg_parts[0] if msg_parts else '[INFO]'
 
-    # Use a try-except block to handle KeyError when msg_type isn't found in the dictionary
-    try:
-        color = {
-            '[ERROR]'   : 'red',
-            '[WARNING]' : 'yellow',
-            '[INFO]'    : 'green',
-            '[COMMAND]' : 'cyan',
-        }[msg_type]
-    except KeyError:
-        color = 'blue'  # Default color if msg_type isn't one of the predefined keys
-
-    # Print the message in color if not in command mode or if it's a command
     if not args.cmd or msg_type == '[COMMAND]':
-        print(colored(msg, color, attrs=['bold']))
+        print(msg, flush=True)
 
 
 def run_cmd(cmd):
@@ -429,6 +614,18 @@ def run_cmd_with_capture(cmd):
     if(args.cmd == False):
         results = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     return results
+
+
+def ensure_inst_mem_for_test(test):
+    """Compile SW when inst_mem.sv is missing (e.g. -hw -sim without -app)."""
+    if test.fail_flag or args.cmd:
+        return
+    inst_mem = TARGET + 'tests/' + test.name + '/gcc_files/inst_mem.sv'
+    if not os.path.isfile(inst_mem):
+        print_message('[INFO] gcc_files/inst_mem.sv missing; compiling SW for this test.')
+        test._compile_sw()
+
+
 #####################################################################################################
 #                                           main
 #####################################################################################################       
@@ -562,19 +759,29 @@ def main():
             if (args.hw or args.full_run) and not test.fail_flag:
                 test._compile_hw()
             if (args.sim or args.full_run) and not test.fail_flag:
-                test._start_simulation()
+                ensure_inst_mem_for_test(test)
+                if not test.fail_flag:
+                    test._start_simulation()
             if (args.fpga) and not test.fail_flag:
                 if not test.app_flag:
                     test._compile_sw()
                 if not test.mif_flag:
                     test._start_mif()
                 test._start_fpga()
+            if (args.reload) and not test.fail_flag:
+                if not test.app_flag:
+                    test._compile_sw()
+                test._reload_fpga()
+            if (args.prog) and not test.fail_flag:
+                test._program_fpga()
             if (args.mif):
                 if not test.app_flag:
                     test._compile_sw()
                 test._start_mif()
             if (args.gui):
-                test._gui()
+                ensure_inst_mem_for_test(test)
+                if not test.fail_flag:
+                    test._gui()
             if (args.pp) and not test.fail_flag:
                 # print that we are running the post process
                 if (test._post_process()):# if return value is 0, then the post process is done successfully
