@@ -120,6 +120,8 @@ end
 
 // TODO - add all m extension instructions
 always_comb begin : alu_logic_m_extension
+  AluOutMulFullQ102H = 64'b0;
+  AluOutMulQ102H     = AluIn1Q102H * AluIn2Q102H;
   unique casez (Ctrl.AluOpMulDivQ102H) 
     // Adder
     MUL     : AluOutMulQ102H = AluIn1Q102H * AluIn2Q102H; 
