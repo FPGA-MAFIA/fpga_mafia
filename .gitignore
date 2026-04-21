@@ -3,6 +3,22 @@
 target/*
 transcript
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Stray Quartus project copies at repo root (real projects live under FPGA/)
+/de10_lite_big_core.qpf
+/de10_lite_big_core.qsf
+
+# Quartus Compiler / IDE sidecar files
+cr_ie_info.json
+**/cr_ie_info.json
+
+# Stale IP generation reports
+*_generation_previous.rpt
+
 FPGA/big_core/*
 FPGA/*/incremental_db/*
 FPGA/*/*/incremental_db/*
@@ -32,8 +48,12 @@ FPGA/*/*.qws
 !FPGA/big_core/de10_lite_big_core.qpf
 !FPGA/big_core/de10_lite_big_core.qsf
 verif/*/__pycache__
+scripts/**/__pycache__/
 */__pycache__/*
 lotr_orig/pyterminal/src/__pycache__
 lotr_orig/target/*
+
+# Legacy duplicate LOTR project name (CPU_GARAGE is canonical in this fork)
+FPGA/lotr/de10_lite_lotr.qpf
 
 
