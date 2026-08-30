@@ -92,11 +92,136 @@ task automatic print_final_status(input string test);
 endtask
 
 // =============================
+// memory block drivers
+//
+// Requests are level driven. Set one or more ports, call mem_commit() to let
+// the write take effect on the clock edge, and the ports are dropped again.
+// Reads are combinational, so mem_check_read samples after a small delay
+// without consuming a clock cycle.
+// =============================
+task automatic mem_clear_requests();
+    imem_valid = '0; imem_wr_en = '0; imem_byte_en = '0;
+    imem_block_idx = '0; imem_offset = '0; imem_wr_data = '0;
+    dmem_valid = '0; dmem_wr_en = '0; dmem_byte_en = '0;
+    dmem_block_idx = '0; dmem_offset = '0; dmem_wr_data = '0;
+    vga_valid  = '0; vga_wr_en  = '0; vga_byte_en  = '0;
+    vga_block_idx  = '0; vga_offset  = '0; vga_wr_data  = '0;
+endtask
+
+// Stage a write on one port of one block. Nothing happens until mem_commit().
+task automatic mem_set_write(input string      block,
+                             input int         port,
+                             input int         slice_idx,
+                             input logic [15:0] offset,
+                             input logic [31:0] data,
+                             input logic [3:0]  byte_en = 4'hF);
+    case (block)
+        "IMEM" : begin
+            imem_valid[port]     = 1'b1;
+            imem_wr_en[port]     = 1'b1;
+            imem_byte_en[port]   = byte_en;
+            imem_block_idx[port] = TILE_IDX_WIDTH'(slice_idx);
+            imem_offset[port]    = offset;
+            imem_wr_data[port]   = data;
+        end
+        "DMEM" : begin
+            dmem_valid[port]     = 1'b1;
+            dmem_wr_en[port]     = 1'b1;
+            dmem_byte_en[port]   = byte_en;
+            dmem_block_idx[port] = TILE_IDX_WIDTH'(slice_idx);
+            dmem_offset[port]    = offset;
+            dmem_wr_data[port]   = data;
+        end
+        "VGA" : begin
+            vga_valid[port]      = 1'b1;
+            vga_wr_en[port]      = 1'b1;
+            vga_byte_en[port]    = byte_en;
+            vga_block_idx[port]  = 1'b0;
+            vga_offset[port]     = offset;
+            vga_wr_data[port]    = data;
+        end
+        default : $error("mem_set_write: unknown block %s", block);
+    endcase
+endtask
+
+// Apply everything staged so far on the next clock edge, then drop the ports.
+task automatic mem_commit();
+    @(posedge clk);
+    #1;
+    mem_clear_requests();
+endtask
+
+// Combinational read plus compare.
+task automatic mem_check_read(input string       check_name,
+                              input string       block,
+                              input int          port,
+                              input int          slice_idx,
+                              input logic [15:0] offset,
+                              input logic [31:0] exp_data);
+    logic [31:0] got;
+
+    case (block)
+        "IMEM" : begin
+            imem_valid[port] = 1'b1; imem_wr_en[port] = 1'b0;
+            imem_block_idx[port] = TILE_IDX_WIDTH'(slice_idx);
+            imem_offset[port] = offset;
+        end
+        "DMEM" : begin
+            dmem_valid[port] = 1'b1; dmem_wr_en[port] = 1'b0;
+            dmem_block_idx[port] = TILE_IDX_WIDTH'(slice_idx);
+            dmem_offset[port] = offset;
+        end
+        "VGA" : begin
+            vga_valid[port] = 1'b1; vga_wr_en[port] = 1'b0;
+            vga_block_idx[port] = 1'b0;
+            vga_offset[port] = offset;
+        end
+        default : $error("mem_check_read: unknown block %s", block);
+    endcase
+
+    #1;
+    case (block)
+        "IMEM"  : got = imem_rd_data[port];
+        "DMEM"  : got = dmem_rd_data[port];
+        "VGA"   : got = vga_rd_data[port];
+        default : got = 32'bx;
+    endcase
+
+    checks_run++;
+    if (got !== exp_data) begin
+        checks_failed++;
+        $error("[FAIL] %s : %s port %0d slice %0d offset 0x%04h -> got 0x%08h expected 0x%08h",
+               check_name, block, port, slice_idx, offset, got, exp_data);
+    end
+    else begin
+        $display("[PASS] %s : %s port %0d slice %0d offset 0x%04h -> 0x%08h",
+                 check_name, block, port, slice_idx, offset, got);
+    end
+
+    mem_clear_requests();
+endtask
+
+// Compare a boolean detection flag, used for the deliberate illegal accesses.
+task automatic check_flag(input string check_name, input logic got, input logic exp);
+    checks_run++;
+    if (got !== exp) begin
+        checks_failed++;
+        $error("[FAIL] %s : got %0b expected %0b", check_name, got, exp);
+    end
+    else begin
+        $display("[PASS] %s : %0b as expected", check_name, got);
+    end
+endtask
+
+// =============================
 // test dispatcher
 // =============================
 task automatic run_fabric_ref_test(input string test);
     if (test == "va2pa_map") begin
         `include "va2pa_map.sv"
+    end
+    else if (test == "mem_blocks") begin
+        `include "mem_blocks.sv"
     end
     else begin
         $error("[ERROR] : test %s not found", test);

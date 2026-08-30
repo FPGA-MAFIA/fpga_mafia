@@ -50,6 +50,9 @@ initial begin: timeout_monitor
     $finish();
 end
 
+// DUT instances - the three blocks of the unified memory
+`include "fabric_ref_mem_dut.vh"
+
 `include "fabric_ref_tasks.vh"
 
 // =============================
@@ -58,6 +61,8 @@ end
 initial begin: test_seq
     checks_run    = 0;
     checks_failed = 0;
+    mem_assert_en = 1'b1;
+    mem_clear_requests();
     $display("================\n     START\n================");
     if ($value$plusargs("STRING=%s", test_name)) $display("STRING value %s", test_name);
     else $fatal(1, "CANNOT FIND TEST %s at time %t", test_name, $time());
