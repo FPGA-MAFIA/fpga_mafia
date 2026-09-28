@@ -214,6 +214,101 @@ task automatic check_flag(input string check_name, input logic got, input logic 
 endtask
 
 // =============================
+// unified memory drivers
+//
+// Same level driven style as the block drivers above, but here the test bench
+// speaks the core's language: a plain 32 bit virtual address. Which block and
+// which slice it lands on is the unified memory's job to work out, which is
+// precisely what these tests are checking.
+// =============================
+task automatic uni_clear_requests();
+    uni_req_valid   = '0;
+    uni_req_wr_en   = '0;
+    uni_req_byte_en = '0;
+    uni_req_address = '0;
+    uni_req_wr_data = '0;
+endtask
+
+// Stage a write from one tile. Nothing happens until uni_commit().
+task automatic uni_set_write(input int          tile_port,
+                             input logic [31:0] address,
+                             input logic [31:0] data,
+                             input logic [3:0]  byte_en = 4'hF);
+    uni_req_valid  [tile_port] = 1'b1;
+    uni_req_wr_en  [tile_port] = 1'b1;
+    uni_req_byte_en[tile_port] = byte_en;
+    uni_req_address[tile_port] = address;
+    uni_req_wr_data[tile_port] = data;
+endtask
+
+// Stage a read from one tile without sampling it yet. Used when several tiles
+// must be observed in the same cycle.
+task automatic uni_set_read(input int          tile_port,
+                            input logic [31:0] address);
+    uni_req_valid  [tile_port] = 1'b1;
+    uni_req_wr_en  [tile_port] = 1'b0;
+    uni_req_byte_en[tile_port] = 4'hF;
+    uni_req_address[tile_port] = address;
+endtask
+
+task automatic uni_commit();
+    @(posedge clk);
+    #1;
+    uni_clear_requests();
+endtask
+
+// Read plus compare, from the point of view of one tile.
+task automatic uni_check_read(input string       check_name,
+                              input int          tile_port,
+                              input logic [31:0] address,
+                              input logic [31:0] exp_data);
+    logic [31:0] got;
+
+    uni_set_read(tile_port, address);
+    #1;
+    got = uni_rsp_rd_data[tile_port];
+
+    checks_run++;
+    if (got !== exp_data) begin
+        checks_failed++;
+        $error("[FAIL] %s : tile %0d (id 0x%02h) read va 0x%08h -> got 0x%08h expected 0x%08h",
+               check_name, tile_port, tile_id_from_idx(tile_port), address, got, exp_data);
+    end
+    else begin
+        $display("[PASS] %s : tile %0d (id 0x%02h) read va 0x%08h -> 0x%08h",
+                 check_name, tile_port, tile_id_from_idx(tile_port), address, got);
+    end
+
+    uni_clear_requests();
+endtask
+
+// Instruction fetch plus compare. The fetch path is separate from the data
+// path on purpose, so it is checked separately.
+task automatic uni_check_fetch(input string       check_name,
+                               input int          tile_port,
+                               input logic [31:0] address,
+                               input logic [31:0] exp_data);
+    logic [31:0] got;
+
+    uni_fetch_addr[tile_port] = address;
+    #1;
+    got = uni_fetch_data[tile_port];
+
+    checks_run++;
+    if (got !== exp_data) begin
+        checks_failed++;
+        $error("[FAIL] %s : tile %0d (id 0x%02h) fetch 0x%08h -> got 0x%08h expected 0x%08h",
+               check_name, tile_port, tile_id_from_idx(tile_port), address, got, exp_data);
+    end
+    else begin
+        $display("[PASS] %s : tile %0d (id 0x%02h) fetch 0x%08h -> 0x%08h",
+                 check_name, tile_port, tile_id_from_idx(tile_port), address, got);
+    end
+
+    uni_fetch_addr[tile_port] = 32'b0;
+endtask
+
+// =============================
 // test dispatcher
 // =============================
 task automatic run_fabric_ref_test(input string test);
@@ -222,6 +317,9 @@ task automatic run_fabric_ref_test(input string test);
     end
     else if (test == "mem_blocks") begin
         `include "mem_blocks.sv"
+    end
+    else if (test == "mem_unified") begin
+        `include "mem_unified.sv"
     end
     else begin
         $error("[ERROR] : test %s not found", test);

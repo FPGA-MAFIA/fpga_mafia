@@ -50,8 +50,11 @@ initial begin: timeout_monitor
     $finish();
 end
 
-// DUT instances - the three blocks of the unified memory
+// DUT instances - the raw memory blocks, driven directly by the mem_blocks test
 `include "fabric_ref_mem_dut.vh"
+
+// DUT instance - the unified memory, driven by virtual addresses
+`include "fabric_ref_unified_dut.vh"
 
 `include "fabric_ref_tasks.vh"
 
@@ -61,8 +64,13 @@ end
 initial begin: test_seq
     checks_run    = 0;
     checks_failed = 0;
-    mem_assert_en = 1'b1;
+    mem_assert_en  = 1'b1;
+    uni_assert_en  = 1'b1;
+    // A fetch address of 0 is the local IMEM of the requesting tile, which is
+    // always legal, so the idle fetch ports never trip the fetch assertion.
+    uni_fetch_addr = '0;
     mem_clear_requests();
+    uni_clear_requests();
     $display("================\n     START\n================");
     if ($value$plusargs("STRING=%s", test_name)) $display("STRING value %s", test_name);
     else $fatal(1, "CANNOT FIND TEST %s at time %t", test_name, $time());
