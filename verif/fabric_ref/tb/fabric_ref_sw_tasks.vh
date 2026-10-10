@@ -71,6 +71,41 @@ function automatic logic [31:0] vga_word(input logic [15:0] offset);
             dut.u_mem.vga_block.mem[0][offset + 0]};
 endfunction
 
+function automatic logic [7:0] vga_byte(input int offset);
+    return dut.u_mem.vga_block.mem[0][offset];
+endfunction
+
+// =============================
+// screen snapshot
+//
+// Same unpacking as print_vga_ref_screen in rv32i_ref_tasks.vh. The frame
+// buffer is 640x480 with one bit per pixel, and four consecutive bytes belong
+// to four different rows, so the walk is block of 320 bytes, then row within
+// the block, then byte column, then bit.
+// =============================
+task automatic print_vga_ref_screen(input string test);
+    integer fd;
+    string  draw;
+    fd = $fopen({"../../../target/fabric_ref/tests/", test, "/ref_screen.log"}, "w");
+    if (!fd) begin
+        $error("[FAIL] could not open ref_screen.log for %s", test);
+        return;
+    end
+    for (int i = 0; i < SIZE_VGA_MEM; i += 320) begin        // blocks of 4 rows
+        for (int j = 0; j < 4; j++) begin                    // row in the block
+            for (int k = 0; k < 320; k += 4) begin           // byte column
+                for (int l = 0; l < 8; l++) begin            // bit in the byte
+                    draw = (dut.u_mem.vga_block.mem[0][i+k+j][l] === 1'b1) ? "x" : " ";
+                    $fwrite(fd, "%s", draw);
+                end
+            end
+            $fwrite(fd, "\n");
+        end
+    end
+    $fclose(fd);
+    $display("[INFO] screen snapshot written to target/fabric_ref/tests/%s/ref_screen.log", test);
+endtask
+
 // =============================
 // checkers
 // =============================
@@ -122,6 +157,9 @@ task automatic check_software(input string test);
     end
     else if (test == "dist_sum") begin
         `include "dist_sum_chk.sv"
+    end
+    else if (test == "vga_draw") begin
+        `include "vga_draw_chk.sv"
     end
     else begin
         $error("[ERROR] : no checker for test %s", test);

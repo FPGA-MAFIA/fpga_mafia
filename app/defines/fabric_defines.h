@@ -10,3 +10,13 @@
 #define LOCAL_SCRATCH    ((volatile int *) (0x0001F000))
 
 #define WHO_AM_I         ((volatile int *) (0x00FFFFFF))
+
+/* The shared VGA frame buffer. 640x480 monochrome, one bit per pixel, so
+   38400 bytes. Unlike the scratch pads above there is only one of these in
+   the whole fabric, so every tile reaching this address lands on the same
+   memory no matter which tile it runs on.
+   Byte layout, same as graphic_vga.h:
+     byte_addr = (y / 4) * 320 + (x / 8) * 4 + (y % 4)   */
+#define FABRIC_VGA_BASE  0x00FF0000
+#define FABRIC_VGA_MEM   ((volatile unsigned char *) (FABRIC_VGA_BASE))
+#define FABRIC_VGA_BYTES 38400
