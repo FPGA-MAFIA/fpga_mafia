@@ -109,6 +109,9 @@ task automatic check_software(input string test);
     if (test == "fabric_alive") begin
         `include "fabric_alive_chk.sv"
     end
+    else if (test == "non_local_rd_wr") begin
+        `include "non_local_rd_wr_chk.sv"
+    end
     else begin
         $error("[ERROR] : no checker for test %s", test);
     end
