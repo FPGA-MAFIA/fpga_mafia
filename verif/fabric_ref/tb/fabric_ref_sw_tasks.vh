@@ -19,10 +19,18 @@
 // Both gcc output files carry an @address directive, so $readmemh drops every
 // byte at its absolute address. The same image is then copied into all nine
 // tiles, which is exactly what issue #454 is about: one binary, nine cores.
+//
+// The image is zero filled first, so every byte a core can address is a real
+// value rather than X. That matches an FPGA block RAM, which powers up at
+// zero, and it matters for software: a core that spins on a shared flag until
+// it turns non zero needs that flag to start out readably zero. Left as X the
+// compare resolves unpredictably and the spin falls straight through.
 // =============================
 task automatic load_program(input string test);
     string dir;
     dir = {"../../../target/fabric_ref/tests/", test, "/gcc_files/"};
+
+    foreach (image[i]) image[i] = 8'h00;
 
     $readmemh({dir, "inst_mem.sv"}, image);
     $readmemh({dir, "data_mem.sv"}, image);
@@ -111,6 +119,9 @@ task automatic check_software(input string test);
     end
     else if (test == "non_local_rd_wr") begin
         `include "non_local_rd_wr_chk.sv"
+    end
+    else if (test == "dist_sum") begin
+        `include "dist_sum_chk.sv"
     end
     else begin
         $error("[ERROR] : no checker for test %s", test);
