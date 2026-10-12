@@ -161,6 +161,9 @@ task automatic check_software(input string test);
     else if (test == "vga_draw") begin
         `include "vga_draw_chk.sv"
     end
+    else if (test == "vga_banner") begin
+        `include "vga_banner_chk.sv"
+    end
     else begin
         $error("[ERROR] : no checker for test %s", test);
     end
