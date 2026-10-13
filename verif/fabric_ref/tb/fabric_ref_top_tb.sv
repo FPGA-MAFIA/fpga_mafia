@@ -68,6 +68,7 @@ fabric_ref_top dut (
 );
 
 `include "fabric_ref_sw_tasks.vh"
+`include "fabric_ref_trk.vh"
 
 // =============================
 // timeout protection
