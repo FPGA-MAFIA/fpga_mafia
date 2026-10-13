@@ -54,3 +54,9 @@ jobs:
 
       - name: FABRIC 3x3 big_cores tiles 
         run:  python build.py -dut fabric -test non_local_wr -app -sim -hw  -top fabric_big_cores_tb
+
+      - name: FABRIC_REF - address map and memory unit tests
+        run:  python build.py -dut fabric_ref -regress unit_level0 -hw -sim
+
+      - name: FABRIC_REF - nine rv32i cores on the unified memory
+        run:  python build.py -dut fabric_ref -top fabric_ref_top_tb -regress level0 -app -hw -sim

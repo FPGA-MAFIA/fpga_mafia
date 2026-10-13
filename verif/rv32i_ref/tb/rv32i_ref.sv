@@ -3,16 +3,45 @@
 // Will be using a simple case statement to model the:
 `include "macros.vh"
 module rv32i_ref 
-#(  
+#(
     parameter I_MEM_LSB = 'h0_0000,
     parameter I_MEM_MSB = 'h1_0000 - 1'h1,
     parameter D_MEM_LSB = 'h1_0000,
-    parameter D_MEM_MSB = 'h2_0000 - 1'h1 
+    parameter D_MEM_MSB = 'h2_0000 - 1'h1,
+    // 0 = the model keeps its own imem/dmem/VGAMem/CRMem arrays and behaves
+    //     exactly as it always has. This is what every existing core test
+    //     bench uses, and the arrays stay at module scope so the usual
+    //     "force rv32i_ref.imem" backdoor keeps working.
+    // 1 = the internal memories are removed from the picture and every access
+    //     goes out through the external port below, which is how the fabric
+    //     reference model gives all of its cores one unified memory.
+    parameter EXTERNAL_MEM = 0,
+    // Hardware tile id of this core, the value WhoAmI returns. It is fixed at
+    // elaboration by the fabric generate loop, so it is a parameter rather
+    // than a port. The default 0x22 is the value the model returned before
+    // this parameter existed, which keeps every existing test unchanged.
+    parameter TILE_ID = 8'h22
 ) (
     input clk,
     input rst,
-    input run
+    input run,
+    //===================================================================
+    // Fabric reference model interface - only used when EXTERNAL_MEM = 1.
+    // Existing test benches do not connect these. The inputs are never
+    // selected when EXTERNAL_MEM = 0, so leaving them dangling is harmless.
+    //===================================================================
+    input  logic [31:0] i_instruction,
+    input  logic [31:0] i_mem_rd_data,
+    output logic [31:0] o_imem_addr,
+    output logic        o_mem_req_valid,
+    output logic        o_mem_req_wr_en,
+    output logic [3:0]  o_mem_req_byte_en,
+    output logic [31:0] o_mem_req_address,
+    output logic [31:0] o_mem_req_wr_data
 );
+
+// Elaboration time constant. Everything memory related keys off this.
+localparam USE_INTERNAL_MEM = (EXTERNAL_MEM == 0);
 import rv32i_ref_pkg::*;
 // Define VGA memory sizes
 parameter SIZE_VGA_MEM          = 38400; 
@@ -61,6 +90,10 @@ logic        end_of_simulation;
 logic [2:0]  funct3;
 logic [6:0]  funct7;
 logic [31:0] lb_data    , lh_data    , lw_data    , lbu_data    , lhu_data;
+// load data taken from the internal arrays, used when EXTERNAL_MEM = 0
+logic [31:0] lb_data_int, lh_data_int, lw_data_int, lbu_data_int, lhu_data_int;
+// load data taken from the unified memory, used when EXTERNAL_MEM = 1
+logic [31:0] lb_data_ext, lh_data_ext, lw_data_ext, lbu_data_ext, lhu_data_ext;
 logic [31:0] vga_lb_data, vga_lh_data, vga_lw_data, vga_lbu_data, vga_lhu_data;
 logic        hit_vga_mem_rd;
 logic        hit_vga_mem_wr;
@@ -105,22 +138,37 @@ assign debug_info.reg_wr_data = reg_wr_data;
 //=======================================================
 `MAFIA_EN_DFF    (regfile[0]   , '0                ,  clk, run);
 `MAFIA_EN_DFF    (regfile[31:1], next_regfile[31:1],  clk, run);
-`MAFIA_EN_DFF    (dmem,    next_dmem,     clk, run);
-`MAFIA_EN_DFF    (dmem_33, next_dmem_33,  clk, run);
-`MAFIA_EN_DFF    (imem,    next_imem,     clk, run);
 `MAFIA_EN_DFF    (csr,     next_csr,      clk, run);
-`MAFIA_EN_DFF    (VGAMem,  NextVGAMem,    clk, run);
-`MAFIA_EN_DFF    (CRMem,  NextCRMem,    clk, run);
 `MAFIA_EN_RST_DFF(pc  ,    next_pc,       clk , ((!end_of_simulation) && run) , rst);
+
+// The memory arrays themselves stay declared at module scope above, so the
+// hierarchical "force rv32i_ref.imem" backdoor used by the core test benches
+// still resolves. Only the flops are conditional: each of these macros copies
+// a whole array every cycle, which is fine for one core but would be millions
+// of byte copies per cycle once the fabric model instantiates nine of them.
+generate
+if (USE_INTERNAL_MEM) begin : gen_internal_mem_dff
+    `MAFIA_EN_DFF(dmem,    next_dmem,     clk, run);
+    `MAFIA_EN_DFF(dmem_33, next_dmem_33,  clk, run);
+    `MAFIA_EN_DFF(imem,    next_imem,     clk, run);
+    `MAFIA_EN_DFF(VGAMem,  NextVGAMem,    clk, run);
+    `MAFIA_EN_DFF(CRMem,   NextCRMem,     clk, run);
+end
+endgenerate
 
 `MAFIA_EN_RST_DFF(end_of_simulation,  1'b1   , clk , en_end_of_simulation , rst)
 //=======================================================
 // The instruction enumerates & terms for the reference model
 //=======================================================
-assign instruction[7:0]  = imem[pc+0];
-assign instruction[15:8] = imem[pc+1];
-assign instruction[23:16]= imem[pc+2];
-assign instruction[31:24]= imem[pc+3];
+// Instruction fetch. In external mode the instruction word arrives from the
+// unified memory instead of the local imem array.
+logic [31:0] instruction_int;
+assign instruction_int[7:0]  = imem[pc+0];
+assign instruction_int[15:8] = imem[pc+1];
+assign instruction_int[23:16]= imem[pc+2];
+assign instruction_int[31:24]= imem[pc+3];
+assign instruction   = USE_INTERNAL_MEM ? instruction_int : i_instruction;
+assign o_imem_addr   = pc;
 //=======================================================
 assign U_ImmediateQ101H = {     instruction[31:12], 12'b0 } ;                                                             // U_Immediate
 assign I_ImmediateQ101H = { {20{instruction[31]}} , instruction[31:20] };                                                 // I_Immediate
@@ -157,45 +205,88 @@ logic hit_33_mem_wr;
 logic hit_who_am_i;
 assign  DMemWrEn         = (instr_type == SB) || (instr_type == SH) || (instr_type == SW);
 assign  DMemRdEn         = (instr_type == LB) || (instr_type == LH) || (instr_type == LW) || (instr_type == LBU) || (instr_type == LHU);
-assign  hit_vga_mem_rd   = (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF) && DMemRdEn;
-assign  hit_vga_mem_wr   = (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF) && DMemWrEn;
-assign  hit_cr_mem_rd   = (mem_rd_addr>=CR_MEM_REGION_FLOOR) && (mem_rd_addr<CR_MEM_REGION_ROOF) && DMemRdEn;
-assign  hit_cr_mem_wr   = (mem_wr_addr>=CR_MEM_REGION_FLOOR) && (mem_wr_addr<CR_MEM_REGION_ROOF) && DMemWrEn;
-assign  hit_local_mem_rd = (mem_rd_addr[31:24]==8'h0 ) && (mem_rd_addr[23:0]<D_MEM_MSB) && DMemRdEn;
-assign  hit_local_mem_wr = (mem_wr_addr[31:24]==8'h0 ) && (mem_wr_addr[23:0]<D_MEM_MSB) && DMemWrEn;
-assign  hit_33_mem_rd    = (mem_rd_addr[31:24]==8'h33) && (mem_rd_addr[23:0]<D_MEM_MSB) && DMemRdEn;
-assign  hit_33_mem_wr    = (mem_wr_addr[31:24]==8'h33) && (mem_wr_addr[23:0]<D_MEM_MSB) && DMemWrEn;
+// The region hits below drive the INTERNAL arrays only, so they are all
+// silenced in external mode. WhoAmI is not a memory access at all, so it stays
+// active in both modes and is answered by the core itself.
+assign  hit_vga_mem_rd   = USE_INTERNAL_MEM && (mem_rd_addr>=VGA_MEM_REGION_FLOOR) && (mem_rd_addr<VGA_MEM_REGION_ROOF) && DMemRdEn;
+assign  hit_vga_mem_wr   = USE_INTERNAL_MEM && (mem_wr_addr>=VGA_MEM_REGION_FLOOR) && (mem_wr_addr<VGA_MEM_REGION_ROOF) && DMemWrEn;
+assign  hit_cr_mem_rd    = USE_INTERNAL_MEM && (mem_rd_addr>=CR_MEM_REGION_FLOOR) && (mem_rd_addr<CR_MEM_REGION_ROOF) && DMemRdEn;
+assign  hit_cr_mem_wr    = USE_INTERNAL_MEM && (mem_wr_addr>=CR_MEM_REGION_FLOOR) && (mem_wr_addr<CR_MEM_REGION_ROOF) && DMemWrEn;
+assign  hit_local_mem_rd = USE_INTERNAL_MEM && (mem_rd_addr[31:24]==8'h0 ) && (mem_rd_addr[23:0]<D_MEM_MSB) && DMemRdEn;
+assign  hit_local_mem_wr = USE_INTERNAL_MEM && (mem_wr_addr[31:24]==8'h0 ) && (mem_wr_addr[23:0]<D_MEM_MSB) && DMemWrEn;
+assign  hit_33_mem_rd    = USE_INTERNAL_MEM && (mem_rd_addr[31:24]==8'h33) && (mem_rd_addr[23:0]<D_MEM_MSB) && DMemRdEn;
+assign  hit_33_mem_wr    = USE_INTERNAL_MEM && (mem_wr_addr[31:24]==8'h33) && (mem_wr_addr[23:0]<D_MEM_MSB) && DMemWrEn;
 assign  hit_who_am_i     = (mem_rd_addr[31:24]==8'h0 ) && (mem_rd_addr[23:0]==24'hFFFFFF) && DMemRdEn;
-assign lb_data [31:0] = hit_local_mem_rd ? { {8{dmem  [mem_rd_addr+0][7]}}       ,{8{dmem  [mem_rd_addr+0][7]}}       ,{8{dmem  [mem_rd_addr+0][7]}}       , dmem   [mem_rd_addr+0]}: 
+assign lb_data_int [31:0] = hit_local_mem_rd ? { {8{dmem  [mem_rd_addr+0][7]}}       ,{8{dmem  [mem_rd_addr+0][7]}}       ,{8{dmem  [mem_rd_addr+0][7]}}       , dmem   [mem_rd_addr+0]}: 
                         hit_vga_mem_rd   ? { {8{VGAMem[mem_rd_addr+0][7]}}       ,{8{VGAMem[mem_rd_addr+0][7]}}       ,{8{VGAMem[mem_rd_addr+0][7]}}       , VGAMem [mem_rd_addr+0]}:
                         hit_cr_mem_rd    ? { {8{CRMem[mem_rd_addr+0][7]}}        ,{8{CRMem[mem_rd_addr+0][7]}}        ,{8{CRMem[mem_rd_addr+0][7]}}        , CRMem [mem_rd_addr+0]} :
                         hit_33_mem_rd    ? { {8{dmem_33[mem_rd_addr[23:0]+0][7]}},{8{dmem_33[mem_rd_addr[23:0]+0][7]}},{8{dmem_33[mem_rd_addr[23:0]+0][7]}}, dmem_33[mem_rd_addr[23:0]+0]}:
-                        hit_who_am_i     ? 32'h0000022                                                                                                            :
+                        hit_who_am_i     ? {24'b0, TILE_ID}                                                                                                            :
                                                                                                                                            32'b0                  ;
-assign lh_data [31:0] = hit_local_mem_rd ? { {8{dmem  [mem_rd_addr+1][7]}}       ,{8{dmem  [mem_rd_addr+1][7]}}       ,   dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]} :
+assign lh_data_int [31:0] = hit_local_mem_rd ? { {8{dmem  [mem_rd_addr+1][7]}}       ,{8{dmem  [mem_rd_addr+1][7]}}       ,   dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]} :
                         hit_vga_mem_rd   ? { {8{VGAMem[mem_rd_addr+1][7]}}       ,{8{VGAMem[mem_rd_addr+1][7]}}       ,   VGAMem[mem_rd_addr+1]        , VGAMem [mem_rd_addr+0]} :
                         hit_cr_mem_rd    ? { {8{CRMem[mem_rd_addr+1][7]}}        ,{8{CRMem[mem_rd_addr+1][7]}}        ,{8{CRMem[mem_rd_addr+1][7]}}    , CRMem [mem_rd_addr+0]}  :
                         hit_33_mem_rd    ? { {8{dmem_33[mem_rd_addr[23:0]+1][7]}},{8{dmem_33[mem_rd_addr[23:0]+1][7]}},   dmem_33[mem_rd_addr[23:0]+1] , dmem_33[mem_rd_addr[23:0]+0]} :
-                        hit_who_am_i     ? 32'h0000022                                                                                                            :
+                        hit_who_am_i     ? {24'b0, TILE_ID}                                                                                                            :
                                                                                                                                           32'b0                   ;
-assign lw_data [31:0] = hit_local_mem_rd ? {    dmem[mem_rd_addr+3]          ,   dmem  [mem_rd_addr+2]       ,   dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]} :
+assign lw_data_int [31:0] = hit_local_mem_rd ? {    dmem[mem_rd_addr+3]          ,   dmem  [mem_rd_addr+2]       ,   dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]} :
                         hit_vga_mem_rd   ? {    VGAMem[mem_rd_addr+3]        ,   VGAMem[mem_rd_addr+2]       ,   VGAMem[mem_rd_addr+1]        , VGAMem [mem_rd_addr+0]} :
                         hit_cr_mem_rd    ? {    CRMem[mem_rd_addr+3]         ,   CRMem[mem_rd_addr+2]        ,   CRMem[mem_rd_addr+1]         , CRMem [mem_rd_addr+0]}  :
                         hit_33_mem_rd    ? {    dmem_33[mem_rd_addr[23:0]+3] ,   dmem_33[mem_rd_addr[23:0]+2],   dmem_33[mem_rd_addr[23:0]+1] , dmem_33[mem_rd_addr[23:0]+0]} :
-                        hit_who_am_i     ? 32'h0000022                                                                                                            :
+                        hit_who_am_i     ? {24'b0, TILE_ID}                                                                                                            :
                                                                                                                                           32'b0                   ;
-assign lbu_data[31:0] = hit_local_mem_rd ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , dmem   [mem_rd_addr+0]} :
+assign lbu_data_int[31:0] = hit_local_mem_rd ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , dmem   [mem_rd_addr+0]} :
                         hit_vga_mem_rd   ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , VGAMem [mem_rd_addr+0]} :
                         hit_cr_mem_rd    ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , CRMem [mem_rd_addr+0]}  :
                         hit_33_mem_rd    ? { {8{1'b0}} ,{8{1'b0}} ,{8{1'b0}}                     , dmem_33[mem_rd_addr[23:0]+0]} :
-                        hit_who_am_i     ? 32'h0000022                                                                    :
+                        hit_who_am_i     ? {24'b0, TILE_ID}                                                                    :
                                                                                                   32'b0                   ;
-assign lhu_data[31:0] = hit_local_mem_rd ? { {8{1'b0}} ,{8{1'b0}} , dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]}       :  
+assign lhu_data_int[31:0] = hit_local_mem_rd ? { {8{1'b0}} ,{8{1'b0}} , dmem  [mem_rd_addr+1]        , dmem   [mem_rd_addr+0]}       :  
                         hit_vga_mem_rd   ? { {8{1'b0}} ,{8{1'b0}} , VGAMem[mem_rd_addr+1]        , VGAMem [mem_rd_addr+0]}       :
                         hit_cr_mem_rd    ? { {8{1'b0}} ,{8{1'b0}} , CRMem[mem_rd_addr+1]         , CRMem [mem_rd_addr+0]}        :    
                         hit_33_mem_rd    ? { {8{1'b0}} ,{8{1'b0}} , dmem_33[mem_rd_addr[23:0]+1] , dmem_33[mem_rd_addr[23:0]+0]} :
-                        hit_who_am_i     ? 32'h0000022                                                                           :
+                        hit_who_am_i     ? {24'b0, TILE_ID}                                                                           :
                                                                                                     32'b0                        ;
+//=======================================================
+// External memory load path
+// The unified memory returns the four bytes starting at the access address,
+// so lane 0 is address+0. The sign and zero extension below is identical to
+// the internal path, it just reads the bytes from the port instead of from a
+// local array.
+//=======================================================
+logic [7:0] ext_byte0, ext_byte1, ext_byte2, ext_byte3;
+assign {ext_byte3, ext_byte2, ext_byte1, ext_byte0} = i_mem_rd_data;
+assign lb_data_ext  = { {8{ext_byte0[7]}}, {8{ext_byte0[7]}}, {8{ext_byte0[7]}}, ext_byte0 };
+assign lh_data_ext  = { {8{ext_byte1[7]}}, {8{ext_byte1[7]}},       ext_byte1  , ext_byte0 };
+assign lw_data_ext  = {       ext_byte3  ,       ext_byte2  ,       ext_byte1  , ext_byte0 };
+assign lbu_data_ext = { {8{1'b0}}        , {8{1'b0}}        , {8{1'b0}}        , ext_byte0 };
+assign lhu_data_ext = { {8{1'b0}}        , {8{1'b0}}        ,       ext_byte1  , ext_byte0 };
+
+//=======================================================
+// Final load data select.
+// WhoAmI is answered by the core itself in both modes, it is not a memory.
+//=======================================================
+assign lb_data  = USE_INTERNAL_MEM ? lb_data_int  : hit_who_am_i ? {24'b0, TILE_ID} : lb_data_ext;
+assign lh_data  = USE_INTERNAL_MEM ? lh_data_int  : hit_who_am_i ? {24'b0, TILE_ID} : lh_data_ext;
+assign lw_data  = USE_INTERNAL_MEM ? lw_data_int  : hit_who_am_i ? {24'b0, TILE_ID} : lw_data_ext;
+assign lbu_data = USE_INTERNAL_MEM ? lbu_data_int : hit_who_am_i ? {24'b0, TILE_ID} : lbu_data_ext;
+assign lhu_data = USE_INTERNAL_MEM ? lhu_data_int : hit_who_am_i ? {24'b0, TILE_ID} : lhu_data_ext;
+
+//=======================================================
+// External memory request
+// A single cycle read or write into the unified memory. Byte lanes are
+// relative to the access address, so lane b targets address+b and no data
+// shifting is needed. WhoAmI never leaves the core.
+//=======================================================
+assign o_mem_req_valid   = (DMemRdEn || DMemWrEn) && !hit_who_am_i && run && !end_of_simulation;
+assign o_mem_req_wr_en   = DMemWrEn;
+assign o_mem_req_address = DMemWrEn ? mem_wr_addr : mem_rd_addr;
+assign o_mem_req_wr_data = data_rd2;
+assign o_mem_req_byte_en = (instr_type == SB) ? 4'b0001 :
+                           (instr_type == SH) ? 4'b0011 :
+                           (instr_type == SW) ? 4'b1111 :
+                                                4'b1111 ; // reads fetch all four bytes
+
 //=======================================================
 // This main logic of the reference model
 //=======================================================
@@ -213,13 +304,18 @@ always_comb begin
     div_custom_trap     = 1'b0;
     ebreak_was_called   = 1'b0;
     ecall_was_called    = 1'b0;
-    next_dmem           = dmem;
-    next_dmem_33        = dmem_33;
-    next_imem           = imem;
-    NextVGAMem          = VGAMem;
+    // These whole array copies only matter when the model owns its memories.
+    // In external mode they are skipped, otherwise nine cores would each copy
+    // a quarter of a megabyte on every evaluation of this block.
+    if (USE_INTERNAL_MEM) begin
+        next_dmem       = dmem;
+        next_dmem_33    = dmem_33;
+        next_imem       = imem;
+        NextVGAMem      = VGAMem;
+        if(rst) NextVGAMem  = '{default: '0};
+    end
     csr_hit             = 1'b0;
     instr_type          = I_NULL;
-    if(rst) NextVGAMem  = '{default: '0};
     //=================================================================
     // decode+execute+mem+write_back 
     // using a single case statement on the instruction
